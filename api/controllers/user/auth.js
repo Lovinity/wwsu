@@ -37,7 +37,7 @@ module.exports = {
         if (user && user[0])
             return exits.success({
                 user: user[0],
-                token: await jwt.sign(
+                token: await jwt.sign( // Sign and generate an authorization token
                         {id: user[0].ID},
                         sails.tokenSecret, // Token Secret that we sign it with
                         {

@@ -3,7 +3,8 @@
  *
  * @description :: Manages users allowed to authenticate to restricted areas of the API.
  */
-var bcrypt = require('bcrypt');
+
+// WORK ON THIS
 
 module.exports = {
     datastore: 'nodebase',
@@ -31,16 +32,18 @@ module.exports = {
         encryptedPassword: {
             type: 'string'
         },
-        // We don't wan't to send back encrypted password either
     },
-
+    
+    // Get rid of encrypted password responses in the API
     customToJSON: function () {
         var obj = this.toObject();
         delete obj.encryptedPassword;
         return obj;
     },
+    
     // Here we encrypt password before creating a User
     beforeCreate: function (values, next) {
+        var bcrypt = require('bcrypt');
         bcrypt.genSalt(10, function (err, salt) {
             if (err)
                 return next(err);
@@ -53,7 +56,9 @@ module.exports = {
         })
     },
 
+    // Make sure a password specified is correct for the user
     comparePassword: function (password, user, cb) {
+        var bcrypt = require('bcrypt');
         bcrypt.compare(password, user.encryptedPassword, function (err, match) {
 
             if (err)
