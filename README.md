@@ -1,27 +1,102 @@
-# wwsu-4
+FORMAT: 4A
+HOST: http://server.wwsu1069.org
 
-a [Sails v1](https://sailsjs.com) application
+# wwsu
 
+The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API.
 
-### Links
+## User [/user]
 
-+ [Get started](https://sailsjs.com/get-started)
-+ [Sails framework documentation](https://sailsjs.com/documentation)
-+ [Version notes / upgrading](https://sailsjs.com/documentation/upgrading)
-+ [Deployment tips](https://sailsjs.com/documentation/concepts/deployment)
-+ [Community support options](https://sailsjs.com/support)
-+ [Professional / enterprise options](https://sailsjs.com/enterprise)
+### /user/auth [POST /user/auth]
 
+A lot of API endpoints require a valid authorization in the form of a header. 
+The key is "authorization", and the value is "Bearer (token)". 
+Use the /user/auth endpoint to authenticate and get a token.
+User accounts are issued by WWSU. They are not available on request.
 
-### Version info
++ Request (application/x-www-form-urlencoded)
 
-This app was originally generated on Sun Apr 29 2018 20:45:57 GMT-0400 (Eastern Daylight Time) using Sails v1.0.1.
+    + Attributes
 
-<!-- Internally, Sails used [`sails-generate@1.15.21`](https://github.com/balderdashy/sails-generate/tree/v1.15.21/lib/core-generators/new). -->
+        + email: Email address of authenticating user. (required)
+        + password: Password of authenticating user (required)
 
++ Response 200 (application/json)
 
+        {
+             "user": {
+                 "email": "null@example.com",
+                 "id": 0,
+                  "createdAt": "2018-02-15T18:00:01.000Z",
+                  "updatedAt": "2018-02-15T18:00:01.000Z"
+              },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNTI1MTI5NTY3LCJleHAiOjE1MjUxMzA0Njd9.1QOmO3EzvkvMBSf5WohMFnCSYzCXxLBFAp-JUrUUGq0"
+        }
+    
++ Response 401 (application/json)
 
-<!--
-Note:  Generators are usually run using the globally-installed `sails` CLI (command-line interface).  This CLI version is _environment-specific_ rather than app-specific, thus over time, as a project's dependencies are upgraded or the project is worked on by different developers on different computers using different versions of Node.js, the Sails dependency in its package.json file may differ from the globally-installed Sails CLI release it was originally generated with.  (Be sure to always check out the relevant [upgrading guides](https://sailsjs.com/upgrading) before upgrading the version of Sails used by your app.  If you're stuck, [get help here](https://sailsjs.com/support).)
--->
+        {
+            "err": "Email and password required."
+        }
+        
++ Response 401 (application/json)
 
+        {
+            "err": "Invalid Token!"
+        }
+        
+## Directors [/directors]
+
+### /directors/get [GET /directors/get]
+
+Get one specific director of WWSU.
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + username: Username of the director to fetch. (required)
+
++ Response 200 (application/json)
+
+        {
+            "George Carlin": { // Full name of the director
+                "position": "General Manager", // Director's occupation with WWSU
+                "present": false, // False = clocked out, True = clocked in
+                "since": "2018-04-30T19:51:16.000Z" // Time at which present last changed
+            }
+        }
+
++ Response 404
+
+### /directors/getall [GET /directors/getall]
+
+Get all directors of WWSU. If the request is a web socket, the request will be subscribed to receive changes to any of the directors.
+
++ Response 200 (application/json)
+
+        {
+            "George Carlin": { // Full name of the director
+                "position": "General Manager", // Director's occupation with WWSU
+                "present": false, // False = clocked out, True = clocked in
+                "since": "2018-04-30T19:51:16.000Z" // Time at which present last changed
+            },
+            ...
+        }
+        
+## Status [/status]
+
+### /status/get [GET /status/get]
+
+Get the status of WWSU sub-systems. If the request is a socket, the request will be subscribed to receive changes to statuses.
+
++ Response 200 (application/json)
+
+        {
+            "database": {
+                "label": "Database", // Friendly name
+                "status": 5, // 1 = critical issue, 2 = major issue, 3 = minor issue, 4 = offline, 5 = good
+                "time": "2018-04-30T23:21:06.204Z" // Time at which the subsystem last had a good (5) status
+            },
+            ...
+        }

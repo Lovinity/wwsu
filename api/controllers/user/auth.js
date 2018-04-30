@@ -35,16 +35,21 @@ module.exports = {
     fn: async function (inputs, exits) {
         var user = await Nodeusers.find({email: inputs.email}).limit(1);
         if (user && user[0])
-            return exits.success({
-                user: user[0],
-                token: await jwt.sign( // Sign and generate an authorization token
-                        {id: user[0].ID},
-                        sails.tokenSecret, // Token Secret that we sign it with
-                        {
-                            expiresIn: (60 * 15) // Token Expire time
-                        }
-                )
-            });
+        {
+            var valid = await Nodeusers.comparePassword(inputs.password, user[0]);
+            if (valid) {
+                return exits.success({
+                    user: user[0],
+                    token: await jwt.sign(// Sign and generate an authorization token
+                            {id: user[0].ID},
+                            sails.tokenSecret, // Token Secret that we sign it with
+                            {
+                                expiresIn: (60 * 15) // Token Expire time
+                            }
+                    )
+                });
+            }
+        }
         return exits.error();
     }
 
