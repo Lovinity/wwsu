@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+    // API note: Please do not modify any of these variables in any code; use the changeStatus function instead. That way, websocket clients get updates pushed.
     'A': {// Current statuses
         'database': {label: 'Database', status: 1, time: null},
         'display-public': {label: 'Display Public', status: 3, time: null},
@@ -19,7 +20,7 @@ module.exports = {
         'server': {label: 'Server', status: 2, time: null}
     },
 
-    changeStatus: async function (key, theStatus, good = false, label = null) {
+    changeStatus: function (key, theStatus, good = false, label = null) {
         var moment = require('moment');
         if (!(key in Status['A']))
         {
