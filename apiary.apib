@@ -18,8 +18,8 @@ User accounts are issued by WWSU. They are not available on request.
 
     + Attributes
 
-        + email: Email address of authenticating user. (required)
-        + password: Password of authenticating user (required)
+        + email: Email address of authenticating user. (string, required)
+        + password: Password of authenticating user (string, required)
 
 + Response 200 (application/json)
 
@@ -47,6 +47,8 @@ User accounts are issued by WWSU. They are not available on request.
         
 ## Directors [/directors]
 
+Directors endpoints regard the directors of WWSU Radio.
+
 ### /directors/get [GET /directors/get]
 
 Get one specific director of WWSU.
@@ -55,7 +57,7 @@ Get one specific director of WWSU.
 
     + Attributes
 
-        + username: Username of the director to fetch. (required)
+        + username: Username of the director to fetch. (string, required)
 
 + Response 200 (application/json)
 
@@ -84,7 +86,56 @@ Get all directors of WWSU. If the request is a web socket, the request will be s
             ...
         }
         
+## Discipline [/discipline]
+
+Discipline endpoints manage moderation of website and mobile app users.
+**NOTE** All discipline endpoints require a valid token from /auth .
+
+### /discipline/showban [POST /discipline/showban]
+
+Bans the specified user until the currently live DJ/broadcast ends. Also mass deletes all website messages sent by the specified user.
+**Requires /auth authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + host: The unique ID of the user, issued by the WWSU system internally. (string, required)
+        
++ Response 200
++ Response 500
+
+### /discipline/dayban [POST /discipline/dayban]
+
+Bans the specified user for 24 hours. Also mass deletes all website messages sent by the specified user.
+**Requires /auth authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + host: The unique ID of the user, issued by the WWSU system internally. (string, required)
+        
++ Response 200
++ Response 500
+
+### /discipline/permaban [POST /discipline/permaban]
+
+Bans the specified user indefinitely. Also mass deletes all website messages sent by the specified user.
+**Requires /auth authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + host: The unique ID of the user, issued by the WWSU system internally. (string, required)
+        
++ Response 200
++ Response 500
+        
 ## Status [/status]
+
+Status endpoints refer to the status of WWSU subsystems.
 
 ### /status/get [GET /status/get]
 
