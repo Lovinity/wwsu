@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-    'A': {
+    'A': {// Current statuses
         'database': {label: 'Database', status: 1, time: null},
         'display-public': {label: 'Display Public', status: 3, time: null},
         'display-internal': {label: 'Display Internal', status: 3, time: null},
@@ -18,7 +18,6 @@ module.exports = {
         'openproject': {label: 'OpenProject', status: 2, time: null},
         'server': {label: 'Server', status: 2, time: null}
     },
-    'B': {},
 
     changeStatus: async function (key, theStatus, good = false, label = null) {
         var moment = require('moment');
@@ -29,11 +28,10 @@ module.exports = {
             Status['A'][key].status = theStatus;
             if (good)
                 Status['A'][key].time = moment().toISOString();
-            var changes = await sails.helpers.difference(Status['B'], Status['A']);
-            if (Object.keys(changes).length > 0)
-                sails.sockets.broadcast('status', 'status', changes);
-            Status['B'] = _.cloneDeep(Status['A']);
-        }
+            var temp = {};
+            temp[key] = Status['A'][key];
+            sails.sockets.broadcast('status', 'status', temp);
+    }
     }
 };
 
