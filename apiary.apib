@@ -151,7 +151,29 @@ Get the status of WWSU sub-systems. If the request is a socket, the request will
             },
             ...
         }
-        
+    
+## Display [/display]
+
+These endpoints deal with the public WWSU display signs
+
+### /display/public [GET /display/public]
+
+Get the public display sign as HTML webpage; to be run in full screen on the display monitor. This is for the general public.
+
++ Response 200 (text/html)
+
+### /display/internal [GET /display/internal]
+
+Get the internal display sign as HTML webpage; to be run in full screen on the display monitor. This is for directors and members of the WWSU organization
+
++ Response 200 (text/html)
+
+### /display/refresh [GET /display/refresh]
+
+Send a refresh signal to all connected display signs via websockets. **Requires /auth authorization**.
+
++ Response 200 (application/json)
+
 ## Meta [/meta]
 
 Meta endpoints regard metadata, or what is currently playing / on the air.
