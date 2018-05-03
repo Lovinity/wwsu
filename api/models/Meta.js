@@ -59,22 +59,22 @@ module.exports = {
         dj: '', // If someone is on the air, name of the host
         track: '', // Currently playing track either in automation or manually logged
         trackstamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
-        topic: '',
-        stream: '',
-        radiodj: '',
-        djcontrols: '',
-        line1: '',
-        line2: '',
-        percent: 0,
-        time: '',
-        listeners: 0,
-        listenerpeak: 0,
-        queueLength: 0,
-        breakneeded: false,
-        status: 1,
-        webchat: true
+        topic: '', // If the DJ specified a show topic, this is the topic.
+        stream: '', // Meta for the internet radio stream
+        radiodj: '', // REST IP of the RadioDJ instance currently in control
+        djcontrols: '', // Hostname of the computer in which has activated the most recent live/sports/remote broadcast via DJ Controls
+        line1: '', // First line of meta for display signs
+        line2: '', // Second line of meta for display signs
+        percent: 0, // Integer or float between 0 and 100 indicating how far in the current track in automation we are, for display signs
+        time: '', // Human readable date and time for display signs
+        listeners: 0, // Number of current online listeners
+        listenerpeak: 0, // Number of peak online listeners
+        queueLength: 0, // Amount of audio queued in radioDJ in seconds (can be a float)
+        breakneeded: false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
+        status: 4, // Overall system status: 1 = major outage, 2 = partial outage, 3 = minor issue, 4 = rebooting, 5 = operational
+        webchat: true // Set to false to restrict the ability to send chat messages through the website
     },
-    history: [], // track history
+    history: [], // track history array
 
     changeMeta: function (key, theMeta) {
         // Cancel the function if there's actually no change
