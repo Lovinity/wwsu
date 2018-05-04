@@ -15,10 +15,13 @@
     "jsonwebtoken": "^8.2.1",
     "moment": "^2.22.1",
     "needle": "^2.2.1",
+    "profanity-util": "^0.2.0",
     "sails": "^1.0.1",
     "sails-hook-grunt": "^3.0.2",
     "sails-hook-orm": "^2.0.0-16",
-    "sails-hook-sockets": "^1.4.0"
+    "sails-hook-sockets": "^1.4.0",
+    "sails-mysql": "^1.0.0",
+    "shorthash": "0.0.2"
   },
   "devDependencies": {
     "@sailshq/eslint": "^4.19.3"

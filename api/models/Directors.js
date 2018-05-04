@@ -6,27 +6,79 @@
  */
 
 module.exports = {
-    directors: {},
-    directorKeys: 0,
-    presence: {},
-    presenceB: {},
-    loadDirectors: async function (forced) {
-        return new Promise((resolve) => {
+    datastore: 'timesheet',
+    attributes: {
+        ID: {
+            type: 'number',
+            autoIncrement: true
+        },
+
+        login: {
+            type: 'string',
+            required: true
+        },
+
+        name: {
+            type: 'string',
+            required: true
+        },
+
+        position: {
+            type: 'string',
+            defaultsTo: 'Unknown'
+        },
+
+        present: {
+            type: 'boolean',
+            defaultsTo: false
+        },
+
+        since: {
+            type: 'ref',
+            columnType: 'datetime',
+        }
+    },
+    directors: {}, // Object of OpenProject director users
+    directorKeys: 0, // Number of directors in memory
+
+    /**
+     * Re-updates directors in database from OpenProject
+     * @constructor
+     * @param {boolean} forced - true if we are to re-determine the presence of all directors from the Timesheet database
+     */
+    updateDirectors: function (forced) {
+        return new Promise(async (resolve, reject) => {
             var moment = require('moment');
             var needle = require('needle');
             var directorNames = [];
+            // Get users from OpenProject via API
             var req = {
                 headers: {
-                    Authorization: 'Basic ' + System.pmAuth,
+                    Authorization: 'Basic ' + sails.config.custom.pmAuth,
                     'Content-Type': 'application/json'
                 }
             };
-            needle('get', System.pmHost + System.pmPath + 'users', {}, req)
+            needle('get', sails.config.custom.pmHost + sails.config.custom.pmPath + 'users', {}, req)
                     .then(async function (resp) {
+                        // Because this code is used twice, condense it into a variable
+                        var endFunction = async function () {
+                            // Remove directors which no longer exist in OpenProject
+                            var deleted = await Directors.destroy({name: {'!': directorNames}}).fetch()
+                                    .intercept((err) => {
+                                        sails.log.error(err);
+                                        reject();
+                                    });
+                            deleted.forEach(function (director, index) {
+                                sails.sockets.broadcast('directors', 'directors-delete', director.name);
+                            });
+                            Status.changeStatus(`openproject`, 5, true, `OpenProject`);
+                            Directors.directorKeys = Object.keys(Directors.directors).length;
+                            resolve();
+                        }
                         var body = resp.body;
                         if (!body)
                         {
-                            resolve(Directors.presence);
+                            resolve();
                         }
                         try {
                             body = JSON.parse(body);
@@ -34,20 +86,29 @@ module.exports = {
                             if (forced || Object.keys(Directors.directors).length != Directors.directorKeys)
                                 Directors.directors = {};
                             stuff.forEach(function (director) {
+                                // Skip non-active or non-invited users
                                 if (director.status == 'active' || director.status == 'invited')
                                 {
                                     directorNames.push(director.name);
+                                    // If user does not exist in the database, create it
                                     if (typeof Directors.directors[director.login] == 'undefined')
                                     {
                                         Directors.directors[director.login] = director;
-                                        if (typeof Directors.presence[director.name] == 'undefined')
-                                            Directors.presence[director.name] = {position: '', present: false, since: null};
                                     }
+                                    Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, position: '', present: false, since: moment().toISOString()})
+                                            .exec(async(err, user, wasCreated) => {
+                                                if (!err && wasCreated)
+                                                {
+                                                    sails.sockets.broadcast('directors', 'directors', [user]);
+                                                }
+                                            });
                                 }
                             });
+                            // If there was a change in the number of users, or we are forcing a reload, then reload all directors' presence.
                             if (forced || Object.keys(Directors.directors).length != Directors.directorKeys)
                             {
                                 var names = {};
+                                // Determine presence by analyzing timesheet records up to 14 days ago
                                 var records = await Timesheet.find({
                                     where: {
                                         name: directorNames,
@@ -56,55 +117,34 @@ module.exports = {
                                             {time_out: null}
                                         ]
                                     },
-                                    sort: 'time_in DESC'});
+                                    sort: 'time_in DESC'})
+                                        .intercept((err) => {
+                                            sails.log.error(err);
+                                            reject();
+                                        });
                                 if (records)
                                 {
                                     records.forEach(function (record) {
                                         if (typeof names[record.name] == 'undefined')
                                         {
-                                            names[record.name] = true;
+                                            names[record.name] = true; // This director is to be listed
+                                            // If there's an entry with a null time_out, then consider the director clocked in
                                             if (record.time_out === null)
                                             {
-                                                Directors.presence[record.name] = {position: '', present: true, since: record.time_in.toISOString()};
+                                                Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()}).exec();
                                             } else {
-                                                Directors.presence[record.name] = {position: '', present: false, since: record.time_out.toISOString()};
+                                                Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()}).exec();
                                             }
                                         }
                                     });
                                 }
-                                for (var key in Directors.presence)
-                                {
-                                    if (Directors.presence.hasOwnProperty(key))
-                                    {
-                                        if (directorNames.indexOf(key) <= -1)
-                                            delete Directors.presence[key];
-                                    }
-                                }
-                                Directors.directorKeys = Object.keys(Directors.directors).length;
-                                var changes = await sails.helpers.difference(Directors.presenceB, Directors.presence);
-                                if (Object.keys(changes).length > 0)
-                                    sails.sockets.broadcast('directors', 'directors', changes);
-                                Directors.presenceB = _.cloneDeep(Directors.presence);
-                                resolve(Directors.presence);
+                                endFunction();
                             } else {
-                                for (var key in Directors.presence)
-                                {
-                                    if (Directors.presence.hasOwnProperty(key))
-                                    {
-                                        if (directorNames.indexOf(key) <= -1)
-                                            delete Directors.presence[key];
-                                    }
-                                }
-                                Status.changeStatus(`openproject`, 5, true, `OpenProject`);
-                                Directors.directorKeys = Object.keys(Directors.directors).length;
-                                var changes = await sails.helpers.difference(Directors.presenceB, Directors.presence);
-                                if (Object.keys(changes).length > 0)
-                                    sails.sockets.broadcast('directors', 'directors', changes);
-                                Directors.presenceB = _.cloneDeep(Directors.presence);
-                                resolve(Directors.presence);
+                                endFunction();
                             }
                         } catch (e) {
-                            resolve(Directors.presence);
+                            sails.log.error(e);
+                            resolve();
                         }
                     });
         });

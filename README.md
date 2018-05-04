@@ -1,4 +1,4 @@
-FORMAT: 4A
+agesFORMAT: 4A
 HOST: http://server.wwsu1069.org
 
 # wwsu
@@ -18,8 +18,8 @@ User accounts are issued by WWSU. They are not available on request.
 
     + Attributes
 
-        + email: Email address of authenticating user. (string, required)
-        + password: Password of authenticating user (string, required)
+        + email: null@example.com (string, required)
+        + password: password (string, required)
 
 + Response 200 (application/json)
 
@@ -57,7 +57,7 @@ Get one specific director of WWSU.
 
     + Attributes
 
-        + username: Username of the director to fetch. (string, required)
+        + username: login (string, required)
 
 + Response 200 (application/json)
 
@@ -70,6 +70,7 @@ Get one specific director of WWSU.
         }
 
 + Response 404
++ Response 500
 
 ### /directors/getall [GET /directors/getall]
 
@@ -85,6 +86,7 @@ Get all directors of WWSU. If the request is a web socket, the request will be s
             },
             ...
         }
++ Response 500
         
 ## Discipline [/discipline]
 
@@ -100,7 +102,7 @@ Bans the specified user until the currently live DJ/broadcast ends. Also mass de
 
     + Attributes
 
-        + host: The unique ID of the user, issued by the WWSU system internally. (string, required)
+        + host: AAAAAA (string, required)
         
 + Response 200
 + Response 500
@@ -114,7 +116,7 @@ Bans the specified user for 24 hours. Also mass deletes all website messages sen
 
     + Attributes
 
-        + host: The unique ID of the user, issued by the WWSU system internally. (string, required)
+        + host: AAAAA (string, required)
         
 + Response 200
 + Response 500
@@ -128,7 +130,7 @@ Bans the specified user indefinitely. Also mass deletes all website messages sen
 
     + Attributes
 
-        + host: The unique ID of the user, issued by the WWSU system internally. (string, required)
+        + host: AAAAA (string, required)
         
 + Response 200
 + Response 500
@@ -151,7 +153,206 @@ Get the status of WWSU sub-systems. If the request is a socket, the request will
             },
             ...
         }
++ Response 500
+    
+## Display [/display]
+
+These endpoints deal with the public WWSU display signs
+
+### /display/public [GET /display/public]
+
+Get the public display sign as HTML webpage; to be run in full screen on the display monitor. This is for the general public.
+
++ Response 200 (text/html)
++ Response 500
+
+### /display/internal [GET /display/internal]
+
+Get the internal display sign as HTML webpage; to be run in full screen on the display monitor. This is for directors and members of the WWSU organization
+
++ Response 200 (text/html)
++ Response 500
+
+### /display/refresh [GET /display/refresh]
+
+Send a refresh signal to all connected display signs via websockets. **Requires /auth authorization**.
+
++ Response 200 (application/json)
++ Response 500
+
+## Messages [/messages]
+
+Messages endpoints regard the internal messaging system with WWSU Radio.
+
+### /messages/delete [POST /messages/delete]
+
+Delete a message. Sends a websocket message to all connected clients to remove the message. **Requires /auth authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + ID: 0 (number, required)
         
++ Response 200
++ Response 500
+
+### /messages/findclients [GET /messages/findclients]
+
+Retrieve a list of recipients that can be sent a message. If request is a websocket, will be subscribed to receive changes to the recipients or their statuses.
+        
++ Response 200 (application/json)
+
+        {
+            "system": {
+                "emergency": {
+                    "label": "Technical Issues",
+                    "status": 0 // 0 = No issues, 1 = issue reported
+                },
+                "trackrequests": {
+                    "label": "Track Requests",
+                    "status": 0 // 0 = no requests, 4 = request pending
+                }
+            },
+            "website": {
+                "website": {
+                    "label": "Web Public",
+                    "status": 5 // 5 = online, 0 = offline/disabled
+                },
+                ...
+            },
+            "computers": {
+                "hostname": {
+                    "label": "OnAir Computer",
+                    "status": 2 // 2 = online, 0 = offline
+                },
+                ...
+            },
+            "display": {
+                "public": {
+                    "label": "Display public",
+                    "status": 2 // 2 = online, 0 = offline
+                },
+                ...
+            }
+        }
++ Response 500
+
+### /messages/read [GET /messages/read]
+
+Retrieve a list of messages sent within the last hour. Used by internal WWSU applications. If request is websocket, will be subscribed to receive new messages sent. **Requires /auth authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + host: OnAirPC (string, required)
+        
++ Response 200 (application/json)
+
+        [
+            {
+                "createdAt": "2018-05-03T23:18:41.089Z",
+                "updatedAt": "2018-05-03T23:18:41.089Z",
+                "ID": 1,
+                "status": "active",
+                "from": "Me", // Host
+                "from_friendly": "Me",
+                "from_IP": "Not Specified",
+                "to": "You", // Host
+                "to_friendly": "You too",
+                "message": "hi"
+            },
+            ...
+        ]
+
++ Response 500
+
+### /messages/reademergencies [GET /messages/reademergencies]
+
+Retrieve a list of active technical issues reported. Used by internal WWSU applications. If request is websocket, will be subscribed to receive new reported technical issues. **Requires /auth authorization**
+        
++ Response 200 (application/json)
+
+        [
+            {
+                "createdAt": "2018-05-03T23:18:41.089Z",
+                "updatedAt": "2018-05-03T23:18:41.089Z",
+                "ID": 1,
+                "status": "active",
+                "from": "Me", // Host
+                "from_friendly": "Me",
+                "from_IP": "Not Specified",
+                "to": "emergency", 
+                "to_friendly": "emergency",
+                "message": "RadioDJ crashed"
+            },
+            ...
+        ]
+
++ Response 500
+
+### /messages/readweb [GET /messages/readweb]
+
+Retrieve a list of messages sent within the last hour applicable to web and mobile users. If request is websocket, will be subscribed to receive new messages.
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + nickname: George Carlin (string)
+        
++ Response 200 (application/json)
+
+        [
+            {
+                "createdAt": "2018-05-03T23:18:41.089Z",
+                "updatedAt": "2018-05-03T23:18:41.089Z",
+                "ID": 1,
+                "status": "active",
+                "from": "Me", // Messages from other web/mobile clients will begin with website-
+                "from_friendly": "Me",
+                "from_IP": "Not Specified",
+                "to": "website", // website = all web/mobile clients, website-hostid = specific web/mobile client, DJ = Public message to the DJ, DJ-private = Private message to the DJ
+                "to_friendly": "You too",
+                "message": "hi"
+            },
+            ...
+        ]
+
++ Response 500
+
+### /messages/send [POST /messages/send]
+
+Sends a message. This is used by internal WWSU clients. **Requires /auth authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + from: AAAAAA (string, required)
+        + to: AAAAAA (string, required)
+        + to_friendly: Engineering Computer (string, required)
+        + message: Fix the Automation System (string, required)
+        
++ Response 200
++ Response 500
+
+### /messages/sendweb [POST /messages/sendweb]
+
+Sends a message. This is used by public web and mobile clients.
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + nickname: George Carlin (string)
+        + private: false (boolean, required) // true = only the DJ can see the message; other public clients cannot see it
+        + message: Fix the Automation System (string, required)
+        
++ Response 200
++ Response 500
+
 ## Meta [/meta]
 
 Meta endpoints regard metadata, or what is currently playing / on the air.

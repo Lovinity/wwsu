@@ -19,7 +19,11 @@ module.exports = {
         //  ╔═╗╔═╗╔═╗╔═╗╔═╗╦╔═╗╔╦╗╦╔═╗╔╗╔╔═╗
         //  ╠═╣╚═╗╚═╗║ ║║  ║╠═╣ ║ ║║ ║║║║╚═╗
         //  ╩ ╩╚═╝╚═╝╚═╝╚═╝╩╩ ╩ ╩ ╩╚═╝╝╚╝╚═╝
-
+        ID: {
+            type: 'number',
+            autoIncrement: true
+        },
+        
         email: {
             type: 'string',
             isEmail: true,
@@ -32,14 +36,22 @@ module.exports = {
         },
     },
 
-    // Get rid of encrypted password responses in the API
+    /**
+     * Sails.js function override: When responding through API, do not send encrypted password!
+     */
+
     customToJSON: function () {
         var obj = this.toObject();
         delete obj.encryptedPassword;
         return obj;
     },
 
-    // Here we encrypt password before creating a User
+    /**
+     * Before creating a new user, we need to bcrypt the password.
+     * @constructor
+     * @param {object} values - Object of values during the create action
+     * @param {function} next - Callback function
+     */
     beforeCreate: function (values, next) {
         var bcrypt = require('bcrypt');
         var salt = bcrypt.genSalt(10)
@@ -58,7 +70,13 @@ module.exports = {
                 })
     },
 
-    // Make sure a password specified is correct for the user
+    /**
+     * Check to see if a provided password matches the given password for the user
+     * @constructor
+     * @param {string} password - The password to check
+     * @param {string} user - Check the password against the provided user.
+     */
+  
     comparePassword: function (password, user) {
         return new Promise((resolve) => {
             var bcrypt = require('bcrypt');

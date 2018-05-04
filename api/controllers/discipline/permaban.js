@@ -22,7 +22,8 @@ module.exports = {
                     return exits.success();
                 })
                 .catch(err => {
-                    return exits.error(err);
+                    sails.log.error(err);
+                    return exits.error();
                 });
     }
 

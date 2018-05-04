@@ -8,14 +8,20 @@ module.exports = {
 
     },
 
-    exits: {
-
-    },
-
     fn: async function (inputs, exits) {
         if (this.req.isSocket)
             sails.sockets.join(this.req, 'directors');
-        return exits.success(await Directors.loadDirectors(false));
+        var records = await Directors.find()
+                .intercept((err) => {
+                    sails.log.error(err);
+                    return exits.error();
+                });
+        if (!records)
+        {
+            return exits.success([]);
+        } else {
+            return exits.success(records);
+        }
     }
 
 

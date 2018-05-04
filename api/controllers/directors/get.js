@@ -18,26 +18,25 @@ module.exports = {
         },
         notFound: {
             statusCode: 404
+        },
+        error: {
+            statusCode: 500
         }
     },
 
     fn: async function (inputs, exits) {
         // See if the specified director is in memory. If not, return 404 not found.
-        if (typeof Directors.directors[inputs.username] == 'undefined' || (Directors.directors[inputs.username].status != 'active' && Directors.directors[inputs.username].status != 'invited'))
+        var records = await Directors.find({login: inputs.username})
+                .intercept((err) => {
+                    sails.log.error(err);
+                    return exits.error();
+                });
+        if (!records || records.length < 1)
         {
             return exits.notFound();
         } else {
-            var temp = {};
-            temp[inputs.username] = Directors.directors[inputs.username];
-            if (typeof Directors.presence[Directors.directors[inputs.username].name] != 'undefined' && Directors.presence[Directors.directors[inputs.username].name].present)
-            {
-                temp[inputs.username].present = true;
-            } else {
-                temp[inputs.username].present = false;
-            }
-            return exits.success(200, JSON.stringify(temp));
+            return exits.success(records);
         }
-        return exits.notFound();
     }
 
 

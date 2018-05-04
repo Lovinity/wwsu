@@ -8,10 +8,6 @@ module.exports = {
 
     },
 
-    exits: {
-
-    },
-
     fn: async function (inputs, exits) {
         sails.sockets.broadcast('display-refresh', 'display-refresh', true);
         return exits.success();

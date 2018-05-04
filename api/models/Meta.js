@@ -76,6 +76,13 @@ module.exports = {
     },
     history: [], // track history array
 
+    /**
+     * Change a meta attribute
+     * @constructor
+     * @param {string} key - The attribute to change... is a key in Meta['A'].
+     * @param {ref} theMeta - The value to be set to the key.
+     */
+
     changeMeta: function (key, theMeta) {
         // Cancel the function if there's actually no change
         if (typeof Meta['A'][key] == 'undefined' || Meta['A'][key] === theMeta)

@@ -12,17 +12,14 @@ module.exports = {
         },
     },
 
-    exits: {
-
-    },
-
     fn: async function (inputs, exits) {
         Discipline.dayban(inputs.host)
                 .then(() => {
                     return exits.success();
                 })
                 .catch(err => {
-                    return exits.error(err);
+                    sails.log.error(err);
+                    return exits.error();
                 });
     }
 

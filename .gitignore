@@ -130,3 +130,21 @@ lib-cov
 *.out
 *.pid
 
+/config/custom.js
+/config/datastores.js
+/config/views.js
+/config/blueprints.js
+/config/bootstrap.js
+/config/custom.js
+/config/datastores.js
+/config/globals.js
+/config/http.js
+/config/i18n.js
+/config/local.js
+/config/log.js
+/config/models.js
+/config/policies.js
+/config/routes.js
+/config/security.js
+/config/session.js
+/config/sockets.js
