@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-    datastore: 'timesheet',
+    datastore: 'memory',
     attributes: {
         ID: {
             type: 'number',
