@@ -63,7 +63,7 @@ module.exports = {
                         // Because this code is used twice, condense it into a variable
                         var endFunction = async function () {
                             // Remove directors which no longer exist in OpenProject
-                            var deleted = await Directors.destroy({name: {'!': directorNames}}).fetch()
+                            var deleted = await Directors.destroy({name: {'!=': directorNames}}).fetch()
                                     .intercept((err) => {
                                         sails.log.error(err);
                                         reject();
@@ -124,17 +124,19 @@ module.exports = {
                                         });
                                 if (records)
                                 {
-                                    records.forEach(function (record) {
+                                    records.forEach(async function (record) {
                                         if (typeof names[record.name] == 'undefined')
                                         {
                                             names[record.name] = true; // This director is to be listed
                                             // If there's an entry with a null time_out, then consider the director clocked in
+                                            var record = null;
                                             if (record.time_out === null)
                                             {
-                                                Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()}).exec();
+                                                record = await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()}).fetch();
                                             } else {
-                                                Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()}).exec();
+                                                record = await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()}).fetch();
                                             }
+                                            sails.sockets.broadcast('directors', 'directors', record);
                                         }
                                     });
                                 }
