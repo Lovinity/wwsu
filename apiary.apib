@@ -180,6 +180,43 @@ Send a refresh signal to all connected display signs via websockets. **Requires 
 + Response 200 (application/json)
 + Response 500
 
+## Eas [/eas]
+
+Eas endpoints deal with the internal WWSU emergency alert system. These endpoints do NOT have anything to do with the SAGE Digital ENDEC; this is internal only.
+
+### /eas/get [GET /eas/get]
+
+Get an array of currently active alerts. If the request is a socket, will also be subscribed to EAS and EAS-delete events.
+
++ Response 200 (application/json)
++ Response 500
+
+### /eas/send [POST /eas/send]
+
+Issue a new alert through the internal emergency alert system, originating from WWSU. **Requires /auth authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + counties: Clark, Greene, Montgomery (string, required)
+        + alert: Bomb Threat (string, required)
+        + severity: Extreme (string, required)
+        + starts: 2018-05-06T21:43:07+00:00 (string)
+        + expires: 2018-05-06T21:58:07+00:00 (string)
+        + color: #000000 (string, required)
+        + Information: A bomb threat has been detected. Please evacuate into bomb shelters immediately. The entire campus is on lockdown. (string, required)
+        
++ Response 200
++ Response 500
+
+### /eas/test [POST /eas/test]
+
+Send out a test through the internal emergency alert system. **Requires /auth authorization**
+
++ Response 200
++ Response 500
+
 ## Messages [/messages]
 
 Messages endpoints regard the internal messaging system with WWSU Radio.
