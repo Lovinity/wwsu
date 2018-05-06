@@ -148,3 +148,4 @@ lib-cov
 /config/security.js
 /config/session.js
 /config/sockets.js
+config

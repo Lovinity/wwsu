@@ -7,7 +7,6 @@
 
 // WORK ON THIS
 module.exports = {
-
     datastore: 'timesheet',
     attributes: {
         ID: {

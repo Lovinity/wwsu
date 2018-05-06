@@ -21,7 +21,8 @@
     "sails-hook-orm": "^2.0.0-16",
     "sails-hook-sockets": "^1.4.0",
     "sails-mysql": "^1.0.0",
-    "shorthash": "0.0.2"
+    "shorthash": "0.0.2",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "@sailshq/eslint": "^4.19.3"

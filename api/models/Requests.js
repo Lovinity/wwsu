@@ -7,7 +7,7 @@
 
 // WORK ON THIS
 module.exports = {
-
+    datastore: 'radiodj',
     attributes: {
 
         ID: {

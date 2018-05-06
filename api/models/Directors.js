@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+    // This model is only a container for temporary data. It should not persist. Use memory instead of SQL.
     datastore: 'memory',
     attributes: {
         ID: {
@@ -96,7 +97,7 @@ module.exports = {
                                         Directors.directors[director.login] = director;
                                     }
                                     Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, position: '', present: false, since: moment().toISOString()})
-                                            .exec(async(err, user, wasCreated) => {
+                                            .exec((err, user, wasCreated) => {
                                                 if (!err && wasCreated)
                                                 {
                                                     sails.sockets.broadcast('directors', 'directors', [user]);
