@@ -189,6 +189,26 @@ Eas endpoints deal with the internal WWSU emergency alert system. These endpoint
 Get an array of currently active alerts. If the request is a socket, will also be subscribed to EAS and EAS-delete events.
 
 + Response 200 (application/json)
+
+        [
+            {
+                "createdAt": "2018-05-07T02:00:12.350Z",
+                "updatedAt": "2018-05-07T02:00:12.367Z",
+                "ID": 12,
+                "source": "WWSU",
+                "reference": "1525658412343",
+                "alert": "Test",
+                "information": "This is a test of the WWSU Emergency Alert System. This is only a test. The WWSU Emergency Alert System is designed to provide the public with timely emergency information, as well as weather alerts for Clark, Greene, and Montgomery counties of Ohio. Had this been an actual emergency, you would have received information and instructions regarding the emergency. This concludes the test of the WWSU Emergency Alert System.",
+                "severity": "Extreme",
+                "color": "#FFFFFF",
+                "counties": "Clark, Greene, Montgomery",
+                "starts": "2018-05-07T02:00:12.343Z",
+                "expires": "2018-05-07T02:03:12.343Z",
+                "push": false
+            }
+            ...
+        ]
+        
 + Response 500
 
 ### /eas/send [POST /eas/send]
@@ -418,5 +438,8 @@ Get the current meta. If request is a socket, will also be subscribed to the met
             queueLength: 0, // Amount of audio queued in radioDJ in seconds (can be a float)
             breakneeded: false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
             status: 4, // Overall system status: 1 = major outage, 2 = partial outage, 3 = minor issue, 4 = rebooting, 5 = operational
-            webchat: true // Set to false to restrict the ability to send chat messages through the website
-        },
+            webchat: true, // Set to false to restrict the ability to send chat messages through the website
+            playlist: null, // Name of the playlist we are currently airing
+            playlist_position: -1, // Current position within the playlist
+            playlist_played: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
+        }

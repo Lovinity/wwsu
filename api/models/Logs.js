@@ -22,8 +22,7 @@ module.exports = {
 
         logsubtype: {
             type: 'string',
-            allowNull: true,
-            defaultsTo: null
+            allowNull: true
         },
 
         event: {
@@ -32,26 +31,22 @@ module.exports = {
 
         trackArtist: {
             type: 'string',
-            allowNull: true,
-            defaultsTo: null
+            allowNull: true
         },
 
         trackTitle: {
             type: 'string',
-            allowNull: true,
-            defaultsTo: null
+            allowNull: true
         },
 
         trackAlbum: {
             type: 'string',
-            allowNull: true,
-            defaultsTo: null
+            allowNull: true
         },
 
         trackLabel: {
             type: 'string',
-            allowNull: true,
-            defaultsTo: null
+            allowNull: true
         }
     }
 };

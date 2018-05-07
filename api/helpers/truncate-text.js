@@ -14,7 +14,7 @@ module.exports = {
           description: 'The string to truncate'
       },
       
-      length: {
+      strLength: {
           type: 'number',
           min: 1,
           defaultsTo: 100,
@@ -32,8 +32,8 @@ module.exports = {
 
   fn: async function (inputs, exits) {
 
-    if (inputs.str.length > inputs.length) {
-        return exits.success(inputs.str.substring(0, inputs.length - inputs.ending.length) + inputs.ending);
+    if (inputs.str.length > inputs.strLength) {
+        return exits.success(inputs.str.substring(0, inputs.strLength - inputs.ending.strLength) + inputs.ending);
     } else {
         return exits.success(inputs.str);
     }
