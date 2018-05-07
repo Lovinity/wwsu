@@ -5,7 +5,6 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-// NEEDS TESTING
 var moment = require("moment");
 var parseString = require('xml2js').parseString;
 var needle = require('needle');

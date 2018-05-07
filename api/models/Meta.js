@@ -50,6 +50,21 @@ module.exports = {
 
         webchat: {
             type: 'boolean'
+        },
+
+        playlist: {
+            type: 'string',
+            allowNull: true
+        },
+
+        playlist_position: {
+            type: 'number',
+            defaultsTo: -1
+        },
+
+        playlist_played: {
+            type: 'ref',
+            columnType: 'datetime'
         }
 
     },
@@ -73,42 +88,57 @@ module.exports = {
         queueLength: 0, // Amount of audio queued in radioDJ in seconds (can be a float)
         breakneeded: false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
         status: 4, // Overall system status: 1 = major outage, 2 = partial outage, 3 = minor issue, 4 = rebooting, 5 = operational
-        webchat: true // Set to false to restrict the ability to send chat messages through the website
+        webchat: true, // Set to false to restrict the ability to send chat messages through the website
+        playlist: null, // Name of the playlist we are currently airing
+        playlist_position: -1, // Current position within the playlist
+        playlist_played: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
     },
     history: [], // track history array
 
     /**
      * Change a meta attribute
      * @constructor
-     * @param {string} key - The attribute to change... is a key in Meta['A'].
-     * @param {ref} theMeta - The value to be set to the key.
+     * @param {object} obj - Object of meta to change.
      */
 
-    changeMeta: function (key, theMeta) {
-        // Cancel the function if there's actually no change
-        if (typeof Meta['A'][key] == 'undefined' || Meta['A'][key] === theMeta)
-            return null;
+    changeMeta: function (obj) {
+        return new Promise(async (resolve, reject) => {
+            var push = {};
+            var db = {};
+            for (var key in obj)
+            {
+                if (obj.hasOwnProperty(key)) {
+                    if (typeof Meta['A'][key] == 'undefined' || Meta['A'][key] === obj[key])
+                        continue;
 
-        Meta['A'][key] = theMeta;
-        var temp = {};
-        temp[key] = Meta['A'][key];
+                    Meta['A'][key] = obj[key];
+                    push[key] = obj[key];
 
-        // Try updating the meta in the database
-        try {
-            if (key in Meta.attributes)
-                Meta.update({ID: 1}).set(temp).exec();
-        } catch (e) {
-        }
+                    // Try updating the meta in the database
+                    try {
+                        if (key in Meta.attributes)
+                            db[key] = obj[key];
+                    } catch (e) {
+                        reject();
+                    }
 
-        // If we're changing stream meta, push to history array, and send an API call to the stream to update the meta on the stream.
-        if (key == 'stream')
-        {
-            Meta.history.unshift(theMeta);
-            Meta.history = Meta.history.slice(0, 5);
-            // TODO: Put stream metadata updating API query here
-        }
-
-        sails.sockets.broadcast('meta', 'meta', temp);
-    }
+                    // If we're changing stream meta, push to history array, and send an API call to the stream to update the meta on the stream.
+                    if (key == 'stream')
+                    {
+                        Meta.history.unshift(obj[key]);
+                        Meta.history = Meta.history.slice(0, 5);
+                        // TODO: Put stream metadata updating API query here
+                    }
+                }
+            }
+            await Meta.update({ID: 1}).set(db)
+                    .intercept((err) => {
+                        sails.log.error(err);
+                        reject();
+                    });
+            sails.sockets.broadcast('meta', 'meta', push);
+            resolve();
+        });
+    },
 };
 

@@ -24,9 +24,9 @@ module.exports = {
     fn: async function (inputs, exits) {
         for (let index = 0; index < inputs.array.length; index++) {
             try {
-                await inputs.callback(inputs.array[index], index, inputs.array)
+                await inputs.callback(inputs.array[index], index, inputs.array);
             } catch (e) {
-                exits.error();
+                exits.error(e);
             }
         }
         exits.success();
