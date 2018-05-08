@@ -44,8 +44,7 @@ module.exports = {
                 Discipline.massDeleteWebMessages(host);
                 var record = await Discipline.create({active: 1, IP: host, action: 'showban', message: `The website user was show-banned by ${Meta['A'].dj}`}).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 sails.sockets.broadcast(host, 'webmessage', {status: 'denied', response: `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${record.ID}`});
                 resolve();
@@ -66,8 +65,7 @@ module.exports = {
                 Discipline.massDeleteWebMessages(host);
                 var record = await Discipline.create({active: 1, IP: host, action: 'dayban', message: `The website user was banned for 24 hours by ${Meta['A'].dj}`}).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 sails.sockets.broadcast(host, 'webmessage', {status: 'denied', response: `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${record.ID}`});
                 resolve();
@@ -88,8 +86,7 @@ module.exports = {
                 Discipline.massDeleteWebMessages(host);
                 var record = await Discipline.create({active: 1, IP: host, action: 'permaban', message: `The website user was banned indefinitely by ${Meta['A'].dj}`}).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 sails.sockets.broadcast(host, 'webmessage', {status: 'denied', response: `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${record.ID}`});
                 resolve();
@@ -109,8 +106,7 @@ module.exports = {
             try {
                 var records = await Messages.update({from: host}, {status: 'deleted'}).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 if (records.constructor == Array)
                 {

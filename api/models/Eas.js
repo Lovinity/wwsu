@@ -202,33 +202,36 @@ module.exports = {
                 parseString(body, async function (err, result) { // Response is in XML. We need to convert to JSON.
                     if (err)
                     {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     } else {
-                        result.feed.entry.forEach(function (entry, indexer) {
-                            if (typeof entry['id'] != 'undefined' && typeof entry['cap:status'] != 'undefined' && entry['cap:status'][0] == 'Actual')
-                            { // Skip any entries that do not have an ID or do not have a status of "Actual"; they're not real alerts.
-                                if (moment().isBefore(moment(entry['cap:expires'][0])))
-                                { // Only flash the bulbs if the alert is in effect. Sometimes, NWS will issue a delayed alert.
-                                    var color = "#787878";
-                                    if (entry['cap:event'][0] in Eas.nwsalerts) { // Is the alert in our array of alerts to alert for?
-                                        color = Eas.nwsalerts[entry['cap:event'][0]];
+                        await sails.helpers.asyncForEach(result.feed.entry, async function (entry, indexer) {
+                            try {
+                                if (typeof entry['id'] != 'undefined' && typeof entry['cap:status'] != 'undefined' && entry['cap:status'][0] == 'Actual')
+                                { // Skip any entries that do not have an ID or do not have a status of "Actual"; they're not real alerts.
+                                    if (moment().isBefore(moment(entry['cap:expires'][0])))
+                                    { // Only flash the bulbs if the alert is in effect. Sometimes, NWS will issue a delayed alert.
+                                        var color = "#787878";
+                                        if (entry['cap:event'][0] in Eas.nwsalerts) { // Is the alert in our array of alerts to alert for?
+                                            color = Eas.nwsalerts[entry['cap:event'][0]];
+                                        } else {
+                                            return null;
+                                        }
+                                        await Eas.addAlert(entry['id'][0], 'NWS', county, entry['cap:event'][0], entry['cap:severity'][0], moment(entry['cap:effective'][0]).toISOString(), moment(entry['cap:expires'][0]).toISOString(), color);
+                                        Eas.activeCAPS.push(entry['id'][0]);
                                     } else {
-                                        return null;
                                     }
-                                    Eas.addAlert(entry['id'][0], 'NWS', county, entry['cap:event'][0], entry['cap:severity'][0], moment(entry['cap:effective'][0]).toISOString(), moment(entry['cap:expires'][0]).toISOString(), color);
-                                    Eas.activeCAPS.push(entry['id'][0]);
                                 } else {
                                 }
-                            } else {
+                            } catch (e) {
+                                sails.log.error(e);
+                                return null;
                             }
                         });
                         resolve();
                     }
                 });
             } catch (e) {
-                sails.log.error(e);
-                reject();
+                reject(e);
             }
         });
     },
@@ -255,8 +258,7 @@ module.exports = {
                 console.log('Getting record');
                 var record = await Eas.findOne({source: source, reference: reference})
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 if (record) // Exists
                 {
@@ -298,8 +300,7 @@ module.exports = {
                     console.log('Updating');
                     await Eas.update({ID: record.ID}, criteria)
                             .intercept((err) => {
-                                sails.log.error(err);
-                                reject();
+                                reject(err);
                             });
                     resolve();
                 } else { // Does not exist
@@ -321,8 +322,7 @@ module.exports = {
                     console.log('Creating');
                     var record = await Eas.create(criteria)
                             .intercept((err) => {
-                                sails.log.error(err);
-                                reject();
+                                reject(err);
                             })
                             .fetch();
 
@@ -337,34 +337,29 @@ module.exports = {
                                         try {
                                             if (err2)
                                             {
-                                                sails.log.error(err2);
-                                                reject();
+                                                reject(err2);
                                             } else {
                                                 console.log('Updating the database');
                                                 await Eas.update({reference: reference}, {information: result.alert.info[0].description[0] + ". Precautionary / Preparedness actions: " + result.alert.info[0].instruction[0]})
                                                         .intercept((err) => {
-                                                            sails.log.error(err);
-                                                            reject();
+                                                            reject(err);
                                                         })
                                             }
                                             resolve();
                                         } catch (e) {
-                                            sails.log.error(e);
-                                            reject();
+                                            reject(e);
                                         }
                                     });
                                 })
                                 .catch(function (err) {
-                                    sails.log.error(err);
-                                    reject();
+                                    reject(err);
                                 });
                     } else {
                         resolve();
                     }
                 }
             } catch (e) {
-                sails.log.error(e);
-                reject();
+                reject(e);
             }
         });
     },
@@ -380,8 +375,7 @@ module.exports = {
             // Get all active alerts from the database.
             var records = await Eas.find()
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     })
 
             // Async is tricky for forEach loops! Use the helper.
@@ -391,8 +385,7 @@ module.exports = {
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
-                                sails.log.error(err);
-                                reject();
+                                reject(err);
                             });
                     sails.sockets.broadcast('EAS-delete', 'EAS-delete', record.ID);
                     return null;
@@ -403,8 +396,7 @@ module.exports = {
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
-                                sails.log.error(err);
-                                reject();
+                                reject(err);
                             });
                     sails.sockets.broadcast('EAS-delete', 'EAS-delete', record.ID);
                     return null;
@@ -421,8 +413,7 @@ module.exports = {
             // Mark these alerts as having been pushed; they do not need pushing anymore unless they get changed later.
             await Eas.update({push: true}, {push: false})
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             resolve();
         });

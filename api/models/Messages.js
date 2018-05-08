@@ -59,14 +59,13 @@ module.exports = {
     read: function (opts) {
         return new Promise(async (resolve, reject) => {
             if (typeof opts.host == 'undefined') // No host? Cannot continue!
-                reject();
+                reject(new Error('Missing parameter: host'));
             var moment = require('moment');
             var searchto = moment().subtract(1, 'hours').toDate(); // Get messages sent within the last hour
             // First, grab data pertaining to the host that is retrieving messages
             var thehost = await Hosts.findOrCreate({host: opts.host}, {host: opts.host, friendlyname: opts.host})
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             // Do socket related maintenance
             if (typeof opts.socket != 'undefined')
@@ -88,8 +87,7 @@ module.exports = {
             // Get messages
             var records = await Messages.find({status: 'active', createdAt: {'>': searchto}, to: {'!=': 'emergency'}})
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (typeof records == 'undefined' || records.length == 0)
             {
@@ -110,7 +108,7 @@ module.exports = {
     readWeb: function (opts) {
         return new Promise(async (resolve, reject) => {
             if (typeof opts.host == 'undefined')
-                reject();
+                reject(new Error('Missing parameter: host'));
             var moment = require('moment');
             var searchto = moment().subtract(1, 'hours').toDate();
             var records = await Messages.find(
@@ -124,8 +122,7 @@ module.exports = {
                         ]
                     })
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (typeof records == 'undefined' || records.length == 0)
             {
@@ -143,8 +140,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             var records = await Messages.find({to: 'emergency', status: 'active'})
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (typeof records == 'undefined' || records.length == 0)
             {
@@ -183,8 +179,7 @@ module.exports = {
             // Include all hosts from the database in the list of recipients
             var records = await Hosts.find()
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (records)
             {
@@ -195,8 +190,7 @@ module.exports = {
             // Include all hosts that have sent a message within the last hour
             var records2 = await Messages.find({or: [{createdAt: {'>': searchto}}, {to: 'emergency'}]})
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (typeof records2 == 'undefined' || records2.length == 0)
             {
@@ -213,8 +207,7 @@ module.exports = {
             // Determine if there is a track request pending, and if so, set the status of requests recipient accordingly.
             var records3 = await Requests.find({played: 0})
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (typeof records3 == 'undefined' || records3.length == 0)
             {
@@ -257,18 +250,16 @@ module.exports = {
                 // First, grab data pertaining to the host that is retrieving messages
                 var stuff = await Hosts.findOrCreate({host: opts.from}, {host: opts.from, friendlyname: opts.from})
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 opts.from_friendly = stuff.friendlyname;
                 var records = await Messages.create(opts).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 if (!records)
                 {
-                    reject();
+                    reject(new Error('Internal error: Could not save message in database.'));
                 } else {
                     var records2 = records;
                     delete records2.from_IP; // We do not want to publish IP addresses publicly!
@@ -286,8 +277,7 @@ module.exports = {
                     resolve();
                 }
             } catch (e) {
-                sails.log.error(e);
-                reject();
+                reject(e);
             }
         });
     },
@@ -312,7 +302,7 @@ module.exports = {
             try {
                 opts.message = await sails.helpers.filterProfane(opts.message);
             } catch (e) {
-                reject();
+                reject(e);
             }
             var theid = opts.host;
             // If no nickname provided, use host as the nickname
@@ -323,31 +313,28 @@ module.exports = {
             var records = null;
             var check = await Messages.find({from_IP: opts.from_IP, createdAt: {'>': searchto}})
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (check.length > 0)
-                reject();
+                reject(new Error('Website visitors are only allowed to send one message per minute.'));
             // Create and broadcast the message, depending on whether or not it was private
             if (typeof opts.private != 'undefined' && opts.private)
             {
                 records = await Messages.create({status: 'active', from: `website-${theid}`, from_friendly: `Web (${opts.nickname})`, from_IP: opts.from_IP, to: 'DJ-private', to_friendly: 'DJ private', message: opts.message}).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 if (!records)
-                    reject();
+                    reject(new Error('Internal Error: Could not save message to the database.'));
                 delete records.from_IP; // We do not want to broadcast IP addresses!
                 sails.sockets.broadcast('website-' + theid, 'webmessage', {status: 'success', response: [records]});
             } else {
                 records = await Messages.create({status: 'active', from: `website-${theid}`, from_friendly: `Web (${opts.nickname})`, from_IP: opts.from_IP, to: 'DJ', to_friendly: 'DJ', message: opts.message}).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            reject(err);
                         });
                 if (!records)
-                    reject();
+                    reject(new Error('Internal Error: Could not save message to the database'));
                 delete records.from_IP; // We do not want to broadcast IP addresses!
                 sails.sockets.broadcast('website', 'webmessage', {status: 'success', response: [records]});
             }
@@ -367,8 +354,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             var records = await Messages.update({ID: id}, {status: 'deleted'}).fetch()
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        reject(err);
                     });
             if (!records || records.length == 0)
             {

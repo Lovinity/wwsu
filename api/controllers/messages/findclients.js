@@ -15,6 +15,7 @@ module.exports = {
             var records = await Messages.findClients()
             return exits.success(records);
         } catch (e) {
+            sails.log.error(e);
             return exits.error();
         }
     }
