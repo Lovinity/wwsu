@@ -185,7 +185,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             Eas.activeCAPS = [];
             Eas.toPush = [];
-            resolve();
+            return resolve();
         });
     },
 
@@ -202,7 +202,7 @@ module.exports = {
                 parseString(body, async function (err, result) { // Response is in XML. We need to convert to JSON.
                     if (err)
                     {
-                        reject(err);
+                        return reject(err);
                     } else {
                         await sails.helpers.asyncForEach(result.feed.entry, async function (entry, indexer) {
                             try {
@@ -227,11 +227,11 @@ module.exports = {
                                 return null;
                             }
                         });
-                        resolve();
+                        return resolve();
                     }
                 });
             } catch (e) {
-                reject(e);
+                return reject(e);
             }
         });
     },
@@ -258,7 +258,7 @@ module.exports = {
                 console.log('Getting record');
                 var record = await Eas.findOne({source: source, reference: reference})
                         .intercept((err) => {
-                            reject(err);
+                            return reject(err);
                         });
                 if (record) // Exists
                 {
@@ -300,9 +300,9 @@ module.exports = {
                     console.log('Updating');
                     await Eas.update({ID: record.ID}, criteria)
                             .intercept((err) => {
-                                reject(err);
+                                return reject(err);
                             });
-                    resolve();
+                    return resolve();
                 } else { // Does not exist
                     console.log('record not found');
                     var criteria = {
@@ -322,7 +322,7 @@ module.exports = {
                     console.log('Creating');
                     var record = await Eas.create(criteria)
                             .intercept((err) => {
-                                reject(err);
+                                return reject(err);
                             })
                             .fetch();
 
@@ -337,29 +337,29 @@ module.exports = {
                                         try {
                                             if (err2)
                                             {
-                                                reject(err2);
+                                                return reject(err2);
                                             } else {
                                                 console.log('Updating the database');
                                                 await Eas.update({reference: reference}, {information: result.alert.info[0].description[0] + ". Precautionary / Preparedness actions: " + result.alert.info[0].instruction[0]})
                                                         .intercept((err) => {
-                                                            reject(err);
+                                                            return reject(err);
                                                         })
                                             }
-                                            resolve();
+                                            return resolve();
                                         } catch (e) {
-                                            reject(e);
+                                            return reject(e);
                                         }
                                     });
                                 })
                                 .catch(function (err) {
-                                    reject(err);
+                                    return reject(err);
                                 });
                     } else {
-                        resolve();
+                        return resolve();
                     }
                 }
             } catch (e) {
-                reject(e);
+                return reject(e);
             }
         });
     },
@@ -375,7 +375,7 @@ module.exports = {
             // Get all active alerts from the database.
             var records = await Eas.find()
                     .intercept((err) => {
-                        reject(err);
+                        return reject(err);
                     })
 
             // Async is tricky for forEach loops! Use the helper.
@@ -385,7 +385,7 @@ module.exports = {
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
-                                reject(err);
+                                return reject(err);
                             });
                     sails.sockets.broadcast('EAS-delete', 'EAS-delete', record.ID);
                     return null;
@@ -396,7 +396,7 @@ module.exports = {
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
-                                reject(err);
+                                return reject(err);
                             });
                     sails.sockets.broadcast('EAS-delete', 'EAS-delete', record.ID);
                     return null;
@@ -406,16 +406,17 @@ module.exports = {
                 if (record.push)
                     sendit.push(record);
             });
-            // Push out alerts to clients
-            if (sendit.length > 0)
-                sails.sockets.broadcast('EAS', 'EAS', sendit);
 
             // Mark these alerts as having been pushed; they do not need pushing anymore unless they get changed later.
             await Eas.update({push: true}, {push: false})
                     .intercept((err) => {
-                        reject(err);
+                        return reject(err);
                     });
-            resolve();
+
+            // Push out alerts to clients
+            if (sendit.length > 0)
+                sails.sockets.broadcast('EAS', 'EAS', sendit);
+            return resolve(sendit);
         });
     },
 

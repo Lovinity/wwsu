@@ -83,13 +83,13 @@ module.exports = {
             bcrypt.compare(password, user.encryptedPassword)
                     .then(match => {
                         if (match) {
-                            resolve(true);
+                            return resolve(true);
                         } else {
-                            resolve(false);
+                            return resolve(false);
                         }
                     })
                     .catch(err => {
-                        resolve(false);
+                        return resolve(false);
                     })
         });
     }

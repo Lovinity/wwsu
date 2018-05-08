@@ -28,8 +28,8 @@ module.exports = {
             } catch (e) {
                 exits.error(e);
             }
+            exits.success();
         }
-        exits.success();
     }
 
 

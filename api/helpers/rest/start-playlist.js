@@ -71,7 +71,7 @@ module.exports = {
                 var queueTrack = function (track) {
                     return new Promise(async (resolve2) => {
                         await sails.helpers.rest.cmd('LoadTrackToBottom', track);
-                        resolve2();
+                        return resolve2();
                     });
                 };
                 var x = Playlists.active.position;
@@ -153,9 +153,9 @@ module.exports = {
                                     loopArray(Playlists.active.tracks);
                                 }
                             } catch (e2) {
-                                reject2(e2);
+                                return reject2(e2);
                             }
-                            resolve2();
+                            return resolve2();
                         });
                     }
                     Playlists.active.tracks = [];
@@ -165,19 +165,19 @@ module.exports = {
                                 Playlists.active.tracks.push(playlistTrack.sID);
                                 await Playlists_list.update({ID: playlistTrack.ID}, {ord: index})
                                         .intercept((err) => {
-                                            sails.log.error(err);
-                                            reject2();
+                                            return reject2(err);
                                         });
                                 await afterFunction();
                             } catch (e2) {
-                                reject2(e2);
+                                return reject2(e2);
                             }
-                            resolve2();
+                            return resolve2();
                         });
                     });
                 }
             }
         } catch (e) {
+            sails.log.error(e);
             return exits.error(e);
         }
     }

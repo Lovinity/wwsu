@@ -119,7 +119,7 @@ module.exports = {
                         if (key in Meta.attributes)
                             db[key] = obj[key];
                     } catch (e) {
-                        reject();
+                        return reject(e);
                     }
 
                     // If we're changing stream meta, push to history array, and send an API call to the stream to update the meta on the stream.
@@ -133,11 +133,10 @@ module.exports = {
             }
             await Meta.update({ID: 1}).set(db)
                     .intercept((err) => {
-                        sails.log.error(err);
-                        reject();
+                        return reject(err);
                     });
             sails.sockets.broadcast('meta', 'meta', push);
-            resolve();
+            return resolve();
         });
     },
 };

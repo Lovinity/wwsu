@@ -66,20 +66,19 @@ module.exports = {
                             // Remove directors which no longer exist in OpenProject
                             var deleted = await Directors.destroy({name: {'!=': directorNames}}).fetch()
                                     .intercept((err) => {
-                                        sails.log.error(err);
-                                        reject();
+                                        return reject(err);
                                     });
                             deleted.forEach(function (director, index) {
                                 sails.sockets.broadcast('directors', 'directors-delete', director.name);
                             });
                             Status.changeStatus(`openproject`, 5, true, `OpenProject`);
                             Directors.directorKeys = Object.keys(Directors.directors).length;
-                            resolve();
+                            return resolve();
                         }
                         var body = resp.body;
                         if (!body)
                         {
-                            resolve();
+                            return resolve();
                         }
                         try {
                             body = JSON.parse(body);
@@ -120,8 +119,7 @@ module.exports = {
                                     },
                                     sort: 'time_in DESC'})
                                         .intercept((err) => {
-                                            sails.log.error(err);
-                                            reject();
+                                            return reject(err);
                                         });
                                 if (records)
                                 {
@@ -147,7 +145,7 @@ module.exports = {
                             }
                         } catch (e) {
                             sails.log.error(e);
-                            resolve();
+                            return resolve();
                         }
                     });
         });

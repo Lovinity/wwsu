@@ -62,21 +62,18 @@ module.exports = {
                     criteria.time = moment().toISOString()
                 var records = await Status.findOrCreate({name: name}, criteria)
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            return reject(err);
                         });
                 if (records.status == theStatus)
-                    resolve();
+                    return resolve();
                 var records2 = await Status.update({name: name}, criteria).fetch()
                         .intercept((err) => {
-                            sails.log.error(err);
-                            reject();
+                            return reject(err);
                         });
                 sails.sockets.broadcast('status', 'status', records2);
-                resolve();
+                return resolve();
             } catch (e) {
-                sails.log.error(e);
-                reject();
+                return reject(e);
             }
         });
     }
