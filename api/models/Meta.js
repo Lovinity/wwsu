@@ -93,6 +93,7 @@ module.exports = {
         playlist_position: -1, // Current position within the playlist
         playlist_played: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
     },
+    automation: [], // Tracks in automation
     history: [], // track history array
 
     /**

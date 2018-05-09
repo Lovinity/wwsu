@@ -177,7 +177,6 @@ module.exports = {
                 }
             }
         } catch (e) {
-            sails.log.error(e);
             return exits.error(e);
         }
     }

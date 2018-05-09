@@ -27,19 +27,17 @@ module.exports = {
         if (typeof inputs.arg != 'undefined' && inputs.arg !== null)
             endstring = '&arg=' + inputs.arg;
         // Query REST
-        needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.restauth + '&command=' + inputs.command + endstring)
+        needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.restAuth + '&command=' + inputs.command + endstring)
                 .then(async function (resp) {
                     try {
                         var json2 = parser.toJson(resp.body);
                         return exits.success(json2);
                     } catch (e) {
-                        sails.log.error(e);
-                        return exits.error();
+                        return exits.error(e);
                     }
                 })
                 .catch(function (err) {
-                    sails.log.error(err);
-                    return exits.error();
+                    return exits.error(err);
                 });
     }
 
