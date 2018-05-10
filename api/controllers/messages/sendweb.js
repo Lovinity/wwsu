@@ -32,7 +32,7 @@ module.exports = {
         var opts = {message: inputs.message, from_IP: from_IP, nickname: inputs.nickname || null, private: inputs.private};
         opts.host = sh.unique(from_IP + sails.tokenSecret);
         try {
-            Messages.sendWeb(opts);
+            await sails.helpers.messages.sendWeb(opts.host, opts.message, opts.from_IP, opts.nickname, opts.private);
             return exits.success();
         } catch (e) {
             sails.log.error(e);

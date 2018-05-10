@@ -40,7 +40,7 @@ module.exports = {
             opts.nickname = opts.host;
         try {
             // Get messages for this client
-            var records = await Messages.readWeb(opts);
+            var records = await sails.helpers.messages.readWeb(opts.host);
             return exits.success(records);
         } catch (e) {
             sails.log.error(e);

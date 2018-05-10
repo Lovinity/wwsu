@@ -1,6 +1,6 @@
 module.exports = {
 
-    friendlyName: 'Discipline / permaban',
+    friendlyName: 'Discipline / banIndefinite',
 
     description: 'Issues a ban against a user indefinitely.',
 
@@ -17,14 +17,13 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        Discipline.permaban(inputs.host)
-                .then(() => {
-                    return exits.success();
-                })
-                .catch(err => {
-                    sails.log.error(err);
-                    return exits.error();
-                });
+        try {
+            await sails.helpers.discipline.banIndefinite(inputs.host);
+            return exits.success();
+        } catch (e) {
+            sails.log.error(e);
+            return exits.error();
+        }
     }
 
 

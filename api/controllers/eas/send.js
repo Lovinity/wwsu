@@ -61,8 +61,8 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            await Eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, moment(inputs.starts).toISOString(), moment(inputs.expires).toISOString(), inputs.color, inputs.information);
-            await Eas.postParse();
+            await sails.helpers.eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, moment(inputs.starts).toISOString(), moment(inputs.expires).toISOString(), inputs.color, inputs.information);
+            await sails.helpers.eas.postParse();
             return exits.success();
         } catch (e) {
             sails.log.error(e);

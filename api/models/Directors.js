@@ -47,7 +47,7 @@ module.exports = {
      * @constructor
      * @param {boolean} forced - true if we are to re-determine the presence of all directors from the Timesheet database
      */
-    updateDirectors: function (forced) {
+    updateDirectors: function (forced = false) {
         return new Promise(async (resolve, reject) => {
             var moment = require('moment');
             var needle = require('needle');

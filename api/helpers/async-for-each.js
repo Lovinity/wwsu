@@ -26,10 +26,11 @@ module.exports = {
             try {
                 await inputs.callback(inputs.array[index], index, inputs.array);
             } catch (e) {
-                exits.error(e);
+                return exits.error(e);
+                break;
             }
-            exits.success();
         }
+        return exits.success();
     }
 
 

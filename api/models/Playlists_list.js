@@ -1,21 +1,59 @@
 /**
  * Playlists_list.js
  *
- * @description :: A model definition.  Represents a database table/collection/etc.
+ * @description :: A list of tracks mapped to playlists.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-// WORK ON THIS
 module.exports = {
 datastore: 'radiodj',
-  attributes: {
-
+    attributes: {
         ID: {
             type: 'number',
             autoIncrement: true
         },
 
-  },
+        pID: {
+            type: 'number'
+        },
+        sID: {
+            type: 'number'
+        },
+        cstart: {
+            type: 'number'
+        },
+        cnext: {
+            type: 'number'
+        },
+        cend: {
+            type: 'number'
+        },
+        fin: {
+            type: 'number'
+        },
+        fout: {
+            type: 'number'
+        },
+        swID: {
+            type: 'number'
+        },
+        swplay: {
+            type: 'number'
+        },
+        vtID: {
+            type: 'number'
+        },
+        vtplay: {
+            type: 'number'
+        },
+        swfirst: {
+            type: 'boolean'
+        },
+        ord: {
+            type: 'number'
+        },
+
+    }
 
 };
 

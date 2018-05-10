@@ -9,12 +9,17 @@ module.exports = {
     // This model's data is only temporary and should not persist. Use memory instead of SQL.
     datastore: 'memory',
     attributes: {
+        
         ID: {
             type: 'number',
             autoIncrement: true
         },
 
         name: {
+            type: 'string'
+        },
+
+        label: {
             type: 'string'
         },
 
@@ -46,31 +51,36 @@ module.exports = {
     },
 
     /**
-     * Change the status of a subsystem
+     * Change statuses
      * @constructor
-     * @param {string} name - The name of the subsystem to change
-     * @param {number} theStatus - A number representing the new status of the subsystem.
-     * @param {boolean} good - Set to true if we are reporting that the subsystem is in good standing.
+     * @param {Array} array - Object containing objects of statuses to change {name: 'key', label: 'friendly name', status: 5}.
      */
 
-    changeStatus: function (name, theStatus, good = false) {
+    changeStatus: function (array) {
         return new Promise(async (resolve, reject) => {
             var moment = require('moment');
             try {
-                var criteria = {name: name, status: theStatus};
-                if (good)
-                    criteria.time = moment().toISOString()
-                var records = await Status.findOrCreate({name: name}, criteria)
-                        .intercept((err) => {
-                            return reject(err);
-                        });
-                if (records.status == theStatus)
-                    return resolve();
-                var records2 = await Status.update({name: name}, criteria).fetch()
-                        .intercept((err) => {
-                            return reject(err);
-                        });
-                sails.sockets.broadcast('status', 'status', records2);
+                var push = [];
+                await sails.helpers.asyncForEach(array, function (status, index) {
+                    return new Promise(async (resolve2, reject2) => {
+                        var criteria = {name: status.name, status: status.status};
+                        if (status.status == 5)
+                            criteria.time = moment().toISOString();
+                        var records = await Status.findOrCreate({name: status.name}, criteria)
+                                .intercept((err) => {
+                                    return resolve2();
+                                });
+                        if (records.status == status.status)
+                            return resolve2();
+                        var records2 = await Status.update({name: status.name}, criteria).fetch()
+                                .intercept((err) => {
+                                    return reject(err);
+                                });
+                        push.push(records2[0]);
+                        return resolve2();
+                    });
+                });
+                sails.sockets.broadcast('status', 'status', push);
                 return resolve();
             } catch (e) {
                 return reject(e);

@@ -12,7 +12,7 @@ module.exports = {
         if (this.req.isSocket)
             sails.sockets.join(req, 'message-emergency');
         try {
-            var records = await Messages.readEmergencies();
+            var records = await sails.helpers.messages.readEmergencies();
             return exits.success(records);
         } catch (e) {
             sails.log.error(e);

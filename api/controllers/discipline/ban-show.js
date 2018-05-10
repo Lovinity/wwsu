@@ -1,6 +1,6 @@
 module.exports = {
 
-    friendlyName: 'Discipline / showban',
+    friendlyName: 'Discipline / banShow',
 
     description: 'Issues a ban against a user until the currently live DJ signs off of the air.',
 
@@ -12,19 +12,14 @@ module.exports = {
         },
     },
 
-    exits: {
-
-    },
-
     fn: async function (inputs, exits) {
-        Discipline.showban(inputs.host)
-                .then(() => {
-                    return exits.success();
-                })
-                .catch(err => {
-                    sails.log.error(err);
-                    return exits.error();
-                });
+        try {
+            await sails.helpers.discipline.banShow(inputs.host);
+            return exits.success();
+        } catch (e) {
+            sails.log.error(e);
+            return exits.error();
+        }
     }
 
 

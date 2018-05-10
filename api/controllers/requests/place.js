@@ -30,7 +30,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            var response = await Requests.place(inputs.ID, this.req.ip, inputs.name, inputs.message);
+            var response = await sails.helpers.requests.place(inputs.ID, this.req.ip, inputs.name, inputs.message);
             return exits.success(response.HTML);
         } catch (e) {
             sails.log.error(e);

@@ -13,7 +13,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
        try {
-           var response = await Requests.getRequests(inputs.offset);
+           var response = await sails.helpers.requests.get(inputs.offset);
            return exits.success(response);
        } catch (e) {
            saols.log.error(e);
