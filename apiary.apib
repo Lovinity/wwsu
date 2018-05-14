@@ -93,7 +93,7 @@ Get all directors of WWSU. If the request is a web socket, the request will be s
 Discipline endpoints manage moderation of website and mobile app users.
 **NOTE** All discipline endpoints require a valid token from /auth .
 
-### /discipline/showban [POST /discipline/showban]
+### /discipline/banShow [POST /discipline/banshow]
 
 Bans the specified user until the currently live DJ/broadcast ends. Also mass deletes all website messages sent by the specified user.
 **Requires /auth authorization**
@@ -107,7 +107,7 @@ Bans the specified user until the currently live DJ/broadcast ends. Also mass de
 + Response 200
 + Response 500
 
-### /discipline/dayban [POST /discipline/dayban]
+### /discipline/banDay [POST /discipline/banday]
 
 Bans the specified user for 24 hours. Also mass deletes all website messages sent by the specified user.
 **Requires /auth authorization**
@@ -121,7 +121,7 @@ Bans the specified user for 24 hours. Also mass deletes all website messages sen
 + Response 200
 + Response 500
 
-### /discipline/permaban [POST /discipline/permaban]
+### /discipline/banIndefinite [POST /discipline/banindefinite]
 
 Bans the specified user indefinitely. Also mass deletes all website messages sent by the specified user.
 **Requires /auth authorization**
@@ -254,7 +254,7 @@ Delete a message. Sends a websocket message to all connected clients to remove t
 + Response 200
 + Response 500
 
-### /messages/findclients [GET /messages/findclients]
+### /messages/findRecipients [GET /messages/findrecipients]
 
 Retrieve a list of recipients that can be sent a message. If request is a websocket, will be subscribed to receive changes to the recipients or their statuses.
         
@@ -325,7 +325,7 @@ Retrieve a list of messages sent within the last hour. Used by internal WWSU app
 
 + Response 500
 
-### /messages/reademergencies [GET /messages/reademergencies]
+### /messages/readEmergencies [GET /messages/reademergencies]
 
 Retrieve a list of active technical issues reported. Used by internal WWSU applications. If request is websocket, will be subscribed to receive new reported technical issues. **Requires /auth authorization**
         
@@ -349,7 +349,7 @@ Retrieve a list of active technical issues reported. Used by internal WWSU appli
 
 + Response 500
 
-### /messages/readweb [GET /messages/readweb]
+### /messages/readWeb [GET /messages/readweb]
 
 Retrieve a list of messages sent within the last hour applicable to web and mobile users. If request is websocket, will be subscribed to receive new messages.
 
@@ -395,7 +395,7 @@ Sends a message. This is used by internal WWSU clients. **Requires /auth authori
 + Response 200
 + Response 500
 
-### /messages/sendweb [POST /messages/sendweb]
+### /messages/sendWts DOCeb [POST /messages/sendweb]
 
 Sends a message. This is used by public web and mobile clients.
 
