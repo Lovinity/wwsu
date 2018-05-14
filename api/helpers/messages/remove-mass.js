@@ -1,6 +1,6 @@
 module.exports = {
 
-    friendlyName: 'Messages / deleteMass',
+    friendlyName: 'Messages / removeMass',
 
     description: 'Mass delete all messages sent by a specified host.',
 
@@ -22,10 +22,12 @@ module.exports = {
             if (records.constructor == Array)
             {
                 records.forEach(function (record) {
-                    sails.sockets.broadcast('message-delete', 'message-delete', {type: 'message', id: record.ID});
+                    sails.sockets.broadcast('message-website', 'message-remove', {type: 'message', id: record.ID});
+                    sails.sockets.broadcast('message-message', 'message-remove', {type: 'message', id: record.ID});
                 });
             } else {
-                sails.sockets.broadcast('message-delete', 'message-delete', {type: 'message', id: records.ID});
+                sails.sockets.broadcast('message-website', 'message-remove', {type: 'message', id: records.ID});
+                sails.sockets.broadcast('message-message', 'message-remove', {type: 'message', id: records.ID});
             }
             return exits.success();
         } catch (e) {

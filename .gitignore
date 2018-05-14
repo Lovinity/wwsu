@@ -149,3 +149,6 @@ lib-cov
 /config/session.js
 /config/sockets.js
 config
+/client_secret.json
+/api/controllers/directors/load.js
+/api/controllers/events/load.js

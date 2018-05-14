@@ -15,7 +15,7 @@ module.exports = {
     fn: async function (inputs, exits) {
 
         try {
-            sails.helpers.messages.deleteMass(inputs.host);
+            await sails.helpers.messages.removeMass(inputs.host);
             var record = await Discipline.create({active: 1, IP: inputs.host, action: 'dayban', message: `The website user was banned for 24 hours by ${Meta['A'].dj}`}).fetch()
                     .intercept((err) => {
                         return exits.error(err);

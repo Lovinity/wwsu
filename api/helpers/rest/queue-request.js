@@ -73,40 +73,39 @@ module.exports = {
 
                 // Prepare the request
                 Requests.pending.push(record.songID);
-                //sails.sockets.broadcast('message-delete', 'message-delete', {type: 'request', id: record.ID});
-
+                
                 // Process the request depending on which state we are in now
                 switch (Meta['A'].state)
                 {
                     case 'live_on':
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
-                        sails.helpers.rest.cmd('EnableAssisted', 0);
-                        sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                        await sails.helpers.rest.cmd('EnableAssisted', 0);
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await Meta.changeMeta({state: 'live_returning'});
                         return exits.success(true);
                         break;
                     case 'remote_on':
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
-                        sails.helpers.rest.cmd('EnableAssisted', 0);
-                        sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                        await sails.helpers.rest.cmd('EnableAssisted', 0);
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await Meta.changeMeta({state: 'remote_returning'});
                         return exits.success(true);
                         break;
                     case 'sports_on':
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
-                        sails.helpers.rest.cmd('EnableAssisted', 0);
-                        sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                        await sails.helpers.rest.cmd('EnableAssisted', 0);
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await Meta.changeMeta({state: 'sports_returning'});
                         return exits.success(true);
                         break;
                     case 'sportsremote_on':
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
-                        sails.helpers.rest.cmd('EnableAssisted', 0);
-                        sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                        await sails.helpers.rest.cmd('EnableAssisted', 0);
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await Meta.changeMeta({state: 'sportsremote_returning'});
                         return exits.success(true);
                         break;

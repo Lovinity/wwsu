@@ -104,14 +104,14 @@ module.exports = {
                 }
                 if (inputs.resume)
                 {
-                    finishIt = function () {
-                        sails.helpers.rest.cmd('EnableAutoDJ', 1);
+                    finishIt = async function () {
+                        await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
                     loopArray(Playlists.active.tracks);
                 } else if (inputs.type == 0)
                 {
-                    finishIt = function () {
-                        sails.helpers.rest.cmd('EnableAutoDJ', 1);
+                    finishIt = async function () {
+                        await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
                     await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()})
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'playlist - ' + theplaylist.name, event: 'A playlist was scheduled to start.' + "\n" + 'Playlist: ' + inputs.name})
@@ -146,8 +146,8 @@ module.exports = {
                                 //sails.log.error(new Error(`${countsleft} processes remaining`));
                                 if (countsleft < 1)
                                 {
-                                    finishIt = function () {
-                                        sails.helpers.rest.cmd('EnableAutoDJ', 1);
+                                    finishIt = async function () {
+                                        await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                                     };
                                     await Meta.changeMeta({state: 'automation_genre', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()});
                                     loopArray(Playlists.active.tracks);
@@ -175,6 +175,7 @@ module.exports = {
                         });
                     });
                 }
+                exits.success();
             }
         } catch (e) {
             return exits.error(e);

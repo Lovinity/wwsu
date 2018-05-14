@@ -69,9 +69,9 @@ module.exports = {
                                         return reject(err);
                                     });
                             deleted.forEach(function (director, index) {
-                                sails.sockets.broadcast('directors', 'directors-delete', director.name);
+                                sails.sockets.broadcast('directors', 'directors-remove', director.name);
                             });
-                            Status.changeStatus(`openproject`, 5, true, `OpenProject`);
+                            Status.changeStatus([{name: `openproject`, status: 5, label: `OpenProject`}]);
                             Directors.directorKeys = Object.keys(Directors.directors).length;
                             return resolve();
                         }

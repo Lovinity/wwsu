@@ -254,7 +254,7 @@ io.socket.on('webmessage', function (data) {
    processmessage(data);
 });
 
-io.socket.on('message-delete', function (data) {
+io.socket.on('message-remove', function (data) {
         var temp = document.getElementById(`msg-${data.id}`)
         if (temp !== null)
             temp.innerHTML = 'XXX This message was deleted XXX';

@@ -12,7 +12,7 @@ module.exports = {
         if (this.req.isSocket)
             sails.sockets.join(req, 'message-user');
         try {
-            var records = await sails.helpers.messahes.findRecipients();
+            var records = await sails.helpers.messages.findRecipients();
             return exits.success(records);
         } catch (e) {
             sails.log.error(e);

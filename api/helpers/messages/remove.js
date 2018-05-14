@@ -1,6 +1,6 @@
 module.exports = {
 
-    friendlyName: 'messages / delete',
+    friendlyName: 'messages / remove',
 
     description: 'Delete a single message.',
 
@@ -24,7 +24,8 @@ module.exports = {
             var type = 'message';
             if (records[0].to == 'emergency')
                 type = 'emergency';
-            sails.sockets.broadcast('message-delete', 'message-delete', {type: type, id: inputs.id});
+            sails.sockets.broadcast('message-website', 'message-remove', {type: type, id: inputs.id});
+            sails.sockets.broadcast('message-message', 'message-remove', {type: type, id: inputs.id});
             return exits.success();
         }
     }

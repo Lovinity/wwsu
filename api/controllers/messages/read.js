@@ -17,7 +17,6 @@ module.exports = {
         if (this.req.isSocket)
         {
             sails.sockets.join(req, 'message-message');
-            sails.sockets.join(req, 'message-delete');
         }
         try {
             var records = await sails.helpers.messages.read(inputs.host, from_IP, this.req.isSocket ? sails.sockets.getId(this.req) : null);

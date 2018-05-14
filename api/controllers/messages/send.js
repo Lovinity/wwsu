@@ -32,7 +32,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            await sails.helpers.messages.send(inputs);
+            await sails.helpers.messages.send(inputs.from, inputs.to, inputs.to_friendly, inputs.message);
             return exits.success();
         } catch (e) {
             sails.log.error(e);

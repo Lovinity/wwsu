@@ -39,7 +39,7 @@ module.exports = {
                     if (Messages.visitors[key].host === inputs.host)
                     {
                         delete Messages.visitors[key];
-                        sails.sockets.broadcast('message-user', 'message-user-delete', key);
+                        sails.sockets.broadcast('message-user', 'message-user-remove', key);
                     }
                 }
             }

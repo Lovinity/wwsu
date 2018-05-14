@@ -10,7 +10,6 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-
         var sendit = [];
 
         // Get all active alerts from the database.
@@ -18,9 +17,8 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 })
-
         // Async is tricky for forEach loops! Use the helper.
-        await sails.helpers.asyncForEach(records, (record) => {
+        await sails.helpers.asyncForEach(records, (record, index) => {
             return new Promise(async (resolve2, reject2) => {
                 // Remove NWS alerts no longer listed in the CAPS; we assume those alerts were expired. Notify clients of the alert being removed.
                 if (record.source == 'NWS' && Eas.activeCAPS.indexOf(record.reference) == -1)
@@ -29,7 +27,7 @@ module.exports = {
                             .intercept((err) => {
                                 return resolve2();
                             });
-                    sails.sockets.broadcast('EAS-delete', 'EAS-delete', record.ID);
+                    sails.sockets.broadcast('EAS', 'EAS-remove', record.ID);
                     return resolve2();
                 }
 
@@ -40,13 +38,15 @@ module.exports = {
                             .intercept((err) => {
                                 return resolve2();
                             });
-                    sails.sockets.broadcast('EAS-delete', 'EAS-delete', record.ID);
+                    sails.sockets.broadcast('EAS', 'EAS-remove', record.ID);
                     return resolve2();
                 }
 
                 // If this alert needs to be pushed, either because it's new or updated, throw it in the sendit array to be pushed.
                 if (record.push)
                     sendit.push(record);
+                
+                return resolve2();
             });
         });
 
@@ -55,7 +55,6 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-
         // Push out alerts to clients
         if (sendit.length > 0)
             sails.sockets.broadcast('EAS', 'EAS', sendit);

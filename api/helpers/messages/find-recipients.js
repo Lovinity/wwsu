@@ -11,7 +11,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        var searchto = moment().subtract(1, 'hours').toISOString();
+        var searchto = moment().subtract(1, 'hours').toDate();
         // Hard-coded recipients with special purposes, plus some groups.
         var users = {
             system: {

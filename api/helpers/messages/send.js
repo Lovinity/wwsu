@@ -31,7 +31,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            opts.message = await sails.helpers.filterProfane(inputs.message);
+            inputs.message = await sails.helpers.filterProfane(inputs.message);
             // First, grab data pertaining to the host that is retrieving messages
             var stuff = await Hosts.findOrCreate({host: inputs.from}, {host: inputs.from, friendlyname: inputs.from})
                     .intercept((err) => {

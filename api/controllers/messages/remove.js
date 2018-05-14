@@ -1,6 +1,6 @@
 module.exports = {
 
-    friendlyName: 'Messages / Delete',
+    friendlyName: 'Messages / Remove',
 
     description: 'Delete a message by ID.',
 
@@ -13,7 +13,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            await Messages.delete(inputs.ID);
+            await sails.helpers.messages.remove(inputs.ID);
         } catch (e)
         {
             sails.log.error(e);
