@@ -24,13 +24,19 @@ module.exports = {
             isIn: ['Top', 'Bottom'],
             description: 'The track will be queued in this position in the queue: Top / Bottom'
         },
-
+        
         quantity: {
             type: 'number',
             defaultsTo: 1,
-            description: 'Number of tracks to queue from this subcategory.'
+            description: 'Number of tracks to queue from this subcategory. Defaults to 1.'
         },
-
+        
+        rules: {
+            type: 'boolean',
+            defaultsTo: true,
+            description: 'If true (default), will check for rotation rules before queuing tracks (unless there is not enough tracks to queue given rotation rules).'
+        },
+        
         duration: {
             type: 'number',
             allowNull: true,
@@ -72,45 +78,56 @@ module.exports = {
                             return exits.error(err);
                         });
 
+                // If duration is provided, remove songs that fail the duration check
+                if (inputs.duration !== null && thesongs.length > 0)
+                {
+                    thesongs.forEach(function (thesong, index) {
+                        if (thesong.duration > (inputs.duration + 5) || thesong.duration < (inputs.duration - 5))
+                            delete thesongs[index];
+                    });
+                }
+
                 if (thesongs.length > 0)
                 {
-                    // Randomise the list and keep only the first number(opt) tracks
+
+                    // Randomise the list of songs
                     thesongs.sort(function (a, b) {
                         return 0.5 - Math.random()
                     });
-                    thesongs.slice(0, inputs.quantity);
 
                     var queuedtracks = 0;
-                    var anyerrors = false;
                     var queuedtracksa = [];
                     Statemeta.automation.forEach(function (queuedtrack) {
                         queuedtracksa.push(queuedtrack.ID);
                     });
 
-                    // Queue up the chosen tracks
-                    await sails.helpers.asyncForEach(thesongs, function (thesong) {
-                        return new Promise(async (resolve, reject) => {
-                            try {
-                                // Check rotation rules first
-                                var canplay = sails.helpers.songs.checkRotationRules(thesong.ID);
-                                if (canplay)
-                                {
-                                    await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
-                                    queuedtracks += 1;
-                                    // If we reached our limit of tracks to queue, break out of the async for each loop.
-                                    if (queuedtracks >= inputs.quantity)
+                    // Queue up the chosen tracks if they pass rotation rules, and if rules is not set to false
+                    if (inputs.rules)
+                    {
+                        await sails.helpers.asyncForEach(thesongs, function (thesong) {
+                            return new Promise(async (resolve, reject) => {
+                                try {
+                                    // Check rotation rules first
+                                    var canplay = sails.helpers.songs.checkRotationRules(thesong.ID);
+                                    if (canplay)
                                     {
-                                        return resolve(true);
+                                        await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
+                                        queuedtracks += 1;
+                                        // If we reached our limit of tracks to queue, break out of the async for each loop.
+                                        if (queuedtracks >= inputs.quantity)
+                                        {
+                                            return resolve(true);
+                                        }
+                                        return resolve(false);
                                     }
-                                    return resolve(false);
+                                } catch (e) {
+                                    return reject(e);
                                 }
-                            } catch (e) {
-                                return reject(e);
-                            }
+                            });
                         });
-                    });
+                    }
 
-                    // Not enough tracks? Let's try queuing more tracks without rotation rules
+                    // Not enough tracks, or rules was set to false? Let's try queuing [more] tracks without rotation rules
                     if (queuedtracks < inputs.quantity)
                     {
                         // We want to be sure we don't queue any tracks that are already in the queue
@@ -142,12 +159,12 @@ module.exports = {
                     }
                     if (queuedtracks < inputs.quantity)
                     {
-                        return exits.success(false);
+                        return exits.success(false); // We could not queue the specified number of tracks when this function was called... so return false.
                     } else {
-                        return exits.success(true);
+                        return exits.success(true); // We queued the specified number of tracks, so return true.
                     }
                 } else {
-                    return exits.error(new Error('No tracks to queue'));
+                    return exits.success(false);
                 }
             } else {
                 return exits.error(new Error('Subcategory not found'));
