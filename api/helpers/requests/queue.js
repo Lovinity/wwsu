@@ -1,6 +1,6 @@
 module.exports = {
 
-    friendlyName: 'rest / queueRequests',
+    friendlyName: 'requests / queue',
 
     description: 'Play/queue requests in RadioDJ.',
 

@@ -262,15 +262,15 @@ module.exports = {
                             {
                                 if (event.summary.startsWith("Playlist: "))
                                 {
-                                    await sails.helpers.rest.startPlaylist(event.summary.replace('Playlist: ', ''), false, criteria.end, 0);
+                                    await sails.helpers.playlists.start(event.summary.replace('Playlist: ', ''), false, criteria.end, 0);
                                 }
                                 if (event.summary.startsWith("Prerecord: "))
                                 {
-                                    await sails.helpers.rest.startPlaylist(event.summary.replace('Prerecord: ', ''), false, criteria.end, 1, criteria.description);
+                                    await sails.helpers.playlists.start(event.summary.replace('Prerecord: ', ''), false, criteria.end, 1, criteria.description);
                                 }
                                 if (event.summary.startsWith("Genre: "))
                                 {
-                                    await sails.helpers.rest.startPlaylist(event.summary.replace('Genre: ', ''), false, criteria.end, 2);
+                                    await sails.helpers.playlists.start(event.summary.replace('Genre: ', ''), false, criteria.end, 2);
                                 }
                             }
                         }

@@ -3,7 +3,7 @@ var moment = require("moment");
 // CHECK OVER
 module.exports = {
 
-    friendlyName: 'Rest / Start playlist',
+    friendlyName: 'Playlists / start',
 
     description: 'Begin a playlist in the active RadioDJ.',
 
