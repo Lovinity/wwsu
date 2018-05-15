@@ -25,10 +25,10 @@ module.exports = {
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
-                                return resolve2();
+                                return resolve2(false);
                             });
                     sails.sockets.broadcast('EAS', 'EAS-remove', record.ID);
-                    return resolve2();
+                    return resolve2(false);
                 }
 
                 // Remove expired alerts, and notify clients of deleted alerts
@@ -36,17 +36,17 @@ module.exports = {
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
-                                return resolve2();
+                                return resolve2(false);
                             });
                     sails.sockets.broadcast('EAS', 'EAS-remove', record.ID);
-                    return resolve2();
+                    return resolve2(false);
                 }
 
                 // If this alert needs to be pushed, either because it's new or updated, throw it in the sendit array to be pushed.
                 if (record.push)
                     sendit.push(record);
                 
-                return resolve2();
+                return resolve2(false);
             });
         });
 

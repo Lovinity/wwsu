@@ -1,0 +1,64 @@
+var moment = require("moment");
+require("moment-duration-format");
+
+module.exports = {
+
+    friendlyName: 'Songs / checkRotationRules',
+
+    description: 'Returns true if this track is allowed to be played via rotation rules, false if it is not allowed to be played',
+
+    inputs: {
+        ID: {
+            type: 'number',
+            required: true,
+            description: 'The song ID number to check.'
+        }
+    },
+
+    fn: async function (inputs, exits) {
+        var record = await Songs.findOne({ID: inputs.ID})
+                .intercept((err) => {
+                    return exits.error(err);
+                });
+        if (!record || record === null)
+            return exits.error(new Error('Provided Song ID was not found.'));
+
+        var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']})
+                .intercept((err) => {
+                    return exits.error(err);
+                });
+
+        var rotationRules = {};
+        thesettings.forEach(function (thesetting) {
+            rotationRules[thesetting.setting] = thesetting.value;
+        });
+
+        // Check if we are past the end date of the track
+        if (moment(record.end_date).isBefore() && moment(record.end_date).isAfter('2002-01-01 00:00:01'))
+            return exits.success(false);
+
+        // Check if we have not yet reached the start date of the track
+        if (moment(record.start_date).isAfter())
+            return exits.success(false);
+
+        // Check if the track has exceeded the number of allowed spin counts
+        if (record.limit_action > 0 && record.count_played >= record.play_limit)
+            return exits.success(false);
+
+        // Check rotation rules
+        if (moment(record.date_played).isAfter(moment().subtract(rotationRules.RepeatTrackInterval, 'minutes')))
+            return exits.success(false);
+        if (moment(record.title_played).isAfter(moment().subtract(rotationRules.RepeatTitleInteval, 'minutes')))
+            return exits.success(false);
+        if (moment(record.artist_played).isAfter(moment().subtract(rotationRules.RepeatArtistInteval, 'minutes')))
+            return exits.success(false);
+        if (moment(record.album_played).isAfter(moment().subtract(rotationRules.RepeatAlbumInteval, 'minutes')))
+            return exits.success(false);
+
+        return exits.success(true);
+
+    }
+
+
+};
+

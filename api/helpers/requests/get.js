@@ -35,7 +35,7 @@ module.exports = {
                         temp.trackname = `${record2.artist} - ${record2.title}`;
                         thereturn.push(temp);
                     }
-                    return resolve2();
+                    return resolve2(false);
                 });
             });
             return exits.success(thereturn);

@@ -49,7 +49,7 @@ module.exports = {
                                 sails.log.error(e);
                                 return reject2();
                             }
-                            return resolve2();
+                            return resolve2(false);
                         });
                     });
                     return exits.success();

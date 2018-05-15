@@ -171,7 +171,7 @@ module.exports = {
                             } catch (e2) {
                                 return reject2(e2);
                             }
-                            return resolve2();
+                            return resolve2(false);
                         });
                     });
                 }
