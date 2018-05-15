@@ -107,7 +107,7 @@ module.exports = {
                             break;
                         default:
                             if (queuedSomething && inputs.liner_first)
-                                await sails.helpers.rest.queueFromSubcategory('Request Liners', 'Jingles', 'Top', 1);
+                                await sails.helpers.songs.queueFromSubcategory('Request Liners', 'Jingles', 'Top', 1);
                             return resolve();
                             break;
                     }
