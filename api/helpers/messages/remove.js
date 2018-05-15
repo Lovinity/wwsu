@@ -13,10 +13,11 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        var records = await Messages.update({ID: inputs.id}, {status: 'deleted'}).fetch()
+        var records = await Messages.update({ID: inputs.id}, {status: 'deleted'})
                 .intercept((err) => {
                     return exits.error(err);
-                });
+                })
+                .fetch();
         if (!records || records.length == 0)
         {
             return exits.error(new Error(`The message does not exist.`));
@@ -24,8 +25,8 @@ module.exports = {
             var type = 'message';
             if (records[0].to == 'emergency')
                 type = 'emergency';
-            sails.sockets.broadcast('message-website', 'message-remove', {type: type, id: inputs.id});
-            sails.sockets.broadcast('message-message', 'message-remove', {type: type, id: inputs.id});
+            sails.sockets.broadcast('message-website', 'message-remove', inputs.id);
+            sails.sockets.broadcast('message-message', 'message-remove', inputs.id);
             return exits.success();
         }
     }

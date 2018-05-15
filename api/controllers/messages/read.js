@@ -16,7 +16,7 @@ module.exports = {
         var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] != 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
         if (this.req.isSocket)
         {
-            sails.sockets.join(req, 'message-message');
+            sails.sockets.join(this.req, 'message-message');
         }
         try {
             var records = await sails.helpers.messages.read(inputs.host, from_IP, this.req.isSocket ? sails.sockets.getId(this.req) : null);

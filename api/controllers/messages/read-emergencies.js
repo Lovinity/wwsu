@@ -10,7 +10,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         if (this.req.isSocket)
-            sails.sockets.join(req, 'message-emergency');
+            sails.sockets.join(this.req, 'message-emergency');
         try {
             var records = await sails.helpers.messages.readEmergencies();
             return exits.success(records);

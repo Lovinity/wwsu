@@ -173,7 +173,6 @@ module.exports = {
                 })
     },
 
-    // WORK ON THIS
     loadEvents: function (auth) {
         return new Promise(async (resolve, reject) => {
             try {

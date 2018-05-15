@@ -1,7 +1,6 @@
 var needle = require('needle');
 var parser = require('xml2json');
 
-// WORK ON ERROR HANDLING
 module.exports = {
 
     friendlyName: 'Rest cmd',
@@ -18,6 +17,11 @@ module.exports = {
             type: 'ref',
             description: 'If the command takes an argument, arg is that argument.',
             defaultsTo: null
+        },
+        timeout: {
+            type: 'number',
+            defaultsTo: 2000,
+            description: 'Amount of time allowed for waiting for a connection, a response header, and response data (each).'
         }
     },
 
@@ -27,7 +31,7 @@ module.exports = {
         if (typeof inputs.arg != 'undefined' && inputs.arg !== null)
             endstring = '&arg=' + inputs.arg;
         // Query REST
-        needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.restAuth + '&command=' + inputs.command + endstring)
+        needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.restAuth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})
                 .then(async function (resp) {
                     try {
                         var json2 = parser.toJson(resp.body);
@@ -36,8 +40,12 @@ module.exports = {
                         return exits.error(e);
                     }
                 })
-                .catch(function (err) {
-                    return exits.error(err);
+                // We do not want code execution to fail for an error in calling REST. So instead, log the error but resolve with an empty success response.
+                .catch(async function (err) {
+                    await Logs.create({logtype: 'REST', loglevel: 'warn', event: 'REST command was called for instance ' + Meta['A'].radiodj + ' with command ' + inputs.command + endstring + ' with ERROR. ' + err.message})
+                            .intercept((err) => {
+                            });
+                    return exits.success();
                 });
     }
 

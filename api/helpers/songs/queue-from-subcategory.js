@@ -1,4 +1,3 @@
-// WORK ON THIS
 module.exports = {
 
     friendlyName: 'songs / queueFromSubcategory',
