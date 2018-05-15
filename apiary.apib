@@ -7,7 +7,7 @@ The WWSU Radio Sails.js API application enables external / remote control of cor
 
 ## User [/user]
 
-### /user/auth [POST /user/auth]
+### /user/auth Authorization [POST /user/auth]
 
 A lot of API endpoints require a valid authorization in the form of a header. 
 The key is "authorization", and the value is "Bearer (token)". 
@@ -61,42 +61,41 @@ Get one specific director of WWSU.
 
 + Response 200 (application/json)
 
-        {
+        [
             "George Carlin": { // Full name of the director
                 "position": "General Manager", // Director's occupation with WWSU
                 "present": false, // False = clocked out, True = clocked in
                 "since": "2018-04-30T19:51:16.000Z" // Time at which present last changed
             }
-        }
+        ]
 
 + Response 404
 + Response 500
 
 ### /directors/getall [GET /directors/getall]
 
-Get all directors of WWSU. If the request is a web socket, the request will be subscribed to the directors event to receive changes to any of the directors.
+Get all directors of WWSU as an array. If the request is a web socket, the request will be subscribed to the directors event to receive changes to any of the directors. Changes to directors will be passed in an array as a directors event; only updated/new directors will be included in that array. Deleted directors will be passed as a directors-remove event, where the data is a string containing the name of the director to be deleted by the client.
 
 + Response 200 (application/json)
 
-        {
+        [
             "George Carlin": { // Full name of the director
                 "position": "General Manager", // Director's occupation with WWSU
                 "present": false, // False = clocked out, True = clocked in
                 "since": "2018-04-30T19:51:16.000Z" // Time at which present last changed
             },
             ...
-        }
+        ]
 + Response 500
         
 ## Discipline [/discipline]
 
 Discipline endpoints manage moderation of website and mobile app users.
-**NOTE** All discipline endpoints require a valid token from /auth .
 
-### /discipline/banShow [POST /discipline/banshow]
+### /discipline/ban-show [POST /discipline/ban-show]
 
 Bans the specified user until the currently live DJ/broadcast ends. Also mass deletes all website messages sent by the specified user.
-**Requires /auth authorization**
+**Requires authorization**
 
 + Request (application/x-www-form-urlencoded)
 
@@ -107,10 +106,10 @@ Bans the specified user until the currently live DJ/broadcast ends. Also mass de
 + Response 200
 + Response 500
 
-### /discipline/banDay [POST /discipline/banday]
+### /discipline/ban-day [POST /discipline/ban-day]
 
 Bans the specified user for 24 hours. Also mass deletes all website messages sent by the specified user.
-**Requires /auth authorization**
+**Requires authorization**
 
 + Request (application/x-www-form-urlencoded)
 
@@ -121,10 +120,10 @@ Bans the specified user for 24 hours. Also mass deletes all website messages sen
 + Response 200
 + Response 500
 
-### /discipline/banIndefinite [POST /discipline/banindefinite]
+### /discipline/ban-indefinite [POST /discipline/ban-indefinite]
 
 Bans the specified user indefinitely. Also mass deletes all website messages sent by the specified user.
-**Requires /auth authorization**
+**Requires authorization**
 
 + Request (application/x-www-form-urlencoded)
 
@@ -133,26 +132,6 @@ Bans the specified user indefinitely. Also mass deletes all website messages sen
         + host: AAAAA (string, required)
         
 + Response 200
-+ Response 500
-        
-## Status [/status]
-
-Status endpoints refer to the status of WWSU subsystems.
-
-### /status/get [GET /status/get]
-
-Get the status of WWSU sub-systems. If the request is a socket, the request will be subscribed to the status event to receive changes to statuses.
-
-+ Response 200 (application/json)
-
-        {
-            "database": {
-                "label": "Database", // Friendly name
-                "status": 5, // 1 = critical issue, 2 = major issue, 3 = minor issue, 4 = offline, 5 = good
-                "time": "2018-04-30T23:21:06.204Z" // Time at which the subsystem last had a good (5) status
-            },
-            ...
-        }
 + Response 500
     
 ## Display [/display]
@@ -175,7 +154,7 @@ Get the internal display sign as HTML webpage; to be run in full screen on the d
 
 ### /display/refresh [GET /display/refresh]
 
-Send a refresh signal to all connected display signs via websockets. **Requires /auth authorization**.
+Send a refresh signal to all connected display signs via websockets. **Requires authorization**.
 
 + Response 200 (application/json)
 + Response 500
@@ -186,7 +165,7 @@ Eas endpoints deal with the internal WWSU emergency alert system. These endpoint
 
 ### /eas/get [GET /eas/get]
 
-Get an array of currently active alerts. If the request is a socket, will also be subscribed to EAS and EAS-delete events.
+Get an array of currently active alerts. If the request is a socket, will also be subscribed to EAS events. New/updated alerts will be passed as an array to the EAS event. Alerts to be deleted will be passed as a number to the EAS-remove event, where the number is the ID of the alert to be deleted.
 
 + Response 200 (application/json)
 
@@ -213,7 +192,7 @@ Get an array of currently active alerts. If the request is a socket, will also b
 
 ### /eas/send [POST /eas/send]
 
-Issue a new alert through the internal emergency alert system, originating from WWSU. **Requires /auth authorization**
+Issue a new alert through the internal emergency alert system, originating from WWSU. **Requires authorization**
 
 + Request (application/x-www-form-urlencoded)
 
@@ -232,18 +211,47 @@ Issue a new alert through the internal emergency alert system, originating from 
 
 ### /eas/test [POST /eas/test]
 
-Send out a test through the internal emergency alert system. **Requires /auth authorization**
+Send out a test through the internal emergency alert system. **Requires authorization**
 
 + Response 200
 + Response 500
 
+## Events [/events]
+
+Events endpoints deal with the Google Calendar events of WWSU Radio (such as show and genre schedules / programming).
+
+### /events/get [GET /events/get]
+
+Get an array of events for the next 7 days, in no particular order (client will need to do their own sorting). If the request is a socket, will also be subscribed to receive changes to events. New/updated events will be sent as an array to the events event. Deleted events will be sent as a number (the ID of the event that was deleted) to the events-remove event.
+
++ Response 200 (application/json)
+
+        [
+            {
+                "createdAt": "2018-05-15T22:31:34.381Z",
+                "updatedAt": "2018-05-15T22:31:34.381Z",
+                "ID": 1,
+                "unique": "578vfod7icjde4ikdbmtii9ren_20180516T080000Z", // Unique event ID as provided by Google Calendar
+                "title": "Genre: New Rock", // Title of the event
+                "description": "", // Description of the event, if provided (HTML is stripped from the Google Calendar API field)
+                "allDay": false, // True if this is an all day event
+                "start": "2018-05-16T04:00:00-04:00", // ISO string of the event start time
+                "end": "2018-05-16T08:00:00-04:00", // ISO string of the event end time
+                "color": "#5484ed", // Hexadecimal color representing this event
+                "push": false // Used internally to determine which events need to be sent through web sockets. No beneficial client use.
+            },
+            ...
+        ]
+        
++ Response 500
+ upda
 ## Messages [/messages]
 
 Messages endpoints regard the internal messaging system with WWSU Radio.
 
-### /messages/delete [POST /messages/delete]
+### /messages/remove [POST /messages/remove]
 
-Delete a message. Sends a websocket message to all connected clients to remove the message. **Requires /auth authorization**
+Delete a message. Sends a websocket message to all connected clients to remove the message. **Requires authorization**
 
 + Request (application/x-www-form-urlencoded)
 
@@ -254,9 +262,9 @@ Delete a message. Sends a websocket message to all connected clients to remove t
 + Response 200
 + Response 500
 
-### /messages/findRecipients [GET /messages/findrecipients]
+### /messages/find-recipients [GET /messages/find-recipients]
 
-Retrieve a list of recipients that can be sent a message. If request is a websocket, will be subscribed to receive changes to the recipients or their statuses.
+Retrieve a list (in the form of an Object) of recipients that can be sent a message. If request is a websocket, will be subscribed to receive changes to the recipients or their statuses. New/updated recipients will be passed as an Object to the message-user event. For example, a change to a user in the system group will be received as {system: {emergency: {label: 'Technical Issues', status: 0}}. Use lodash merging to merge this object with the complete users object stored in client memory. Also, deleted users will be passed as a string to the message-user-remove event, where the string is the key of the user to remove. Using the example with updating, if the emergency user is removed, message-user-remove will pass 'emergency'.
         
 + Response 200 (application/json)
 
@@ -297,7 +305,7 @@ Retrieve a list of recipients that can be sent a message. If request is a websoc
 
 ### /messages/read [GET /messages/read]
 
-Retrieve a list of messages sent within the last hour. Used by internal WWSU applications. If request is websocket, will be subscribed to receive new messages sent. **Requires /auth authorization**
+Retrieve a list of messages sent within the last hour. Used by internal WWSU applications. If request is websocket, will be subscribed to receive new messages sent. New/updated messages will be passed as an array to the message-message event. Deleted messages will be passed as a number (the ID of the message deleted) to the message-remove event. **Requires authorization**
 
 + Request (application/x-www-form-urlencoded)
 
@@ -325,9 +333,9 @@ Retrieve a list of messages sent within the last hour. Used by internal WWSU app
 
 + Response 500
 
-### /messages/readEmergencies [GET /messages/reademergencies]
+### /messages/read-emergencies [GET /messages/read-emergencies]
 
-Retrieve a list of active technical issues reported. Used by internal WWSU applications. If request is websocket, will be subscribed to receive new reported technical issues. **Requires /auth authorization**
+Retrieve a list of active technical issues reported. Used by internal WWSU applications. If request is websocket, will be subscribed to receive new reported technical issues. Emergency messages will be passed as an array to the message-emergency event. Deleted emergency messages will be passed as a number (ID of the message to be deleted) to the message-remove event. **Requires authorization**
         
 + Response 200 (application/json)
 
@@ -349,9 +357,9 @@ Retrieve a list of active technical issues reported. Used by internal WWSU appli
 
 + Response 500
 
-### /messages/readWeb [GET /messages/readweb]
+### /messages/read-web [GET /messages/read-web]
 
-Retrieve a list of messages sent within the last hour applicable to web and mobile users. If request is websocket, will be subscribed to receive new messages.
+Retrieve a list of messages sent within the last hour applicable to web and mobile users. If request is websocket, will be subscribed to receive new messages. New messages will be passed as an array to the message-message event. Deleted messages will be passed as a number (ID of the message deleted) to the message-remove event. Client may receive message-remove event calls for messages not pertaining to them / not received by them, so be sure to have a check for that.
 
 + Request (application/x-www-form-urlencoded)
 
@@ -369,7 +377,6 @@ Retrieve a list of messages sent within the last hour applicable to web and mobi
                 "status": "active",
                 "from": "Me", // Messages from other web/mobile clients will begin with website-
                 "from_friendly": "Me",
-                "from_IP": "Not Specified",
                 "to": "website", // website = all web/mobile clients, website-hostid = specific web/mobile client, DJ = Public message to the DJ, DJ-private = Private message to the DJ
                 "to_friendly": "You too",
                 "message": "hi"
@@ -381,7 +388,7 @@ Retrieve a list of messages sent within the last hour applicable to web and mobi
 
 ### /messages/send [POST /messages/send]
 
-Sends a message. This is used by internal WWSU clients. **Requires /auth authorization**
+Sends a message. This is used by internal WWSU clients. **Requires authorization**
 
 + Request (application/x-www-form-urlencoded)
 
@@ -395,7 +402,7 @@ Sends a message. This is used by internal WWSU clients. **Requires /auth authori
 + Response 200
 + Response 500
 
-### /messages/sendWts DOCeb [POST /messages/sendweb]
+### /messages/send-web [POST /messages/send-web]
 
 Sends a message. This is used by public web and mobile clients.
 
@@ -443,3 +450,78 @@ Get the current meta. If request is a socket, will also be subscribed to the met
             playlist_position: -1, // Current position within the playlist
             playlist_played: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
         }
+        
+## Requests [/requests]
+
+Requests endpoints deal with the WWSU track request system.
+
+### /requests/get [GET /requests/get]
+
+Get an array of requested tracks. If the request is a socket, will also be subscribed to receive new/played requests. When a new request is placed, it will be passed as an array to the request event. When a request is played, the ID of the request will be passed to the request-remove event. **Requires authorization**
+**NOTE:** This may return requests that have already been queued; requests do not get marked as removed until they have actually played. Any requests a client attempts to queue via. requests/queue that are already in the queue will be returned with an error that it is already in the queue.
+
++ Response 200 (application/json)
+
+        [
+            // Response format TBD
+        ]
++ Response 500
+
+### /requests/place [POST /requests/place]
+
+Place a track request in the system.
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + ID: 1 (number, required)
+        + name: George Carlin (string)
+        + message: This track is the best Classic Rock you could get for radio. (string)
+        
++ Response 200
+
+        {
+            requested: true, // True if the track request was accepted, false if it was rejected (such as it is already in the queue, or it fails rotation rules)
+            HTML: `<div class="alert alert-success" role="alert">
+                                            Request placed! In automation, requests are queued every :20, :40, and :00 past the hour. If a show is live, it is up to the host's discretion of when/if to play requests.
+                                            </div>` // an HTML response suitable for the track request webpage.
+        }
+        
++ Response 500
+
+### /requests/queue [POST /requests/queue]
+
+Immediately queue or play a request. If in automation, will queue it to the top. If live / sports / remote / sportsremote, will queue and immediately begin playing it. **Requires authorization**
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + ID: 1 (number, required)
+        
++ Response 200
+
+        true // Returns true if the requests was queued, false if the request was not queued (usually the cause of already being in the queue or have already been played)
+        
++ Response 500
+        
+## Status [/status]
+
+Status endpoints refer to the status of WWSU subsystems.
+
+### /status/get [GET /status/get]
+
+Get an array of statuss of WWSU sub-systems. If the request is a socket, the request will be subscribed to the status event to receive changes to statuses. Changes to status will be passed as an array as a status event; only changed statuses will be included in this array. There are no delete events for statuses.
+
++ Response 200 (application/json)
+
+        [
+            "database": {
+                "label": "Database", // Friendly name
+                "status": 5, // 1 = critical issue, 2 = major issue, 3 = minor issue, 4 = offline, 5 = good
+                "time": "2018-04-30T23:21:06.204Z" // Time at which the subsystem last had a good (5) status
+            },
+            ...
+        ]
++ Response 500
