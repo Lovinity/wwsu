@@ -68,9 +68,6 @@ module.exports = {
                                     .intercept((err) => {
                                         return reject(err);
                                     });
-                            deleted.forEach(function (director, index) {
-                                sails.sockets.broadcast('directors', 'directors-remove', director.name);
-                            });
                             Status.changeStatus([{name: `openproject`, status: 5, label: `OpenProject`}]);
                             Directors.directorKeys = Object.keys(Directors.directors).length;
                             return resolve();
@@ -96,12 +93,7 @@ module.exports = {
                                         Directors.directors[director.login] = director;
                                     }
                                     Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, position: '', present: false, since: moment().toISOString()})
-                                            .exec((err, user, wasCreated) => {
-                                                if (!err && wasCreated)
-                                                {
-                                                    sails.sockets.broadcast('directors', 'directors', [user]);
-                                                }
-                                            });
+                                            .exec((err, user, wasCreated) => {});
                                 }
                             });
                             // If there was a change in the number of users, or we are forcing a reload, then reload all directors' presence.
@@ -135,7 +127,6 @@ module.exports = {
                                             } else {
                                                 record = await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()}).fetch();
                                             }
-                                            sails.sockets.broadcast('directors', 'directors', record);
                                         }
                                     });
                                 }

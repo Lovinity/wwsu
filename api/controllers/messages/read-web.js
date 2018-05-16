@@ -25,13 +25,9 @@ module.exports = {
             if (opts.nickname === null || opts.nickname == '')
                 opts.nickname = opts.host;
             // Subscribe the client to receiving web messages over websockets
-            sails.sockets.join(this.req, 'message-website-' + opts.host);
-            sails.sockets.join(this.req, 'message-website');
             // Mark client as online and broadcast client on websockets
             Messages.visitors[sails.sockets.getId(this.req)] = {group: 'website', name: `Web (${opts.nickname})`, ip: from_IP, time: moment(), type: 5, host: `website-${opts.host}`};
-            var temp = {website: {}};
-            temp.website[`website-${opts.host}`] = {label: `Web (${opts.nickname})`, status: 5};
-            sails.sockets.broadcast('message-user', 'message-user', temp);
+            // RECIPIENTS
         } else {
             opts.host = sh.unique(from_IP + sails.tokenSecret);
         }

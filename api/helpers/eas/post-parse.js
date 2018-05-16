@@ -27,7 +27,6 @@ module.exports = {
                             .intercept((err) => {
                                 return resolve2(false);
                             });
-                    sails.sockets.broadcast('EAS', 'EAS-remove', record.ID);
                     return resolve2(false);
                 }
 
@@ -38,7 +37,6 @@ module.exports = {
                             .intercept((err) => {
                                 return resolve2(false);
                             });
-                    sails.sockets.broadcast('EAS', 'EAS-remove', record.ID);
                     return resolve2(false);
                 }
 
@@ -55,9 +53,6 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        // Push out alerts to clients
-        if (sendit.length > 0)
-            sails.sockets.broadcast('EAS', 'EAS', sendit);
         return exits.success(sendit);
 
     }

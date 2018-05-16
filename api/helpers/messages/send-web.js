@@ -66,7 +66,6 @@ module.exports = {
             if (!records)
                 return exits.error(new Error('Internal Error: Could not save message to the database.'));
             delete records.from_IP; // We do not want to broadcast IP addresses!
-            sails.sockets.broadcast('website-' + theid, 'webmessage', {status: 'success', response: [records]});
         } else {
             records = await Messages.create({status: 'active', from: `website-${theid}`, from_friendly: `Web (${inputs.nickname})`, from_IP: inputs.from_IP, to: 'DJ', to_friendly: 'DJ', message: inputs.message}).fetch()
                     .intercept((err) => {
@@ -75,10 +74,7 @@ module.exports = {
             if (!records)
                 return exits.error(new Error('Internal Error: Could not save message to the database'));
             delete records.from_IP; // We do not want to broadcast IP addresses!
-            sails.sockets.broadcast('website', 'webmessage', {status: 'success', response: [records]});
         }
-        if (records)
-            sails.sockets.broadcast('message-message', 'message-message', {status: 'success', response: [records]});
         return exits.success();
     }
 

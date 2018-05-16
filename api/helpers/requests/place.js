@@ -55,13 +55,11 @@ module.exports = {
                 var temp = record;
                 if (record2)
                     temp.trackname = `${record2.artist} - ${record2.title}`;
-                sails.sockets.broadcast('message-request', 'message-request', [temp]);
 
                 // Update the Track Requests recipient to light up, showing a pending request is in queue.
                 var temp2 = {};
                 temp2['system'] = {};
                 temp2['system']['trackrequests'] = {label: 'Track Requests', status: 4};
-                sails.sockets.broadcast('message-user', 'message-user', temp2);
 
                 // Finish it
                 return exits.success({requested: true, HTML: `<div class="alert alert-success" role="alert">

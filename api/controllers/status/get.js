@@ -9,8 +9,6 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        if (this.req.isSocket)
-            sails.sockets.join(this.req, 'status');
         var records = await Status.find()
                 .intercept((err) => {
                     sails.log.error(err);

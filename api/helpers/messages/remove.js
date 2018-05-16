@@ -25,8 +25,6 @@ module.exports = {
             var type = 'message';
             if (records[0].to == 'emergency')
                 type = 'emergency';
-            sails.sockets.broadcast('message-website', 'message-remove', inputs.id);
-            sails.sockets.broadcast('message-message', 'message-remove', inputs.id);
             return exits.success();
         }
     }

@@ -19,7 +19,6 @@ module.exports = {
                     .intercept((err) => {
                         return exits.error(err);
                     });
-            sails.sockets.broadcast(inputs.host, 'webmessage', {status: 'denied', response: `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${record.ID}`});
             return exits.success();
         } catch (e) {
             return exits.error(e);

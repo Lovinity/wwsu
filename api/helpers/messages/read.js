@@ -39,14 +39,12 @@ module.exports = {
                     if (Messages.visitors[key].host === inputs.host)
                     {
                         delete Messages.visitors[key];
-                        sails.sockets.broadcast('message-user', 'message-user-remove', key);
                     }
                 }
             }
             Messages.visitors[inputs.socket] = {group: 'computers', name: thehost.friendlyname, ip: inputs.ip || 'NA', time: moment(), type: 2, host: inputs.host};
             var temp = {computers: {}};
             temp.computers[inputs.host] = {label: thehost.friendlyname, status: 2};
-            sails.sockets.broadcast('message-user', 'message-user', temp);
         }
         // Get messages
         var records = await Messages.find({status: 'active', or: [{createdAt: {'>': searchto}}, {to: 'emergency'}]})

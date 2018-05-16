@@ -48,17 +48,6 @@ module.exports = {
             } else {
                 var records2 = records;
                 // Broadcast the message over web sockets
-                if (inputs.to == 'emergency')
-                {
-                    sails.sockets.broadcast('message-emergency', 'message-emergency', {status: 'success', response: [records2]});
-                } else if (inputs.to.startsWith("website-") || inputs.to == 'website')
-                {
-                    sails.sockets.broadcast('message-message', 'message-message', {status: 'success', response: [records2]});
-                    delete records2.from_IP; // We do not want to publish IP addresses to public clients!
-                    sails.sockets.broadcast('message-' + inputs.to, 'message-message', {status: 'success', response: [records2]});
-                } else {
-                    sails.sockets.broadcast('message-message', 'message-message', {status: 'success', response: [records2]});
-                }
                 return exits.success();
             }
         } catch (e) {

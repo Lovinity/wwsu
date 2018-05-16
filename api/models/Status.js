@@ -80,7 +80,6 @@ module.exports = {
                         return resolve2();
                     });
                 });
-                sails.sockets.broadcast('status', 'status', push);
                 return resolve();
             } catch (e) {
                 return reject(e);

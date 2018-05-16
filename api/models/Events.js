@@ -280,17 +280,12 @@ module.exports = {
                             .intercept((err) => {
                             })
                             .fetch();
-                    destroyed.forEach(function (dEvent) {
-                        sails.sockets.broadcast('events', 'events-remove', dEvent.ID);
-                    });
 
                     // Push any updated events out
                     var updated = await Events.update({push: true}, {push: false})
                             .intercept((err) => {
                             })
                             .fetch();
-                    if (updated.length > 0)
-                        sails.sockets.broadcast('events', 'events', updated);
 
                     return resolve();
                 }

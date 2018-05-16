@@ -19,16 +19,6 @@ module.exports = {
                     .intercept((err) => {
                         return exits.error(err);
                     });
-            if (records.constructor == Array)
-            {
-                records.forEach(function (record) {
-                    sails.sockets.broadcast('message-website', 'message-remove', {type: 'message', id: record.ID});
-                    sails.sockets.broadcast('message-message', 'message-remove', {type: 'message', id: record.ID});
-                });
-            } else {
-                sails.sockets.broadcast('message-website', 'message-remove', {type: 'message', id: records.ID});
-                sails.sockets.broadcast('message-message', 'message-remove', {type: 'message', id: records.ID});
-            }
             return exits.success();
         } catch (e) {
             return exits.error(e);
