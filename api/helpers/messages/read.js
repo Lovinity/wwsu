@@ -49,7 +49,7 @@ module.exports = {
             sails.sockets.broadcast('message-user', 'message-user', temp);
         }
         // Get messages
-        var records = await Messages.find({status: 'active', createdAt: {'>': searchto}, to: {'!=': 'emergency'}})
+        var records = await Messages.find({status: 'active', or: [{createdAt: {'>': searchto}}, {to: 'emergency'}]})
                 .intercept((err) => {
                     return exits.error(err);
                 });
