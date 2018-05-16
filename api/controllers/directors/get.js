@@ -2,13 +2,13 @@ module.exports = {
 
     friendlyName: 'Directors / Get',
 
-    description: 'Retrieve a specific director from memory',
+    description: 'Retrieve directors from memory.',
 
     inputs: {
         username: {
             description: 'Director to search for; this is an OpenProject username.',
             type: 'string',
-            required: true
+            allowNull: true
         },
     },
 
@@ -25,8 +25,11 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        var query = {};
+        if (inputs.username !== null)
+            query = {login: inputs.username};
         // See if the specified director is in memory. If not, return 404 not found.
-        var records = await Directors.find({login: inputs.username})
+        var records = await Directors.find(query)
                 .intercept((err) => {
                     sails.log.error(err);
                     return exits.error();

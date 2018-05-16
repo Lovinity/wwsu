@@ -64,7 +64,8 @@ User accounts are issued by WWSU. They are not available on request.
 ## Directors [/directors]
 The Directors endpoints regard the directors of WWSU Radio.
 ### /directors/get [GET /directors/get]
-Get one specific director of WWSU.
+Get an array of directors. If a username is provided, will filter according to the provided username. Otherwise, will return all directors.
+This endpoint supports sockets, uses the "directors" event, and returns data in the structure defined in the websockets section.
 #### Request
 | key | criteria |
 |--|--|
@@ -77,22 +78,10 @@ Get one specific director of WWSU.
                 "position": "General Manager", // Director's occupation with WWSU
                 "present": false, // False = clocked out, True = clocked in
                 "since": "2018-04-30T19:51:16.000Z" // Time at which present last changed
-            }
+            },
+			...
     ]
 #### Response 404
-### /directors/getall [GET /directors/getall]
-Returns all of the directors of WWSU as an array. 
-This endpoint supports sockets, uses the "directors" event, and returns data in the structure defined in the websockets section.
-#### Response 200
-
-        [
-            "George Carlin": { // Full name of the director as key
-                "position": "General Manager", // Director's occupation with WWSU
-                "present": false, // False = clocked out, True = clocked in
-                "since": "2018-04-30T19:51:16.000Z" // Time at which present last changed
-            },
-            ...
-        ]
 ## Discipline [/discipline]
 The discipline endpoints regard moderation for public clients (website and app users).
 ### /discipline/ban-show [POST /discipline/ban-show]
