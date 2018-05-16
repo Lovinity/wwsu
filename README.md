@@ -375,11 +375,14 @@ Get an array of the status of WWSU subsystems.
 This endpoint supports sockets, uses the "status" event, and returns data in the structure defined in the websockets section.
 #### Response 200
         [
-            "createdAt": "2018-05-15T22:31:34.381Z",
-            "updatedAt": "2018-05-15T22:31:34.381Z",
-	        "ID": 1,
-	        "name": "database", // alphanumeric key ID of the subsystem
-	        "label": "Database", // Human friendly name of the subsystem
-	        "status": 5, // 1 = critical issue, 2 = significant issue, 3 = minor issue, 4 = offline (no issue), 5 = online (no issue)
-	        "time": "2018-05-15T22:31:34.381Z" // ISO String indicating the most recent time the subsystem was detected as status 5.
+			{
+				"createdAt": "2018-05-15T22:31:34.381Z",
+				"updatedAt": "2018-05-15T22:31:34.381Z",
+				"ID": 1,
+				"name": "database", // alphanumeric key ID of the subsystem
+				"label": "Database", // Human friendly name of the subsystem
+				"status": 5, // 1 = critical issue, 2 = significant issue, 3 = minor issue, 4 = offline (no issue), 5 = online (no issue)
+				"time": "2018-05-15T22:31:34.381Z" // ISO String indicating the most recent time the subsystem was detected as status 5.
+			},
+			...
         ]
