@@ -30,9 +30,9 @@ module.exports = {
         name: {
             type: 'string',
             maxLength: 100
-        },
+        }
 
-    },
+    }
 
 };
 

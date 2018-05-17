@@ -1,3 +1,5 @@
+/* global Meta, sails */
+
 /**
  * Meta.js
  *
@@ -108,7 +110,7 @@ module.exports = {
             for (var key in obj)
             {
                 if (obj.hasOwnProperty(key)) {
-                    if (typeof Meta['A'][key] == 'undefined' || Meta['A'][key] === obj[key])
+                    if (typeof Meta['A'][key] === 'undefined' || Meta['A'][key] === obj[key])
                         continue;
 
                     Meta['A'][key] = obj[key];
@@ -123,7 +125,7 @@ module.exports = {
                     }
 
                     // If we're changing stream meta, push to history array, and send an API call to the stream to update the meta on the stream.
-                    if (key == 'stream')
+                    if (key === 'stream')
                     {
                         Meta.history.unshift(obj[key]);
                         Meta.history = Meta.history.slice(0, 5);
@@ -138,6 +140,6 @@ module.exports = {
             sails.sockets.broadcast('meta', 'meta', push);
             return resolve();
         });
-    },
+    }
 };
 

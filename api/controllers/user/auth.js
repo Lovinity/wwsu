@@ -1,3 +1,5 @@
+/* global sails, Nodeusers */
+
 var
         jwt = require('jsonwebtoken'),
         cryptoRandomString = require('crypto-random-string');
@@ -19,7 +21,7 @@ module.exports = {
             description: 'Password of the user authenticating.',
             type: 'string',
             required: true
-        },
+        }
     },
 
     exits: {
@@ -32,7 +34,7 @@ module.exports = {
         },
 
         notFound: {
-            statusCode: 404,
+            statusCode: 404
         }
     },
 

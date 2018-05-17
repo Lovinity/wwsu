@@ -1,3 +1,5 @@
+/* global Messages */
+
 var moment = require('moment');
 
 module.exports = {
@@ -29,10 +31,16 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof records == 'undefined' || records.length == 0)
+        if (typeof records === 'undefined' || records.length === 0)
         {
             return exits.success([]);
         } else {
+            // Remove IP addresses from response!
+            records.forEach(function (record, index) {
+                if (typeof records[index].from_IP !== 'undefined')
+                    delete records[index].from_IP;
+            });
+            
             return exits.success(records);
         }
 

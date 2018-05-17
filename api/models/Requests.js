@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Requests.js
  *
@@ -11,7 +13,7 @@ module.exports = {
 
         ID: {
             type: 'number',
-            autoIncrement: true,
+            autoIncrement: true
         },
 
         songID: {
@@ -39,12 +41,36 @@ module.exports = {
         played: {
             type: 'number',
             min: 0,
-            max: 2
+            max: 1
         }
 
     },
     
     pending: [], // Store track ID numbers in memory so that we don't need to query the Requests table every second and see if a request is being played.
+    
+        // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.sockets.broadcast('requests', 'requests', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        
+        // Since we update played to 1, instead of outright deleting a request, check for that.
+        if (updatedRecord.played === 1)
+            data = {remove: updatedRecord.ID};
+        
+        sails.sockets.broadcast('requests', 'requests', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.sockets.broadcast('requests', 'requests', data);
+        return proceed();
+    }
 
 };
 

@@ -1,3 +1,5 @@
+/* global sails */
+
 module.exports = {
 
     friendlyName: 'Difference',
@@ -12,7 +14,7 @@ module.exports = {
         o2: {
             required: true,
             type: 'json'
-        },
+        }
     },
 
     fn: async function (inputs, exits) {
@@ -22,11 +24,11 @@ module.exports = {
                 diff = {};
         for (k in o1) {
             if (!o1.hasOwnProperty(k)) {
-            } else if (typeof o1[k] != 'object' || typeof o2[k] != 'object') {
+            } else if (typeof o1[k] !== 'object' || typeof o2[k] !== 'object') {
                 if (!(k in o2) || o1[k] !== o2[k]) {
                     diff[k] = o2[k];
                 }
-            } else if (kDiff = difference(o1[k], o2[k])) {
+            } else if (kDiff === sails.helpers.difference(o1[k], o2[k])) {
                 diff[k] = kDiff;
             }
         }

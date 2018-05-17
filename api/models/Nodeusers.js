@@ -23,7 +23,7 @@ module.exports = {
             type: 'number',
             autoIncrement: true
         },
-        
+
         email: {
             type: 'string',
             isEmail: true,
@@ -33,7 +33,7 @@ module.exports = {
 
         encryptedPassword: {
             type: 'string'
-        },
+        }
     },
 
     /**
@@ -63,11 +63,11 @@ module.exports = {
                             })
                             .catch(err => {
                                 return next(err);
-                            })
+                            });
                 })
                 .catch(err => {
                     return next(err);
-                })
+                });
     },
 
     /**
@@ -76,7 +76,7 @@ module.exports = {
      * @param {string} password - The password to check
      * @param {string} user - Check the password against the provided user.
      */
-  
+
     comparePassword: function (password, user) {
         return new Promise((resolve) => {
             var bcrypt = require('bcrypt');
@@ -90,7 +90,7 @@ module.exports = {
                     })
                     .catch(err => {
                         return resolve(false);
-                    })
+                    });
         });
     }
 };

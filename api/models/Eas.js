@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Eas.js
  *
@@ -51,12 +53,7 @@ module.exports = {
         expires: {
             type: 'ref',
             columnType: 'datetime'
-        },
-
-        push: {
-            type: 'boolean',
-            defaultsTo: true
-        },
+        }
     },
 
     // This object contains all of the NWS alerts we will process. Key is the alert from NWS, value is the hex color used for this alert.
@@ -167,11 +164,28 @@ module.exports = {
         "Wind Chill Watch": "#5F9EA0",
         "Winter Storm Warning": "#FF69B4",
         "Winter Storm Watch": "#4682B4",
-        "Winter Weather Advisory": "#7B68EE",
+        "Winter Weather Advisory": "#7B68EE"
     },
 
     activeCAPS: [], // Array of active NWS alerts, cleared at each check, to help determine maintenance / cleaning up of alerts.
-    toPush: [], // Array of alerts to push to clients in the postParse function.
 
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.sockets.broadcast('eas', 'eas', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.sockets.broadcast('eas', 'eas', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.sockets.broadcast('eas', 'eas', data);
+        return proceed();
+    }
 };
 

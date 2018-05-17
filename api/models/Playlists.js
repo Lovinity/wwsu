@@ -14,7 +14,7 @@ module.exports = {
         },
         name: {
             type: 'string'
-        },
+        }
     },
     active: {name: null, ID: 0, position: 0, tracks: [], end: null},
     played: moment('2000-01-01').toDate(),

@@ -1,3 +1,6 @@
+/* global Category, Subcategory, Songs, Statemeta, sails */
+
+// WORK ON THIS
 module.exports = {
 
     friendlyName: 'songs / queueFromSubcategory',
@@ -91,7 +94,7 @@ module.exports = {
 
                     // Randomise the list of songs
                     thesongs.sort(function (a, b) {
-                        return 0.5 - Math.random()
+                        return 0.5 - Math.random();
                     });
 
                     var queuedtracks = 0;
@@ -133,7 +136,7 @@ module.exports = {
                         var tracks = await sails.helpers.rest.getQueue();
                         queuedtracksa = [];
                         tracks.forEach(function (track) {
-                            queuedtracksa.push(track.ID)
+                            queuedtracksa.push(track.ID);
                         });
 
                         // Go through all the songs again

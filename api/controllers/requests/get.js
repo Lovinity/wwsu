@@ -1,3 +1,5 @@
+/* global sails */
+
 module.exports = {
 
     friendlyName: 'Requests / Get',
@@ -12,13 +14,15 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-       try {
-           var response = await sails.helpers.requests.get(inputs.offset);
-           return exits.success(response);
-       } catch (e) {
-           saols.log.error(e);
-           return exits.error();
-       }
+        try {
+            var response = await sails.helpers.requests.get(inputs.offset);
+            if (this.req.isSocket)
+                sails.sockets.join(this.req, 'requests');
+            return exits.success(response);
+        } catch (e) {
+            sails.log.error(e);
+            return exits.error();
+        }
 
     }
 

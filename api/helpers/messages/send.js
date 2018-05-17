@@ -1,3 +1,5 @@
+/* global sails, Hosts, Messages */
+
 module.exports = {
 
     friendlyName: 'messages / send',
@@ -26,7 +28,7 @@ module.exports = {
             type: 'string',
             required: true,
             description: 'The message.'
-        },
+        }
     },
 
     fn: async function (inputs, exits) {

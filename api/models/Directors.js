@@ -1,3 +1,5 @@
+/* global sails, Directors, Status, Timesheet */
+
 /**
  * Directors.js
  *
@@ -36,7 +38,7 @@ module.exports = {
 
         since: {
             type: 'ref',
-            columnType: 'datetime',
+            columnType: 'datetime'
         }
     },
     directors: {}, // Object of OpenProject director users
@@ -64,14 +66,15 @@ module.exports = {
                         // Because this code is used twice, condense it into a variable
                         var endFunction = async function () {
                             // Remove directors which no longer exist in OpenProject
-                            var deleted = await Directors.destroy({name: {'!=': directorNames}}).fetch()
+                            await Directors.destroy({name: {'!=': directorNames}})
                                     .intercept((err) => {
                                         return reject(err);
-                                    });
+                                    })
+                                    .fetch();
                             Status.changeStatus([{name: `openproject`, status: 5, label: `OpenProject`}]);
                             Directors.directorKeys = Object.keys(Directors.directors).length;
                             return resolve();
-                        }
+                        };
                         var body = resp.body;
                         if (!body)
                         {
@@ -80,24 +83,25 @@ module.exports = {
                         try {
                             body = JSON.parse(body);
                             var stuff = body._embedded.elements;
-                            if (forced || Object.keys(Directors.directors).length != Directors.directorKeys)
+                            if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)
                                 Directors.directors = {};
                             stuff.forEach(function (director) {
                                 // Skip non-active or non-invited users
-                                if (director.status == 'active' || director.status == 'invited')
+                                if (director.status === 'active' || director.status === 'invited')
                                 {
                                     directorNames.push(director.name);
                                     // If user does not exist in the database, create it
-                                    if (typeof Directors.directors[director.login] == 'undefined')
+                                    if (typeof Directors.directors[director.login] === 'undefined')
                                     {
                                         Directors.directors[director.login] = director;
                                     }
                                     Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, position: '', present: false, since: moment().toISOString()})
-                                            .exec((err, user, wasCreated) => {});
+                                            .exec((err, user, wasCreated) => {
+                                            });
                                 }
                             });
                             // If there was a change in the number of users, or we are forcing a reload, then reload all directors' presence.
-                            if (forced || Object.keys(Directors.directors).length != Directors.directorKeys)
+                            if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)
                             {
                                 var names = {};
                                 // Determine presence by analyzing timesheet records up to 14 days ago
@@ -116,16 +120,22 @@ module.exports = {
                                 if (records)
                                 {
                                     records.forEach(async function (record) {
-                                        if (typeof names[record.name] == 'undefined')
+                                        if (typeof names[record.name] === 'undefined')
                                         {
                                             names[record.name] = true; // This director is to be listed
                                             // If there's an entry with a null time_out, then consider the director clocked in
                                             var record = null;
                                             if (record.time_out === null)
                                             {
-                                                record = await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()}).fetch();
+                                                record = await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()})
+                                                        .intercept((err) => {
+                                                        })
+                                                        .fetch();
                                             } else {
-                                                record = await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()}).fetch();
+                                                record = await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()})
+                                                        .intercept((err) => {
+                                                        })
+                                                        .fetch();
                                             }
                                         }
                                     });
@@ -140,6 +150,25 @@ module.exports = {
                         }
                     });
         });
+    },
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.sockets.broadcast('directors', 'directors', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.sockets.broadcast('directors', 'directors', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.sockets.broadcast('directors', 'directors', data);
+        return proceed();
     },
 };
 

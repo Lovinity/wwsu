@@ -1,3 +1,5 @@
+/* global sails, Meta, _ */
+
 var needle = require('needle');
 var parser = require('xml2json');
 

@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Messages.js
  *
@@ -40,11 +42,75 @@ module.exports = {
 
         message: {
             type: 'string'
-        },
+        }
 
     },
 
+    // WORK ON THIS: replace use of this with the new Recipients model
     visitors: {}, // Used to track which people are online for messaging
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        // Do not pass IP addresses through web sockets!
+        if (typeof newlyCreatedRecord.from_IP !== 'undefined')
+            delete newlyCreatedRecord.from_IP;
+        var data = {insert: newlyCreatedRecord};
+        sails.sockets.broadcast('messages', 'messages', data);
+        
+        // If message was a public website message, send to public website socket
+        if (newlyCreatedRecord.to === 'DJ' || newlyCreatedRecord.to === 'website')
+            sails.sockets.broadcast('messages-website', 'messages', data);
+        
+        // If message was a private website message, send to the respective client's socket
+        if (newlyCreatedRecord.from.startsWith("website-"))
+            sails.sockets.broadcast(`messages-${newlyCreatedRecord.from}`, 'messages', data);
+        if (newlyCreatedRecord.to.startsWith("website-"))
+            sails.sockets.broadcast(`messages-${newlyCreatedRecord.to}`, 'messages', data);
+        
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        // Do not pass IP addresses through web sockets!
+        if (typeof updatedRecord.from_IP !== 'undefined')
+            delete updatedRecord.from_IP;
+        var data = {update: updatedRecord};
+        
+        // Since we use update to "deleted" status when deleting messages instead of outright deleting them, check for that.
+        if (updatedRecord.status === 'deleted')
+            data = {remove: updatedRecord.ID};
+        
+        sails.sockets.broadcast('messages', 'messages', data);
+        
+        // If message was a public website message, send to public website socket
+        if (updatedRecord.to === 'DJ' || updatedRecord.to === 'website')
+            sails.sockets.broadcast('messages-website', 'messages', data);
+        
+        // If message was a private website message, send to the respective client's socket
+        if (updatedRecord.from.startsWith("website-"))
+            sails.sockets.broadcast(`messages-${updatedRecord.from}`, 'messages', data);
+        if (updatedRecord.to.startsWith("website-"))
+            sails.sockets.broadcast(`messages-${updatedRecord.to}`, 'messages', data);
+        
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.sockets.broadcast('messages', 'messages', data);
+        
+        // If message was a public website message, send to public website socket
+        if (destroyedRecord.to === 'DJ' || destroyedRecord.to === 'website')
+            sails.sockets.broadcast('messages-website', 'messages', data);
+        
+        // If message was a private website message, send to the respective client's socket
+        if (destroyedRecord.from.startsWith("website-"))
+            sails.sockets.broadcast(`messages-${destroyedRecord.from}`, 'messages', data);
+        if (destroyedRecord.to.startsWith("website-"))
+            sails.sockets.broadcast(`messages-${destroyedRecord.to}`, 'messages', data);
+        
+        return proceed();
+    }
 
 };
 

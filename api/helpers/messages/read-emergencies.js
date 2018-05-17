@@ -1,3 +1,5 @@
+/* global Messages */
+
 module.exports = {
 
     friendlyName: 'messages / readEmergencies',
@@ -13,7 +15,7 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof records == 'undefined' || records.length == 0)
+        if (typeof records === 'undefined' || records.length === 0)
         {
             return exits.success([]);
         } else {

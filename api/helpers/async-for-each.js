@@ -1,3 +1,5 @@
+/* global _ */
+
 module.exports = {
 
     friendlyName: 'Asyncforeach',

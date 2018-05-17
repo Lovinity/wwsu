@@ -1,3 +1,5 @@
+/* global sails, Eas */
+
 var moment = require("moment");
 var parseString = require('xml2js').parseString;
 module.exports = {
@@ -29,7 +31,7 @@ module.exports = {
                     await sails.helpers.asyncForEach(result.feed.entry, function (entry) {
                         return new Promise(async (resolve2, reject2) => {
                             try {
-                                if (typeof entry['id'] != 'undefined' && typeof entry['cap:status'] != 'undefined' && entry['cap:status'][0] == 'Actual')
+                                if (typeof entry['id'] !== 'undefined' && typeof entry['cap:status'] !== 'undefined' && entry['cap:status'][0] === 'Actual')
                                 { // Skip any entries that do not have an ID or do not have a status of "Actual"; they're not real alerts.
                                     if (moment().isBefore(moment(entry['cap:expires'][0])))
                                     { // Only flash the bulbs if the alert is in effect. Sometimes, NWS will issue a delayed alert.

@@ -1,3 +1,5 @@
+/* global Meta, Discipline, sails */
+
 module.exports = {
 
     friendlyName: 'Discipline / banIndefinite',
@@ -16,7 +18,7 @@ module.exports = {
 
         try {
             await sails.helpers.messages.removeMass(inputs.host);
-            var record = await Discipline.create({active: 1, IP: inputs.host, action: 'permaban', message: `The website user was banned indefinitely by ${Meta['A'].dj}`}).fetch()
+            await Discipline.create({active: 1, IP: inputs.host, action: 'permaban', message: `The website user was banned indefinitely by ${Meta['A'].dj}`}).fetch()
                     .intercept((err) => {
                         return exits.error(err);
                     });

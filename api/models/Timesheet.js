@@ -32,7 +32,7 @@ module.exports = {
             type: 'number',
             max: 1,
             min: 0
-        },
+        }
 
     }
 

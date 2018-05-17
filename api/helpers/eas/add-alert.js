@@ -1,3 +1,5 @@
+/* global Eas */
+
 var moment = require("moment");
 var parseString = require('xml2js').parseString;
 var needle = require('needle');
@@ -75,7 +77,7 @@ module.exports = {
             {
                 // Detect if the county issuing the alert is already in the alert. If not, add the county in.
                 var temp = record.counties.split(', ');
-                if (temp.indexOf(inputs.county) == -1)
+                if (temp.indexOf(inputs.county) === -1)
                     temp.push(inputs.county);
                 temp = temp.join(', ');
 
@@ -89,7 +91,7 @@ module.exports = {
                     starts: inputs.starts,
                     expires: inputs.expires
                 };
-                if (typeof inputs.information != 'undefined' && inputs.information !== null)
+                if (typeof inputs.information !== 'undefined' && inputs.information !== null)
                     criteria.information = inputs.information;
 
                 // Detect any changes in the alert. If a change is detected, we will push it to clients.
@@ -98,18 +100,20 @@ module.exports = {
                 {
                     if (criteria.hasOwnProperty(key))
                     {
-                        if (criteria[key] != record[key])
+                        if (criteria[key] !== record[key])
                         {
                             updateIt = true;
                         }
                     }
                 }
                 if (updateIt)
-                    criteria.push = true;
-                await Eas.update({ID: record.ID}, criteria)
-                        .intercept((err) => {
-                            return exits.error(err);
-                        });
+                {
+                    await Eas.update({ID: record.ID}, criteria)
+                            .intercept((err) => {
+                                return exits.error(err);
+                            })
+                            .fetch();
+                }
                 return exits.success();
             } else { // Does not exist
                 var criteria = {
@@ -121,19 +125,11 @@ module.exports = {
                     counties: inputs.county,
                     starts: inputs.starts,
                     expires: inputs.expires,
-                    information: inputs.information || '',
-                    push: true
+                    information: inputs.information || ''
                 };
 
-                // Create it in our database
-                var record = await Eas.create(criteria)
-                        .intercept((err) => {
-                            return reject(err);
-                        })
-                        .fetch();
-
                 // If this alert came from NWS, we need to GET a separate URL for alert information.
-                if (inputs.source == 'NWS')
+                if (inputs.source === 'NWS')
                 {
                     needle('get', inputs.reference)
                             .then(async function (resp) {
@@ -143,10 +139,12 @@ module.exports = {
                                         {
                                             return exits.error(err2);
                                         } else {
-                                            await Eas.update({reference: inputs.reference}, {information: result.alert.info[0].description[0] + ". Precautionary / Preparedness actions: " + result.alert.info[0].instruction[0]})
+                                            criteria.information = result.alert.info[0].description[0] + ". Precautionary / Preparedness actions: " + result.alert.info[0].instruction[0];
+                                            await Eas.create(criteria)
                                                     .intercept((err) => {
                                                         return reject(err);
                                                     })
+                                                    .fetch();
                                         }
                                         return exits.success();
                                     } catch (e) {
@@ -158,6 +156,11 @@ module.exports = {
                                 return exits.error(err);
                             });
                 } else {
+                    var record = await Eas.create(criteria)
+                            .intercept((err) => {
+                                return reject(err);
+                            })
+                            .fetch();
                     return exits.success();
                 }
             }

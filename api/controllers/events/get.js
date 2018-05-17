@@ -1,3 +1,5 @@
+/* global Events, sails */
+
 module.exports = {
 
     friendlyName: 'Events / Get',
@@ -13,7 +15,9 @@ module.exports = {
                 .intercept((err) => {
                     sails.log.error(err);
                     exits.error();
-                })
+                });
+        if (this.req.isSocket)
+            sails.sockets.join(this.req, 'events');
         return exits.success(records);
     }
 

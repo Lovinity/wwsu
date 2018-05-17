@@ -1,3 +1,5 @@
+/* global Eas */
+
 module.exports = {
 
     friendlyName: 'eas / preParse',

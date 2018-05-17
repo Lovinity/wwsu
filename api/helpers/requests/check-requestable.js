@@ -1,3 +1,5 @@
+/* global Requests, sails, Songs, Subcategory, Category, Settings */
+
 var moment = require("moment");
 require("moment-duration-format");
 
@@ -21,7 +23,6 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        var canrequest = true;
         var d = moment().startOf('day');
         // First, check to see if the client has already exceeded their requests for the day
         var requests = await Requests.find({userIP: inputs.IP, requested: {'>=': d}})
@@ -40,7 +41,7 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof record == 'undefined')
+        if (typeof record === 'undefined')
         {
             return exits.success({requestable: false, HTML: `<div class="alert alert-danger" role="alert">
                                 Internal Error: Unable to find the requested track ID.
@@ -48,7 +49,7 @@ module.exports = {
         }
 
         // Is the track disabled?
-        if (record.enabled == 0)
+        if (record.enabled === 0)
         {
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                             You cannot request a disabled track.
@@ -72,15 +73,15 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof subcat == 'undefined')
+        if (typeof subcat === 'undefined')
             return exits.error(new Error('Unable to determine the track subcategory.'));
         var parentcat = await Category.findOne({id: subcat.parentid})
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof parentcat == 'undefined')
+        if (typeof parentcat === 'undefined')
             return exits.error(new Error('Unable to determine the track main category.'));
-        if (sails.config.custom.requests.musicCats.indexOf(parentcat.ID) == -1)
+        if (sails.config.custom.requests.musicCats.indexOf(parentcat.ID) === -1)
         {
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                             You cannot request a non-music track.

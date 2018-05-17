@@ -1,3 +1,5 @@
+/* global Messages */
+
 module.exports = {
 
     friendlyName: 'Messages / removeMass',
@@ -15,7 +17,7 @@ module.exports = {
     fn: async function (inputs, exits) {
 
         try {
-            var records = await Messages.update({from: inputs.host}, {status: 'deleted'}).fetch()
+            await Messages.update({from: inputs.host}, {status: 'deleted'}).fetch()
                     .intercept((err) => {
                         return exits.error(err);
                     });

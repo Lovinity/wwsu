@@ -1,3 +1,5 @@
+/* global Meta, Hosts, Messages, Requests */
+
 var moment = require('moment');
 
 module.exports = {
@@ -45,15 +47,15 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof records2 == 'undefined' || records2.length == 0)
+        if (typeof records2 === 'undefined' || records2.length === 0)
         {
         } else {
             records2.forEach(function (record2, index) {
-                if (typeof users[record2.from] == 'undefined' && record2.from.startsWith('website-'))
+                if (typeof users[record2.from] === 'undefined' && record2.from.startsWith('website-'))
                     users.website[record2.from] = {label: `${record2.from_friendly}`, status: 0};
-                if (typeof users[record2.to] == 'undefined' && record2.to.startsWith('website-'))
+                if (typeof users[record2.to] === 'undefined' && record2.to.startsWith('website-'))
                     users.website[record2.to] = {label: `${record2.to_friendly}`, status: 0};
-                if (record2.to == 'emergency')
+                if (record2.to === 'emergency')
                     users.system['emergency'].status = 1;
             });
         }
@@ -62,7 +64,7 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof records3 == 'undefined' || records3.length == 0)
+        if (typeof records3 === 'undefined' || records3.length === 0)
         {
         } else {
             if (records3.length > 0)
@@ -84,7 +86,7 @@ module.exports = {
                     }
                 } else if (Messages.visitors[key].host in users && Messages.visitors[key].group === 'computers')
                 {
-                    users[Messages.visitors[key].group][Messages.visitors[key].host] = {label: `${Messages.visitors[key].name}`, status: Messages.visitors[key].type}
+                    users[Messages.visitors[key].group][Messages.visitors[key].host] = {label: `${Messages.visitors[key].name}`, status: Messages.visitors[key].type};
                 }
             }
         }

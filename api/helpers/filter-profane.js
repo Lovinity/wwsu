@@ -1,3 +1,5 @@
+var profanity = require('profanity-util', {substring: "lite"});
+
 module.exports = {
 
     friendlyName: 'Filter profane',
@@ -17,7 +19,6 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        var profanity = require('profanity-util', {substring: "lite"});
         var filtered = profanity.purify(inputs.message);
         return exits.success(filtered[0]);
     }

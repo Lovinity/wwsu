@@ -1,3 +1,5 @@
+/* global sails */
+
 module.exports = {
 
     friendlyName: 'Messages / Send',
@@ -23,7 +25,7 @@ module.exports = {
         message: {
             type: 'string',
             required: true
-        },
+        }
     },
 
     exits: {

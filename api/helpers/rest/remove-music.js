@@ -1,3 +1,5 @@
+/* global sails */
+
 module.exports = {
 
     friendlyName: 'rest / Remove music',
@@ -19,7 +21,7 @@ module.exports = {
             while (!terminateloop && loopposition < queue.length)
             {
                 // If the track is a music track, remove it
-                if (queue[loopposition].TrackType == 'Music' && queue[loopposition].Elapsed == 0 && queue[loopposition].ID != 0)
+                if (queue[loopposition].TrackType === 'Music' && queue[loopposition].Elapsed === 0 && queue[loopposition].ID !== 0)
                 {
                     terminateloop = true;
                     await sails.helpers.rest.cmd('RemovePlaylistTrack', loopposition - 1);
@@ -33,7 +35,7 @@ module.exports = {
             }
             if (!terminateloop)
                 cb();
-        }
+        };
         removetrack(exits.success);
     }
 

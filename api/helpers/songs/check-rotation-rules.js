@@ -1,3 +1,5 @@
+/* global Songs, Settings */
+
 var moment = require("moment");
 require("moment-duration-format");
 

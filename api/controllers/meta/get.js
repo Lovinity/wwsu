@@ -1,3 +1,5 @@
+/* global sails, Meta */
+
 module.exports = {
 
     friendlyName: 'Meta / Get',

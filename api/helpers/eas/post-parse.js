@@ -1,3 +1,5 @@
+/* global Eas, sails */
+
 var moment = require("moment");
 module.exports = {
 
@@ -16,43 +18,36 @@ module.exports = {
         var records = await Eas.find()
                 .intercept((err) => {
                     return exits.error(err);
-                })
+                });
         // Async is tricky for forEach loops! Use the helper.
-        await sails.helpers.asyncForEach(records, (record, index) => {
-            return new Promise(async (resolve2, reject2) => {
+        await sails.helpers.asyncForEach(records, (record) => {
+            return new Promise(async (resolve2) => {
                 // Remove NWS alerts no longer listed in the CAPS; we assume those alerts were expired. Notify clients of the alert being removed.
-                if (record.source == 'NWS' && Eas.activeCAPS.indexOf(record.reference) == -1)
+                if (record.source === 'NWS' && Eas.activeCAPS.indexOf(record.reference) === -1)
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
                                 return resolve2(false);
-                            });
+                            })
+                            .fetch();
                     return resolve2(false);
                 }
 
-                // Remove expired alerts, and notify clients of deleted alerts
+                // Remove expired alerts
                 if (moment().isAfter(moment(record.expires)))
                 {
                     await Eas.destroy({ID: record.ID})
                             .intercept((err) => {
                                 return resolve2(false);
-                            });
+                            })
+                            .fetch();
                     return resolve2(false);
                 }
-
-                // If this alert needs to be pushed, either because it's new or updated, throw it in the sendit array to be pushed.
-                if (record.push)
-                    sendit.push(record);
                 
                 return resolve2(false);
             });
         });
 
-        // Mark these alerts as having been pushed; they do not need pushing anymore unless they get changed later.
-        await Eas.update({push: true}, {push: false})
-                .intercept((err) => {
-                    return exits.error(err);
-                });
         return exits.success(sendit);
 
     }

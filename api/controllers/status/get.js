@@ -1,3 +1,5 @@
+/* global Status, sails */
+
 module.exports = {
 
     friendlyName: 'Status / Get',
@@ -14,6 +16,8 @@ module.exports = {
                     sails.log.error(err);
                     return exits.error();
                 });
+                        if (this.req.isSocket)
+            sails.sockets.join(this.req, 'status');
         return exits.success(records);
     }
 

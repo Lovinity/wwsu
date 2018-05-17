@@ -1,3 +1,5 @@
+/* global Meta, sails, Requests */
+
 module.exports = {
 
     friendlyName: 'requests / queue',
@@ -30,11 +32,11 @@ module.exports = {
     fn: async function (inputs, exits) {
         try {
             var query = {played: 0};
-            if (typeof inputs.ID != 0)
+            if (typeof inputs.ID !== 0)
                 query.ID = inputs.ID;
 
             // End if consider_playlist and we are not in automation mode.
-            if (inputs.consider_playlist && Meta['A'].state != 'automation_on' && Meta['A'].state != 'automation_genre')
+            if (inputs.consider_playlist && Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_genre')
             {
                 return exits.success(false);
             }
@@ -70,7 +72,7 @@ module.exports = {
                             break;
                     }
                 });
-            }
+            };
 
             // called when we are done queuing requests
             var finalizeRequests = function () {
@@ -112,7 +114,7 @@ module.exports = {
                             break;
                     }
                 });
-            }
+            };
 
             // This function queues a request into automation
             var queueRequest = function (record) {
@@ -120,7 +122,7 @@ module.exports = {
                     // Check to see if the requested track is already in the queue. If so, terminate.
                     var inQueue = false;
                     queue.forEach(function (track) {
-                        if (record.songID == track.ID)
+                        if (record.songID === track.ID)
                             inQueue = true;
                     });
                     if (inQueue)
@@ -131,7 +133,7 @@ module.exports = {
                     Requests.pending.push(record.songID);
                     return resolve(true);
                 });
-            }
+            };
 
             // Get a request
             var getRequest = function (quantity) {
@@ -142,12 +144,12 @@ module.exports = {
                             .intercept((err) => {
                                 return reject(err);
                             });
-                    if (typeof record != 'undefined' && typeof record[0] != 'undefined' && record.length > 0 && Requests.pending.indexOf(record[0].songID) != -1)
+                    if (typeof record !== 'undefined' && typeof record[0] !== 'undefined' && record.length > 0 && Requests.pending.indexOf(record[0].songID) !== -1)
                     {
                         checked.push(record[0].ID);
                         await getRequest(quantity);
                     } else {
-                        if (quantity == inputs.quantity)
+                        if (quantity === inputs.quantity)
                             await prepareRequests();
                         var temp = await queueRequest(record);
                         if (temp)

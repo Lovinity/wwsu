@@ -1,3 +1,5 @@
+/* global Events, sails, Playlists */
+
 /**
  * Events.js
  *
@@ -51,13 +53,7 @@ module.exports = {
 
         color: {
             type: 'string'
-        },
-
-        push: {
-            type: 'boolean',
-            defaultsTo: true
-        },
-
+        }
     },
 
     // Google auth does not seem to support async/promises yet, so we need to have a sync function for that
@@ -71,7 +67,7 @@ module.exports = {
             return new Promise(async (resolve, reject) => {
                 try {
                     var credentials = await getClientSecret();
-                    if (typeof credentials == 'undefined' || credentials === null)
+                    if (typeof credentials === 'undefined' || credentials === null)
                         return reject(new Error('Empty credentials file.'));
                 } catch (e) {
                     return reject(e);
@@ -80,7 +76,7 @@ module.exports = {
                 authorizePromise.then(resolve);
                 authorizePromise.catch(reject);
             });
-        }
+        };
 
         var getNewToken = function (oauth2Client) {
             return new Promise((resolve, reject) => {
@@ -106,7 +102,7 @@ module.exports = {
                     });
                 });
             });
-        }
+        };
         var authorize = function (credentials) {
             return new Promise((resolve, reject) => {
                 try {
@@ -131,19 +127,19 @@ module.exports = {
                     }
                 });
             });
-        }
+        };
 
         var storeToken = function (token) {
             try {
                 fs.mkdirSync(TOKEN_DIR);
             } catch (err) {
-                if (err.code != 'EEXIST') {
+                if (err.code !== 'EEXIST') {
                     throw err;
                 }
             }
             fs.writeFile(TOKEN_PATH, JSON.stringify(token));
             console.log('Token stored to ' + TOKEN_PATH);
-        }
+        };
         // Load client secrets from a local file.
         var getClientSecret = function () {
             return new Promise((resolve, reject) => {
@@ -152,7 +148,7 @@ module.exports = {
                         return reject(err);
                     }
 
-                    if (typeof content == 'undefined' || content === null)
+                    if (typeof content === 'undefined' || content === null)
                     {
                         return reject(new Error('Empty credentials file.'));
                     }
@@ -161,7 +157,7 @@ module.exports = {
                     return resolve(JSON.parse(content));
                 });
             });
-        }
+        };
 
         authenticate()
                 .then((auth) => {
@@ -170,7 +166,7 @@ module.exports = {
                 .catch(err => {
                     sails.log.error(err);
                     return null;
-                })
+                });
     },
 
     loadEvents: function (auth) {
@@ -188,20 +184,20 @@ module.exports = {
                     calendarId: sails.config.custom.GoogleAPI.calendarId,
                     timeMin: currentdate.toISOString(),
                     timeMax: nextWeekDate.toISOString(),
-                    singleEvents: true,
+                    singleEvents: true
                     //orderBy: 'startTime' does not work correctly, so ignoring as it's not a big deal if events are not in time order
                 });
                 events = events.data.items;
-                if (events.length == 0) {
+                if (events.length === 0) {
                     return resolve();
                 } else {
                     // Iterate through each returned event from Google Calendar
-                    var eventIds = [];
+                    var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
                     for (var i = 0; i < events.length; i++) {
                         var event = events[i];
                         eventIds.push(event.id);
                         // Skip events without a start time or without an end time or without a summary
-                        if (typeof event.start == 'undefined' || typeof event.end == 'undefined' || typeof event.summary == 'undefined')
+                        if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined')
                         {
                             continue;
                         }
@@ -209,10 +205,10 @@ module.exports = {
                         var criteria = {
                             unique: event.id,
                             title: event.summary,
-                            description: (typeof event.description != 'undefined') ? breakdance(event.description) : '',
+                            description: (typeof event.description !== 'undefined') ? breakdance(event.description) : '',
                             start: event.start.dateTime || event.start.date,
-                            end: event.end.dateTime || event.end.date,
-                        }
+                            end: event.end.dateTime || event.end.date
+                        };
                         criteria.allDay = (moment(criteria.start).isSameOrBefore(moment().startOf('day')) && moment(criteria.end).isSameOrAfter(moment().startOf('day').add(1, 'days')));
                         if (event.colorId && event.colorId in colors)
                         {
@@ -237,7 +233,7 @@ module.exports = {
                                         {
                                             if (theEvent.hasOwnProperty(key))
                                             {
-                                                if (typeof criteria[key] != 'undefined' && theEvent[key] != criteria[key])
+                                                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key])
                                                 {
                                                     needsUpdate = true;
                                                     break;
@@ -246,8 +242,7 @@ module.exports = {
                                         }
                                         if (needsUpdate)
                                         {
-                                            criteria.push = true;
-                                            Events.update({unique: event.id}, criteria).exec(function () {});
+                                            Events.update({unique: event.id}, criteria).fetch().exec(function () {});
                                         }
                                     }
 
@@ -276,13 +271,7 @@ module.exports = {
                     }
 
                     // Destroy events in the database that no longer exist on the Google Calendar
-                    var destroyed = await Events.destroy({unique: {'!=': eventIds}})
-                            .intercept((err) => {
-                            })
-                            .fetch();
-
-                    // Push any updated events out
-                    var updated = await Events.update({push: true}, {push: false})
+                    await Events.destroy({unique: {'!=': eventIds}})
                             .intercept((err) => {
                             })
                             .fetch();
@@ -293,6 +282,25 @@ module.exports = {
                 return reject(e);
             }
         });
+    },
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.sockets.broadcast('events', 'events', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.sockets.broadcast('events', 'events', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.sockets.broadcast('events', 'events', data);
+        return proceed();
     }
 
 };

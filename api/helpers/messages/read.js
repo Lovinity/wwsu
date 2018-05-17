@@ -1,3 +1,5 @@
+/* global Hosts, Messages */
+
 var moment = require('moment');
 
 module.exports = {
@@ -32,7 +34,7 @@ module.exports = {
                     return exits.error(err);
                 });
         // Do socket related maintenance
-        if (typeof inputs.socket != 'undefined' && inputs.socket !== null)
+        if (typeof inputs.socket !== 'undefined' && inputs.socket !== null)
         {
             for (var key in Messages.visitors) {
                 if (Messages.visitors.hasOwnProperty(key)) {
@@ -51,10 +53,15 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-        if (typeof records == 'undefined' || records.length == 0)
+        if (typeof records === 'undefined' || records.length === 0)
         {
             return exits.success([]);
         } else {
+            // Remove IP addresses from response!
+            records.forEach(function (record, index) {
+                if (typeof records[index].from_IP !== 'undefined')
+                    delete records[index].from_IP;
+            });
             return exits.success(records);
         }
 

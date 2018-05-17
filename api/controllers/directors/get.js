@@ -1,3 +1,5 @@
+/* global Directors, sails */
+
 module.exports = {
 
     friendlyName: 'Directors / Get',
@@ -9,12 +11,12 @@ module.exports = {
             description: 'Director to search for; this is an OpenProject username.',
             type: 'string',
             allowNull: true
-        },
+        }
     },
 
     exits: {
         success: {
-            statusCode: 200,
+            statusCode: 200
         },
         notFound: {
             statusCode: 404
@@ -38,6 +40,8 @@ module.exports = {
         {
             return exits.notFound();
         } else {
+            if (this.req.isSocket)
+                sails.sockets.join(this.req, 'directors');
             return exits.success(records);
         }
     }

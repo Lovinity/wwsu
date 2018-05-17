@@ -9,6 +9,8 @@
  * display/public.js
  *
  * Public display sign webpage.
+ * @param {object} req Express.js request object
+ * @param {object} res Express.js response object
  */
 module.exports = async function public(req, res) {
 

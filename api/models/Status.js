@@ -1,3 +1,5 @@
+/* global sails, Status */
+
 /**
  * Status.js
  *
@@ -67,7 +69,7 @@ module.exports = {
                 await sails.helpers.asyncForEach(array, function (status, index) {
                     return new Promise(async (resolve2, reject2) => {
                         var criteria = {name: status.name, status: status.status};
-                        if (status.status == 5)
+                        if (status.status === 5)
                             criteria.time = moment().toISOString();
                         
                         // Find or create the status record
@@ -82,10 +84,10 @@ module.exports = {
                         {
                             if (criteria.hasOwnProperty(key))
                             {
-                                if (criteria[key] != record[key])
+                                if (criteria[key] !== record[key])
                                 {
                                     // We don't want to fetch() on time-only updates; this will flood websockets
-                                    if (!updateIt && key == 'time')
+                                    if (!updateIt && key === 'time')
                                     {
                                         updateIt = 2;
                                     } else {
@@ -94,14 +96,14 @@ module.exports = {
                                 }
                             }
                         }
-                        if (updateIt == 1)
+                        if (updateIt === 1)
                         {
                             await Status.update({name: status.name}, criteria)
                                     .intercept((err) => {
                                         return reject(err);
                                     })
                                     .fetch();
-                        } else if (updateIt == 2) {
+                        } else if (updateIt === 2) {
                             await Status.update({name: status.name}, criteria)
                                     .intercept((err) => {
                                         return reject(err);
@@ -134,6 +136,6 @@ module.exports = {
         var data = {remove: destroyedRecord.ID};
         sails.sockets.broadcast('status', 'status', data);
         return proceed();
-    },
+    }
 };
 

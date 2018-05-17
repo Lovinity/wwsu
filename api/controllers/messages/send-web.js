@@ -1,3 +1,5 @@
+/* global sails */
+
 module.exports = {
 
     friendlyName: 'Messages / Sendweb',
@@ -19,7 +21,7 @@ module.exports = {
         message: {
             type: 'string',
             required: true
-        },
+        }
     },
 
     exits: {
@@ -28,7 +30,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         var sh = require("shorthash");
-        var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] != 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
+        var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
         var opts = {message: inputs.message, from_IP: from_IP, nickname: inputs.nickname || null, private: inputs.private};
         opts.host = sh.unique(from_IP + sails.tokenSecret);
         try {

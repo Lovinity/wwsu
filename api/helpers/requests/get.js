@@ -1,3 +1,5 @@
+/* global Requests, sails, Songs */
+
 module.exports = {
 
     friendlyName: 'requests / get',
@@ -18,7 +20,7 @@ module.exports = {
                     return exits.error(err);
                 });
         var thereturn = [];
-        if (typeof records == 'undefined' || records.length == 0)
+        if (typeof records === 'undefined' || records.length === 0)
         {
             return exits.success([]);
         } else {

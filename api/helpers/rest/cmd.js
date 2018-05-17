@@ -1,3 +1,5 @@
+/* global sails, Meta, Logs */
+
 var needle = require('needle');
 var parser = require('xml2json');
 
@@ -28,7 +30,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         var endstring = ''; // appends at the end of a REST call, say, if arg was supplied
         // arg supplied? Load it in memory.
-        if (typeof inputs.arg != 'undefined' && inputs.arg !== null)
+        if (typeof inputs.arg !== 'undefined' && inputs.arg !== null)
             endstring = '&arg=' + inputs.arg;
         // Query REST
         needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.restAuth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})

@@ -51,7 +51,7 @@ datastore: 'radiodj',
         },
         ord: {
             type: 'number'
-        },
+        }
 
     }
 

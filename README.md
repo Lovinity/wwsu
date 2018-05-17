@@ -69,7 +69,7 @@ This endpoint supports sockets, uses the "directors" event, and returns data in 
 #### Request
 | key | criteria |
 |--|--|
-| username | string (required; the OpenProject username of the director to return) |
+| username | string (optional; the OpenProject username of the director to return) |
 
 #### Response 200
 

@@ -1,3 +1,5 @@
+/* global Messages */
+
 module.exports = {
 
     friendlyName: 'messages / remove',
@@ -18,12 +20,12 @@ module.exports = {
                     return exits.error(err);
                 })
                 .fetch();
-        if (!records || records.length == 0)
+        if (!records || records.length === 0)
         {
             return exits.error(new Error(`The message does not exist.`));
         } else {
             var type = 'message';
-            if (records[0].to == 'emergency')
+            if (records[0].to === 'emergency')
                 type = 'emergency';
             return exits.success();
         }

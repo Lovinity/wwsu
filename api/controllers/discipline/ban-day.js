@@ -1,3 +1,5 @@
+/* global sails */
+
 module.exports = {
 
     friendlyName: 'Discipline / banDay',
@@ -9,7 +11,7 @@ module.exports = {
             description: 'The unique ID of the user to ban.',
             type: 'string',
             required: true
-        },
+        }
     },
 
     fn: async function (inputs, exits) {

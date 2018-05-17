@@ -1,6 +1,8 @@
+/* global Meta, Playlists, Playlists_list, sails, Logs, Statemeta */
+
 var moment = require("moment");
 
-// CHECK OVER
+// WORK ON THIS
 module.exports = {
 
     friendlyName: 'Playlists / start',
@@ -39,7 +41,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            if (!Playlists.queuing && ((Meta['A'].state == 'automation_on' || Meta['A'].state == 'automation_playlist' || Meta['A'].state == 'automation_genre') || inputs.resume))
+            if (!Playlists.queuing && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre') || inputs.resume))
             {
                 Playlists.active.end = inputs.end;
                 Playlists.queuing = true;
@@ -76,14 +78,14 @@ module.exports = {
                 };
                 var x = Playlists.active.position;
                 var loopArray = async function (arr) {
-                    if (typeof arr[x] != 'undefined')
+                    if (typeof arr[x] !== 'undefined')
                     {
                         await queueTrack(arr[x]);
                         setTimeout(function () {
                             x++;
 
                             // any more items in array? continue loop
-                            if (x < arr.length && ((inputs.type != 2 && Meta['A'].state != 'automation_genre') || inputs.end === null || moment(inputs.end).diff(moment(), 'minutes') > (x * 3))) {
+                            if (x < arr.length && ((inputs.type !== 2 && Meta['A'].state !== 'automation_genre') || inputs.end === null || moment(inputs.end).diff(moment(), 'minutes') > (x * 3))) {
                                 loopArray(arr);
                             } else {
                                 Playlists.queuing = false;
@@ -94,43 +96,43 @@ module.exports = {
                         x++;
 
                         // any more items in array? continue loop
-                        if (x < arr.length && ((inputs.type != 2 && Meta['A'].state != 'automation_genre') || inputs.end === null || moment(inputs.end).diff(moment(), 'minutes') > (x * 3))) {
+                        if (x < arr.length && ((inputs.type !== 2 && Meta['A'].state !== 'automation_genre') || inputs.end === null || moment(inputs.end).diff(moment(), 'minutes') > (x * 3))) {
                             loopArray(arr);
                         } else {
                             Playlists.queuing = false;
                             finishIt();
                         }
                     }
-                }
+                };
                 if (inputs.resume)
                 {
                     finishIt = async function () {
                         await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
                     loopArray(Playlists.active.tracks);
-                } else if (inputs.type == 0)
+                } else if (inputs.type === 0)
                 {
                     finishIt = async function () {
                         await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
-                    await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()})
+                    await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'playlist - ' + theplaylist.name, event: 'A playlist was scheduled to start.' + "\n" + 'Playlist: ' + inputs.name})
                             .intercept((err) => {
                                 sails.log.error(err);
                             });
                     loopArray(Playlists.active.tracks);
-                } else if (inputs.type == 1) {
+                } else if (inputs.type === 1) {
                     finishIt = function () {
                         sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
                     Statemeta.final.state = 'automation_prerecord';
-                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(), live: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)})
+                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(), live: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: theplaylist.name, event: 'A prerecorded show was scheduled to start.' + "\n" + 'Show: ' + inputs.name})
                             .intercept((err) => {
                                 sails.log.error(err);
                             });
                     loopArray(Playlists.active.tracks);
-                } else if (inputs.type == 2) {
+                } else if (inputs.type === 2) {
                     // We shuffle genre playlist tracks by shuffling the orders
                     var ordersa = [];
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'automation', event: 'A genre playlist was scheduled to start.' + "\n" + 'Playlist: ' + inputs.name})
@@ -157,7 +159,7 @@ module.exports = {
                             }
                             return resolve2();
                         });
-                    }
+                    };
                     Playlists.active.tracks = [];
                     await sails.helpers.asyncForEach(ordersa, function (playlistTrack, index) {
                         return new Promise(async (resolve2, reject2) => {

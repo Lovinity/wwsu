@@ -1,3 +1,5 @@
+/* global sails, Songs, Requests */
+
 var moment = require("moment");
 
 module.exports = {
