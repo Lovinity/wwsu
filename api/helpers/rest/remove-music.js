@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'rest / Remove music',
+    friendlyName: 'rest.removeMusic',
 
     description: 'Remove all music-type tracks from the active RadioDJ queue.',
 
@@ -11,6 +11,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper rest.removeMusic called.');
         var removetrack = async function (cb) {
             // Get current queue
             var queue = await sails.helpers.rest.getQueue();

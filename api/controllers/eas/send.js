@@ -62,6 +62,8 @@ module.exports = {
 
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller eas/send called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await sails.helpers.eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, moment(inputs.starts).toISOString(), moment(inputs.expires).toISOString(), inputs.color, inputs.information);
             await sails.helpers.eas.postParse();

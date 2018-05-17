@@ -11,7 +11,9 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller display/refresh called.');
         sails.sockets.broadcast('display-refresh', 'display-refresh', true);
+        sails.log.verbose('Sent out a refresh request to display-refresh.');
         return exits.success();
 
     }

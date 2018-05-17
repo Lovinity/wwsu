@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'Discipline / banIndefinite',
+    friendlyName: 'discipline.banIndefinite',
 
     description: 'Ban a specified host indefinitely, until the ban is manually removed.',
 
@@ -15,7 +15,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-
+        sails.log.debug('Helper discipline.banIndefinite called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await sails.helpers.messages.removeMass(inputs.host);
             await Discipline.create({active: 1, IP: inputs.host, action: 'permaban', message: `The website user was banned indefinitely by ${Meta['A'].dj}`}).fetch()

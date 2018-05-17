@@ -15,11 +15,16 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller messages/read called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
         try {
             var records = await sails.helpers.messages.read(inputs.host, from_IP, this.req.isSocket ? sails.sockets.getId(this.req) : null);
             if (this.req.isSocket)
+            {
                 sails.sockets.join(this.req, 'messages');
+                sails.log.verbose('Request was a socket. Joining messages.')
+            }
             return exits.success(records);
         } catch (e) {
             sails.log.error(e);

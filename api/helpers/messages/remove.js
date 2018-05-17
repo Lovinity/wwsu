@@ -2,12 +2,12 @@
 
 module.exports = {
 
-    friendlyName: 'messages / remove',
+    friendlyName: 'messages.remove',
 
     description: 'Delete a single message.',
 
     inputs: {
-        id: {
+        ID: {
             type: 'number',
             required: true,
             description: 'The ID number of the message to delete.'
@@ -15,7 +15,9 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        var records = await Messages.update({ID: inputs.id}, {status: 'deleted'})
+        sails.log.debug('Helper messages.remove called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
+        var records = await Messages.update({ID: inputs.ID}, {status: 'deleted'})
                 .intercept((err) => {
                     return exits.error(err);
                 })
@@ -24,9 +26,6 @@ module.exports = {
         {
             return exits.error(new Error(`The message does not exist.`));
         } else {
-            var type = 'message';
-            if (records[0].to === 'emergency')
-                type = 'emergency';
             return exits.success();
         }
     }

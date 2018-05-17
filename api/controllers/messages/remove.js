@@ -14,6 +14,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller messages/remove called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await sails.helpers.messages.remove(inputs.ID);
         } catch (e)

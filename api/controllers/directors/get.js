@@ -27,6 +27,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller directors/get called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var query = {};
         if (inputs.username !== null)
             query = {login: inputs.username};
@@ -36,12 +38,17 @@ module.exports = {
                     sails.log.error(err);
                     return exits.error();
                 });
+                sails.log.verbose(`Director records retrieved: ${records.length}`);
+                sails.log.silly(records);
         if (!records || records.length < 1)
         {
             return exits.notFound();
         } else {
             if (this.req.isSocket)
+            {
                 sails.sockets.join(this.req, 'directors');
+                sails.log.verbose('Request was a socket. Joined directors.');
+            }
             return exits.success(records);
         }
     }

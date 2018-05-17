@@ -5,7 +5,7 @@ var moment = require("moment");
 // WORK ON THIS
 module.exports = {
 
-    friendlyName: 'Playlists / start',
+    friendlyName: 'playlists.start',
 
     description: 'Begin a playlist in the active RadioDJ.',
 
@@ -40,15 +40,19 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper playlists.start called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             if (!Playlists.queuing && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre') || inputs.resume))
             {
+                sails.log.verbose(`Processing helper.`);
                 Playlists.active.end = inputs.end;
                 Playlists.queuing = true;
                 var theplaylist = await Playlists.findOne({name: inputs.name})
                         .intercept((err) => {
                             return exits.error(err);
                         });
+                sails.log.silly(`Playlist: ${theplaylist}`);
                 if (!theplaylist)
                     return exits.error();
                 Playlists.active.name = theplaylist.name;
@@ -60,6 +64,8 @@ module.exports = {
                         .intercept((err) => {
                             return exits.error(err);
                         });
+                sails.log.verbose(`Playlists_list records retrieved: ${playlistTracks.length}`);
+                sails.log.silly(playlistTracks);
                 if (!playlistTracks)
                     return exits.error();
                 Playlists.active.tracks = [];
@@ -72,16 +78,31 @@ module.exports = {
                 var finishIt = function () {};
                 var queueTrack = function (track) {
                     return new Promise(async (resolve2) => {
+                        sails.log.verbose(`queueTrack called: ${track}`);
                         await sails.helpers.rest.cmd('LoadTrackToBottom', track);
                         return resolve2();
                     });
                 };
                 var x = Playlists.active.position;
                 var loopArray = async function (arr) {
-                    if (typeof arr[x] !== 'undefined')
-                    {
-                        await queueTrack(arr[x]);
-                        setTimeout(function () {
+                    sails.log.verbose(`loopArray called.`);
+                    try {
+                        if (typeof arr[x] !== 'undefined' && await sails.helpers.songs.checkRotationRules(arr[x]))
+                        {
+                            await queueTrack(arr[x]);
+                            setTimeout(function () {
+                                x++;
+
+                                // any more items in array? continue loop
+                                if (x < arr.length && ((inputs.type !== 2 && Meta['A'].state !== 'automation_genre') || inputs.end === null || moment(inputs.end).diff(moment(), 'minutes') > (x * 3))) {
+                                    loopArray(arr);
+                                } else {
+                                    Playlists.queuing = false;
+                                    finishIt();
+                                }
+                            }, 500);
+                        } else {
+                            sails.log.verbose(`${arr[x]} will not be queued.`);
                             x++;
 
                             // any more items in array? continue loop
@@ -91,8 +112,11 @@ module.exports = {
                                 Playlists.queuing = false;
                                 finishIt();
                             }
-                        }, 500);
-                    } else {
+                        }
+                    } catch (e) {
+                        sails.log.verbose(`${arr[x]} will not be queued due to an error.`);
+                        sails.log.error(e);
+
                         x++;
 
                         // any more items in array? continue loop
@@ -107,12 +131,14 @@ module.exports = {
                 if (inputs.resume)
                 {
                     finishIt = async function () {
+                        sails.log.verbose(`finishIt called.`);
                         await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
                     loopArray(Playlists.active.tracks);
                 } else if (inputs.type === 0)
                 {
                     finishIt = async function () {
+                        sails.log.verbose(`finishIt called.`);
                         await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
                     await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()});
@@ -123,9 +149,9 @@ module.exports = {
                     loopArray(Playlists.active.tracks);
                 } else if (inputs.type === 1) {
                     finishIt = function () {
+                        sails.log.verbose(`finishIt called.`);
                         sails.helpers.rest.cmd('EnableAutoDJ', 1);
                     };
-                    Statemeta.final.state = 'automation_prerecord';
                     await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(), live: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: theplaylist.name, event: 'A prerecorded show was scheduled to start.' + "\n" + 'Show: ' + inputs.name})
                             .intercept((err) => {
@@ -140,15 +166,18 @@ module.exports = {
                                 sails.log.error(err);
                             });
                     ordersa = await sails.helpers.shuffle(playlistTracks);
+                    sails.log.silly(`Tracks shuffled. New order: ${ordersa}`);
                     var countsleft = playlistTracks.length;
                     var afterFunction = function () {
                         return new Promise(async (resolve2, reject2) => {
                             try {
                                 countsleft -= 1;
+                                sails.log.silly(`afterFunction called. countsleft: ${countsleft}`);
                                 //sails.log.error(new Error(`${countsleft} processes remaining`));
                                 if (countsleft < 1)
                                 {
                                     finishIt = async function () {
+                                        sails.log.verbose(`finishIt called.`);
                                         await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                                     };
                                     await Meta.changeMeta({state: 'automation_genre', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()});
@@ -177,6 +206,9 @@ module.exports = {
                         });
                     });
                 }
+                exits.success();
+            } else {
+                sails.log.verbose('Helper SKIPPED.');
                 exits.success();
             }
         } catch (e) {

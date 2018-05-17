@@ -1,4 +1,5 @@
 /* global sails */
+var sh = require("shorthash");
 
 module.exports = {
 
@@ -29,7 +30,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        var sh = require("shorthash");
+        sails.log.debug('Controller messages/send-web called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
         var opts = {message: inputs.message, from_IP: from_IP, nickname: inputs.nickname || null, private: inputs.private};
         opts.host = sh.unique(from_IP + sails.tokenSecret);

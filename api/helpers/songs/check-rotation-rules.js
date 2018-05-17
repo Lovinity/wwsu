@@ -5,7 +5,7 @@ require("moment-duration-format");
 
 module.exports = {
 
-    friendlyName: 'Songs / checkRotationRules',
+    friendlyName: 'Songs.checkRotationRules',
 
     description: 'Returns true if this track is allowed to be played via rotation rules, false if it is not allowed to be played',
 
@@ -18,10 +18,13 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper songs.checkRotationRules called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var record = await Songs.findOne({ID: inputs.ID})
                 .intercept((err) => {
                     return exits.error(err);
                 });
+        sails.log.silly(`Song: ${record}`);
         if (!record || record === null)
             return exits.error(new Error('Provided Song ID was not found.'));
 
@@ -29,7 +32,7 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
-
+                sails.log.silly(`Rotation settings: ${thesettings}`);
         var rotationRules = {};
         thesettings.forEach(function (thesetting) {
             rotationRules[thesetting.setting] = thesetting.value;

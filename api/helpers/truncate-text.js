@@ -1,44 +1,43 @@
+/* global sails */
+
 module.exports = {
 
+    friendlyName: 'Truncate text',
 
-  friendlyName: 'Truncate text',
+    description: 'Truncate a string to a certain length.',
 
+    inputs: {
+        str: {
+            type: 'string',
+            required: true,
+            description: 'The string to truncate'
+        },
 
-  description: 'Truncate a string to a certain length.',
+        strLength: {
+            type: 'number',
+            min: 1,
+            defaultsTo: 100,
+            description: 'The string should be the specified number of characters after truncation.'
+        },
 
+        ending: {
+            type: 'string',
+            defaultsTo: '...',
+            description: 'The string to put on the end if truncation happened.'
+        }
 
-  inputs: {
-      str: {
-          type: 'string',
-          required: true,
-          description: 'The string to truncate'
-      },
-      
-      strLength: {
-          type: 'number',
-          min: 1,
-          defaultsTo: 100,
-          description: 'The string should be the specified number of characters after truncation.'
-      },
-      
-      ending: {
-          type: 'string',
-          defaultsTo: '...',
-          description: 'The string to put on the end if truncation happened.'
-      }
+    },
 
-  },
+    fn: async function (inputs, exits) {
+        sails.log.debug('Helper truncateText called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
+        if (inputs.str.length > inputs.strLength) {
+            return exits.success(inputs.str.substring(0, inputs.strLength - inputs.ending.strLength) + inputs.ending);
+        } else {
+            return exits.success(inputs.str);
+        }
 
-
-  fn: async function (inputs, exits) {
-
-    if (inputs.str.length > inputs.strLength) {
-        return exits.success(inputs.str.substring(0, inputs.strLength - inputs.ending.strLength) + inputs.ending);
-    } else {
-        return exits.success(inputs.str);
     }
-
-  }
 
 
 };

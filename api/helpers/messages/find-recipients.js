@@ -1,10 +1,11 @@
-/* global Meta, Hosts, Messages, Requests */
+/* global Meta, Hosts, Messages, Requests, sails */
 
+// WORK ON THIS. Use new recipients model.
 var moment = require('moment');
 
 module.exports = {
 
-    friendlyName: 'messages / findRecipients',
+    friendlyName: 'messages.findRecipients',
 
     description: 'Get a list of recipients that can receive messages, both clients and internal.',
 
@@ -13,6 +14,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper messages.findRecipients called.');
         var searchto = moment().subtract(1, 'hours').toDate();
         // Hard-coded recipients with special purposes, plus some groups.
         var users = {

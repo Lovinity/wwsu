@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'messages / send',
+    friendlyName: 'messages.send',
 
     description: 'Send out client messages',
 
@@ -32,13 +32,17 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper messages.send called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             inputs.message = await sails.helpers.filterProfane(inputs.message);
+            sails.log.silly(`Profanity filtered. New messahe: ${inputs.message}`);
             // First, grab data pertaining to the host that is retrieving messages
             var stuff = await Hosts.findOrCreate({host: inputs.from}, {host: inputs.from, friendlyname: inputs.from})
                     .intercept((err) => {
                         return exits.error(err);
                     });
+            sails.log.silly(`Host: ${stuff}`);
             inputs.from_friendly = stuff.friendlyname;
             var records = await Messages.create(inputs).fetch()
                     .intercept((err) => {
@@ -48,7 +52,6 @@ module.exports = {
             {
                 return exits.error(new Error('Internal error: Could not save message in database.'));
             } else {
-                var records2 = records;
                 // Broadcast the message over web sockets
                 return exits.success();
             }

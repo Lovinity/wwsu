@@ -5,7 +5,7 @@ require("moment-duration-format");
 
 module.exports = {
 
-    friendlyName: 'requests / checkRequestable',
+    friendlyName: 'requests.checkRequestable',
 
     description: 'Check to see if a track can be requested by the client.',
 
@@ -23,14 +23,19 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper requests.checkRequestable called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
+
         var d = moment().startOf('day');
         // First, check to see if the client has already exceeded their requests for the day
         var requests = await Requests.find({userIP: inputs.IP, requested: {'>=': d}})
                 .intercept((err) => {
                     return exits.error(err);
                 });
+        sails.log.verbose(`Requests made by this IP address today: ${requests.length}`);
         if (requests.length >= sails.config.custom.requests.dailyLimit)
         {
+            sails.log.verbose(`Track cannot be requested: Reached daily request limit.`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                 You have reached your daily request limit (${sails.config.custom.requests.dailyLimit}). Please check back tomorrow.
                                 </div>`, type: 'requestRules'});
@@ -41,16 +46,19 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
+        sails.log.silly(`Song: ${record}`);
         if (typeof record === 'undefined')
         {
+            sails.log.verbose(`Track cannot be requested: song ID not found.`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-danger" role="alert">
                                 Internal Error: Unable to find the requested track ID.
                                 </div>`, type: 'internal'});
         }
 
         // Is the track disabled?
-        if (record.enabled === 0)
+        if (record.enabled !== 1)
         {
+            sails.log.verbose(`Track cannot be requested: Track is not enabled.`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                             You cannot request a disabled track.
                                             </div>`, type: 'disabled'});
@@ -61,8 +69,10 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
+                sails.log.silly(`Requests of this song that are pending: ${requests2}`);
         if (requests2.length > 0)
         {
+            sails.log.verbose(`Track cannot be requested: Track is already in the request queue.`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                 This track is already in the request queue and pending to air.
                                 </div>`, type: 'inQueue'});
@@ -73,16 +83,19 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
+                sails.log.silly(`Track subcategory: ${subcat}`);
         if (typeof subcat === 'undefined')
             return exits.error(new Error('Unable to determine the track subcategory.'));
         var parentcat = await Category.findOne({id: subcat.parentid})
                 .intercept((err) => {
                     return exits.error(err);
                 });
+                sails.log.silly(`Track category: ${parentcat}`);
         if (typeof parentcat === 'undefined')
             return exits.error(new Error('Unable to determine the track main category.'));
         if (sails.config.custom.requests.musicCats.indexOf(parentcat.ID) === -1)
         {
+            sails.log.verbose(`Track cannot be requested: Track is not a music track.`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                             You cannot request a non-music track.
                                             </div>`, type: 'nonMusic'});
@@ -111,6 +124,7 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
+                sails.log.silly(`Rotation rule records: ${thesettings}`);
         var rotationRules = {};
         thesettings.forEach(function (thesetting) {
             rotationRules[thesetting.setting] = thesetting.value;
@@ -119,6 +133,7 @@ module.exports = {
         // Check if we are past the end date of the track
         if (moment(record.end_date).isBefore() && moment(record.end_date).isAfter('2002-01-01 00:00:01'))
         {
+            sails.log.verbose(`Track cannot be requested: Track is expired (date).`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                             You cannot request an expired track.
                                             </div>`, type: 'expired'});
@@ -127,6 +142,7 @@ module.exports = {
         // Check if we have not yet reached the start date of the track
         if (moment(record.start_date).isAfter())
         {
+            sails.log.verbose(`Track cannot be requested: Track has not yet started via start date.`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                             You cannot request a track that has not yet started airing.
                                             </div>`, type: 'expired'});
@@ -135,6 +151,7 @@ module.exports = {
         // Check if the track has exceeded the number of allowed spin counts
         if (record.limit_action > 0 && record.count_played >= record.play_limit)
         {
+            sails.log.verbose(`Track cannot be requested: Track is expired (spin counts).`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                             You cannot request an expired track.
                                             </div>`, type: 'expired'});
@@ -161,10 +178,12 @@ module.exports = {
         }
         if (!passesRules)
         {
+            sails.log.verbose(`Track cannot be requested: Fails rotation rules: ${rulesFailed}`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">This track fails one or more playlist rotation rules and cannot be requested at this time:${rulesFailed}</div>`, type: 'rotationRules'});
 
             // By this point, all rules passed and the track can be requested. Include the request form.
         } else {
+            sails.log.verbose(`Track can be requested.`);
             return exits.success({requestable: true, HTML: `<form action="javascript:requestTrack(${record.ID})"><div class="form-group">
                                     <label for="request-name"><strong>Request this track</strong></label>
                                     <input type="text" class="form-control" id="request-name" placeholder="Your name">

@@ -3,7 +3,7 @@
 // WORK ON THIS
 module.exports = {
 
-    friendlyName: 'songs / queueFromSubcategory',
+    friendlyName: 'songs.queueFromSubcategory',
 
     description: 'Queue a track from a subcategory',
 
@@ -26,19 +26,19 @@ module.exports = {
             isIn: ['Top', 'Bottom'],
             description: 'The track will be queued in this position in the queue: Top / Bottom'
         },
-        
+
         quantity: {
             type: 'number',
             defaultsTo: 1,
             description: 'Number of tracks to queue from this subcategory. Defaults to 1.'
         },
-        
+
         rules: {
             type: 'boolean',
             defaultsTo: true,
             description: 'If true (default), will check for rotation rules before queuing tracks (unless there is not enough tracks to queue given rotation rules).'
         },
-        
+
         duration: {
             type: 'number',
             allowNull: true,
@@ -47,13 +47,15 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-
+        sails.log.debug('Helper songs.queueFromSubcategory called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         // Get the parent category
         try {
             var thecategory = await Category.find({name: inputs.category}).limit(1)
                     .intercept((err) => {
                         return exits.error(err);
                     });
+            sails.log.silly(`Category: ${thecategory}`);
             var whereString = {name: inputs.subcategory};
             if (thecategory.length > 0)
             {
@@ -67,6 +69,7 @@ module.exports = {
                     .intercept((err) => {
                         return exits.error(err);
                     });
+            sails.log.silly(`Subcategories: ${thesubcategories}`);
             if (thesubcategories.length > 0)
             {
                 var theids = [];
@@ -79,7 +82,8 @@ module.exports = {
                         .intercept((err) => {
                             return exits.error(err);
                         });
-
+                sails.log.verbose(`Songs records retrieved: ${thesongs.length}`);
+                sails.log.silly(thesongs);
                 // If duration is provided, remove songs that fail the duration check
                 if (inputs.duration !== null && thesongs.length > 0)
                 {
@@ -87,6 +91,7 @@ module.exports = {
                         if (thesong.duration > (inputs.duration + 5) || thesong.duration < (inputs.duration - 5))
                             delete thesongs[index];
                     });
+                    sails.log.silly(`Removed duration-nonconforming tracks. Resulting array: ${thesongs}`);
                 }
 
                 if (thesongs.length > 0)
@@ -96,6 +101,7 @@ module.exports = {
                     thesongs.sort(function (a, b) {
                         return 0.5 - Math.random();
                     });
+                    sails.log.silly(`Array shuffled. Resulting array: ${thesongs}`);
 
                     var queuedtracks = 0;
                     var queuedtracksa = [];
@@ -113,14 +119,18 @@ module.exports = {
                                     var canplay = sails.helpers.songs.checkRotationRules(thesong.ID);
                                     if (canplay)
                                     {
+                                        sails.log.verbose(`Queued ${thesong.ID}`);
                                         await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
                                         queuedtracks += 1;
                                         // If we reached our limit of tracks to queue, break out of the async for each loop.
                                         if (queuedtracks >= inputs.quantity)
                                         {
+                                            sails.log.verbose(`Reached the quantity limit of tracks to queue.`);
                                             return resolve(true);
                                         }
                                         return resolve(false);
+                                    } else {
+                                        sails.log.verbose(`Skipped ${thesong.ID}`);
                                     }
                                 } catch (e) {
                                     return reject(e);
@@ -132,6 +142,7 @@ module.exports = {
                     // Not enough tracks, or rules was set to false? Let's try queuing [more] tracks without rotation rules
                     if (queuedtracks < inputs.quantity)
                     {
+                        sails.log.verbose('Not enough tracks to queue when considering rotation rules.');
                         // We want to be sure we don't queue any tracks that are already in the queue
                         var tracks = await sails.helpers.rest.getQueue();
                         queuedtracksa = [];
@@ -144,12 +155,17 @@ module.exports = {
                             return new Promise(async (resolve, reject) => {
                                 try {
                                     if (queuedtracksa.indexOf(thesong.ID) > -1)
+                                    {
+                                        sails.log.verbose(`Skipped ${thesong.ID}: already in queue.`);
                                         return resolve(false);
+                                    }
+                                    sails.log.verbose(`Queued ${thesong.ID}`);
                                     await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
                                     queuedtracks += 1;
                                     // If we reached our limit of tracks to queue, break out of the async for each loop.
                                     if (queuedtracks >= inputs.quantity)
                                     {
+                                        sails.log.verbose(`Reached the quantity limit of tracks to queue.`);
                                         return resolve(true);
                                     }
                                     return resolve(false);
@@ -161,11 +177,14 @@ module.exports = {
                     }
                     if (queuedtracks < inputs.quantity)
                     {
+                        sails.log.verbose(`Did not have enough tracks to queue.`);
                         return exits.success(false); // We could not queue the specified number of tracks when this function was called... so return false.
                     } else {
+                        sails.log.verbose(`Finished: Had enough tracks to queue.`);
                         return exits.success(true); // We queued the specified number of tracks, so return true.
                     }
                 } else {
+                    sails.log.verbose(`No tracks available to queue`);
                     return exits.success(false);
                 }
             } else {

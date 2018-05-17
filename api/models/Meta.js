@@ -105,6 +105,7 @@ module.exports = {
 
     changeMeta: function (obj) {
         return new Promise(async (resolve, reject) => {
+            sails.log.debug(`Meta.changeMeta called.`);
             var push = {};
             var db = {};
             for (var key in obj)
@@ -137,6 +138,7 @@ module.exports = {
                     .intercept((err) => {
                         return reject(err);
                     });
+            sails.log.silly(`meta socket: ${push}`);
             sails.sockets.broadcast('meta', 'meta', push);
             return resolve();
         });

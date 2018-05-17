@@ -45,29 +45,31 @@ module.exports = {
         }
 
     },
-    
+
     pending: [], // Store track ID numbers in memory so that we don't need to query the Requests table every second and see if a request is being played.
-    
-        // Websockets standards
+
+    // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`requests socket: ${data}`);
         sails.sockets.broadcast('requests', 'requests', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
-        
+
         // Since we update played to 1, instead of outright deleting a request, check for that.
         if (updatedRecord.played === 1)
             data = {remove: updatedRecord.ID};
-        
+        sails.log.silly(`requests socket: ${data}`);
         sails.sockets.broadcast('requests', 'requests', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`requests socket: ${data}`);
         sails.sockets.broadcast('requests', 'requests', data);
         return proceed();
     }

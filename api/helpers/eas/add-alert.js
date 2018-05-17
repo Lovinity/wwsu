@@ -1,11 +1,11 @@
-/* global Eas */
+/* global Eas, sails */
 
 var moment = require("moment");
 var parseString = require('xml2js').parseString;
 var needle = require('needle');
 module.exports = {
 
-    friendlyName: 'eas / addAlert',
+    friendlyName: 'eas.addAlert',
 
     description: 'Prepares an alert to be pushed by the eas/postParse helper.',
 
@@ -66,6 +66,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper eas.addAlert called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
 
             // Get the alert if it already exists in the database
@@ -75,12 +77,12 @@ module.exports = {
                     });
             if (record) // Exists
             {
+                sails.log.verbose('Alert already exists.');
                 // Detect if the county issuing the alert is already in the alert. If not, add the county in.
                 var temp = record.counties.split(', ');
                 if (temp.indexOf(inputs.county) === -1)
                     temp.push(inputs.county);
                 temp = temp.join(', ');
-
                 var criteria = {
                     source: inputs.source,
                     reference: inputs.reference,
@@ -94,6 +96,7 @@ module.exports = {
                 if (typeof inputs.information !== 'undefined' && inputs.information !== null)
                     criteria.information = inputs.information;
 
+                sails.log.silly(`Criteria: ${criteria}`);
                 // Detect any changes in the alert. If a change is detected, we will push it to clients.
                 var updateIt = false;
                 for (var key in criteria)
@@ -106,6 +109,7 @@ module.exports = {
                         }
                     }
                 }
+                sails.log.sillt(`Needs updating?: ${updateIt}`);
                 if (updateIt)
                 {
                     await Eas.update({ID: record.ID}, criteria)
@@ -116,6 +120,7 @@ module.exports = {
                 }
                 return exits.success();
             } else { // Does not exist
+                sails.log.verbose('Alert does not exist.');
                 var criteria = {
                     source: inputs.source,
                     reference: inputs.reference,
@@ -131,6 +136,7 @@ module.exports = {
                 // If this alert came from NWS, we need to GET a separate URL for alert information.
                 if (inputs.source === 'NWS')
                 {
+                    sails.log.verbose('Alert is from NWS source. Retrieving alert information.');
                     needle('get', inputs.reference)
                             .then(async function (resp) {
                                 parseString(resp.body, async function (err2, result) { // Response is in XML. We need to convert to JSON.
@@ -140,6 +146,7 @@ module.exports = {
                                             return exits.error(err2);
                                         } else {
                                             criteria.information = result.alert.info[0].description[0] + ". Precautionary / Preparedness actions: " + result.alert.info[0].instruction[0];
+                                            sails.log.silly(`Criteria: ${criteria}`);
                                             await Eas.create(criteria)
                                                     .intercept((err) => {
                                                         return reject(err);
@@ -156,6 +163,7 @@ module.exports = {
                                 return exits.error(err);
                             });
                 } else {
+                    sails.log.silly(`Criteria: ${criteria}`);
                     var record = await Eas.create(criteria)
                             .intercept((err) => {
                                 return reject(err);

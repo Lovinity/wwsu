@@ -1,10 +1,11 @@
 /* global Hosts, Messages */
 
+// WORK ON THIS via recipients model
 var moment = require('moment');
 
 module.exports = {
 
-    friendlyName: 'Messages / Read',
+    friendlyName: 'messages.read',
 
     description: 'Retrieve applicable messages sent within the last hour. Do not include emergency messages.',
 
@@ -27,12 +28,15 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper messages.read called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var searchto = moment().subtract(1, 'hours').toDate(); // Get messages sent within the last hour
         // First, grab data pertaining to the host that is retrieving messages
         var thehost = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: inputs.host})
                 .intercept((err) => {
                     return exits.error(err);
                 });
+        sails.log.silly(thehost);
         // Do socket related maintenance
         if (typeof inputs.socket !== 'undefined' && inputs.socket !== null)
         {
@@ -53,6 +57,8 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
+        sails.log.verbose(`Messages records retrieved: ${records.length}`);
+        sails.log.silly(records);
         if (typeof records === 'undefined' || records.length === 0)
         {
             return exits.success([]);

@@ -39,11 +39,14 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller user/auth called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var user = await Nodeusers.find({email: inputs.email}).limit(1)
                 .intercept((err) => {
                     sails.log.error(err);
                     return exits.error();
                 });
+                sails.log.verbose(`Nodeusers records retrieved: ${user.length}`);
         if (user && user[0])
         {
             try {

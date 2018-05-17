@@ -51,6 +51,7 @@ module.exports = {
 
     changeRecipients: function (array) {
         return new Promise(async (resolve, reject) => {
+            sails.log.debug(`Recipients.changeRecipients called.`);
             var moment = require('moment');
             try {
                 await sails.helpers.asyncForEach(array, function (recipient, index) {
@@ -59,6 +60,7 @@ module.exports = {
                         if (recipient.status !== 0)
                             criteria.time = moment().toISOString();
 
+                            sails.log.silly(`Criteria: ${criteria}`);
                         // Find or create the status record
                         var record = await Recipients.findOrCreate({name: recipient.name}, criteria)
                                 .intercept((err) => {
@@ -85,12 +87,14 @@ module.exports = {
                         }
                         if (updateIt === 1)
                         {
+                            sails.log.verbose(`Updating recipient ${recipient.name} and pushing to sockets via fetch.`);
                             await Recipients.update({name: recipient.name}, criteria)
                                     .intercept((err) => {
                                         return reject(err);
                                     })
                                     .fetch();
                         } else if (updateIt === 2) {
+                            sails.log.verbose(`Updating recipient ${recipient.name} without using fetch / pushing to sockets.`);
                             await Recipients.update({name: recipient.name}, criteria)
                                     .intercept((err) => {
                                         return reject(err);
@@ -109,18 +113,21 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`recipients socket: ${data}`);
         sails.sockets.broadcast('recipients', 'recipients', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
+        sails.log.silly(`recipients socket: ${data}`);
         sails.sockets.broadcast('recipients', 'recipients', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`recipients socket: ${data}`);
         sails.sockets.broadcast('recipients', 'recipients', data);
         return proceed();
     }

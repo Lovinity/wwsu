@@ -64,6 +64,7 @@ module.exports = {
 
     changeStatus: function (array) {
         return new Promise(async (resolve, reject) => {
+            sails.log.debug(`Status.changeStatus called.`);
             var moment = require('moment');
             try {
                 await sails.helpers.asyncForEach(array, function (status, index) {
@@ -98,12 +99,14 @@ module.exports = {
                         }
                         if (updateIt === 1)
                         {
+                            sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`);
                             await Status.update({name: status.name}, criteria)
                                     .intercept((err) => {
                                         return reject(err);
                                     })
                                     .fetch();
                         } else if (updateIt === 2) {
+                            sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`);
                             await Status.update({name: status.name}, criteria)
                                     .intercept((err) => {
                                         return reject(err);
@@ -122,18 +125,21 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`status socket: ${data}`);
         sails.sockets.broadcast('status', 'status', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
+        sails.log.silly(`status socket: ${data}`);
         sails.sockets.broadcast('status', 'status', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`status socket: ${data}`);
         sails.sockets.broadcast('status', 'status', data);
         return proceed();
     }

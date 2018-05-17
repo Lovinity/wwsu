@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'Discipline / banDay',
+    friendlyName: 'discipline.banDay',
 
     description: 'Ban a specified host for 24 hours.',
 
@@ -15,7 +15,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-
+        sails.log.debug('Helper discipline.banDay called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await sails.helpers.messages.removeMass(inputs.host);
             await Discipline.create({active: 1, IP: inputs.host, action: 'dayban', message: `The website user was banned for 24 hours by ${Meta['A'].dj}`}).fetch()

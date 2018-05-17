@@ -31,6 +31,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller requests/place called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             var response = await sails.helpers.requests.place(inputs.ID, this.req.ip, inputs.name, inputs.message);
             return exits.success(response.HTML);

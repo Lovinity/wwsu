@@ -53,16 +53,6 @@
     "eqeqeq":                       ["error", "always"],
     "eol-last":                     ["warn"],
     "handle-callback-err":          ["error"],
-    "indent":                       ["warn", 2, {
-      "SwitchCase": 1,
-      "MemberExpression": "off",
-      "FunctionDeclaration": {"body":1, "parameters":"off"},
-      "FunctionExpression": {"body":1, "parameters":"off"},
-      "CallExpression": {"arguments":"off"},
-      "ArrayExpression": 1,
-      "ObjectExpression": 1,
-      "ignoredNodes": ["ConditionalExpression"]
-    }],
     "linebreak-style":              ["error", "unix"],
     "no-dupe-keys":                 ["error"],
     "no-duplicate-case":            ["error"],

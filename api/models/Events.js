@@ -171,6 +171,7 @@ module.exports = {
 
     loadEvents: function (auth) {
         return new Promise(async (resolve, reject) => {
+            sails.log.verbose(`Events.loadEvents called`);
             try {
                 var {google} = require('googleapis');
                 var calendar = google.calendar({version: 'v3', auth: auth});
@@ -188,6 +189,7 @@ module.exports = {
                     //orderBy: 'startTime' does not work correctly, so ignoring as it's not a big deal if events are not in time order
                 });
                 events = events.data.items;
+                sails.log.silly(events);
                 if (events.length === 0) {
                     return resolve();
                 } else {
@@ -199,6 +201,7 @@ module.exports = {
                         // Skip events without a start time or without an end time or without a summary
                         if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined')
                         {
+                            sails.log.verbose(`SKIPPING ${i}: invalid event parameters.`);
                             continue;
                         }
                         // Prepare data structure for event
@@ -218,7 +221,7 @@ module.exports = {
                         } else {
                             criteria.color = '#607D8B';
                         }
-
+                        sails.log.silly(`Event criteria: ${criteria}`);
                         // Find existing record of event. If does not exist, create it.
                         Events.findOrCreate({unique: event.id}, criteria)
                                 .exec(function (err2, theEvent, wasCreated) {
@@ -287,18 +290,21 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`events socket: ${data}`);
         sails.sockets.broadcast('events', 'events', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
+        sails.log.silly(`events socket: ${data}`);
         sails.sockets.broadcast('events', 'events', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`events socket: ${data}`);
         sails.sockets.broadcast('events', 'events', data);
         return proceed();
     }

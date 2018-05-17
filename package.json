@@ -22,6 +22,8 @@
     "profanity-util": "^0.2.0",
     "readline": "^1.3.0",
     "sails": "^1.0.1",
+    "sails-hook-autoreload": "^1.1.0",
+    "sails-hook-cron": "^3.0.0",
     "sails-hook-grunt": "^3.0.2",
     "sails-hook-orm": "^2.0.0-16",
     "sails-hook-sockets": "^1.4.0",
@@ -31,7 +33,8 @@
     "xml2json": "^0.11.2"
   },
   "devDependencies": {
-    "@sailshq/eslint": "^4.19.3"
+    "@sailshq/eslint": "^4.19.3",
+    "sails-hook-lint": "^1.1.2"
   },
   "scripts": {
     "start": "NODE_ENV=production node app.js",

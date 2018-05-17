@@ -19,7 +19,8 @@ module.exports = {
 
 
   fn: async function (inputs, exits) {
-
+        sails.log.debug('Controller requests/queue called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             var response = await sails.helpers.requests.queue(1, false, false, inputs.ID);
             return exits.success(response);

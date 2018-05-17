@@ -33,6 +33,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller messages/send called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await sails.helpers.messages.send(inputs.from, inputs.to, inputs.to_friendly, inputs.message);
             return exits.success();

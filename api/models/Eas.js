@@ -172,18 +172,21 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`eas socket: ${data}`);
         sails.sockets.broadcast('eas', 'eas', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
+        sails.log.silly(`eas socket: ${data}`);
         sails.sockets.broadcast('eas', 'eas', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`eas socket: ${data}`);
         sails.sockets.broadcast('eas', 'eas', data);
         return proceed();
     }

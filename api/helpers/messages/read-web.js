@@ -1,10 +1,10 @@
-/* global Messages */
+/* global Messages, sails */
 
 var moment = require('moment');
 
 module.exports = {
 
-    friendlyName: 'messages / readWeb',
+    friendlyName: 'messages.readWeb',
 
     description: 'Get messages for a specified web client.',
 
@@ -17,6 +17,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper messages.readWeb called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var searchto = moment().subtract(1, 'hours').toDate();
         var records = await Messages.find(
                 {
@@ -31,6 +33,8 @@ module.exports = {
                 .intercept((err) => {
                     return exits.error(err);
                 });
+                sails.log.verbose(`Messages records retrieved: ${records.length}`);
+                sails.log.silly(records);
         if (typeof records === 'undefined' || records.length === 0)
         {
             return exits.success([]);
@@ -40,7 +44,7 @@ module.exports = {
                 if (typeof records[index].from_IP !== 'undefined')
                     delete records[index].from_IP;
             });
-            
+
             return exits.success(records);
         }
 

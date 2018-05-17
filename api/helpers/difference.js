@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'Difference',
+    friendlyName: 'difference',
 
     description: 'Determine the differences between two objects.',
 
@@ -18,6 +18,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper difference called.');
         var o1 = inputs.o1;
         var o2 = inputs.o2;
         var k, kDiff,

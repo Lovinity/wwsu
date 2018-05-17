@@ -1,8 +1,8 @@
-/* global _ */
+/* global _, sails */
 
 module.exports = {
 
-    friendlyName: 'Asyncforeach',
+    friendlyName: 'asyncForEach',
 
     description: 'This helper should be used instead of Array.prototype.forEach() when you need to perform an async function for each item in an array.',
 
@@ -24,11 +24,16 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper asyncForEach called.');
         for (let index = 0; index < inputs.array.length; index++) {
             try {
+                sails.log.silly(`Calling iteration ${index}`);
                 var breakIt = await inputs.callback(inputs.array[index], index, inputs.array);
                 if (breakIt)
+                {
+                    sails.log.silly(`BREAKING as per resolve(true).`);
                     break;
+                }
             } catch (e) {
                 return exits.error(e);
                 break;

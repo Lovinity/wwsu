@@ -55,18 +55,28 @@ module.exports = {
         if (typeof newlyCreatedRecord.from_IP !== 'undefined')
             delete newlyCreatedRecord.from_IP;
         var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`messages socket: ${data}`);
         sails.sockets.broadcast('messages', 'messages', data);
-        
+
         // If message was a public website message, send to public website socket
         if (newlyCreatedRecord.to === 'DJ' || newlyCreatedRecord.to === 'website')
+        {
+            sails.log.silly(`messages socket for messages-website: ${data}`);
             sails.sockets.broadcast('messages-website', 'messages', data);
-        
+        }
+
         // If message was a private website message, send to the respective client's socket
         if (newlyCreatedRecord.from.startsWith("website-"))
+        {
+            sails.log.silly(`messages socket for messages-${newlyCreatedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${newlyCreatedRecord.from}`, 'messages', data);
+        }
         if (newlyCreatedRecord.to.startsWith("website-"))
+        {
+            sails.log.silly(`messages socket for messages-${newlyCreatedRecord.to}: ${data}`);
             sails.sockets.broadcast(`messages-${newlyCreatedRecord.to}`, 'messages', data);
-        
+        }
+
         return proceed();
     },
 
@@ -75,40 +85,58 @@ module.exports = {
         if (typeof updatedRecord.from_IP !== 'undefined')
             delete updatedRecord.from_IP;
         var data = {update: updatedRecord};
-        
-        // Since we use update to "deleted" status when deleting messages instead of outright deleting them, check for that.
-        if (updatedRecord.status === 'deleted')
-            data = {remove: updatedRecord.ID};
-        
+        sails.log.silly(`messages socket: ${data}`);
         sails.sockets.broadcast('messages', 'messages', data);
-        
+
         // If message was a public website message, send to public website socket
         if (updatedRecord.to === 'DJ' || updatedRecord.to === 'website')
+        {
+            sails.log.silly(`messages socket for messages-website: ${data}`);
             sails.sockets.broadcast('messages-website', 'messages', data);
-        
+        }
+
         // If message was a private website message, send to the respective client's socket
         if (updatedRecord.from.startsWith("website-"))
+        {
+            sails.log.silly(`messages socket for messages-${updatedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${updatedRecord.from}`, 'messages', data);
+        }
         if (updatedRecord.to.startsWith("website-"))
+        {
+            sails.log.silly(`messages socket for messages-${updatedRecord.to}: ${data}`);
             sails.sockets.broadcast(`messages-${updatedRecord.to}`, 'messages', data);
-        
+        }
+
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
-        var data = {remove: destroyedRecord.ID};
+        // Do not pass IP addresses through web sockets!
+        if (typeof destroyedRecord.from_IP !== 'undefined')
+            delete destroyedRecord.from_IP;
+        var data = {insert: destroyedRecord};
+        sails.log.silly(`messages socket: ${data}`);
         sails.sockets.broadcast('messages', 'messages', data);
-        
+
         // If message was a public website message, send to public website socket
         if (destroyedRecord.to === 'DJ' || destroyedRecord.to === 'website')
+        {
+            sails.log.silly(`messages socket for messages-website: ${data}`);
             sails.sockets.broadcast('messages-website', 'messages', data);
-        
+        }
+
         // If message was a private website message, send to the respective client's socket
         if (destroyedRecord.from.startsWith("website-"))
+        {
+            sails.log.silly(`messages socket for messages-${destroyedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${destroyedRecord.from}`, 'messages', data);
+        }
         if (destroyedRecord.to.startsWith("website-"))
+        {
+            sails.log.silly(`messages socket for messages-${destroyedRecord.to}: ${data}`);
             sails.sockets.broadcast(`messages-${destroyedRecord.to}`, 'messages', data);
-        
+        }
+
         return proceed();
     }
 

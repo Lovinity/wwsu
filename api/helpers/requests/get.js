@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'requests / get',
+    friendlyName: 'requests.get',
 
     description: 'Get all pending requests.',
 
@@ -15,10 +15,14 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper requests.get called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         var records = await Requests.find({played: 0, ID: {'>': inputs.offset}})
                 .intercept((err) => {
                     return exits.error(err);
                 });
+                sails.log.verbose(`Requests records retrieved: ${records.length}`);
+                sails.log.silly(records);
         var thereturn = [];
         if (typeof records === 'undefined' || records.length === 0)
         {
@@ -32,6 +36,7 @@ module.exports = {
                             .intercept((err) => {
                                 return reject2(err);
                             });
+                            sails.log.silly(`Song: ${record2}`);
                     if (record2)
                     {
                         temp.trackname = `${record2.artist} - ${record2.title}`;

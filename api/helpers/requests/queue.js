@@ -1,8 +1,9 @@
 /* global Meta, sails, Requests */
 
+// WORK ON THIS: make requests.pending requeue when they are detected as not in queue.
 module.exports = {
 
-    friendlyName: 'requests / queue',
+    friendlyName: 'requests.queue',
 
     description: 'Play/queue requests in RadioDJ.',
 
@@ -30,6 +31,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper requests.queue called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             var query = {played: 0};
             if (typeof inputs.ID !== 0)
@@ -38,6 +41,7 @@ module.exports = {
             // End if consider_playlist and we are not in automation mode.
             if (inputs.consider_playlist && Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_genre')
             {
+                sails.log.verbose(`Helper abandoned: consider_playlist is true, and we are airing a playlist.`);
                 return exits.success(false);
             }
 
@@ -49,6 +53,7 @@ module.exports = {
             // This function is called before queuing the first request, if we have one.
             var prepareRequests = function () {
                 return new Promise(async (resolve, reject) => {
+                    sails.log.verbose(`prepareRequests called.`);
                     switch (Meta['A'].state)
                     {
                         case 'live_on':
@@ -77,6 +82,7 @@ module.exports = {
             // called when we are done queuing requests
             var finalizeRequests = function () {
                 return new Promise(async (resolve, reject) => {
+                    sails.log.verbose(`finalizeRequests called.`);
                     switch (Meta['A'].state)
                     {
                         case 'live_on':
@@ -119,6 +125,7 @@ module.exports = {
             // This function queues a request into automation
             var queueRequest = function (record) {
                 return new Promise(async (resolve, reject) => {
+                    sails.log.verbose(`queueRequest called: ${record.ID}`);
                     // Check to see if the requested track is already in the queue. If so, terminate.
                     var inQueue = false;
                     queue.forEach(function (track) {
@@ -126,7 +133,10 @@ module.exports = {
                             inQueue = true;
                     });
                     if (inQueue)
+                    {
+                        sails.log.verbose(`Track already in queue. Abandoning queueRequest.`);
                         return resolve(false);
+                    }
 
                     // Prepare the request
                     await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
@@ -138,14 +148,17 @@ module.exports = {
             // Get a request
             var getRequest = function (quantity) {
                 return new Promise(async (resolve, reject) => {
+                    sails.log.verbose(`getRequest called: ${quantity}`);
                     if (checked.length > 0)
                         query.ID = {'!=': checked};
                     record = await Requests.find(query).limit(1)
                             .intercept((err) => {
                                 return reject(err);
                             });
+                            sails.log.silly(`Request: ${record}`);
                     if (typeof record !== 'undefined' && typeof record[0] !== 'undefined' && record.length > 0 && Requests.pending.indexOf(record[0].songID) !== -1)
                     {
+                        sails.log.verbose(`getRequest abandoned: the track was already queued.`);
                         checked.push(record[0].ID);
                         await getRequest(quantity);
                     } else {
@@ -163,7 +176,7 @@ module.exports = {
                     }
                 });
             };
-            
+
             await getRequest(inputs.quantity);
             if (queuedSomething)
                 return exits.success(true);

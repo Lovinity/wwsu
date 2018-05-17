@@ -51,6 +51,7 @@ module.exports = {
      */
     updateDirectors: function (forced = false) {
         return new Promise(async (resolve, reject) => {
+            sails.log.debug(`updateDirectors called.`);
             var moment = require('moment');
             var needle = require('needle');
             var directorNames = [];
@@ -65,6 +66,7 @@ module.exports = {
                     .then(async function (resp) {
                         // Because this code is used twice, condense it into a variable
                         var endFunction = async function () {
+                            sails.log.verbose(`endFunction called.`);
                             // Remove directors which no longer exist in OpenProject
                             await Directors.destroy({name: {'!=': directorNames}})
                                     .intercept((err) => {
@@ -83,6 +85,7 @@ module.exports = {
                         try {
                             body = JSON.parse(body);
                             var stuff = body._embedded.elements;
+                            sails.log.silly(stuff);
                             if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)
                                 Directors.directors = {};
                             stuff.forEach(function (director) {
@@ -103,6 +106,7 @@ module.exports = {
                             // If there was a change in the number of users, or we are forcing a reload, then reload all directors' presence.
                             if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)
                             {
+                                sails.log.verbose(`Re-calculating directors and presence.`);
                                 var names = {};
                                 // Determine presence by analyzing timesheet records up to 14 days ago
                                 var records = await Timesheet.find({
@@ -155,18 +159,21 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`directors socket: ${data}`);
         sails.sockets.broadcast('directors', 'directors', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
+        sails.log.silly(`directors socket: ${data}`);
         sails.sockets.broadcast('directors', 'directors', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`directors socket: ${data}`);
         sails.sockets.broadcast('directors', 'directors', data);
         return proceed();
     },

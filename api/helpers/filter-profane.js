@@ -2,7 +2,7 @@ var profanity = require('profanity-util', {substring: "lite"});
 
 module.exports = {
 
-    friendlyName: 'Filter profane',
+    friendlyName: 'filterProfane',
 
     description: 'Filter out any profanity in a string',
 
@@ -19,7 +19,9 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper filterProfane called.');
         var filtered = profanity.purify(inputs.message);
+        sails.log.silly(filtered);
         return exits.success(filtered[0]);
     }
 

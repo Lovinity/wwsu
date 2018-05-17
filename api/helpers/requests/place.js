@@ -4,7 +4,7 @@ var moment = require("moment");
 
 module.exports = {
 
-    friendlyName: 'Requests / Place',
+    friendlyName: 'requests.place',
 
     description: 'Place a request.',
 
@@ -32,6 +32,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper requests.place called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             // First, confirm the track can actually be requested.
             var requestable = await sails.helpers.requests.checkRequestable(inputs.ID, inputs.IP);
@@ -45,23 +47,14 @@ module.exports = {
                         .intercept((err) => {
                             return exits.error(err);
                         });
+                        sails.log.silly(`Song: ${record2}`);
 
                 // Create the request
-                var record = await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(), played: 0})
+                await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(), played: 0})
                         .intercept((err) => {
                             return exits.error(err);
                         });
                 Requests.pending.push(inputs.ID);
-
-                // Push the request through websockets
-                var temp = record;
-                if (record2)
-                    temp.trackname = `${record2.artist} - ${record2.title}`;
-
-                // Update the Track Requests recipient to light up, showing a pending request is in queue.
-                var temp2 = {};
-                temp2['system'] = {};
-                temp2['system']['trackrequests'] = {label: 'Track Requests', status: 4};
 
                 // Finish it
                 return exits.success({requested: true, HTML: `<div class="alert alert-success" role="alert">

@@ -15,6 +15,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Controller discipline/ban-show called.');
+        sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await sails.helpers.discipline.banShow(inputs.host);
             return exits.success();

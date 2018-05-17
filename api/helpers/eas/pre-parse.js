@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'eas / preParse',
+    friendlyName: 'eas.preParse',
 
     description: 'Execute this helper when beginning routine pulling of EAS alerts from external sources. This clears some variables in preparation.',
 
@@ -11,6 +11,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper eas.preParse called.');
         Eas.activeCAPS = [];
         Eas.toPush = [];
         return exits.success();

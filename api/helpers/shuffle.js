@@ -1,4 +1,4 @@
-/* global _ */
+/* global _, sails */
 
 module.exports = {
 
@@ -18,6 +18,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper shuffle called.');
         var currentIndex = inputs.array.length, temporaryValue, randomIndex;
 
         // While there remain elements to shuffle...
@@ -32,7 +33,7 @@ module.exports = {
             inputs.array[currentIndex] = inputs.array[randomIndex];
             inputs.array[randomIndex] = temporaryValue;
         }
-
+        sails.log.silly(`New array: ${inputs.array}`);
         return exits.success(inputs.array);
 
     }

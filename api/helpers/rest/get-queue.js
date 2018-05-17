@@ -5,7 +5,7 @@ var parser = require('xml2json');
 
 module.exports = {
 
-    friendlyName: 'rest / getQueue',
+    friendlyName: 'rest.getQueue',
 
     description: 'Get the current RadioDJ queue. Also, update it in the Meta.automation variable for local access.',
 
@@ -14,10 +14,12 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        sails.log.debug('Helper rest.getQueue called.');
         needle('get', Meta['A'].radiodj + '/p?auth=' + sails.config.custom.restAuth)
                 .then(async function (resp) {
                     try {
                         var queue = parser.toJson(resp.body);
+                        sails.log.silly(`REST response: ${queue}`);
                         if (queue === null)
                         {
                             Meta.automation = [];
