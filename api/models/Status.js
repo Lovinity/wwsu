@@ -5,11 +5,14 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
+// API NOTE: Do not use Status.update() to update statuses; use Status.changeStatus instead. Otherwise, websockets may get flooded with updates.
+
 module.exports = {
+
     // This model's data is only temporary and should not persist. Use memory instead of SQL.
     datastore: 'memory',
     attributes: {
-        
+
         ID: {
             type: 'number',
             autoIncrement: true
@@ -30,25 +33,26 @@ module.exports = {
             defaultsTo: 4
         },
 
+        // websocket API note: Do not use time in client code; changes to time will not be pushed in sockets to avoid unnecessary data transfer.
         time: {
             type: 'ref',
             columnType: 'datetime'
         }
     },
 
-    // API note: Please do not modify any of these variables in any code; use the changeStatus function instead. That way, websocket clients get updates pushed.
-    'A': {// Current statuses
-        'database': {label: 'Database', status: 1, time: null},
-        'display-public': {label: 'Display Public', status: 3, time: null},
-        'display-internal': {label: 'Display Internal', status: 3, time: null},
-        'website': {label: 'Website', status: 2, time: null},
-        'stream-public': {label: 'Radio Stream', status: 2, time: null},
-        'stream-remote': {label: 'Remote Stream', status: 4, time: null},
-        'silence': {label: 'Audio Level', status: 5, time: null},
-        'EAS-internal': {label: 'EAS Internal', status: 3, time: null},
-        'openproject': {label: 'OpenProject', status: 2, time: null},
-        'server': {label: 'Server', status: 2, time: null}
-    },
+    // The template are subsystems that should be added into memory upon lifting of the Sails app via bootstrap().
+    template: [
+        {name: 'database', label: 'database', status: 1, time: null},
+        {name: 'display-public', label: 'Display (Public)', status: 3, time: null},
+        {name: 'display-internal', label: 'Display (Internal)', status: 3, time: null},
+        {name: 'website', label: 'Website', status: 2, time: null},
+        {name: 'stream-public', label: 'Radio Stream', status: 2, time: null},
+        {name: 'stream-remote', label: 'Remote Stream', status: 4, time: null},
+        {name: 'silence', label: 'Silence', status: 5, time: null},
+        {name: 'EAS-internal', label: 'Internal EAS', status: 3, time: null},
+        {name: 'openproject', label: 'OpenProject', status: 2, time: null},
+        {name: 'server', label: 'Server', status: 2, time: null}
+    ],
 
     /**
      * Change statuses
@@ -60,23 +64,49 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             var moment = require('moment');
             try {
-                var push = [];
                 await sails.helpers.asyncForEach(array, function (status, index) {
                     return new Promise(async (resolve2, reject2) => {
                         var criteria = {name: status.name, status: status.status};
                         if (status.status == 5)
                             criteria.time = moment().toISOString();
-                        var records = await Status.findOrCreate({name: status.name}, criteria)
+                        
+                        // Find or create the status record
+                        var record = await Status.findOrCreate({name: status.name}, criteria)
                                 .intercept((err) => {
                                     return resolve2();
                                 });
-                        if (records.status == status.status)
-                            return resolve2();
-                        var records2 = await Status.update({name: status.name}, criteria).fetch()
-                                .intercept((err) => {
-                                    return reject(err);
-                                });
-                        push.push(records2[0]);
+                                
+                        // Search to see if any changes are made to the status; we only want to update if there is a change.
+                        var updateIt = false;
+                        for (var key in criteria)
+                        {
+                            if (criteria.hasOwnProperty(key))
+                            {
+                                if (criteria[key] != record[key])
+                                {
+                                    // We don't want to fetch() on time-only updates; this will flood websockets
+                                    if (!updateIt && key == 'time')
+                                    {
+                                        updateIt = 2;
+                                    } else {
+                                        updateIt = 1;
+                                    }
+                                }
+                            }
+                        }
+                        if (updateIt == 1)
+                        {
+                            await Status.update({name: status.name}, criteria)
+                                    .intercept((err) => {
+                                        return reject(err);
+                                    })
+                                    .fetch();
+                        } else if (updateIt == 2) {
+                            await Status.update({name: status.name}, criteria)
+                                    .intercept((err) => {
+                                        return reject(err);
+                                    });
+                        }
                         return resolve2();
                     });
                 });
@@ -85,6 +115,25 @@ module.exports = {
                 return reject(e);
             }
         });
-    }
+    },
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.sockets.broadcast('status', 'status', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.sockets.broadcast('status', 'status', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.sockets.broadcast('status', 'status', data);
+        return proceed();
+    },
 };
 
