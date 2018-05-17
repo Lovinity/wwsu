@@ -34,6 +34,7 @@ module.exports = {
             Messages.visitors[sails.sockets.getId(this.req)] = {group: 'website', name: `Web (${opts.nickname})`, ip: from_IP, time: moment(), type: 5, host: `website-${opts.host}`};
             sails.sockets.join(this.req, 'messages-website');
             sails.sockets.join(this.req, `messages-website-${opts.host}`);
+            sails.sockets.join(this.req, `discipline-${opts.host}`);
             sails.log.verbose(`Request was a socket. Joining messages-website and messages-website-${opts.host}.`)
         } else {
             opts.host = sh.unique(from_IP + sails.tokenSecret);
