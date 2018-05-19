@@ -4,7 +4,7 @@ var moment = require('moment');
 
 module.exports = {
 
-    friendlyName: 'messages.readWeb',
+    friendlyName: 'messages.getWeb',
 
     description: 'Get messages for a specified web client.',
 
@@ -17,7 +17,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Helper messages.readWeb called.');
+        sails.log.debug('Helper messages.getWeb called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         var searchto = moment().subtract(1, 'hours').toDate();
         var records = await Messages.find(

@@ -5,7 +5,7 @@ var moment = require('moment');
 
 module.exports = {
 
-    friendlyName: 'messages.read',
+    friendlyName: 'messages.get',
 
     description: 'Retrieve applicable messages sent within the last hour. Do not include emergency messages.',
 
@@ -28,7 +28,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Helper messages.read called.');
+        sails.log.debug('Helper messages.get called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         var searchto = moment().subtract(1, 'hours').toDate(); // Get messages sent within the last hour
         // First, grab data pertaining to the host that is retrieving messages

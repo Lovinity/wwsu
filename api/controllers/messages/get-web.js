@@ -4,7 +4,7 @@ var sh = require("shorthash");
 
 module.exports = {
 
-    friendlyName: 'Messages / Readweb',
+    friendlyName: 'Messages / get-web',
 
     description: 'Web and mobile clients will use this endpoint to get messages.',
 
@@ -16,7 +16,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller messages/read-web called.');
+        sails.log.debug('Controller messages/get-web called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         // Get the client IP address
         var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
@@ -43,7 +43,7 @@ module.exports = {
             opts.nickname = opts.host;
         try {
             // Get messages for this client
-            var records = await sails.helpers.messages.readWeb(opts.host);
+            var records = await sails.helpers.messages.getWeb(opts.host);
             return exits.success(records);
         } catch (e) {
             sails.log.error(e);

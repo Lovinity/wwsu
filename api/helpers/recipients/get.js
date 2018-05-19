@@ -5,7 +5,7 @@ var moment = require('moment');
 
 module.exports = {
 
-    friendlyName: 'messages.findRecipients',
+    friendlyName: 'recipients.get',
 
     description: 'Get a list of recipients that can receive messages, both clients and internal.',
 

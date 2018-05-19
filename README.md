@@ -187,25 +187,7 @@ This endpoint supports sockets, uses the "events" event, and returns data in the
         ]
 ## Messages [/messages]
 Messages endpoints regard the internal WWSU messaging system.
-### /messages/find-recipients [GET /messages/find-recipients]
-Retrieve an array of recipients that can receive and send messages.
-This endpoint supports sockets and returns data in the structure defined in the websockets section. However, it uses the "recipients" event instead of the "messages" event.
-#### Response 200
-
-    [
-	    {
-		    "createdAt": "2018-05-15T22:31:34.381Z",
-            "updatedAt": "2018-05-15T22:31:34.381Z",
-		    "ID": 1,
-		    "group": "system", // Each recipient can be grouped together by the group
-		    "name": "emergency", // A key identifier of the recipient
-		    "label": "Technical Issues", // A human friendly label for the recipient
-		    "status": 1, // 1 = red (active issue), used by emergency, 2 = yellow (online), used by the computers and display groups, 3 = unused, 4 = blue (pending request), used by track requests, 5 = green (online), used by public clients, 0 = gray (offline / none)
-		    "time": "2018-05-15T22:31:34.381Z" // ISO string of the last time the recipient was active.
-		},
-		...
-    ]
-### /messages/read [GET /messages/read]
+### /messages/get [GET /messages/get]
 Retrieve an array of messages sent within the last hour. Used by internal WWSU applications. **Requires authorization**.
 This endpoint supports sockets, uses the "messages" event, and returns data in the structure defined in the websockets section.
 #### Request
@@ -227,7 +209,7 @@ This endpoint supports sockets, uses the "messages" event, and returns data in t
             },
             ...
         ]
-### /messages/read-web [GET /messages/read-web]
+### /messages/get-web [GET /messages/get-web]
 Retrieve a list of messages sent within the last hour applicable to web and mobile users.
 This endpoint supports sockets. When called by a socket, the client will be subscribed to multiple events:
 
@@ -327,6 +309,26 @@ The value of the meta state key can be any of the following strings:
 | sportsremote_returning | A remotely-produced sports broadcast is about to resume. |
 ## Requests [/requests]
 Requests endpoints regard the WWSU track request system.
+## Recipients [/recipients]
+These endpoints regard the recipients and clients that may send or receive messages.
+### /recipients/get [GET /recipients/get]
+Retrieve an array of recipients that can receive and send messages.
+This endpoint supports sockets, returns data in the structure defined in the websockets section, and uses the "recipients" event.
+#### Response 200
+
+    [
+	    {
+		    "createdAt": "2018-05-15T22:31:34.381Z",
+            "updatedAt": "2018-05-15T22:31:34.381Z",
+		    "ID": 1,
+		    "group": "system", // Each recipient can be grouped together by the group
+		    "name": "emergency", // A key identifier of the recipient
+		    "label": "Technical Issues", // A human friendly label for the recipient
+		    "status": 1, // 1 = red (active issue), used by emergency, 2 = yellow (online), used by the computers and display groups, 3 = unused, 4 = blue (pending request), used by track requests, 5 = green (online), used by public clients, 0 = gray (offline / none)
+		    "time": "2018-05-15T22:31:34.381Z" // ISO string of the last time the recipient was active.
+		},
+		...
+    ]
 ### /requests/get [GET /requests/get]
 Get an array of requested tracks. **Requires authorization**
 This endpoint supports sockets, uses the "requests" event, and returns data in the structure defined in the websockets section. However, it is important to note that a delete is not sent out until the request begins playing; it is not sent out when a request is queued in automation. This is by design.

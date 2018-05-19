@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'Messages / Findclients',
+    friendlyName: 'Recipients / get',
 
     description: 'Get a list of recipients for messages.',
 
@@ -11,7 +11,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller messages/find-recipients called.');
+        sails.log.debug('Controller recipients/get called.');
         try {
             var records = await Recipients.find({})
                     .intercept((err) => {
