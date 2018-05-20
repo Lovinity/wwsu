@@ -49,7 +49,7 @@ module.exports = {
                     if (inputs.name === 'emergency')
                         status = 1;
                     if (inputs.name === 'requests')
-                        status = 3;
+                        status = 4;
                     break;
                 case 'website':
                     status = 5;

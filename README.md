@@ -307,8 +307,6 @@ The value of the meta state key can be any of the following strings:
 | sportsremote_break | A remotely-produced sports broadcast is taking a break or is in halftime / injury break. |
 | sportsremote_break_disconnected | A remotely-produced sports broadcast is on break because the remote stream disconnected from WWSU. |
 | sportsremote_returning | A remotely-produced sports broadcast is about to resume. |
-## Requests [/requests]
-Requests endpoints regard the WWSU track request system.
 ## Recipients [/recipients]
 These endpoints regard the recipients and clients that may send or receive messages.
 ### /recipients/get [GET /recipients/get]
@@ -325,10 +323,12 @@ This endpoint supports sockets, returns data in the structure defined in the web
 		    "name": "emergency", // A key identifier of the recipient
 		    "label": "Technical Issues", // A human friendly label for the recipient
 		    "status": 1, // 1 = red (active issue), used by emergency, 2 = yellow (online), used by the computers and display groups, 3 = unused, 4 = blue (pending request), used by track requests, 5 = green (online), used by public clients, 0 = gray (offline / none)
-		    "time": "2018-05-15T22:31:34.381Z" // ISO string of the last time the recipient was active.
+		    "time": "2018-05-15T22:31:34.381Z" // ISO string of the last time the recipient had a change in status.
 		},
 		...
     ]
+## Requests [/requests]
+Requests endpoints regard the WWSU track request system.
 ### /requests/get [GET /requests/get]
 Get an array of requested tracks. **Requires authorization**
 This endpoint supports sockets, uses the "requests" event, and returns data in the structure defined in the websockets section. However, it is important to note that a delete is not sent out until the request begins playing; it is not sent out when a request is queued in automation. This is by design.
