@@ -38,77 +38,34 @@ module.exports = {
 
         time: {
             type: 'ref',
-            columnType: 'datetime'
+            columnType: 'datetime',
+            defaultsTo: new Date()
         }
     },
+    
+    // Template are initial records created in the Recipients model upon execution of bootstrap.
+    template: [
+        {
+            name: 'emergency',
+            group: 'system',
+            label: 'Technical Issues',
+            status: 0
+        },
+        {
+            name: 'requests',
+            group: 'system',
+            label: 'Track Requests',
+            status: 0
+        },
+        {
+            name: 'website',
+            group: 'website',
+            label: 'Web Public',
+            status: 0
+        }
+    ],
 
-    sockets: [], // For recipients connecting via sockets, we will pair the sockets with the Recipients.ID in the format: [{Recipients.ID: [array, of, socket, IDs]}]
-    /**
-     * Change recipients
-     * @constructor
-     * @param {Array} array - Array containing objects of recipients to change {name: 'key', group: 'group', label: 'friendly name', status: 5}.
-     */
-
-    changeRecipients: function (array) {
-        return new Promise(async (resolve, reject) => {
-            sails.log.debug(`Recipients.changeRecipients called.`);
-            var moment = require('moment');
-            try {
-                await sails.helpers.asyncForEach(array, function (recipient, index) {
-                    return new Promise(async (resolve2, reject2) => {
-                        var criteria = {name: recipient.name, group: recipient.group, label: recipient.label, status: recipient.status};
-                        if (recipient.status !== 0)
-                            criteria.time = moment().toISOString();
-
-                            sails.log.silly(`Criteria: ${criteria}`);
-                        // Find or create the status record
-                        var record = await Recipients.findOrCreate({name: recipient.name}, criteria)
-                                .intercept((err) => {
-                                    return resolve2();
-                                });
-
-                        // Search to see if any changes are made to the status; we only want to update if there is a change.
-                        var updateIt = false;
-                        for (var key in criteria)
-                        {
-                            if (criteria.hasOwnProperty(key))
-                            {
-                                if (criteria[key] !== record[key])
-                                {
-                                    // We don't want to fetch() on time-only updates; this will flood websockets
-                                    if (!updateIt && key === 'time')
-                                    {
-                                        updateIt = 2;
-                                    } else {
-                                        updateIt = 1;
-                                    }
-                                }
-                            }
-                        }
-                        if (updateIt === 1)
-                        {
-                            sails.log.verbose(`Updating recipient ${recipient.name} and pushing to sockets via fetch.`);
-                            await Recipients.update({name: recipient.name}, criteria)
-                                    .intercept((err) => {
-                                        return reject(err);
-                                    })
-                                    .fetch();
-                        } else if (updateIt === 2) {
-                            sails.log.verbose(`Updating recipient ${recipient.name} without using fetch / pushing to sockets.`);
-                            await Recipients.update({name: recipient.name}, criteria)
-                                    .intercept((err) => {
-                                        return reject(err);
-                                    });
-                        }
-                        return resolve2();
-                    });
-                });
-                return resolve();
-            } catch (e) {
-                return reject(e);
-            }
-        });
-    },
+    sockets: {}, // For recipients connecting via sockets, we will pair the sockets with the Recipients.ID in the format: sockets[Recipients.ID] = [array, of, socket, IDs]
 
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
