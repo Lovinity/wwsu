@@ -260,6 +260,7 @@ This endpoint supports sockets under the "meta" event. However, the data sent is
             "state": 'unknown', // State of the WWSU system. Refer to the states section in meta
             "dj": '', // If someone is on the air, name of the host
             "track": '', // Currently playing track either in automation or manually logged
+			"genre": '', // Name of the genre or rotation currently being played, if any
             "trackstamp": null, // An ISO string used as a marker for when a manual track was logged. Clients displaying manual tracks should consider the track old if this is 10 or more minutes ago from now.
             "topic": '', // If the DJ specified a show topic, this is the topic.
             "stream": '', // Meta artist - title for the internet radio stream

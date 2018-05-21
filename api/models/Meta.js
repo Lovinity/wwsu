@@ -75,6 +75,7 @@ module.exports = {
         state: 'unknown', // State of the WWSU system
         dj: '', // If someone is on the air, name of the host
         track: '', // Currently playing track either in automation or manually logged
+        genre: '', // Name of the genre or rotation currently being played, if any
         trackstamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
         topic: '', // If the DJ specified a show topic, this is the topic.
         stream: '', // Meta for the internet radio stream

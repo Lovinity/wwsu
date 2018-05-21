@@ -18,7 +18,7 @@ module.exports = {
         arg: {
             type: 'ref',
             description: 'If the command takes an argument, arg is that argument.',
-            defaultsTo: null
+            defaultsTo: 0
         },
         timeout: {
             type: 'number',

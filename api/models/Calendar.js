@@ -1,4 +1,4 @@
-/* global Calendar, sails, Playlists */
+/* global Calendar, sails, Playlists, Meta, Genre */
 
 /**
  * Calendar.js
@@ -180,13 +180,14 @@ module.exports = {
                 //formatted.push(currentdate.format("YYYY-MM-DDTHH:mm:ssZ"));
                 //formatted.push(tomorrowdate.format("YYYY-MM-DDTHH:mm:ssZ"));
                 var colors = await calendar.colors.get();
+                var genreActive = false;
                 colors = colors.data.event;
                 var events = await calendar.events.list({
                     calendarId: sails.config.custom.GoogleAPI.calendarId,
                     timeMin: currentdate.toISOString(),
                     timeMax: nextWeekDate.toISOString(),
                     singleEvents: true
-                    //orderBy: 'startTime' does not work correctly, so ignoring as it's not a big deal if events are not in time order
+                            //orderBy: 'startTime' does not work correctly, so ignoring as it's not a big deal if events are not in time order
                 });
                 events = events.data.items;
                 sails.log.silly(events);
@@ -265,12 +266,23 @@ module.exports = {
                                 {
                                     await sails.helpers.playlists.start(event.summary.replace('Prerecord: ', ''), false, criteria.end, 1, criteria.description);
                                 }
-                                if (event.summary.startsWith("Genre: "))
+                            }
+                            if (event.summary.startsWith("Genre: "))
+                            {
+                                genreActive = true;
+                                if ((Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre' && Meta['A'].genre !== event.summary.replace('Genre: ', ''))))
                                 {
-                                    await sails.helpers.playlists.start(event.summary.replace('Genre: ', ''), false, criteria.end, 2);
+                                    await sails.helpers.genre.start(event.summary.replace('Genre: ', ''));
                                 }
                             }
                         }
+                    }
+                    
+                    // No genre events active right now? Switch back to regular automation.
+                    if (!genreActive && Meta['A'].state === 'automation_genre')
+                    {
+                        await Meta.changeMeta({genre: '', state: 'automation_on'});
+                        await sails.helpers.genre.start('Default');
                     }
 
                     // Destroy events in the database that no longer exist on the Google Calendar
