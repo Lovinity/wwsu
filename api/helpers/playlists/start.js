@@ -23,7 +23,7 @@ module.exports = {
             type: 'number',
             defaultsTo: 0,
             min: 0,
-            max: 2,
+            max: 1,
             description: '0 = standard playlist, 1 = prerecord'
         },
         topic: {

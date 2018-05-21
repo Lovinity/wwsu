@@ -61,6 +61,28 @@ User accounts are issued by WWSU. They are not available on request.
             {
             "err": "Email and password required."
 	        }
+## Calendar [/calendar]
+Calendar endpoints regard the Google Calendar events of WWSU Radio (such as show and genre schedules / programming).
+### /calendar/get [GET /calendar/get]
+Get an array of events for the next 7 days, in no particular order (client will need to do their own sorting).
+This endpoint supports sockets, uses the "calendar" event, and returns data in the structure defined in the websockets section.
+#### Response 200
+        [
+            {
+                "createdAt": "2018-05-15T22:31:34.381Z",
+                "updatedAt": "2018-05-15T22:31:34.381Z",
+                "ID": 1,
+                "unique": "578vfod7icjde4ikdbmtii9ren_20180516T080000Z", // Unique event ID as provided by Google Calendar
+                "title": "Genre: New Rock", // Title of the event
+                "description": "", // Description of the event, if provided (HTML is stripped from the Google Calendar API field)
+                "allDay": false, // True if this is an all day event
+                "start": "2018-05-16T04:00:00-04:00", // ISO string of the event start time
+                "end": "2018-05-16T08:00:00-04:00", // ISO string of the event end time
+                "color": "#5484ed", // Hexadecimal color representing this event
+                "push": false // Internal use only
+            },
+            ...
+        ]
 ## Directors [/directors]
 The Directors endpoints regard the directors of WWSU Radio.
 ### /directors/get [GET /directors/get]
@@ -163,28 +185,6 @@ Issue a new alert through the internal emergency alert system, originating from 
 ### /eas/test [POST /eas/test]
 Send out a test through the internal emergency alert system. **Requires authorization**
 #### Response 200 OK
-## Events [/events]
-Events endpoints regard the Google Calendar events of WWSU Radio (such as show and genre schedules / programming).
-### /events/get [GET /events/get]
-Get an array of events for the next 7 days, in no particular order (client will need to do their own sorting).
-This endpoint supports sockets, uses the "events" event, and returns data in the structure defined in the websockets section.
-#### Response 200
-        [
-            {
-                "createdAt": "2018-05-15T22:31:34.381Z",
-                "updatedAt": "2018-05-15T22:31:34.381Z",
-                "ID": 1,
-                "unique": "578vfod7icjde4ikdbmtii9ren_20180516T080000Z", // Unique event ID as provided by Google Calendar
-                "title": "Genre: New Rock", // Title of the event
-                "description": "", // Description of the event, if provided (HTML is stripped from the Google Calendar API field)
-                "allDay": false, // True if this is an all day event
-                "start": "2018-05-16T04:00:00-04:00", // ISO string of the event start time
-                "end": "2018-05-16T08:00:00-04:00", // ISO string of the event end time
-                "color": "#5484ed", // Hexadecimal color representing this event
-                "push": false // Internal use only
-            },
-            ...
-        ]
 ## Messages [/messages]
 Messages endpoints regard the internal WWSU messaging system.
 ### /messages/get [GET /messages/get]

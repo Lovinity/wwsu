@@ -1,8 +1,8 @@
-/* global Events, sails */
+/* global Calendar, sails */
 
 module.exports = {
 
-    friendlyName: 'Events / Get',
+    friendlyName: 'Calendar / Get',
 
     description: 'Get the events from WWSU Google Calendar for the next 7 days.',
 
@@ -11,18 +11,18 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller events/get called.');
-        var records = await Events.find()
+        sails.log.debug('Controller calendar/get called.');
+        var records = await Calendar.find()
                 .intercept((err) => {
                     sails.log.error(err);
                     exits.error();
                 });
-                sails.log.verbose(`Events records retrieved: ${records.length}`);
+                sails.log.verbose(`Calendar records retrieved: ${records.length}`);
                 sails.log.silly(records);
         if (this.req.isSocket)
         {
-            sails.sockets.join(this.req, 'events');
-            sails.log.verbose('Request was a socket. Joining events.');
+            sails.sockets.join(this.req, 'calendar');
+            sails.log.verbose('Request was a socket. Joining calendar.');
         }
         return exits.success(records);
     }

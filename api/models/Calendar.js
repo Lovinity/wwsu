@@ -1,7 +1,7 @@
-/* global Events, sails, Playlists */
+/* global Calendar, sails, Playlists */
 
 /**
- * Events.js
+ * Calendar.js
  *
  * @description :: Container containing Google Calendar events.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -161,7 +161,7 @@ module.exports = {
 
         authenticate()
                 .then((auth) => {
-                    Events.loadEvents(auth);
+                    Calendar.loadEvents(auth);
                 })
                 .catch(err => {
                     sails.log.error(err);
@@ -171,7 +171,7 @@ module.exports = {
 
     loadEvents: function (auth) {
         return new Promise(async (resolve, reject) => {
-            sails.log.verbose(`Events.loadEvents called`);
+            sails.log.verbose(`Calendar.loadEvents called`);
             try {
                 var {google} = require('googleapis');
                 var calendar = google.calendar({version: 'v3', auth: auth});
@@ -223,7 +223,7 @@ module.exports = {
                         }
                         sails.log.silly(`Event criteria: ${criteria}`);
                         // Find existing record of event. If does not exist, create it.
-                        Events.findOrCreate({unique: event.id}, criteria)
+                        Calendar.findOrCreate({unique: event.id}, criteria)
                                 .exec(function (err2, theEvent, wasCreated) {
                                     if (err2)
                                         return reject(err2);
@@ -245,7 +245,7 @@ module.exports = {
                                         }
                                         if (needsUpdate)
                                         {
-                                            Events.update({unique: event.id}, criteria).fetch().exec(function () {});
+                                            Calendar.update({unique: event.id}, criteria).fetch().exec(function () {});
                                         }
                                     }
 
@@ -274,7 +274,7 @@ module.exports = {
                     }
 
                     // Destroy events in the database that no longer exist on the Google Calendar
-                    await Events.destroy({unique: {'!=': eventIds}})
+                    await Calendar.destroy({unique: {'!=': eventIds}})
                             .intercept((err) => {
                             })
                             .fetch();
@@ -290,22 +290,22 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
-        sails.log.silly(`events socket: ${data}`);
-        sails.sockets.broadcast('events', 'events', data);
+        sails.log.silly(`calendar socket: ${data}`);
+        sails.sockets.broadcast('calendar', 'calendar', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
-        sails.log.silly(`events socket: ${data}`);
-        sails.sockets.broadcast('events', 'events', data);
+        sails.log.silly(`calendar socket: ${data}`);
+        sails.sockets.broadcast('calendar', 'calendar', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
-        sails.log.silly(`events socket: ${data}`);
-        sails.sockets.broadcast('events', 'events', data);
+        sails.log.silly(`calendar socket: ${data}`);
+        sails.sockets.broadcast('calendar', 'calendar', data);
         return proceed();
     }
 

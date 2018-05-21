@@ -18,7 +18,9 @@ module.exports = {
             maxLength: 50
         }
 
-    }
+    },
+    
+    active: null, // Used for keeping track of genre rotations so that Node doesn't keep re-triggering rotation changes in RadioDJ.
 
 };
 
