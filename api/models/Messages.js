@@ -46,9 +46,6 @@ module.exports = {
 
     },
 
-    // WORK ON THIS: replace use of this with the new Recipients model
-    visitors: {}, // Used to track which people are online for messaging
-
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         // Do not pass IP addresses through web sockets!

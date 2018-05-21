@@ -16,7 +16,7 @@ module.exports = {
             type: 'string'
         }
     },
-    active: {name: null, ID: 0, position: 0, tracks: [], end: null},
+    active: {name: null, ID: 0, position: 0, tracks: []},
     played: moment('2000-01-01').toDate(),
     queuing: false
 };

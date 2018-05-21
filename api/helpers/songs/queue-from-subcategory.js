@@ -1,6 +1,5 @@
 /* global Category, Subcategory, Songs, Statemeta, sails */
 
-// WORK ON THIS
 module.exports = {
 
     friendlyName: 'songs.queueFromSubcategory',
@@ -78,7 +77,7 @@ module.exports = {
                 });
 
                 // Find all applicable songs that are in the subcategory and load them in memory (have to do randomisation by Node, not by database)
-                var thesongs = await Songs.find({id_subcat: theids})
+                var thesongs = await Songs.find({id_subcat: theids, enabled: 1})
                         .intercept((err) => {
                             return exits.error(err);
                         });
@@ -105,7 +104,8 @@ module.exports = {
 
                     var queuedtracks = 0;
                     var queuedtracksa = [];
-                    Statemeta.automation.forEach(function (queuedtrack) {
+                    var tracks = await sails.helpers.rest.getQueue();
+                    tracks.forEach(function (queuedtrack) {
                         queuedtracksa.push(queuedtrack.ID);
                     });
 
@@ -116,7 +116,7 @@ module.exports = {
                             return new Promise(async (resolve, reject) => {
                                 try {
                                     // Check rotation rules first
-                                    var canplay = sails.helpers.songs.checkRotationRules(thesong.ID);
+                                    var canplay = await sails.helpers.songs.checkRotationRules(thesong.ID);
                                     if (canplay)
                                     {
                                         sails.log.verbose(`Queued ${thesong.ID}`);

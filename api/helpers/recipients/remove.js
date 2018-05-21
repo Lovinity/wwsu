@@ -66,7 +66,6 @@ module.exports = {
             {
                 // Remove the socket ID from the array of sockets in memory
                 _.remove(Recipients.sockets[recipient.ID], function (e) {
-                    sails.log.silly(`Removing socket ${e}`);
                     return e === inputs.socket;
                 });
 
