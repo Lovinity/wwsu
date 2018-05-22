@@ -1,4 +1,4 @@
-/* global sails */
+/* global sails, Requests, _ */
 
 module.exports = {
 
@@ -7,7 +7,11 @@ module.exports = {
     description: 'Remove all music-type tracks from the active RadioDJ queue.',
 
     inputs: {
-
+        keepRequests: {
+            type: 'boolean',
+            defaultsTo: false,
+            description: 'If true, we will not delete any tracks that are in the queue that were requested.'
+        }
     },
 
     fn: async function (inputs, exits) {
@@ -24,13 +28,17 @@ module.exports = {
                 // If the track is a music track, remove it
                 if (queue[loopposition].TrackType === 'Music' && queue[loopposition].Elapsed === 0 && queue[loopposition].ID !== 0)
                 {
-                    terminateloop = true;
-                    await sails.helpers.rest.cmd('RemovePlaylistTrack', loopposition - 1);
-                    
-                    // We have to re-execute the entire function again after each time we remove something so we can load the new queue in memory and have correct position numbers.
-                    setTimeout(function () {
-                        removetrack(cb);
-                    }, 100);
+                    // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
+                    if (!inputs.keepRequests || !_.includes(queue[loopposition].ID, Requests.pending))
+                    {
+                        terminateloop = true;
+                        await sails.helpers.rest.cmd('RemovePlaylistTrack', loopposition - 1);
+
+                        // We have to re-execute the entire function again after each time we remove something so we can load the new queue in memory and have correct position numbers.
+                        setTimeout(function () {
+                            removetrack(cb);
+                        }, 100);
+                    }
                 }
                 loopposition += 1;
             }

@@ -22,7 +22,7 @@ module.exports = {
         if (this.req.isSocket)
         {
             sails.sockets.join(this.req, 'status');
-            sails.log.verbose('Request was a socket. Joining status.')
+            sails.log.verbose('Request was a socket. Joining status.');
         }
         return exits.success(records);
     }

@@ -31,7 +31,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             var searchto = moment().subtract(1, 'hours').toDate(); // Get messages sent within the last hour
-            // First, grab data pertaining to the host that is retrieving messages
+            // First, grab data pertaining to the host that is retrieving messages (create the host record if it does not exist)
             var thehost = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: inputs.host})
                     .intercept((err) => {
                         return exits.error(err);
@@ -40,6 +40,7 @@ module.exports = {
 
             if (inputs.socket && inputs.socket !== null)
             {
+                // Consider the client as online in the recipients model
                 await sails.helpers.recipients.add(inputs.socket, inputs.host, 'computers', thehost.friendlyname);
             }
 

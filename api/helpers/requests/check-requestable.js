@@ -27,6 +27,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
 
         var d = moment().startOf('day');
+        
         // First, check to see if the client has already exceeded their requests for the day
         var requests = await Requests.find({userIP: inputs.IP, requested: {'>=': d}})
                 .intercept((err) => {
@@ -78,7 +79,7 @@ module.exports = {
                                 </div>`, type: 'inQueue'});
         }
 
-        // Check if the track exists in 
+
         var subcat = await Subcategory.findOne({id: record.id_subcat})
                 .intercept((err) => {
                     return exits.error(err);
@@ -93,6 +94,8 @@ module.exports = {
                 sails.log.silly(`Track category: ${parentcat}`);
         if (typeof parentcat === 'undefined')
             return exits.error(new Error('Unable to determine the track main category.'));
+        
+        // Check if the track exists in any of the sails.config.custom.musicCats.
         if (sails.config.custom.requests.musicCats.indexOf(parentcat.ID) === -1)
         {
             sails.log.verbose(`Track cannot be requested: Track is not a music track.`);
@@ -100,24 +103,6 @@ module.exports = {
                                             You cannot request a non-music track.
                                             </div>`, type: 'nonMusic'});
         }
-
-        // DEPRECATED: System should be designed not to mark requests as played until they actually play in RadioDJ.
-        /*
-         var inQueue = false;
-         Statemeta.automation.forEach(function (thetrack) {
-         if (thetrack.Artist == record.artist && thetrack.Title == record.title)
-         {
-         inQueue = true;
-         }
-         });
-         if (inQueue)
-         {
-         cb(false, `<div class="alert alert-warning" role="alert">
-         This track is already in the automation queue and pending to air.
-         </div>`, 'inQueue');
-         return null;
-         }
-         */
 
         // The rest of the checks are based off of track rotation rule settings saved in the database via RadioDJ
         var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']})

@@ -35,15 +35,20 @@ module.exports = {
         sails.log.debug('Helper messages.send called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
+            
+            // Filter profanity
             inputs.message = await sails.helpers.filterProfane(inputs.message);
             sails.log.silly(`Profanity filtered. New messahe: ${inputs.message}`);
-            // First, grab data pertaining to the host that is retrieving messages
+            
+            // Grab data pertaining to the host that is retrieving messages. Create if not exists.
             var stuff = await Hosts.findOrCreate({host: inputs.from}, {host: inputs.from, friendlyname: inputs.from})
                     .intercept((err) => {
                         return exits.error(err);
                     });
             sails.log.silly(`Host: ${stuff}`);
             inputs.from_friendly = stuff.friendlyname;
+            
+            // Create the message
             var records = await Messages.create(inputs).fetch()
                     .intercept((err) => {
                         return exits.error(err);

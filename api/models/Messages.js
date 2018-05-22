@@ -63,7 +63,7 @@ module.exports = {
         }
 
         // If message was a private website message, send to the respective client's socket
-        if (newlyCreatedRecord.from.startsWith("website-"))
+        if (newlyCreatedRecord.from.startsWith("website-") && newlyCreatedRecord.to === 'DJ-private')
         {
             sails.log.silly(`messages socket for messages-${newlyCreatedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${newlyCreatedRecord.from}`, 'messages', data);
@@ -93,7 +93,7 @@ module.exports = {
         }
 
         // If message was a private website message, send to the respective client's socket
-        if (updatedRecord.from.startsWith("website-"))
+        if (updatedRecord.from.startsWith("website-") && updatedRecord.to === 'DJ-private')
         {
             sails.log.silly(`messages socket for messages-${updatedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${updatedRecord.from}`, 'messages', data);
@@ -123,7 +123,7 @@ module.exports = {
         }
 
         // If message was a private website message, send to the respective client's socket
-        if (destroyedRecord.from.startsWith("website-"))
+        if (destroyedRecord.from.startsWith("website-") && destroyedRecord.to === 'DJ-private')
         {
             sails.log.silly(`messages socket for messages-${destroyedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${destroyedRecord.from}`, 'messages', data);

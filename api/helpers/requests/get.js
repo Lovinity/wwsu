@@ -29,6 +29,8 @@ module.exports = {
             return exits.success([]);
         } else {
             var thereturn = [];
+            
+            // Get artist and title of each requested track
             await sails.helpers.asyncForEach(records, function (record) {
                 return new Promise(async (resolve2, reject2) => {
                     var temp = record;

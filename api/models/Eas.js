@@ -167,7 +167,7 @@ module.exports = {
         "Winter Weather Advisory": "#7B68EE"
     },
 
-    activeCAPS: [], // Array of active NWS alerts, cleared at each check, to help determine maintenance / cleaning up of alerts.
+    activeCAPS: [], // Array of active NWS alerts, cleared at each check, to help determine maintenance / cleaning up of NWS alerts.
 
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {

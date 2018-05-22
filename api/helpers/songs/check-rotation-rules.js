@@ -1,4 +1,4 @@
-/* global Songs, Settings */
+/* global Songs, Settings, sails */
 
 var moment = require("moment");
 require("moment-duration-format");
@@ -20,6 +20,8 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper songs.checkRotationRules called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
+
+        // Find the track
         var record = await Songs.findOne({ID: inputs.ID})
                 .intercept((err) => {
                     return exits.error(err);
@@ -28,11 +30,12 @@ module.exports = {
         if (!record || record === null)
             return exits.error(new Error('Provided Song ID was not found.'));
 
+        // Get rotation rule settings as saved in the database by RadioDJ.
         var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']})
                 .intercept((err) => {
                     return exits.error(err);
                 });
-                sails.log.silly(`Rotation settings: ${thesettings}`);
+        sails.log.silly(`Rotation settings: ${thesettings}`);
         var rotationRules = {};
         thesettings.forEach(function (thesetting) {
             rotationRules[thesetting.setting] = thesetting.value;

@@ -29,7 +29,7 @@ module.exports = {
             try {
                 sails.log.silly(`Calling iteration ${index}`);
                 var breakIt = await inputs.callback(inputs.array[index], index, inputs.array);
-                if (breakIt)
+                if (breakIt) // If a loop iteration resolves with true, break the forEach loop.
                 {
                     sails.log.silly(`BREAKING as per resolve(true).`);
                     break;

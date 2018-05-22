@@ -34,13 +34,15 @@ module.exports = {
                         return new Promise(async (resolve2, reject2) => {
                             try {
                                 sails.log.silly(entry);
+                                // Skip any entries that do not have an ID or do not have a status of "Actual"; they're not real alerts.
                                 if (typeof entry['id'] !== 'undefined' && typeof entry['cap:status'] !== 'undefined' && entry['cap:status'][0] === 'Actual')
-                                { // Skip any entries that do not have an ID or do not have a status of "Actual"; they're not real alerts.
+                                {
+                                    // Skip expired alerts
                                     if (moment().isBefore(moment(entry['cap:expires'][0])))
                                     {
                                         sails.log.verbose(`Processing ${index}.`);
                                         var color = "#787878";
-                                        if (entry['cap:event'][0] in Eas.nwsalerts) { // Is the alert in our array of alerts to alert for?
+                                        if (entry['cap:event'][0] in Eas.nwsalerts) { // Is the alert in our array of alerts to alert for? Get its color if so.
                                             color = Eas.nwsalerts[entry['cap:event'][0]];
                                         } else {
                                             return reject2();
@@ -52,7 +54,7 @@ module.exports = {
                                     }
                                 } else {
                                     sails.log.verbose(`Skipped ${index} because it was not a valid alert.`);
-                                }
+                                }  
                             } catch (e) {
                                 sails.log.error(e);
                                 return reject2();

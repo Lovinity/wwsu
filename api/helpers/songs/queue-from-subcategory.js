@@ -83,6 +83,7 @@ module.exports = {
                         });
                 sails.log.verbose(`Songs records retrieved: ${thesongs.length}`);
                 sails.log.silly(thesongs);
+                
                 // If duration is provided, remove songs that fail the duration check
                 if (inputs.duration !== null && thesongs.length > 0)
                 {

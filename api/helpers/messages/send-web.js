@@ -39,7 +39,6 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.sendWeb called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
-        var searchto = moment().subtract(1, 'minutes').toDate();
 
         // Filter profanity
         try {
@@ -55,13 +54,17 @@ module.exports = {
             inputs.nickname = theid;
         }
         var records = null;
+
+        // Check how many messages were sent by this host within the last minute. If any are returned, the host is not allowed to send messages yet.
+        var searchto = moment().subtract(1, 'minutes').toDate();
         var check = await Messages.find({from_IP: inputs.from_IP, createdAt: {'>': searchto}})
                 .intercept((err) => {
                     return exits.error(err);
                 });
-                sails.log.verbose(`IP address sent ${check.length} messages within the last minute.`);
+        sails.log.verbose(`IP address sent ${check.length} messages within the last minute.`);
         if (check.length > 0)
             return exits.error(new Error('Website visitors are only allowed to send one message per minute.'));
+        
         // Create and broadcast the message, depending on whether or not it was private
         if (inputs.private)
         {

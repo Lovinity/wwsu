@@ -19,7 +19,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.getWeb called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
-        var searchto = moment().subtract(1, 'hours').toDate();
+        var searchto = moment().subtract(1, 'hours').toDate(); // Do not return messages more than 1 hour old
         var records = await Messages.find(
                 {
                     status: 'active',

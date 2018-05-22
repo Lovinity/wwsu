@@ -97,7 +97,7 @@ module.exports = {
                     criteria.information = inputs.information;
 
                 sails.log.silly(`Criteria: ${criteria}`);
-                // Detect any changes in the alert. If a change is detected, we will push it to clients.
+                // Detect any changes in the alert. If a change is detected, we will do a database update.
                 var updateIt = false;
                 for (var key in criteria)
                 {
@@ -133,7 +133,7 @@ module.exports = {
                     information: inputs.information || ''
                 };
 
-                // If this alert came from NWS, we need to GET a separate URL for alert information.
+                // If this alert came from NWS, we need to GET a separate URL for alert information before we create the record.
                 if (inputs.source === 'NWS')
                 {
                     sails.log.verbose('Alert is from NWS source. Retrieving alert information.');

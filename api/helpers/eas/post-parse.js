@@ -27,7 +27,7 @@ module.exports = {
         await sails.helpers.asyncForEach(records, (record, index) => {
             return new Promise(async (resolve2) => {
                 
-                // Remove NWS alerts no longer listed in the CAPS; we assume those alerts were expired. Notify clients of the alert being removed.
+                // Remove NWS alerts no longer listed in the CAPS; we assume those alerts were expired.
                 if (record.source === 'NWS' && Eas.activeCAPS.indexOf(record.reference) === -1)
                 {
                     sails.log.verbose(`Record ${record.ID} is to be deleted. It no longer exists in NWS CAPS.`);

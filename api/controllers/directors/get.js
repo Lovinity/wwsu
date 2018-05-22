@@ -29,17 +29,21 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller directors/get called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
+        
+        // If a username was specified, find only that director. Otherwise, get all directors.
         var query = {};
         if (inputs.username !== null)
             query = {login: inputs.username};
+        
         // See if the specified director is in memory. If not, return 404 not found.
         var records = await Directors.find(query)
                 .intercept((err) => {
                     sails.log.error(err);
                     return exits.error();
                 });
-                sails.log.verbose(`Director records retrieved: ${records.length}`);
-                sails.log.silly(records);
+                
+        sails.log.verbose(`Director records retrieved: ${records.length}`);
+        sails.log.silly(records);
         if (!records || records.length < 1)
         {
             return exits.notFound();
