@@ -360,6 +360,80 @@ Immediately queue or play a request. If in automation, will queue it to the top.
 | ID | number (required; the ID of the request (NOT the song ID!) to queue now) |
 #### Response 200 boolean
 true if the track was queued, false if the track was not queued. A track may fail to queue if it is already in the queue, or it fails track rotation rules.
+## Songs [/songs]
+Songs endpoints regard the available songs/tracks in the automation system.
+### /songs/get [GET /songs/get]
+Get an array of tracks from the automation system. This was designed to be used with the track request system.
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (If only getting a specific song, provide the song's ID number. If none provided, will return requestable songs.) |
+| limit | number (Maximum number of songs to return. Defaults to 25.) |
+| offset | number (If provided, songs with an ID number less than or equal to the offset will not be returned.) |
+#### Response 200
+        [
+			{
+				"createdAt": "2018-05-15T22:31:34.381Z",
+				"updatedAt": "2018-05-15T22:31:34.381Z",
+				"ID": 1,
+				"path": "M:\music\temp\temp.mp3", // The local filepath to the song.
+				"enabled": 1, // 1 = enabled, 0 = disabled, -1 = invalid track, or track not found in the given path.
+				"date_added": "2018-05-15T22:31:34.381Z", // The date in which the track was added to RadioDJ
+				"date_modified": "2018-05-15T22:31:34.381Z", // The date in which the track was modified in RadioDJ
+				"date_played": "2018-05-15T22:31:34.381Z", // The date in which this track was last played
+				"artist_played": "2018-05-15T22:31:34.381Z", // The date in which a track by the same artist was last played
+				"album_played": "2018-05-15T22:31:34.381Z", // The date in which a track from the same album last played
+				"title_added": "2018-05-15T22:31:34.381Z", // The date in which a song with the same title last played
+				"count_played": 1, // UNRELIABLE RadioDJ count of the number of times the track was played; please use the "spins" object for more reliable count
+				"play_limit": 0, // If greater than 0, this track will expire once it has played this number of times
+				"limit_action": 1, // Internal RadioDJ directive indicating what happens to this track once it expires
+				"start_date": "2018-05-15T22:31:34.381Z", // Date in which track becomes active
+				"date_added": "2018-05-15T22:31:34.381Z", // Date in which track becomes expired. ISO of 2002-01-01 00:00:01 is no expiration
+				"startEvent": -1, // RadioDJ directive
+				"endEvent": -1, // RadioDJ directive
+				"song_type": 0, // RadioDJ directive indicating the type of track. 0 is a music track.
+				"id_subcat": 33, // ID of the track's subcategory
+				"id_genre": 2, // ID of the track's genre
+				"weight": 50.0, // Float indicating how heavy this track is for priority rotation rules
+				"duration": 320.12349, // The track's current duration is this number of seconds
+				"original_duration": 0.00000, // If greater than 0, this indicates the track's duration when it was first added to RadioDJ.
+				"cue_times": "&sta=0.1059410430839&xta=485.516553287982&end=494.661632653061&fin=0&fou=9.14507936507937", // RadioDJ cue markers
+				"precise_cue": 0, // If 1, applications are encouraged to use exact cue times.
+				"fade_type": 0, // RadioDJ directive
+				"start_type": 0, // RadioDJ directive
+				"end_type": 0, // RadioDJ directive
+				"mix_type": 0, // RadioDJ directive
+				"mood": "", // A string describing the mood of this track
+				"gender": "", // A string describing the genders involved in the track's vocals
+				"lang": "", // A string describing the languages involved in the track's lyrics
+				"rating": 0, // A 5-star rating for this track given by WWSU
+				"loudness": 1.00, // A factor by which the track's volume is to be played
+				"overlay": 0, // If 1, this is a track to be played on top of other tracks, such as voice tracking.
+				"artist": "George Carlin", // Artist of the track
+				"original_artist": "George Carlin", // When an artist is changed, this is the artist that was originally set when imported into RadioDJ.
+				"title": "Seven dirty words of television", // Title of the track
+				"album": "", // The track comes from this specified album
+				"composer": "", // The name of the person who composed this track
+				"label": "", // The record label
+				"year": "2001", // Year of the track
+				"track_no": 0, // Usually used to indicate the track number from a CD, record, etc.
+				"disc_no": 0, // Usually used to indicate the disc from a multi-disc series
+				"publisher": "", // Name of the entity responsible for publishing the track
+				"copyright": "", // Track copyright information
+				"isrc": "", // ISRC number
+				"bpm": 120.0, // A float indicating the detected BPM of the track
+				"comments": "", // Various comments about this track as added by WWSU
+				"sweepers": "", // RadioDJ directive indicating which sweepers belong to this track
+				"image": "", // Name of the image file (from RadioDJ's album cover photo)
+				"buy_link": "", // URL to purchase this track
+				"url1": "", // Misc URL
+				"url2": "", // Misc URL
+				"tdate_played": "2018-05-15T22:31:34.381Z" // internal
+				"tartist_played": "2018-05-15T22:31:34.381Z" // Internal,
+				"original_metadata": 0 // If 1, clients should use original metadata, not current metadata.
+			},
+			...
+        ]
 ## Status [/status]
 Status endpoints refer to the status of WWSU subsystems.
 ### /status/get [GET /status/get]
