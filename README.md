@@ -430,7 +430,10 @@ Get an array of tracks from the automation system. This was designed to be used 
 				"url2": "", // Misc URL
 				"tdate_played": "2018-05-15T22:31:34.381Z" // internal
 				"tartist_played": "2018-05-15T22:31:34.381Z" // Internal,
-				"original_metadata": 0 // If 1, clients should use original metadata, not current metadata.
+				"original_metadata": 0, // If 1, clients should use original metadata, not current metadata.
+				"category": "Podcasts >> Best of George Carlin", // String containing the name of the category and subcategory of the track
+				"request": {"requestable": false, "HTML": "<div class="alert alert-warning" role="alert">You cannot request a non-music track.</div>", "listDiv": "info", "type": "nonMusic"}, // Request object. If requestable is true, the track can be requested. HTML contains a bit of HTML for the request section, such as a form if the track can be requested. listDiv is the color class to use for color coding this track on a list. Type is a short phrase describing the reason for not being able to request the track.
+				"spins": {7: 1, 30: 4, "YTD": 12, 365: 28} // Spin counts. Keys... 7 = last 7 days, 30 = last 30 days, YTD = Since January 1, 365: last year.
 			},
 			...
         ]
