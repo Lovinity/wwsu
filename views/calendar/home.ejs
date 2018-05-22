@@ -1,0 +1,249 @@
+// WORK ON THIS
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>if (typeof module === 'object') {
+                window.module = module;
+                module = undefined;
+            }</script> 
+<link rel="stylesheet" href="../../../bootstrap/css/bootstrap.min.css">
+<script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
+<link rel='stylesheet' href='../../../calendar/fullcalendar.css'/>
+<link rel='stylesheet' href='../../../css/jquery-ui.min.css'/>
+<link href="https://fonts.googleapis.com/css?family=PT+Sans:400,400i,700,700i" rel="stylesheet">
+<script src="../../js/jquery-3.3.1.min.js"></script>
+<script src="../../js/jquery-ui.min.js"></script>
+<script src="../../js/moment.min.js"></script>
+<script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src='../../calendar/fullcalendar.js'></script>
+<script>
+</script>
+
+        <meta charset="UTF-8">
+<title>WWSU Week Calendar</title>
+<meta name="Description" content="See what is coming up for the next week on WWSU Radio.">
+        <style>
+            body
+            {
+                overflow-x: hidden;
+            }
+        </style>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    </head>
+    <body >
+    <div id="mainPage" aria-hidden="false">
+    <div id='calendar'></div>
+    </div>
+<div class="modal fade" id="dialog" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-describedby="dialogDesc" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dialogTitle">Title unavailable</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="dialogDesc">
+        Description unavailable
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+    </body>
+    <script>if (window.module)
+                module = window.module;</script>
+    <script>
+
+var focusableElementsString = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+var focusedElementBeforeModal;
+var pwidth = null;
+function adaptScreen(width)
+{
+        if (width >= 1024 && (pwidth < 1024 || pwidth === null))
+        {
+        $('#calendar').fullCalendar('changeView', 'agendaWeek');
+        } else if (width < 1024 && (pwidth >= 1024 || pwidth === null)) {
+        $('#calendar').fullCalendar('changeView', 'agendaThreeDay');
+        }
+pwidth = width;
+}
+function trapEscapeKey(obj, evt) {
+
+    // if escape pressed
+    if (evt.which == 27) {
+
+        // get list of all children elements in given object
+        var o = obj.find('*');
+
+        // get list of focusable items
+        var cancelElement;
+        cancelElement = o.filter("#cancel")
+
+        // close the modal window
+        cancelElement.click();
+        evt.preventDefault();
+    }
+
+}
+function trapTabKey(obj, evt) {
+
+    // if tab or shift-tab pressed
+    if (evt.which == 9) {
+
+        // get list of all children elements in given object
+        var o = obj.find('*');
+
+        // get list of focusable items
+        var focusableItems;
+        focusableItems = o.filter(focusableElementsString).filter(':visible')
+
+        // get currently focused item
+        var focusedItem;
+        focusedItem = jQuery(':focus');
+
+        // get the number of focusable items
+        var numberOfFocusableItems;
+        numberOfFocusableItems = focusableItems.length
+
+        // get the index of the currently focused item
+        var focusedItemIndex;
+        focusedItemIndex = focusableItems.index(focusedItem);
+
+        if (evt.shiftKey) {
+            //back tab
+            // if focused on first item and user preses back-tab, go to the last focusable item
+            if (focusedItemIndex == 0) {
+                focusableItems.get(numberOfFocusableItems - 1).focus();
+                evt.preventDefault();
+            }
+
+        } else {
+            //forward tab
+            // if focused on the last item and user preses tab, go to the first focusable item
+            if (focusedItemIndex == numberOfFocusableItems - 1) {
+                focusableItems.get(0).focus();
+                evt.preventDefault();
+            }
+        }
+    }
+
+}
+
+function setInitialFocusModal(obj) {
+    // get list of all children elements in given object
+    var o = obj.find('*');
+
+    // set focus to first focusable item
+    var focusableItems;
+    focusableItems = o.filter(focusableElementsString).filter(':visible').first().focus();
+
+}
+function setFocusToFirstItemInModal(obj){
+    // get list of all children elements in given object
+    var o = obj.find('*');
+
+    // set the focus to the first keyboard focusable item
+    o.filter(focusableElementsString).filter(':visible').first().focus();
+}
+$(document).ready(function() {
+
+$('#dialog').on('shown.bs.modal', function () {
+  $('#dialog').trigger('focus');
+    jQuery('body').on('focusin','#mainPage',function() {
+        setFocusToFirstItemInModal(jQuery('#dialog'));
+    });
+    focusedElementBeforeModal = jQuery(':focus');
+    setFocusToFirstItemInModal($('#dialog'));
+})
+
+$('#dialog').on('hidden.bs.modal', function (e) {
+    jQuery('body').off('focusin','#mainPage');
+    focusedElementBeforeModal.focus();
+})
+
+    jQuery('#dialog').keydown(function(event) {
+        trapTabKey($(this), event);
+    })
+
+    jQuery('#dialog').keydown(function(event) {
+        trapEscapeKey($(this), event);
+    })
+
+  // page is now ready, initialize the calendar...
+
+  $('#calendar').fullCalendar({
+  header: {
+    left: '',
+    center: 'listDay,listWeek,agendaThreeDay,agendaWeek',
+    right: ''
+  },
+    footer: false,
+    themeSystem: 'bootstrap4',
+    defaultView: 'agendaWeek',
+    slotEventOverlap: false,
+    slotDuration: '01:00:00',
+    nowIndicator: true,
+    firstDay: moment().format('d'),
+    eventSources: [
+      '../../stateevents/getcalendar'
+    ],
+eventClick: function(event) {
+        // opens events in a popup window
+        $('#dialogTitle').html(event.title);
+        $('#dialogDesc').html(`<div class="container">
+  <div class="row">
+    <div class="col-sm">
+      <strong>Title:</strong>
+    </div>
+    <div class="col">
+      ${event.title}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <strong>Description:</strong>
+    </div>
+    <div class="col">
+      ${event.description}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm">
+      <strong>Start:</strong>
+    </div>
+    <div class="col">
+      ${moment(event.start).format('LLLL')}
+    </div>
+  </div>
+<div class="row">
+    <div class="col-sm">
+      <strong>End:</strong>
+    </div>
+    <div class="col">
+      ${moment(event.end).format('LLLL')}
+    </div>
+  </div>
+</div>`);
+$('#dialog').modal('show');
+        return false;
+      },
+  views: {
+    agendaThreeDay: {
+      type: 'agenda',
+      duration: { days: 3 },
+      buttonText: '3 days'
+    }
+  },
+    timezone: 'America/New_York',
+  });
+  adaptScreen($(this).width());
+$(window).on('resize', function(e) {
+  adaptScreen($(this).width());
+    });
+});
+    </script>
+</html>
+
