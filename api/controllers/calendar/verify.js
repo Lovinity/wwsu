@@ -141,7 +141,7 @@ module.exports = {
                             var summary = event.title.replace('Sports: ', '');
 
                             // Ensure the name of the sport is one that is implemented in the system.
-                            if ([`Men's Basketball`, `Women's Basketball`, `Men's Baseball`, `Women's Softball`, `Men's Soccer`, `Women's Soccer`, `Men's Tennis`, `Women's Tennis`, `Men's Volleyball`, `Women's Volleyball`, `Men's Football`, `Women's Football`].indexOf(summary))
+                            if (sails.config.custom.sports.indexOf(summary))
                             {
                                 retData[index].title = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`;
                                 type = 'Valid';

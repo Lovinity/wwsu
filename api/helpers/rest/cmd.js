@@ -35,7 +35,7 @@ module.exports = {
         if (typeof inputs.arg !== 'undefined' && inputs.arg !== null)
             endstring = '&arg=' + inputs.arg;
         // Query REST
-        needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.restAuth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})
+        needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})
                 .then(async function (resp) {
                     try {
                         var json2 = parser.toJson(resp.body);

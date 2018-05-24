@@ -30,11 +30,15 @@ module.exports.bootstrap = async function (done) {
     // Don't forget to trigger `done()` when this bootstrap function's logic is finished.
     // (otherwise your server will never lift, since it's waiting on the bootstrap)
 
-    // Load default status template into memory
+    // Load default status template into memory. Add radioDJ instances to template as well.
+    sails.config.custom.radiodjs.forEach(function(radiodj) {
+            Status.template.push({name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: 2, data: 'This RadioDJ has not reported online since initialization.', time: null});
+    });
     await Status.createEach(Status.template)
             .intercept((err) => {
                 return done(err);
             });
+            
 
     // Load internal recipients into memory
     await Recipients.createEach(Recipients.template)

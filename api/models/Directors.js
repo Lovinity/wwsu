@@ -58,11 +58,11 @@ module.exports = {
             // Get users from OpenProject via API
             var req = {
                 headers: {
-                    Authorization: 'Basic ' + sails.config.custom.pmAuth,
+                    Authorization: 'Basic ' + sails.config.custom.pm.auth,
                     'Content-Type': 'application/json'
                 }
             };
-            needle('get', sails.config.custom.pmHost + sails.config.custom.pmPath + 'users', {}, req)
+            needle('get', sails.config.custom.pm.host + sails.config.custom.pm.path + 'users', {}, req)
                     .then(async function (resp) {
                         // Because this code is used twice, condense it into a variable
                         var endFunction = async function () {

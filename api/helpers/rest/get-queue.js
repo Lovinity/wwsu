@@ -15,7 +15,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper rest.getQueue called.');
-        needle('get', Meta['A'].radiodj + '/p?auth=' + sails.config.custom.restAuth)
+        needle('get', Meta['A'].radiodj + '/p?auth=' + sails.config.custom.rest.auth)
                 .then(async function (resp) {
                     try {
                         var queue = parser.toJson(resp.body);
