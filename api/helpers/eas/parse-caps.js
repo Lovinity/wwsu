@@ -51,8 +51,8 @@ module.exports = {
                             {
                                 sails.log.verbose(`Processing ${index}.`);
                                 var color = "#787878";
-                                if (alert['cap:event'] in Eas.nwsalerts) { // Is the alert in our array of alerts to alert for? Get its color if so.
-                                    color = Eas.nwsalerts[alert['cap:event']];
+                                if (alert['cap:event'] in sails.config.custom.EAS.alerts) { // Is the alert in our array of alerts to alert for? Get its color if so.
+                                    color = sails.config.custom.EAS.alerts[alert['cap:event']];
                                 } else {
                                     return resolve2(false);
                                 }

@@ -48,7 +48,16 @@ module.exports.bootstrap = async function (done) {
 
     // Load directors into memory
     await Directors.updateDirectors(true);
-
+    
+    // Load IDs of music categories into config
+    var records = await Category.find({name: sails.config.custom.requests.musicCats})
+            .intercept((err) => {
+                return done(err);
+            });
+        records.forEach(function(record) {
+            sails.config.custom.requests.musicCatsN.push(record.ID);
+        });
+            
     return done();
 
 };

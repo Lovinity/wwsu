@@ -95,8 +95,8 @@ module.exports = {
         if (typeof parentcat === 'undefined')
             return exits.error(new Error('Unable to determine the track main category.'));
         
-        // Check if the track exists in any of the sails.config.custom.musicCats.
-        if (sails.config.custom.requests.musicCats.indexOf(parentcat.ID) === -1)
+        // Check if the track exists in any of the sails.config.custom.musicCatsN.
+        if (sails.config.custom.requests.musicCatsN.indexOf(parentcat.ID) === -1)
         {
             sails.log.verbose(`Track cannot be requested: Track is not a music track.`);
             return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
