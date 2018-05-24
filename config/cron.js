@@ -60,7 +60,11 @@ module.exports.cron = {
 
             // If all counties succeeded, mark EAS-internal as operational
             if (complete >= sails.config.custom.EAS.NWSX.length)
-                Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', status: 5}]);
+            {
+                Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: 'All EAS NWS CAPS are operational.', status: 5}]);
+            } else {
+                Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: `${complete} out of ${sails.config.custom.EAS.NWSX.length} EAS NWS CAPS are operational.`, status: 3}]);
+            }
 
             // Finish up
             await sails.helpers.eas.postParse();

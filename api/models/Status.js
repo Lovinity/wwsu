@@ -34,6 +34,10 @@ module.exports = {
             max: 5,
             defaultsTo: 4
         },
+        
+        data: {
+            type: 'string'
+        },
 
         // websocket API note: Do not use time in client code; changes to time will not be pushed in sockets to avoid unnecessary data transfer.
         time: {
@@ -44,16 +48,16 @@ module.exports = {
 
     // The template are subsystems that should be added into memory upon lifting of the Sails app via bootstrap().
     template: [
-        {name: 'database', label: 'database', status: 1, time: null},
-        {name: 'display-public', label: 'Display (Public)', status: 3, time: null},
-        {name: 'display-internal', label: 'Display (Internal)', status: 3, time: null},
-        {name: 'website', label: 'Website', status: 2, time: null},
-        {name: 'stream-public', label: 'Radio Stream', status: 2, time: null},
-        {name: 'stream-remote', label: 'Remote Stream', status: 4, time: null},
-        {name: 'silence', label: 'Silence', status: 5, time: null},
-        {name: 'EAS-internal', label: 'Internal EAS', status: 3, time: null},
-        {name: 'openproject', label: 'OpenProject', status: 2, time: null},
-        {name: 'server', label: 'Server', status: 2, time: null}
+        {name: 'database', label: 'database', status: 1, data: 'No successful database queries since initialization.', time: null},
+        {name: 'display-public', label: 'Display (Public)', data: 'Public display sign has not re-connected since initialization.', status: 3, time: null},
+        {name: 'display-internal', label: 'Display (Internal)', data: 'Internal display sign has not re-connected since initialization.', status: 3, time: null},
+        {name: 'website', label: 'Website', data: 'No connection to wwsu1069.org could be made yet since initialization.', status: 2, time: null},
+        {name: 'stream-public', label: 'Radio Stream', data: 'Public radio stream has not reported online since initialization.', status: 2, time: null},
+        {name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream for remote broadcasts has not reported online since initialization.', status: 4, time: null},
+        {name: 'silence', label: 'Silence', data: 'The silence detection system has not reported silence since initialization.', status: 5, time: null},
+        {name: 'EAS-internal', label: 'EAS NWS CAPS', data: 'No successful connection to all EAS NWS CAPS has been made yet since initialization.', status: 3, time: null},
+        {name: 'openproject', label: 'OpenProject', data: 'No successful connection to OpenProject since initialization.', status: 2, time: null},
+        {name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 2, time: null}
     ],
 
     /**
