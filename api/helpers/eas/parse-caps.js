@@ -15,9 +15,9 @@ module.exports = {
             description: 'The CAPS body applies to the specified county.'
         },
         body: {
-            type: 'string',
+            type: 'ref',
             required: true,
-            description: 'XML formatted CAPS body to parse.'
+            description: 'An object returned by the needle library containing the CAPS data.'
         }
     },
 
@@ -25,46 +25,55 @@ module.exports = {
         sails.log.debug('Helper eas.parseCaps called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
-            parseString(inputs.body, async function (err, result) { // Response is in XML. We need to convert to JSON.
-                if (err)
-                {
-                    return exits.error(err);
-                } else {
-                    await sails.helpers.asyncForEach(result.feed.entry, function (entry, index) {
-                        return new Promise(async (resolve2, reject2) => {
-                            try {
-                                sails.log.silly(entry);
-                                // Skip any entries that do not have an ID or do not have a status of "Actual"; they're not real alerts.
-                                if (typeof entry['id'] !== 'undefined' && typeof entry['cap:status'] !== 'undefined' && entry['cap:status'][0] === 'Actual')
-                                {
-                                    // Skip expired alerts
-                                    if (moment().isBefore(moment(entry['cap:expires'][0])))
-                                    {
-                                        sails.log.verbose(`Processing ${index}.`);
-                                        var color = "#787878";
-                                        if (entry['cap:event'][0] in Eas.nwsalerts) { // Is the alert in our array of alerts to alert for? Get its color if so.
-                                            color = Eas.nwsalerts[entry['cap:event'][0]];
-                                        } else {
-                                            return reject2();
-                                        }
-                                        await sails.helpers.eas.addAlert(entry['id'][0], 'NWS', inputs.county, entry['cap:event'][0], entry['cap:severity'][0], moment(entry['cap:effective'][0]).toISOString(), moment(entry['cap:expires'][0]).toISOString(), color);
-                                        Eas.activeCAPS.push(entry['id'][0]);
-                                    } else {
-                                        sails.log.verbose(`Skipped ${index} because it is expired.`);
-                                    }
-                                } else {
-                                    sails.log.verbose(`Skipped ${index} because it was not a valid alert.`);
-                                }  
-                            } catch (e) {
-                                sails.log.error(e);
-                                return reject2();
-                            }
+            await sails.helpers.asyncForEach(inputs.body.children, function (entry, index) {
+                return new Promise(async (resolve2, reject2) => {
+                    try {
+
+                        sails.log.silly(entry);
+
+                        // Skip non-entries
+                        if (typeof entry.name === 'undefined' || entry.name !== 'entry')
                             return resolve2(false);
+
+                        var alert = {};
+
+                        // Parse field information into the alert variable
+                        entry.children.forEach(function (entry2)
+                        {
+                            alert[entry2.name] = entry2.value;
                         });
-                    });
-                    return exits.success();
-                }
+
+                        // Skip any entries that do not have an ID or do not have a status of "Actual"; they're not real alerts.
+                        if (typeof alert['id'] !== 'undefined' && typeof alert['cap:status'] !== 'undefined' && alert['cap:status'] === 'Actual')
+                        {
+                            // Skip expired alerts
+                            if (moment().isBefore(moment(alert['cap:expires'])))
+                            {
+                                sails.log.verbose(`Processing ${index}.`);
+                                var color = "#787878";
+                                if (alert['cap:event'] in Eas.nwsalerts) { // Is the alert in our array of alerts to alert for? Get its color if so.
+                                    color = Eas.nwsalerts[alert['cap:event']];
+                                } else {
+                                    return resolve2(false);
+                                }
+                                await sails.helpers.eas.addAlert(alert['id'], 'NWS', inputs.county, alert['cap:event'], alert['cap:severity'], moment(alert['cap:effective']).toISOString(), moment(alert['cap:expires']).toISOString(), color);
+                                Eas.activeCAPS.push(alert['id']);
+                            } else {
+                                sails.log.verbose(`Skipped ${index} because it is expired.`);
+                            }
+                        } else {
+                            sails.log.verbose(`Skipped ${index} because it was not a valid alert.`);
+                        }
+                    } catch (e) {
+                        sails.log.error(e);
+                        return reject2();
+                    }
+                    return resolve2(false);
+                });
             });
+            return exits.success();
+            //}
+            // });
         } catch (e) {
             return exits.error(e);
         }

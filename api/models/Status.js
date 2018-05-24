@@ -17,7 +17,7 @@ module.exports = {
 
         ID: {
             type: 'number',
-            autoIncrement: true
+            autoIncrement: true,
         },
 
         name: {

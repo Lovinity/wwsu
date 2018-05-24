@@ -42,6 +42,9 @@ module.exports.bootstrap = async function (done) {
                 return done(err);
             });
 
+    // Load directors into memory
+    await Directors.updateDirectors(true);
+
     return done();
 
 };

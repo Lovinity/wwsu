@@ -33,8 +33,7 @@
     "xml2json": "^0.11.2"
   },
   "devDependencies": {
-    "@sailshq/eslint": "^4.19.3",
-    "sails-hook-lint": "^1.1.2"
+    "@sailshq/eslint": "^4.19.3"
   },
   "scripts": {
     "start": "NODE_ENV=production node app.js",

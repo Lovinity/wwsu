@@ -109,7 +109,7 @@ module.exports = {
                         }
                     }
                 }
-                sails.log.sillt(`Needs updating?: ${updateIt}`);
+                sails.log.silly(`Needs updating?: ${updateIt}`);
                 if (updateIt)
                 {
                     await Eas.update({ID: record.ID}, criteria)
@@ -139,25 +139,47 @@ module.exports = {
                     sails.log.verbose('Alert is from NWS source. Retrieving alert information.');
                     needle('get', inputs.reference)
                             .then(async function (resp) {
-                                parseString(resp.body, async function (err2, result) { // Response is in XML. We need to convert to JSON.
-                                    try {
-                                        if (err2)
-                                        {
-                                            return exits.error(err2);
-                                        } else {
-                                            criteria.information = result.alert.info[0].description[0] + ". Precautionary / Preparedness actions: " + result.alert.info[0].instruction[0];
-                                            sails.log.silly(`Criteria: ${criteria}`);
-                                            await Eas.create(criteria)
-                                                    .intercept((err) => {
-                                                        return reject(err);
-                                                    })
-                                                    .fetch();
-                                        }
-                                        return exits.success();
-                                    } catch (e) {
-                                        return exits.error(e);
-                                    }
-                                });
+                                try {
+
+                                    sails.log.silly(resp.body);
+
+                                    // Go through each child
+                                    await sails.helpers.asyncForEach(resp.body.children, function (entry, index) {
+                                        return new Promise(async (resolve2, reject2) => {
+                                            try {
+
+                                                // Skip all non-info properties
+                                                if (typeof entry.name === 'undefined' || entry.name !== 'info')
+                                                    return resolve2(false);
+
+                                                var alert = {};
+
+                                                // Parse field information into the alert variable
+                                                entry.children.forEach(function (entry2)
+                                                {
+                                                    alert[entry2.name] = entry2.value;
+                                                });
+
+                                                criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
+                                                sails.log.silly(`Criteria: ${criteria}`);
+                                                await Eas.create(criteria)
+                                                        .intercept((err) => {
+                                                            return reject(err);
+                                                        })
+                                                        .fetch();
+                                                return exits.success();
+
+                                            } catch (e) {
+                                                sails.log.error(e);
+                                                return reject2();
+                                            }
+                                            return resolve2(false);
+                                        });
+                                    });
+
+                                } catch (e) {
+                                    return exits.error(e);
+                                }
                             })
                             .catch(function (err) {
                                 return exits.error(err);
