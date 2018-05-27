@@ -455,3 +455,31 @@ This endpoint supports sockets, uses the "status" event, and returns data in the
 			},
 			...
         ]
+## Timesheet [/timesheet]
+Timesheet endpoints regard the internal timesheet and clock in/out system for WWSU directors.
+### /timesheet/add [POST /timesheet/add]
+Add a timesheet entry into the system. If the director is present, the add entry will be a clock-out entry. If the director is not present, the add entry will be a clock-in entry. Use the edit endpoint for editing entries.
+#### Request
+| key | criteria |
+|--|--|
+| login | string (required; The OpenProject login of the director for this timesheet entry.) |
+| timestamp | string (required; a timestamp indicating the time this director clocked in/out. Must be valid by moment.js.) |
+#### Response 200 OK
+#### Response 404
+### /timesheet/edit [POST /timesheet/edit]
+Edit a specific timesheet entry.
+#### Request
+| key | criteria |
+|--|--|
+| admin | string (required; the OpenProject login of an administrator) |
+| ID | number (required; the ID of the timesheet entry to be edited) |
+| time_in | string (required; a moment.js valid timestamp indicating when the director clocked in) |
+| time_out | string (a moment.js valid timestamp indicating when the director clocked out. Use null if the director has not clocked out yet. Defaults to null.) |
+| approved | boolean (required; true if this timesheet entry has been approved, false if it is flagged.) |
+#### Response 200 OK
+#### Response 403
+#### Response 404
+### /timesheet/view [GET /timesheet/view]
+Access the timesheet web interface.
+#### Request
+#### Response 200 (text/html)
