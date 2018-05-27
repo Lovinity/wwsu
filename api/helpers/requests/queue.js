@@ -1,6 +1,5 @@
-/* global Meta, sails, Requests */
+/* global Meta, sails, Requests, _ */
 
-// WORK ON THIS: make requests.pending requeue when they are detected as not in queue.
 module.exports = {
 
     friendlyName: 'requests.queue',
@@ -140,7 +139,8 @@ module.exports = {
 
                     // Prepare the request
                     await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
-                    Requests.pending.push(record.songID);
+                    if (!_.includes(Requests.pending, record.songID))
+                        Requests.pending.push(record.songID);
                     return resolve(true);
                 });
             };
@@ -155,7 +155,7 @@ module.exports = {
                             .intercept((err) => {
                                 return reject(err);
                             });
-                            sails.log.silly(`Request: ${record}`);
+                    sails.log.silly(`Request: ${record}`);
                     if (typeof record !== 'undefined' && typeof record[0] !== 'undefined' && record.length > 0 && Requests.pending.indexOf(record[0].songID) !== -1)
                     {
                         sails.log.verbose(`getRequest abandoned: the track was already queued.`);

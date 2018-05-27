@@ -5,7 +5,6 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-// WORK ON THIS
 module.exports = {
     datastore: 'timesheet',
     attributes: {

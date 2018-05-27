@@ -7,7 +7,7 @@ module.exports.cron = {
     workOrders: {
         schedule: '0 * * * * *',
         onTick: function () {
-            Tasks.getTasks(function () {});
+            //Tasks.getTasks(function () {});
         },
         start: true
     },

@@ -26,6 +26,11 @@ module.exports = {
             required: true
         },
 
+        admin: {
+            type: 'boolean',
+            defaultsTo: false
+        },
+
         position: {
             type: 'string',
             defaultsTo: 'Unknown'
@@ -67,12 +72,22 @@ module.exports = {
                         // Because this code is used twice, condense it into a variable
                         var endFunction = async function () {
                             sails.log.verbose(`endFunction called.`);
+
                             // Remove directors which no longer exist in OpenProject
-                            await Directors.destroy({name: {'!=': directorNames}})
+                            var removed = await Directors.destroy({name: {'!=': directorNames}})
                                     .intercept((err) => {
                                         return reject(err);
                                     })
                                     .fetch();
+
+                            sails.log.verbose(`Removed ${removed.length} directors.`);
+                            sails.log.silly(removed);
+
+                            // Remove deleted directors from memory
+                            removed.forEach(function (record) {
+                                delete Directors.directors[record.login];
+                            });
+
                             Directors.directorKeys = Object.keys(Directors.directors).length;
                             return resolve();
                         };
@@ -93,13 +108,21 @@ module.exports = {
                                 if (director.status === 'active' || director.status === 'invited')
                                 {
                                     directorNames.push(director.name);
+
                                     // If user does not exist in the database, create it
                                     if (typeof Directors.directors[director.login] === 'undefined')
                                     {
                                         Directors.directors[director.login] = director;
                                     }
-                                    Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, position: '', present: false, since: moment().toISOString()})
+
+                                    Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, position: '', present: false, since: moment().toISOString()})
                                             .exec((err, user, wasCreated) => {
+                                                
+                                                // Update director if anything changed.
+                                                if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin || director.position !== user.position))
+                                                {
+                                                    Directors.update({name: director.name}, {login: director.login, name: director.name, admin: director.admin, position: ''}).fetch().exec(function(err2, user2) {});
+                                                }
                                             });
                                 }
                             });
@@ -146,11 +169,11 @@ module.exports = {
                                         }
                                     });
                                 }
-                                // Repor OpenProject as good, since parsing of API response has happened earlier.
+                                // Report OpenProject as good, since parsing of API response has happened earlier.
                                 Status.changeStatus([{name: `openproject`, status: 5, data: 'OpenProject API is operational.', label: `OpenProject`}]);
                                 endFunction();
                             } else {
-                                // Repor OpenProject as good, since parsing of API response has happened earlier.
+                                // Report OpenProject as good, since parsing of API response has happened earlier.
                                 Status.changeStatus([{name: `openproject`, status: 5, data: 'OpenProject API is operational.', label: `OpenProject`}]);
                                 endFunction();
                             }
@@ -183,6 +206,6 @@ module.exports = {
         sails.log.silly(`directors socket: ${data}`);
         sails.sockets.broadcast('directors', 'directors', data);
         return proceed();
-    },
+    }
 };
 

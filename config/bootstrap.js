@@ -30,15 +30,18 @@ module.exports.bootstrap = async function (done) {
     // Don't forget to trigger `done()` when this bootstrap function's logic is finished.
     // (otherwise your server will never lift, since it's waiting on the bootstrap)
 
-    // Load default status template into memory. Add radioDJ instances to template as well.
-    sails.config.custom.radiodjs.forEach(function(radiodj) {
-            Status.template.push({name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: 2, data: 'This RadioDJ has not reported online since initialization.', time: null});
+    // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
+    sails.config.custom.radiodjs.forEach(function (radiodj) {
+        Status.template.push({name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: 2, data: 'This RadioDJ has not reported online since initialization.', time: null});
+    });
+    sails.config.custom.djcontrols.forEach(function (djcontrol) {
+        Status.template.push({name: `djcontrols-${djcontrol.name}`, label: `DJ Controls ${djcontrol.label}`, status: 2, data: 'This DJ Controls has not reported online since initialization.', time: null});
     });
     await Status.createEach(Status.template)
             .intercept((err) => {
                 return done(err);
             });
-            
+
 
     // Load internal recipients into memory
     await Recipients.createEach(Recipients.template)
@@ -48,16 +51,16 @@ module.exports.bootstrap = async function (done) {
 
     // Load directors into memory
     await Directors.updateDirectors(true);
-    
+
     // Load IDs of music categories into config
     var records = await Category.find({name: sails.config.custom.requests.musicCats})
             .intercept((err) => {
                 return done(err);
             });
-        records.forEach(function(record) {
-            sails.config.custom.requests.musicCatsN.push(record.ID);
-        });
-            
+    records.forEach(function (record) {
+        sails.config.custom.requests.musicCatsN.push(record.ID);
+    });
+
     return done();
 
 };

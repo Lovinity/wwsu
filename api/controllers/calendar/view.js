@@ -1,16 +1,14 @@
+/* global sails */
+
 module.exports = {
 
+    friendlyName: 'Calendar / View',
 
-  friendlyName: 'Calendar / View',
+    description: 'Loads the HTML calendar page',
 
+    inputs: {
 
-  description: 'Loads the HTML calendar page',
-
-
-  inputs: {
-
-  },
-
+    },
 
     exits: {
         success: {
@@ -19,12 +17,10 @@ module.exports = {
         }
     },
 
-
-  fn: async function (inputs, exits) {
-
-    return exits.success();
-
-  }
+    fn: async function (inputs, exits) {
+        sails.log.debug(`Controller calendar/view called.`);
+        return exits.success();
+    }
 
 
 };
