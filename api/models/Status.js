@@ -1,4 +1,4 @@
-/* global sails, Status */
+/* global sails, Status, _ */
 
 /**
  * Status.js
@@ -17,7 +17,7 @@ module.exports = {
 
         ID: {
             type: 'number',
-            autoIncrement: true,
+            autoIncrement: true
         },
 
         name: {
@@ -34,7 +34,7 @@ module.exports = {
             max: 5,
             defaultsTo: 4
         },
-        
+
         data: {
             type: 'string'
         },
@@ -73,16 +73,20 @@ module.exports = {
             try {
                 await sails.helpers.asyncForEach(array, function (status, index) {
                     return new Promise(async (resolve2, reject2) => {
-                        var criteria = {name: status.name, status: status.status};
+                        var criteria = {name: status.name, status: status.status, data: status.data};
                         if (status.status === 5)
                             criteria.time = moment().toISOString();
-                        
+
                         // Find or create the status record
-                        var record = await Status.findOrCreate({name: status.name}, criteria)
+
+                        // SAILS BUG WORKAROUND
+                        var criteriaB = _.cloneDeep(criteria);
+
+                        var record = await Status.findOrCreate({name: status.name}, criteriaB)
                                 .intercept((err) => {
                                     return resolve2();
                                 });
-                                
+
                         // Search to see if any changes are made to the status; we only want to update if there is a change.
                         var updateIt = false;
                         for (var key in criteria)
@@ -103,15 +107,19 @@ module.exports = {
                         }
                         if (updateIt === 1)
                         {
+                            // SAILS BUG WORKAROUND
+                            var criteriaB = _.cloneDeep(criteria);
                             sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`);
-                            await Status.update({name: status.name}, criteria)
+                            await Status.update({name: status.name}, criteriaB)
                                     .intercept((err) => {
                                         return reject(err);
                                     })
                                     .fetch();
                         } else if (updateIt === 2) {
+                            // SAILS BUG WORKAROUND
+                            var criteriaB = _.cloneDeep(criteria);
                             sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`);
-                            await Status.update({name: status.name}, criteria)
+                            await Status.update({name: status.name}, criteriaB)
                                     .intercept((err) => {
                                         return reject(err);
                                     });

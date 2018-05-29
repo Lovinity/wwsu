@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta */
+/* global Directors, sails, Status, Calendar, Meta, Tasks */
 
 module.exports.cron = {
 
@@ -6,8 +6,8 @@ module.exports.cron = {
     // WORK ON THIS
     workOrders: {
         schedule: '0 * * * * *',
-        onTick: function () {
-            //Tasks.getTasks(function () {});
+        onTick: async function () {
+            await Tasks.updateTasks();
         },
         start: true
     },
@@ -125,11 +125,9 @@ module.exports.cron = {
                         } else {
                             Status.changeStatus([{name: `website`, label: `Website`, data: 'WWSU website appears to have an issue; expected body data was not returned.', status: 2}]);
                         }
-                        return resolve(false);
                     })
                     .catch(function (err) {
                         Status.changeStatus([{name: `website`, label: `Website`, data: 'There was an error connecting to the WWSU website.', status: 2}]);
-                        return resolve(false);
                     });
         },
         start: true
