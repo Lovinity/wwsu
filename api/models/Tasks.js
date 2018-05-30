@@ -123,7 +123,7 @@ module.exports = {
                                             responsible: element._links.responsible.title || 'Unknown'
                                         };
 
-                                        // SAILS BUG WORKAROUND
+                                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
                                         var criteriaB = _.cloneDeep(criteria);
 
                                         var record = await Tasks.findOrCreate({unique: criteriaB.unique}, criteriaB)

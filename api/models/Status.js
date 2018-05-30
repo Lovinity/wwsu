@@ -113,7 +113,7 @@ module.exports = {
 
                         // Find or create the status record
 
-                        // SAILS BUG WORKAROUND
+                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
                         var criteriaB = _.cloneDeep(criteria);
 
                         var record = await Status.findOrCreate({name: status.name}, criteriaB)
@@ -141,7 +141,7 @@ module.exports = {
                         }
                         if (updateIt === 1)
                         {
-                            // SAILS BUG WORKAROUND
+                            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
                             var criteriaB = _.cloneDeep(criteria);
                             sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`);
                             await Status.update({name: status.name}, criteriaB)
@@ -150,7 +150,7 @@ module.exports = {
                                     })
                                     .fetch();
                         } else if (updateIt === 2) {
-                            // SAILS BUG WORKAROUND
+                            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
                             var criteriaB = _.cloneDeep(criteria);
                             sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`);
                             await Status.update({name: status.name}, criteriaB)
