@@ -1,6 +1,4 @@
-/* global sails, Playlists, Events, Playlists_list, Songs, Calendar */
-
-var moment = require("moment");
+/* global sails, Playlists, Events, Playlists_list, Songs, Calendar, moment */
 
 module.exports = {
 

@@ -1,7 +1,8 @@
+/* global sails, moment */
+
 /**
  * Module dependencies
  */
-var moment = require('moment');
 // ...
 
 

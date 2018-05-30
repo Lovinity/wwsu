@@ -1,7 +1,4 @@
-/* global sails, Meta, _ */
-
-var needle = require('needle');
-var parser = require('xml2json');
+/* global sails, Meta, _, needle */
 
 module.exports = {
 
@@ -15,28 +12,31 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper rest.getQueue called.');
-        needle('get', Meta['A'].radiodj + '/p?auth=' + sails.config.custom.rest.auth)
+        needle('get', Meta['A'].radiodj + '/p?auth=' + sails.config.custom.rest.auth, {}, {open_timeout: 2000, response_timeout: 2000, read_timeout: 2000})
                 .then(async function (resp) {
                     try {
-                        var queue = parser.toJson(resp.body);
-                        sails.log.silly(`REST response: ${queue}`);
-                        if (queue === null)
+                        Meta.automation = [];
+                        if (typeof resp.body.name === 'undefined' || (resp.body.name !== 'ArrayOfSongData' && resp.body.name !== 'SongData'))
                         {
-                            Meta.automation = [];
                             return exits.success([]);
                         }
-                        // If there's nothing in the queue, it returns NOT Array. If there is something in queue, it returns Array. Convert to Array if not array to be consistent.
-                        if (Array.isArray(queue.ArrayOfSongData.SongData))
+                        if (resp.body.name === 'ArrayOfSongData')
                         {
-                            var thequeue = queue.ArrayOfSongData.SongData;
-                            Meta.automation = _.map(queue.ArrayOfSongData.SongData, _.clone);
+                            resp.body.children.forEach(function (trackA, index) {
+                                var theTrack = {};
+                                trackA.children.forEach(function (track) {
+                                    theTrack[track.name] = track.value;
+                                });
+                                Meta.automation.push(theTrack);
+                            });
                         } else {
-                            var thequeue = [];
-                            Meta.automation = [];
-                            thequeue.push(queue.ArrayOfSongData.SongData);
-                            Meta.automation.push(queue.ArrayOfSongData.SongData);
+                            var theTrack = {};
+                            resp.body.children.forEach(function (track) {
+                                theTrack[track.name] = track.value;
+                            });
+                            Meta.automation.push(theTrack);
                         }
-                        return exits.success(thequeue);
+                        return exits.success(Meta.automation);
                     } catch (e) {
                         return exits.error(e);
                     }

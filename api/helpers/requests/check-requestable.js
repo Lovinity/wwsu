@@ -1,6 +1,5 @@
-/* global Requests, sails, Songs, Subcategory, Category, Settings */
+/* global Requests, sails, Songs, Subcategory, Category, Settings, moment */
 
-var moment = require("moment");
 require("moment-duration-format");
 
 module.exports = {

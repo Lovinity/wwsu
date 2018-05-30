@@ -1,8 +1,5 @@
-/* global Eas, sails */
+/* global Eas, sails, moment, needle */
 
-var moment = require("moment");
-var parseString = require('xml2js').parseString;
-var needle = require('needle');
 module.exports = {
 
     friendlyName: 'eas.addAlert',

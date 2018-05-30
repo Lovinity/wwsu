@@ -1,6 +1,4 @@
-/* global Meta, Playlists, Playlists_list, sails, Logs, Statemeta, _ */
-
-var moment = require("moment");
+/* global Meta, Playlists, Playlists_list, sails, Logs, Statemeta, _, moment */
 
 module.exports = {
 
@@ -67,7 +65,7 @@ module.exports = {
                     return new Promise(async (resolve2, reject2) => {
                         try {
                             await sails.helpers.rest.cmd('LoadPlaylist', theplaylist.ID);
-                            var playlistTracks = await Playlists_list.find({pID: theplaylist.ID})
+                            var playlistTracks = await Playlists_list.find({pID: theplaylist.ID}).sort('ord ASC')
                                     .intercept((err) => {
                                         return reject2(err);
                                     });
@@ -169,7 +167,7 @@ module.exports = {
                                         } catch (e) {
                                             return reject2(e);
                                         }
-                                    }
+                                    };
                                     theFunction();
                                 } catch (e) {
                                     return reject2(e);
@@ -194,7 +192,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                     await sails.helpers.rest.removeMusic(); // Do not leave requests in the queue for prerecords; the prerecord should be beginning ASAP.
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
-                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(), live: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
+                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(), dj: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: theplaylist.name, event: 'A prerecorded show was scheduled to start.' + "\n" + 'Show: ' + inputs.name})
                             .intercept((err) => {
                                 sails.log.error(err);

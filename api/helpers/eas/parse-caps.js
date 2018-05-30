@@ -1,7 +1,5 @@
-/* global sails, Eas */
+/* global sails, Eas, moment */
 
-var moment = require("moment");
-var parseString = require('xml2js').parseString;
 module.exports = {
 
     friendlyName: 'eas.parseCaps',

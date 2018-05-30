@@ -1,6 +1,4 @@
-/* global sails, Directors, Timesheet */
-
-var moment = require('moment');
+/* global sails, Directors, Timesheet, moment */
 
 module.exports = {
 

@@ -1,4 +1,4 @@
-/* global sails, Status, _ */
+/* global sails, Status, _, Logs, moment */
 
 /**
  * Status.js
@@ -60,6 +60,41 @@ module.exports = {
         {name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 2, time: null}
     ],
 
+    // Object used internally to check for errors.
+    errorCheck: {
+        
+        // This contains a moment timestamp of when the previous triggered error happened.
+        prevError: null,
+        
+        // Used for determining if we have a sudden jump in queue time in RadioDJ
+        trueZero: 0,
+        
+        // Used for queue length error detecting and trueZero
+        prevQueueLength: 0,
+
+        // Triggered when CRON checks fails to getQueue. 
+        queueFail: {
+            count: 0,
+            trigger: 15,
+            fn: function () {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        sails.sockets.broadcast('system-error', 'system-error', true);
+                        await sails.helpers.rest.cmd('EnableAssisted', 1);
+                        await sails.helpers.rest.cmd('EnabledAutoDJ', 1);
+                        await sails.helpers.rest.cmd('StopPlayer', 1);
+                        await sails.helpers.rest.changeRadioDj();
+                        await sails.helpers.error.post();
+                    } catch (e) {
+                        return reject();
+                    }
+                });
+                return resolve();
+            }
+        },
+
+    },
+
     /**
      * Change statuses
      * @constructor
@@ -69,7 +104,6 @@ module.exports = {
     changeStatus: function (array) {
         return new Promise(async (resolve, reject) => {
             sails.log.debug(`Status.changeStatus called.`);
-            var moment = require('moment');
             try {
                 await sails.helpers.asyncForEach(array, function (status, index) {
                     return new Promise(async (resolve2, reject2) => {

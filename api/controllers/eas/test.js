@@ -1,6 +1,5 @@
-/* global sails */
+/* global sails, moment */
 
-var moment = require('moment');
 module.exports = {
 
     friendlyName: 'EAS / Test',

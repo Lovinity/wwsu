@@ -1,6 +1,5 @@
-/* global Eas, sails */
+/* global Eas, sails, moment */
 
-var moment = require("moment");
 module.exports = {
 
     friendlyName: 'eas.postParse',

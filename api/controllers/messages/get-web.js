@@ -1,5 +1,4 @@
 /* global sails, Messages */
-var moment = require("moment");
 var sh = require("shorthash");
 
 module.exports = {

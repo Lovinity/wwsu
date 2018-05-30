@@ -1,4 +1,4 @@
-/* global sails, Directors, Status, Timesheet */
+/* global sails, Directors, Status, Timesheet, moment, needle */
 
 /**
  * Directors.js
@@ -57,8 +57,6 @@ module.exports = {
     updateDirectors: function (forced = false) {
         return new Promise(async (resolve, reject) => {
             sails.log.debug(`updateDirectors called.`);
-            var moment = require('moment');
-            var needle = require('needle');
             var directorNames = [];
             // Get users from OpenProject via API
             var req = {

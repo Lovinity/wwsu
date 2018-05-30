@@ -1,7 +1,4 @@
-/* global sails, Meta, Logs */
-
-var needle = require('needle');
-var parser = require('xml2json');
+/* global sails, Meta, Logs, needle */
 
 module.exports = {
 
@@ -23,7 +20,7 @@ module.exports = {
         timeout: {
             type: 'number',
             defaultsTo: 2000,
-            description: 'Amount of time allowed for waiting for a connection, a response header, and response data (each).'
+            description: 'Amount of time allowed for waiting for a connection, a response header, and response data (each). If this value is set to 0, the promise will resolve immediately without waiting for needle to finish, and will assume 10000 for needle timeout.'
         }
     },
 
@@ -34,13 +31,19 @@ module.exports = {
         // arg supplied? Load it in memory.
         if (typeof inputs.arg !== 'undefined' && inputs.arg !== null)
             endstring = '&arg=' + inputs.arg;
+        
+        // If timeout is 0, resolve the promise but continue execution (so do not return it).
+        if (inputs.timeout === 0)
+        {
+            exits.success();
+            inputs.timeout = 10000;
+        }
+        
         // Query REST
         needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})
                 .then(async function (resp) {
                     try {
-                        var json2 = parser.toJson(resp.body);
-                        sails.log.silly(`Response from RadioDJ: ${json2}`);
-                        return exits.success(json2);
+                        return exits.success();
                     } catch (e) {
                         sails.log.silly(`REST ERROR: ${e.message}`);
                         await Logs.create({logtype: 'REST', loglevel: 'warn', event: 'REST command was called for instance ' + Meta['A'].radiodj + ' with command ' + inputs.command + endstring + ' with ERROR. ' + e.message})

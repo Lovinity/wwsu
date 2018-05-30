@@ -1,4 +1,4 @@
-/* global Calendar, sails, Playlists, Meta, Genre */
+/* global Calendar, sails, Playlists, Meta, Genre, moment */
 
 /**
  * Calendar.js
@@ -8,7 +8,6 @@
  */
 
 var fs = require('fs');
-var moment = require('moment');
 var readline = require('readline');
 var {OAuth2Client} = require('google-auth-library');
 var breakdance = require('breakdance');

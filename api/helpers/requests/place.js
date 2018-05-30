@@ -1,6 +1,4 @@
-/* global sails, Songs, Requests */
-
-var moment = require("moment");
+/* global sails, Songs, Requests, moment */
 
 module.exports = {
 

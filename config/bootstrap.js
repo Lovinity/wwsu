@@ -1,3 +1,5 @@
+/* global sails, Meta, _, Status, Recipients, Category, Logs */
+
 /**
  * Bootstrap
  * (sails.config.bootstrap)
@@ -30,8 +32,11 @@ module.exports.bootstrap = async function (done) {
     // Don't forget to trigger `done()` when this bootstrap function's logic is finished.
     // (otherwise your server will never lift, since it's waiting on the bootstrap)
 
-    // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
 
+    sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);
+    Meta.template = _.cloneDeep(Meta['A']);
+
+    // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
     sails.log.verbose(`BOOTSTRAP: Loading RadioDJ instances into template`);
     sails.config.custom.radiodjs.forEach(function (radiodj) {
         Status.template.push({name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: 2, data: 'This RadioDJ has not reported online since initialization.', time: null});
@@ -40,7 +45,7 @@ module.exports.bootstrap = async function (done) {
     sails.config.custom.djcontrols.forEach(function (djcontrol) {
         Status.template.push({name: `djcontrols-${djcontrol.name}`, label: `DJ Controls ${djcontrol.label}`, status: 2, data: 'This DJ Controls has not reported online since initialization.', time: null});
     });
-    
+
     sails.log.verbose(`BOOTSTRAP: Adding Status template to database.`);
     await Status.createEach(Status.template)
             .intercept((err) => {
@@ -64,7 +69,7 @@ module.exports.bootstrap = async function (done) {
     records.forEach(function (record) {
         sails.config.custom.requests.musicCatsN.push(record.ID);
     });
-    
+
     sails.log.verbose(`BOOTSTRAP: Done.`);
 
     return done();

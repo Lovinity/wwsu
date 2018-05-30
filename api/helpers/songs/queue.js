@@ -4,13 +4,13 @@ module.exports = {
 
     friendlyName: 'songs.queueFromSubcategory',
 
-    description: 'Queue a track from a subcategory',
+    description: 'Queue a track from a category or subcategory',
 
     inputs: {
         subcategory: {
             type: 'string',
-            required: true,
-            description: 'Name of the subcategory.'
+            allowNull: true,
+            description: 'Name of the subcategory to queue from. Use null if you want to queue from any subcategory within the defined parent category.'
         },
 
         category: {
@@ -55,7 +55,9 @@ module.exports = {
                         return exits.error(err);
                     });
             sails.log.silly(`Category: ${thecategory}`);
-            var whereString = {name: inputs.subcategory};
+            var whereString = {};
+            if (inputs.subcategory !== null)
+                whereString.name = inputs.subcategory;
             if (thecategory.length > 0)
             {
                 whereString.parentid = thecategory[0].ID;

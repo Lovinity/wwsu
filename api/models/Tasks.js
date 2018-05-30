@@ -1,4 +1,4 @@
-/* global sails, Tasks, _ */
+/* global sails, Tasks, _, needle */
 
 /**
  * Tasks.js
@@ -43,10 +43,10 @@ module.exports = {
             defaultsTo: 'Unknown'
         },
         start: {
-            type: 'string',
+            type: 'string'
         },
         due: {
-            type: 'string',
+            type: 'string'
         },
         percent: {
             type: 'number',
@@ -90,7 +90,6 @@ module.exports = {
     updateTasks: function () {
         return new Promise(async (resolve, reject) => {
             sails.log.debug(`Tasks.update called.`);
-            var needle = require("needle");
 
             // Get the tasks from OpenProject
             needle('get', sails.config.custom.pm.host + sails.config.custom.pm.path + 'work_packages', {headers: {Authorization: 'Basic ' + sails.config.custom.pm.auth, 'Content-Type': 'application/json'}})

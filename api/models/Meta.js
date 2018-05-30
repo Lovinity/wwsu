@@ -1,4 +1,4 @@
-/* global Meta, sails */
+/* global Meta, sails, _ */
 
 /**
  * Meta.js
@@ -73,7 +73,7 @@ module.exports = {
     // API NOTE: Do not modify any of these directly; use the changeMeta function instead.
     A: {
         state: 'unknown', // State of the WWSU system
-        dj: '', // If someone is on the air, name of the host
+        dj: '', // If someone is on the air, host name - show name
         track: '', // Currently playing track either in automation or manually logged
         genre: '', // Name of the genre or rotation currently being played, if any
         trackstamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
@@ -81,7 +81,7 @@ module.exports = {
         stream: '', // Meta for the internet radio stream
         radiodj: '', // REST IP of the RadioDJ instance currently in control
         djcontrols: '', // Hostname of the computer in which has activated the most recent live/sports/remote broadcast via DJ Controls
-        line1: '', // First line of meta for display signs
+        line1: 'We are unable to provide now playing info at this time.', // First line of meta for display signs
         line2: '', // Second line of meta for display signs
         percent: 0, // Integer or float between 0 and 100 indicating how far in the current track in automation we are, for display signs
         time: '', // Human readable date and time for display signs

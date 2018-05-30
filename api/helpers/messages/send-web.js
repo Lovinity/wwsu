@@ -1,6 +1,4 @@
-/* global sails, Messages */
-
-var moment = require('moment');
+/* global sails, Messages, moment */
 
 module.exports = {
 
