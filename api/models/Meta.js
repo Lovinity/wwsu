@@ -79,6 +79,8 @@ module.exports = {
         trackstamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
         topic: '', // If the DJ specified a show topic, this is the topic.
         stream: '', // Meta for the internet radio stream
+        artist: '', // Artist from the stream meta
+        title: '', // Title from the stream meta
         radiodj: '', // REST IP of the RadioDJ instance currently in control
         djcontrols: '', // Hostname of the computer in which has activated the most recent live/sports/remote broadcast via DJ Controls
         line1: 'We are unable to provide now playing info at this time.', // First line of meta for display signs
@@ -97,6 +99,8 @@ module.exports = {
     },
     automation: [], // Tracks in automation
     history: [], // track history array
+    stationID: null, // moment stamp of when the most recent station ID was queued.
+    prevBreak: null, // moment stamp of when the most recent PSA break was queued.
 
     /**
      * Change a meta attribute

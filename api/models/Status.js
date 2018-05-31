@@ -60,17 +60,29 @@ module.exports = {
         {name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 2, time: null}
     ],
 
-    // Object used internally to check for errors.
+    /* Object used internally to check for errors.
+     * Items in the object which are to be used by sails.helpers.error.count and sails.helpers.error.reset are formatted as the following:
+     * key: {
+     *     count: 0, // Used by the helper to count the number of times that error occurred.
+     *     trigger: 15, // If count reaches this number, then fn() is executed
+     *     condition: function() {}, // If this function returns true, then count is automatically reset to 0 in the count helper.
+     *     fn: function() {}, // This function is executed when count reaches trigger. The function should return a number to which the count should be changed to (such as 0).
+     * }
+     */
     errorCheck: {
-        
+
         // This contains a moment timestamp of when the previous triggered error happened.
         prevError: null,
-        
+
         // Used for determining if we have a sudden jump in queue time in RadioDJ
         trueZero: 0,
-        
+
         // Used for queue length error detecting and trueZero
         prevQueueLength: 0,
+
+        // Used for determining if RadioDJ froze.
+        prevDuration: 0,
+        prevElapsed: 0,
 
         // Triggered when CRON checks fails to getQueue. 
         queueFail: {
@@ -86,10 +98,113 @@ module.exports = {
                         await sails.helpers.rest.changeRadioDj();
                         await sails.helpers.error.post();
                     } catch (e) {
-                        return reject();
+                        return reject(e);
+                    }
+                    return resolve(0);
+                });
+            }
+        },
+
+        // Triggered when RadioDJ appears to be frozen
+        frozen: {
+            count: 0,
+            trigger: 15,
+            fn: function () {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
+                        if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
+                        {
+                            sails.log.verbose(`No recent error; attempting standard recovery.`);
+                            await sails.helpers.error.post();
+                        } else {
+                            sails.log.verbose(`Recent error; switching RadioDJs.`);
+                            sails.sockets.broadcast('system-error', 'system-error', true);
+                            await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
+                            await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
+                            await sails.helpers.rest.cmd('StopPlayer', 0, 0);
+                            await sails.helpers.rest.changeRadioDj();
+                            await sails.helpers.rest.cmd('ClearPlaylist', 1);
+                            await sails.helpers.error.post();
+                        }
+                    } catch (e) {
+                        return reject(e);
+                    }
+                    return resolve(0);
+                });
+            }
+        },
+
+        // Triggered when RadioDJ appears to be frozen, and we are in the middle of a remote broadcast
+        frozenRemote: {
+            count: 0,
+            trigger: 15,
+            fn: function () {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
+                        if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
+                        {
+                            sails.log.verbose(`No recent error; attempting standard recovery.`);
+                            await sails.helpers.rest.cmd('EnableAutoDJ', 0);
+                            await sails.helpers.rest.cmd('EnableAssisted', 1);
+                            await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                            await sails.helpers.rest.cmd('EnableAssisted', 0);
+
+                        } else {
+                            sails.log.verbose(`Recent error; switching RadioDJs.`);
+                            sails.sockets.broadcast('system-error', 'system-error', true);
+                            await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
+                            await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
+                            await sails.helpers.rest.cmd('StopPlayer', 0, 0);
+                            await sails.helpers.rest.changeRadioDj();
+                            await sails.helpers.rest.cmd('ClearPlaylist', 1);
+                            await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                            await sails.helpers.rest.cmd('EnableAssisted', 0);
+                        }
+                    } catch (e) {
+                        return reject(e);
+                    }
+                    return resolve(0);
+                });
+            }
+        },
+
+        // Check to see if we successfully queued what we needed to in order to return to the sports broadcast
+        sportsReturn: {
+            count: 0,
+            trigger: 5,
+            condition: function () {
+                // WORK ON THIS
+            },
+            fn: function () {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        // WORK ON THIS
+                    } catch (e) {
+                        return reject(e);
                     }
                 });
-                return resolve();
+            }
+        },
+
+        // Check to see if we successfully queued a station ID
+        stationID: {
+            count: 0,
+            trigger: 5,
+            condition: function () {
+                // WORK ON THIS
+            },
+            fn: function () {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        // WORK ON THIS
+                    } catch (e) {
+                        return reject(e);
+                    }
+                });
             }
         },
 
