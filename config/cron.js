@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs */
+/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas */
 
 module.exports.cron = {
 
@@ -535,7 +535,7 @@ module.exports.cron = {
                                 // Begin error check for legal ID
                                 await sails.helpers.error.count('stationID');
                                 await sails.helpers.songs.queue(sails.config.custom.categories.IDs.subcategory, sails.config.custom.categories.IDs.category, 'Bottom', 1);
-                                Meta.stationID = moment();
+                                Status.errorCheck.prevID = moment();
                                 await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
                             } else {
                                 await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
@@ -554,7 +554,7 @@ module.exports.cron = {
                                 // Begin error check for legal ID
                                 await sails.helpers.error.count('stationID');
                                 await sails.helpers.songs.queue(sails.config.custom.categories.IDs.subcategory, sails.config.custom.categories.IDs.category, 'Bottom', 1);
-                                Meta.stationID = moment();
+                                Status.errorCheck.prevID = moment();
                                 await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
                             } else {
                                 await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
@@ -628,7 +628,7 @@ module.exports.cron = {
                                 doPSAbreak = false;
 
                             // Do not queue if we queued a break less than 10 minutes ago
-                            if (Meta.prevBreak !== null && moment(Meta.prevBreak).isAfter(moment().subtract(10, 'minutes')))
+                            if (Status.errorCheck.prevBreak !== null && moment(Status.errorCheck.prevBreak).isAfter(moment().subtract(10, 'minutes')))
                                 doPSAbreak = false;
 
                             // Do not queue anything yet if the current track has 10 or more minutes left (resolves a discrepancy with the previous logic)
@@ -638,7 +638,7 @@ module.exports.cron = {
                             // Finally, if we are to queue a PSA break, queue it and make note we queued it so we don't queue another one too soon.
                             if (doPSAbreak)
                             {
-                                Meta.prevBreak = moment();
+                                Status.errorCheck.prevBreak = moment();
                                 await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: 'Queued :20 / :40 PSA break'})
                                         .intercept((err) => {
                                         });
@@ -669,7 +669,7 @@ module.exports.cron = {
                             }
 
                             // If the last time we queued a station ID break was less than 20 minutes ago, it's too soon!
-                            if (Meta.stationID !== null && moment(Meta.stationID).isAfter(moment().subtract(20, 'minutes')))
+                            if (Status.errorCheck.prevID !== null && moment(Status.errorCheck.prevID).isAfter(moment().subtract(20, 'minutes')))
                                 doIDbreak = false;
 
                             // Do not queue anything yet if the current time is before :40 after (resolves a discrepancy with the previous logic)
@@ -683,8 +683,8 @@ module.exports.cron = {
                             // If we are to queue an ID, queue it
                             if (doIDbreak)
                             {
-                                Meta.stationID = moment();
-                                Meta.prevBreak = moment();
+                                Status.errorCheck.prevID = moment();
+                                Status.errorCheck.prevBreak = moment();
                                 await sails.helpers.error.count('stationID');
                                 await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: 'Queued :00 Station ID Break'})
                                         .intercept((err) => {
@@ -705,13 +705,17 @@ module.exports.cron = {
                             await sails.helpers.error.count('frozenRemote');
                         }
                     }
+
+                    // Change applicable meta
+                    await Meta.changeMeta(change);
+
+                    // All done
+                    return resolve();
                 } catch (e) {
                     // Uncomment once we confirmed this CRON is fully operational
                     //  await sails.helpers.error.count('frozen');
-                    sails.log.error(e);
+                    return reject(e);
                 }
-
-
             });
         },
         start: true
@@ -892,15 +896,119 @@ module.exports.cron = {
         },
         start: true
     },
-    // Every day at 11:59pm, clock out any directors still clocked in
-    // WORK ON THIS
+    // Every minute at second 07, check to see if our databases are active and functional
+    checkDB: {
+        schedule: '7 * * * * *',
+        onTick: async function () {
+            sails.log.debug(`CRON checkDB called`);
+            try {
+                // Make sure all models have a record at ID 1, even if it's a dummy.
+                var checksMemory = [Calendar, Directors, Recipients, Status, Tasks];
+                var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
+                var checksNodebase = [Discipline, Eas, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet];
+
+                // Memory checks
+                var checkStatus = {data: ``, status: 5};
+                await sails.helpers.asyncForEach(checksMemory, function (check, index) {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            var record = await check.findOne({ID: 1})
+                                    .intercept((err) => {
+                                        checkStatus.status = 1;
+                                        checkStatus.data += `Model failure (query error): ${index}. `;
+                                    });
+                            if (typeof record.ID === 'undefined')
+                            {
+                                if (checkStatus.status > 3)
+                                    checkStatus.status = 3;
+                                checkStatus.data += `Model failure (record ID 1 not returned): ${index}. `;
+                            }
+                        } catch (e) {
+                            checkStatus.status = 1;
+                            checkStatus.data += `Model failure (internal error): ${index}. `;
+                            return resolve(false);
+                        }
+                    });
+                });
+                if (checkStatus.status === 5)
+                    checkStatus.data = `This datastore is fully operational.`;
+                Status.changeStatus([{name: 'db-memory', label: 'DB Memory', data: checkStatus.data, status: checkStatus.status}]);
+
+                // RadioDJ checks
+                var checkStatus = {data: ``, status: 5};
+                await sails.helpers.asyncForEach(checksRadioDJ, function (check, index) {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            var record = await check.findOne({ID: 1})
+                                    .intercept((err) => {
+                                        checkStatus.status = 1;
+                                        checkStatus.data += `Model failure (query error): ${index}. `;
+                                    });
+                            if (typeof record.ID === 'undefined')
+                            {
+                                if (checkStatus.status > 3)
+                                    checkStatus.status = 3;
+                                checkStatus.data += `Model failure (record ID 1 not returned): ${index}. `;
+                            }
+                        } catch (e) {
+                            checkStatus.status = 1;
+                            checkStatus.data += `Model failure (internal error): ${index}. `;
+                            return resolve(false);
+                        }
+                    });
+                });
+                if (checkStatus.status === 5)
+                    checkStatus.data = `This datastore is fully operational.`;
+                Status.changeStatus([{name: 'db-radiodj', label: 'DB RadioDJ', data: checkStatus.data, status: checkStatus.status}]);
+
+                // Nodebase checks
+                var checkStatus = {data: ``, status: 5};
+                await sails.helpers.asyncForEach(checksNodebase, function (check, index) {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            var record = await check.findOne({ID: 1})
+                                    .intercept((err) => {
+                                        checkStatus.status = 1;
+                                        checkStatus.data += `Model failure (query error): ${index}. `;
+                                    });
+                            if (typeof record.ID === 'undefined')
+                            {
+                                if (checkStatus.status > 3)
+                                    checkStatus.status = 3;
+                                checkStatus.data += `Model failure (record ID 1 not returned): ${index}. `;
+                            }
+                        } catch (e) {
+                            checkStatus.status = 1;
+                            checkStatus.data += `Model failure (internal error): ${index}. `;
+                            return resolve(false);
+                        }
+                    });
+                });
+                if (checkStatus.status === 5)
+                    checkStatus.data = `This datastore is fully operational.`;
+                Status.changeStatus([{name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status}]);
+            } catch (e) {
+                Status.changeStatus([{name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed.', status: 1}]);
+                Status.changeStatus([{name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed.', status: 1}]);
+                Status.changeStatus([{name: 'db-nodebase', label: 'DB Nodebase', data: 'The CRON checkDB failed.', status: 1}]);
+            }
+        },
+        start: true
+    },
+
+    // Every day at 11:59:59pm, clock out any directors still clocked in
     clockOutDirectors: {
-        schedule: '59 23 * * *',
-        onTick: function () {
-            var d = new Date();
-            Timesheet.update({time_out: null}, {time_out: d, approved: 0}).exec(function (error, records) {
-                Directors.loadDirectors(true, function () {});
-            });
+        schedule: '59 59 23 * * *',
+        onTick: async function () {
+            sails.log.debug(`CRON clockOutDirectors called`);
+            try {
+                await Timesheet.update({time_out: null}, {time_out: moment().toISOString(), approved: 0})
+                        .intercept((err) => {
+                        });
+                // Force reload all directors based on timesheets
+                await Directors.updateDirectors(true);
+            } catch (e) {
+            }
         },
         start: true
     }

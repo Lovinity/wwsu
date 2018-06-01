@@ -54,7 +54,7 @@ module.exports = {
             }
 
             // Get the recipient entry
-            var recipient = await Recipients.findOne(where, {name: inputs.name, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()})
+            var recipient = await Recipients.findOne(where)
                     .intercept((err) => {
                         return exits.error(err);
                     });

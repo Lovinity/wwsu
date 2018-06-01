@@ -8,8 +8,8 @@
  */
 
 module.exports = {
-    // Eas data should persist. However, all data is temporary and not client heavy. Use disk instead of SQL.
-    datastore: 'disk',
+    // Eas data should persist. Use MySQL.
+    datastore: 'nodebase',
     attributes: {
 
         ID: {
