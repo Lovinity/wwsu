@@ -70,7 +70,7 @@ module.exports = {
             if (typeof inputs.ID === 'undefined' || inputs.ID === null)
             {
                 // Retrieve a list of subcategories that fall within a parent category defined in config as a music category.
-                var subcats2 = await Subcategory.find({parentid: sails.config.custom.requests.musicCatsN})
+                var subcats2 = await Subcategory.find({parentid: sails.config.custom.subcats.music})
                         .intercept((err) => {
                             sails.log.error(err);
                             return exits.error();

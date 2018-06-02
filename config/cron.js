@@ -25,12 +25,24 @@ module.exports.cron = {
                 // Try to get the current RadioDJ queue. Add an error count if we fail.
                 try {
                     var queue = await sails.helpers.rest.getQueue();
+
                     // Calculate the length of the current queue
                     queue.forEach(function (track) {
                         change.queueLength += (track.Duration - track.Elapsed);
                     });
 
                     await sails.helpers.error.reset('queueFail');
+                    
+                    // Error checks
+                    
+                    
+                    if (Status.errorCheck.stationID.count > 0)
+                    {
+                        var idQueued = false;
+                        queue.forEach(function(track) {
+                            
+                        });
+                    }
                 } catch (e) {
                     await sails.helpers.error.count('queueFail');
                     return reject(e);
@@ -572,6 +584,8 @@ module.exports.cron = {
                         } else {
                             Status.errorCheck.prevDuration = queue[0].Duration;
                             Status.errorCheck.prevElapsed = queue[0].Elapsed;
+                            await sails.helpers.error.reset('frozen');
+                            await sails.helpers.error.reset('frozenRemote');
                         }
 
                         // Manage PSAs and IDs intelligently using track queue length. This gets complicated, so comments explain the process.

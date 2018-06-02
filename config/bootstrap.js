@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory */
 
 /**
  * Bootstrap
@@ -60,15 +60,44 @@ module.exports.bootstrap = async function (done) {
                 return done(err);
             });
 
-    // Load IDs of music categories into config
-    sails.log.verbose(`BOOTSTRAP: Loading music category IDs into config.`);
-    var records = await Category.find({name: sails.config.custom.requests.musicCats})
-            .intercept((err) => {
-                return done(err);
-            });
-    records.forEach(function (record) {
-        sails.config.custom.requests.musicCatsN.push(record.ID);
-    });
+    // Load subcats IDs for each consigured categories
+    for (var config in sails.config.custom.categories)
+    {
+        if (sails.config.custom.categories.hasOwnProperty(config))
+        {
+            for (var cat in sails.config.custom.categories[config])
+            {
+                if (sails.config.custom.categories[config].hasOwnProperty(cat))
+                {
+                    sails.config.custom.subcats[config] = [];
+                    var thecategory = await Category.findOne({name: cat})
+                            .intercept((err) => {
+                            });
+                    if (!thecategory || thecategory === null)
+                        continue;
+
+                    if (sails.config.custom.categories[config][cat].length <= 0)
+                    {
+                        var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
+                                .intercept((err) => {
+                                });
+                    } else {
+                        var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
+                                .intercept((err) => {
+                                });
+                    }
+                    if (!thesubcategories || thesubcategories.length <= 0)
+                        continue;
+
+                    thesubcategories.forEach(function (thesubcategory) {
+                        sails.config.custom.subcats[config].push(thesubcategory.ID);
+                    });
+                    
+                    sails.log.silly(`Subcategories for ${config}: ${sails.config.custom.subcats[config]}`);
+                }
+            }
+        }
+    }
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 
