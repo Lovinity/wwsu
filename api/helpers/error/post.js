@@ -12,6 +12,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper error.post called.');
+        try {
         if (Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'automation_playlist')
         {
             sails.log.verbose(`Automation recovery triggered.`);
@@ -19,8 +20,8 @@ module.exports = {
             await sails.helpers.rest.cmd('ClearPlaylist', 1);
             if (Meta['A'].state === 'automation_genre')
                 await sails.helpers.genre.start(Meta['A'].genre);
-            await sails.helpers.songs.queue(sails.config.custom.categories.music.subcategory, sails.config.custom.categories.music.category, 'Top', 3, true);
-            await sails.helpers.songs.queue(sails.config.custom.categories.IDs.subcategory, sails.config.custom.categories.IDs.category, 'Top', 1);
+            await sails.helpers.songs.queue(sails.config.custom.subcats.music, 'Top', 3, true);
+            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
             await sails.helpers.rest.cmd('EnableAssisted', 0);
             await sails.helpers.rest.cmd('EnableAutoDJ', 1);
             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
@@ -30,7 +31,7 @@ module.exports = {
             await sails.helpers.rest.cmd('EnableAutoDJ', 0);
             await sails.helpers.rest.cmd('EnableAssisted', 1);
             await sails.helpers.rest.cmd('ClearPlaylist', 1);
-            await sails.helpers.songs.queue(sails.config.custom.categories.IDs.subcategory, sails.config.custom.categories.music.IDs.category, 'Top', 1);
+            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
             await sails.helpers.rest.cmd('EnableAssisted', 0);
             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
             await sails.helpers.playlists.start(Meta['A'].playlist, true, Meta['A'].state === 'live_prerecord' ? 1 : 0);
@@ -40,13 +41,17 @@ module.exports = {
             await sails.helpers.rest.cmd('EnableAutoDJ', 0);
             await sails.helpers.rest.cmd('EnableAssisted', 1);
             await sails.helpers.rest.cmd('ClearPlaylist', 1);
-            await sails.helpers.songs.queue(sails.config.custom.categories.PSAs.subcategory, sails.config.custom.categories.music.PSAs.category, 'Top', 2, false);
+            await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, false);
             await sails.helpers.rest.cmd('EnableAssisted', 0);
             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
         }
 
         // All done.
         return exits.success();
+        
+        } catch (e) {
+            return exits.error(e);
+        }
 
     }
 

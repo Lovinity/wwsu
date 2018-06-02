@@ -32,15 +32,15 @@ module.exports.cron = {
                     });
 
                     await sails.helpers.error.reset('queueFail');
-                    
+
                     // Error checks
-                    
-                    
+
+
                     if (Status.errorCheck.stationID.count > 0)
                     {
                         var idQueued = false;
-                        queue.forEach(function(track) {
-                            
+                        queue.forEach(function (track) {
+
                         });
                     }
                 } catch (e) {
@@ -468,7 +468,7 @@ module.exports.cron = {
                             change.track = '';
                             await Meta.changeMeta({state: 'remote_on'});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
-                            await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
                         }
@@ -478,7 +478,7 @@ module.exports.cron = {
                             change.track = '';
                             await Meta.changeMeta({state: 'sportsremote_on'});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
-                            await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
                         }
@@ -498,7 +498,7 @@ module.exports.cron = {
                                     change.track = '';
                                     await Meta.changeMeta({state: 'remote_on'});
                                     await sails.helpers.rest.cmd('EnableAssisted', 1);
-                                    await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                                    await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                                     break;
@@ -513,7 +513,7 @@ module.exports.cron = {
                                     change.track = '';
                                     await Meta.changeMeta({state: 'sportsremote_on'});
                                     await sails.helpers.rest.cmd('EnableAssisted', 1);
-                                    await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                                    await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                                     break;
@@ -523,11 +523,11 @@ module.exports.cron = {
                         // If we are in break, queue something if the queue is under 2 items to keep the break going
                         if ((Meta['A'].state === 'sports_halftime' || Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected') && queue.length < 2)
                         {
-                            await sails.helpers.songs.queue(sails.config.custom.categories.halftime.subcategory, sails.config.custom.categories.halftime.category, 'Bottom', 1);
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 1);
                         }
                         if (Meta['A'].state.includes('_break') && queue.length < 2)
                         {
-                            await sails.helpers.songs.queue(sails.config.custom.categories.PSAs.subcategory, sails.config.custom.categories.PSAs.category, 'Bottom', 1, true);
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1, true);
                         }
 
                         // If we are in a sports break, switch it to returning mode because it should not be an indefinite break
@@ -546,11 +546,11 @@ module.exports.cron = {
                             {
                                 // Begin error check for legal ID
                                 await sails.helpers.error.count('stationID');
-                                await sails.helpers.songs.queue(sails.config.custom.categories.IDs.subcategory, sails.config.custom.categories.IDs.category, 'Bottom', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                                 Status.errorCheck.prevID = moment();
-                                await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
                             } else {
-                                await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
                             }
                         }
                         if (Meta['A'].state === 'sportsremote_break')
@@ -565,11 +565,11 @@ module.exports.cron = {
                             {
                                 // Begin error check for legal ID
                                 await sails.helpers.error.count('stationID');
-                                await sails.helpers.songs.queue(sails.config.custom.categories.IDs.subcategory, sails.config.custom.categories.IDs.category, 'Bottom', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                                 Status.errorCheck.prevID = moment();
-                                await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
                             } else {
-                                await sails.helpers.songs.queue(sails.config.custom.categories.sportsLiners.subcategory, sails.config.custom.categories.sportsLiners.category, 'Bottom', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
                             }
                         }
 
@@ -657,8 +657,8 @@ module.exports.cron = {
                                         .intercept((err) => {
                                         });
                                 await sails.helpers.requests.queue(3, true, true);
-                                await sails.helpers.songs.queue(sails.config.custom.categories.sweepers.subcategory, sails.config.custom.categories.sweepers.category, 'Top', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.categories.PSAs.subcategory, sails.config.custom.categories.PSAs.category, 'Top', 2, true);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Top', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, true);
                             }
 
                             // Determine if we are to queue a station ID break
@@ -704,9 +704,9 @@ module.exports.cron = {
                                         .intercept((err) => {
                                         });
                                 await sails.helpers.requests.queue(3, true, true);
-                                await sails.helpers.songs.queue(sails.config.custom.categories.IDs.subcategory, sails.config.custom.categories.IDs.category, 'Top', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.categories.promos.subcategory, sails.config.custom.categories.promos.category, 'Top', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.categories.PSAs.subcategory, sails.config.custom.categories.PSAs.category, 'Top', 2, true);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Top', 1);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, true);
                             }
                         }
                     } else {
@@ -1005,6 +1005,56 @@ module.exports.cron = {
                 Status.changeStatus([{name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed.', status: 1}]);
                 Status.changeStatus([{name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed.', status: 1}]);
                 Status.changeStatus([{name: 'db-nodebase', label: 'DB Nodebase', data: 'The CRON checkDB failed.', status: 1}]);
+            }
+        },
+        start: true
+    },
+
+    // Every 5 minutes, reload the subcategory IDs in configuration
+    reloadSubcats: {
+        schedule: '*/5 * * * *',
+        onTick: async function () {
+            sails.log.debug(`CRON reloadSubcats called.`);
+            
+            sails.config.custom.subcats = {};
+            
+            // Load subcats IDs for each consigured categories
+            for (var config in sails.config.custom.categories)
+            {
+                if (sails.config.custom.categories.hasOwnProperty(config))
+                {
+                    for (var cat in sails.config.custom.categories[config])
+                    {
+                        if (sails.config.custom.categories[config].hasOwnProperty(cat))
+                        {
+                            sails.config.custom.subcats[config] = [];
+                            var thecategory = await Category.findOne({name: cat})
+                                    .intercept((err) => {
+                                    });
+                            if (!thecategory || thecategory === null)
+                                continue;
+
+                            if (sails.config.custom.categories[config][cat].length <= 0)
+                            {
+                                var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
+                                        .intercept((err) => {
+                                        });
+                            } else {
+                                var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
+                                        .intercept((err) => {
+                                        });
+                            }
+                            if (!thesubcategories || thesubcategories.length <= 0)
+                                continue;
+
+                            thesubcategories.forEach(function (thesubcategory) {
+                                sails.config.custom.subcats[config].push(thesubcategory.ID);
+                            });
+
+                            sails.log.silly(`Subcategories for ${config}: ${sails.config.custom.subcats[config]}`);
+                        }
+                    }
+                }
             }
         },
         start: true

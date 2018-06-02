@@ -114,7 +114,7 @@ module.exports = {
                             break;
                         default:
                             if (queuedSomething && inputs.liner_first)
-                                await sails.helpers.songs.queue(sails.config.custom.categories.requestLiners.subcategory, sails.config.custom.categories.requestLiners.category, 'Top', 1, false);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, false);
                             return resolve();
                             break;
                     }

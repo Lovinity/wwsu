@@ -156,7 +156,7 @@ module.exports = {
                             sails.log.verbose(`No recent error; attempting standard recovery.`);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
-                            await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
 
@@ -168,7 +168,7 @@ module.exports = {
                             await sails.helpers.rest.cmd('StopPlayer', 0, 0);
                             await sails.helpers.rest.changeRadioDj();
                             await sails.helpers.rest.cmd('ClearPlaylist', 1);
-                            await sails.helpers.songs.queue(sails.config.custom.categories.remote.subcategory, sails.config.custom.categories.remote.category, 'Bottom', 1);
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
                         }
