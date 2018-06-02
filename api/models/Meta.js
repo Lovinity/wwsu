@@ -99,8 +99,6 @@ module.exports = {
     },
     automation: [], // Tracks in automation
     history: [], // track history array
-    stationID: null, // moment stamp of when the most recent station ID was queued.
-    prevBreak: null, // moment stamp of when the most recent PSA break was queued.
 
     /**
      * Change a meta attribute

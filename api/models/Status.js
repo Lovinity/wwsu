@@ -48,7 +48,9 @@ module.exports = {
 
     // The template are subsystems that should be added into memory upon lifting of the Sails app via bootstrap().
     template: [
-        {name: 'database', label: 'database', status: 1, data: 'No successful database queries since initialization.', time: null},
+        {name: 'db-nodebase', label: 'DB Nodebase', status: 1, data: 'Successful database test has not been run yet since initialization.', time: null},
+        {name: 'db-radiodj', label: 'DB RadioDJ', status: 1, data: 'Successful database test has not been run yet since initialization.', time: null},
+        {name: 'db-memory', label: 'DB Memory', status: 1, data: 'Successful database test has not been run yet since initialization.', time: null},
         {name: 'display-public', label: 'Display (Public)', data: 'Public display sign has not re-connected since initialization.', status: 3, time: null},
         {name: 'display-internal', label: 'Display (Internal)', data: 'Internal display sign has not re-connected since initialization.', status: 3, time: null},
         {name: 'website', label: 'Website', data: 'No connection to wwsu1069.org could be made yet since initialization.', status: 2, time: null},
@@ -73,6 +75,12 @@ module.exports = {
 
         // This contains a moment timestamp of when the previous triggered error happened.
         prevError: null,
+
+        // Contains a moment timestamp of when the most recent station ID was queued.
+        prevID: null,
+
+        // moment stamp of when the most recent PSA break was queued.
+        prevBreak: null,
 
         // Used for determining if we have a sudden jump in queue time in RadioDJ
         trueZero: 0,
