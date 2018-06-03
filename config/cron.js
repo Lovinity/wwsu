@@ -540,9 +540,11 @@ module.exports.cron = {
                                 await sails.helpers.error.count('stationID');
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                                 Status.errorCheck.prevID = moment();
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
+                                if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                             } else {
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
+                                if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                             }
                         }
                         if (Meta['A'].state === 'sportsremote_break')
@@ -559,9 +561,11 @@ module.exports.cron = {
                                 await sails.helpers.error.count('stationID');
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                                 Status.errorCheck.prevID = moment();
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
+                                if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                             } else {
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.sportsLiners, 'Bottom', 1);
+                                if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                             }
                         }
 
@@ -1008,9 +1012,9 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON reloadSubcats called.`);
 
+            // Load subcats IDs for each consigured categories
             sails.config.custom.subcats = {};
 
-            // Load subcats IDs for each consigured categories
             for (var config in sails.config.custom.categories)
             {
                 if (sails.config.custom.categories.hasOwnProperty(config))
@@ -1047,6 +1051,43 @@ module.exports.cron = {
                         }
                     }
                 }
+            }
+
+            // Load subcats IDs for each consigured sport
+            sails.config.custom.sportscats = {};
+            for (var config in sails.config.custom.sports)
+            {
+                if (sails.config.custom.sports.hasOwnProperty(config))
+                {
+                    sails.config.custom.sportscats[config] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
+                }
+            }
+
+            var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
+                    .intercept((err) => {
+                    });
+
+            var catIDs = [];
+            var cats = {};
+
+            if (categories.length > 0)
+            {
+                categories.forEach(function (category) {
+                    catIDs.push(category.ID);
+                    cats[category.ID] = category.name;
+                });
+            }
+
+            var subcategories = await Subcategory.find({parentid: catIDs})
+                    .intercept((err) => {
+                    });
+
+            if (subcategories.length > 0)
+            {
+                subcategories.forEach(function (subcategory) {
+                    if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
+                        sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
+                });
             }
         },
         start: true
