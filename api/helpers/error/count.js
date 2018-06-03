@@ -32,7 +32,7 @@ module.exports = {
         {
             return exits.success();
         }
-        if (typeof Status.errorCheck[inputs.name].condition === 'function' && Status.errorCheck[inputs.name].condition())
+        if (typeof Status.errorCheck[inputs.name].condition === 'function' && await Status.errorCheck[inputs.name].condition())
         {
             sails.log.verbose(`Condition met. Error check reset to zero.`);
             await sails.helpers.error.reset(inputs.name);

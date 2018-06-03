@@ -60,13 +60,13 @@ module.exports = {
             if (!Meta['A'].state.startsWith("live_"))
             {
                 Meta.changeMeta({state: 'automation_live', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-                Status.errorCheck.prevID = moment();
-                await sails.helpers.error.count('stationID');
                 //await sails.helpers.error.count('goLive');
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                 await sails.helpers.rest.removeMusic();
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                Status.errorCheck.prevID = moment();
+                await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
             } else {
                 // Otherwise, just update metadata but do not do anything else

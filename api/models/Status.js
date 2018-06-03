@@ -1,4 +1,4 @@
-/* global sails, Status, _, Logs, moment */
+/* global sails, Status, _, Logs, moment, Meta */
 
 /**
  * Status.js
@@ -183,7 +183,7 @@ module.exports = {
         // Check to see if we successfully queued what we needed to in order to return to the sports broadcast
         sportsReturn: {
             count: 0,
-            trigger: 5,
+            trigger: 6,
             condition: function () {
                 // WORK ON THIS
             },
@@ -198,20 +198,29 @@ module.exports = {
             }
         },
 
-        // Check to see if we successfully queued a station ID
+        // Check to see if we successfully queued a station ID. If not, try again.
         stationID: {
             count: 0,
-            trigger: 5,
+            trigger: 6,
             condition: function () {
-                // WORK ON THIS
+                var inQueue = false;
+                Meta.automation.forEach(function (track) {
+                    if (sails.config.custom.subcats.IDs.indexOf(track.IDSubcat) > -1)
+                    {
+                        inQueue = true;
+                        return true;
+                    }
+                });
+                return inQueue;
             },
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
-                        // WORK ON THIS
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                     } catch (e) {
                         return reject(e);
                     }
+                    return resolve(1);
                 });
             }
         },

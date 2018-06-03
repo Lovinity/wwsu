@@ -34,15 +34,7 @@ module.exports.cron = {
                     await sails.helpers.error.reset('queueFail');
 
                     // Error checks
-
-
-                    if (Status.errorCheck.stationID.count > 0)
-                    {
-                        var idQueued = false;
-                        queue.forEach(function (track) {
-
-                        });
-                    }
+                    await sails.helpers.error.count('stationID', true);
                 } catch (e) {
                     await sails.helpers.error.count('queueFail');
                     return reject(e);
@@ -1015,9 +1007,9 @@ module.exports.cron = {
         schedule: '8 */5 * * * *',
         onTick: async function () {
             sails.log.debug(`CRON reloadSubcats called.`);
-            
+
             sails.config.custom.subcats = {};
-            
+
             // Load subcats IDs for each consigured categories
             for (var config in sails.config.custom.categories)
             {
