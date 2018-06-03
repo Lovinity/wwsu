@@ -1,4 +1,4 @@
-/* global sails, Recipients, _, moment */
+/* global sails, Recipients, _, moment, Status */
 
 module.exports = {
 
@@ -76,6 +76,32 @@ module.exports = {
                             .intercept((err) => {
                                 return exits.error(err);
                             });
+
+                    // If the recipient name is found in djcontrols config, reflect status
+                    await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
+                        return new Promise(async (resolve, reject) => {
+                            try {
+                                if (djcontrols.host === inputs.name)
+                                    await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 3, data: 'This DJ Controls is reporting offline.'}]);
+                                return resolve(true);
+                            } catch (e) {
+                                return reject(e);
+                            }
+                        });
+                    });
+                    
+                    // If the recipient name is found in display sign config, reflect status
+                    await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
+                        return new Promise(async (resolve, reject) => {
+                            try {
+                                if (inputs.name === `display-${display.name}`)
+                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 3, data: 'This display sign is reporting offline.'}]);
+                                return resolve(true);
+                            } catch (e) {
+                                return reject(e);
+                            }
+                        });
+                    });
                 }
             }
 

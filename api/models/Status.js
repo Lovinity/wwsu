@@ -51,8 +51,6 @@ module.exports = {
         {name: 'db-nodebase', label: 'DB Nodebase', status: 1, data: 'Successful database test has not been run yet since initialization.', time: null},
         {name: 'db-radiodj', label: 'DB RadioDJ', status: 1, data: 'Successful database test has not been run yet since initialization.', time: null},
         {name: 'db-memory', label: 'DB Memory', status: 1, data: 'Successful database test has not been run yet since initialization.', time: null},
-        {name: 'display-public', label: 'Display (Public)', data: 'Public display sign has not re-connected since initialization.', status: 3, time: null},
-        {name: 'display-internal', label: 'Display (Internal)', data: 'Internal display sign has not re-connected since initialization.', status: 3, time: null},
         {name: 'website', label: 'Website', data: 'No connection to wwsu1069.org could be made yet since initialization.', status: 2, time: null},
         {name: 'stream-public', label: 'Radio Stream', data: 'Public radio stream has not reported online since initialization.', status: 2, time: null},
         {name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream for remote broadcasts has not reported online since initialization.', status: 4, time: null},
