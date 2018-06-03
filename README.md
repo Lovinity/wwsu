@@ -447,6 +447,18 @@ Get an array of tracks from the automation system. This was designed to be used 
 			},
 			...
         ]
+## State [/state]
+State endpoints are used to request to change states in WWSU's system (for example, going live or going to automation).
+### /state/live [POST /state/live]
+Request to go live. **Requires authorization**
+#### Request
+| key | criteria |
+|--|--|
+| topic | string (optional; a short blurb describing this live broadcast.) |
+| showname | string (required; the name of this live broadcast. It must follow this format: "DJ name/handle - show name". Validation will fail if it does not.) |
+| webchat | boolean (True allows the public to send messages to the DJ; false disallows this.) |
+| djcontrols | string (required; the computer hostname requesting to go live (this should be executed from DJ Controls)) |
+#### Response 200 OK
 ## Status [/status]
 Status endpoints refer to the status of WWSU subsystems.
 ### /status/get [GET /status/get]

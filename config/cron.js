@@ -1010,9 +1010,9 @@ module.exports.cron = {
         start: true
     },
 
-    // Every 5 minutes, reload the subcategory IDs in configuration
+    // Every 5 minutes at second 08, reload the subcategory IDs in configuration, in case changes were made in RadioDJ
     reloadSubcats: {
-        schedule: '*/5 * * * *',
+        schedule: '8 */5 * * * *',
         onTick: async function () {
             sails.log.debug(`CRON reloadSubcats called.`);
             
