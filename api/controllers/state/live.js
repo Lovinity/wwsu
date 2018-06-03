@@ -39,7 +39,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller display/internal called.');
+        sails.log.debug('Controller state/live called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
 
         try {

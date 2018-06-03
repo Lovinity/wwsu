@@ -449,8 +449,13 @@ Get an array of tracks from the automation system. This was designed to be used 
         ]
 ## State [/state]
 State endpoints are used to request to change states in WWSU's system (for example, going live or going to automation).
+### /state/automation [POST /state/automation]
+Request to go into automation mode. **Requires authorization**
+Requests do not get a response until the entire process of going to automation is completed on the backend. This could take several seconds.
+#### Response 200 OK
 ### /state/live [POST /state/live]
 Request to go live. **Requires authorization**
+Requests do not get a response until the entire process of preparing for live is completed on the backend. This could take several seconds.
 #### Request
 | key | criteria |
 |--|--|

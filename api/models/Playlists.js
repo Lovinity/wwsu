@@ -18,7 +18,7 @@ module.exports = {
         }
     },
     active: {name: null, ID: -1, position: 0, tracks: []},
-    played: moment('2000-01-01').toDate(),
+    played: moment('2000-01-01'),
     queuing: false
 };
 
