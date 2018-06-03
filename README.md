@@ -95,14 +95,20 @@ This endpoint supports sockets, uses the "directors" event, and returns data in 
 
 #### Response 200
 
-    [
-            "George Carlin": { // Full name of the director as key
-                "position": "General Manager", // Director's occupation with WWSU
-                "present": false, // False = clocked out, True = clocked in
-                "since": "2018-04-30T19:51:16.000Z" // Time at which present last changed
+        [
+            {
+                "createdAt": "2018-05-15T22:31:34.381Z",
+                "updatedAt": "2018-05-15T22:31:34.381Z",
+                "ID": 1,
+				"login": "george-carlin", // Username from OpenProject
+				"name": "George Carlin", // Full name of the director
+				"admin": true, // True if this is a super director / admin
+				"position": "Seven Dirty Words Manager", // The director's position with WWSU
+				"present": false, // True if the director is currently clocked in to WWSU
+				"since": "2018-05-15T22:31:34.381Z" // ISO stamp indicating when the director last clocked in or clocked out
             },
-			...
-    ]
+            ...
+        ]
 #### Response 404
 ## Discipline [/discipline]
 The discipline endpoints regard moderation for public clients (website and app users).
@@ -164,8 +170,7 @@ This endpoint supports sockets, uses the "eas" event, and returns data in the st
                 "color": "#FFFFFF", // Hexadecimal color representing the alert
                 "counties": "Clark, Greene, Montgomery", // Comma separated list of counties affected by the alert. Clark, Greene, and Montgomery counties of Ohio are the only ones in the WWSU coverage.
                 "starts": "2018-05-07T02:00:12.343Z", // ISO string when the alert begins
-                "expires": "2018-05-07T02:03:12.343Z", // ISO string when the alert expires
-                "push": false // Internal use only
+                "expires": "2018-05-07T02:03:12.343Z" // ISO string when the alert expires
             },
             ...
         ]
@@ -255,6 +260,11 @@ Meta endpoints regard metadata, or what is currently playing / on the air.
 ### /meta/get [GET /meta/get]
 Get the current meta as an object.
 This endpoint supports sockets under the "meta" event. However, the data sent is an object containing only the changed key: value pairs. This should be used with lodash merge to merge received changes with the meta stored in memory. There will never be new or deleted keys sent through sockets.
+If the display parameter is provided in the request, and the request is a socket, will also be subscribed to the "display-refresh" event, which returns a true to indicate the display sign should refresh itself and clear cache.
+#### Request
+| key | criteria |
+|--|--|
+| display | string (optional; if this request is coming from a display sign, the name of the display sign) |
 #### Response 200
         {
             "state": 'unknown', // State of the WWSU system. Refer to the states section in meta
@@ -451,6 +461,7 @@ This endpoint supports sockets, uses the "status" event, and returns data in the
 				"name": "database", // alphanumeric key ID of the subsystem
 				"label": "Database", // Human friendly name of the subsystem
 				"status": 5, // 1 = critical issue, 2 = significant issue, 3 = minor issue, 4 = offline (no issue), 5 = online (no issue)
+				"data": "The database is operational.", // A string containing information about the current running state of this subsystem.
 				"time": "2018-05-15T22:31:34.381Z" // ISO String indicating the most recent time the subsystem was detected as status 5.
 			},
 			...

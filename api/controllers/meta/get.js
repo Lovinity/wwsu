@@ -20,12 +20,14 @@ module.exports = {
         {
             sails.sockets.join(this.req, 'meta');
             sails.log.verbose('Request was a socket. Joining meta.');
-            
+
             // WORK ON THIS: find a better way to log display connections rather than in the meta controller
             if (inputs.display !== null)
             {
                 var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
                 await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.display, 'display', inputs.display);
+                sails.sockets.join(this.req, 'display-refresh');
+                sails.log.verbose('Request was a socket with a display parameter. Joined display-refresh.');
             }
         }
         return exits.success(Meta['A']);
