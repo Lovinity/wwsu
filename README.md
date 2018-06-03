@@ -464,6 +464,17 @@ Requests do not get a response until the entire process of preparing for live is
 | webchat | boolean (True allows the public to send messages to the DJ; false disallows this.) |
 | djcontrols | string (required; the computer hostname requesting to go live (this should be executed from DJ Controls)) |
 #### Response 200 OK
+### /state/remote [POST /state/remote]
+Request to begin a remote broadcast. **Requires authorization**
+Requests do not get a response until the entire process of preparing for a remote broadcast is completed on the backend. This could take several seconds.
+#### Request
+| key | criteria |
+|--|--|
+| topic | string (optional; a short blurb describing this broadcast.) |
+| showname | string (required; the name of this broadcast. It must follow this format: "Show host - show name". Validation will fail if it does not.) |
+| webchat | boolean (True allows the public to send messages to the host's DJ Controls; false disallows this.) |
+| djcontrols | string (required; the computer hostname requesting to go to remote (this should be executed from DJ Controls)) |
+#### Response 200 OK
 ## Status [/status]
 Status endpoints refer to the status of WWSU subsystems.
 ### /status/get [GET /status/get]

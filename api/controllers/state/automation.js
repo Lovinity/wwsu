@@ -29,6 +29,7 @@ module.exports = {
             Playlists.active.ID = 0;
             Playlists.active.position = -1;
             
+            // Operation: Queue a station ID, queue up to 3 pending track requests, load any scheduled playlists/rotations, and enable Auto DJ.
             await sails.helpers.rest.cmd('EnableAssisted', 1);
             await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
             Status.errorCheck.prevID = moment();
