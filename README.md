@@ -450,7 +450,7 @@ Get an array of tracks from the automation system. This was designed to be used 
 ## State [/state]
 State endpoints are used to request to change states in WWSU's system (for example, going live or going to automation).
 ### /state/automation [POST /state/automation]
-Request to go into automation mode. **Requires authorization**
+Request to go into automation mode. If coming from a sports broadcast, this will also play the closer, if there is one. **Requires authorization**
 Requests do not get a response until the entire process of going to automation is completed on the backend. This could take several seconds.
 #### Response 200 OK
 ### /state/live [POST /state/live]
@@ -461,7 +461,7 @@ Requests do not get a response until the entire process of preparing for live is
 |--|--|
 | topic | string (optional; a short blurb describing this live broadcast.) |
 | showname | string (required; the name of this live broadcast. It must follow this format: "DJ name/handle - show name". Validation will fail if it does not.) |
-| webchat | boolean (True allows the public to send messages to the DJ; false disallows this.) |
+| webchat | boolean (optional; True allows the public to send messages to the DJ; false disallows this. Defaults to true.) |
 | djcontrols | string (required; the computer hostname requesting to go live (this should be executed from DJ Controls)) |
 #### Response 200 OK
 ### /state/remote [POST /state/remote]
@@ -472,7 +472,19 @@ Requests do not get a response until the entire process of preparing for a remot
 |--|--|
 | topic | string (optional; a short blurb describing this broadcast.) |
 | showname | string (required; the name of this broadcast. It must follow this format: "Show host - show name". Validation will fail if it does not.) |
-| webchat | boolean (True allows the public to send messages to the host's DJ Controls; false disallows this.) |
+| webchat | boolean (optional; True allows the public to send messages to the host's DJ Controls; false disallows this. Defaults to true.) |
+| djcontrols | string (required; the computer hostname requesting to go to remote (this should be executed from DJ Controls)) |
+#### Response 200 OK
+### /state/sports [POST /state/sports]
+Request to begin a sports broadcast. **Requires authorization**
+Requests do not get a response until the entire process of preparing for a sports broadcast is completed on the backend. This could take several seconds.
+#### Request
+| key | criteria |
+|--|--|
+| topic | string (optional; a short blurb describing this broadcast.) |
+| sport | string (required; the sport being broadcast. This must be configured in the Node application.) |
+| remote | boolean (optional; if true, this will be a remote sports broadcast. Defaults to false.) |
+| webchat | boolean (optional; True allows the public to send messages to the host's DJ Controls; false disallows this. Defaults to true.) |
 | djcontrols | string (required; the computer hostname requesting to go to remote (this should be executed from DJ Controls)) |
 #### Response 200 OK
 ## Status [/status]
