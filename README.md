@@ -454,12 +454,12 @@ Request to go into automation mode. If coming from a sports broadcast, this will
 Requests do not get a response until the entire process of going to automation is completed on the backend. This could take several seconds.
 #### Response 200 OK
 ### /state/break [POST /state/break]
+Go into break mode (play PSAs, or music if halftime is true, until state/return is called). **Requires authorization**
+Requests do not get a response until the entire process of starting a break is complete.
 #### Request
 | key | criteria |
 |--|--|
 | halftime | boolean (optional; if true, will switch to a halftime / extended break. If false, will switch to a standard break. Defaults to false.) |
-Go into break mode (play PSAs, or music if halftime is true, until state/return is called). **Requires authorization**
-Requests do not get a response until the entire process of starting a break is complete.
 #### Response 200 OK
 ### /state/live [POST /state/live]
 Request to go live. **Requires authorization**
@@ -482,6 +482,10 @@ Requests do not get a response until the entire process of preparing for a remot
 | showname | string (required; the name of this broadcast. It must follow this format: "Show host - show name". Validation will fail if it does not.) |
 | webchat | boolean (optional; True allows the public to send messages to the host's DJ Controls; false disallows this. Defaults to true.) |
 | djcontrols | string (required; the computer hostname requesting to go to remote (this should be executed from DJ Controls)) |
+#### Response 200 OK
+### /state/return [POST /state/return]
+Return from a break, back into the broadcast. **Requires authorization**
+Requests do not get a response until the entire process of returning is completed on the backend.
 #### Response 200 OK
 ### /state/sports [POST /state/sports]
 Request to begin a sports broadcast. **Requires authorization**
