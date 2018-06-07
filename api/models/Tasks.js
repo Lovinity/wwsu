@@ -92,97 +92,101 @@ module.exports = {
             sails.log.debug(`Tasks.update called.`);
 
             // Get the tasks from OpenProject
-            needle('get', sails.config.custom.pm.host + sails.config.custom.pm.path + 'work_packages', {headers: {Authorization: 'Basic ' + sails.config.custom.pm.auth, 'Content-Type': 'application/json'}})
-                    .then(async function (resp) {
-                        try {
-                            resp.body = JSON.parse(resp.body.toString());
-                            sails.log.silly(`OpenProject response`);
-                            sails.log.silly(resp.body);
+            try {
+                needle('get', sails.config.custom.pm.host + sails.config.custom.pm.path + 'work_packages', {headers: {Authorization: 'Basic ' + sails.config.custom.pm.auth, 'Content-Type': 'application/json'}})
+                        .then(async function (resp) {
+                            try {
+                                resp.body = JSON.parse(resp.body.toString());
+                                sails.log.silly(`OpenProject response`);
+                                sails.log.silly(resp.body);
 
-                            var elements = resp.body._embedded.elements;
-                            var tasks = []; // Push task IDs into this array so we can detect deleted tasks
+                                var elements = resp.body._embedded.elements;
+                                var tasks = []; // Push task IDs into this array so we can detect deleted tasks
 
-                            // Iterate over each task
-                            await sails.helpers.asyncForEach(elements, function (element, index) {
-                                return new Promise(async (resolve2, reject2) => {
-                                    try {
-                                        // Prepare task information
-                                        tasks.push(element.id);
-                                        var criteria = {
-                                            unique: element.id,
-                                            subject: element.subject || 'Unknown',
-                                            category: element._links.category.title || 'Unknown',
-                                            project: element._links.project.title || 'Unknown',
-                                            type: element._links.type.title || 'Unknown',
-                                            priority: element._links.priority.title || 'Unknown',
-                                            status: element._links.status.title || 'Unknown',
-                                            start: element.startDate,
-                                            due: element.dueDate,
-                                            percent: element.percentageDone,
-                                            assignee: element._links.assignee.title || 'Unknown',
-                                            responsible: element._links.responsible.title || 'Unknown'
-                                        };
+                                // Iterate over each task
+                                await sails.helpers.asyncForEach(elements, function (element, index) {
+                                    return new Promise(async (resolve2, reject2) => {
+                                        try {
+                                            // Prepare task information
+                                            tasks.push(element.id);
+                                            var criteria = {
+                                                unique: element.id,
+                                                subject: element.subject || 'Unknown',
+                                                category: element._links.category.title || 'Unknown',
+                                                project: element._links.project.title || 'Unknown',
+                                                type: element._links.type.title || 'Unknown',
+                                                priority: element._links.priority.title || 'Unknown',
+                                                status: element._links.status.title || 'Unknown',
+                                                start: element.startDate,
+                                                due: element.dueDate,
+                                                percent: element.percentageDone,
+                                                assignee: element._links.assignee.title || 'Unknown',
+                                                responsible: element._links.responsible.title || 'Unknown'
+                                            };
 
-                                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                                        var criteriaB = _.cloneDeep(criteria);
+                                            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+                                            var criteriaB = _.cloneDeep(criteria);
 
-                                        var record = await Tasks.findOrCreate({unique: criteriaB.unique}, criteriaB)
-                                                .tolerate((err) => {
-                                                    // No error throw, just skip this task
-                                                    return resolve2(false);
-                                                });
-                                        sails.log.silly(`Task returned:`);
-                                        sails.log.silly(record);
-
-                                        // Detect any changes in the task. If a change is detected, we will do a database update.
-                                        var updateIt = false;
-                                        for (var key in criteria)
-                                        {
-                                            if (criteria.hasOwnProperty(key))
-                                            {
-                                                if (criteria[key] !== record[key])
-                                                {
-                                                    updateIt = true;
-                                                }
-                                            }
-                                        }
-
-                                        if (updateIt)
-                                        {
-                                            await Tasks.update({unique: criteria.unique}, criteria).fetch()
+                                            var record = await Tasks.findOrCreate({unique: criteriaB.unique}, criteriaB)
                                                     .tolerate((err) => {
                                                         // No error throw, just skip this task
                                                         return resolve2(false);
                                                     });
+                                            sails.log.silly(`Task returned:`);
+                                            sails.log.silly(record);
+
+                                            // Detect any changes in the task. If a change is detected, we will do a database update.
+                                            var updateIt = false;
+                                            for (var key in criteria)
+                                            {
+                                                if (criteria.hasOwnProperty(key))
+                                                {
+                                                    if (criteria[key] !== record[key])
+                                                    {
+                                                        updateIt = true;
+                                                    }
+                                                }
+                                            }
+
+                                            if (updateIt)
+                                            {
+                                                await Tasks.update({unique: criteria.unique}, criteria).fetch()
+                                                        .tolerate((err) => {
+                                                            // No error throw, just skip this task
+                                                            return resolve2(false);
+                                                        });
+                                            }
+
+                                            // Delete tasks that no longer exist
+                                            var removed = await Tasks.destroy({unique: {'!=': tasks}})
+                                                    .tolerate((err) => {
+                                                        return resolve2(false);
+                                                    })
+                                                    .fetch();
+
+                                            sails.log.silly(`Deleted tasks:`);
+                                            sails.log.silly(removed);
+
+                                            return resolve2(false);
+
+                                        } catch (e) {
+                                            // Don't throw an error, just skip this task
+                                            return resolve2(false);
                                         }
 
-                                        // Delete tasks that no longer exist
-                                        var removed = await Tasks.destroy({unique: {'!=': tasks}})
-                                                .tolerate((err) => {
-                                                    return resolve2(false);
-                                                })
-                                                .fetch();
-
-                                        sails.log.silly(`Deleted tasks:`);
-                                        sails.log.silly(removed);
-
-                                        return resolve2(false);
-
-                                    } catch (e) {
-                                        // Don't throw an error, just skip this task
-                                        return resolve2(false);
-                                    }
-
+                                    });
                                 });
-                            });
-                            return resolve();
-                        } catch (e) {
-                            return reject(e);
-                        }
-                    })
-                    .catch(function (err) {
-                        return reject(err);
-                    });
+                                return resolve();
+                            } catch (e) {
+                                return reject(e);
+                            }
+                        })
+                        .catch(function (err) {
+                            return reject(err);
+                        });
+            } catch (e) {
+                return reject(e);
+            }
         });
     }
 

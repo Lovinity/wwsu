@@ -30,7 +30,7 @@ module.exports = {
             var records = await Timesheet.find({or: [
                     {time_in: {'>=': start.toISOString(), '<': end.toISOString()}},
                     {time_out: {'>=': start.toISOString(), '<': end.toISOString()}}
-                ]}).sort('time_in ASC')
+                ]}).sort('time_ing ASC')
                     .tolerate((err) => {
                         return exits.error(err);
                     });

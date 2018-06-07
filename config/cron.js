@@ -767,36 +767,45 @@ module.exports.cron = {
         schedule: '3,33 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON checkRadioStreams triggered.`);
-
-            needle('get', sails.config.custom.stream)
-                    .then(async function (resp) {
-                        if (resp.body.includes("Mount Point /public"))
-                        {
-                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
-                        } else {
-                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream appears to be offline.', status: 2}]);
-                        }
-                        if (resp.body.includes("Mount Point /remote"))
-                        {
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
-                        } else {
+            try {
+                needle('get', sails.config.custom.stream)
+                        .then(async function (resp) {
+                            if (resp.body.includes("Mount Point /public"))
+                            {
+                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
+                            } else {
+                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream appears to be offline.', status: 2}]);
+                            }
+                            if (resp.body.includes("Mount Point /remote"))
+                            {
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
+                            } else {
+                                if (Meta['A'].state.includes("remote"))
+                                {
+                                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline.', status: 2}]);
+                                } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
+                                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline, but that is not an issue at this time as a remote broadcast is not active.', status: 4}]);
+                                }
+                            }
+                        })
+                        .catch(function (err) {
+                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
                             if (Meta['A'].state.includes("remote"))
                             {
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline.', status: 2}]);
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
                             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline, but that is not an issue at this time as a remote broadcast is not active.', status: 4}]);
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 4}]);
                             }
-                        }
-                    })
-                    .catch(function (err) {
-                        Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
-                        if (Meta['A'].state.includes("remote"))
-                        {
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
-                        } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 4}]);
-                        }
-                    });
+                        });
+            } catch (e) {
+                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
+                if (Meta['A'].state.includes("remote"))
+                {
+                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
+                } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
+                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 4}]);
+                }
+            }
         },
         start: true
     },
@@ -809,30 +818,40 @@ module.exports.cron = {
 
             await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
                 return new Promise(async (resolve, reject) => {
-                    needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`)
-                            .then(async function (resp) {
-                                if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
-                                {
-                                    Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
-                                } else {
+                    try {
+                        needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`)
+                                .then(async function (resp) {
+                                    if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
+                                    {
+                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
+                                    } else {
+                                        if (Meta['A'].radiodj === radiodj.rest)
+                                        {
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
+                                        } else {
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
+                                        }
+                                    }
+                                    return resolve(false);
+                                })
+                                .catch(function (err) {
                                     if (Meta['A'].radiodj === radiodj.rest)
                                     {
                                         Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
                                     } else {
                                         Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
                                     }
-                                }
-                                return resolve(false);
-                            })
-                            .catch(function (err) {
-                                if (Meta['A'].radiodj === radiodj.rest)
-                                {
-                                    Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
-                                } else {
-                                    Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
-                                }
-                                return resolve(false);
-                            });
+                                    return resolve(false);
+                                });
+                    } catch (e) {
+                        if (Meta['A'].radiodj === radiodj.rest)
+                        {
+                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
+                        } else {
+                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
+                        }
+                        return resolve(false);
+                    }
                 });
             });
         },
@@ -844,18 +863,22 @@ module.exports.cron = {
         schedule: '5,35 * * * * *',
         onTick: function () {
             sails.log.debug(`CRON checkWebsite triggered.`);
-            needle('get', sails.config.custom.website)
-                    .then(async function (resp) {
-                        if (typeof resp.body !== 'undefined')
-                        {
-                            Status.changeStatus([{name: `website`, label: `Website`, data: 'WWSU website appears online', status: 5}]);
-                        } else {
-                            Status.changeStatus([{name: `website`, label: `Website`, data: 'WWSU website appears to have an issue; expected body data was not returned.', status: 2}]);
-                        }
-                    })
-                    .catch(function (err) {
-                        Status.changeStatus([{name: `website`, label: `Website`, data: 'There was an error connecting to the WWSU website.', status: 2}]);
-                    });
+            try {
+                needle('get', sails.config.custom.website)
+                        .then(async function (resp) {
+                            if (typeof resp.body !== 'undefined')
+                            {
+                                Status.changeStatus([{name: `website`, label: `Website`, data: 'WWSU website appears online', status: 5}]);
+                            } else {
+                                Status.changeStatus([{name: `website`, label: `Website`, data: 'WWSU website appears to have an issue; expected body data was not returned.', status: 2}]);
+                            }
+                        })
+                        .catch(function (err) {
+                            Status.changeStatus([{name: `website`, label: `Website`, data: 'There was an error connecting to the WWSU website.', status: 2}]);
+                        });
+            } catch (e) {
+                Status.changeStatus([{name: `website`, label: `Website`, data: 'There was an error connecting to the WWSU website.', status: 2}]);
+            }
         },
         start: true
     },

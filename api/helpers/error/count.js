@@ -43,7 +43,7 @@ module.exports = {
         if (Status.errorCheck[inputs.name].count >= Status.errorCheck[inputs.name].trigger)
         {
             try {
-                sails.log.error(new Error(`Status.errorCheck.${inputs.name} triggered!`));
+                sails.log.warn(`Status.errorCheck.${inputs.name} triggered!`);
                 Status.errorCheck[inputs.name].count = await Status.errorCheck[inputs.name].fn();
                 Status.errorCheck.prevError = moment();
                 await Logs.create({logtype: 'system', loglevel: 'warn', logsubtype: '', event: `Status.errorCheck.${inputs.name} triggered!`})

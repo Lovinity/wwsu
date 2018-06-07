@@ -40,6 +40,7 @@ module.exports = {
         }
         
         // Query REST
+        try {
         needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})
                 .then(async function (resp) {
                     try {
@@ -54,6 +55,9 @@ module.exports = {
                     sails.log.silly(`REST ERROR: ${err.message}`);
                     return exits.success();
                 });
+            } catch (e) {
+                return exits.error(e);
+            }
     }
 
 

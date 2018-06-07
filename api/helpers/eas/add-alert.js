@@ -134,53 +134,57 @@ module.exports = {
                 if (inputs.source === 'NWS')
                 {
                     sails.log.verbose('Alert is from NWS source. Retrieving alert information.');
-                    needle('get', inputs.reference)
-                            .then(async function (resp) {
-                                try {
+                    try {
+                        needle('get', inputs.reference)
+                                .then(async function (resp) {
+                                    try {
 
-                                    sails.log.silly(resp.body);
+                                        sails.log.silly(resp.body);
 
-                                    // Go through each child
-                                    await sails.helpers.asyncForEach(resp.body.children, function (entry, index) {
-                                        return new Promise(async (resolve2, reject2) => {
-                                            try {
+                                        // Go through each child
+                                        await sails.helpers.asyncForEach(resp.body.children, function (entry, index) {
+                                            return new Promise(async (resolve2, reject2) => {
+                                                try {
 
-                                                // Skip all non-info properties
-                                                if (typeof entry.name === 'undefined' || entry.name !== 'info')
-                                                    return resolve2(false);
+                                                    // Skip all non-info properties
+                                                    if (typeof entry.name === 'undefined' || entry.name !== 'info')
+                                                        return resolve2(false);
 
-                                                var alert = {};
+                                                    var alert = {};
 
-                                                // Parse field information into the alert variable
-                                                entry.children.forEach(function (entry2)
-                                                {
-                                                    alert[entry2.name] = entry2.value;
-                                                });
+                                                    // Parse field information into the alert variable
+                                                    entry.children.forEach(function (entry2)
+                                                    {
+                                                        alert[entry2.name] = entry2.value;
+                                                    });
 
-                                                criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
-                                                sails.log.silly(`Criteria: ${criteria}`);
-                                                await Eas.create(criteria)
-                                                        .tolerate((err) => {
-                                                            return reject(err);
-                                                        })
-                                                        .fetch();
-                                                return exits.success();
+                                                    criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
+                                                    sails.log.silly(`Criteria: ${criteria}`);
+                                                    await Eas.create(criteria)
+                                                            .tolerate((err) => {
+                                                                return reject(err);
+                                                            })
+                                                            .fetch();
+                                                    return exits.success();
 
-                                            } catch (e) {
-                                                sails.log.error(e);
-                                                return reject2();
-                                            }
-                                            return resolve2(false);
+                                                } catch (e) {
+                                                    sails.log.error(e);
+                                                    return reject2();
+                                                }
+                                                return resolve2(false);
+                                            });
                                         });
-                                    });
 
-                                } catch (e) {
-                                    return exits.error(e);
-                                }
-                            })
-                            .catch(function (err) {
-                                return exits.error(err);
-                            });
+                                    } catch (e) {
+                                        return exits.error(e);
+                                    }
+                                })
+                                .catch(function (err) {
+                                    return exits.error(err);
+                                });
+                    } catch (e) {
+                        return exits.error(e);
+                    }
                 } else {
                     sails.log.silly(`Criteria: ${criteria}`);
                     var record = await Eas.create(criteria)
