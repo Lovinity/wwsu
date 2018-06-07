@@ -152,7 +152,7 @@ module.exports = {
                     if (checked.length > 0)
                         query.ID = {'!=': checked};
                     record = await Requests.find(query).limit(1)
-                            .intercept((err) => {
+                            .catch((err) => {
                                 return reject(err);
                             });
                     sails.log.silly(`Request: ${record}`);

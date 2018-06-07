@@ -22,7 +22,7 @@ module.exports = {
 
         // Find the track
         var record = await Songs.findOne({ID: inputs.ID})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
         sails.log.silly(`Song: ${record}`);
@@ -31,7 +31,7 @@ module.exports = {
 
         // Get rotation rule settings as saved in the database by RadioDJ.
         var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
         sails.log.silly(`Rotation settings: ${thesettings}`);

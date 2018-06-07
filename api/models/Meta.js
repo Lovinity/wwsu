@@ -138,7 +138,7 @@ module.exports = {
                 }
             }
             await Meta.update({ID: 1}).set(db)
-                    .intercept((err) => {
+                    .catch((err) => {
                         return reject(err);
                     });
             sails.log.silly(`meta socket: ${push}`);

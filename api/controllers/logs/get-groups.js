@@ -28,7 +28,7 @@ module.exports = {
 
             // Get DISTINCT records
             var records = await Logs.getDatastore().sendNativeQuery(`SELECT DISTINCT logsubtype FROM logs WHERE (createdAt BETWEEN ? AND ?) AND logsubtype IS NOT NULL AND logsubtype NOT LIKE ''`, [start.toISOString(), end.toISOString()])
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
 

@@ -29,7 +29,7 @@ module.exports = {
         
         // First, check to see if the client has already exceeded their requests for the day
         var requests = await Requests.find({userIP: inputs.IP, requested: {'>=': d}})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
         sails.log.verbose(`Requests made by this IP address today: ${requests.length}`);
@@ -43,7 +43,7 @@ module.exports = {
 
         // Next, confirm the track ID actually exists
         var record = await Songs.findOne({ID: inputs.ID})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
         sails.log.silly(`Song: ${record}`);
@@ -66,7 +66,7 @@ module.exports = {
 
         // Next, check if the provided track has already been requested and is pending to air
         var requests2 = await Requests.find({songID: inputs.ID, played: 0})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
                 sails.log.silly(`Requests of this song that are pending: ${requests2}`);
@@ -80,14 +80,14 @@ module.exports = {
 
 
         var subcat = await Subcategory.findOne({id: record.id_subcat})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
                 sails.log.silly(`Track subcategory: ${subcat}`);
         if (typeof subcat === 'undefined')
             return exits.error(new Error('Unable to determine the track subcategory.'));
         var parentcat = await Category.findOne({id: subcat.parentid})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
                 sails.log.silly(`Track category: ${parentcat}`);
@@ -105,7 +105,7 @@ module.exports = {
 
         // The rest of the checks are based off of track rotation rule settings saved in the database via RadioDJ
         var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
                 sails.log.silly(`Rotation rule records: ${thesettings}`);

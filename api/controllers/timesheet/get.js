@@ -31,7 +31,7 @@ module.exports = {
                     {time_in: {'>=': start.toISOString(), '<': end.toISOString()}},
                     {time_out: {'>=': start.toISOString(), '<': end.toISOString()}}
                 ]}).sort('time_in ASC')
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
             sails.log.verbose(`Returned Timesheet records: ${records.length}`);

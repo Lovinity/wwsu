@@ -83,7 +83,7 @@ module.exports.cron = {
                 {
                     try {
                         var meta = await Meta.find().limit(1)
-                                .intercept((err) => {
+                                .catch((err) => {
                                     return reject(err);
                                 });
                         meta = meta[0];
@@ -99,7 +99,7 @@ module.exports.cron = {
                 {
                     try {
                         var theplaylist = await Playlists.findOne({name: Meta['A'].playlist})
-                                .intercept((err) => {
+                                .catch((err) => {
                                     Playlists.active.ID = 0;
                                 });
                         if (typeof theplaylist === 'undefined')
@@ -108,7 +108,7 @@ module.exports.cron = {
                         } else {
                             Playlists.active.ID = theplaylist.ID;
                             var playlistTracks = await Playlists_list.find({pID: Playlists.active.ID})
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                     });
                             Playlists.active.tracks = [];
                             if (typeof playlistTracks !== 'undefined')
@@ -166,7 +166,7 @@ module.exports.cron = {
                         if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing)
                         {
                             await Statelogs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Playlist has finished and we went to automation.'})
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                     });
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
                             Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
@@ -200,7 +200,7 @@ module.exports.cron = {
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
                                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
                             change.track = newmeta;
                             // We do not want to display metadata for tracks that are not of type music, or have Unknown Artist as the artist
@@ -232,7 +232,7 @@ module.exports.cron = {
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
                                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'playlist', event: 'Automation playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
 
                             change.track = newmeta;
@@ -255,7 +255,7 @@ module.exports.cron = {
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
                                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'automation', event: 'Genre automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
                             change.track = newmeta;
                             // Do not display track meta if the track is not type Music or the artist is unknown
@@ -279,7 +279,7 @@ module.exports.cron = {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
                                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                            .intercept((err) => {
+                                            .catch((err) => {
                                             });
                                 change.track = newmeta;
                                 // Do not display meta for tracks that are not type Music or have an unknown artist
@@ -320,7 +320,7 @@ module.exports.cron = {
                             change.dj = Meta['A'].playlist;
                             if (Meta['A'].track !== newmeta)
                                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].playlist, event: 'Prerecorded show playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
                             change.track = newmeta;
                             // If the currently playing track is not a track that exists in the prerecord playlist, do not display meta for it
@@ -344,7 +344,7 @@ module.exports.cron = {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
                                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Remote producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                            .intercept((err) => {
+                                            .catch((err) => {
                                             });
                                 change.track = newmeta;
                                 // If the currently playing track is a non-Music track, or if we are in disconnected remote mode, show alternative metadata
@@ -384,7 +384,7 @@ module.exports.cron = {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
                                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                            .intercept((err) => {
+                                            .catch((err) => {
                                             });
                                 change.track = newmeta;
                                 change.line1 = `Raider Sports: ${Meta['A'].dj}`;
@@ -651,7 +651,7 @@ module.exports.cron = {
                             {
                                 Status.errorCheck.prevBreak = moment();
                                 await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: 'Queued :20 / :40 PSA break'})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
                                 await sails.helpers.requests.queue(3, true, true);
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Top', 1);
@@ -698,7 +698,7 @@ module.exports.cron = {
                                 Status.errorCheck.prevBreak = moment();
                                 await sails.helpers.error.count('stationID');
                                 await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: 'Queued :00 Station ID Break'})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
                                 await sails.helpers.requests.queue(3, true, true);
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
@@ -924,7 +924,7 @@ module.exports.cron = {
                     return new Promise(async (resolve, reject) => {
                         try {
                             var record = await check.findOne({ID: 1})
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                         checkStatus.status = 1;
                                         checkStatus.data += `Model failure (query error): ${index}. `;
                                     });
@@ -951,7 +951,7 @@ module.exports.cron = {
                     return new Promise(async (resolve, reject) => {
                         try {
                             var record = await check.findOne({ID: 1})
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                         checkStatus.status = 1;
                                         checkStatus.data += `Model failure (query error): ${index}. `;
                                     });
@@ -978,7 +978,7 @@ module.exports.cron = {
                     return new Promise(async (resolve, reject) => {
                         try {
                             var record = await check.findOne({ID: 1})
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                         checkStatus.status = 1;
                                         checkStatus.data += `Model failure (query error): ${index}. `;
                                     });
@@ -1026,7 +1026,7 @@ module.exports.cron = {
                         {
                             sails.config.custom.subcats[config] = [];
                             var thecategory = await Category.findOne({name: cat})
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                     });
                             if (!thecategory || thecategory === null)
                                 continue;
@@ -1034,11 +1034,11 @@ module.exports.cron = {
                             if (sails.config.custom.categories[config][cat].length <= 0)
                             {
                                 var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
                             } else {
                                 var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                         });
                             }
                             if (!thesubcategories || thesubcategories.length <= 0)
@@ -1065,7 +1065,7 @@ module.exports.cron = {
             }
 
             var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
-                    .intercept((err) => {
+                    .catch((err) => {
                     });
 
             var catIDs = [];
@@ -1080,7 +1080,7 @@ module.exports.cron = {
             }
 
             var subcategories = await Subcategory.find({parentid: catIDs})
-                    .intercept((err) => {
+                    .catch((err) => {
                     });
 
             if (subcategories.length > 0)
@@ -1101,7 +1101,7 @@ module.exports.cron = {
             sails.log.debug(`CRON clockOutDirectors called`);
             try {
                 await Timesheet.update({time_out: null}, {time_out: moment().toISOString(), approved: false})
-                        .intercept((err) => {
+                        .catch((err) => {
                         });
                 // Force reload all directors based on timesheets
                 await Directors.updateDirectors(true);

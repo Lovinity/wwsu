@@ -73,7 +73,7 @@ module.exports = {
 
                             // Remove directors which no longer exist in OpenProject
                             var removed = await Directors.destroy({name: {'!=': directorNames}})
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                         return reject(err);
                                     })
                                     .fetch();
@@ -140,7 +140,7 @@ module.exports = {
                                         ]
                                     },
                                     sort: 'time_in DESC'})
-                                        .intercept((err) => {
+                                        .catch((err) => {
                                             Status.changeStatus([{name: `openproject`, status: 3, data: 'Error with Timesheet.', label: `OpenProject`}]);
                                             return reject(err);
                                         });
@@ -155,12 +155,12 @@ module.exports = {
                                             if (record.time_out === null)
                                             {
                                                 record = await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()})
-                                                        .intercept((err) => {
+                                                        .catch((err) => {
                                                         })
                                                         .fetch();
                                             } else {
                                                 record = await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()})
-                                                        .intercept((err) => {
+                                                        .catch((err) => {
                                                         })
                                                         .fetch();
                                             }

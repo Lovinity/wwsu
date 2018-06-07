@@ -47,7 +47,7 @@ module.exports = {
                 Status.errorCheck[inputs.name].count = await Status.errorCheck[inputs.name].fn();
                 Status.errorCheck.prevError = moment();
                 await Logs.create({logtype: 'system', loglevel: 'warn', logsubtype: '', event: `Status.errorCheck.${inputs.name} triggered!`})
-                        .intercept((err) => {
+                        .catch((err) => {
                         });
             } catch (e) {
                 Status.errorCheck[inputs.name].count = Status.errorCheck[inputs.name].trigger;

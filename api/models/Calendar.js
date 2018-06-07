@@ -289,7 +289,7 @@ module.exports = {
 
                     // Destroy events in the database that no longer exist on the Google Calendar
                     await Calendar.destroy({unique: {'!=': eventIds}})
-                            .intercept((err) => {
+                            .catch((err) => {
                             })
                             .fetch();
 

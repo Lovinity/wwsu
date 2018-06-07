@@ -57,7 +57,7 @@ module.exports = {
 
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast.' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
-                        .intercept((err) => {
+                        .catch((err) => {
                         });
 
                 // Change meta
@@ -91,7 +91,7 @@ module.exports = {
 
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast (immediate transition from another sports broadcast).' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
-                        .intercept((err) => {
+                        .catch((err) => {
                         });
             }
             

@@ -21,14 +21,14 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             var song = await Songs.findOne({ID: inputs.ID})
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
             sails.log.silly(`Song: ${song}`);
 
             // Get history from RadioDJ
             var history = History.find({artist: song.artist, title: song.title})
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.success({});
                     });
             sails.log.verbose(`Retrieved history records: ${history.length}`);
@@ -36,7 +36,7 @@ module.exports = {
             
             // Get history from manually logged track airs via DJs (EXPERIMENTAL: may need to revise to be more accurate, say, for mixed cases etc)
             var history2 = Logs.find({event: {'conains': 'DJ/Producer'}, trackArtist: song.artist, trackTitle: song.title})
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.success({});
                     });
             sails.log.verbose(`Retrieved logs records: ${history2.length}`);

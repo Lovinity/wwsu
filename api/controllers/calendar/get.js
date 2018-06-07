@@ -13,7 +13,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller calendar/get called.');
         var records = await Calendar.find()
-                .intercept((err) => {
+                .catch((err) => {
                     sails.log.error(err);
                     exits.error();
                 });

@@ -24,7 +24,7 @@ module.exports = {
 
             // Add the indefinite ban to the database
             var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'permaban', message: `The website user was banned indefinitely by ${Meta['A'].dj}`}).fetch()
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
 

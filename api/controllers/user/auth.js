@@ -42,7 +42,7 @@ module.exports = {
         sails.log.debug('Controller user/auth called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         var user = await Nodeusers.find({email: inputs.email}).limit(1)
-                .intercept((err) => {
+                .catch((err) => {
                     sails.log.error(err);
                     return exits.error();
                 });

@@ -20,7 +20,7 @@ module.exports = {
         try {
             // Find the manual RadioDJ event for Node to trigger
             var event = Events.find({type: 3, name: inputs.event, enabled: 'True'})
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
             sails.log.verbose(`Events returned ${event.length} matched events, but we're only going to use the first one.`);

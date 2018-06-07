@@ -23,7 +23,7 @@ module.exports = {
 
             // Add the show ban to the database
             var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'showban', message: `The website user was show-banned by ${Meta['A'].dj}`}).fetch()
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
 

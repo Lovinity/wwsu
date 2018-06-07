@@ -247,7 +247,7 @@ module.exports = {
                         var criteriaB = _.cloneDeep(criteria);
 
                         var record = await Status.findOrCreate({name: status.name}, criteriaB)
-                                .intercept((err) => {
+                                .catch((err) => {
                                     return resolve2();
                                 });
 
@@ -275,7 +275,7 @@ module.exports = {
                             var criteriaB = _.cloneDeep(criteria);
                             sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`);
                             await Status.update({name: status.name}, criteriaB)
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                         return reject(err);
                                     })
                                     .fetch();
@@ -284,7 +284,7 @@ module.exports = {
                             var criteriaB = _.cloneDeep(criteria);
                             sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`);
                             await Status.update({name: status.name}, criteriaB)
-                                    .intercept((err) => {
+                                    .catch((err) => {
                                         return reject(err);
                                     });
                         }

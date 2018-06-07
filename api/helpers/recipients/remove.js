@@ -55,7 +55,7 @@ module.exports = {
 
             // Get the recipient entry
             var recipient = await Recipients.findOne(where)
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
 
@@ -73,7 +73,7 @@ module.exports = {
                 {
                     sails.log.verbose(`Recipient is no longer connected. Setting to offline.`);
                     await Recipients.update({host: inputs.host}, {host: inputs.host, status: 0, time: moment().toISOString()})
-                            .intercept((err) => {
+                            .catch((err) => {
                                 return exits.error(err);
                             });
 

@@ -17,7 +17,7 @@ module.exports = {
 
         // Get all active alerts from the database.
         var records = await Eas.find()
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
         sails.log.verbose(`Eas records retrieved: ${records.length}`);
@@ -31,7 +31,7 @@ module.exports = {
                 {
                     sails.log.verbose(`Record ${record.ID} is to be deleted. It no longer exists in NWS CAPS.`);
                     await Eas.destroy({ID: record.ID})
-                            .intercept((err) => {
+                            .catch((err) => {
                                 return resolve2(false);
                             })
                             .fetch();
@@ -43,7 +43,7 @@ module.exports = {
                 {
                     sails.log.verbose(`Record ${record.ID} is to be deleted. It has expired.`);
                     await Eas.destroy({ID: record.ID})
-                            .intercept((err) => {
+                            .catch((err) => {
                                 return resolve2(false);
                             })
                             .fetch();

@@ -56,7 +56,7 @@ module.exports = {
         // Check how many messages were sent by this host within the last minute. If any are returned, the host is not allowed to send messages yet.
         var searchto = moment().subtract(1, 'minutes').toDate();
         var check = await Messages.find({from_IP: inputs.from_IP, createdAt: {'>': searchto}})
-                .intercept((err) => {
+                .catch((err) => {
                     return exits.error(err);
                 });
         sails.log.verbose(`IP address sent ${check.length} messages within the last minute.`);
@@ -68,7 +68,7 @@ module.exports = {
         {
             sails.log.verbose(`Sending private message.`);
             records = await Messages.create({status: 'active', from: `website-${theid}`, from_friendly: `Web (${inputs.nickname})`, from_IP: inputs.from_IP, to: 'DJ-private', to_friendly: 'DJ private', message: inputs.message}).fetch()
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
             if (!records)
@@ -77,7 +77,7 @@ module.exports = {
         } else {
             sails.log.verbose(`Sending public message.`);
             records = await Messages.create({status: 'active', from: `website-${theid}`, from_friendly: `Web (${inputs.nickname})`, from_IP: inputs.from_IP, to: 'DJ', to_friendly: 'DJ', message: inputs.message}).fetch()
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
             if (!records)

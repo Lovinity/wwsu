@@ -63,7 +63,7 @@ module.exports = {
         try {
             // Get the director as provided by admin
             var record = await Directors.findOne({login: inputs.admin})
-                    .intercept((err) => {
+                    .catch((err) => {
                         sails.log.error(err);
                         return exits.error();
                     });
@@ -75,7 +75,7 @@ module.exports = {
 
             // Update the timesheet record
             await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(), time_out: moment(inputs.time_out).toISOString, approved: inputs.approved})
-                    .intercept((err) => {
+                    .catch((err) => {
                         sails.log.error(err);
                         return exits.error();
                     });

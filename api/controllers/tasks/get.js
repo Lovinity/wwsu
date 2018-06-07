@@ -14,7 +14,7 @@ module.exports = {
         sails.log.debug('Controller tasks/get called.');
         try {
             var records = await Tasks.find({})
-                    .intercept((err) => {
+                    .catch((err) => {
                         sails.log.error(err);
                         exits.error();
                     });

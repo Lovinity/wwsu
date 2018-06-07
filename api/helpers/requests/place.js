@@ -42,14 +42,14 @@ module.exports = {
 
                 // Get the song data
                 var record2 = await Songs.findOne({ID: inputs.ID})
-                        .intercept((err) => {
+                        .catch((err) => {
                             return exits.error(err);
                         });
                         sails.log.silly(`Song: ${record2}`);
 
                 // Create the request
                 await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(), played: 0})
-                        .intercept((err) => {
+                        .catch((err) => {
                             return exits.error(err);
                         });
                 Requests.pending.push(inputs.ID);

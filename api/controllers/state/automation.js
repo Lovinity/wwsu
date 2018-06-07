@@ -17,7 +17,7 @@ module.exports = {
         try {
             // Log the request
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off and went to automation.'})
-                    .intercept((err) => {
+                    .catch((err) => {
                     });
 
             // Reset playlist information; if any playlists / events are scheduled, we want them to start up immediately.

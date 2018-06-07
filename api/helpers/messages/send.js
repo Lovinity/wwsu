@@ -42,7 +42,7 @@ module.exports = {
             
             // Grab data pertaining to the host that is retrieving messages. Create if not exists.
             var stuff = await Hosts.findOrCreate({host: inputs.from}, {host: inputs.from, friendlyname: inputs.from})
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
             sails.log.silly(`Host: ${stuff}`);
@@ -50,7 +50,7 @@ module.exports = {
             
             // Create the message
             var records = await Messages.create(inputs).fetch()
-                    .intercept((err) => {
+                    .catch((err) => {
                         return exits.error(err);
                     });
             if (!records)
