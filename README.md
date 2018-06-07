@@ -447,6 +447,13 @@ Get an array of tracks from the automation system. This was designed to be used 
 			},
 			...
         ]
+### /songs/queue-psa [POST /songs/queue-psa]
+Add a PSA into the RadioDJ queue. **Requires authorization**
+#### Request
+| key | criteria |
+|--|--|
+| duration | number (optional; if provided, the PSA queued will be this long in seconds, +/- 5 seconds. Defaults to 30.) |
+#### Response 200
 ## State [/state]
 State endpoints are used to request to change states in WWSU's system (for example, going live or going to automation).
 ### /state/automation [POST /state/automation]
