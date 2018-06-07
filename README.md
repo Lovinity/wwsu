@@ -192,6 +192,21 @@ Send out a test through the internal emergency alert system. **Requires authoriz
 #### Response 200 OK
 ## Logs [/logs]
 Logs endpoints regard the internal logging system.
+### /logs/add [POST /logs/add]
+Add a log into the system. **Requires authorization**
+#### Request
+| key | criteria |
+|--|--|
+| date | string (optional; a moment.js parsable string containing the date this log took place. Defaults to now.) |
+| logtype | string (required; type of log. It is recommended to use "operation" for Node logs, "automation" for automation logs, and "manual" for manually logged entries. Manual-type logs will update manual metadata if running a show and a track artist and title was specified.) |
+| loglevel | string (required; level of severity. Must be one of: ["debug", "info", "warn", "error"]) |
+| logsubtype | string (optional; a subcategory of the log. Clients are advised to use "DJ/show host - show name" when logging things pertaining to a show.) |
+| event | string (required; details about the event that happened prompting the log. Do not include track info; include that in the track parameters.) |
+| trackArtist | string (optional; specify track artist if a track was played to be used for spin counts.) |
+| trackTitle | string (optional; specify track title if a track was played to be used for spin counts.) |
+| trackAlbum | string (optional; specify track album if a track was played.) |
+| trackLabel | string (optional; specify track label if a track was played.) |
+#### Response 200 OK
 ### /logs/get [POST /logs/get]
 Get a list of logs for a specific subtype and a specific date. Returns logs for the 24-hour period of the provided date.
 #### Request

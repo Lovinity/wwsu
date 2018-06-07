@@ -14,7 +14,8 @@ module.exports = {
         },
 
         logtype: {
-            type: 'string'
+            type: 'string',
+            isIn: ["debug", "info", "warn", "error"]
         },
         loglevel: {
             type: 'string'
