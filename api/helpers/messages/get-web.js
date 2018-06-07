@@ -28,7 +28,7 @@ module.exports = {
                         {from: `website-${inputs.host}`, to: 'DJ-private'}
                     ]
                 })
-                .catch((err) => {
+                .tolerate((err) => {
                     return exits.error(err);
                 });
                 sails.log.verbose(`Messages records retrieved: ${records.length}`);

@@ -17,7 +17,7 @@ module.exports = {
 
             // log it
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested to return from break.'})
-                    .catch((err) => {
+                    .tolerate((err) => {
                     });
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);

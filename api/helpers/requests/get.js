@@ -18,7 +18,7 @@ module.exports = {
         sails.log.debug('Helper requests.get called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         var records = await Requests.find({played: 0, ID: {'>': inputs.offset}})
-                .catch((err) => {
+                .tolerate((err) => {
                     return exits.error(err);
                 });
                 sails.log.verbose(`Requests records retrieved: ${records.length}`);
@@ -35,7 +35,7 @@ module.exports = {
                 return new Promise(async (resolve2, reject2) => {
                     var temp = record;
                     var record2 = await Songs.findOne({ID: record.songID})
-                            .catch((err) => {
+                            .tolerate((err) => {
                                 return reject2(err);
                             });
                             sails.log.silly(`Song: ${record2}`);

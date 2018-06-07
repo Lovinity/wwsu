@@ -127,7 +127,7 @@ module.exports = {
                                         var criteriaB = _.cloneDeep(criteria);
 
                                         var record = await Tasks.findOrCreate({unique: criteriaB.unique}, criteriaB)
-                                                .catch((err) => {
+                                                .tolerate((err) => {
                                                     // No error throw, just skip this task
                                                     return resolve2(false);
                                                 });
@@ -150,7 +150,7 @@ module.exports = {
                                         if (updateIt)
                                         {
                                             await Tasks.update({unique: criteria.unique}, criteria).fetch()
-                                                    .catch((err) => {
+                                                    .tolerate((err) => {
                                                         // No error throw, just skip this task
                                                         return resolve2(false);
                                                     });
@@ -158,7 +158,7 @@ module.exports = {
 
                                         // Delete tasks that no longer exist
                                         var removed = await Tasks.destroy({unique: {'!=': tasks}})
-                                                .catch((err) => {
+                                                .tolerate((err) => {
                                                     return resolve2(false);
                                                 })
                                                 .fetch();

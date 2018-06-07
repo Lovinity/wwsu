@@ -17,7 +17,7 @@ module.exports = {
         try {
             // Log it
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested a single Top Add.'})
-                    .catch((err) => {
+                    .tolerate((err) => {
                     });
 
             // Queue it

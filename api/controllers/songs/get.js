@@ -53,7 +53,7 @@ module.exports = {
 
             // First, grab RadioDJ categories and put them in memory.
             var cats2 = await Category.find()
-                    .catch((err) => {
+                    .tolerate((err) => {
                         sails.log.error(err);
                         return exits.error();
                     });
@@ -71,7 +71,7 @@ module.exports = {
             {
                 // Retrieve a list of subcategories that fall within a parent category defined in config as a music category.
                 var subcats2 = await Subcategory.find({parentid: sails.config.custom.subcats.music})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         });
@@ -90,7 +90,7 @@ module.exports = {
                 // Find songs in any of these subcategories
                 query = {ID: {'<': inputs.offset}, id_subcat: subcatIDs};
                 songs = await Songs.find(query).limit(inputs.limit)
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         });
@@ -104,7 +104,7 @@ module.exports = {
                 // Find the song matching the defined ID
                 query = {ID: inputs.ID};
                 songs = await Songs.find(query).limit(inputs.limit)
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         });
@@ -125,7 +125,7 @@ module.exports = {
 
                 // Get those subcategories
                 var subcats2 = await Subcategory.find({ID: subcatIDs})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         });

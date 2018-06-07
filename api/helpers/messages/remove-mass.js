@@ -19,7 +19,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await Messages.update({from: inputs.host}, {status: 'deleted'}).fetch()
-                    .catch((err) => {
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
             return exits.success();

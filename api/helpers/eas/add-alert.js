@@ -69,7 +69,7 @@ module.exports = {
 
             // Get the alert if it already exists in the database
             var record = await Eas.findOne({source: inputs.source, reference: inputs.reference})
-                    .catch((err) => {
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
             if (record) // Exists
@@ -110,7 +110,7 @@ module.exports = {
                 if (updateIt)
                 {
                     await Eas.update({ID: record.ID}, criteria)
-                            .catch((err) => {
+                            .tolerate((err) => {
                                 return exits.error(err);
                             })
                             .fetch();
@@ -160,7 +160,7 @@ module.exports = {
                                                 criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
                                                 sails.log.silly(`Criteria: ${criteria}`);
                                                 await Eas.create(criteria)
-                                                        .catch((err) => {
+                                                        .tolerate((err) => {
                                                             return reject(err);
                                                         })
                                                         .fetch();
@@ -184,7 +184,7 @@ module.exports = {
                 } else {
                     sails.log.silly(`Criteria: ${criteria}`);
                     var record = await Eas.create(criteria)
-                            .catch((err) => {
+                            .tolerate((err) => {
                                 return reject(err);
                             })
                             .fetch();

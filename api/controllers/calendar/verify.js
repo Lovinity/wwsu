@@ -27,7 +27,7 @@ module.exports = {
 
             // Load all the playlists into memory
             var playlistsR = await Playlists.find()
-                    .catch((err) => {
+                    .tolerate((err) => {
                         sails.log.error(err);
                         return exits.error();
                     });
@@ -39,7 +39,7 @@ module.exports = {
                 return new Promise(async (resolve, reject) => {
                     try {
                         var pTracks = await Playlists_list.find({pID: playlist.ID})
-                                .catch((err) => {
+                                .tolerate((err) => {
                                     return reject(err);
                                 });
                         sails.log.verbose(`Retrieved Playlists_list records: ${pTracks.length}`);
@@ -51,7 +51,7 @@ module.exports = {
                         });
 
                         var songs = await Songs.find({ID: temp})
-                                .catch((err) => {
+                                .tolerate((err) => {
                                     return reject(err);
                                 });
                         sails.log.verbose(`Retrieved Songs records: ${songs.length}`);
@@ -72,7 +72,7 @@ module.exports = {
 
             // Load all manual RadioDJ events into memory
             var eventsR = await Events.find({type: 3})
-                    .catch((err) => {
+                    .tolerate((err) => {
                         sails.log.error(err);
                         return exits.error();
                     });
@@ -85,7 +85,7 @@ module.exports = {
 
             // Load all the calendar events into memory
             var calendar = await Calendar.find().sort('start ASC')
-                    .catch((err) => {
+                    .tolerate((err) => {
                         sails.log.error(err);
                         return exits.error();
                     });

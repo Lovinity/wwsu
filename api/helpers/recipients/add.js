@@ -67,7 +67,7 @@ module.exports = {
             if (inputs.group === 'computers')
             {
                 var host = await Hosts.find({host: inputs.host}).limit(1)
-                        .catch((err) => {
+                        .tolerate((err) => {
                         });
                 if (host && typeof host[0] !== 'undefined')
                 {
@@ -77,7 +77,7 @@ module.exports = {
 
             // Get or create the recipient entry
             var recipient = await Recipients.findOrCreate({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()})
-                    .catch((err) => {
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
 
@@ -101,7 +101,7 @@ module.exports = {
             {
                 sails.log.verbose(`Updating recipient as it has changed.`);
                 await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             return exits.error(err);
                         });
             }

@@ -37,7 +37,7 @@ module.exports = {
         
         // See if the specified director is in memory. If not, return 404 not found.
         var records = await Directors.find(query)
-                .catch((err) => {
+                .tolerate((err) => {
                     sails.log.error(err);
                     return exits.error();
                 });

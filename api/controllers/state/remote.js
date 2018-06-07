@@ -56,7 +56,7 @@ module.exports = {
             {
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.showname, event: 'Remote show requested.' + "\n" + 'Producer - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
-                        .catch((err) => {
+                        .tolerate((err) => {
                         });
 
                 Meta.changeMeta({state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
@@ -76,7 +76,7 @@ module.exports = {
 
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.showname, event: 'Remote show requested (immediate transition from another show).' + "\n" + 'Host - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
-                        .catch((err) => {
+                        .tolerate((err) => {
                         });
             }
             return exits.success();

@@ -19,8 +19,8 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             // Find the manual RadioDJ event for Node to trigger
-            var event = Events.find({type: 3, name: inputs.event, enabled: 'True'})
-                    .catch((err) => {
+            var event = await Events.find({type: 3, name: inputs.event, enabled: 'True'})
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
             sails.log.verbose(`Events returned ${event.length} matched events, but we're only going to use the first one.`);

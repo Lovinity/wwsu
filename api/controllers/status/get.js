@@ -13,7 +13,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller status/get called.');
         var records = await Status.find()
-                .catch((err) => {
+                .tolerate((err) => {
                     sails.log.error(err);
                     return exits.error();
                 });

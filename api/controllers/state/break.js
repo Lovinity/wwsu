@@ -25,7 +25,7 @@ module.exports = {
 
             // Log it
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer went into break. Halftime?: ' + inputs.halftime})
-                    .catch((err) => {
+                    .tolerate((err) => {
                     });
 
             // halftime break? Play a station ID and then begin halftime music

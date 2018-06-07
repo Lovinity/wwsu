@@ -22,7 +22,7 @@ module.exports = {
 
             // Log it
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested a Sports Liner.'})
-                    .catch((err) => {
+                    .tolerate((err) => {
                     });
 
             // Queue it

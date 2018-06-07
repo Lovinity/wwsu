@@ -24,7 +24,7 @@ module.exports = {
             
             // Add a dayban to the database
             var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'dayban', message: `The website user was banned for 24 hours by ${Meta['A'].dj}`}).fetch()
-                    .catch((err) => {
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
                     

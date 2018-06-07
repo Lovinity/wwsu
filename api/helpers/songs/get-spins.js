@@ -21,22 +21,22 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             var song = await Songs.findOne({ID: inputs.ID})
-                    .catch((err) => {
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
             sails.log.silly(`Song: ${song}`);
 
             // Get history from RadioDJ
-            var history = History.find({artist: song.artist, title: song.title})
-                    .catch((err) => {
+            var history = await History.find({artist: song.artist, title: song.title})
+                    .tolerate((err) => {
                         return exits.success({});
                     });
             sails.log.verbose(`Retrieved history records: ${history.length}`);
             sails.log.silly(history);
             
             // Get history from manually logged track airs via DJs (EXPERIMENTAL: may need to revise to be more accurate, say, for mixed cases etc)
-            var history2 = Logs.find({event: {'conains': 'DJ/Producer'}, trackArtist: song.artist, trackTitle: song.title})
-                    .catch((err) => {
+            var history2 = await Logs.find({event: {'conains': 'DJ/Producer'}, trackArtist: song.artist, trackTitle: song.title})
+                    .tolerate((err) => {
                         return exits.success({});
                     });
             sails.log.verbose(`Retrieved logs records: ${history2.length}`);

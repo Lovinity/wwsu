@@ -34,7 +34,7 @@ module.exports = {
 
             // Get records
             var records = await Logs.find({createdAt: {'>=': start.toISOString(), '<': end.toISOString()}, logsubtype: inputs.subtype}).sort('createdAt ASC')
-                    .catch((err) => {
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
 

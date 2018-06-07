@@ -52,7 +52,7 @@ module.exports.bootstrap = async function (done) {
 
     sails.log.verbose(`BOOTSTRAP: Adding Status template to database.`);
     await Status.createEach(Status.template)
-            .catch((err) => {
+            .tolerate((err) => {
                 return done(err);
             });
 
@@ -60,7 +60,7 @@ module.exports.bootstrap = async function (done) {
     // Load internal recipients into memory
     sails.log.verbose(`BOOTSTRAP: Adding recipients template to database.`);
     await Recipients.createEach(Recipients.template)
-            .catch((err) => {
+            .tolerate((err) => {
                 return done(err);
             });
 
@@ -76,7 +76,7 @@ module.exports.bootstrap = async function (done) {
                 {
                     sails.config.custom.subcats[config] = [];
                     var thecategory = await Category.findOne({name: cat})
-                            .catch((err) => {
+                            .tolerate((err) => {
                             });
                     if (!thecategory || thecategory === null)
                         continue;
@@ -84,11 +84,11 @@ module.exports.bootstrap = async function (done) {
                     if (sails.config.custom.categories[config][cat].length <= 0)
                     {
                         var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
-                                .catch((err) => {
+                                .tolerate((err) => {
                                 });
                     } else {
                         var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
-                                .catch((err) => {
+                                .tolerate((err) => {
                                 });
                     }
                     if (!thesubcategories || thesubcategories.length <= 0)
@@ -115,7 +115,7 @@ module.exports.bootstrap = async function (done) {
     }
 
     var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
-            .catch((err) => {
+            .tolerate((err) => {
             });
 
     var catIDs = [];
@@ -130,7 +130,7 @@ module.exports.bootstrap = async function (done) {
     }
 
     var subcategories = await Subcategory.find({parentid: catIDs})
-            .catch((err) => {
+            .tolerate((err) => {
             });
 
     if (subcategories.length > 0)

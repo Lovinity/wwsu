@@ -71,7 +71,7 @@ module.exports = {
         try {
             // Create the log entry
             await Logs.create({logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel})
-                    .catch((err) => {
+                    .tolerate((err) => {
                         return exits.error(err);
                     });
 

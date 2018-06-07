@@ -43,7 +43,7 @@ module.exports = {
 
                 // Find the playlist
                 var theplaylist = await Playlists.findOne({name: inputs.name})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             Playlists.queuing = false;
                             return exits.error(err);
                         });
@@ -66,7 +66,7 @@ module.exports = {
                         try {
                             await sails.helpers.rest.cmd('LoadPlaylist', theplaylist.ID);
                             var playlistTracks = await Playlists_list.find({pID: theplaylist.ID}).sort('ord ASC')
-                                    .catch((err) => {
+                                    .tolerate((err) => {
                                         return reject2(err);
                                     });
                             sails.log.verbose(`Playlists_list records retrieved: ${playlistTracks.length}`);
@@ -183,7 +183,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                     await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'playlist - ' + theplaylist.name, event: 'A playlist was scheduled to start.' + "\n" + 'Playlist: ' + inputs.name})
-                            .catch((err) => {
+                            .tolerate((err) => {
                                 sails.log.error(err);
                             });
                     await loadPlaylist();
@@ -194,7 +194,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                     await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(), dj: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: theplaylist.name, event: 'A prerecorded show was scheduled to start.' + "\n" + 'Show: ' + inputs.name})
-                            .catch((err) => {
+                            .tolerate((err) => {
                                 sails.log.error(err);
                             });
                     await loadPlaylist();

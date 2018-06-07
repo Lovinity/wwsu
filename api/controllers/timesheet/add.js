@@ -30,7 +30,7 @@ module.exports = {
         try {
 
             var record = await Directors.findOne({login: inputs.login})
-                    .catch((err) => {
+                    .tolerate((err) => {
                         sails.log.error(err);
                         return exits.error();
                     });
@@ -52,14 +52,14 @@ module.exports = {
 
                 // Add the time_out entry
                 await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(), approved: toapprove})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         });
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: false, since: thetime.toISOString()})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         })
@@ -75,14 +75,14 @@ module.exports = {
 
                 // Clock-ins need a new entry
                 await Timesheet.create({name: record.name, time_in: thetime.toISOString(), approved: toapprove})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         });
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: true, since: thetime.toISOString()})
-                        .catch((err) => {
+                        .tolerate((err) => {
                             sails.log.error(err);
                             return exits.error();
                         })

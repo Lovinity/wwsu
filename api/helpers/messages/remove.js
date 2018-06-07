@@ -18,7 +18,7 @@ module.exports = {
         sails.log.debug('Helper messages.remove called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         var records = await Messages.update({ID: inputs.ID}, {status: 'deleted'})
-                .catch((err) => {
+                .tolerate((err) => {
                     return exits.error(err);
                 })
                 .fetch();
