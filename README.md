@@ -450,6 +450,10 @@ Get an array of tracks from the automation system. This was designed to be used 
 ### /songs/queue-add [POST /songs/queue-add]
 Queue a Top Add into RadioDJ. If in a show, will play the Add immediately and send into returning state. **Requires authorization**
 #### Response 200
+### /songs/queue-liner [POST /songs/queue-liner]
+Queue and play a Sports Liner. Will error if we are not in a sports broadcast. **Requires authorization**
+#### Response 200
+#### Response 500
 ### /songs/queue-psa [POST /songs/queue-psa]
 Add a PSA into the RadioDJ queue. **Requires authorization**
 #### Request
