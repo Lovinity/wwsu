@@ -228,6 +228,9 @@ Retrieve a list of log subtypes for a specified date.
 			"Log subtype 2",
 			...
 		]
+### /logs/view [GET /logs/view]
+View a webpage to browse through the system logs.
+#### Response 200 (text/html)
 ## Messages [/messages]
 Messages endpoints regard the internal WWSU messaging system.
 ### /messages/get [GET /messages/get]

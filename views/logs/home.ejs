@@ -1,0 +1,127 @@
+// WORK ON THIS
+
+<!DOCTYPE html>
+<head>
+<link rel="stylesheet" href="../../../bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../../../bootstrap/css/bootstrap.datetimepicker.css">
+<script src="../../js/jquery-3.2.1.min.js"></script>
+<script src="../../js/popper.js"></script>
+<script src="../../js/moment.min.js"></script>
+<script src="../../bootstrap/js/bootstrap.min.js"></script>
+<script src="../../bootstrap/js/bootstrap.datetimepicker.js"></script>
+<title>WWSU logs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<html>
+<body>
+<h1>WWSU Logs</h1>
+<div class="input-group" id="DateDemo">
+	<form action="javascript:filterLogs(null)" method="post" class="form">
+              <input type='text' id='weekly-date-picker' name="firstdate" value="<%= currentDate %>" />
+              <input type="submit" class="btn btn-default" value="Filter">
+              </form>
+          </div>
+<table border="1" class="table table-hover" cellpadding="1" cellspacing="1" style="width: 100%;" id="results-table"> <tr>
+</table>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+  //Initialize the datePicker(I have taken format as mm-dd-yyyy, you can     //have your owh)
+  $("#weekly-date-picker").datetimepicker({
+      format: 'MM-DD-YYYY'
+  });
+
+   //Get the value of Start and End of Week
+  $('#weekly-date-picker').on('dp.change', function (e) {
+      var value = $("#weekly-date-picker").val();
+      var firstDate = moment(value, "MM-DD-YYYY").format("MM-DD-YYYY");
+      $("#weekly-date-picker").val(firstDate);
+  });
+});
+
+var theopts = {};
+
+function escapeHTML(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+function filterLogs(subtype = null) {
+var datePicker = document.getElementById('weekly-date-picker');
+var tableData = document.getElementById('results-table');
+    for(var i = tableData.rows.length; i > 0;i--)
+        {
+        tableData.deleteRow(i -1);
+        }
+if (subtype === null)
+{
+$.ajax({
+  type: "POST",
+  url: '/statelogs/getgroups',
+  data: {day: datePicker.value}
+})
+.then(
+    function success(resHTML) {
+        var header = tableData.createTHead();
+        header.classList.add(`thead-dark`);
+        var newRow = header.insertRow(0);
+        var cell = newRow.insertCell(0);
+        cell.innerHTML = 'Choose a log for this day';
+        resHTML = JSON.parse(resHTML);
+        resHTML.response.forEach(function(logtype) {
+        var newRow = tableData.insertRow(tableData.rows.length);
+            var cell = newRow.insertCell(0);
+            cell.innerHTML = `<a href="javascript:filterLogs(\`${logtype}\`)" title="Show the log" role="button" class="btn btn-primary">${logtype}</a>`;
+        });
+    },
+
+    function fail(data, status) {
+    }
+);
+} else {
+$.ajax({
+  type: "POST",
+  url: '/statelogs/getlogs',
+  data: {day: datePicker.value, log: subtype}
+})
+.then(
+    function success(resHTML) {
+        var header = tableData.createTHead();
+        header.classList.add(`thead-dark`);
+        var newRow = header.insertRow(0);
+        var cell = newRow.insertCell(0);
+        cell.innerHTML = 'Date/Time';
+        var cell2 = newRow.insertCell(1);
+        cell2.innerHTML = 'Event';
+        var cell3 = newRow.insertCell(2);
+        cell3.innerHTML = 'Artist';
+        var cell4 = newRow.insertCell(3);
+        cell4.innerHTML = 'Title';
+        resHTML = JSON.parse(resHTML);
+        resHTML.response.forEach(function(thelog) {
+        var newRow = tableData.insertRow(tableData.rows.length);
+            var cell = newRow.insertCell(0);
+            cell.innerHTML = thelog.createdAt;
+            var cell2 = newRow.insertCell(1);
+            thelog.event = thelog.event.replace(/(?:\r\n|\r|\n)/g, '<br />');
+            cell2.innerHTML = thelog.event;
+            var cell3 = newRow.insertCell(2);
+            cell3.innerHTML = thelog.trackArtist;
+            var cell4 = newRow.insertCell(3);
+            cell4.innerHTML = thelog.trackTitle;
+        });
+    },
+
+    function fail(data, status) {
+    }
+);
+}
+}
+
+filterLogs(null);
+</script>
+</body>
+</html>
+
