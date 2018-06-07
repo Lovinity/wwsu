@@ -17,7 +17,7 @@ module.exports = {
             autoIncrement: true
         },
 
-        name: {
+        host: {
             type: 'string'
         },
 

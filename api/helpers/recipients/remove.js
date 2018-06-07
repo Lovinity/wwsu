@@ -13,7 +13,7 @@ module.exports = {
             description: 'The socket ID of the recipient that was removed / disconnected.'
         },
 
-        name: {
+        host: {
             type: 'string',
             description: 'The alphanumeric host / name of the recipient.',
             allowNull: true
@@ -27,9 +27,9 @@ module.exports = {
         try {
 
             // No host name? Try to find it based on provided socket.
-            if (typeof inputs.name === 'undefined' || inputs.name === null)
+            if (typeof inputs.host === 'undefined' || inputs.host === null)
             {
-                sails.log.verbose(`No name specified. Trying to find recipient ID instead.`);
+                sails.log.verbose(`No host specified. Trying to find recipient ID instead.`);
                 for (var key in Recipients.sockets)
                 {
                     if (Recipients.sockets.hasOwnProperty(key))
@@ -43,11 +43,11 @@ module.exports = {
                     }
                 }
             } else {
-                where.name = inputs.name;
+                where.host = inputs.host;
             }
 
             // If we could not find the recipient, exit the helper.
-            if (typeof where.ID === 'undefined' && typeof where.name === 'undefined')
+            if (typeof where.ID === 'undefined' && typeof where.host === 'undefined')
             {
                 sails.log.verbose(`Could not find recipient. Assuming they do not exist. Terminating helper.`);
                 return exits.success();
@@ -72,7 +72,7 @@ module.exports = {
                 if (Recipients.sockets[recipient.ID].length <= 0)
                 {
                     sails.log.verbose(`Recipient is no longer connected. Setting to offline.`);
-                    await Recipients.update({name: inputs.name}, {name: inputs.name, status: 0, time: moment().toISOString()})
+                    await Recipients.update({host: inputs.host}, {host: inputs.host, status: 0, time: moment().toISOString()})
                             .intercept((err) => {
                                 return exits.error(err);
                             });
@@ -81,7 +81,7 @@ module.exports = {
                     await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
                         return new Promise(async (resolve, reject) => {
                             try {
-                                if (djcontrols.host === inputs.name)
+                                if (djcontrols.host === inputs.host)
                                     await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 3, data: 'This DJ Controls is reporting offline.'}]);
                                 return resolve(true);
                             } catch (e) {
@@ -94,7 +94,7 @@ module.exports = {
                     await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
                         return new Promise(async (resolve, reject) => {
                             try {
-                                if (inputs.name === `display-${display.name}`)
+                                if (inputs.host === `display-${display.name}`)
                                     await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 3, data: 'This display sign is reporting offline.'}]);
                                 return resolve(true);
                             } catch (e) {

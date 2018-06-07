@@ -14,7 +14,7 @@ module.exports = {
             description: 'The socket ID of the recipient.'
         },
 
-        name: {
+        host: {
             type: 'string',
             required: true,
             description: 'The alphanumeric host / name of the recipient.'
@@ -45,9 +45,9 @@ module.exports = {
             switch (inputs.group)
             {
                 case 'system':
-                    if (inputs.name === 'emergency')
+                    if (inputs.host === 'emergency')
                         status = 1;
-                    if (inputs.name === 'requests')
+                    if (inputs.host === 'requests')
                         status = 4;
                     break;
                 case 'website':
@@ -66,7 +66,7 @@ module.exports = {
             // If this is a computers recipient, see if it's in the Hosts table. If so, use that as the label instead of the provided label.
             if (inputs.group === 'computers')
             {
-                var host = await Hosts.find({host: inputs.name}).limit(1)
+                var host = await Hosts.find({host: inputs.host}).limit(1)
                         .intercept((err) => {
                         });
                 if (host && typeof host[0] !== 'undefined')
@@ -76,7 +76,7 @@ module.exports = {
             }
 
             // Get or create the recipient entry
-            var recipient = await Recipients.findOrCreate({name: inputs.name}, {name: inputs.name, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()})
+            var recipient = await Recipients.findOrCreate({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()})
                     .intercept((err) => {
                         return exits.error(err);
                     });
@@ -84,7 +84,7 @@ module.exports = {
             sails.log.silly(`Recipients record: ${recipient}`);
 
             // Search to see if any changes are made to the recipient; we only want to update if there is a change.
-            var criteria = {name: inputs.name, group: inputs.group, label: inputs.label, status: status};
+            var criteria = {host: inputs.host, group: inputs.group, label: inputs.label, status: status};
             var updateIt = false;
             for (var key in criteria)
             {
@@ -100,7 +100,7 @@ module.exports = {
             if (updateIt)
             {
                 sails.log.verbose(`Updating recipient as it has changed.`);
-                await Recipients.update({name: inputs.name}, {name: inputs.name, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()})
+                await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()})
                         .intercept((err) => {
                             return exits.error(err);
                         });
@@ -113,7 +113,7 @@ module.exports = {
                 await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
-                            if (djcontrols.host === inputs.name)
+                            if (djcontrols.host === inputs.host)
                             {
                                 inConfig = true;
                                 await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 5, data: 'This DJ Controls is reporting operational.'}]);
@@ -128,7 +128,7 @@ module.exports = {
                 });
 
                 if (!inConfig)
-                    await Status.changeStatus([{name: `djcontrols-${inputs.name}`, label: `DJ Controls ${inputs.label}`, status: 5, data: 'This DJ Controls is reporting operational.'}]);
+                    await Status.changeStatus([{name: `djcontrols-${inputs.host}`, label: `DJ Controls ${inputs.label}`, status: 5, data: 'This DJ Controls is reporting operational.'}]);
             }
 
             // If the recipient group is display, update Status
@@ -138,7 +138,7 @@ module.exports = {
                 await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
-                            if (inputs.name === `display-${display.name}`)
+                            if (inputs.host === `display-${display.name}`)
                             {
                                 inConfig = true;
                                 await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'This display sign is reporting operational.'}]);
@@ -153,7 +153,7 @@ module.exports = {
                 });
 
                 if (!inConfig)
-                    await Status.changeStatus([{name: inputs.name, label: inputs.label, status: 5, data: 'This display sign is reporting operational.'}]);
+                    await Status.changeStatus([{name: inputs.host, label: inputs.label, status: 5, data: 'This display sign is reporting operational.'}]);
             }
 
             // Put the socket ID in memory

@@ -118,7 +118,7 @@ Bans the specified user until the currently live DJ/broadcast ends. Also mass de
 #### Request
 |key|criteria|
 |--|--|
-| host | string (required; the unique ID assigned to the client to be issued the discipline) |
+| host | string (required; the Recipient host to be issued the discipline) |
 #### Response 200 OK
 #### Response 500
 ### /discipline/ban-day [POST /discipline/ban-day]
@@ -127,7 +127,7 @@ Bans the specified user for 24 hours. Also mass deletes all website messages sen
 #### Request
 |key|criteria|
 |--|--|
-| host | string (required; the unique ID assigned to the client to be issued the discipline) |
+| host | string (required; the Recipient host to be issued the discipline) |
 #### Response 200 OK
 #### Response 500
 ### /discipline/ban-indefinite [POST /discipline/ban-indefinite]
@@ -136,7 +136,7 @@ Bans the specified user indefinitely. Also mass deletes all website messages sen
 #### Request
 |key|criteria|
 |--|--|
-| host | string (required; the unique ID assigned to the client to be issued the discipline) |
+| host | string (required; the Recipient host to be issued the discipline) |
 #### Response 200 OK
 #### Response 500
 ## Display [/display]
@@ -331,7 +331,7 @@ This endpoint supports sockets, returns data in the structure defined in the web
             "updatedAt": "2018-05-15T22:31:34.381Z",
 		    "ID": 1,
 		    "group": "system", // Each recipient can be grouped together by the group
-		    "name": "emergency", // A key identifier of the recipient
+		    "host": "emergency", // An alphnumeric ID of the recipient
 		    "label": "Technical Issues", // A human friendly label for the recipient
 		    "status": 1, // 1 = red (active issue), used by emergency, 2 = yellow (online), used by the computers and display groups, 3 = unused, 4 = blue (pending request), used by track requests, 5 = green (online), used by public clients, 0 = gray (offline / none)
 		    "time": "2018-05-15T22:31:34.381Z" // ISO string of the last time the recipient had a change in status.
