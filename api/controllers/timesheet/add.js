@@ -43,12 +43,12 @@ module.exports = {
             // If the director is present, this is a clock-out entry.
             if (record.present)
             {
-                var toapprove = 0;
+                var toapprove = false;
                 thetime = moment(inputs.timestamp);
 
                 // If the entry is less than 30 minutes off from the current time, approve automatically
                 if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))
-                    toapprove = 1;
+                    toapprove = true;
 
                 // Add the time_out entry
                 await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(), approved: toapprove})
@@ -66,12 +66,12 @@ module.exports = {
                         .fetch();
 
             } else { // If the director is not present, this is a clock-in entry.
-                var toapprove = 0;
+                var toapprove = false;
                 thetime = moment(inputs.timestamp);
 
                 // If the entry is less than 30 minutes off from the current time, approve automatically
                 if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))
-                    toapprove = 1;
+                    toapprove = true;
 
                 // Clock-ins need a new entry
                 await Timesheet.create({name: record.name, time_in: thetime.toISOString(), approved: toapprove})

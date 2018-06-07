@@ -82,10 +82,11 @@ module.exports.cron = {
                 if (Meta['A'].state === '' || Meta['A'].state === 'unknown')
                 {
                     try {
-                        var meta = await Meta.findOne()
+                        var meta = await Meta.find().limit(1)
                                 .intercept((err) => {
                                     return reject(err);
                                 });
+                        meta = meta[0];
                         sails.log.silly(meta);
                         await Meta.changeMeta(meta);
                     } catch (e) {
@@ -1099,7 +1100,7 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON clockOutDirectors called`);
             try {
-                await Timesheet.update({time_out: null}, {time_out: moment().toISOString(), approved: 0})
+                await Timesheet.update({time_out: null}, {time_out: moment().toISOString(), approved: false})
                         .intercept((err) => {
                         });
                 // Force reload all directors based on timesheets

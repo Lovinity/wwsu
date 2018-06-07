@@ -28,9 +28,8 @@ module.exports = {
         },
         
         approved: {
-            type: 'number',
-            max: 1,
-            min: 0
+            type: 'boolean',
+            defaultsTo: false
         }
 
     }

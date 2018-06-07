@@ -582,6 +582,25 @@ Edit a specific timesheet entry.
 #### Response 200 OK
 #### Response 403
 #### Response 404
+### /timesheet/get [GET /timesheet/get]
+Return an array of timesheet entries for the week.
+#### Request
+| key | criteria |
+|--|--|
+| date | string (optional; a moment.js parsable date that falls within the week to get timesheet entries. Will return entries from 12am that past sunday, to 12am the next sunday. Defaults to now.) |
+#### Response 200
+		[
+			{
+				"createdAt": "2018-05-29T18:13:01.763Z",
+				"updatedAt": "2018-05-29T18:13:01.763Z",
+				"ID": 7,
+				"name": "George Carlin", // The name of the director which this record applies
+				"time_in": "2018-05-29T18:13:01.763Z", // An ISO string containing when the director clocked in
+				"time_out": null, // An ISO string containing when the director clocked out. Null means the director is still in.
+				"approved": true // True if this timesheet does not require admin approval
+			},
+			...
+		]
 ### /timesheet/view [GET /timesheet/view]
 Access the timesheet web interface.
 #### Request
