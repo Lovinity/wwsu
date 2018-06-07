@@ -1,12 +1,18 @@
-/* global moment, sails, Logs */
+/* global sails, moment, Logs */
 
 module.exports = {
 
-    friendlyName: 'logs / get-groups',
+    friendlyName: 'Logs / get',
 
-    description: 'Retrieve a list of log subtypes for a particular day.',
+    description: 'Retrieve a list of log entries.',
 
     inputs: {
+        subtype: {
+            type: 'string',
+            defaultsTo: '',
+            description: 'The log subtype to retrieve.'
+        },
+
         date: {
             type: 'string',
             custom: function (value) {
@@ -18,7 +24,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller logs/get-groups called.');
+        sails.log.debug('Controller logs/get called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
 
         try {
@@ -26,20 +32,22 @@ module.exports = {
             var start = moment(inputs.date).startOf('day');
             var end = moment(start).add(1, 'days');
 
-            // Get DISTINCT records
-            var records = await Logs.getDatastore().sendNativeQuery(`SELECT DISTINCT logsubtype FROM logs WHERE (createdAt BETWEEN ? AND ?) AND logsubtype IS NOT NULL AND logsubtype NOT LIKE ''`, [start.toISOString(), end.toISOString()])
+            // Get records
+            var records = await Logs.find({createdAt: {'>=': start.toISOString(), '<': end.toISOString()}, logsubtype: inputs.subtype}).sort('createdAt ASC')
                     .intercept((err) => {
                         return exits.error(err);
                     });
 
-            sails.log.verbose(`Special records returned: ${records.length}`);
+            sails.log.verbose(`Retrieved Logs records: ${records.length}`);
             sails.log.silly(records);
-
+            
             return exits.success(records);
 
         } catch (e) {
             return exits.error(e);
         }
+
+        return exits.success();
 
     }
 

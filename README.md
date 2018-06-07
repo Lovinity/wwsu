@@ -192,6 +192,30 @@ Send out a test through the internal emergency alert system. **Requires authoriz
 #### Response 200 OK
 ## Logs [/logs]
 Logs endpoints regard the internal logging system.
+### /logs/get [POST /logs/get]
+Get a list of logs for a specific subtype and a specific date. Returns logs for the 24-hour period of the provided date.
+#### Request
+| key | criteria |
+|--|--|
+| subtype | string (required; the name of the log subtype to get. Defaults to '' (no subtype).) |
+| date | string (optional; a moment.js parsable date that falls within the day to get logs. Defaults to now.) |
+#### Response 200
+		[
+			{
+				"createdAt": "2018-05-03T23:18:41.089Z",
+                "updatedAt": "2018-05-03T23:18:41.089Z",
+				"ID": 1,
+				"logtype": "operation", // A category for this log
+				"loglevel": "info", // Level of importance: debug, info, warn, error
+				"logsubtype": "automation", // A subcategory, such as the name of a radio show
+				"event": "Automation played a track.", // The log event and data
+				"trackArtist": "Alan Jackson", // If played a track, this is the track artist. Null if this is not a track entry.
+				"trackTitle": "Chattahoochee (Extended Mix)", // If played a track, this is the track title. Null if this is not a track entry.
+				"trackAlbum": null, // If played a track and we know the album, this is the album name. Otherwise, null.
+				"trackLabel": null, // If played a track and we know the record label, this is the label. Otherwise, null.
+			},
+			...
+		]
 ### /logs/get-groups [POST /logs/get-groups]
 Retrieve a list of log subtypes for a specified date.
 #### Request
