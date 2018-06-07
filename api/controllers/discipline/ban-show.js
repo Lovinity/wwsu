@@ -21,8 +21,7 @@ module.exports = {
             await sails.helpers.discipline.banShow(inputs.host);
             return exits.success();
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
     }
 

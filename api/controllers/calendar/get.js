@@ -14,8 +14,7 @@ module.exports = {
         sails.log.debug('Controller calendar/get called.');
         var records = await Calendar.find()
                 .tolerate((err) => {
-                    sails.log.error(err);
-                    exits.error();
+                    return exits.error(err);
                 });
                 sails.log.verbose(`Calendar records retrieved: ${records.length}`);
                 sails.log.silly(records);

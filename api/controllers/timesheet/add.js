@@ -31,8 +31,7 @@ module.exports = {
 
             var record = await Directors.findOne({login: inputs.login})
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        return exits.error();
+                        return exits.error(err);
                     });
             sails.log.silly(record);
 
@@ -53,15 +52,13 @@ module.exports = {
                 // Add the time_out entry
                 await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(), approved: toapprove})
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         });
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: false, since: thetime.toISOString()})
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         })
                         .fetch();
 
@@ -76,15 +73,13 @@ module.exports = {
                 // Clock-ins need a new entry
                 await Timesheet.create({name: record.name, time_in: thetime.toISOString(), approved: toapprove})
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         });
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: true, since: thetime.toISOString()})
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         })
                         .fetch();
             }

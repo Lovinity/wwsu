@@ -14,8 +14,7 @@ module.exports = {
         sails.log.debug('Controller eas/get called.');
         var records = await Eas.find()
                 .tolerate((err) => {
-                    sails.log.error(err);
-                    exits.error();
+                    return exits.error(err);
                 });
                 sails.log.verbose(`Retrieved Eas records: ${records.length}`);
                 sails.log.silly(records);

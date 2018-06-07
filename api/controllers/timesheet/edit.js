@@ -64,8 +64,7 @@ module.exports = {
             // Get the director as provided by admin
             var record = await Directors.findOne({login: inputs.admin})
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        return exits.error();
+                        return exits.error(err);
                     });
             sails.log.silly(record);
 
@@ -76,8 +75,7 @@ module.exports = {
             // Update the timesheet record
             await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(), time_out: moment(inputs.time_out).toISOString, approved: inputs.approved})
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        return exits.error();
+                        return exits.error(err);
                     });
 
             // Force a re-load of all directors to update any possible changes in presence

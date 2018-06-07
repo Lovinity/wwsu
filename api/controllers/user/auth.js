@@ -43,8 +43,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         var user = await Nodeusers.find({email: inputs.email}).limit(1)
                 .tolerate((err) => {
-                    sails.log.error(err);
-                    return exits.error();
+                    return exits.error(err);
                 });
                 sails.log.verbose(`Nodeusers records retrieved: ${user.length}`);
         if (user && user[0])
@@ -64,8 +63,7 @@ module.exports = {
                     });
                 }
             } catch (e) {
-                sails.log.error(e);
-                return exits.error();
+                return exits.error(e);
             }
         } else {
             return exits.notFound({code: 'E_NOT_FOUND', problems: ['Could not find a user matching the provided credentials.'], message: 'The server could not fulfill your request. No users matching the provided email and password exist. Please ensure your email and password are correct.'});

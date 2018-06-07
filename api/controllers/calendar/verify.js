@@ -28,8 +28,7 @@ module.exports = {
             // Load all the playlists into memory
             var playlistsR = await Playlists.find()
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        return exits.error();
+                        return exits.error(err);
                     });
             sails.log.verbose(`Retrieved Playlists records: ${playlistsR.length}`);
             sails.log.silly(playlistsR);
@@ -73,8 +72,7 @@ module.exports = {
             // Load all manual RadioDJ events into memory
             var eventsR = await Events.find({type: 3})
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        return exits.error();
+                        return exits.error(err);
                     });
             sails.log.verbose(`Retrieved Events records: ${eventsR.length}`);
             sails.log.silly(eventsR);
@@ -86,8 +84,7 @@ module.exports = {
             // Load all the calendar events into memory
             var calendar = await Calendar.find().sort('start ASC')
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        return exits.error();
+                        return exits.error(err);
                     });
             sails.log.verbose(`Retrieved Calendar records: ${calendar.length}`);
             sails.log.silly(calendar);
@@ -250,8 +247,7 @@ module.exports = {
 
             return exits.success({data: retData});
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
     }
 

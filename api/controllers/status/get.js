@@ -14,8 +14,7 @@ module.exports = {
         sails.log.debug('Controller status/get called.');
         var records = await Status.find()
                 .tolerate((err) => {
-                    sails.log.error(err);
-                    return exits.error();
+                    return exits.error(err);
                 });
                 sails.log.verbose(`Status records retrieved: ${records.length}.`);
                 sails.log.silly(records);

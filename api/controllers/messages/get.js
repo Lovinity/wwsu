@@ -26,12 +26,11 @@ module.exports = {
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'messages');
-                sails.log.verbose('Request was a socket. Joining messages.')
+                sails.log.verbose('Request was a socket. Joining messages.');
             }
             return exits.success(records);
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
     }
 

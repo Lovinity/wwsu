@@ -54,8 +54,7 @@ module.exports = {
             // First, grab RadioDJ categories and put them in memory.
             var cats2 = await Category.find()
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        return exits.error();
+                        return exits.error(err);
                     });
             sails.log.verbose(`Categories retrieved: ${cats2.length}`);
             sails.log.silly(cats2);
@@ -72,8 +71,7 @@ module.exports = {
                 // Retrieve a list of subcategories that fall within a parent category defined in config as a music category.
                 var subcats2 = await Subcategory.find({parentid: sails.config.custom.subcats.music})
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         });
                 sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
                 sails.log.silly(subcats2);
@@ -91,8 +89,7 @@ module.exports = {
                 query = {ID: {'<': inputs.offset}, id_subcat: subcatIDs};
                 songs = await Songs.find(query).limit(inputs.limit)
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         });
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
                 sails.log.silly(songs);
@@ -105,8 +102,7 @@ module.exports = {
                 query = {ID: inputs.ID};
                 songs = await Songs.find(query).limit(inputs.limit)
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         });
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
                 sails.log.silly(songs);
@@ -126,8 +122,7 @@ module.exports = {
                 // Get those subcategories
                 var subcats2 = await Subcategory.find({ID: subcatIDs})
                         .tolerate((err) => {
-                            sails.log.error(err);
-                            return exits.error();
+                            return exits.error(err);
                         });
                 sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
                 sails.log.silly(subcats2);
@@ -143,7 +138,7 @@ module.exports = {
 
             // If songs is undefined at this point, that is an internal error!
             if (typeof songs === 'undefined')
-                return exits.error();
+                return exits.error(new Error(`Internal error: No songs returned!`));
 
             // Add additional necessary data to each song, such as request ability 
             await sails.helpers.asyncForEach(songs, function (song, index) {
@@ -158,8 +153,7 @@ module.exports = {
             });
 
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
 
     }

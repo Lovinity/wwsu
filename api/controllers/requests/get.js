@@ -21,12 +21,11 @@ module.exports = {
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'requests');
-                sails.log.verbose('Request was a socket. Joining requests.')
+                sails.log.verbose('Request was a socket. Joining requests.');
             }
             return exits.success(response);
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
 
     }

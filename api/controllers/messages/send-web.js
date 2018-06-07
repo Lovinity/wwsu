@@ -41,8 +41,7 @@ module.exports = {
             await sails.helpers.messages.sendWeb(opts.host, opts.message, opts.from_IP, opts.nickname, opts.private);
             return exits.success();
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
 
     }

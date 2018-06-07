@@ -39,8 +39,7 @@ module.exports = {
             await sails.helpers.messages.send(inputs.from, inputs.to, inputs.to_friendly, inputs.message);
             return exits.success();
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
 
     }

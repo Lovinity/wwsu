@@ -18,12 +18,11 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             await sails.helpers.messages.remove(inputs.ID);
+            return exits.success();
         } catch (e)
         {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
-        return exits.success();
     }
 
 

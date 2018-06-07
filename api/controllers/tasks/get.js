@@ -15,8 +15,7 @@ module.exports = {
         try {
             var records = await Tasks.find({})
                     .tolerate((err) => {
-                        sails.log.error(err);
-                        exits.error();
+                        exits.error(err);
                     });
             sails.log.verbose(`Tasks records retrieved: ${records.length}`);
             sails.log.silly(records);
@@ -27,8 +26,7 @@ module.exports = {
             }
             return exits.success(records);
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
     }
 

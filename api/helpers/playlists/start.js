@@ -51,7 +51,7 @@ module.exports = {
                 if (!theplaylist)
                 {
                     Playlists.queuing = false;
-                    return exits.error();
+                    return exits.error(new Error(`Playlist not found!`));
                 }
                 Playlists.active.name = theplaylist.name;
                 Playlists.active.ID = theplaylist.ID;

@@ -37,8 +37,7 @@ module.exports = {
             var response = await sails.helpers.requests.place(inputs.ID, this.req.ip, inputs.name, inputs.message);
             return exits.success(response.HTML);
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
     }
 

@@ -17,8 +17,7 @@ module.exports = {
             await sails.helpers.eas.postParse();
             return exits.success();
         } catch (e) {
-            sails.log.error(e);
-            return exits.error();
+            return exits.error(e);
         }
 
     }
