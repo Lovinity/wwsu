@@ -190,6 +190,20 @@ Issue a new alert through the internal emergency alert system, originating from 
 ### /eas/test [POST /eas/test]
 Send out a test through the internal emergency alert system. **Requires authorization**
 #### Response 200 OK
+## Logs [/logs]
+Logs endpoints regard the internal logging system.
+### /logs/get-groups [POST /logs/get-groups]
+Retrieve a list of log subtypes for a specified date.
+#### Request
+| key | criteria |
+|--|--|
+| date | string (optional; a moment.js parsable date that falls within the day to get log subtypes. Defaults to now.) |
+#### Response 200
+		[
+			"Log subtype 1",
+			"Log subtype 2",
+			...
+		]
 ## Messages [/messages]
 Messages endpoints regard the internal WWSU messaging system.
 ### /messages/get [GET /messages/get]
