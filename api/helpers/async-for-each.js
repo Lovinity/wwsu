@@ -25,8 +25,8 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper asyncForEach called.');
-        for (let index = 0; index < inputs.array.length; index++) {
-            try {
+        try {
+            for (let index = 0; index < inputs.array.length; index++) {
                 sails.log.silly(`Calling iteration ${index}`);
                 var breakIt = await inputs.callback(inputs.array[index], index, inputs.array);
                 if (breakIt) // If a loop iteration resolves with true, break the forEach loop.
@@ -34,12 +34,11 @@ module.exports = {
                     sails.log.silly(`BREAKING as per resolve(true).`);
                     break;
                 }
-            } catch (e) {
-                return exits.error(e);
-                break;
             }
+            return exits.success();
+        } catch (e) {
+            return exits.error(e);
         }
-        return exits.success();
     }
 
 

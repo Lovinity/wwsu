@@ -62,11 +62,10 @@ module.exports = {
                         } else {
                             sails.log.verbose(`Skipped ${index} because it was not a valid alert.`);
                         }
+                        return resolve2(false);
                     } catch (e) {
-                        sails.log.error(e);
-                        return reject2();
+                        return reject2(e);
                     }
-                    return resolve2(false);
                 });
             });
             return exits.success();

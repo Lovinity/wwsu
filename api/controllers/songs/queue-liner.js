@@ -23,6 +23,8 @@ module.exports = {
             // Log it
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested a Sports Liner.'})
                     .tolerate((err) => {
+                        // Do not throw for errors, but log it
+                        sails.log.error(err);
                     });
 
             // Queue it

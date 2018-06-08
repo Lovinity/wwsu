@@ -151,10 +151,7 @@ module.exports = {
                     sails.log.verbose(`getRequest called: ${quantity}`);
                     if (checked.length > 0)
                         query.ID = {'!=': checked};
-                    record = await Requests.find(query).limit(1)
-                            .tolerate((err) => {
-                                return reject(err);
-                            });
+                    record = await Requests.find(query).limit(1);
                     sails.log.silly(`Request: ${record}`);
                     if (typeof record !== 'undefined' && typeof record[0] !== 'undefined' && record.length > 0 && Requests.pending.indexOf(record[0].songID) !== -1)
                     {

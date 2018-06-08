@@ -25,39 +25,39 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        // API NOTE: This helper should never throw an error unless the error is so severe that we should terminate everything (don't throw for time-outs to RadioDJ REST, for instance)
+
         sails.log.debug('Helper rest.cmd called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         var endstring = ''; // appends at the end of a REST call, say, if arg was supplied
         // arg supplied? Load it in memory.
         if (typeof inputs.arg !== 'undefined' && inputs.arg !== null)
             endstring = '&arg=' + inputs.arg;
-        
+
         // If timeout is 0, resolve the promise but continue execution (so do not return it).
         if (inputs.timeout === 0)
         {
             exits.success();
             inputs.timeout = 10000;
         }
-        
+
         // Query REST
         try {
-        needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})
-                .then(async function (resp) {
-                    try {
-                        return exits.success();
-                    } catch (e) {
-                        sails.log.silly(`REST ERROR: ${e.message}`);
-                        return exits.error(e);
-                    }
-                })
-                // We do not want code execution to fail for an error in calling REST. So instead, log the error but resolve with an empty success response.
-                .catch(async function (err) {
-                    sails.log.silly(`REST ERROR: ${err.message}`);
-                    return exits.success();
-                });
-            } catch (e) {
-                return exits.error(e);
-            }
+            needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout})
+                    .then(async function (resp) {
+                        try {
+                            return exits.success(true);
+                        } catch (e) {
+                            throw e;
+                        }
+                    })
+                    .catch(async function (err) {
+                        throw err;
+                    });
+        } catch (e) {
+            sails.log.error(e);
+            return exits.success(false);
+        }
     }
 
 

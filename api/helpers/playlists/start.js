@@ -42,17 +42,10 @@ module.exports = {
                 Playlists.queuing = true; // Mark that the playlist is being queued, to avoid app conflicts.
 
                 // Find the playlist
-                var theplaylist = await Playlists.findOne({name: inputs.name})
-                        .tolerate((err) => {
-                            Playlists.queuing = false;
-                            return exits.error(err);
-                        });
+                var theplaylist = await Playlists.findOne({name: inputs.name});
                 sails.log.silly(`Playlist: ${theplaylist}`);
                 if (!theplaylist)
-                {
-                    Playlists.queuing = false;
-                    return exits.error(new Error(`Playlist not found!`));
-                }
+                    throw new Error('Playlist not found!');
                 Playlists.active.name = theplaylist.name;
                 Playlists.active.ID = theplaylist.ID;
                 if (!inputs.resume)
@@ -65,14 +58,11 @@ module.exports = {
                     return new Promise(async (resolve2, reject2) => {
                         try {
                             await sails.helpers.rest.cmd('LoadPlaylist', theplaylist.ID);
-                            var playlistTracks = await Playlists_list.find({pID: theplaylist.ID}).sort('ord ASC')
-                                    .tolerate((err) => {
-                                        return reject2(err);
-                                    });
+                            var playlistTracks = await Playlists_list.find({pID: theplaylist.ID}).sort('ord ASC');
                             sails.log.verbose(`Playlists_list records retrieved: ${playlistTracks.length}`);
                             sails.log.silly(playlistTracks);
                             if (!playlistTracks)
-                                return reject2();
+                                throw new Error(`No playlist tracks were returned.`);
                             Playlists.active.tracks = [];
                             playlistTracks.forEach(function (playlistTrack) {
                                 Playlists.active.tracks.push(playlistTrack.sID);
@@ -139,36 +129,39 @@ module.exports = {
                         var removetracks = function () {
                             return new Promise(async (resolve2, reject2) => {
                                 try {
-                                    var theFunction = async function () {
-                                        try {
-                                            var queue = await sails.helpers.rest.getQueue();
-                                            var terminateloop = false;
-                                            var loopposition = 1;
+                                    var theFunction = function () {
+                                        return new Promise(async (resolve3, reject3) => {
+                                            try {
+                                                var queue = await sails.helpers.rest.getQueue();
+                                                var terminateloop = false;
+                                                var loopposition = 1;
 
-                                            // Loop through all the tracks in the queue
-                                            while (!terminateloop && loopposition < queue.length)
-                                            {
-                                                // If the track is a music track, remove it
-                                                if (toRemove.indexOf(queue[loopposition].ID) > -1)
+                                                // Loop through all the tracks in the queue
+                                                while (!terminateloop && loopposition < queue.length)
                                                 {
-                                                    terminateloop = true;
-                                                    await sails.helpers.rest.cmd('RemovePlaylistTrack', loopposition - 1, 10000);
-                                                    delete toRemove[toRemove.indexOf(queue[loopposition].ID)];
+                                                    // If the track is a music track, remove it
+                                                    if (toRemove.indexOf(queue[loopposition].ID) > -1)
+                                                    {
+                                                        terminateloop = true;
+                                                        await sails.helpers.rest.cmd('RemovePlaylistTrack', loopposition - 1, 10000);
+                                                        delete toRemove[toRemove.indexOf(queue[loopposition].ID)];
 
-                                                    // We have to re-execute the entire function again after each time we remove something so we can load the new queue in memory and have correct position numbers.
-                                                    setTimeout(function () {
-                                                        theFunction();
-                                                    }, 100);
+                                                        // We have to re-execute the entire function again after each time we remove something so we can load the new queue in memory and have correct position numbers.
+                                                        setTimeout(async function () {
+                                                            await theFunction();
+                                                        }, 100);
+                                                    }
+                                                    loopposition += 1;
                                                 }
-                                                loopposition += 1;
+                                                if (!terminateloop)
+                                                    return resolve3();
+                                            } catch (e) {
+                                                return reject3(e);
                                             }
-                                            if (!terminateloop)
-                                                return resolve2();
-                                        } catch (e) {
-                                            return reject2(e);
-                                        }
+                                        });
                                     };
-                                    theFunction();
+                                    await theFunction();
+                                    return resolve2();
                                 } catch (e) {
                                     return reject2(e);
                                 }

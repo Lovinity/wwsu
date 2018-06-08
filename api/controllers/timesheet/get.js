@@ -30,10 +30,7 @@ module.exports = {
             var records = await Timesheet.find({or: [
                     {time_in: {'>=': start.toISOString(), '<': end.toISOString()}},
                     {time_out: {'>=': start.toISOString(), '<': end.toISOString()}}
-                ]}).sort('time_in ASC')
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+                ]}).sort('time_in ASC');
             sails.log.verbose(`Returned Timesheet records: ${records.length}`);
             sails.log.silly(records);
 

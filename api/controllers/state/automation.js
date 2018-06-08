@@ -18,6 +18,8 @@ module.exports = {
             // Log the request
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off and went to automation.'})
                     .tolerate((err) => {
+                        // Do not throw for error, but log it
+                        sails.log.error(err);
                     });
 
             // Reset playlist information; if any playlists / events are scheduled, we want them to start up immediately.

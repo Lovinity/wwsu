@@ -57,11 +57,12 @@ module.exports = {
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.showname, event: 'DJ requested to go live.' + "\n" + 'DJ - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
+                            // Do not throw for errors, but log it.
+                            sails.log.error(err);
                         });
 
-                Meta.changeMeta({state: 'automation_live', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
                 //await sails.helpers.error.count('goLive');
-                
+
                 // Operation: Remove all music tracks, queue a station ID, and disable auto DJ.
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                 await sails.helpers.rest.removeMusic();
@@ -70,20 +71,22 @@ module.exports = {
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
+                await Meta.changeMeta({state: 'automation_live', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else
-                Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
 
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.showname, event: 'DJ requested to go live (immediate transition from another live show).' + "\n" + 'DJ - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
+                            // Do not throw for errors, but log it.
+                            sails.log.error(err);
                         });
             }
             return exits.success();
         } catch (e) {
             return exits.error(e);
         }
-        return exits.success();
 
     }
 

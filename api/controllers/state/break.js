@@ -26,17 +26,13 @@ module.exports = {
             // Log it
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer went into break. Halftime?: ' + inputs.halftime})
                     .tolerate((err) => {
+                        // Do not throw for errors, but log it.
+                        sails.log.error(err);
                     });
 
             // halftime break? Play a station ID and then begin halftime music
             if (inputs.halftime)
             {
-                if (Meta['A'].state.startsWith("sportsremote"))
-                {
-                    await Meta.changeMeta({state: 'sportsremote_halftime'});
-                } else {
-                    await Meta.changeMeta({state: 'sports_halftime'});
-                }
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
@@ -45,9 +41,20 @@ module.exports = {
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 2);
+                if (Meta['A'].state.startsWith("sportsremote"))
+                {
+                    await Meta.changeMeta({state: 'sportsremote_halftime'});
+                } else {
+                    await Meta.changeMeta({state: 'sports_halftime'});
+                }
+
                 // Standard break
             } else {
                 Status.errorCheck.prevBreak = moment();
+                await sails.helpers.rest.cmd('EnableAssisted', 1);
+                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 2, true);
+                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                await sails.helpers.rest.cmd('EnableAssisted', 0);
                 switch (Meta['A'].state)
                 {
                     case 'live_on':
@@ -63,10 +70,6 @@ module.exports = {
                         await Meta.changeMeta({state: 'sportsremote_break'});
                         break;
                 }
-                await sails.helpers.rest.cmd('EnableAssisted', 1);
-                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 2, true);
-                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                await sails.helpers.rest.cmd('EnableAssisted', 0);
             }
             return exits.success();
         } catch (e) {

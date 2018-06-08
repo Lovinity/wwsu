@@ -58,15 +58,9 @@ module.exports = {
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast.' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
+                            // Don't throw errors, but log them
+                            sails.log.error(err);
                         });
-
-                // Change meta
-                if (inputs.remote)
-                {
-                    Meta.changeMeta({state: 'automation_sportsremote', dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-                } else {
-                    Meta.changeMeta({state: 'automation_sports', dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-                }
 
                 //await sails.helpers.error.count('goLive');
 
@@ -85,6 +79,13 @@ module.exports = {
                 if (Meta.automation[0].TrackType === 'Music')
                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
 
+                // Change meta
+                if (inputs.remote)
+                {
+                    Meta.changeMeta({state: 'automation_sportsremote', dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                } else {
+                    Meta.changeMeta({state: 'automation_sports', dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                }
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
@@ -92,9 +93,11 @@ module.exports = {
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast (immediate transition from another sports broadcast).' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
+                            // Don't throw errors, but log them
+                            sails.log.error(err);
                         });
             }
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

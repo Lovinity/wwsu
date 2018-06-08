@@ -57,9 +57,10 @@ module.exports = {
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.showname, event: 'Remote show requested.' + "\n" + 'Producer - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
+                            // Do not throw for errors, but log it
+                            sails.log.error(err);
                         });
 
-                Meta.changeMeta({state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
                 //await sails.helpers.error.count('goRemote');
 
                 // Operation: Remove all music tracks, queue a station ID, and disable auto DJ. CRON will queue and play the remote stream track once queue is empty.
@@ -70,21 +71,22 @@ module.exports = {
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
+                await Meta.changeMeta({state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else
-                Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
 
                 // Log this request
                 await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.showname, event: 'Remote show requested (immediate transition from another show).' + "\n" + 'Host - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
+                            // Do not throw for errors, but log it
+                            sails.log.error(err);
                         });
             }
             return exits.success();
         } catch (e) {
             return exits.error(e);
         }
-
-        return exits.success();
 
     }
 

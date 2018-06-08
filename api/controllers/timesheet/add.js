@@ -29,10 +29,7 @@ module.exports = {
 
         try {
 
-            var record = await Directors.findOne({login: inputs.login})
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var record = await Directors.findOne({login: inputs.login});
             sails.log.silly(record);
 
             // No director? return not found.
@@ -50,16 +47,10 @@ module.exports = {
                     toapprove = true;
 
                 // Add the time_out entry
-                await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(), approved: toapprove})
-                        .tolerate((err) => {
-                            return exits.error(err);
-                        });
+                await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(), approved: toapprove});
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: false, since: thetime.toISOString()})
-                        .tolerate((err) => {
-                            return exits.error(err);
-                        })
                         .fetch();
 
             } else { // If the director is not present, this is a clock-in entry.
@@ -71,16 +62,10 @@ module.exports = {
                     toapprove = true;
 
                 // Clock-ins need a new entry
-                await Timesheet.create({name: record.name, time_in: thetime.toISOString(), approved: toapprove})
-                        .tolerate((err) => {
-                            return exits.error(err);
-                        });
+                await Timesheet.create({name: record.name, time_in: thetime.toISOString(), approved: toapprove});
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: true, since: thetime.toISOString()})
-                        .tolerate((err) => {
-                            return exits.error(err);
-                        })
                         .fetch();
             }
             return exits.success();

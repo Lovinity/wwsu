@@ -13,10 +13,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller tasks/get called.');
         try {
-            var records = await Tasks.find({})
-                    .tolerate((err) => {
-                        exits.error(err);
-                    });
+            var records = await Tasks.find({});
             sails.log.verbose(`Tasks records retrieved: ${records.length}`);
             sails.log.silly(records);
             if (this.req.isSocket)

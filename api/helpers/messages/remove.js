@@ -1,4 +1,4 @@
-/* global Messages */
+/* global Messages, sails */
 
 module.exports = {
 
@@ -17,16 +17,17 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.remove called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
-        var records = await Messages.update({ID: inputs.ID}, {status: 'deleted'})
-                .tolerate((err) => {
-                    return exits.error(err);
-                })
-                .fetch();
-        if (!records || records.length === 0)
-        {
-            return exits.error(new Error(`The message does not exist.`));
-        } else {
-            return exits.success();
+        try {
+            var records = await Messages.update({ID: inputs.ID}, {status: 'deleted'})
+                    .fetch();
+            if (!records || records.length === 0)
+            {
+                return exits.error(new Error(`The message does not exist.`));
+            } else {
+                return exits.success();
+            }
+        } catch (e) {
+            return exits.error(e);
         }
     }
 

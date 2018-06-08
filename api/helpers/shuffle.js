@@ -1,5 +1,6 @@
 /* global _, sails */
 
+// TODO: Use lodash instead of this
 module.exports = {
 
     friendlyName: 'Shuffle',

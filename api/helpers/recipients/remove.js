@@ -56,7 +56,7 @@ module.exports = {
             // Get the recipient entry
             var recipient = await Recipients.findOne(where)
                     .tolerate((err) => {
-                        return exits.error(err);
+                        sails.log.error(err);
                     });
 
             sails.log.silly(`Recipients record: ${recipient}`);
@@ -72,10 +72,7 @@ module.exports = {
                 if (Recipients.sockets[recipient.ID].length <= 0)
                 {
                     sails.log.verbose(`Recipient is no longer connected. Setting to offline.`);
-                    await Recipients.update({host: inputs.host}, {host: inputs.host, status: 0, time: moment().toISOString()})
-                            .tolerate((err) => {
-                                return exits.error(err);
-                            });
+                    await Recipients.update({host: inputs.host}, {host: inputs.host, status: 0, time: moment().toISOString()});
 
                     // If the recipient name is found in djcontrols config, reflect status
                     await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
@@ -110,9 +107,6 @@ module.exports = {
         } catch (e) {
             return exits.error(e);
         }
-
-        // All done.
-        return exits.success();
 
     }
 

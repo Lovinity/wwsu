@@ -33,10 +33,7 @@ module.exports = {
             var end = moment(start).add(1, 'days');
 
             // Get records
-            var records = await Logs.find({createdAt: {'>=': start.toISOString(), '<': end.toISOString()}, logsubtype: inputs.subtype}).sort('createdAt ASC')
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var records = await Logs.find({createdAt: {'>=': start.toISOString(), '<': end.toISOString()}, logsubtype: inputs.subtype}).sort('createdAt ASC');
 
             sails.log.verbose(`Retrieved Logs records: ${records.length}`);
             sails.log.silly(records);
@@ -46,8 +43,6 @@ module.exports = {
         } catch (e) {
             return exits.error(e);
         }
-
-        return exits.success();
 
     }
 

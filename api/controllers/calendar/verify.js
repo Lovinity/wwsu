@@ -26,10 +26,7 @@ module.exports = {
             var retData = [];
 
             // Load all the playlists into memory
-            var playlistsR = await Playlists.find()
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var playlistsR = await Playlists.find();
             sails.log.verbose(`Retrieved Playlists records: ${playlistsR.length}`);
             sails.log.silly(playlistsR);
 
@@ -37,10 +34,7 @@ module.exports = {
             await sails.helpers.asyncForEach(playlistsR, function (playlist, index) {
                 return new Promise(async (resolve, reject) => {
                     try {
-                        var pTracks = await Playlists_list.find({pID: playlist.ID})
-                                .tolerate((err) => {
-                                    return reject(err);
-                                });
+                        var pTracks = await Playlists_list.find({pID: playlist.ID});
                         sails.log.verbose(`Retrieved Playlists_list records: ${pTracks.length}`);
                         sails.log.silly(pTracks);
 
@@ -49,10 +43,7 @@ module.exports = {
                             temp.push(track.sID);
                         });
 
-                        var songs = await Songs.find({ID: temp})
-                                .tolerate((err) => {
-                                    return reject(err);
-                                });
+                        var songs = await Songs.find({ID: temp});
                         sails.log.verbose(`Retrieved Songs records: ${songs.length}`);
                         sails.log.silly(songs);
 
@@ -70,10 +61,7 @@ module.exports = {
             });
 
             // Load all manual RadioDJ events into memory
-            var eventsR = await Events.find({type: 3})
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var eventsR = await Events.find({type: 3});
             sails.log.verbose(`Retrieved Events records: ${eventsR.length}`);
             sails.log.silly(eventsR);
 
@@ -82,10 +70,7 @@ module.exports = {
             });
 
             // Load all the calendar events into memory
-            var calendar = await Calendar.find().sort('start ASC')
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var calendar = await Calendar.find().sort('start ASC');
             sails.log.verbose(`Retrieved Calendar records: ${calendar.length}`);
             sails.log.silly(calendar);
 

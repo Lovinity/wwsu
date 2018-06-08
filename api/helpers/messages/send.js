@@ -41,18 +41,12 @@ module.exports = {
             sails.log.silly(`Profanity filtered. New messahe: ${inputs.message}`);
             
             // Grab data pertaining to the host that is retrieving messages. Create if not exists.
-            var stuff = await Hosts.findOrCreate({host: inputs.from}, {host: inputs.from, friendlyname: inputs.from})
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var stuff = await Hosts.findOrCreate({host: inputs.from}, {host: inputs.from, friendlyname: inputs.from});
             sails.log.silly(`Host: ${stuff}`);
             inputs.from_friendly = stuff.friendlyname;
             
             // Create the message
-            var records = await Messages.create(inputs).fetch()
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var records = await Messages.create(inputs).fetch();
             if (!records)
             {
                 return exits.error(new Error('Internal error: Could not save message in database.'));

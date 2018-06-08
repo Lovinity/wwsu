@@ -22,11 +22,16 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper error.reset called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
-        
-        Status.errorCheck[inputs.name].count = 0;
 
-        // All done.
-        return exits.success();
+        try {
+            Status.errorCheck[inputs.name].count = 0;
+
+            // All done.
+            return exits.success();
+
+        } catch (e) {
+            return exits.error(e);
+        }
 
     }
 

@@ -1,3 +1,5 @@
+/* global sails */
+
 var profanity = require('profanity-util', {substring: "lite"});
 
 module.exports = {
@@ -20,9 +22,13 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper filterProfane called.');
-        var filtered = profanity.purify(inputs.message);
-        sails.log.silly(filtered);
-        return exits.success(filtered[0]);
+        try {
+            var filtered = profanity.purify(inputs.message);
+            sails.log.silly(filtered);
+            return exits.success(filtered[0]);
+        } catch (e) {
+            return exits.error(e);
+        }
     }
 
 

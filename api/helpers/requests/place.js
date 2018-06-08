@@ -41,17 +41,11 @@ module.exports = {
             {
 
                 // Get the song data
-                var record2 = await Songs.findOne({ID: inputs.ID})
-                        .tolerate((err) => {
-                            return exits.error(err);
-                        });
-                        sails.log.silly(`Song: ${record2}`);
+                var record2 = await Songs.findOne({ID: inputs.ID});
+                sails.log.silly(`Song: ${record2}`);
 
                 // Create the request
-                await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(), played: 0})
-                        .tolerate((err) => {
-                            return exits.error(err);
-                        });
+                await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(), played: 0});
                 Requests.pending.push(inputs.ID);
 
                 // Finish it

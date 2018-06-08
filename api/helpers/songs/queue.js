@@ -46,10 +46,7 @@ module.exports = {
         try {
 
             // Find all applicable songs that are in the subcategory and load them in memory (have to do randomisation by Node, not by database)
-            var thesongs = await Songs.find({id_subcat: inputs.subcategories, enabled: 1})
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var thesongs = await Songs.find({id_subcat: inputs.subcategories, enabled: 1});
             sails.log.verbose(`Songs records retrieved: ${thesongs.length}`);
             sails.log.silly(thesongs);
 

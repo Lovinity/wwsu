@@ -62,10 +62,7 @@ module.exports = {
 
         try {
             // Get the director as provided by admin
-            var record = await Directors.findOne({login: inputs.admin})
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var record = await Directors.findOne({login: inputs.admin});
             sails.log.silly(record);
 
             // Director not found or is not an admin? Forbidden request.
@@ -73,10 +70,7 @@ module.exports = {
                 return exits.forbidden();
 
             // Update the timesheet record
-            await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(), time_out: moment(inputs.time_out).toISOString, approved: inputs.approved})
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(), time_out: moment(inputs.time_out).toISOString, approved: inputs.approved});
 
             // Force a re-load of all directors to update any possible changes in presence
             await Directors.updateDirectors(true);

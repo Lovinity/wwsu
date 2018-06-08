@@ -22,10 +22,7 @@ module.exports = {
             await sails.helpers.messages.removeMass(inputs.host);
 
             // Add the show ban to the database
-            var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'showban', message: `The website user was show-banned by ${Meta['A'].dj}`}).fetch()
-                    .tolerate((err) => {
-                        return exits.error(err);
-                    });
+            var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'showban', message: `The website user was show-banned by ${Meta['A'].dj}`}).fetch();
 
             // Broadcast the ban to the client
             sails.sockets.broadcast(`discipline-${inputs.host}`, `discipline`, {"discipline": `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}`});

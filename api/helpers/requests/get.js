@@ -17,37 +17,36 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.get called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
-        var records = await Requests.find({played: 0, ID: {'>': inputs.offset}})
-                .tolerate((err) => {
-                    return exits.error(err);
-                });
-                sails.log.verbose(`Requests records retrieved: ${records.length}`);
-                sails.log.silly(records);
-        var thereturn = [];
-        if (typeof records === 'undefined' || records.length === 0)
-        {
-            return exits.success([]);
-        } else {
+
+        try {
+            var records = await Requests.find({played: 0, ID: {'>': inputs.offset}});
+            sails.log.verbose(`Requests records retrieved: ${records.length}`);
+            sails.log.silly(records);
             var thereturn = [];
-            
-            // Get artist and title of each requested track
-            await sails.helpers.asyncForEach(records, function (record) {
-                return new Promise(async (resolve2, reject2) => {
-                    var temp = record;
-                    var record2 = await Songs.findOne({ID: record.songID})
-                            .tolerate((err) => {
-                                return reject2(err);
-                            });
-                            sails.log.silly(`Song: ${record2}`);
-                    if (record2)
-                    {
-                        temp.trackname = `${record2.artist} - ${record2.title}`;
-                        thereturn.push(temp);
-                    }
-                    return resolve2(false);
+            if (typeof records === 'undefined' || records.length === 0)
+            {
+                return exits.success([]);
+            } else {
+                var thereturn = [];
+
+                // Get artist and title of each requested track
+                await sails.helpers.asyncForEach(records, function (record) {
+                    return new Promise(async (resolve2, reject2) => {
+                        var temp = record;
+                        var record2 = await Songs.findOne({ID: record.songID});
+                        sails.log.silly(`Song: ${record2}`);
+                        if (record2)
+                        {
+                            temp.trackname = `${record2.artist} - ${record2.title}`;
+                            thereturn.push(temp);
+                        }
+                        return resolve2(false);
+                    });
                 });
-            });
-            return exits.success(thereturn);
+                return exits.success(thereturn);
+            }
+        } catch (e) {
+            return exits.error(e);
         }
     }
 

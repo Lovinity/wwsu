@@ -39,11 +39,11 @@ module.exports = {
                             }
                             return exits.success(Meta.automation);
                         } catch (e) {
-                            return exits.error(e);
+                            throw e;
                         }
                     })
                     .catch(function (err) {
-                        return exits.error(err);
+                        throw err;
                     });
         } catch (e) {
             return exits.error(e);

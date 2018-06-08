@@ -12,18 +12,20 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller calendar/get called.');
-        var records = await Calendar.find()
-                .tolerate((err) => {
-                    return exits.error(err);
-                });
-                sails.log.verbose(`Calendar records retrieved: ${records.length}`);
-                sails.log.silly(records);
-        if (this.req.isSocket)
-        {
-            sails.sockets.join(this.req, 'calendar');
-            sails.log.verbose('Request was a socket. Joining calendar.');
+
+        try {
+            var records = await Calendar.find();
+            sails.log.verbose(`Calendar records retrieved: ${records.length}`);
+            sails.log.silly(records);
+            if (this.req.isSocket)
+            {
+                sails.sockets.join(this.req, 'calendar');
+                sails.log.verbose('Request was a socket. Joining calendar.');
+            }
+            return exits.success(records);
+        } catch (e) {
+            return exits.error(e);
         }
-        return exits.success(records);
     }
 
 

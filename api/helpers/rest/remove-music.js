@@ -15,37 +15,46 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        // API NOTE: This should never throw an error unless we have to stop all execution.
         sails.log.debug('Helper rest.removeMusic called.');
+
         var removetrack = async function (cb) {
-            // Get current queue
-            var queue = await sails.helpers.rest.getQueue();
-            var terminateloop = false;
-            var loopposition = 1;
+            try {
+                // Get current queue
+                var queue = await sails.helpers.rest.getQueue();
+                var terminateloop = false;
+                var loopposition = 1;
 
-            // Loop through all the tracks in the queue
-            while (!terminateloop && loopposition < queue.length)
-            {
-                // If the track is a music track, remove it
-                if (queue[loopposition].TrackType === 'Music' && queue[loopposition].Elapsed === 0 && queue[loopposition].ID !== 0)
+                // Loop through all the tracks in the queue
+                while (!terminateloop && loopposition < queue.length)
                 {
-                    // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
-                    if (!inputs.keepRequests || !_.includes(queue[loopposition].ID, Requests.pending))
+                    // If the track is a music track, remove it
+                    if (queue[loopposition].TrackType === 'Music' && queue[loopposition].Elapsed === 0 && queue[loopposition].ID !== 0)
                     {
-                        terminateloop = true;
-                        await sails.helpers.rest.cmd('RemovePlaylistTrack', loopposition - 1);
+                        // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
+                        if (!inputs.keepRequests || !_.includes(queue[loopposition].ID, Requests.pending))
+                        {
+                            terminateloop = true;
+                            await sails.helpers.rest.cmd('RemovePlaylistTrack', loopposition - 1);
 
-                        // We have to re-execute the entire function again after each time we remove something so we can load the new queue in memory and have correct position numbers.
-                        setTimeout(function () {
-                            removetrack(cb);
-                        }, 100);
+                            // We have to re-execute the entire function again after each time we remove something so we can load the new queue in memory and have correct position numbers.
+                            setTimeout(async function () {
+                                await removetrack(cb);
+                            }, 100);
+                        }
                     }
+                    loopposition += 1;
                 }
-                loopposition += 1;
+                if (!terminateloop)
+                    cb();
+            } catch (e) {
+                throw e;
             }
-            if (!terminateloop)
-                cb();
         };
-        removetrack(exits.success);
+        await removetrack(exits.success)
+                .catch(e => {
+                    return exits.error(e);
+                });
     }
 
 

@@ -1,4 +1,4 @@
-/* global Eas */
+/* global Eas, sails */
 
 module.exports = {
 

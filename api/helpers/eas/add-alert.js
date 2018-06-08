@@ -70,7 +70,7 @@ module.exports = {
             // Get the alert if it already exists in the database
             var record = await Eas.findOne({source: inputs.source, reference: inputs.reference})
                     .tolerate((err) => {
-                        return exits.error(err);
+                        sails.log.error(err);
                     });
             if (record) // Exists
             {
@@ -110,9 +110,6 @@ module.exports = {
                 if (updateIt)
                 {
                     await Eas.update({ID: record.ID}, criteria)
-                            .tolerate((err) => {
-                                return exits.error(err);
-                            })
                             .fetch();
                 }
                 return exits.success();
@@ -161,36 +158,29 @@ module.exports = {
                                                     criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
                                                     sails.log.silly(`Criteria: ${criteria}`);
                                                     await Eas.create(criteria)
-                                                            .tolerate((err) => {
-                                                                return reject(err);
-                                                            })
                                                             .fetch();
                                                     return exits.success();
 
                                                 } catch (e) {
-                                                    sails.log.error(e);
-                                                    return reject2();
+                                                    return reject2(e);
                                                 }
                                                 return resolve2(false);
                                             });
                                         });
 
                                     } catch (e) {
-                                        return exits.error(e);
+                                        throw e;
                                     }
                                 })
                                 .catch(function (err) {
-                                    return exits.error(err);
+                                    throw err;
                                 });
                     } catch (e) {
-                        return exits.error(e);
+                        throw e;
                     }
                 } else {
                     sails.log.silly(`Criteria: ${criteria}`);
                     var record = await Eas.create(criteria)
-                            .tolerate((err) => {
-                                return reject(err);
-                            })
                             .fetch();
                     return exits.success();
                 }
