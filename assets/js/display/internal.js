@@ -199,12 +199,12 @@ io.socket.on('display-refresh', function (data) {
 });
 
 // Update meta information when meta is provided
-io.socket.on('meta', function (event) {
-    for (var key in event)
+io.socket.on('meta', function (data) {
+    for (var key in data)
     {
-        if (event.hasOwnProperty(key))
+        if (data.hasOwnProperty(key))
         {
-            Meta[key] = event[key];
+            Meta[key] = data[key];
         }
     }
     processMeta();
