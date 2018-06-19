@@ -12,6 +12,11 @@ module.exports = {
             allowNull: true,
             description: 'If provided, will only return the provided song ID.'
         },
+        search: {
+            type: 'string',
+            allowNull: true,
+            description: 'Search by provided artist or title.'
+        },
         limit: {
             type: 'number',
             defaultsTo: 25,
@@ -81,6 +86,8 @@ module.exports = {
 
                 // Find songs in any of these subcategories
                 query = {ID: {'<': inputs.offset}, id_subcat: subcatIDs};
+                if (inputs.search !== null)
+                    query.or = [{artist: {'contains': inputs.search}}, {title: {'contains': inputs.search}}];
                 songs = await Songs.find(query).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
                 sails.log.silly(songs);

@@ -434,6 +434,7 @@ Get an array of tracks from the automation system. This was designed to be used 
 | key | criteria |
 |--|--|
 | ID | number (If only getting a specific song, provide the song's ID number. If none provided, will return requestable songs.) |
+| search | string (If provided, return only songs that contain the provided string in the artist or the title.) |
 | limit | number (Maximum number of songs to return. Defaults to 25.) |
 | offset | number (If provided, songs with an ID number less than or equal to the offset will not be returned.) |
 #### Response 200
