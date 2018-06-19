@@ -183,7 +183,10 @@ module.exports = {
             count: 0,
             trigger: 6,
             condition: function () {
-                // WORK ON THIS
+                var inQueue = false;
+                Meta.automation.forEach(function (track) {
+                    // WORK ON THIS
+                });
             },
             fn: function () {
                 return new Promise(async (resolve, reject) => {
