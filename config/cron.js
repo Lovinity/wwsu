@@ -744,6 +744,19 @@ module.exports.cron = {
                                         .tolerate((err) => {
                                         });
                                 await sails.helpers.requests.queue(3, true, true);
+
+                                // Load in any duplicate non-music tracks that were removed prior, to ensure underwritings etc get proper play counts.
+                                if (Songs.pending.length > 0)
+                                {
+                                    await sails.helpers.asyncForEach(Songs.pending, function (track, index) {
+                                        return new Promise(async (resolve2, reject2) => {
+                                            await sails.helpers.rest.cmd('LoadTrackToTop', track.ID);
+                                            delete Songs.pending[index];
+                                            return resolve2(false);
+                                        });
+                                    });
+                                }
+
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Top', 1);
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, true);
