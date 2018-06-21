@@ -26,10 +26,40 @@ module.exports.cron = {
                 try {
                     var queue = await sails.helpers.rest.getQueue();
 
-                    // Calculate the length of the current queue
-                    queue.forEach(function (track) {
-                        change.queueLength += (track.Duration - track.Elapsed);
-                    });
+                    // Remove duplicate tracks. Also, calculate length of the queue
+                    async function queueCheck() {
+                        try {
+                            sails.log.silly(`queueCheck executed.`);
+                            var theTracks = [];
+                            return sails.helpers.asyncForEach(queue, function (track, index) {
+                                return new Promise(async (resolve2, reject2) => {
+                                    var title = `${track.Artist} - ${track.Title}`;
+
+                                    // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again
+                                    if (theTracks.indexOf(title) > -1)
+                                    {
+                                        sails.log.debug(`Track ${track.ID} is a duplicate. Removing!`);
+                                        if (track.TrackType !== 'Music')
+                                            Songs.pending.push(track.ID);
+                                        await sails.helpers.rest.cmd('RemovePlaylistTrack', index);
+                                        queue = await sails.helpers.rest.getQueue();
+                                        change.queueLength = 0;
+                                        await queueCheck();
+                                        return resolve2(true);
+                                    } else {
+                                        theTracks.push(title);
+                                        change.queueLength += (track.Duration - track.Elapsed);
+                                        return resolve2(false);
+                                    }
+                                });
+                            });
+                        } catch (e) {
+                            sails.log.error(e);
+                            return null;
+                        }
+                    }
+                    await queueCheck();
+                    sails.log.silly(`Proceeding after queueCheck.`);
 
                     await sails.helpers.error.reset('queueFail');
 
@@ -654,6 +684,19 @@ module.exports.cron = {
                                         .tolerate((err) => {
                                         });
                                 await sails.helpers.requests.queue(3, true, true);
+
+                                // Load in any duplicate non-music tracks that were removed prior, to ensure underwritings etc get proper play counts.
+                                if (Songs.pending.length > 0)
+                                {
+                                    await sails.helpers.asyncForEach(Songs.pending, function (track, index) {
+                                        return new Promise(async (resolve2, reject2) => {
+                                            await sails.helpers.rest.cmd('LoadTrackToTop', track.ID);
+                                            delete Songs.pending[index];
+                                            return resolve2(false);
+                                        });
+                                    });
+                                }
+
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Top', 1);
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, true);
                             }
