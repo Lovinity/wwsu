@@ -61,6 +61,15 @@ module.exports.cron = {
                     await queueCheck();
                     sails.log.silly(`Proceeding after queueCheck.`);
 
+                    // If the currently playing track was a request, mark as played
+                    if (Requests.pending.indexOf(queue[0].ID) > -1)
+                    {
+                        await Requests.update({songID: queue[0].ID}, {played: 1})
+                                .tolerate((err) => {
+                                });
+                        delete Requests.pending[Requests.pending.indexOf(queue[0].ID)];
+                    }
+
                     await sails.helpers.error.reset('queueFail');
 
                     // Error checks
