@@ -1129,10 +1129,10 @@ module.exports.cron = {
                     .tolerate((err) => {
                     });
 
-            if (found && found >= 25)
+            if (found && found >= sails.config.custom.status.musicLibrary.verify.error)
             {
                 Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
-            } else if (found && found >= 10)
+            } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn)
             {
                 Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
             } else if (found)
