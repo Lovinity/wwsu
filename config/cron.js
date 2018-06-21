@@ -17,7 +17,8 @@ module.exports.cron = {
                     try {
                         Meta.changeMeta(Meta.template);
                     } catch (e) {
-                        return reject(e);
+                        sails.log.error(e);
+                        return resolve(e);
                     }
                     return resolve();
                 }
@@ -76,7 +77,8 @@ module.exports.cron = {
                     await sails.helpers.error.count('stationID', true);
                 } catch (e) {
                     await sails.helpers.error.count('queueFail');
-                    return reject(e);
+                    sails.log.error(e);
+                    return resolve(e);
                 }
 
                 /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
@@ -123,13 +125,14 @@ module.exports.cron = {
                     try {
                         var meta = await Meta.find().limit(1)
                                 .tolerate((err) => {
-                                    return reject(err);
+                                    sails.log.error(err);
+                                    return resolve(err);
                                 });
                         meta = meta[0];
                         sails.log.silly(meta);
                         await Meta.changeMeta(meta);
                     } catch (e) {
-                        return reject(e);
+                        return resolve(e);
                     }
                 }
 
@@ -790,7 +793,8 @@ module.exports.cron = {
                 } catch (e) {
                     // Uncomment once we confirmed this CRON is fully operational
                     //  await sails.helpers.error.count('frozen');
-                    return reject(e);
+                    sails.log.error(e);
+                    return resolve(e);
                 }
             });
         },
@@ -802,7 +806,12 @@ module.exports.cron = {
         schedule: '0 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON workOrders triggered.`);
-            await Tasks.updateTasks();
+            try {
+                await Tasks.updateTasks();
+            } catch (e) {
+                sails.log.error(e);
+                return null;
+            }
         },
         start: true
     },
@@ -812,7 +821,12 @@ module.exports.cron = {
         schedule: '1 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON updateDirectors triggered.`);
-            await Directors.updateDirectors();
+            try {
+                await Directors.updateDirectors();
+            } catch (e) {
+                sails.log.error(e);
+                return null;
+            }
         },
         start: true
     },
@@ -822,7 +836,12 @@ module.exports.cron = {
         schedule: '2 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON updateCalendar triggered.`);
-            await Calendar.preLoadEvents();
+            try {
+                await Calendar.preLoadEvents();
+            } catch (e) {
+                sails.log.error(e);
+                return null;
+            }
         },
         start: true
     },
@@ -870,6 +889,8 @@ module.exports.cron = {
                 } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
                     Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 4}]);
                 }
+                sails.log.error(e);
+                return null;
             }
         },
         start: true
@@ -881,44 +902,49 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON checkRadioDJs triggered.`);
 
-            await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
-                return new Promise(async (resolve, reject) => {
-                    try {
-                        needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`)
-                                .then(async function (resp) {
-                                    if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
-                                    {
-                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
-                                    } else {
+            try {
+                await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`)
+                                    .then(async function (resp) {
+                                        if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
+                                        {
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
+                                        } else {
+                                            if (Meta['A'].radiodj === radiodj.rest)
+                                            {
+                                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
+                                            } else {
+                                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
+                                            }
+                                        }
+                                        return resolve(false);
+                                    })
+                                    .catch(function (err) {
                                         if (Meta['A'].radiodj === radiodj.rest)
                                         {
                                             Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
                                         } else {
                                             Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
                                         }
-                                    }
-                                    return resolve(false);
-                                })
-                                .catch(function (err) {
-                                    if (Meta['A'].radiodj === radiodj.rest)
-                                    {
-                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
-                                    } else {
-                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
-                                    }
-                                    return resolve(false);
-                                });
-                    } catch (e) {
-                        if (Meta['A'].radiodj === radiodj.rest)
-                        {
-                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
-                        } else {
-                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
+                                        return resolve(false);
+                                    });
+                        } catch (e) {
+                            if (Meta['A'].radiodj === radiodj.rest)
+                            {
+                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
+                            } else {
+                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
+                            }
+                            return resolve(false);
                         }
-                        return resolve(false);
-                    }
+                    });
                 });
-            });
+            } catch (e) {
+                sails.log.error(e);
+                return null;
+            }
         },
         start: true
     },
@@ -943,6 +969,8 @@ module.exports.cron = {
                         });
             } catch (e) {
                 Status.changeStatus([{name: `website`, label: `Website`, data: 'There was an error connecting to the WWSU website.', status: 2}]);
+                sails.log.error(e);
+                return null;
             }
         },
         start: true
@@ -954,44 +982,49 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON EAS triggered.`);
 
-            // Initial procedure
-            await sails.helpers.eas.preParse();
+            try {
+                // Initial procedure
+                await sails.helpers.eas.preParse();
 
-            // Iterate through every configured county and get their weather alerts
-            var complete = 0;
-            await sails.helpers.asyncForEach(sails.config.custom.EAS.NWSX, function (county, index) {
-                return new Promise(async (resolve, reject) => {
-                    try {
-                        sails.log.verbose(`Trying ${county.name}-${county.code}`);
-                        needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`)
-                                .then(async function (resp) {
-                                    await sails.helpers.eas.parseCaps(county.name, resp.body);
-                                    complete++;
-                                    return resolve(false);
-                                })
-                                .catch(function (err) {
-                                    // Do not reject on error; just go to the next county
-                                    sails.log.error(err);
-                                    return resolve(false);
-                                });
-                    } catch (e) {
-                        // Do not reject on error; just go to the next county
-                        sails.log.error(e);
-                        return resolve(false);
-                    }
+                // Iterate through every configured county and get their weather alerts
+                var complete = 0;
+                await sails.helpers.asyncForEach(sails.config.custom.EAS.NWSX, function (county, index) {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            sails.log.verbose(`Trying ${county.name}-${county.code}`);
+                            needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`)
+                                    .then(async function (resp) {
+                                        await sails.helpers.eas.parseCaps(county.name, resp.body);
+                                        complete++;
+                                        return resolve(false);
+                                    })
+                                    .catch(function (err) {
+                                        // Do not reject on error; just go to the next county
+                                        sails.log.error(err);
+                                        return resolve(false);
+                                    });
+                        } catch (e) {
+                            // Do not reject on error; just go to the next county
+                            sails.log.error(e);
+                            return resolve(false);
+                        }
+                    });
                 });
-            });
 
-            // If all counties succeeded, mark EAS-internal as operational
-            if (complete >= sails.config.custom.EAS.NWSX.length)
-            {
-                Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: 'All EAS NWS CAPS are operational.', status: 5}]);
-            } else {
-                Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: `${complete} out of ${sails.config.custom.EAS.NWSX.length} EAS NWS CAPS are operational.`, status: 3}]);
+                // If all counties succeeded, mark EAS-internal as operational
+                if (complete >= sails.config.custom.EAS.NWSX.length)
+                {
+                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: 'All EAS NWS CAPS are operational.', status: 5}]);
+                } else {
+                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: `${complete} out of ${sails.config.custom.EAS.NWSX.length} EAS NWS CAPS are operational.`, status: 3}]);
+                }
+
+                // Finish up
+                await sails.helpers.eas.postParse();
+            } catch (e) {
+                sails.log.error(e);
+                return null;
             }
-
-            // Finish up
-            await sails.helpers.eas.postParse();
         },
         start: true
     },
@@ -1090,6 +1123,8 @@ module.exports.cron = {
                 Status.changeStatus([{name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed.', status: 1}]);
                 Status.changeStatus([{name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed.', status: 1}]);
                 Status.changeStatus([{name: 'db-nodebase', label: 'DB Nodebase', data: 'The CRON checkDB failed.', status: 1}]);
+                sails.log.error(e);
+                return null;
             }
         },
         start: true
@@ -1101,82 +1136,87 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON reloadSubcats called.`);
 
-            // Load subcats IDs for each consigured categories
-            sails.config.custom.subcats = {};
+            try {
+                // Load subcats IDs for each consigured categories
+                sails.config.custom.subcats = {};
 
-            for (var config in sails.config.custom.categories)
-            {
-                if (sails.config.custom.categories.hasOwnProperty(config))
+                for (var config in sails.config.custom.categories)
                 {
-                    for (var cat in sails.config.custom.categories[config])
+                    if (sails.config.custom.categories.hasOwnProperty(config))
                     {
-                        if (sails.config.custom.categories[config].hasOwnProperty(cat))
+                        for (var cat in sails.config.custom.categories[config])
                         {
-                            sails.config.custom.subcats[config] = [];
-                            var thecategory = await Category.findOne({name: cat})
-                                    .tolerate((err) => {
-                                    });
-                            if (!thecategory || thecategory === null)
-                                continue;
-
-                            if (sails.config.custom.categories[config][cat].length <= 0)
+                            if (sails.config.custom.categories[config].hasOwnProperty(cat))
                             {
-                                var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
+                                sails.config.custom.subcats[config] = [];
+                                var thecategory = await Category.findOne({name: cat})
                                         .tolerate((err) => {
                                         });
-                            } else {
-                                var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
-                                        .tolerate((err) => {
-                                        });
+                                if (!thecategory || thecategory === null)
+                                    continue;
+
+                                if (sails.config.custom.categories[config][cat].length <= 0)
+                                {
+                                    var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
+                                            .tolerate((err) => {
+                                            });
+                                } else {
+                                    var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
+                                            .tolerate((err) => {
+                                            });
+                                }
+                                if (!thesubcategories || thesubcategories.length <= 0)
+                                    continue;
+
+                                thesubcategories.forEach(function (thesubcategory) {
+                                    sails.config.custom.subcats[config].push(thesubcategory.ID);
+                                });
+
+                                sails.log.silly(`Subcategories for ${config}: ${sails.config.custom.subcats[config]}`);
                             }
-                            if (!thesubcategories || thesubcategories.length <= 0)
-                                continue;
-
-                            thesubcategories.forEach(function (thesubcategory) {
-                                sails.config.custom.subcats[config].push(thesubcategory.ID);
-                            });
-
-                            sails.log.silly(`Subcategories for ${config}: ${sails.config.custom.subcats[config]}`);
                         }
                     }
                 }
-            }
 
-            // Load subcats IDs for each consigured sport
-            sails.config.custom.sportscats = {};
-            for (var config in sails.config.custom.sports)
-            {
-                if (sails.config.custom.sports.hasOwnProperty(config))
+                // Load subcats IDs for each consigured sport
+                sails.config.custom.sportscats = {};
+                for (var config in sails.config.custom.sports)
                 {
-                    sails.config.custom.sportscats[config] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
+                    if (sails.config.custom.sports.hasOwnProperty(config))
+                    {
+                        sails.config.custom.sportscats[config] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
+                    }
                 }
-            }
 
-            var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
-                    .tolerate((err) => {
+                var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
+                        .tolerate((err) => {
+                        });
+
+                var catIDs = [];
+                var cats = {};
+
+                if (categories.length > 0)
+                {
+                    categories.forEach(function (category) {
+                        catIDs.push(category.ID);
+                        cats[category.ID] = category.name;
                     });
+                }
 
-            var catIDs = [];
-            var cats = {};
+                var subcategories = await Subcategory.find({parentid: catIDs})
+                        .tolerate((err) => {
+                        });
 
-            if (categories.length > 0)
-            {
-                categories.forEach(function (category) {
-                    catIDs.push(category.ID);
-                    cats[category.ID] = category.name;
-                });
-            }
-
-            var subcategories = await Subcategory.find({parentid: catIDs})
-                    .tolerate((err) => {
+                if (subcategories.length > 0)
+                {
+                    subcategories.forEach(function (subcategory) {
+                        if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
+                            sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
                     });
-
-            if (subcategories.length > 0)
-            {
-                subcategories.forEach(function (subcategory) {
-                    if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
-                        sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
-                });
+                }
+            } catch (e) {
+                sails.log.error(e);
+                return null;
             }
         },
         start: true
@@ -1188,21 +1228,26 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON disabledTracks called.`);
 
-            // Count the number of -1 enabled tracks
+            try {
+                // Count the number of -1 enabled tracks
 
-            var found = await Songs.count({enabled: -1})
-                    .tolerate((err) => {
-                    });
+                var found = await Songs.count({enabled: -1})
+                        .tolerate((err) => {
+                        });
 
-            if (found && found >= sails.config.custom.status.musicLibrary.verify.error)
-            {
-                Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
-            } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn)
-            {
-                Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
-            } else if (found)
-            {
-                Status.changeStatus([{name: `music-library`, status: 5, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+                if (found && found >= sails.config.custom.status.musicLibrary.verify.error)
+                {
+                    Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+                } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn)
+                {
+                    Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+                } else if (found)
+                {
+                    Status.changeStatus([{name: `music-library`, status: 5, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+                }
+            } catch (e) {
+                sails.log.error(e);
+                return null;
             }
         },
         start: true
@@ -1213,23 +1258,28 @@ module.exports.cron = {
         schedule: '10 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON serverCheck called.`);
-            var os = require("os");
+            try {
+                var os = require("os");
 
-            // Get CPU load and free memory
-            var load = os.loadavg();
-            var mem = os.freemem();
+                // Get CPU load and free memory
+                var load = os.loadavg();
+                var mem = os.freemem();
 
-            if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical)
-            {
-                Status.changeStatus([{name: `status`, label: `Status`, status: 1, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
-            } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error)
-            {
-                Status.changeStatus([{name: `status`, label: `Status`, status: 2, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
-            } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn)
-            {
-                Status.changeStatus([{name: `status`, label: `Status`, status: 3, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
-            } else {
-                Status.changeStatus([{name: `status`, label: `Status`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical)
+                {
+                    Status.changeStatus([{name: `status`, label: `Status`, status: 1, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error)
+                {
+                    Status.changeStatus([{name: `status`, label: `Status`, status: 2, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn)
+                {
+                    Status.changeStatus([{name: `status`, label: `Status`, status: 3, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                } else {
+                    Status.changeStatus([{name: `status`, label: `Status`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                }
+            } catch (e) {
+                sails.log.error(e);
+                return null;
             }
         },
         start: true
@@ -1247,6 +1297,8 @@ module.exports.cron = {
                 // Force reload all directors based on timesheets
                 await Directors.updateDirectors(true);
             } catch (e) {
+                sails.log.error(e);
+                return null;
             }
         },
         start: true
