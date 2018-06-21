@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas */
+/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs */
 
 module.exports.cron = {
 
@@ -1112,6 +1112,32 @@ module.exports.cron = {
                     if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
                         sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
                 });
+            }
+        },
+        start: true
+    },
+
+    // Every minute at second 9, count the number of tracks disabled because they are invalid / corrupt / not accessible, and update Music Library status.
+    disabledTracks: {
+        schedule: '9 * * * * *',
+        onTick: async function () {
+            sails.log.debug(`CRON disabledTracks called.`);
+
+            // Count the number of -1 enabled tracks
+
+            var found = await Songs.count({enabled: -1})
+                    .tolerate((err) => {
+                    });
+
+            if (found && found >= 25)
+            {
+                Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+            } else if (found && found >= 10)
+            {
+                Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+            } else if (found)
+            {
+                Status.changeStatus([{name: `music-library`, status: 5, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
             }
         },
         start: true
