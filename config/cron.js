@@ -1143,6 +1143,33 @@ module.exports.cron = {
         start: true
     },
 
+    // Every minute at second 10, check server memory and CPU use
+    serverCheck: {
+        schedule: '10 * * * * *',
+        onTick: async function () {
+            sails.log.debug(`CRON serverCheck called.`);
+            var os = require("os");
+
+            // Get CPU load and free memory
+            var load = os.loadavg();
+            var mem = os.freemem();
+
+            if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical)
+            {
+                Status.changeStatus([{name: `status`, label: `Status`, status: 1, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+            } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error)
+            {
+                Status.changeStatus([{name: `status`, label: `Status`, status: 2, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+            } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn)
+            {
+                Status.changeStatus([{name: `status`, label: `Status`, status: 3, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+            } else {
+                Status.changeStatus([{name: `status`, label: `Status`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+            }
+        },
+        start: true
+    },
+
     // Every day at 11:59:59pm, clock out any directors still clocked in
     clockOutDirectors: {
         schedule: '59 59 23 * * *',
