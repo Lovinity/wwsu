@@ -61,8 +61,9 @@ module.exports = {
 
             sails.log.silly(`Recipients record: ${recipient}`);
 
-            if (typeof recipient !== 'undefined' && typeof Recipients.sockets[recipient.ID] === 'undefined')
+            if (typeof recipient !== 'undefined' && typeof Recipients.sockets[recipient.ID] !== 'undefined')
             {
+
                 // Remove the socket ID from the array of sockets in memory
                 _.remove(Recipients.sockets[recipient.ID], function (e) {
                     return e === inputs.socket;
@@ -78,28 +79,36 @@ module.exports = {
                     await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
                         return new Promise(async (resolve, reject) => {
                             try {
-                                if (djcontrols.host === inputs.host)
+                                if (djcontrols.host === recipient.host)
+                                {
                                     await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 3, data: 'This DJ Controls is reporting offline.'}]);
-                                return resolve(true);
+                                    return resolve(true);
+                                }
+                                return resolve(false);
                             } catch (e) {
                                 return reject(e);
                             }
                         });
                     });
-                    
+
                     // If the recipient name is found in display sign config, reflect status
                     await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
                         return new Promise(async (resolve, reject) => {
                             try {
-                                if (inputs.host === `display-${display.name}`)
+                                if (recipient.host === `display-${display.name}`)
+                                {
                                     await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 3, data: 'This display sign is reporting offline.'}]);
-                                return resolve(true);
+                                    return resolve(true);
+                                }
+                                return resolve(false);
                             } catch (e) {
                                 return reject(e);
                             }
                         });
                     });
                 }
+            } else {
+                sails.log.verbose(`Recipient not found in database. Assuming already removed.`);
             }
 
             return exits.success();

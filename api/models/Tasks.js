@@ -9,7 +9,7 @@
 
 module.exports = {
     // Do not persist the data, as this is only a collection held in memory.
-    datastore: 'memory',
+    datastore: 'ram',
     attributes: {
         ID: {
             type: 'number',

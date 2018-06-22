@@ -28,7 +28,7 @@ module.exports = {
             sails.log.verbose('Request was a socket. Joining meta.');
 
             // WORK ON THIS: find a better way to log display connections rather than in the meta controller
-            if (inputs.display !== null)
+            if (inputs.display)
             {
                 await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.display, 'display', inputs.display);
                 sails.sockets.join(this.req, 'display-refresh');
@@ -36,7 +36,7 @@ module.exports = {
             }
 
             // WORK ON THIS: find a better way to log djcontrols connections rather than in the meta controller
-            if (inputs.djcontrols !== null)
+            if (inputs.djcontrols)
             {
                 await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.djcontrols, 'computers', inputs.djcontrols);
             }

@@ -9,7 +9,7 @@
 
 module.exports = {
     // This model is only a container for temporary data. It should not persist. Use memory instead of SQL.
-    datastore: 'memory',
+    datastore: 'ram',
     attributes: {
         ID: {
             type: 'number',

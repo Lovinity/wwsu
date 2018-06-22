@@ -121,9 +121,6 @@ module.exports = {
                         }
                     });
                 });
-
-                if (!inConfig)
-                    await Status.changeStatus([{name: `djcontrols-${inputs.host}`, label: `DJ Controls ${inputs.label}`, status: 5, data: 'This DJ Controls is reporting operational.'}]);
             }
 
             // If the recipient group is display, update Status
@@ -146,9 +143,6 @@ module.exports = {
                         }
                     });
                 });
-
-                if (!inConfig)
-                    await Status.changeStatus([{name: inputs.host, label: inputs.label, status: 5, data: 'This display sign is reporting operational.'}]);
             }
 
             // Put the socket ID in memory

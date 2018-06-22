@@ -9,7 +9,7 @@
 
 module.exports = {
 
-    datastore: 'memory',
+    datastore: 'ram',
     attributes: {
 
         ID: {
@@ -46,19 +46,19 @@ module.exports = {
     // Template are initial records created in the Recipients model upon execution of bootstrap.
     template: [
         {
-            name: 'emergency',
+            host: 'emergency',
             group: 'system',
             label: 'Technical Issues',
             status: 0
         },
         {
-            name: 'requests',
+            host: 'requests',
             group: 'system',
             label: 'Track Requests',
             status: 0
         },
         {
-            name: 'website',
+            host: 'website',
             group: 'website',
             label: 'Web Public',
             status: 0

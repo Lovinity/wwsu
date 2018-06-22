@@ -1,8 +1,5 @@
 /* global io */
 
-// Require libraries
-const moment = require('moment');
-
 // Define data variables
 var Directors = [];
 var Tasks = [];
@@ -12,8 +9,6 @@ var Status = [];
 
 // Define HTML elements
 var noConnection = document.getElementById("no-connection");
-var taskKey = document.getElementById('taskkey');
-var status = document.getElementById('status');
 var slidebadges = document.getElementById('slide-badges');
 var statusBadges = document.getElementById('status-badges');
 var statusLine = document.getElementById('status-line');
@@ -127,14 +122,17 @@ var restart = setTimeout(function () {
 // Define a function that manages the data arrays
 function updateData(variable, data)
 {
-    if (typeof data === 'object')
+    console.dir(data);
+    if (typeof data === 'object' || data.constructor === Array)
     {
-        if (data.isArray())
+        if (data.constructor === Array)
         {
-            variable = [];
+            variable = [variable[0]];
             data.forEach(function (datum, key) {
-                if (typeof (datum[key].ID !== 'undefined'))
-                    variable[datum[key].ID] = datum[key];
+                if (typeof datum !== 'undefined' && datum.ID !== 'undefined')
+                {
+                    variable[datum.ID] = datum;
+                }
             });
         } else {
             for (var key in data)
@@ -157,200 +155,15 @@ function updateData(variable, data)
             }
         }
     }
+    variable[0](variable);
 }
 
-// When a director is passed as an event, process it.
-io.socket.on('directors', function (data) {
-    updateData(Directors, data);
-    checkDirectors();
-});
-
-// When a socket connection is established
-io.socket.on('connect', function () {
-    metaSocket();
-    taskSocket();
-    directorSocket();
-    statusSocket();
-    // Remove the lost connection overlay
-    if (disconnected)
-    {
-        noConnection.style.display = "none";
-        disconnected = false;
-        clearTimeout(restart);
-        clearTimeout(slidetimer);
-        doSlide(true);
-    }
-});
-
-// When a socket connection is lost
-io.socket.on('disconnect', function () {
-    console.log('Lost connection');
-    // Show the lost connection overlay
-    if (!disconnected)
-    {
-        noConnection.style.display = "inline";
-        disconnected = true;
-    }
-});
-
-// Display sign reload event
-io.socket.on('display-refresh', function (data) {
-    window.location.reload(true);
-});
-
-// Update meta information when meta is provided
-io.socket.on('meta', function (data) {
-    for (var key in data)
-    {
-        if (data.hasOwnProperty(key))
-        {
-            Meta[key] = data[key];
-        }
-    }
-    processMeta();
-});
-
-// Update statuses when status events are passed
-io.socket.on('status', function (data) {
-    updateData(Status, data);
-    processStatus();
-});
-
-// Update tasks when task events are passed
-io.socket.on('tasks', function (data) {
-    updateData(Tasks, data);
-    processTasks();
-});
-
-// Called to replace all data in Tasks with body of request
-function taskSocket()
-{
-    console.log('attempting orders socket');
-    io.socket.post('/tasks/get', {}, function serverResponded(body, JWR) {
-        try {
-            updateData(Tasks, JSON.parse(body));
-            processTasks();
-        } catch (e) {
-            console.log('FAILED TASKS CONNECTION');
-            setTimeout(taskSocket, 10000);
-        }
-    });
-}
-
-// Called to replace all Directors data with body of request
-function directorSocket()
-{
-    console.log('attempting director socket');
-    io.socket.post('/directors/get', {}, function serverResponded(body, JWR) {
-        try {
-            updateData(Directors, JSON.parse(body));
-            checkDirectors();
-        } catch (e) {
-            console.log('FAILED DIRECTORS CONNECTION');
-            setTimeout(directorSocket, 10000);
-        }
-    });
-}
-
-// Called to update all meta information with that of a body request
-function metaSocket()
-{
-    console.log('attempting meta socket');
-    io.socket.post('/meta/get', {display: 'WWSU-internal'}, function serverResponded(body, JWR) {
-        try {
-            temp = JSON.parse(body);
-            for (var key in temp)
-            {
-                if (temp.hasOwnProperty(key))
-                {
-                    Meta[key] = temp[key];
-                }
-            }
-            processMeta();
-        } catch (e) {
-            console.log('FAILED META CONNECTION');
-            setTimeout(metaSocket, 10000);
-        }
-    });
-}
-
-// Replace all Status data with that of body request
-function statusSocket()
-{
-    console.log('attempting status socket');
-    io.socket.post('/status/get', function serverResponded(body, JWR) {
-        try {
-            updateData(Status, JSON.parse(body));
-            processStatus();
-        } catch (e) {
-            console.log('FAILED STATUS CONNECTION');
-            setTimeout(statusSocket, 10000);
-        }
-    });
-}
-
-// Run through operations of current meta in memory
-function processMeta()
-{
-    try {
-        var color = 'rgba(158, 158, 158, 0.3)';
-        switch (Meta.status)
-        {
-            case 1:
-                color = 'rgba(244, 67, 54, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Major Outage';
-                // Flash screen for major outages
-                $("html, body").animate({
-                    backgroundColor: '#D32F2F'
-                }, 250, function () {
-                    $("html, body").animate({
-                        backgroundColor: "#000000"
-                    }, 250);
-                });
-                break;
-            case 2:
-                color = 'rgba(245, 124, 0, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Partial Outage';
-                // Flash screen for partial outages
-                $("html, body").animate({
-                    backgroundColor: '#F57C00'
-                }, 250, function () {
-                    $("html, body").animate({
-                        backgroundColor: "#000000"
-                    }, 250);
-                });
-                break;
-            case 3:
-                color = 'rgba(251, 192, 45, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Operational; minor issue';
-                break;
-            case 5:
-                color = 'rgba(76, 175, 80, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Operational';
-                break;
-            default:
-                color = 'rgba(158, 158, 158, 0.3)';
-                statusLine.innerHTML = 'WWSU Status: Unknown';
-        }
-
-        // Have dim elements if we are to be in power saving mode
-        if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent) {
-            status.style.backgroundColor = color;
-            status.style.color = 'rgba(255, 255, 255, 1)';
-            statusLine.style.color = 'rgba(255, 255, 255, 1)';
-        } else {
-            status.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-            status.style.color = 'rgba(255, 255, 255, 0.2)';
-            statusLine.style.color = 'rgba(255, 255, 255, 0.2)';
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
-
+// Define data-specific functions
 // Run through operations of each WWSU status
-function processStatus()
+Status.push(function (data)
 {
+    Status = data;
+
     // Make a dim status bar if it is time for power saving
     if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote')) {
         statusBadges.style.opacity = '1';
@@ -361,43 +174,50 @@ function processStatus()
     statusBadges.innerHTML = '';
 
     // Make a badge for each status subsystem and display its status by color / class.
-    Status.forEach(function (status) {
-        switch (status.status)
+    Status.forEach(function (thestatus, key) {
+        if (key === 0)
+            return null;
+        switch (thestatus.status)
         {
             case 1:
-                statusBadges.innerHTML += `<span class="m-1 btn btn-danger btn-sm">${status.label}</span>`;
+                statusBadges.innerHTML += `<span class="m-1 btn btn-danger btn-sm">${thestatus.label}</span>`;
                 break;
             case 2:
-                statusBadges.innerHTML += `<span class="m-1 btn btn-danger btn-sm" style="background: #FF5722;">${status.label}</span>`;
+                statusBadges.innerHTML += `<span class="m-1 btn btn-danger btn-sm" style="background: #FF5722;">${thestatus.label}</span>`;
                 break;
             case 3:
-                statusBadges.innerHTML += `<span class="m-1 btn btn-warning btn-sm">${status.label}</span>`;
+                statusBadges.innerHTML += `<span class="m-1 btn btn-warning btn-sm">${thestatus.label}</span>`;
                 break;
             case 4:
-                statusBadges.innerHTML += `<span class="m-1 btn btn-outline-success btn-sm">${status.label}</span>`;
+                statusBadges.innerHTML += `<span class="m-1 btn btn-outline-success btn-sm">${thestatus.label}</span>`;
                 break;
             case 5:
-                statusBadges.innerHTML += `<span class="m-1 btn btn-success btn-sm">${status.label}</span>`;
+                statusBadges.innerHTML += `<span class="m-1 btn btn-success btn-sm">${thestatus.label}</span>`;
                 break;
             default:
-                statusBadges.innerHTML += `<span class="m-1 btn btn-outline-secondary btn-sm">${status.label}</span>`;
+                statusBadges.innerHTML += `<span class="m-1 btn btn-outline-secondary btn-sm">${thestatus.label}</span>`;
         }
     });
-}
+});
 
 // Mark if a director is present or not
-function checkDirectors()
+Directors.push(function (data)
 {
+    Directors = data;
     directorpresent = false;
-    Directors.forEach(function (director) {
+    Directors.forEach(function (director, key) {
+        if (key === 0)
+            return null;
         if (director.present)
             directorpresent = true;
     });
-}
+});
 
 // Do task related stuff when tasks changes
-function processTasks()
+Tasks.push(function (data)
 {
+    console.log(`Tasks called.`);
+    Tasks = data;
     taskProjects = {};
 
     // Delete all project slides
@@ -408,16 +228,18 @@ function processTasks()
     }
 
     // Process each task
-    Tasks.forEach(function (task) {
+    Tasks.forEach(function (task, key) {
+        if (key === 0)
+            return null;
         if (typeof taskProjects[task.project] === 'undefined')
             taskProjects[task.project] = [];
         taskProjects[task.project].push(task);
     });
 
     // Iterate through each project and create a slide for it
+    var projects = 0;
     for (var key in taskProjects)
     {
-        var projects = 0;
         if (taskProjects.hasOwnProperty(key))
         {
             projects++;
@@ -534,10 +356,207 @@ function processTasks()
         slides[projects].content += `</div></div>`;
         slides[projects].function = function () {
             $('#slide').animateCss('fadeOutUp', function () {
-                content.innerHTML = slides[slide].content;
-                slidetimer = setTimeout(doSlide, 14000);
+                if (typeof slides[slide] !== 'undefined' && typeof slides[slide].content !== 'undefined')
+                {
+                    content.innerHTML = slides[slide].content;
+                    slidetimer = setTimeout(doSlide, 14000);
+                } else {
+                    console.log(`NO SLIDE DICE`);
+                    slide = 1;
+                    Tasks[0](Tasks);
+                    doSlide();
+                }
             });
         };
+    }
+});
+
+// When a director is passed as an event, process it.
+io.socket.on('directors', function (data) {
+    updateData(Directors, data);
+});
+
+// When a socket connection is established
+io.socket.on('connect', function () {
+    metaSocket();
+    taskSocket();
+    directorSocket();
+    statusSocket();
+    // Remove the lost connection overlay
+    if (disconnected)
+    {
+        noConnection.style.display = "none";
+        disconnected = false;
+        clearTimeout(restart);
+        clearTimeout(slidetimer);
+        doSlide(true);
+    }
+});
+
+// When a socket connection is lost
+io.socket.on('disconnect', function () {
+    console.log('Lost connection');
+    io.socket._raw.io._reconnection = true;
+    io.socket._raw.io._reconnectionAttempts = Infinity;
+    // Show the lost connection overlay
+    if (!disconnected)
+    {
+        noConnection.style.display = "inline";
+        disconnected = true;
+    }
+});
+
+// Display sign reload event
+io.socket.on('display-refresh', function (data) {
+    window.location.reload(true);
+});
+
+// Update meta information when meta is provided
+io.socket.on('meta', function (data) {
+    for (var key in data)
+    {
+        if (data.hasOwnProperty(key))
+        {
+            Meta[key] = data[key];
+        }
+    }
+    processMeta();
+});
+
+// Update statuses when status events are passed
+io.socket.on('status', function (data) {
+    updateData(Status, data);
+});
+
+// Update tasks when task events are passed
+io.socket.on('tasks', function (data) {
+    updateData(Tasks, data);
+});
+
+// Called to replace all data in Tasks with body of request
+function taskSocket()
+{
+    console.log('attempting orders socket');
+    io.socket.post('/tasks/get', {}, function serverResponded(body, JWR) {
+        try {
+            updateData(Tasks, body);
+        } catch (e) {
+            console.log('FAILED TASKS CONNECTION');
+            setTimeout(taskSocket, 10000);
+        }
+    });
+}
+
+// Called to replace all Directors data with body of request
+function directorSocket()
+{
+    console.log('attempting director socket');
+    io.socket.post('/directors/get', {}, function serverResponded(body, JWR) {
+        try {
+            updateData(Directors, body);
+        } catch (e) {
+            console.error(e);
+            console.log('FAILED DIRECTORS CONNECTION');
+            setTimeout(directorSocket, 10000);
+        }
+    });
+}
+
+// Called to update all meta information with that of a body request
+function metaSocket()
+{
+    console.log('attempting meta socket');
+    io.socket.post('/meta/get', {display: 'display-internal'}, function serverResponded(body, JWR) {
+        try {
+            temp = body;
+            for (var key in temp)
+            {
+                if (temp.hasOwnProperty(key))
+                {
+                    Meta[key] = temp[key];
+                }
+            }
+            processMeta();
+        } catch (e) {
+            console.error(e);
+            console.log('FAILED META CONNECTION');
+            setTimeout(metaSocket, 10000);
+        }
+    });
+}
+
+// Replace all Status data with that of body request
+function statusSocket()
+{
+    console.log('attempting status socket');
+    io.socket.post('/status/get', function serverResponded(body, JWR) {
+        try {
+            updateData(Status, body);
+        } catch (e) {
+            console.error(e)
+            console.log('FAILED STATUS CONNECTION');
+            setTimeout(statusSocket, 10000);
+        }
+    });
+}
+
+// Run through operations of current meta in memory
+function processMeta()
+{
+    try {
+        var status = document.getElementById('status-div');
+        var color = 'rgba(158, 158, 158, 0.3)';
+        switch (Meta.status)
+        {
+            case 1:
+                color = 'rgba(244, 67, 54, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Major Outage';
+                // Flash screen for major outages
+                $("html, body").animate({
+                    backgroundColor: '#D32F2F'
+                }, 250, function () {
+                    $("html, body").animate({
+                        backgroundColor: "#000000"
+                    }, 250);
+                });
+                break;
+            case 2:
+                color = 'rgba(245, 124, 0, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Partial Outage';
+                // Flash screen for partial outages
+                $("html, body").animate({
+                    backgroundColor: '#F57C00'
+                }, 250, function () {
+                    $("html, body").animate({
+                        backgroundColor: "#000000"
+                    }, 250);
+                });
+                break;
+            case 3:
+                color = 'rgba(251, 192, 45, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Operational; minor issue';
+                break;
+            case 5:
+                color = 'rgba(76, 175, 80, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Operational';
+                break;
+            default:
+                color = 'rgba(158, 158, 158, 0.3)';
+                statusLine.innerHTML = 'WWSU Status: Unknown';
+        }
+
+        // Have dim elements if we are to be in power saving mode
+        if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent) {
+            status.style.backgroundColor = color;
+            status.style.color = 'rgba(255, 255, 255, 1)';
+            statusLine.style.color = 'rgba(255, 255, 255, 1)';
+        } else {
+            status.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+            status.style.color = 'rgba(255, 255, 255, 0.2)';
+            statusLine.style.color = 'rgba(255, 255, 255, 0.2)';
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 
@@ -552,7 +571,7 @@ function doSlide(same = false)
     var projects = taskProjects;
 
     // Do slides if we are not to be in power saving mode
-    if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent)
+    if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent || 1 === 1)
     {
         slidebadges.innerHTML = `<span class="m-1 btn btn-outline-primary btn-sm" id="slidebadge-orders">Work Orders</span>`;
 

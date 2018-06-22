@@ -1041,6 +1041,7 @@ module.exports.cron = {
 
                 // Memory checks
                 var checkStatus = {data: ``, status: 5};
+                sails.log.debug(`CHECK: DB Memory`);
                 await sails.helpers.asyncForEach(checksMemory, function (check, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
@@ -1055,6 +1056,7 @@ module.exports.cron = {
                                     checkStatus.status = 3;
                                 checkStatus.data += `Model failure (record ID 1 not returned): ${index}. `;
                             }
+                            return resolve(false);
                         } catch (e) {
                             checkStatus.status = 1;
                             checkStatus.data += `Model failure (internal error): ${index}. `;
@@ -1067,6 +1069,7 @@ module.exports.cron = {
                 Status.changeStatus([{name: 'db-memory', label: 'DB Memory', data: checkStatus.data, status: checkStatus.status}]);
 
                 // RadioDJ checks
+                sails.log.debug(`CHECK: DB RadioDJ`);
                 var checkStatus = {data: ``, status: 5};
                 await sails.helpers.asyncForEach(checksRadioDJ, function (check, index) {
                     return new Promise(async (resolve, reject) => {
@@ -1082,6 +1085,7 @@ module.exports.cron = {
                                     checkStatus.status = 3;
                                 checkStatus.data += `Model failure (record ID 1 not returned): ${index}. `;
                             }
+                            return resolve(false);
                         } catch (e) {
                             checkStatus.status = 1;
                             checkStatus.data += `Model failure (internal error): ${index}. `;
@@ -1094,6 +1098,7 @@ module.exports.cron = {
                 Status.changeStatus([{name: 'db-radiodj', label: 'DB RadioDJ', data: checkStatus.data, status: checkStatus.status}]);
 
                 // Nodebase checks
+                sails.log.debug(`CHECK: DB Nodebase`);
                 var checkStatus = {data: ``, status: 5};
                 await sails.helpers.asyncForEach(checksNodebase, function (check, index) {
                     return new Promise(async (resolve, reject) => {
@@ -1109,6 +1114,7 @@ module.exports.cron = {
                                     checkStatus.status = 3;
                                 checkStatus.data += `Model failure (record ID 1 not returned): ${index}. `;
                             }
+                            return resolve(false);
                         } catch (e) {
                             checkStatus.status = 1;
                             checkStatus.data += `Model failure (internal error): ${index}. `;
@@ -1267,15 +1273,15 @@ module.exports.cron = {
 
                 if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical)
                 {
-                    Status.changeStatus([{name: `status`, label: `Status`, status: 1, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 1, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error)
                 {
-                    Status.changeStatus([{name: `status`, label: `Status`, status: 2, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 2, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn)
                 {
-                    Status.changeStatus([{name: `status`, label: `Status`, status: 3, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 3, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 } else {
-                    Status.changeStatus([{name: `status`, label: `Status`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 }
             } catch (e) {
                 sails.log.error(e);

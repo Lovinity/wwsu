@@ -14,7 +14,7 @@ var breakdance = require('breakdance');
 
 module.exports = {
     // We do not want this data to be persistent as it is being grabbed from Google Calendar
-    datastore: 'memory',
+    datastore: 'ram',
     attributes: {
 
         ID: {

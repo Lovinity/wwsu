@@ -12,7 +12,7 @@
 module.exports = {
 
     // This model's data is only temporary and should not persist. Use memory instead of SQL.
-    datastore: 'memory',
+    datastore: 'ram',
     attributes: {
 
         ID: {
@@ -241,7 +241,7 @@ module.exports = {
             try {
                 await sails.helpers.asyncForEach(array, function (status, index) {
                     return new Promise(async (resolve2, reject2) => {
-                        var criteria = {name: status.name, status: status.status, data: status.data};
+                        var criteria = {name: status.name, status: status.status, data: status.data || '', label: status.label || status.name};
                         if (status.status === 5)
                             criteria.time = moment().toISOString();
 
