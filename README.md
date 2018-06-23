@@ -340,7 +340,6 @@ If the display parameter is provided in the request, and the request is a socket
             "listenerpeak": 0, // Number of peak online listeners
             "queueLength": 0, // Amount of audio queued in radioDJ in seconds (can be a float)
             "breakneeded": false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
-            "status": 4, // Overall system status: 1 = major outage, 2 = partial outage, 3 = minor issue, 4 = rebooting, 5 = operational
             "webchat": true, // Set to false to restrict the ability to send chat messages through the website. Clients should forbid the ability to send messages when this is true. /messages/send-web will reject attempts when this is true.
             "playlist": null, // Name of the playlist we are currently airing if any
             "playlist_position": -1, // Current position within the playlist
