@@ -801,9 +801,9 @@ module.exports.cron = {
         start: true
     },
 
-    // Every minute at second 00, update work orders.
+    // Every 5 minutes at second 00, update work orders. This is only done every 5 minutes because it puts a lot of load on OpenProject.
     workOrders: {
-        schedule: '0 * * * * *',
+        schedule: '0 */5 * * * *',
         onTick: async function () {
             sails.log.debug(`CRON workOrders triggered.`);
             try {

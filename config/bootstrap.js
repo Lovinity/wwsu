@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks */
 
 /**
  * Bootstrap
@@ -140,6 +140,9 @@ module.exports.bootstrap = async function (done) {
                 sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
         });
     }
+    
+    // Trigger task updating, but do not wait for the promise to resolve.
+    Tasks.updateTasks();
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 

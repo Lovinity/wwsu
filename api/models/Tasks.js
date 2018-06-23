@@ -43,10 +43,12 @@ module.exports = {
             defaultsTo: 'Unknown'
         },
         start: {
-            type: 'string'
+            type: 'string',
+            allowNull: true
         },
         due: {
-            type: 'string'
+            type: 'string',
+            allowNull: true
         },
         percent: {
             type: 'number',
@@ -93,7 +95,7 @@ module.exports = {
 
             // Get the tasks from OpenProject
             try {
-                needle('get', sails.config.custom.pm.host + sails.config.custom.pm.path + 'work_packages', {headers: {Authorization: 'Basic ' + sails.config.custom.pm.auth, 'Content-Type': 'application/json'}})
+                needle('get', sails.config.custom.pm.host + sails.config.custom.pm.path + 'work_packages?pageSize=250', {}, {headers: {Authorization: 'Basic ' + sails.config.custom.pm.auth, 'Content-Type': 'application/json'}})
                         .then(async function (resp) {
                             try {
                                 resp.body = JSON.parse(resp.body.toString());
@@ -109,6 +111,7 @@ module.exports = {
                                         try {
                                             // Prepare task information
                                             tasks.push(element.id);
+
                                             var criteria = {
                                                 unique: element.id,
                                                 subject: element.subject || 'Unknown',
@@ -117,9 +120,9 @@ module.exports = {
                                                 type: element._links.type.title || 'Unknown',
                                                 priority: element._links.priority.title || 'Unknown',
                                                 status: element._links.status.title || 'Unknown',
-                                                start: element.startDate,
-                                                due: element.dueDate,
-                                                percent: element.percentageDone,
+                                                start: element.startDate || null,
+                                                due: element.dueDate || null,
+                                                percent: element.percentageDone || 0,
                                                 assignee: element._links.assignee.title || 'Unknown',
                                                 responsible: element._links.responsible.title || 'Unknown'
                                             };
@@ -130,9 +133,10 @@ module.exports = {
                                             var record = await Tasks.findOrCreate({unique: criteriaB.unique}, criteriaB)
                                                     .tolerate((err) => {
                                                         // No error throw, just skip this task
+                                                        sails.log.error(err);
                                                         return resolve2(false);
                                                     });
-                                            sails.log.silly(`Task returned:`);
+                                            sails.log.silly(`Task returned`);
                                             sails.log.silly(record);
 
                                             // Detect any changes in the task. If a change is detected, we will do a database update.
@@ -157,25 +161,31 @@ module.exports = {
                                                         });
                                             }
 
-                                            // Delete tasks that no longer exist
-                                            var removed = await Tasks.destroy({unique: {'!=': tasks}})
-                                                    .tolerate((err) => {
-                                                        return resolve2(false);
-                                                    })
-                                                    .fetch();
-
-                                            sails.log.silly(`Deleted tasks:`);
-                                            sails.log.silly(removed);
-
                                             return resolve2(false);
 
                                         } catch (e) {
                                             // Don't throw an error, just skip this task
+                                            sails.log.error(e);
+                                            console.dir(criteria);
+                                            console.dir(criteriaB);
+                                            console.dir(record);
                                             return resolve2(false);
                                         }
 
                                     });
                                 });
+                                
+                                // Delete tasks that no longer exist
+                                var removed = await Tasks.destroy({unique: {'!=': tasks}})
+                                        .tolerate((err) => {
+                                            return resolve2(false);
+                                        })
+                                        .fetch();
+
+                                sails.log.silly(`Deleted tasks:`);
+                                sails.log.silly(removed);
+                                
+                                var counts = await Tasks.count({});
                                 return resolve();
                             } catch (e) {
                                 return reject(e);

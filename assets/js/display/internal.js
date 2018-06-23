@@ -1,4 +1,4 @@
-/* global io */
+/* global io, moment, Infinity */
 
 // Define data variables
 var Directors = [];
@@ -122,7 +122,6 @@ var restart = setTimeout(function () {
 // Define a function that manages the data arrays
 function updateData(variable, data)
 {
-    console.dir(data);
     if (typeof data === 'object' || data.constructor === Array)
     {
         if (data.constructor === Array)
@@ -216,7 +215,6 @@ Directors.push(function (data)
 // Do task related stuff when tasks changes
 Tasks.push(function (data)
 {
-    console.log(`Tasks called.`);
     Tasks = data;
     taskProjects = {};
 
@@ -229,8 +227,14 @@ Tasks.push(function (data)
 
     // Process each task
     Tasks.forEach(function (task, key) {
+        // Skip the first item as it's a function
         if (key === 0)
             return null;
+        
+        // Skip any tasks that are complete or have a start date later than today.
+        if (task.percent >= 100 || (task.start !== null && moment(task.start).isAfter(moment())))
+            return null;
+        
         if (typeof taskProjects[task.project] === 'undefined')
             taskProjects[task.project] = [];
         taskProjects[task.project].push(task);
@@ -255,7 +259,7 @@ Tasks.push(function (data)
                                             Type
                                         </div>
                                         <div class="col-2">
-                                            Responsible
+                                            Assigned To
                                         </div>
                                         <div class="col-2">
                                             Status
@@ -342,7 +346,7 @@ Tasks.push(function (data)
                             <span style="color: #4DD0E1;">${(typeof dodo.type !== 'undefined') ? dodo.type : 'Undefined'}</span>
                         </div>
                         <div class="col-2">
-                            <span style="color: #FFF176;">${(typeof dodo.assignedTo !== 'undefined') ? dodo.assignedTo : 'Not assigned'}</span>
+                            <span style="color: #FFF176;">${(typeof dodo.assignee !== 'undefined') ? dodo.assignee : 'Not assigned'}</span>
                         </div>
                         <div class="col-2">
                             <span style="color: #C5E1A5;">${(typeof dodo.status !== 'undefined') ? dodo.status : 'Undefined'}</span>
@@ -361,7 +365,6 @@ Tasks.push(function (data)
                     content.innerHTML = slides[slide].content;
                     slidetimer = setTimeout(doSlide, 14000);
                 } else {
-                    console.log(`NO SLIDE DICE`);
                     slide = 1;
                     Tasks[0](Tasks);
                     doSlide();
@@ -430,6 +433,7 @@ io.socket.on('status', function (data) {
 
 // Update tasks when task events are passed
 io.socket.on('tasks', function (data) {
+    console.dir(data);
     updateData(Tasks, data);
 });
 
@@ -439,6 +443,7 @@ function taskSocket()
     console.log('attempting orders socket');
     io.socket.post('/tasks/get', {}, function serverResponded(body, JWR) {
         try {
+            console.dir(body);
             updateData(Tasks, body);
         } catch (e) {
             console.log('FAILED TASKS CONNECTION');
@@ -493,7 +498,7 @@ function statusSocket()
         try {
             updateData(Status, body);
         } catch (e) {
-            console.error(e)
+            console.error(e);
             console.log('FAILED STATUS CONNECTION');
             setTimeout(statusSocket, 10000);
         }
