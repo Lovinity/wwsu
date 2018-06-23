@@ -17,6 +17,7 @@ var title = document.getElementById('title');
 var wrapper = document.getElementById("wrapper");
 wrapper.width = window.innerWidth;
 wrapper.height = window.innerHeight;
+var flashInterval = null;
 
 // Define other variables
 var nodeURL = 'http://server.wwsu1069.org';
@@ -45,6 +46,8 @@ var slides = {1000: {
         }
     }};
 
+var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
+
 // burnGuard is a periodic line that sweeps across the screen to prevent burn-in. Define / construct it.
 var $burnGuard = $('<div>').attr('id', 'burnGuard').css({
     'background-color': 'rgba(0, 0, 0, 0)',
@@ -57,7 +60,14 @@ var $burnGuard = $('<div>').attr('id', 'burnGuard').css({
     'z-index': 99
 }).appendTo('body');
 
-var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
+// Construct a new LineJS instance (the periodic line marquee screensaver)
+var lines = new LinesJS({
+    canvasId: 'wrapper',
+    skipMin: 5,
+    skipMax: 15,
+    numLines: 30,
+    timeInterval: 50
+});
 
 // This function triggers a burn guard sweep.
 function burnGuardAnimate()
@@ -105,15 +115,6 @@ $.fn.extend({
     }
 });
 
-// Construct a new LineJS instance (the periodic line marquee screensaver)
-var lines = new LinesJS({
-    canvasId: 'wrapper',
-    skipMin: 5,
-    skipMax: 15,
-    numLines: 30,
-    timeInterval: 50
-});
-
 // Define a reload timer; terminates if socket connection gets established. This ensures if no connection is made, page will refresh itself to try again.
 var restart = setTimeout(function () {
     window.location.reload(true);
@@ -122,7 +123,7 @@ var restart = setTimeout(function () {
 // Define a function that manages the data arrays
 function updateData(variable, data)
 {
-    if (typeof data === 'object' || data.constructor === Array)
+    if (data !== null && (typeof data === 'object' || data.constructor === Array))
     {
         if (data.constructor === Array)
         {
@@ -172,7 +173,9 @@ Status.push(function (data)
 
     statusBadges.innerHTML = '';
 
-    // Make a badge for each status subsystem and display its status by color / class.
+    var globalStatus = 4;
+
+    // Make a badge for each status subsystem and display its status by color / class. Also check for current overall status.
     Status.forEach(function (thestatus, key) {
         if (key === 0)
             return null;
@@ -180,23 +183,110 @@ Status.push(function (data)
         {
             case 1:
                 statusBadges.innerHTML += `<span class="m-1 btn btn-danger btn-sm">${thestatus.label}</span>`;
+                if (globalStatus > 1)
+                    globalStatus = 1;
                 break;
             case 2:
                 statusBadges.innerHTML += `<span class="m-1 btn btn-danger btn-sm" style="background: #FF5722;">${thestatus.label}</span>`;
+                if (globalStatus > 2)
+                    globalStatus = 2;
                 break;
             case 3:
                 statusBadges.innerHTML += `<span class="m-1 btn btn-warning btn-sm">${thestatus.label}</span>`;
+                if (globalStatus > 3)
+                    globalStatus = 3;
                 break;
             case 4:
                 statusBadges.innerHTML += `<span class="m-1 btn btn-outline-success btn-sm">${thestatus.label}</span>`;
                 break;
             case 5:
                 statusBadges.innerHTML += `<span class="m-1 btn btn-success btn-sm">${thestatus.label}</span>`;
+                if (globalStatus > 3)
+                    globalStatus = 5;
                 break;
             default:
                 statusBadges.innerHTML += `<span class="m-1 btn btn-outline-secondary btn-sm">${thestatus.label}</span>`;
         }
     });
+
+    if (disconnected)
+        globalStatus = 0;
+
+    try {
+        var status = document.getElementById('status-div');
+        var color = 'rgba(158, 158, 158, 0.3)';
+        clearInterval(flashInterval);
+        switch (globalStatus)
+        {
+            case 0:
+                color = 'rgba(244, 67, 54, 0.5)';
+                statusLine.innerHTML = 'DISPLAY SIGN NOT CONNECTED TO WWSU';
+                // Flash screen for major outages every second
+                flashInterval = setInterval(function () {
+                    $("html, body").animate({
+                        backgroundColor: '#D32F2F'
+                    }, 250, function () {
+                        $("html, body").animate({
+                            backgroundColor: "#000000"
+                        }, 250);
+                    });
+                }, 1000);
+                break;
+            case 1:
+                color = 'rgba(244, 67, 54, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Major Outage';
+                // Flash screen for major outages every second
+                flashInterval = setInterval(function () {
+                    $("html, body").animate({
+                        backgroundColor: '#D32F2F'
+                    }, 250, function () {
+                        $("html, body").animate({
+                            backgroundColor: "#000000"
+                        }, 250);
+                    });
+                }, 1000);
+                break;
+            case 2:
+                color = 'rgba(245, 124, 0, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Partial Outage';
+                // Flash screen for partial outages every 5 seconds
+                // Flash screen for major outages every second
+                flashInterval = setInterval(function () {
+                    $("html, body").animate({
+                        backgroundColor: '#FF9800'
+                    }, 250, function () {
+                        $("html, body").animate({
+                            backgroundColor: "#000000"
+                        }, 250);
+                    });
+                }, 5000);
+                break;
+            case 3:
+                color = 'rgba(251, 192, 45, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Operational; minor issue';
+                break;
+            case 5:
+                color = 'rgba(76, 175, 80, 0.5)';
+                statusLine.innerHTML = 'WWSU Status: Operational';
+                break;
+            default:
+                color = 'rgba(158, 158, 158, 0.3)';
+                statusLine.innerHTML = 'WWSU Status: Unknown';
+        }
+
+        // Have dim elements if we are to be in power saving mode
+        if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent) {
+            status.style.backgroundColor = color;
+            status.style.color = 'rgba(255, 255, 255, 1)';
+            statusLine.style.color = 'rgba(255, 255, 255, 1)';
+        } else {
+            status.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+            status.style.color = 'rgba(255, 255, 255, 0.2)';
+            statusLine.style.color = 'rgba(255, 255, 255, 0.2)';
+        }
+    } catch (e) {
+        console.error(e);
+    }
 });
 
 // Mark if a director is present or not
@@ -230,11 +320,11 @@ Tasks.push(function (data)
         // Skip the first item as it's a function
         if (key === 0)
             return null;
-        
+
         // Skip any tasks that are complete or have a start date later than today.
         if (task.percent >= 100 || (task.start !== null && moment(task.start).isAfter(moment())))
             return null;
-        
+
         if (typeof taskProjects[task.project] === 'undefined')
             taskProjects[task.project] = [];
         taskProjects[task.project].push(task);
@@ -365,9 +455,9 @@ Tasks.push(function (data)
                     content.innerHTML = slides[slide].content;
                     slidetimer = setTimeout(doSlide, 14000);
                 } else {
-                    slide = 1;
+                    slide = 1000;
                     Tasks[0](Tasks);
-                    doSlide();
+                    doSlide(true);
                 }
             });
         };
@@ -388,7 +478,7 @@ io.socket.on('connect', function () {
     // Remove the lost connection overlay
     if (disconnected)
     {
-        noConnection.style.display = "none";
+        //noConnection.style.display = "none";
         disconnected = false;
         clearTimeout(restart);
         clearTimeout(slidetimer);
@@ -404,8 +494,9 @@ io.socket.on('disconnect', function () {
     // Show the lost connection overlay
     if (!disconnected)
     {
-        noConnection.style.display = "inline";
+        //noConnection.style.display = "inline";
         disconnected = true;
+        updateData(Status, null);
     }
 });
 
@@ -421,9 +512,12 @@ io.socket.on('meta', function (data) {
         if (data.hasOwnProperty(key))
         {
             Meta[key] = data[key];
+
+            // Do a status update if a state change was returned; this could impact power saving mode
+            if (key === 'state')
+                updateData(Status, null);
         }
     }
-    processMeta();
 });
 
 // Update statuses when status events are passed
@@ -481,7 +575,7 @@ function metaSocket()
                     Meta[key] = temp[key];
                 }
             }
-            processMeta();
+            updateData(Status, null);
         } catch (e) {
             console.error(e);
             console.log('FAILED META CONNECTION');
@@ -505,75 +599,15 @@ function statusSocket()
     });
 }
 
-// Run through operations of current meta in memory
-function processMeta()
-{
-    try {
-        var status = document.getElementById('status-div');
-        var color = 'rgba(158, 158, 158, 0.3)';
-        switch (Meta.status)
-        {
-            case 1:
-                color = 'rgba(244, 67, 54, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Major Outage';
-                // Flash screen for major outages
-                $("html, body").animate({
-                    backgroundColor: '#D32F2F'
-                }, 250, function () {
-                    $("html, body").animate({
-                        backgroundColor: "#000000"
-                    }, 250);
-                });
-                break;
-            case 2:
-                color = 'rgba(245, 124, 0, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Partial Outage';
-                // Flash screen for partial outages
-                $("html, body").animate({
-                    backgroundColor: '#F57C00'
-                }, 250, function () {
-                    $("html, body").animate({
-                        backgroundColor: "#000000"
-                    }, 250);
-                });
-                break;
-            case 3:
-                color = 'rgba(251, 192, 45, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Operational; minor issue';
-                break;
-            case 5:
-                color = 'rgba(76, 175, 80, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Operational';
-                break;
-            default:
-                color = 'rgba(158, 158, 158, 0.3)';
-                statusLine.innerHTML = 'WWSU Status: Unknown';
-        }
-
-        // Have dim elements if we are to be in power saving mode
-        if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent) {
-            status.style.backgroundColor = color;
-            status.style.color = 'rgba(255, 255, 255, 1)';
-            statusLine.style.color = 'rgba(255, 255, 255, 1)';
-        } else {
-            status.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-            status.style.color = 'rgba(255, 255, 255, 0.2)';
-            statusLine.style.color = 'rgba(255, 255, 255, 0.2)';
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
-
 // Process slides
 function doSlide(same = false)
 {
-    console.log('DOING SLIDE stuff.');
     clearTimeout(slidetimer);
     slidetimer = true;
     if (!same)
         slide += 1;
     var projects = taskProjects;
+    console.log(`Slide ${slide}.`);
 
     // Do slides if we are not to be in power saving mode
     if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent || 1 === 1)
@@ -594,6 +628,7 @@ function doSlide(same = false)
         }
 
         var done = false;
+        var restarted = false;
 
         // Iterate through each number until we find a slide with a matching number, or we exceed highestslide
         while (!done)
@@ -602,11 +637,14 @@ function doSlide(same = false)
             if (slide > highestslide)
             {
                 slide = 1;
-                if (lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
+                if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
                 {
                     slide = 0;
                     lastBurnIn = moment();
+                    if (restarted)
+                        console.log(`Slide issue. Triggering marquee screensaver.`);
                 }
+                restarted = true;
             }
 
             // Do marquee screensaver
@@ -632,7 +670,13 @@ function doSlide(same = false)
             {
                 done = true;
                 console.log(`Doing slide ${slide}`);
-                slides[slide].function();
+                try {
+                    slides[slide].function();
+                } catch (e) {
+                    console.log(e);
+                    doSlide();
+                    return null;
+                }
                 var temp = document.getElementById(`slidebadge-${slide}`);
                 if (temp !== null)
                     temp.className = `m-1 btn btn-${slides[slide].class} btn-sm`;
@@ -642,7 +686,13 @@ function doSlide(same = false)
             {
                 done = true;
                 console.log(`Doing slide ${slide}`);
-                slides[slide].function();
+                try {
+                    slides[slide].function();
+                } catch (e) {
+                    console.log(e);
+                    doSlide();
+                    return null;
+                }
                 var temp = document.getElementById(`slidebadge-orders`);
                 if (temp !== null)
                     temp.className = `m-1 btn btn-primary btn-sm`;
