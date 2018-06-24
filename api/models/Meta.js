@@ -1,4 +1,4 @@
-/* global Meta, sails, _ */
+/* global Meta, sails, _, moment */
 
 /**
  * Meta.js
@@ -86,7 +86,7 @@ module.exports = {
         line1: 'We are unable to provide now playing info at this time.', // First line of meta for display signs
         line2: '', // Second line of meta for display signs
         percent: 0, // Integer or float between 0 and 100 indicating how far in the current track in automation we are, for display signs
-        time: '', // Human readable date and time for display signs
+        time: moment().toISOString(), // ISO string of the current WWSU time
         listeners: 0, // Number of current online listeners
         listenerpeak: 0, // Number of peak online listeners
         queueLength: 0, // Amount of audio queued in radioDJ in seconds (can be a float)

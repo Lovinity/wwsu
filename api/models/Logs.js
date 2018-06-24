@@ -6,19 +6,19 @@
  */
 
 module.exports = {
-  datastore: 'nodebase',
-   attributes: {
+    datastore: 'nodebase',
+    attributes: {
         ID: {
             type: 'number',
             autoIncrement: true
         },
 
         logtype: {
-            type: 'string',
-            isIn: ["debug", "info", "warn", "error"]
+            type: 'string'
         },
         loglevel: {
-            type: 'string'
+            type: 'string',
+            isIn: ["debug", "info", "warn", "error"]
         },
 
         logsubtype: {

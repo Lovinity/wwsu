@@ -610,7 +610,7 @@ function doSlide(same = false)
     console.log(`Slide ${slide}.`);
 
     // Do slides if we are not to be in power saving mode
-    if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent || 1 === 1)
+    if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote'))
     {
         slidebadges.innerHTML = `<span class="m-1 btn btn-outline-primary btn-sm" id="slidebadge-orders">Work Orders</span>`;
 

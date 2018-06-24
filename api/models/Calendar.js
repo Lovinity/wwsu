@@ -27,7 +27,8 @@ module.exports = {
         },
 
         title: {
-            type: 'string'
+            type: 'string',
+            defaultsTo: 'Unnamed Event'
         },
 
         description: {

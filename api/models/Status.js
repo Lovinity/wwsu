@@ -66,6 +66,7 @@ module.exports = {
      * key: {
      *     count: 0, // Used by the helper to count the number of times that error occurred.
      *     trigger: 15, // If count reaches this number, then fn() is executed
+     *     active: false, // Set to false by default; used to make sure error checks do not run on top of each other.
      *     condition: function() {}, // If this function returns true, then count is automatically reset to 0 in the count helper.
      *     fn: function() {}, // This function is executed when count reaches trigger. The function should return a number to which the count should be changed to (such as 0).
      * }
@@ -95,6 +96,7 @@ module.exports = {
         queueFail: {
             count: 0,
             trigger: 15,
+            active: false,
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
@@ -107,7 +109,6 @@ module.exports = {
                     } catch (e) {
                         return reject(e);
                     }
-                    return resolve(0);
                 });
             }
         },
@@ -116,6 +117,7 @@ module.exports = {
         frozen: {
             count: 0,
             trigger: 15,
+            active: false,
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
@@ -146,6 +148,7 @@ module.exports = {
         frozenRemote: {
             count: 0,
             trigger: 15,
+            active: false,
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
@@ -183,6 +186,7 @@ module.exports = {
         sportsReturn: {
             count: 0,
             trigger: 6,
+            active: false,
             condition: function () {
                 var inQueue = false;
                 Meta.automation.forEach(function (track) {
@@ -204,6 +208,7 @@ module.exports = {
         stationID: {
             count: 0,
             trigger: 6,
+            active: false,
             condition: function () {
                 var inQueue = false;
                 Meta.automation.forEach(function (track) {

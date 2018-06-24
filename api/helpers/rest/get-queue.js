@@ -43,9 +43,10 @@ module.exports = {
                         }
                     })
                     .catch(function (err) {
-                        throw err;
+                        return exits.error(err);
                     });
         } catch (e) {
+            sails.log.debug(`CAUGHT2`);
             return exits.error(e);
         }
     }

@@ -48,14 +48,13 @@ module.exports = {
                         try {
                             return exits.success(true);
                         } catch (e) {
-                            throw e;
+                            return exits.success(false);
                         }
                     })
                     .catch(async function (err) {
-                        throw err;
+                       return exits.success(false);
                     });
         } catch (e) {
-            sails.log.error(e);
             return exits.success(false);
         }
     }

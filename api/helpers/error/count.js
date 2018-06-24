@@ -39,20 +39,25 @@ module.exports = {
                 await sails.helpers.error.reset(inputs.name);
                 return exits.success();
             }
-            Status.errorCheck[inputs.name].count++;
-            sails.log.verbose(`Count now at ${Status.errorCheck[inputs.name].count}`);
-            if (Status.errorCheck[inputs.name].count >= Status.errorCheck[inputs.name].trigger)
+            if (!Status.errorCheck[inputs.name].active)
             {
-                try {
-                    sails.log.warn(`Status.errorCheck.${inputs.name} triggered!`);
-                    Status.errorCheck[inputs.name].count = await Status.errorCheck[inputs.name].fn();
-                    Status.errorCheck.prevError = moment();
-                    await Logs.create({logtype: 'system', loglevel: 'warn', logsubtype: '', event: `Status.errorCheck.${inputs.name} triggered!`})
-                            .tolerate((err) => {
-                                sails.log.error(err);
-                            });
-                } catch (e) {
-                    Status.errorCheck[inputs.name].count = Status.errorCheck[inputs.name].trigger;
+                Status.errorCheck[inputs.name].count++;
+                sails.log.verbose(`Count now at ${Status.errorCheck[inputs.name].count}`);
+                if (Status.errorCheck[inputs.name].count >= Status.errorCheck[inputs.name].trigger)
+                {
+                    try {
+                        sails.log.warn(`Status.errorCheck.${inputs.name} triggered!`);
+                        Status.errorCheck[inputs.name].active = true;
+                        await Logs.create({logtype: 'system', loglevel: 'warn', logsubtype: '', event: `Status.errorCheck.${inputs.name} triggered!`})
+                                .tolerate((err) => {
+                                    sails.log.error(err);
+                                });
+                        Status.errorCheck[inputs.name].count = await Status.errorCheck[inputs.name].fn();
+                        Status.errorCheck[inputs.name].active = false;
+                        Status.errorCheck.prevError = moment();
+                    } catch (e) {
+                        Status.errorCheck[inputs.name].count = Status.errorCheck[inputs.name].trigger;
+                    }
                 }
             }
 

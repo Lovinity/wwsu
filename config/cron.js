@@ -9,14 +9,17 @@ module.exports.cron = {
             return new Promise(async (resolve, reject) => {
                 sails.log.debug(`CRON checks triggered.`);
 
-                var change = {queueLength: 0, percent: 0}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
-
+                var change = {queueLength: 0, percent: 0, time: moment().toISOString()}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
+                //
                 // Skip all checks and use default meta template if sails.config.custom.lofi = true
                 if (sails.config.custom.lofi)
                 {
                     try {
-                        Meta.changeMeta(Meta.template);
+                        change = Meta.template;
+                        change.time = moment().toISOString();
+                        await Meta.changeMeta(change);
                     } catch (e) {
+                        Meta.changeMeta({time: moment().toISOString()});
                         sails.log.error(e);
                         return resolve(e);
                     }
@@ -56,6 +59,7 @@ module.exports.cron = {
                             });
                         } catch (e) {
                             sails.log.error(e);
+                            Meta.changeMeta({time: moment().toISOString()});
                             return null;
                         }
                     }
@@ -78,6 +82,7 @@ module.exports.cron = {
                 } catch (e) {
                     await sails.helpers.error.count('queueFail');
                     sails.log.error(e);
+                    Meta.changeMeta({time: moment().toISOString()});
                     return resolve(e);
                 }
 
@@ -126,12 +131,15 @@ module.exports.cron = {
                         var meta = await Meta.find().limit(1)
                                 .tolerate((err) => {
                                     sails.log.error(err);
+                                    Meta.changeMeta({time: moment().toISOString()});
                                     return resolve(err);
                                 });
                         meta = meta[0];
+                        meta.time = moment().toISOString();
                         sails.log.silly(meta);
                         await Meta.changeMeta(meta);
                     } catch (e) {
+                        Meta.changeMeta({time: moment().toISOString()});
                         return resolve(e);
                     }
                 }
@@ -794,6 +802,7 @@ module.exports.cron = {
                     // Uncomment once we confirmed this CRON is fully operational
                     //  await sails.helpers.error.count('frozen');
                     sails.log.error(e);
+                    Meta.changeMeta({time: moment().toISOString()});
                     return resolve(e);
                 }
             });
