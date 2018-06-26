@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar */
 
 /**
  * Bootstrap
@@ -141,8 +141,14 @@ module.exports.bootstrap = async function (done) {
         });
     }
     
-    // Trigger task updating, but do not wait for the promise to resolve.
+    // Load work orders.
     Tasks.updateTasks();
+    
+    // Load directors.
+    Directors.updateDirectors(true);
+    
+    // Load Google Calendar.
+    Calendar.preLoadEvents();
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 

@@ -52,7 +52,8 @@ module.exports = {
         },
 
         color: {
-            type: 'string'
+            type: 'string',
+            defaultsTo: '#D50000'
         }
     },
 

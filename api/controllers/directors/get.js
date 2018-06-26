@@ -36,6 +36,12 @@ module.exports = {
             if (inputs.username !== null)
                 query = {login: inputs.username};
 
+            if (this.req.isSocket)
+            {
+                sails.sockets.join(this.req, 'directors');
+                sails.log.verbose('Request was a socket. Joined directors.');
+            }
+
             // See if the specified director is in memory. If not, return 404 not found.
             var records = await Directors.find(query);
 
@@ -43,13 +49,8 @@ module.exports = {
             sails.log.silly(records);
             if (!records || records.length < 1)
             {
-                return exits.notFound();
+                return exits.success([]);
             } else {
-                if (this.req.isSocket)
-                {
-                    sails.sockets.join(this.req, 'directors');
-                    sails.log.verbose('Request was a socket. Joined directors.');
-                }
                 return exits.success(records);
             }
         } catch (e) {

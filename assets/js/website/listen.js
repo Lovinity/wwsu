@@ -18,6 +18,40 @@ var skipIt = 0;
 var blocked = false;
 var firstTime = true;
 
+// Initialize the web player
+$("#nativeflashradio").flashradio({
+	userinterface: "big",
+	backgroundcolor: "#263238",
+	themecolor: "#d31e38", 
+	themefontcolor: "#ffffff", 
+	startvolume: "75", 
+	radioname: "WWSU 106.9 FM", 
+	scroll: "auto", 
+	autoplay: "true", 
+	useanalyzer: "real", 
+	analyzertype: "4", 
+	usecover: "true", 
+	usestreamcorsproxy: "false", 
+	affiliatetoken: "1000lIPN", 
+	debug: "false", 
+	ownsongtitleurl: "", 
+	radiocover: "http://server.wwsu1069.org/images/display/logo.png", 
+	songgooglefontname: "", 
+	songfontname: "", 
+	titlegooglefontname: "", 
+	titlefontname: "", 
+	corsproxy: "https://html5radioplayer2us.herokuapp.com/?q=", 
+	streamprefix: "/stream", 
+	mountpoint: "", 
+	radiouid: "", 
+	apikey: "", 
+	streamid: "1", 
+	streampath: "/live", 
+	streamtype: "other", 
+	streamurl: "http://server.wwsu1069.org", 
+	songinformationinterval: "600000", 
+});
+
 function escapeHTML(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
@@ -33,7 +67,7 @@ io.socket.on('connect', function () {
     notificationsBox.innerHTML += `<div class="p-3 mb-2 border border-success" style="background: rgba(76, 175, 80, 1);><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span> You are now connected to WWSU.</div>`;
     iziToast.show({
         title: 'Connected to WWSU',
-        message: 'You are now connected to WWSU and can send or receive messages.',
+        message: 'You will now receive metadata, can send or receive messages, and can place track requests.',
         color: 'green',
         zindex: 100,
         layout: 2,
@@ -47,11 +81,11 @@ io.socket.on('connect', function () {
 // On socket disconnect, notify the user.
 io.socket.on('disconnect', function () {
     console.log('Lost connection');
-    nowPlaying.innerHTML = `<div class="p-3 mb-2 border border-danger">Lost connection to WWSU. Attempting to re-connect...</div>`;
+    nowPlaying.innerHTML = `<div class="p-3 mb-2 border border-danger">Re-connecting...</div>`;
     notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>Lost connection to WWSU. The chat system will be unavailable until connection is re-established. Please wait while trying to reconnect...</div>`;
     iziToast.show({
         title: 'Lost connection to WWSU',
-        message: 'Lost connection to WWSU. Attempting to reconnect...',
+        message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
         color: 'red',
         zindex: 100,
         layout: 2,
@@ -311,7 +345,7 @@ function sendMessage(private) {
         return null;
     io.socket.post('/messages/send-web', {message: messageText.value, nickname: nickname.value, private: private}, function serverResponded(response, JWR) {
         try {
-            response = JSON.parse(response);
+            //response = JSON.parse(response);
             if (response !== 'OK')
             {
                 notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message: ${response}</div>`;
@@ -340,7 +374,7 @@ function loadTrackInfo(trackID) {
     $('#trackModal').modal('handleUpdate');
     io.socket.post('/songs/get', {ID: trackID}, function serverResponded(response, JWR) {
         try {
-            response = JSON.parse(response);
+            //response = JSON.parse(response);
             // WORK ON THIS: HTML table of song information
             $('#trackModal').modal('handleUpdate');
         } catch (e) {
@@ -378,7 +412,7 @@ function loadTracks(offset = 0) {
         songData.innerHTML = ``;
     io.socket.post('/songs/get', query, function serverResponded(response, JWR) {
         try {
-            response = JSON.parse(response);
+            //response = JSON.parse(response);
             response.forEach(function (track) {
                 songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 border border-secondary bg-${(track.request.requestable) ? 'success' : 'danger'}" onclick="loadTrackInfo(${track.ID});" style="cursor: pointer;"><span>${track.artist} - ${track.title}</span></div>`;
                 if (track.ID > skipIt)
@@ -395,6 +429,7 @@ function loadTracks(offset = 0) {
                 position: 'bottomCenter',
                 timeout: 5000
             });
+            console.error(e);
         }
     });
 }

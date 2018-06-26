@@ -72,13 +72,6 @@ module.exports = {
                             var endFunction = async function () {
                                 sails.log.verbose(`endFunction called.`);
 
-                                // Remove directors which no longer exist in OpenProject
-                                var removed = await Directors.destroy({name: {'!=': directorNames}})
-                                        .tolerate((err) => {
-                                            return reject(err);
-                                        })
-                                        .fetch();
-
                                 sails.log.verbose(`Removed ${removed.length} directors.`);
                                 sails.log.silly(removed);
 
@@ -125,6 +118,13 @@ module.exports = {
                                                 });
                                     }
                                 });
+
+                                // Remove directors which no longer exist in OpenProject
+                                var removed = await Directors.destroy({name: {'!=': directorNames}})
+                                        .tolerate((err) => {
+                                            return reject(err);
+                                        })
+                                        .fetch();
 
                                 // If there was a change in the number of users, or we are forcing a reload, then reload all directors' presence.
                                 if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)

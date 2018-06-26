@@ -10,6 +10,9 @@
         <script src="../../js/bootstrap/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" src="../../dependencies/sails.io.js"></script>
 <script type="text/javascript" src="../../js/display/lines.js"></script>
+<script src="../../js/iziToast.min.js"></script>
+<script src="../../js/taffy-min.js"></script>
+<link rel="stylesheet" href="../../styles/iziToast.min.css">
 <link rel="stylesheet" href="../../styles/bootstrap/bootstrap.min.css">
         <link rel="stylesheet" href="../../styles/animate.css">
 <script src="../../js/moment.min.js"></script>
@@ -40,18 +43,10 @@
                 bottom:0px;
                 background: #FFC107;
             }
-            html, body {
-                height: 100%;
-                margin: 0;
-            }
             .content {
                 padding: 20px;
                 min-height: 100%;
                 margin: 0 auto -240px;
-            }
-            .footer,
-            .push {
-                height: 240px;
             }
             .overlay {
                 position: fixed;
@@ -94,6 +89,15 @@
 #status-line {
     overflow: hidden;
 }
+
+.foot {position: relative;}
+.footer {
+   position: fixed;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   text-align: center;
+}
         </style>
     </head>
     <body style="background-color: #000000; overflow-y: hidden; overflow-x: hidden;">
@@ -106,7 +110,7 @@
         </div>
         <div class="content" id="slide" style="background-color: rgba(0, 0, 0, 0);">TESTING</div>
 
-                    <footer class="footer m-3" style="color: #FFFFFF; text-align: center;">
+                    <div class="footer" style="color: #FFFFFF; text-align: center;">
                 <div class="foot">
                         <div class="p-1 m-1" style="height: 50px; text-align: center; font-size: 1.5em;" id="slide-badges"></div>
                         <div style="height: 135px; background-color: #787878; text-align: center;" id="status-div">
@@ -114,7 +118,7 @@
                         <div class="m-1" style="color: #FFFFFF; font-size: 2em;" id="status-line">DISPLAY SIGN NOT CONNECTED TO WWSU</div>
                         </div>
                 </div>
-            </footer>
+            </div>
     </body>
     <script>if (window.module)
                 module = window.module;</script>

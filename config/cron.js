@@ -1300,9 +1300,9 @@ module.exports.cron = {
         start: true
     },
 
-    // Every day at 11:59:59pm, clock out any directors still clocked in
+    // Every day at 11:59:50pm, clock out any directors still clocked in
     clockOutDirectors: {
-        schedule: '59 59 23 * * *',
+        schedule: '50 59 23 * * *',
         onTick: async function () {
             sails.log.debug(`CRON clockOutDirectors called`);
             try {

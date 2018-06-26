@@ -1,26 +1,8 @@
-// WORK ON THIS
-module.exports = {
+/* global sails */
 
-    friendlyName: 'Listen',
-
-    description: 'Load the listener corner.',
-
-    inputs: {
-
-    },
-
-    exits: {
-        success: {
-            responseType: 'view',
-            viewTemplatePath: 'listen/home'
-        }
-    },
-
-    fn: async function (inputs, exits) {
-
-        return exits.success();
-
-    }
-
+module.exports = async function public(req, res) {
+    sails.log.debug('Controller listen called.');
+    
+    return res.view('listen/layout', {layout: 'listen/home'});
 
 };
