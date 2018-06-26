@@ -68,7 +68,7 @@ module.exports = {
             sails.log.silly(`messages socket for messages-${newlyCreatedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${newlyCreatedRecord.from}`, 'messages', data);
         }
-        if (newlyCreatedRecord.to.startsWith("website-"))
+        if (newlyCreatedRecord.to.startsWith("website-") || newlyCreatedRecord.to.startsWith("display-"))
         {
             sails.log.silly(`messages socket for messages-${newlyCreatedRecord.to}: ${data}`);
             sails.sockets.broadcast(`messages-${newlyCreatedRecord.to}`, 'messages', data);
@@ -98,7 +98,7 @@ module.exports = {
             sails.log.silly(`messages socket for messages-${updatedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${updatedRecord.from}`, 'messages', data);
         }
-        if (updatedRecord.to.startsWith("website-"))
+        if (updatedRecord.to.startsWith("website-") || updatedRecord.to.startsWith("display-"))
         {
             sails.log.silly(`messages socket for messages-${updatedRecord.to}: ${data}`);
             sails.sockets.broadcast(`messages-${updatedRecord.to}`, 'messages', data);
@@ -128,7 +128,7 @@ module.exports = {
             sails.log.silly(`messages socket for messages-${destroyedRecord.from}: ${data}`);
             sails.sockets.broadcast(`messages-${destroyedRecord.from}`, 'messages', data);
         }
-        if (destroyedRecord.to.startsWith("website-"))
+        if (destroyedRecord.to.startsWith("website-") || destroyedRecord.to.startsWith("display-"))
         {
             sails.log.silly(`messages socket for messages-${destroyedRecord.to}: ${data}`);
             sails.sockets.broadcast(`messages-${destroyedRecord.to}`, 'messages', data);

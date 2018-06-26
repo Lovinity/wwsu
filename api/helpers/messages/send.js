@@ -38,7 +38,7 @@ module.exports = {
             
             // Filter profanity
             inputs.message = await sails.helpers.filterProfane(inputs.message);
-            sails.log.silly(`Profanity filtered. New messahe: ${inputs.message}`);
+            sails.log.silly(`Profanity filtered. New message: ${inputs.message}`);
             
             // Grab data pertaining to the host that is retrieving messages. Create if not exists.
             var stuff = await Hosts.findOrCreate({host: inputs.from}, {host: inputs.from, friendlyname: inputs.from});

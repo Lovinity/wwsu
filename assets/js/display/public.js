@@ -194,7 +194,7 @@ function processDirectors(data, replace = false)
                 }
             }
         }
-        
+
         // Check for present directors
         directorpresent = false;
         Directors().each(function (director) {
@@ -224,7 +224,7 @@ function processDirectors(data, replace = false)
 function processCalendar(data, replace = false)
 {
     try {
-        
+
         // Run data processing
         if (replace)
         {
@@ -250,7 +250,7 @@ function processCalendar(data, replace = false)
                 }
             }
         }
-        
+
         // Define a comparison function that will order calendar events by start time when we run the iteration
         var compare = function (a, b) {
             try {
@@ -365,17 +365,17 @@ function processEas(data, replace = false)
         {
             // Get all the EAS IDs currently in memory before replacing the data
             prev = Eas().select("ID");
-            
+
             Eas = TAFFY();
             Eas.insert(data);
-            
+
             // Go through the new data. If any IDs exists that did not exist before, consider it a new alert.
             Eas().each(function (record)
             {
-               if (prev.indexOf(record.ID) === -1)
-                   newEas.push(record);
+                if (prev.indexOf(record.ID) === -1)
+                    newEas.push(record);
             });
-            
+
         } else {
             for (var key in data)
             {
@@ -397,23 +397,23 @@ function processEas(data, replace = false)
                 }
             }
         }
-        
+
         // Check to see if any alerts are extreme
         easExtreme = false;
 
-            Eas().each(function (alert) {
-                try {
-                    if (alert.severity === 'Extreme')
-                        easExtreme = true;
-                } catch (e) {
-                    console.error(e);
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred during Eas iteration in processEas.`
-                    });
-                }
-            });
-            
+        Eas().each(function (alert) {
+            try {
+                if (alert.severity === 'Extreme')
+                    easExtreme = true;
+            } catch (e) {
+                console.error(e);
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: `Error occurred during Eas iteration in processEas.`
+                });
+            }
+        });
+
         // Do EAS events
         doEas();
     } catch (e) {
@@ -422,7 +422,7 @@ function processEas(data, replace = false)
             title: 'An error occurred - Please check the logs',
             message: 'Error occurred during the call of Eas[0].'
         });
-    }
+}
 }
 
 // When new Meta is received, update it in our memory and then run the process function.
@@ -453,6 +453,29 @@ io.socket.on('calendar', function (data) {
 // On new directors data, update our directors memory and run the process function.
 io.socket.on('directors', function (data) {
     processDirectors(data);
+});
+
+// on messages, display message if event is an insert
+io.socket.on('messages', function (data) {
+    for (var key in data)
+    {
+        if (data.hasOwnProperty(key) && key === 'insert')
+        {
+            iziToast.show({
+                title: 'DJ says',
+                message: data[key].message,
+                timeout: 60000,
+                backgroundColor: '#FFF59D',
+                color: '#FFF59D',
+                progressBarColor: '#FFF59D',
+                overlayColor: 'rgba(255, 255, 54, 0.1)',
+                closeOnClick: true,
+                titleSize: '2em',
+                messageSize: '1.5em',
+                balloon: true
+            });
+        }
+    }
 });
 
 
@@ -639,7 +662,7 @@ function doEas()
                             //true or false - should the marquee be duplicated to show an effect of continues flow
                             duplicated: false
                         });
-                        clearInterval(flashInterval);
+                clearInterval(flashInterval);
                 flashInterval = setInterval(function () {
                     $("html, body").animate({
                         backgroundColor: color3
@@ -807,6 +830,12 @@ function processNowPlaying(response)
                 var countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
+                    // Stop marquee screensaver if it is running
+                    lines.stop();
+                    $('#wrapper').fadeOut(500, 'linear', function () {
+                        lines.clear();
+                        wrapper.style.display = "none";
+                    });
                     var temp = Meta.dj.split(" - ");
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
@@ -844,6 +873,12 @@ function processNowPlaying(response)
                 var countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
+                    // Stop marquee screensaver if it is running
+                    lines.stop();
+                    $('#wrapper').fadeOut(500, 'linear', function () {
+                        lines.clear();
+                        wrapper.style.display = "none";
+                    });
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -880,6 +915,12 @@ function processNowPlaying(response)
                 var countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
+                    // Stop marquee screensaver if it is running
+                    lines.stop();
+                    $('#wrapper').fadeOut(500, 'linear', function () {
+                        lines.clear();
+                        wrapper.style.display = "none";
+                    });
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -916,6 +957,12 @@ function processNowPlaying(response)
                 var countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
+                    // Stop marquee screensaver if it is running
+                    lines.stop();
+                    $('#wrapper').fadeOut(500, 'linear', function () {
+                        lines.clear();
+                        wrapper.style.display = "none";
+                    });
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -952,6 +999,12 @@ function processNowPlaying(response)
                 var countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
+                    // Stop marquee screensaver if it is running
+                    lines.stop();
+                    $('#wrapper').fadeOut(500, 'linear', function () {
+                        lines.clear();
+                        wrapper.style.display = "none";
+                    });
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -988,6 +1041,12 @@ function processNowPlaying(response)
                 var countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
+                    // Stop marquee screensaver if it is running
+                    lines.stop();
+                    $('#wrapper').fadeOut(500, 'linear', function () {
+                        lines.clear();
+                        wrapper.style.display = "none";
+                    });
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>

@@ -32,7 +32,8 @@ module.exports = {
             {
                 await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.display, 'display', inputs.display);
                 sails.sockets.join(this.req, 'display-refresh');
-                sails.log.verbose('Request was a socket with a display parameter. Joined display-refresh.');
+                sails.sockets.join(this.req, `messages-${inputs.display}`);
+                sails.log.verbose('Request was a socket with a display parameter. Joined display-refresh and messages-(host).');
             }
 
             // WORK ON THIS: find a better way to log djcontrols connections rather than in the meta controller
