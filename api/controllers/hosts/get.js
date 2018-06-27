@@ -20,7 +20,7 @@ module.exports = {
 
         try {
             // Find or create the hosts record
-            var record = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: inputs.host, requests: 0, emergencies: 0, webmessages: 0});
+            var record = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: inputs.host});
 
             sails.log.silly(record);
 
