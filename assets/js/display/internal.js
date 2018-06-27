@@ -561,7 +561,7 @@ io.socket.on('disconnect', function () {
     {
         //noConnection.style.display = "inline";
         disconnected = true;
-        updateData(Status, null);
+        processStatus();
     }
 });
 
@@ -581,7 +581,7 @@ io.socket.on('meta', function (data) {
 
                 // Do a status update if a state change was returned; this could impact power saving mode
                 if (key === 'state')
-                    updateData(Status, null);
+                    processStatus();
             }
         }
     } catch (e) {

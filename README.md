@@ -190,6 +190,25 @@ Issue a new alert through the internal emergency alert system, originating from 
 ### /eas/test [POST /eas/test]
 Send out a test through the internal emergency alert system. **Requires authorization**
 #### Response 200 OK
+## Hosts [/hosts]
+Hosts endpoints regard DJ Controls instances.
+### /hosts/get [POST /hosts/get]
+Retrieve information about a host. If the host does not exist in the database, it will be created with default data. **Requires authorization**.
+#### Request
+| key | criteria |
+|--|--|
+| host | string (required; name of the host to retrieve or create.) |
+#### Response 200
+		{
+			"createdAt": "2018-05-03T23:18:41.089Z",
+            "updatedAt": "2018-05-03T23:18:41.089Z",
+			"ID": 1,
+			"host": "hostname", // Name of the host
+			"friendlyname": "OnAir Computer", // Friendly name to use for labels
+			"requests": true, // If true, this client should notify of track requests even when this host was not used to go live
+			"emergencies": false, // If true, this client should notify of reported technical issues
+			"webmessages": true // If true, this client should notify of messages sent by public clients, even when this host was not used to go live
+		}
 ## Logs [/logs]
 Logs endpoints regard the internal logging system.
 ### /logs/add [POST /logs/add]
