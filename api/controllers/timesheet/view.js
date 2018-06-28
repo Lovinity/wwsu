@@ -1,32 +1,6 @@
-/* global sails */
+/* global sails, moment */
 
-module.exports = {
-
-
-  friendlyName: 'Timesheet / View',
-
-
-  description: 'Loads the HTML page of director timesheets',
-
-
-  inputs: {
-
-  },
-
-
-    exits: {
-        success: {
-            responseType: 'view',
-            viewTemplatePath: 'timesheet/home'
-        }
-    },
-
-
-  fn: async function (inputs, exits) {
-        sails.log.debug(`Controller timesheet/view called.`);
-    return exits.success();
-
-  }
-
-
+module.exports = async function public(req, res) {
+    sails.log.debug('Controller timesheet/view called.');
+    return res.view('timesheet/layout', {layout: 'timesheet/home', currentDate: moment().format("MM-DD-YYYY")});
 };

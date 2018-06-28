@@ -1,27 +1,7 @@
-/* global sails */
+/* global sails, moment */
 
-module.exports = {
-
-    friendlyName: 'logs / view',
-
-    description: 'Display an HTML webpage to view system logs.',
-
-    inputs: {
-
-    },
-
-    exits: {
-        success: {
-            responseType: 'view',
-            viewTemplatePath: 'logs/home'
-        }
-    },
-
-    fn: async function (inputs, exits) {
-        sails.log.debug(`Controller logs/view called.`);
-        return exits.success();
-
-    }
-
-
+module.exports = async function public(req, res) {
+    sails.log.debug('Controller logs/view called.');
+    return res.view('logs/layout', {layout: 'logs/home', currentDate: moment().format("MM-DD-YYYY")});
 };
+

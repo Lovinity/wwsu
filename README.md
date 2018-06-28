@@ -83,6 +83,22 @@ This endpoint supports sockets, uses the "calendar" event, and returns data in t
             },
             ...
         ]
+### /calendar/verify [GET /calendar/verify]
+Returns an HTML page verifying the events in the WWSU Calendar for the next week. Checks for event title syntax, proper formatting, existing playlists/rotations, playlist length, and more. Page also uses calendar/verify-data for populating the verification.
+#### Response 200 HTML
+### /calendar/verify-data [GET /calendar/verify-data]
+Get an array of verification statuses for calendar events.
+#### Response 200
+        [
+            {
+				"start": "2018-06-28T04:00:00-04:00", // Event start time ISO string
+				"end": "2018-06-28T08:00:00-04:00", // Event end time ISO string
+				"title": "<span style=\"background: rgba(0, 0, 255, 0.2);\">Genre</span>: <span style=\"background: rgba(255, 0, 0, 0.5);\">Dope Hip Hop</span>", // HTML title; indicates detected prefixes and formatting
+				"type": "Invalid", // Either Valid (works), Check (works but not optimally), Invalid (does not work), or Manual (not detected as a system event).
+				"message": "" // Contains information regarding what should be done for Valid status
+            },
+            ...
+        ]
 ## Directors [/directors]
 The Directors endpoints regard the directors of WWSU Radio.
 ### /directors/get [GET /directors/get]
