@@ -78,12 +78,12 @@ module.exports = {
             sails.sockets.broadcast('requests', 'requests', data);
             return proceed();
         } else {
-            data.insert.trackname = `Unknown track`;
+            data.update.trackname = `Unknown track`;
             Songs.findOne({ID: updatedRecord.songID})
                     .then(((record2) => {
                         sails.log.silly(`Song: ${record2}`);
                         if (record2)
-                            data.insert.trackname = `${record2.artist} - ${record2.title}`;
+                            data.update.trackname = `${record2.artist} - ${record2.title}`;
                         sails.log.silly(`requests socket: ${data}`);
                         sails.sockets.broadcast('requests', 'requests', data);
                         return proceed();
