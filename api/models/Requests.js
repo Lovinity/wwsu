@@ -1,4 +1,4 @@
-/* global sails */
+/* global sails, Songs */
 
 /**
  * Requests.js
@@ -52,8 +52,19 @@ module.exports = {
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
         sails.log.silly(`requests socket: ${data}`);
-        sails.sockets.broadcast('requests', 'requests', data);
-        return proceed();
+        data.insert.trackname = `Unknown track`;
+        Songs.findOne({ID: newlyCreatedRecord.songID})
+                .then(((record2) => {
+                    sails.log.silly(`Song: ${record2}`);
+                    if (record2)
+                        data.insert.trackname = `${record2.artist} - ${record2.title}`;
+                    sails.sockets.broadcast('requests', 'requests', data);
+                    return proceed();
+                }))
+                .catch((err) => {
+                    sails.sockets.broadcast('requests', 'requests', data);
+                    return proceed();
+                });
     },
 
     afterUpdate: function (updatedRecord, proceed) {
@@ -61,10 +72,28 @@ module.exports = {
 
         // Since we update played to 1, instead of outright deleting a request, check for that.
         if (updatedRecord.played === 1)
+        {
             data = {remove: updatedRecord.ID};
-        sails.log.silly(`requests socket: ${data}`);
-        sails.sockets.broadcast('requests', 'requests', data);
-        return proceed();
+            sails.log.silly(`requests socket: ${data}`);
+            sails.sockets.broadcast('requests', 'requests', data);
+            return proceed();
+        } else {
+            data.insert.trackname = `Unknown track`;
+            Songs.findOne({ID: updatedRecord.songID})
+                    .then(((record2) => {
+                        sails.log.silly(`Song: ${record2}`);
+                        if (record2)
+                            data.insert.trackname = `${record2.artist} - ${record2.title}`;
+                        sails.log.silly(`requests socket: ${data}`);
+                        sails.sockets.broadcast('requests', 'requests', data);
+                        return proceed();
+                    }))
+                    .catch((err) => {
+                        sails.log.silly(`requests socket: ${data}`);
+                        sails.sockets.broadcast('requests', 'requests', data);
+                        return proceed();
+                    });
+        }
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
