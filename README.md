@@ -250,7 +250,7 @@ Get a list of logs for a specific subtype and a specific date. Returns logs for 
 			},
 			...
 		]
-### /logs/get-groups [POST /logs/get-groups]
+### /logs/get-subtypes [POST /logs/get-subtypes]
 Retrieve a list of log subtypes for a specified date.
 #### Request
 | key | criteria |

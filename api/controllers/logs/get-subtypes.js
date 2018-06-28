@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'logs / get-groups',
+    friendlyName: 'logs / get-subtypes',
 
     description: 'Retrieve a list of log subtypes for a particular day.',
 
@@ -18,7 +18,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller logs/get-groups called.');
+        sails.log.debug('Controller logs/get-subtypes called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
 
         try {

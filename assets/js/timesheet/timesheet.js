@@ -111,7 +111,7 @@ function filterDate() {
                         }
 
                         // parse new timesheet
-                        timesheets = JSON.parse(resHTML);
+                        timesheets = resHTML;
 
                         // iterate through each timesheet record
                         var hours = {};
