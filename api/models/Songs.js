@@ -245,7 +245,7 @@ module.exports = {
         }
   },
   
-  pendingBreak: [] // Tracks that have been removed but need to air eventually, and will be re-queued at the next break.
+  pending: [] // Tracks that have been removed but need to air eventually, and will be re-queued at the next break.
 
 };
 

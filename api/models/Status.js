@@ -106,6 +106,7 @@ module.exports = {
                         await sails.helpers.rest.cmd('StopPlayer', 1);
                         await sails.helpers.rest.changeRadioDj();
                         await sails.helpers.error.post();
+                        return resolve(0);
                     } catch (e) {
                         return reject(e);
                     }
@@ -230,7 +231,7 @@ module.exports = {
                     return resolve(1);
                 });
             }
-        },
+        }
 
     },
 

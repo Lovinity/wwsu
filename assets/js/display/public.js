@@ -230,6 +230,8 @@ function processCalendar(data, replace = false)
         {
             Calendar = TAFFY();
             Calendar.insert(data);
+            console.log(`Calendar Replace`);
+            console.dir(Calendar);
         } else {
             for (var key in data)
             {
@@ -247,6 +249,8 @@ function processCalendar(data, replace = false)
                             Calendar({ID: data[key]}).remove();
                             break;
                     }
+                    console.log(`Calendar ${key}`);
+                    console.dir(data[key]);
                 }
             }
         }

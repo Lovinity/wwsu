@@ -42,10 +42,11 @@ module.exports.cron = {
                                     // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again
                                     if (theTracks.indexOf(title) > -1)
                                     {
-                                        sails.log.debug(`Track ${track.ID} is a duplicate. Removing!`);
+                                        sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
                                         if (track.TrackType !== 'Music')
                                             Songs.pending.push(track.ID);
-                                        await sails.helpers.rest.cmd('RemovePlaylistTrack', index);
+                                        await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
+                                        theTracks = [];
                                         queue = await sails.helpers.rest.getQueue();
                                         change.queueLength = 0;
                                         await queueCheck();
@@ -1001,7 +1002,7 @@ module.exports.cron = {
                     return new Promise(async (resolve, reject) => {
                         try {
                             sails.log.verbose(`Trying ${county.name}-${county.code}`);
-                            needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`)
+                            needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`, {}, {headers: {'Content-Type': 'application/json'}})
                                     .then(async function (resp) {
                                         await sails.helpers.eas.parseCaps(county.name, resp.body);
                                         complete++;

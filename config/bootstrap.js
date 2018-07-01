@@ -106,13 +106,9 @@ module.exports.bootstrap = async function (done) {
 
     // Load subcats IDs for each consigured sport
     sails.log.verbose(`BOOTSTRAP: Loading sportscats into configuration.`);
-    for (var config in sails.config.custom.sports)
-    {
-        if (sails.config.custom.sports.hasOwnProperty(config))
-        {
-            sails.config.custom.sportscats[config] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
-        }
-    }
+    sails.config.custom.sports.forEach(function (sport) {
+        sails.config.custom.sportscats[sport] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
+    });
 
     var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
             .tolerate((err) => {
@@ -128,25 +124,30 @@ module.exports.bootstrap = async function (done) {
             cats[category.ID] = category.name;
         });
     }
+    
+    console.dir(cats);
 
     var subcategories = await Subcategory.find({parentid: catIDs})
             .tolerate((err) => {
             });
+    
 
     if (subcategories.length > 0)
     {
         subcategories.forEach(function (subcategory) {
             if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
-                sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
+            {
+                sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
+            }
         });
     }
-    
+
     // Load work orders.
     Tasks.updateTasks();
-    
+
     // Load directors.
     Directors.updateDirectors(true);
-    
+
     // Load Google Calendar.
     Calendar.preLoadEvents();
 

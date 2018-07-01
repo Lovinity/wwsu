@@ -1,4 +1,4 @@
-/* global Calendar, sails, Playlists, Meta, Genre, moment */
+/* global Calendar, sails, Playlists, Meta, Genre, moment, _ */
 
 /**
  * Calendar.js
@@ -227,57 +227,59 @@ module.exports = {
                             criteria.color = '#607D8B';
                         }
                         sails.log.silly(`Event criteria: ${criteria}`);
+
+                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+                        var criteriaB = _.cloneDeep(criteria);
+
+                        // WORK ON THIS: Make so that new records do not also trigger an update
+         
                         // Find existing record of event. If does not exist, create it.
-                        Calendar.findOrCreate({unique: event.id}, criteria)
-                                .exec(function (err2, theEvent, wasCreated) {
-                                    if (err2)
-                                        return reject(err2);
+                        var theEvent = await Calendar.findOrCreate({unique: event.id}, criteriaB);
 
-                                    if (!wasCreated)
-                                    {
-                                        // Check if the event changed. If so, update it and push it out to clients.
-                                        var needsUpdate = false;
-                                        for (var key in theEvent)
-                                        {
-                                            if (theEvent.hasOwnProperty(key))
-                                            {
-                                                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key])
-                                                {
-                                                    needsUpdate = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        if (needsUpdate)
-                                        {
-                                            Calendar.update({unique: event.id}, criteria).fetch().exec(function () {});
-                                        }
-                                    }
-
-                                });
-
+                        //sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
+                        // Check if the event changed. If so, update it and push it out to clients.
+                        var needsUpdate = false;
+                        for (var key in theEvent)
+                        {
+                            if (theEvent.hasOwnProperty(key))
+                            {
+                                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID')
+                                {
+                                    needsUpdate = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (needsUpdate)
+                        {
+                            await Calendar.update({unique: event.id}, criteria).fetch();
+                        }
 
                         // Check to see if any of the events are triggering events, and it is time to trigger them.
                         if (moment(criteria.start).isBefore() && moment(criteria.end).isAfter())
                         {
-                            if (moment(criteria.start).isAfter(Playlists.played))
-                            {
-                                if (event.summary.startsWith("Playlist: "))
+                            try {
+                                if (moment(criteria.start).isAfter(Playlists.played))
                                 {
-                                    await sails.helpers.playlists.start(event.summary.replace('Playlist: ', ''), false, criteria.end, 0);
+                                    if (event.summary.startsWith("Playlist: "))
+                                    {
+                                        await sails.helpers.playlists.start(event.summary.replace('Playlist: ', ''), false, criteria.end, 0);
+                                    }
+                                    if (event.summary.startsWith("Prerecord: "))
+                                    {
+                                        await sails.helpers.playlists.start(event.summary.replace('Prerecord: ', ''), false, criteria.end, 1, criteria.description);
+                                    }
                                 }
-                                if (event.summary.startsWith("Prerecord: "))
+                                if (event.summary.startsWith("Genre: "))
                                 {
-                                    await sails.helpers.playlists.start(event.summary.replace('Prerecord: ', ''), false, criteria.end, 1, criteria.description);
+                                    genreActive = true;
+                                    if ((Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre' && Meta['A'].genre !== event.summary.replace('Genre: ', ''))))
+                                    {
+                                        await sails.helpers.genre.start(event.summary.replace('Genre: ', ''));
+                                    }
                                 }
-                            }
-                            if (event.summary.startsWith("Genre: "))
-                            {
-                                genreActive = true;
-                                if ((Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre' && Meta['A'].genre !== event.summary.replace('Genre: ', ''))))
-                                {
-                                    await sails.helpers.genre.start(event.summary.replace('Genre: ', ''));
-                                }
+                            } catch (e) {
+                                sails.log.error(e);
                             }
                         }
                     }

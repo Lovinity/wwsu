@@ -11,7 +11,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debig(`Helper sails.helpers.rest.changeRadioDj called.`);
+        sails.log.debug(`Helper sails.helpers.rest.changeRadioDj called.`);
 
         try {
             var runninginstance = 0;
@@ -21,13 +21,19 @@ module.exports = {
                 if (instance.rest === Meta['A'].radiodj)
                     runninginstance = index;
             });
+            
+            sails.log.verbose(`INSTANCE ${runninginstance}`);
+            
             runninginstance += 1;
-            if ((runninginstance >= sails.config.custom.radiodjs))
+            if ((runninginstance >= sails.config.custom.radiodjs.length))
+            {
+                sails.log.verbose(`RESTARTING to 0.`);
                 runninginstance = 0;
+            }
 
             // Change the instance
-            sails.log.debug('Using instance ' + runninginstance + ' which translates to ' + sails.config.custom.radiodjs[runninginstance].name);
-            await Meta.changeMeta({radiodj: sails.config.custom.radiodjs[runninginstance].name});
+            sails.log.debug('USING instance ' + runninginstance + ' which translates to ' + sails.config.custom.radiodjs[runninginstance].name);
+            await Meta.changeMeta({radiodj: sails.config.custom.radiodjs[runninginstance].rest});
 
             // All done.
             return exits.success();
