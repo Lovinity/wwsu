@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-    datastore: 'timesheet',
+    datastore: 'nodebase',
     attributes: {
         ID: {
             type: 'number',
@@ -31,7 +31,6 @@ module.exports = {
             type: 'boolean',
             defaultsTo: false
         }
-
     }
 
 };

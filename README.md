@@ -61,6 +61,59 @@ User accounts are issued by WWSU. They are not available on request.
             {
             "err": "Email and password required."
 	        }
+## Announcements [/announcements]
+Announcements endpoints regard the internal announcements system at WWSU.
+### /announcements/add [POST /announcements/add]
+Adds an announcement into the system. **Requires authorization**.
+#### Request
+| key | criteria |
+|--|--|
+| type | string (required; the type of announcement, which often dictates what should display the announcement) |
+| level | string (required; Severity level. Must be in: ["danger", "warning", "info", "success", "primary", "secondary"]) |
+| announcement | string (required; The announcement text) |
+| starts | string (optional; the ISO moment.js compatible time that the announcement starts. Defaults to now.) |
+| expires | string (optional; the ISO moment.js compatible time that the announcement expires. Defaults to the year 3000.) |
+#### Response 200
+### /announcements/edit [POST /announcements/edit]
+Edits an existing announcement. **Requires authorization**.
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; the ID of the announcement to edit) |
+| type | string (optional, but edits original value if provided; the type of announcement, which often dictates what should display the announcement) |
+| level | string (optional, but edits original value when provided; Severity level. Must be in: ["danger", "warning", "info", "success", "primary", "secondary"]) |
+| announcement | string (optional, but edits original value if provided; The announcement text) |
+| starts | string (optional, but edits original value if provided; the ISO moment.js compatible time that the announcement starts.) |
+| expires | string (optional, but edits original value if provided; the ISO moment.js compatible time that the announcement expires.) |
+#### Response 200
+### /announcements/get [GET /announcements/get]
+Get an array of announcements for the provided type.
+This endpoint supports sockets, uses the "announcements" event, and returns data in the structure defined in the websockets section.
+#### Request
+| key | criteria |
+|--|--|
+| type | string (required; return announcements of the provided type, both in the request and in the websockets) |
+#### Response 200
+        [
+            {
+                "createdAt": "2018-05-15T22:31:34.381Z",
+                "updatedAt": "2018-05-15T22:31:34.381Z",
+                "ID": 1,
+				"type": "display-public", // This announcement is applicable to the provided type. Examples: display-public, display-internal, djcontrols, website.
+				"level": "info", // Severity level. Must be in: ["danger", "warning", "info", "success", "primary", "secondary"].
+				"announcement": "Do not forget to do your air checks. They are due August 3.", // The announcement text
+				"starts": "2018-05-15T22:31:34.381Z", // ISO string of when the announcement begins.
+				"expires": "2018-08-3T22:31:34.381Z" // ISO string of when the announcement expires.
+            },
+            ...
+        ]
+### /announcements/remove [POST /announcements/remove]
+Removes an announcement. **Requires authorization**.
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; the ID of the announcement to remove.) |
+#### Response 200
 ## Calendar [/calendar]
 Calendar endpoints regard the Google Calendar events of WWSU Radio (such as show and genre schedules / programming).
 ### /calendar/get [GET /calendar/get]
