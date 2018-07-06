@@ -528,6 +528,7 @@ io.socket.on('directors', function (data) {
 
 // When a socket connection is established
 io.socket.on('connect', function () {
+    onlineSocket();
     metaSocket();
     taskSocket();
     directorSocket();
@@ -639,6 +640,18 @@ io.socket.on('tasks', function (data) {
     processTasks();
 });
 
+function onlineSocket()
+{
+    console.log('attempting online socket');
+    io.socket.post('/recipients/add-display', {host: 'display-internal'}, function serverResponded(body, JWR) {
+        try {
+        } catch (e) {
+            console.log('FAILED ONLINE CONNECTION');
+            setTimeout(onlineSocket, 10000);
+        }
+    });
+}
+
 // Called to replace all data in Tasks with body of request
 function taskSocket()
 {
@@ -676,7 +689,7 @@ function directorSocket()
 function metaSocket()
 {
     console.log('attempting meta socket');
-    io.socket.post('/meta/get', {display: 'display-internal'}, function serverResponded(body, JWR) {
+    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
         try {
             temp = body;
             for (var key in temp)

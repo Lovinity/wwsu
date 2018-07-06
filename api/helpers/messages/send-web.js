@@ -50,12 +50,12 @@ module.exports = {
             }
             var records = null;
 
-            // Check how many messages were sent by this host within the last minute. If any are returned, the host is not allowed to send messages yet.
+            // Check how many messages were sent by this host within the last minute. If more than 2 are returned, the host is not allowed to send messages yet.
             var searchto = moment().subtract(1, 'minutes').toDate();
             var check = await Messages.find({from_IP: inputs.from_IP, createdAt: {'>': searchto}});
             sails.log.verbose(`IP address sent ${check.length} messages within the last minute.`);
-            if (check.length > 0)
-                return exits.error(new Error('Website visitors are only allowed to send one message per minute.'));
+            if (check.length > 2)
+                return exits.error(new Error('Website visitors are only allowed to send 3 messages per minute.'));
 
             // Create and broadcast the message, depending on whether or not it was private
             if (inputs.private)

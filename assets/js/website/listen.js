@@ -17,39 +17,40 @@ var shouldScroll = false;
 var skipIt = 0;
 var blocked = false;
 var firstTime = true;
+var nicknameTimer = null;
 
 // Initialize the web player
 $("#nativeflashradio").flashradio({
-	userinterface: "small",
-	backgroundcolor: "#263238",
-	themecolor: "#d31e38", 
-	themefontcolor: "#ffffff", 
-	startvolume: "75", 
-	radioname: "WWSU 106.9 FM", 
-	scroll: "auto", 
-	autoplay: "true", 
-	useanalyzer: "real", 
-	analyzertype: "4", 
-	usecover: "true", 
-	usestreamcorsproxy: "false", 
-	affiliatetoken: "1000lIPN", 
-	debug: "false", 
-	ownsongtitleurl: "", 
-	radiocover: "http://server.wwsu1069.org/images/display/logo.png", 
-	songgooglefontname: "", 
-	songfontname: "", 
-	titlegooglefontname: "", 
-	titlefontname: "", 
-	corsproxy: "https://html5radioplayer2us.herokuapp.com/?q=", 
-	streamprefix: "/stream", 
-	mountpoint: "", 
-	radiouid: "", 
-	apikey: "", 
-	streamid: "1", 
-	streampath: "/live", 
-	streamtype: "other", 
-	streamurl: "http://server.wwsu1069.org", 
-	songinformationinterval: "600000", 
+    userinterface: "small",
+    backgroundcolor: "#263238",
+    themecolor: "#d31e38",
+    themefontcolor: "#ffffff",
+    startvolume: "75",
+    radioname: "WWSU 106.9 FM",
+    scroll: "auto",
+    autoplay: "true",
+    useanalyzer: "real",
+    analyzertype: "4",
+    usecover: "true",
+    usestreamcorsproxy: "false",
+    affiliatetoken: "1000lIPN",
+    debug: "false",
+    ownsongtitleurl: "",
+    radiocover: "http://server.wwsu1069.org/images/display/logo.png",
+    songgooglefontname: "",
+    songfontname: "",
+    titlegooglefontname: "",
+    titlefontname: "",
+    corsproxy: "https://html5radioplayer2us.herokuapp.com/?q=",
+    streamprefix: "/stream",
+    mountpoint: "",
+    radiouid: "",
+    apikey: "",
+    streamid: "1",
+    streampath: "/live",
+    streamtype: "other",
+    streamurl: "http://server.wwsu1069.org",
+    songinformationinterval: "600000",
 });
 
 function escapeHTML(str) {
@@ -134,11 +135,31 @@ io.socket.on('messages', function (data) {
 
 function doSockets(firsttime = false)
 {
-    io.socket.post('/messages/get-web', {nickname: nickname.value}, function serverResponded(body, JWR) {
+    onlineSocket();
+    messagesSocket();
+    metaSocket();
+}
+
+function onlineSocket()
+{
+    io.socket.post('/recipients/add-web', {}, function serverResponded(body, JWR) {
+        try {
+            nickname.value = body.label;
+            nickname.value = nickname.value.replace('Web ','');
+            nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
+        } catch (e) {
+            console.error(e);
+            setTimeout(onlineSocket, 10000);
+        }
+    });
+}
+
+function messagesSocket()
+{
+    io.socket.post('/messages/get-web', {}, function serverResponded(body, JWR) {
         //console.log(body);
         try {
-            var data = JSON.parse(body);
-            data.forEach(function (message) {
+            body.forEach(function (message) {
                 if (messageIDs.indexOf(message.ID) === -1)
                 {
                     addMessage(message, firstTime);
@@ -146,29 +167,40 @@ function doSockets(firsttime = false)
             });
             firstTime = false;
         } catch (e) {
-            //console.error(e);
-            setTimeout(doSockets, 10000);
-        }
-    });
-
-    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
-        //console.log(body);
-        try {
-            var data = JSON.parse(body);
-            for (var key in data)
-            {
-                if (data.hasOwnProperty(key))
-                {
-                    Meta[key] = data[key];
-                }
-            }
-            doMeta(data);
-        } catch (e) {
-            //console.error(e);
-            setTimeout(doSockets, 10000);
+            console.error(e);
+            setTimeout(messagesSocket, 10000);
         }
     });
 }
+
+function metaSocket()
+{
+    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
+        //console.log(body);
+        try {
+            for (var key in body)
+            {
+                if (body.hasOwnProperty(key))
+                {
+                    Meta[key] = body[key];
+                }
+            }
+            doMeta(body);
+        } catch (e) {
+            console.error(e);
+            setTimeout(metaSocket, 10000);
+        }
+    });
+}
+
+// Whenever the nickname is changed, (re)set a 5 second timeout. After 5 seconds, if nickname is not changed, send the new nickname to the server for all clients to see.
+nickname.addEventListener("change", function () {
+    clearTimeout(nicknameTimer);
+    nicknameTimer = setTimeout(function () {
+        io.socket.post('/recipients/edit-web', {label: nickname.value}, function serverResponded(body, JWR) {
+        });
+    }, 5000);
+});
 
 // Function called when a new message arrived that should be displayed
 function addMessage(data, firsttime = false)

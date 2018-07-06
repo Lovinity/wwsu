@@ -7,17 +7,6 @@ module.exports = {
     description: 'Get the current Meta. If the request is a socket, subscribe to meta changes.',
 
     inputs: {
-        display: {
-            type: 'string',
-            allowNull: true,
-            description: 'Displays which we need to log their connection will pass a display input.'
-        },
-
-        djcontrols: {
-            type: 'string',
-            allowNull: true,
-            description: 'DJ Controls making a request to this endpoint will past the computer hostname.'
-        }
     },
 
     fn: async function (inputs, exits) {
@@ -26,22 +15,8 @@ module.exports = {
         {
             sails.sockets.join(this.req, 'meta');
             sails.log.verbose('Request was a socket. Joining meta.');
-
-            // WORK ON THIS: find a better way to log display connections rather than in the meta controller
-            if (inputs.display)
-            {
-                await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.display, 'display', inputs.display);
-                sails.sockets.join(this.req, 'display-refresh');
-                sails.sockets.join(this.req, `messages-${inputs.display}`);
-                sails.log.verbose('Request was a socket with a display parameter. Joined display-refresh and messages-(host).');
-            }
-
-            // WORK ON THIS: find a better way to log djcontrols connections rather than in the meta controller
-            if (inputs.djcontrols)
-            {
-                await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.djcontrols, 'computers', inputs.djcontrols);
-            }
         }
+        
         return exits.success(Meta['A']);
     }
 

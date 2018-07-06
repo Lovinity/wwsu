@@ -90,8 +90,12 @@ module.exports = {
                 {
                     if (criteria[key] !== recipient[key])
                     {
-                        updateIt = true;
-                        break;
+                        // Do not update label changes. This should be done via recipients/edit or recipients/edit-web.
+                        if (key !== 'label')
+                        {
+                            updateIt = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -149,12 +153,13 @@ module.exports = {
             if (typeof Recipients.sockets[recipient.ID] === 'undefined')
                 Recipients.sockets[recipient.ID] = [];
 
+            // Make sure we do not add the same socket more than once
             if (!_.includes(Recipients.sockets[recipient.ID], inputs.socket))
             {
                 Recipients.sockets[recipient.ID].push(inputs.socket);
             }
 
-            return exits.success();
+            return exits.success(recipient.label);
         } catch (e) {
             return exits.error(e);
         }

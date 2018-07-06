@@ -484,6 +484,7 @@ io.socket.on('messages', function (data) {
 
 
 io.socket.on('connect', function () {
+    onlineSocket();
     MetaSocket();
     eventSocket();
     directorSocket();
@@ -531,6 +532,18 @@ io.socket.on('display-refresh', function (data) {
     window.location.reload(true);
 });
 
+function onlineSocket()
+{
+    console.log('attempting online socket');
+    io.socket.post('/recipients/add-display', {host: 'display-public'}, function serverResponded(body, JWR) {
+        try {
+        } catch (e) {
+            console.log('FAILED ONLINE CONNECTION');
+            setTimeout(onlineSocket, 10000);
+        }
+    });
+}
+
 function easSocket()
 {
     console.log('attempting eas socket');
@@ -547,7 +560,7 @@ function easSocket()
 function MetaSocket()
 {
     console.log('attempting Meta socket');
-    io.socket.post('/meta/get', {display: 'display-public'}, function serverResponded(body, JWR) {
+    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
         try {
             temp = body;
             for (var key in temp)

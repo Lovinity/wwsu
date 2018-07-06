@@ -339,6 +339,7 @@ Messages endpoints regard the internal WWSU messaging system.
 ### /messages/get [GET /messages/get]
 Retrieve an array of messages sent within the last hour. Used by internal WWSU applications. **Requires authorization**.
 This endpoint supports sockets, uses the "messages" event, and returns data in the structure defined in the websockets section.
+NOTE: new clients should call recipients/add in order to show up as online to other clients.
 #### Request
 | key | criteria |
 |--|--|
@@ -360,6 +361,7 @@ This endpoint supports sockets, uses the "messages" event, and returns data in t
         ]
 ### /messages/get-web [GET /messages/get-web]
 Retrieve a list of messages sent within the last hour applicable to web and mobile users.
+NOTE: new clients should call recipients/add-web in order to show up as online to other clients and to receive any stored nicknames for this client as response.label.
 This endpoint supports sockets. When called by a socket, the client will be subscribed to multiple events:
 
  - The "messages" event receives new/updated/deleted messages using the structure defined in the websockets section.
@@ -404,11 +406,6 @@ Meta endpoints regard metadata, or what is currently playing / on the air.
 ### /meta/get [GET /meta/get]
 Get the current meta as an object.
 This endpoint supports sockets under the "meta" event. However, the data sent is an object containing only the changed key: value pairs. This should be used with lodash merge to merge received changes with the meta stored in memory. There will never be new or deleted keys sent through sockets.
-If the display parameter is provided in the request, and the request is a socket, will also be subscribed to the "display-refresh" event, which returns a true to indicate the display sign should refresh itself and clear cache.
-#### Request
-| key | criteria |
-|--|--|
-| display | string (optional; if this request is coming from a display sign, the name of the display sign) |
 #### Response 200
         {
             "state": 'unknown', // State of the WWSU system. Refer to the states section in meta
@@ -463,6 +460,44 @@ The value of the meta state key can be any of the following strings:
 | sportsremote_returning | A remotely-produced sports broadcast is about to resume. |
 ## Recipients [/recipients]
 These endpoints regard the recipients and clients that may send or receive messages.
+### /recipients/add-computers [POST /recipients/add-computers]
+DJ Controls clients should use this endpoint to register themselves as online. Clients should call this endpoint after every re-connection as well, since recipients are erased when the server restarts. **Requires authorization**
+**Request to this endpoint must be a websocket**.
+#### Request
+| key | criteria |
+|--|--|
+| host | string (required; the host name of the computer running DJ Controls) |
+#### Response 200
+		{
+			"label": "Nickname" // The nickname of the client as we have it in records at this time.
+		}
+### /recipients/add-display [POST /recipients/add-display]
+WWSU Display Signs should use this endpoint to register themselves as online. Clients should call this endpoint after every re-connection since recipients are erased when the server restarts.
+This will also subscribe the socket to the "messages" event to receive messages to be displayed on the display sign, as well as the "display-refresh" event which the display sign should restart itself when called.
+**Request to this endpoint must be a websocket**.
+#### Request
+| key | criteria |
+|--|--|
+| host | string (required; the host name of the display sign) |
+#### Response 200
+		{
+			"label": "Nickname" // The nickname of the client as we have it in records at this time.
+		}
+### /recipients/add-web [POST /recipients/add-web]
+Public clients should use this endpoint prior to using any messages endpoints to register themselves as online. Clients should call this endpoint after every re-connection as well, since recipients are erased when the server restarts.
+**Request to this endpoint must be a websocket**.
+#### Response 200
+		{
+			"label": "Nickname" // The nickname of the client as we have it in records at this time.
+		}
+### /recipients/edit-web [POST /recipients/edit-web]
+Public clients wishing to change their nickname should call this endpoint.
+**Request to this endpoint must be a websocket**.
+#### Request
+| key | criteria |
+|--|--|
+| label | string (required; the nickname to use for this client) |
+#### Response 200 OK
 ### /recipients/get [GET /recipients/get]
 Retrieve an array of recipients that can receive and send messages.
 This endpoint supports sockets, returns data in the structure defined in the websockets section, and uses the "recipients" event.

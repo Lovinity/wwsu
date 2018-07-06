@@ -33,12 +33,6 @@ module.exports = {
             var thehost = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: inputs.host});
             sails.log.silly(thehost);
 
-            if (inputs.socket && inputs.socket !== null)
-            {
-                // Consider the client as online in the recipients model
-                await sails.helpers.recipients.add(inputs.socket, inputs.host, 'computers', thehost.friendlyname);
-            }
-
             // Get messages
             var records = await Messages.find({status: 'active', or: [{createdAt: {'>': searchto}}, {to: 'emergency'}]});
             sails.log.verbose(`Messages records retrieved: ${records.length}`);
