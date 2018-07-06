@@ -20,7 +20,7 @@ var firstTime = true;
 
 // Initialize the web player
 $("#nativeflashradio").flashradio({
-	userinterface: "big",
+	userinterface: "small",
 	backgroundcolor: "#263238",
 	themecolor: "#d31e38", 
 	themefontcolor: "#ffffff", 
