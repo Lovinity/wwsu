@@ -13,7 +13,7 @@
 <script src="../../js/moment.min.js"></script>
 <script src="../../js/bootstrap/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" src="../../js/website/nativeflashradiov4.js"></script>
-<link rel="stylesheet" href="../../../styles/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" href="../../../styles/bootstrap/mytheme.min.css">
 <link rel="stylesheet" href="../../../styles/iziToast.min.css">
 <link rel="apple-touch-icon" sizes="57x57" href="../../images/icons/apple-icon-57x57.png">
 <link rel="apple-touch-icon" sizes="60x60" href="../../images/icons/apple-icon-60x60.png">
@@ -46,11 +46,11 @@
         </style>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     </head>
-    <body style="background-color: #37474F; min-width: 240px;">
+    <body style="background-color: #000000; min-width: 240px;">
 <div class="container">
   <div class="row">
     <div class="col">
-<div class="card" style="background-color: #455A64; color: #ffffff;">
+<div class="card text-white bg-dark">
   <div class="card-header text-center"><a href="https://www.wright.edu/wwsu"><img src="http://server.wwsu1069.org/images/logo.png" style="width: 240px; height: auto;"></a></div>
   <div class="card-body">
       <h4 class="card-title">WWSU Listener's Corner</h4>
@@ -58,45 +58,46 @@
              <div id="nativeflashradio" style="height:65px; width:100%;"></div>
              <p class="card-text">Please allow several seconds after clicking play for buffering before you begin hearing audio.</p>
              <br style="clear:both;">
-        <p class="card-text"><div style="text-align: center; color: #ffffff;" id="nowplaying"><div class="p-3 mb-2 border border-warning">Connecting to WWSU...</div></div></p>
+        <p class="card-text"><div style="text-align: center; color: #ffffff;" id="nowplaying"><div class="p-3 mb-2 bg-wwsu-red">Connecting...</div></div></p>
   </div>
 </div>
     </div>
 </div>
   <div class="row">
     <div class="col">
-<div class="card" style="background-color: #455A64; color: #ffffff;">
+<div class="card text-white bg-dark">
   <div class="card-header text-center">Chat with the DJ</div>
   <div class="card-body">
-        <div class="container-fluid" id="messages" style="height: 360px; overflow-y: auto; background-color: #546E7A; color: #FFFFFF;">
+        <div class="container-fluid" id="messages" style="height: 360px; overflow-y: auto; background-color: #787878; color: #FFFFFF;">
         </div>
         <div class="form-group">
             <textarea class="form-control" rows="2" id="themessage" placeholder="Type your message here. You are limited to sending 3 messages per minute."></textarea>
         </div>
         <div class="form-group">
     <input type="text" class="form-control" id="nickname" maxlength="32" placeholder="Nickname (optional)">
-            <a type="button" class="btn btn-success" id="sendmessage" href="javascript:sendMessage(false)">
-                Send (public)
+            <button type="button" class="btn btn-wwsu-red m-1" id="sendmessage" onclick="sendMessage(false);">
+                Send to Chat
             </a>
-            <a type="button" class="btn btn-primary" id="sendmessagep" href="javascript:sendMessage(true)">
-                Send (private)
+            <button type="button" class="btn btn-secondary m-1" id="sendmessagep" onclick="sendMessage(true);">
+                DM to the DJ
             </a>
-            <a type="button" class="btn btn-danger" id="clearchat" href="javascript:clearChat()">
-                Clear Chat
+            <button type="button" class="btn btn-secondary m-1" id="clearchat" onclick="clearChat();">
+                Clear Messages
             </a>
         </div>
-<p style="color: #ffffff">Sending a public message is viewable by the DJ and other web visitors. Sending a private message is only viewable by the DJ.</p>
-        <p style="color: #ffffff"><strong>By submitting messages, you agree not to abuse the chat system (and that your IP is logged).</strong> WWSU and the on-air DJ have the right to delete messages or ban users, temporarily or indefinitely, for any reason, with or without explanation.</p>
+<div class="alert alert-warning" role="alert">
+  <strong>Your IP address is logged when you send messages.</strong> Abuse of the chat system may result in a temporary or permanent ban from the listener's corner.
+</div>
   </div>
 </div>
     </div>
 </div>
   <div class="row">
     <div class="col">
-<div class="card" style="background-color: #455A64; color: #ffffff; min-width: 240px;">
+<div class="card text-white bg-dark">
   <div class="card-header text-center">Request a Song</div>
   <div class="card-body">
-<div class="container-fluid" id="trackrequests" style="height: 480px; overflow-y: auto; background-color: #546E7A; color: #000000;">
+<div class="container-fluid" id="trackrequests" style="height: 480px; overflow-y: auto; background-color: #787878; color: #000000;">
 <form name="input" action="javascript:loadTracks(null)" method="get"><div class="col-sm-6"><div class="input-group"><input type="text" placeholder="Search artist or title..." value="" id="searchterm" class="form-control"><span class="input-group-btn"><input type="submit" class="btn btn-default" type="button" value="Search">Search</span><br /></div></div></form>
 <p style="color: #ffffff; text-align: center;">Click a track below to view more info and/or to request it. Scroll to the bottom to load more tracks.</p>
 <div id="song-data" style="color: #ffffff; text-align: center;"></div>

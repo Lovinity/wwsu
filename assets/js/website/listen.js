@@ -36,7 +36,7 @@ $("#nativeflashradio").flashradio({
     affiliatetoken: "1000lIPN",
     debug: "false",
     ownsongtitleurl: "",
-    radiocover: "http://server.wwsu1069.org/images/display/logo.png",
+    radiocover: "",
     songgooglefontname: "",
     songfontname: "",
     titlegooglefontname: "",
@@ -65,7 +65,6 @@ function closeModal() {
 
 // On socket connection, notify the user and do socket tasks.
 io.socket.on('connect', function () {
-    notificationsBox.innerHTML += `<div class="p-3 mb-2 border border-success" style="background: rgba(76, 175, 80, 1);><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span> You are now connected to WWSU.</div>`;
     iziToast.show({
         title: 'Connected to WWSU',
         message: 'You will now receive metadata, can send or receive messages, and can place track requests.',
@@ -82,8 +81,7 @@ io.socket.on('connect', function () {
 // On socket disconnect, notify the user.
 io.socket.on('disconnect', function () {
     console.log('Lost connection');
-    nowPlaying.innerHTML = `<div class="p-3 mb-2 border border-danger">Re-connecting...</div>`;
-    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>Lost connection to WWSU. The chat system will be unavailable until connection is re-established. Please wait while trying to reconnect...</div>`;
+    nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
     iziToast.show({
         title: 'Lost connection to WWSU',
         message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
@@ -145,7 +143,7 @@ function onlineSocket()
     io.socket.post('/recipients/add-web', {}, function serverResponded(body, JWR) {
         try {
             nickname.value = body.label;
-            nickname.value = nickname.value.replace('Web ','');
+            nickname.value = nickname.value.replace('Web ', '');
             nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
         } catch (e) {
             console.error(e);
@@ -213,7 +211,7 @@ function addMessage(data, firsttime = false)
     // Private website message
     if (data.to.startsWith("website-"))
     {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 border border-warning" style="background: rgba(255, 193, 7, 0.5);"><span class="badge badge-primary" style="font-size: 1em;">${moment(data.createdAt).format('LTS')}</span> <span class="badge badge-secondary" style="font-size: 1em;">#${data.ID}</span> <span class="badge badge-danger" style="font-size: 1em;">${data.from_friendly}</span> <span class="badge badge-success" style="font-size: 1em;">Private with ${data.to_friendly}</span><br />${data.message}</div>`;
+        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (Only you see this message)</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -232,7 +230,7 @@ function addMessage(data, firsttime = false)
         // Public website message for all visitors
     } else if (data.to === 'website')
     {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 border border-warning" style="background: rgba(255, 193, 7, 0.5);"><span class="badge badge-primary" style="font-size: 1em;">${moment(data.createdAt).format('LTS')}</span> <span class="badge badge-secondary" style="font-size: 1em;">#${data.ID}</span> <span class="badge badge-danger" style="font-size: 1em;">From: ${data.from_friendly}</span><br />${data.message}</div>`;
+        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -250,7 +248,7 @@ function addMessage(data, firsttime = false)
 
         // Private message sent from visitor
     } else if (data.to === 'DJ-private') {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 border border-secondary" style="background: rgba(96, 125, 139, 0.3);"><span class="badge badge-primary" style="font-size: 1em;">${moment(data.createdAt).format('LTS')}</span> <span class="badge badge-secondary" style="font-size: 1em;">#${data.ID}</span> <span class="badge badge-danger" style="font-size: 1em;">From: ${data.from_friendly}</span> <span class="badge badge-success" style="font-size: 1em;">Private with DJ</span><br />${data.message}</div>`;
+        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (only the DJ sees this message)</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -267,7 +265,7 @@ function addMessage(data, firsttime = false)
         }
         // All other messages
     } else {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 border border-secondary" style="background: rgba(96, 125, 139, 0.3);"><span class="badge badge-primary" style="font-size: 1em;">${moment(data.createdAt).format('LTS')}</span> <span class="badge badge-secondary" style="font-size: 1em;">#${data.ID}</span> <span class="badge badge-danger" style="font-size: 1em;">From: ${data.from_friendly}</span><br />${data.message}</div>`;
+        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -298,13 +296,13 @@ function doMeta(response)
         if ('line1' in response || 'line2' in response)
         {
             if (Meta.state.includes("live_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-danger">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
             if (Meta.state.includes("sports_") || Meta.state.includes("sportsremote_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-success">${Meta.line1}<br />${Meta.line2}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}</div>`;
             if (Meta.state.includes("remote_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-primary" style="background-color: #673AB7">${Meta.line1}<br />${Meta.line2}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
             if (Meta.state.includes("automation_") || Meta.state === 'unknown')
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-primary">${Meta.line1}<br />${Meta.line2}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}</div>`;
             iziToast.show({
                 title: Meta.line1,
                 message: Meta.line2,
@@ -323,7 +321,7 @@ function doMeta(response)
             blocked = true;
             messageText.disabled = true;
             sendButton.disabled = true;
-            notificationsBox.innerHTML = `<div class="p-3 mb-2 border border-danger" style="background: rgba(244, 67, 54, 0.5);">The DJ currently on the air has disabled the chat system for their show. You will not be able to send any messages until the DJ finishes their show.</div>`;
+            notificationsBox.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red" id="msg-disabled">The web chat is currently disabled for this show.</div>`;
             if (shouldScroll) {
                 $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
             }
@@ -337,7 +335,10 @@ function doMeta(response)
             {
                 if (automationpost !== 'automation')
                 {
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 border border-primary" style="background: rgba(33, 150, 243, 1);"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span> Currently, there are no DJs live on the air. There might not be anyone in the studio at this time to view your messages.</div>`;
+                    var temp = document.getElementById('msg-state');
+                    if (temp)
+                        temp.remove();
+                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">No one is on the air at this time. There may not be anyone in the studio to read your messages.</div>`;
                     if (shouldScroll) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                     }
@@ -346,7 +347,10 @@ function doMeta(response)
             } else if (response.state === 'live_prerecord') {
                 if (automationpost !== response.live)
                 {
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 border border-primary" style="background: rgba(33, 150, 243, 1);"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span> A pre-recorded show is now airing. There might not actually be anyone in the studio right now to view your messages.</div>`;
+                    var temp = document.getElementById('msg-state');
+                    if (temp)
+                        temp.remove();
+                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">The current show airing is a prerecord. There may not be anyone in the studio to read your messages.</div>`;
                     automationpost = response.live;
                     if (shouldScroll) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -355,7 +359,10 @@ function doMeta(response)
             } else {
                 if (automationpost !== response.live)
                 {
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 border border-success" style="background: rgba(76, 175, 80, 1);><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span> A DJ/show is now live on the air (${response.live}). Your messages should be received by the DJ.</div>`;
+                    var temp = document.getElementById('msg-state');
+                    if (temp)
+                        temp.remove();
+                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">There is a show airing now. Your messages should be received by the host.</div>`;
                     automationpost = response.live;
                     if (shouldScroll) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -366,6 +373,9 @@ function doMeta(response)
         blocked = false;
         messageText.disabled = false;
         sendButton.disabled = false;
+        var temp = document.getElementById('msg-disabled');
+        if (temp)
+            temp.remove();
     } catch (e) {
         console.error(e);
     }
