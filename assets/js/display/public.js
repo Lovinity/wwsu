@@ -643,8 +643,8 @@ function doEas()
                 content.innerHTML = `<div class="animated wobble" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em;">WWSU Emergency Alert System</h1>
                     <div class="m-3" style="color: ${color4}; font-size: 6em;">${alert}</div>
-                    <div class="m-1 text-info" style="font-size: 2em;">${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
-                    <div class="m-1 text-warning" style="font-size: 2em;">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
+                    <div class="m-1 text-info-light" style="font-size: 2em;">${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
+                    <div class="m-1 text-warning-light" style="font-size: 2em;">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3" style="color: #FFFFFF; background: rgba(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}, 0.5); font-size: 2.5em;">${text}</div>
                     </div></div>`;
                 if (easExtreme)
@@ -738,8 +738,8 @@ function doEas()
                     color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
                     innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="text-warning">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em;" class="text-secondary">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
+                        <span style="font-size: 1em;" class="text-info-light">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="text-warning-light">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
                         </div>
                         `;
                 } catch (e) {
@@ -788,7 +788,7 @@ function processNowPlaying(response)
                 color = 'rgba(244, 67, 54, 0.5)';
             } else if (Meta.state.startsWith("remote_"))
             {
-                statebadge = `<span class="badge badge-primary" style="background-color: rgba(103, 58, 183, 1);">REMOTE</span>`;
+                statebadge = `<span class="badge badge-purple">REMOTE</span>`;
                 color = 'rgba(103, 58, 183, 0.5)';
             } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_"))
             {
@@ -1164,7 +1164,7 @@ function doSlide(same = false)
         // Each call, we need to re-generate our collection of slides
         var slides = {
             // Slide 1 is the WWSU logo and standard information
-            1: {name: 'WWSU', class: 'light', do: true, function: function () {
+            1: {name: 'WWSU', class: 'wwsu-red', do: true, function: function () {
                     if (content.innerHTML === "TESTING")
                     {
                         content.innerHTML = `<div class="animated bounceIn">
@@ -1223,7 +1223,7 @@ function doSlide(same = false)
                     }
                 }},
             // Slide 2 is only visible if we are not in automation, and displays who is on the air, as well as the topic if one is set.
-            2: {name: 'On the Air', class: 'primary', do: false, function() {
+            2: {name: 'On the Air', class: 'light', do: false, function() {
                     $('#slide').animateCss('lightSpeedOut', function () {
                         if (Meta.topic.length > 2)
                         {
@@ -1320,7 +1320,7 @@ function doSlide(same = false)
                                         }
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
                                         innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
-                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;"><string>${dodo.title}</strong></span><br /><span class="text-warning" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span><br /><span class="text-danger" style="font-size: 1em;">${timeleft}</span><br /><span class="text-light" style="font-size: 0.75em; text-align: left;">${text_truncate(dodo.description, 140)}</div>
+                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;"><string>${dodo.title}</strong></span><br /><span class="text-warning-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span><br /><span class="text-danger-light" style="font-size: 1em;">${timeleft}</span><br /><span class="text-light" style="font-size: 0.75em; text-align: left;">${text_truncate(dodo.description, 140)}</div>
                         </div>
                         `;
                                     } catch (e) {
@@ -1803,7 +1803,7 @@ function doSlide(same = false)
                         slidetimer = setTimeout(doSlide, 14000);
                     });
                 }},
-            101: {name: 'Be a DJ', class: 'primary', do: true, function() {
+            101: {name: 'Be a DJ', class: 'purple', do: true, function() {
                     $('#slide').animateCss('fadeOutUp', function () {
                         if (Meta.state.startsWith("live_"))
                         {
@@ -1890,9 +1890,9 @@ function doSlide(same = false)
                                 color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
                                 innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="text-warning">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em;" class="text-secondary">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
-<span style="font-size: 1em;" class="text-danger">${timeleft}</span></div>
+                        <span style="font-size: 1em;" class="text-info-light">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="text-warning-light">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
+<span style="font-size: 1em;" class="text-danger-light">${timeleft}</span></div>
                         </div>
                         `;
                             } catch (e) {
@@ -2048,9 +2048,9 @@ function doSlide(same = false)
                                 color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
                                 innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="text-warning">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em;" class="text-secondary">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
-<span style="font-size: 1em;" class="text-danger">${timeleft}</span></div>
+                        <span style="font-size: 1em;">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
+<span style="font-size: 1em;">${timeleft}</span></div>
                         </div>
                         `;
                             } catch (e) {

@@ -184,7 +184,7 @@ function processStatus()
                             globalStatus = 1;
                         break;
                     case 2:
-                        statusBadges.innerHTML += `<span class="m-1 btn btn-danger btn-sm" style="background: #FF5722;">${thestatus.label}</span>`;
+                        statusBadges.innerHTML += `<span class="m-1 btn btn-urgent btn-sm">${thestatus.label}</span>`;
                         if (globalStatus > 2)
                             globalStatus = 2;
                         break;
@@ -462,19 +462,19 @@ function processTasks()
                     <div class="row task m-1 border border-${border}" style="width: 100%; background: ${color}; text-align: left; font-size: 1em;">
                         <div class="order-progress" style="background: #ffffff; opacity: 0.25; width: ${(typeof dodo.percent !== 'undefined') ? dodo.percent : 0}%;"></div>
                         <div class="col-4">
-                            <span style="#ffffff;">${(typeof dodo.subject !== 'undefined') ? dodo.subject : 'Undefined task'}</span>
+                            <span class="text-light">${(typeof dodo.subject !== 'undefined') ? dodo.subject : 'Undefined task'}</span>
                         </div>
                         <div class="col-2">
-                            <span style="color: #4DD0E1;">${(typeof dodo.type !== 'undefined') ? dodo.type : 'Undefined'}</span>
+                            <span class="text-info-light">${(typeof dodo.type !== 'undefined') ? dodo.type : 'Undefined'}</span>
                         </div>
                         <div class="col-2">
-                            <span style="color: #FFF176;">${(typeof dodo.assignee !== 'undefined') ? dodo.assignee : 'Not assigned'}</span>
+                            <span class="text-warning-light">${(typeof dodo.assignee !== 'undefined') ? dodo.assignee : 'Not assigned'}</span>
                         </div>
                         <div class="col-2">
-                            <span style="color: #C5E1A5;">${(typeof dodo.status !== 'undefined') ? dodo.status : 'Undefined'}</span>
+                            <span class="text-success-light">${(typeof dodo.status !== 'undefined') ? dodo.status : 'Undefined'}</span>
                         </div>
                         <div class="col-2">
-                            <span style="color: #EF9A9A;">${(typeof dodo.due !== 'undefined' && moment(dodo.due).isValid()) ? dodo.due : 'Not specified'}</span>
+                            <span class="text-danger-light">${(typeof dodo.due !== 'undefined' && moment(dodo.due).isValid()) ? dodo.due : 'Not specified'}</span>
                         </div>
                     </div>`;
                 }
