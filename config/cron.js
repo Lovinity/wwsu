@@ -461,11 +461,11 @@ module.exports.cron = {
                         }
 
                         // Clean up profanity in metadata
-                        if (typeof change.line1 !== 'undefined')
+                        if (typeof change.line1 !== 'undefined' && change.line1 !== '')
                             change.line1 = await sails.helpers.filterProfane(change.line1);
-                        if (typeof change.line2 !== 'undefined')
+                        if (typeof change.line2 !== 'undefined' && change.line2 !== '')
                             change.line2 = await sails.helpers.filterProfane(change.line2);
-                        if (typeof change.stream !== 'undefined')
+                        if (typeof change.stream !== 'undefined' && change.stream !== '')
                             change.stream = await sails.helpers.filterProfane(change.stream);
 
                         // parse metadata
