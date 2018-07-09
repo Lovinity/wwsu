@@ -47,7 +47,7 @@ module.exports.bootstrap = async function (done) {
     });
     sails.log.verbose(`BOOTSTRAP: Loading Display Sign instances into template`);
     sails.config.custom.displaysigns.forEach(function (display) {
-        Status.template.push({name: `display-${display.name}`, label: `Display ${display.label}`, status: 2, data: 'This display sign has not reported online since initialization.', time: null});
+        Status.template.push({name: `display-${display.name}`, label: `Display ${display.label}`, status: 3, data: 'This display sign has not reported online since initialization.', time: null});
     });
 
     sails.log.verbose(`BOOTSTRAP: Adding Status template to database.`);

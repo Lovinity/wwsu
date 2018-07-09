@@ -862,18 +862,33 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON checkRadioStreams triggered.`);
             try {
-                needle('get', sails.config.custom.stream)
+                needle('get', sails.config.custom.stream, {}, {headers: {'Content-Type': 'application/json'}})
                         .then(async function (resp) {
-                            if (resp.body.includes("Mount Point /public"))
+                            console.log(resp.body);
+                            var publicStream = false;
+                            var remoteStream = false;
+                            if (typeof resp.body.children !== 'undefined' && typeof resp.body.children[1] !== 'undefined' && typeof resp.body.children[1].children !== 'undefined')
                             {
-                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
-                            } else {
-                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream appears to be offline.', status: 2}]);
+                                resp.body.children[1].children.forEach(function (child) {
+                                    if (typeof child.children !== 'undefined' && typeof child.children[0] !== 'undefined' && typeof child.children[0].children !== 'undefined' && typeof child.children[0].children[0] !== 'undefined')
+                                    {
+                                        if (child.children[0].children[0].value === "Mount Point /public")
+                                        {
+                                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
+                                            publicStream = true;
+                                        }
+                                        if (child.children[0].children[0].value === "Mount Point /remote")
+                                        {
+                                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
+                                            remoteStream = true;
+                                        }
+                                    }
+                                });
                             }
-                            if (resp.body.includes("Mount Point /remote"))
+                            if (!publicStream)
+                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream appears to be offline.', status: 2}]);
+                            if (!remoteStream)
                             {
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
-                            } else {
                                 if (Meta['A'].state.includes("remote"))
                                 {
                                     Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline.', status: 2}]);
@@ -890,6 +905,7 @@ module.exports.cron = {
                             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
                                 Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 4}]);
                             }
+                            sails.log.error(err);
                         });
             } catch (e) {
                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
@@ -965,7 +981,7 @@ module.exports.cron = {
         onTick: function () {
             sails.log.debug(`CRON checkWebsite triggered.`);
             try {
-                needle('get', sails.config.custom.website)
+                needle('get', sails.config.custom.website, {}, {headers: {'Content-Type': 'application/json'}})
                         .then(async function (resp) {
                             if (typeof resp.body !== 'undefined')
                             {

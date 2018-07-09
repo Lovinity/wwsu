@@ -1,4 +1,4 @@
-# WWSU 4.0.alpha
+# WWSU 4.0 alpha
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Alpha stage, which means not everything from version 3 has been ported to version 4 yet. Furthermore, this should be considered a non-working build until Beta stage.
