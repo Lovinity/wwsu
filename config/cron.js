@@ -932,7 +932,7 @@ module.exports.cron = {
                 await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
                     return new Promise(async (resolve, reject) => {
                         try {
-                            needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`)
+                            needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, {headers: {'Content-Type': 'application/json'}})
                                     .then(async function (resp) {
                                         if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
                                         {
