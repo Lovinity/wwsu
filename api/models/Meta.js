@@ -70,7 +70,7 @@ module.exports = {
 
     },
 
-    // API NOTE: Do not modify any of these directly; use the changeMeta function instead.
+    // API NOTE: Do not modify any of these directly; use the changeMeta function instead. That way, changes are pushed through web sockets.
     A: {
         state: 'unknown', // State of the WWSU system
         dj: '', // If someone is on the air, host name - show name
@@ -96,7 +96,7 @@ module.exports = {
         playlist_position: -1, // Current position within the playlist
         playlist_played: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
     },
-    automation: [], // Tracks in automation
+    automation: [], // Tracks in automation, populated by sails.helpers.rest.getQueue().
     history: [], // track history array
 
     /**
