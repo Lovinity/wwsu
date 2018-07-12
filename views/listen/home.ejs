@@ -7,8 +7,7 @@
             }</script> 
 <script src="../../js/jquery-3.3.1.min.js"></script>
 <script src="../../js/jquery-ui.min.js"></script>
-<script type="text/javascript" src="../../dependencies/sails.io.js"
-  environment="production"></script>
+<script type="text/javascript" src="../../dependencies/sails.io.js"></script>
 <script src="../../js/iziToast.min.js"></script>
 <script src="../../js/moment.min.js"></script>
 <script src="../../js/bootstrap/bootstrap.bundle.min.js"></script>
@@ -50,13 +49,15 @@
 <div class="container">
   <div class="row">
     <div class="col">
-<div class="card text-white bg-dark">
-  <div class="card-header text-center"><a href="https://www.wright.edu/wwsu"><img src="http://server.wwsu1069.org/images/logo.png" style="width: 240px; height: auto;"></a></div>
+<div class="p-1 m-3 card text-white bg-dark">
+  <div class="card-header text-center" style="font-size: 1.5em;">WWSU Listener's Corner</div>
   <div class="card-body">
-      <h4 class="card-title">WWSU Listener's Corner</h4>
-      <p class="card-text">Listen live to WWSU, chat with the DJ, or make song requests here.</p>
+      <div class="card-title" style="text-align: center;"><a href="https://www.wright.edu/wwsu"><img src="http://server.wwsu1069.org/images/logo.png" style="width: 100%; max-width: 640px;"></a></div>
+      <p class="card-text" style="text-align: center;">Listen live to WWSU, chat with the DJ, or make song requests here.</p>
              <div id="nativeflashradio" style="height:65px; width:100%;"></div>
-             <p class="card-text">Please allow several seconds after clicking play for buffering before you begin hearing audio.</p>
+<div class="alert alert-info" role="alert">
+  Please allow several seconds after clicking play before you begin hearing audio.
+</div>
              <br style="clear:both;">
         <p class="card-text"><div style="text-align: center; color: #ffffff;" id="nowplaying"><div class="p-3 mb-2 bg-wwsu-red">Connecting...</div></div></p>
   </div>
@@ -65,16 +66,18 @@
 </div>
   <div class="row">
     <div class="col">
-<div class="card text-white bg-dark">
-  <div class="card-header text-center">Chat with the DJ</div>
+<div class="p-1 m-3 card text-white bg-dark">
+  <div class="card-header text-center" style="font-size: 1.5em;">Chat with the DJ</div>
   <div class="card-body">
         <div class="container-fluid" id="messages" style="height: 360px; overflow-y: auto; background-color: #787878; color: #FFFFFF;">
         </div>
         <div class="form-group">
-            <textarea class="form-control" rows="2" id="themessage" placeholder="Type your message here. You are limited to sending 3 messages per minute."></textarea>
+<label for="nickname">Nickname</label>
+            <input type="text" class="form-control" id="nickname" maxlength="32" placeholder="">
+<label for="themessage">Message</label>
+            <textarea class="form-control" rows="2" id="themessage" placeholder=""></textarea>
         </div>
         <div class="form-group">
-    <input type="text" class="form-control" id="nickname" maxlength="32" placeholder="Nickname (optional)">
             <button type="button" class="btn btn-wwsu-red m-1" id="sendmessage" onclick="sendMessage(false);">
                 Send to Chat
             </a>
@@ -85,6 +88,9 @@
                 Clear Messages
             </a>
         </div>
+<div class="alert alert-info" role="alert">
+  Each IP address is limited to sending 3 messages per minute.
+</div>
 <div class="alert alert-warning" role="alert">
   <strong>Your IP address is logged when you send messages.</strong> Abuse of the chat system may result in a temporary or permanent ban from the listener's corner.
 </div>
@@ -94,8 +100,8 @@
 </div>
   <div class="row">
     <div class="col">
-<div class="card text-white bg-dark">
-  <div class="card-header text-center">Request a Song</div>
+<div class="p-1 m-3 card text-white bg-dark">
+  <div class="card-header text-center" style="font-size: 1.5em;">Request a Song</div>
   <div class="card-body">
 <div class="container-fluid" id="trackrequests" style="height: 480px; overflow-y: auto; background-color: #787878; color: #000000;">
 <form name="input" action="javascript:loadTracks(null)" method="get"><div class="col-sm-6"><div class="input-group"><input type="text" placeholder="Search artist or title..." value="" id="searchterm" class="form-control"><span class="input-group-btn"><input type="submit" class="btn btn-default" type="button" value="Search">Search</span><br /></div></div></form>
@@ -131,5 +137,5 @@
     </body>
     <script>if (window.module)
                 module = window.module;</script>
-<script src="../../js/website/listen.js"></script>
+<script src="../../js/website/listen.js" defer></script>
 </html>

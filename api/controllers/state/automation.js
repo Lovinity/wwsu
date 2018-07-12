@@ -50,13 +50,14 @@ module.exports = {
 
                 // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled. Load any scheduled playlists/rotations
                 await Calendar.preLoadEvents();
-
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
+                await sails.helpers.songs.queuePending();
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
                 // otherwise queue a station ID, and up to 3 pending requests.
             } else {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
+                await sails.helpers.songs.queuePending();
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
 

@@ -145,22 +145,21 @@ module.exports = {
                                                 Status.changeStatus([{name: `openproject`, status: 3, data: 'Error with Timesheet.', label: `OpenProject`}]);
                                                 return reject(err);
                                             });
-                                    if (records)
+                                    if (records.length > 0)
                                     {
                                         records.forEach(async function (record) {
                                             if (typeof names[record.name] === 'undefined')
                                             {
                                                 names[record.name] = true; // This director is to be listed
                                                 // If there's an entry with a null time_out, then consider the director clocked in
-                                                var record = null;
                                                 if (record.time_out === null)
                                                 {
-                                                    record = await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()})
+                                                    await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()})
                                                             .tolerate((err) => {
                                                             })
                                                             .fetch();
                                                 } else {
-                                                    record = await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()})
+                                                    await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()})
                                                             .tolerate((err) => {
                                                             })
                                                             .fetch();

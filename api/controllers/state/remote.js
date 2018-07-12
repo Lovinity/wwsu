@@ -44,12 +44,14 @@ module.exports = {
 
         try {
             // Do not continue if not in automation mode; client should request automation before requesting remote
-            if (!Meta['A'].state.startsWith("automation_") || !Meta['A'].state.startsWith("remote_"))
+            if (!Meta['A'].state.startsWith("automation_") && !Meta['A'].state.startsWith("remote_"))
                 return exits.error(new Error(`Cannot execute state/remote unless in automation or remote. Please go to automation first.`));
 
             // Filter profanity
-            inputs.topic = await sails.helpers.filterProfane(inputs.topic);
-            inputs.showname = await sails.helpers.filterProfane(inputs.showname);
+            if (inputs.topic !== '')
+                inputs.topic = await sails.helpers.filterProfane(inputs.topic);
+            if (inputs.showname !== '')
+                inputs.showname = await sails.helpers.filterProfane(inputs.showname);
 
             // If we are not already in remote mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("remote_"))

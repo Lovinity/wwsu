@@ -46,18 +46,6 @@ module.exports = {
     // Template are initial records created in the Recipients model upon execution of bootstrap.
     template: [
         {
-            host: 'emergency',
-            group: 'system',
-            label: 'Technical Issues',
-            status: 0
-        },
-        {
-            host: 'requests',
-            group: 'system',
-            label: 'Track Requests',
-            status: 0
-        },
-        {
             host: 'website',
             group: 'website',
             label: 'Web Public',

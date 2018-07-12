@@ -153,23 +153,29 @@ module.exports = {
                         query.ID = {'!=': checked};
                     record = await Requests.find(query).limit(1);
                     sails.log.silly(`Request: ${record}`);
-                    if (typeof record !== 'undefined' && typeof record[0] !== 'undefined' && typeof record[0].ID !== 'undefined' && record.length > 0 && Requests.pending.indexOf(record[0].songID) !== -1)
+                    if (typeof record !== 'undefined' && typeof record[0] !== 'undefined' && typeof record[0].ID !== 'undefined')
                     {
-                        sails.log.verbose(`getRequest abandoned: the track was already queued.`);
-                        checked.push(record[0].ID);
-                        await getRequest(quantity);
-                    } else {
-                        if (quantity === inputs.quantity)
-                            await prepareRequests();
-                        var temp = await queueRequest(record[0]);
-                        if (temp)
-                            queuedSomething = true;
-                        if (quantity > 1) {
-                            await getRequest(quantity - 1);
+                        if (record.length > 0 && Requests.pending.indexOf(record[0].songID) !== -1)
+                        {
+                            sails.log.verbose(`getRequest abandoned: the track was already queued.`);
+                            checked.push(record[0].ID);
+                            await getRequest(quantity);
                         } else {
-                            await finalizeRequests();
-                            return resolve();
+                            if (quantity === inputs.quantity)
+                                await prepareRequests();
+                            var temp = await queueRequest(record[0]);
+                            if (temp)
+                                queuedSomething = true;
+                            if (quantity > 1) {
+                                await getRequest(quantity - 1);
+                            } else {
+                                await finalizeRequests();
+                                return resolve();
+                            }
                         }
+                    } else {
+                        queuedSomething = false;
+                        return resolve();
                     }
                 });
             };

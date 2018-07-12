@@ -73,7 +73,7 @@ module.exports = {
                 if (Recipients.sockets[recipient.ID].length <= 0)
                 {
                     sails.log.verbose(`Recipient is no longer connected. Setting to offline.`);
-                    await Recipients.update({host: recipient.host}, {host: recipient.host, status: 0, time: moment().toISOString()});
+                    await Recipients.update({host: recipient.host}, {host: recipient.host, status: 0, time: moment().toISOString()}).fetch();
 
                     // If the recipient name is found in djcontrols config, reflect status
                     await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {

@@ -12,7 +12,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug(`Helper sails.helpers.rest.changeRadioDj called.`);
-
         try {
             var runninginstance = 0;
 

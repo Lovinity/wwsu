@@ -82,6 +82,10 @@ module.exports = {
         if (typeof updatedRecord.from_IP !== 'undefined')
             delete updatedRecord.from_IP;
         var data = {update: updatedRecord};
+        
+        if (updatedRecord.status === 'deleted')
+            data = {remove: updatedRecord.ID};
+        
         sails.log.silly(`messages socket: ${data}`);
         sails.sockets.broadcast('messages', 'messages', data);
 
@@ -111,7 +115,7 @@ module.exports = {
         // Do not pass IP addresses through web sockets!
         if (typeof destroyedRecord.from_IP !== 'undefined')
             delete destroyedRecord.from_IP;
-        var data = {insert: destroyedRecord};
+        var data = {remove: destroyedRecord.ID};
         sails.log.silly(`messages socket: ${data}`);
         sails.sockets.broadcast('messages', 'messages', data);
 

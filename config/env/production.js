@@ -292,7 +292,7 @@ module.exports = {
   *                                                                         *
   ***************************************************************************/
   log: {
-    level: 'warn'
+    level: 'verbose'
   },
 
 
@@ -337,7 +337,7 @@ module.exports = {
   * this, just try deploying without setting it and see if it works.)       *
   *                                                                         *
   ***************************************************************************/
-  // port: 80,
+  port: 1977,
 
 
 

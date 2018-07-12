@@ -47,7 +47,7 @@ datastore: 'radiodj',
             type: 'number'
         },
         swfirst: {
-            type: 'boolean'
+            type: 'string'
         },
         ord: {
             type: 'number'

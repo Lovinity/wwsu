@@ -44,12 +44,6 @@ module.exports = {
             var status = 5;
             switch (inputs.group)
             {
-                case 'system':
-                    if (inputs.host === 'emergency')
-                        status = 1;
-                    if (inputs.host === 'requests')
-                        status = 4;
-                    break;
                 case 'website':
                     status = 5;
                     break;
@@ -72,7 +66,7 @@ module.exports = {
                         });
                 if (host && typeof host[0] !== 'undefined')
                 {
-                    inputs.label = host.friendlyname;
+                    inputs.label = host[0].friendlyname;
                 }
             }
 
@@ -82,7 +76,7 @@ module.exports = {
             sails.log.silly(`Recipients record: ${recipient}`);
 
             // Search to see if any changes are made to the recipient; we only want to update if there is a change.
-            var criteria = {host: inputs.host, group: inputs.group, label: inputs.label, status: status};
+            var criteria = {host: inputs.host, group: inputs.group, status: status};
             var updateIt = false;
             for (var key in criteria)
             {
@@ -102,7 +96,7 @@ module.exports = {
             if (updateIt)
             {
                 sails.log.verbose(`Updating recipient as it has changed.`);
-                await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()});
+                await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, status: status, time: moment().toISOString()}).fetch();
             }
 
             // If the recipient group is computers, update Status

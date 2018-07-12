@@ -35,6 +35,7 @@ module.exports = {
             {
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                await sails.helpers.songs.queuePending();
                 Status.errorCheck.prevID = moment();
                 Status.errorCheck.prevBreak = moment();
                 await sails.helpers.error.count('stationID');
@@ -52,6 +53,7 @@ module.exports = {
             } else {
                 Status.errorCheck.prevBreak = moment();
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
+                await sails.helpers.songs.queuePending();
                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 2, true);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);

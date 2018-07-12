@@ -25,8 +25,6 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        // API NOTE: This helper should never throw an error unless the error is so severe that we should terminate everything (don't throw for time-outs to RadioDJ REST, for instance)
-
         sails.log.debug('Helper rest.cmd called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         var endstring = ''; // appends at the end of a REST call, say, if arg was supplied

@@ -1,6 +1,4 @@
-/* global io, moment, iziToast */
-
-// WORK ON THIS
+/* global io, moment, iziToast, Infinity */
 
 // Load HTML elements
 var nowPlaying = document.getElementById('nowplaying');
@@ -50,7 +48,31 @@ $("#nativeflashradio").flashradio({
     streampath: "/live",
     streamtype: "other",
     streamurl: "http://server.wwsu1069.org",
-    songinformationinterval: "600000",
+    songinformationinterval: "600000"
+});
+
+function waitFor(check, callback, count = 0)
+{
+    if (!check())
+    {
+        if (count < 1200)
+        {
+            count++;
+            window.requestAnimationFrame(function() {
+                waitFor(check, callback, count);
+            });
+        } else {
+        }
+    } else {
+        callback();
+}
+}
+
+waitFor(function () {
+    return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && typeof io.socket._raw !== 'undefined' && typeof io.socket._raw.io !== 'undefined');
+}, function () {
+    io.socket._raw.io._reconnection = true;
+    io.socket._raw.io._reconnectionAttempts = Infinity;
 });
 
 function escapeHTML(str) {
@@ -80,18 +102,23 @@ io.socket.on('connect', function () {
 
 // On socket disconnect, notify the user.
 io.socket.on('disconnect', function () {
-    console.log('Lost connection');
-    nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
-    iziToast.show({
-        title: 'Lost connection to WWSU',
-        message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
-        color: 'red',
-        zindex: 100,
-        layout: 2,
-        closeOnClick: true,
-        position: 'bottomCenter',
-        timeout: 5000
-    });
+    try {
+        console.log('Lost connection');
+        nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
+        iziToast.show({
+            title: 'Lost connection to WWSU',
+            message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
+            color: 'red',
+            zindex: 100,
+            layout: 2,
+            closeOnClick: true,
+            position: 'bottomCenter',
+            timeout: 10000
+        });
+        io.socket._raw.io._reconnection = true;
+        io.socket._raw.io._reconnectionAttempts = Infinity;
+    } catch (e) {
+    }
 });
 
 // On meta changes, process meta
@@ -129,6 +156,24 @@ io.socket.on('messages', function (data) {
     } catch (e) {
         console.error(e);
     }
+});
+
+// On meta changes, process meta
+io.socket.on('discipline', function (data) {
+    console.dir(data);
+    iziToast.show({
+        title: `Notice`,
+        message: data.discipline,
+        color: 'red',
+        zindex: 1000,
+        layout: 2,
+        closeOnClick: false,
+        close: false,
+        overlay: true,
+        position: 'center',
+        timeout: false,
+        balloon: false
+    });
 });
 
 function doSockets(firsttime = false)
@@ -193,11 +238,8 @@ function metaSocket()
 
 // Whenever the nickname is changed, (re)set a 5 second timeout. After 5 seconds, if nickname is not changed, send the new nickname to the server for all clients to see.
 nickname.addEventListener("change", function () {
-    clearTimeout(nicknameTimer);
-    nicknameTimer = setTimeout(function () {
-        io.socket.post('/recipients/edit-web', {label: nickname.value}, function serverResponded(body, JWR) {
-        });
-    }, 5000);
+    io.socket.post('/recipients/edit-web', {label: nickname.value}, function serverResponded(body, JWR) {
+    });
 });
 
 // Function called when a new message arrived that should be displayed
@@ -382,10 +424,10 @@ function doMeta(response)
 }
 
 // Send a message through the system
-function sendMessage(private) {
+function sendMessage(privateMsg) {
     if (blocked)
         return null;
-    io.socket.post('/messages/send-web', {message: messageText.value, nickname: nickname.value, private: private}, function serverResponded(response, JWR) {
+    io.socket.post('/messages/send-web', {message: messageText.value, nickname: nickname.value, private: privateMsg}, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
             if (response !== 'OK')

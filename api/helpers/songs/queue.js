@@ -98,6 +98,7 @@ module.exports = {
                                     return resolve(false);
                                 } else {
                                     sails.log.verbose(`Skipped ${thesong.ID}`);
+                                    return resolve(false);
                                 }
                             } catch (e) {
                                 return reject(e);

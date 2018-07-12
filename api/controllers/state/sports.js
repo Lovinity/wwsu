@@ -50,7 +50,8 @@ module.exports = {
                 return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`));
 
             // Filter profanity
-            inputs.topic = await sails.helpers.filterProfane(inputs.topic);
+            if (inputs.topic !== '')
+                inputs.topic = await sails.helpers.filterProfane(inputs.topic);
 
             if (!Meta['A'].state.startsWith("sports"))
             {

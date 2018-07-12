@@ -980,6 +980,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
+                    var temp = Meta.dj.split(" - ");
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>

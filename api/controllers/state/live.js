@@ -48,8 +48,10 @@ module.exports = {
                 return exits.error(new Error(`Cannot execute state/live unless in automation or live mode. Please go to automation first.`));
 
             // Filter profanity
-            inputs.topic = await sails.helpers.filterProfane(inputs.topic);
-            inputs.showname = await sails.helpers.filterProfane(inputs.showname);
+            if (inputs.topic !== '')
+                inputs.topic = await sails.helpers.filterProfane(inputs.topic);
+            if (inputs.showname !== '')
+                inputs.showname = await sails.helpers.filterProfane(inputs.showname);
 
             // If we are not already in live mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("live_"))
