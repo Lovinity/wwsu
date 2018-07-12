@@ -21,6 +21,6 @@ module.exports = async function internal(req, res) {
     res.header('Expires', '-1');
     res.header('Pragma', 'no-cache');
     
-    return res.view('display/layout', {layout: 'display/internal', timestamp: moment().valueOf()});
+    return res.view('display/internal', {layout: 'display/layout', timestamp: moment().valueOf()});
 
 };

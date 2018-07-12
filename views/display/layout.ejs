@@ -1,1 +1,170 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+        <script>if (typeof module === 'object') {
+                window.module = module;
+                module = undefined;
+            }</script>  
+<script src="../../js/jquery-3.3.1.min.js"></script>
+<script src="../../js/jquery-ui.min.js"></script>
+<script src="../../js/display/marquee.js"></script>
+<script src="../../js/display/progress.js"></script>
+        <script src="../../js/bootstrap/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="../../dependencies/sails.io.js"></script>
+<script src="../../js/moment.min.js"></script>
+<script src="../../js/iziToast.min.js"></script>
+<script src="../../js/taffy-min.js"></script>
+<link rel="stylesheet" href="../../styles/iziToast.min.css">
+<script type="text/javascript" src="../../js/display/lines.js"></script>
+<link rel="stylesheet" href="../../styles/bootstrap/mytheme.min.css">
+        <link rel="stylesheet" href="../../styles/animate.css">
+        <meta charset="UTF-8">
+<meta http-equiv="Cache-control" content="no-cache">
+<meta http-equiv="Expires" content="-1">
+        <title>WWSU Display Sign</title>
+        <style>
+            .content {
+                padding: 5px;
+                min-height: 100%;
+                margin: 0 auto -225px;
+            }
+.foot {position: relative;}
+.footer {
+   position: fixed;
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   text-align: center;
+}
+     #wrapper {
+       position: absolute;
+       top: 0;
+       left: 0;
+       z-index: 98;
+       display: none;
+     }
+#nowplaying-seek {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  margin: 0px, 20px, -56px, 20px;
+}
+#nowplaying {
+    transition: color 0.5s ease-in-out, background-color 0.5s ease-in-out, opacity 0.5s linear;
+}
+#nowplaying-line1 {
+    overflow: hidden;
+}
+#nowplaying-line2 {
+    overflow: hidden;
+}
+#alert-marquee {
+    overflow: hidden;
+}
+            .loader2 {
+                border: 16px solid #455A64; /* Light grey */
+                border-top: 16px solid #F44336; /* Blue */
+                border-radius: 50%;
+                width: 50%;
+                height: 50%;
+                animation: spin 2s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .overlay {
+                position: fixed;
+                display: block;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.8);
+                z-index: 90;
+            }
 
+            .toast {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 999;
+            }
+
+            .text{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%,-50%);
+                -ms-transform: translate(-50%,-50%);
+            }
+.bgoverlay {
+  background: url(../../images/display/20180419bg.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+                position: fixed;
+                display: block;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                opacity: 0.2;
+}
+            .task{position:relative;}
+            .tcontent{
+                z-index:9;
+                position:relative;
+            }
+            .tbg{
+                z-index:1;
+                width:0px;
+                height:95%;
+                position:absolute;
+                left:0px;
+                top:0px;
+            }
+            .tprogress{
+                z-index:5;
+                width:0px;
+                height:5%;
+                position:absolute;
+                left:0px;
+                bottom:0px;
+                background: #FFC107;
+            }
+
+            .content {
+                padding: 20px;
+                min-height: 100%;
+                margin: 0 auto -240px;
+            }
+
+     #wrapper {
+       position: absolute;
+       top: 0;
+       left: 0;
+       z-index: 98;
+       display: none;
+     }
+.order-progress {
+  height: 100%;
+       top: 0;
+       left: 0;
+       z-index: 10;
+  position: absolute;
+}
+
+        </style>
+    </head>
+<%- body %>
+</html>

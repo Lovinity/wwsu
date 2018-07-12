@@ -21,6 +21,6 @@ module.exports = async function public(req, res) {
     res.header('Expires', '-1');
     res.header('Pragma', 'no-cache');
     
-    return res.view('display/layout', {layout: 'display/public', timestamp: moment().valueOf()});
+    return res.view('display/public', {layout: 'display/layout', timestamp: moment().valueOf()});
 
 };
