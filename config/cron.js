@@ -1308,6 +1308,23 @@ module.exports.cron = {
         },
         start: true
     },
+    
+        // Every minute at second 11, prune out recipients that have been offline for an hour or more.
+    recipientsCheck: {
+        schedule: '11 * * * * *',
+        onTick: async function () {
+            sails.log.debug(`CRON recipientsCheck called.`);
+            try {
+                    var searchto = moment().subtract(1, 'hours').toDate(); // Get recipients updated an hour or more ago
+                    await Recipients.destroy({host: {'!=': ['website']}, status: 0, time: {'<=': searchto}}).fetch();
+            } catch (e) {
+                sails.log.error(e);
+                return null;
+            }
+        },
+        start: true
+    },
+   
 
     // Every day at 11:59:50pm, clock out any directors still clocked in
     clockOutDirectors: {
