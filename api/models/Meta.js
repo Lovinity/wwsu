@@ -87,7 +87,7 @@ module.exports = {
         line1: 'We are unable to provide now playing info at this time.', // First line of meta for display signs
         line2: '', // Second line of meta for display signs
         percent: 0, // Integer or float between 0 and 100 indicating how far in the current track in automation we are, for display signs
-        time: moment().toISOString(), // ISO string of the current WWSU time
+        time: moment().toISOString(true), // ISO string of the current WWSU time
         listeners: 0, // Number of current online listeners
         listenerpeak: 0, // Number of peak online listeners
         queueLength: 0, // Amount of audio queued in radioDJ in seconds (can be a float)
@@ -99,6 +99,7 @@ module.exports = {
     },
     automation: [], // Tracks in automation, populated by sails.helpers.rest.getQueue().
     history: [], // track history array
+    changingState: false, // Used to block out state changes when changing state
 
     /**
      * Change a meta attribute

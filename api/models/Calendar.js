@@ -216,7 +216,7 @@ module.exports = {
                 } else {
                     // Iterate through each returned event from Google Calendar
                     var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
-                    /*
+
                     var playlists = {};
                     var djevents = {};
                     var retData = [];
@@ -264,7 +264,6 @@ module.exports = {
                     djeventsR.forEach(function (event) {
                         djevents[event.name] = event;
                     });
-                    */
 
                     var badEvent = false;
                     for (var i = 0; i < events.length; i++) {
@@ -296,7 +295,6 @@ module.exports = {
                             criteria.color = '#607D8B';
                         }
 
-                        /*
                         // Verify the event
                         criteria.verify = 'Manual';
                         criteria.verify_message = 'This was not detected as an event dealing with OnAir programming. If this event was meant to trigger OnAir programming, <strong>please ensure the event title formatting is correct and that everything is spelled correctly</strong>.';
@@ -451,7 +449,6 @@ module.exports = {
                             criteria.verify_titleHTML = `<span style="background: rgba(128, 128, 128, 0.2);">${criteria.verify_titleHTML}</span>`;
                         }
                         
-                        */
 
                         sails.log.silly(`Event criteria: ${JSON.stringify(criteria)}`);
 

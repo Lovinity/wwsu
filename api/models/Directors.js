@@ -107,7 +107,7 @@ module.exports = {
                                             Directors.directors[director.login] = director;
                                         }
 
-                                        Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, position: '', present: false, since: moment().toISOString()})
+                                        Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, position: '', present: false, since: moment().toISOString(true)})
                                                 .exec((err, user, wasCreated) => {
 
                                                     // Update director if anything changed.
@@ -154,12 +154,12 @@ module.exports = {
                                                 // If there's an entry with a null time_out, then consider the director clocked in
                                                 if (record.time_out === null)
                                                 {
-                                                    await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString()})
+                                                    await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString(true)})
                                                             .tolerate((err) => {
                                                             })
                                                             .fetch();
                                                 } else {
-                                                    await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString()})
+                                                    await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString(true)})
                                                             .tolerate((err) => {
                                                             })
                                                             .fetch();

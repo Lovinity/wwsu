@@ -26,7 +26,7 @@ try {
 // Define variables
     var disconnected = true;
     var slide = 1;
-    var Meta = {time: moment().toISOString()};
+    var Meta = {time: moment().toISOString(true)};
     var Calendar = TAFFY();
 // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
     var calendar = [{}, [{}, {}, {}], [{}, {}, {}]];

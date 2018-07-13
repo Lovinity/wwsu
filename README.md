@@ -1,7 +1,7 @@
-# WWSU 4.0 alpha
+# WWSU 4.0 beta 1
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
-This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Alpha stage, which means not everything from version 3 has been ported to version 4 yet. Furthermore, this should be considered a non-working build until Beta stage.
+This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Beta stage, which means although this is a working build, bugs are to be expected.
 
 ## Websockets
 Several of the API endpoints, as noted in their respective section of this documentation, can be called using a socket request. When the request is a socket, the client will be subscribed to receive changes. Unless otherwise specified, all websocket messages are sent as an event containing the same name as the top level endpoint, in all lowercase (For example, anything under Messages will be sent as a socket event named "messages"). The data sent to the event follows the following format, designed to be used in conjunction with nedb:
@@ -131,27 +131,16 @@ This endpoint supports sockets, uses the "calendar" event, and returns data in t
                 "allDay": false, // True if this is an all day event
                 "start": "2018-05-16T04:00:00-04:00", // ISO string of the event start time
                 "end": "2018-05-16T08:00:00-04:00", // ISO string of the event end time
+				"verify": "Valid", // Verification status: Manual (event is not recognized by the system as a trigger), Valid (properly formatted event recognized by the system), Check (Event is valid but may require attention), Invalid (event will not work)
+				"verify_message": "", // Additional information regarding the verification status
+				"verify_titleHTML": "<span style=\"background: rgba(0, 0, 255, 0.2);\">Genre</span>: <span style=\"background: rgba(0, 255, 0, 0.2);\">New Rock</span>", // HTML formatted title for the calendar/verify page.
                 "color": "#5484ed", // Hexadecimal color representing this event
-                "push": false // Internal use only
             },
             ...
         ]
 ### /calendar/verify [GET /calendar/verify]
-Returns an HTML page verifying the events in the WWSU Calendar for the next week. Checks for event title syntax, proper formatting, existing playlists/rotations, playlist length, and more. Page also uses calendar/verify-data for populating the verification.
+Returns an HTML page verifying the events in the WWSU Calendar for the next week. Checks for event title syntax, proper formatting, existing playlists/rotations, playlist length, and more. Page also uses calendar/get for populating the verification.
 #### Response 200 HTML
-### /calendar/verify-data [GET /calendar/verify-data]
-Get an array of verification statuses for calendar events.
-#### Response 200
-        [
-            {
-				"start": "2018-06-28T04:00:00-04:00", // Event start time ISO string
-				"end": "2018-06-28T08:00:00-04:00", // Event end time ISO string
-				"title": "<span style=\"background: rgba(0, 0, 255, 0.2);\">Genre</span>: <span style=\"background: rgba(255, 0, 0, 0.5);\">Dope Hip Hop</span>", // HTML title; indicates detected prefixes and formatting
-				"type": "Invalid", // Either Valid (works), Check (works but not optimally), Invalid (does not work), or Manual (not detected as a system event).
-				"message": "" // Contains information regarding what should be done for Valid status
-            },
-            ...
-        ]
 ## Directors [/directors]
 The Directors endpoints regard the directors of WWSU Radio.
 ### /directors/get [GET /directors/get]

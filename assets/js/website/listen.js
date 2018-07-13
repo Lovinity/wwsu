@@ -9,6 +9,7 @@ var sendButton = document.getElementById('sendmessage');
 
 // Load variables
 var messageIDs = [];
+var announcementIDs = [];
 var automationpost = null;
 var Meta = {};
 var shouldScroll = false;
@@ -58,7 +59,7 @@ function waitFor(check, callback, count = 0)
         if (count < 1200)
         {
             count++;
-            window.requestAnimationFrame(function() {
+            window.requestAnimationFrame(function () {
                 waitFor(check, callback, count);
             });
         } else {
@@ -158,6 +159,18 @@ io.socket.on('messages', function (data) {
     }
 });
 
+// When an announcement comes through
+io.socket.on('announcements', function (data) {
+    try {
+        if (announcementIDs.indexOf(data.ID) === -1)
+        {
+            addAnnouncement(data);
+        }
+    } catch (e) {
+        console.error(e);
+    }
+});
+
 // On meta changes, process meta
 io.socket.on('discipline', function (data) {
     console.dir(data);
@@ -181,6 +194,7 @@ function doSockets(firsttime = false)
     onlineSocket();
     messagesSocket();
     metaSocket();
+    announcementsSocket();
 }
 
 function onlineSocket()
@@ -232,6 +246,24 @@ function metaSocket()
         } catch (e) {
             console.error(e);
             setTimeout(metaSocket, 10000);
+        }
+    });
+}
+
+function announcementsSocket()
+{
+    io.socket.post('/announcements/get', {type: 'website'}, function serverResponded(body, JWR) {
+        //console.log(body);
+        try {
+            body.forEach(function (announcement) {
+                if (announcementIDs.indexOf(announcement.ID) === -1)
+                {
+                    addAnnouncement(announcement);
+                }
+            });
+        } catch (e) {
+            console.error(e);
+            setTimeout(announcementsSocket, 10000);
         }
     });
 }
@@ -526,3 +558,21 @@ $('#trackrequests').bind('scroll', function () {
     }
 });
 
+function addAnnouncement(announcement)
+{
+    if (moment(Meta.time).isAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.ends)))
+    {
+        announcementIDs.push(announcement.ID);
+        iziToast.show({
+            title: 'Announcement from WWSU',
+            message: announcement.announcement,
+            color: 'red',
+            zindex: 100,
+            layout: 1,
+            closeOnClick: true,
+            close: true,
+            position: 'bottomCenter',
+            timeout: false
+        });
+    }
+}

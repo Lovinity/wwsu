@@ -12,7 +12,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(),
+            defaultsTo: moment().toISOString(true),
             description: `moment() parsable string of a date to get logs.`
         }
     },

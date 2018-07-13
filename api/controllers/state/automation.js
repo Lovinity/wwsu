@@ -15,6 +15,10 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
 
         try {
+            if (Meta.changingState)
+                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+            Meta.changingState = true;
+            
             // Log the request
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off and went to automation.'})
                     .tolerate((err) => {
@@ -76,9 +80,11 @@ module.exports = {
             // Enable Auto DJ
             await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
+            Meta.changingState = false;
             return exits.success();
 
         } catch (e) {
+            Meta.changingState = false;
             return exits.error(e);
         }
 

@@ -36,10 +36,11 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
             // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, and/or it was not specified we are resuming a playlist.
-            if (!Playlists.queuing && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre') || inputs.resume))
+            if (!Meta.changingState && !Playlists.queuing && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre') || inputs.resume))
             {
                 sails.log.verbose(`Processing helper.`);
                 Playlists.queuing = true; // Mark that the playlist is being queued, to avoid app conflicts.
+                Meta.changingState = true;
 
                 // Find the playlist
                 var theplaylist = await Playlists.findOne({name: inputs.name});
@@ -82,6 +83,7 @@ module.exports = {
                                         if (slot <= 0)
                                         {
                                             Playlists.queuing = false;
+                                            Meta.changingState = false;
                                             sails.log.verbose(`Considered playlist as queued. Proceeding.`);
                                             return resolve2();
                                         } else {
@@ -174,7 +176,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                     await sails.helpers.rest.removeMusic(true); // Leave requests in the queue for standard playlists.
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
-                    await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString()});
+                    await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'playlist - ' + theplaylist.name, event: 'A playlist was scheduled to start.' + "\n" + 'Playlist: ' + inputs.name})
                             .tolerate((err) => {
                                 sails.log.error(err);
@@ -185,7 +187,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                     await sails.helpers.rest.removeMusic(); // Do not leave requests in the queue for prerecords; the prerecord should be beginning ASAP.
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
-                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(), dj: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
+                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), dj: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: theplaylist.name, event: 'A prerecorded show was scheduled to start.' + "\n" + 'Show: ' + inputs.name})
                             .tolerate((err) => {
                                 sails.log.error(err);
@@ -199,6 +201,7 @@ module.exports = {
                 return exits.success();
             }
         } catch (e) {
+            Meta.changingState = false;
             Playlists.queuing = false;
             return exits.error(e);
         }

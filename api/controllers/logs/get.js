@@ -18,7 +18,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(),
+            defaultsTo: moment().toISOString(true),
             description: `moment() parsable string of a date to get logs.`
         }
     },
@@ -33,7 +33,7 @@ module.exports = {
             var end = moment(start).add(1, 'days');
 
             // Get records
-            var records = await Logs.find({createdAt: {'>=': start.toISOString(), '<': end.toISOString()}, logsubtype: inputs.subtype}).sort('createdAt ASC');
+            var records = await Logs.find({createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}, logsubtype: inputs.subtype}).sort('createdAt ASC');
 
             sails.log.verbose(`Retrieved Logs records: ${records.length}`);
             sails.log.silly(records);

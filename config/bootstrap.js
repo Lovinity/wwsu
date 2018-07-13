@@ -64,6 +64,24 @@ module.exports.bootstrap = async function (done) {
                 return done(err);
             });
 
+    // Generate recipients based off of messages from the last hour... website only
+    sails.log.verbose(`BOOTSTRAP: Adding recipients from messages sent within the last hour into database.`);
+    var records = await Messages.find({status: 'active', from: {'startsWith': 'website-'}, createdAt: {'>': moment().subtract(1, 'hours').toDate()}})
+            .tolerate((err) => {
+            });
+    if (records && records.length > 0)
+    {
+        var insertRecords = [];
+        records.forEach(function (record) {
+            insertRecords.push({host: record.from, group: 'website', label: record.from_friendly, status: 0});
+        });
+
+        await Recipients.createEach(insertRecords)
+                .tolerate((err) => {
+                    return done(err);
+                });
+    }
+
     // Load subcats IDs for each consigured categories
     sails.log.verbose(`BOOTSTRAP: loading subcats into configuration.`);
     for (var config in sails.config.custom.categories)
@@ -124,13 +142,13 @@ module.exports.bootstrap = async function (done) {
             cats[category.ID] = category.name;
         });
     }
-    
+
     console.dir(cats);
 
     var subcategories = await Subcategory.find({parentid: catIDs})
             .tolerate((err) => {
             });
-    
+
 
     if (subcategories.length > 0)
     {

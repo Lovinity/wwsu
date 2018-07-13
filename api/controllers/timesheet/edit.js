@@ -70,7 +70,7 @@ module.exports = {
                 return exits.forbidden();
 
             // Update the timesheet record
-            await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(), time_out: moment(inputs.time_out).toISOString, approved: inputs.approved});
+            await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(true), time_out: moment(inputs.time_out).toISOString(true), approved: inputs.approved});
 
             // Force a re-load of all directors to update any possible changes in presence
             await Directors.updateDirectors(true);

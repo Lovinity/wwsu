@@ -71,7 +71,7 @@ module.exports = {
             }
 
             // Get or create the recipient entry
-            var recipient = await Recipients.findOrCreate({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString()});
+            var recipient = await Recipients.findOrCreate({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString(true)});
 
             sails.log.silly(`Recipients record: ${recipient}`);
 
@@ -96,7 +96,7 @@ module.exports = {
             if (updateIt)
             {
                 sails.log.verbose(`Updating recipient as it has changed.`);
-                await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, status: status, time: moment().toISOString()}).fetch();
+                await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, status: status, time: moment().toISOString(true)}).fetch();
             }
 
             // If the recipient group is computers, update Status

@@ -12,7 +12,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(),
+            defaultsTo: moment().toISOString(true),
             description: `moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.`
         }
     },
@@ -28,8 +28,8 @@ module.exports = {
 
             // Get timesheet records
             var records = await Timesheet.find({or: [
-                    {time_in: {'>=': start.toISOString(), '<': end.toISOString()}},
-                    {time_out: {'>=': start.toISOString(), '<': end.toISOString()}}
+                    {time_in: {'>=': start.toISOString(true), '<': end.toISOString(true)}},
+                    {time_out: {'>=': start.toISOString(true), '<': end.toISOString(true)}}
                 ]}).sort('time_in ASC');
             sails.log.verbose(`Returned Timesheet records: ${records.length}`);
             sails.log.silly(records);

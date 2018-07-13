@@ -38,7 +38,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(),
+            defaultsTo: moment().toISOString(true),
             description: `moment() parsable string of when the alert starts. Recommended ISO string.`
         },
         expires: {
@@ -46,7 +46,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().add(15, 'minutes').toISOString(),
+            defaultsTo: moment().add(15, 'minutes').toISOString(true),
             description: `moment() parsable string of when the alert expires. Recommended ISO string.`
         },
         color: {

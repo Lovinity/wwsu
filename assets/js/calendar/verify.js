@@ -13,7 +13,7 @@ var tableData = document.getElementById('results-table');
 
 function verifyEvents() {
     // Get events
-    $.ajax('/calendar/verify-data', {})
+    $.ajax('/calendar/get', {})
             .then(
                     function success(resHTML) {
                         for (var i = tableData.rows.length; i > 0; i--)
@@ -31,22 +31,36 @@ function verifyEvents() {
                         cell3.innerHTML = 'Status';
                         var cell4 = newRow.insertCell(3);
                         cell4.innerHTML = 'Information';
-                        resHTML.forEach(function (dodo) {
+
+                        // Define a comparison function that will order calendar events by start time when we run the iteration
+                        var compare = function (a, b) {
+                            try {
+                                if (moment(a.start).valueOf() < moment(b.start).valueOf())
+                                    return -1;
+                                if (moment(a.start).valueOf() > moment(b.start).valueOf())
+                                    return 1;
+                                return 0;
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        };
+
+                        resHTML.sort(compare).forEach(function (dodo) {
                             var newRow = tableData.insertRow(tableData.rows.length);
                             var cell = newRow.insertCell(0);
                             cell.innerHTML = `${moment(dodo.start).format("LLLL")} - ${moment(dodo.end).format("LLLL")}`;
                             var cell2 = newRow.insertCell(1);
-                            cell2.innerHTML = dodo.title;
+                            cell2.innerHTML = dodo.verify_titleHTML;
                             var cell3 = newRow.insertCell(2);
                             var cell4 = newRow.insertCell(3);
-                            cell4.innerHTML = dodo.message;
-                            if (dodo.type === 'Valid')
+                            cell4.innerHTML = dodo.verify_message;
+                            if (dodo.verify === 'Valid')
                             {
                                 cell3.innerHTML = `<span class="badge badge-success">Valid</span>`;
-                            } else if (dodo.type === 'Invalid')
+                            } else if (dodo.verify === 'Invalid')
                             {
                                 cell3.innerHTML = `<span class="badge badge-danger">Invalid</span>`;
-                            } else if (dodo.type === 'Check')
+                            } else if (dodo.verify === 'Check')
                             {
                                 cell3.innerHTML = `<span class="badge badge-warning">Check</span>`;
                             } else {

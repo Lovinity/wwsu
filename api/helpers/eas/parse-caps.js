@@ -54,7 +54,7 @@ module.exports = {
                                 } else {
                                     return resolve2(false);
                                 }
-                                await sails.helpers.eas.addAlert(alert['id'], 'NWS', inputs.county, alert['cap:event'], alert['cap:severity'], moment(alert['cap:effective']).toISOString(), moment(alert['cap:expires']).toISOString(), color);
+                                await sails.helpers.eas.addAlert(alert['id'], 'NWS', inputs.county, alert['cap:event'], alert['cap:severity'], moment(alert['cap:effective']).toISOString(true), moment(alert['cap:expires']).toISOString(true), color);
                                 Eas.activeCAPS.push(alert['id']);
                             } else {
                                 sails.log.verbose(`Skipped ${index} because it is expired.`);

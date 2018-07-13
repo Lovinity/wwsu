@@ -45,7 +45,7 @@ module.exports = {
                 sails.log.silly(`Song: ${record2}`);
 
                 // Create the request
-                await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(), played: 0});
+                await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(true), played: 0});
                 Requests.pending.push(inputs.ID);
 
                 // Finish it

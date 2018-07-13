@@ -49,6 +49,10 @@ module.exports = {
             if (!Meta['A'].state.startsWith("sports") && !Meta['A'].state.startsWith("automation_"))
                 return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`));
 
+            if (Meta.changingState)
+                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+            Meta.changingState = true;
+
             // Filter profanity
             if (inputs.topic !== '')
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
@@ -98,9 +102,11 @@ module.exports = {
                             sails.log.error(err);
                         });
             }
-
+            
+            Meta.changingState = false;
             return exits.success();
         } catch (e) {
+            Meta.changingState = false;
             return exits.error(e);
         }
 

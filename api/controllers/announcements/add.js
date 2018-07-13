@@ -31,7 +31,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(),
+            defaultsTo: moment().toISOString(true),
             description: `moment() parsable string of when the announcement starts. Defaults to now. Recommended ISO string.`
         },
 
@@ -40,7 +40,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment({year: 3000}).toISOString(),
+            defaultsTo: moment({year: 3000}).toISOString(true),
             description: `moment() parsable string of when the announcement expires. Defaults to the year 3000. Recommended ISO string.`
         }
 
@@ -52,7 +52,7 @@ module.exports = {
 
         try {
             
-            await Announcements.create({type: inputs.type, level: inputs.level, announcement: inputs.announcement, starts: moment(inputs.starts).toISOString(), expires: moment(inputs.expires).toISOString()}).fetch();
+            await Announcements.create({type: inputs.type, level: inputs.level, announcement: inputs.announcement, starts: moment(inputs.starts).toISOString(true), expires: moment(inputs.expires).toISOString(true)}).fetch();
             
             return exits.success();
         } catch (e) {

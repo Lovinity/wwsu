@@ -255,7 +255,7 @@ module.exports = {
                     return new Promise(async (resolve2, reject2) => {
                         var criteria = {name: status.name, status: status.status, data: status.data || '', label: status.label || status.name};
                         if (status.status === 5)
-                            criteria.time = moment().toISOString();
+                            criteria.time = moment().toISOString(true);
 
                         // Find or create the status record
 

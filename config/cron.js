@@ -9,17 +9,17 @@ module.exports.cron = {
             return new Promise(async (resolve, reject) => {
                 sails.log.debug(`CRON checks triggered.`);
 
-                var change = {queueLength: 0, percent: 0, time: moment().toISOString()}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
+                var change = {queueLength: 0, percent: 0, time: moment().toISOString(true)}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
                 //
                 // Skip all checks and use default meta template if sails.config.custom.lofi = true
                 if (sails.config.custom.lofi)
                 {
                     try {
                         change = Meta.template;
-                        change.time = moment().toISOString();
+                        change.time = moment().toISOString(true);
                         await Meta.changeMeta(change);
                     } catch (e) {
-                        Meta.changeMeta({time: moment().toISOString()});
+                        Meta.changeMeta({time: moment().toISOString(true)});
                         sails.log.error(e);
                         return resolve(e);
                     }
@@ -34,15 +34,15 @@ module.exports.cron = {
                         var meta = await Meta.find().limit(1)
                                 .tolerate((err) => {
                                     sails.log.error(err);
-                                    Meta.changeMeta({time: moment().toISOString()});
+                                    Meta.changeMeta({time: moment().toISOString(true)});
                                     return resolve(err);
                                 });
                         meta = meta[0];
-                        meta.time = moment().toISOString();
+                        meta.time = moment().toISOString(true);
                         sails.log.silly(meta);
                         await Meta.changeMeta(meta);
                     } catch (e) {
-                        Meta.changeMeta({time: moment().toISOString()});
+                        Meta.changeMeta({time: moment().toISOString(true)});
                         return resolve(e);
                     }
                 }
@@ -51,12 +51,11 @@ module.exports.cron = {
                 try {
                     var queue = await sails.helpers.rest.getQueue();
 
-                    // Remove duplicate tracks. Also, calculate length of the queue
-                    async function queueCheck() {
+                    // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Also, calculate length of the queue
                         try {
                             sails.log.silly(`queueCheck executed.`);
                             var theTracks = [];
-                            return sails.helpers.asyncForEach(queue, function (track, index) {
+                            await sails.helpers.asyncForEach(queue, function (track, index) {
                                 return new Promise(async (resolve2, reject2) => {
                                     var title = `${track.Artist} - ${track.Title}`;
 
@@ -70,7 +69,6 @@ module.exports.cron = {
                                         theTracks = [];
                                         queue = await sails.helpers.rest.getQueue();
                                         change.queueLength = 0;
-                                        await queueCheck();
                                         return resolve2(true);
                                     } else {
                                         theTracks.push(title);
@@ -81,11 +79,9 @@ module.exports.cron = {
                             });
                         } catch (e) {
                             sails.log.error(e);
-                            Meta.changeMeta({time: moment().toISOString()});
+                            Meta.changeMeta({time: moment().toISOString(true)});
                             return null;
                         }
-                    }
-                    await queueCheck();
                     sails.log.silly(`Proceeding after queueCheck.`);
 
                     // If the currently playing track was a request, mark as played
@@ -104,7 +100,7 @@ module.exports.cron = {
                 } catch (e) {
                     await sails.helpers.error.count('queueFail');
                     sails.log.error(e);
-                    Meta.changeMeta({time: moment().toISOString()});
+                    Meta.changeMeta({time: moment().toISOString(true)});
                     return resolve(e);
                 }
 
@@ -1319,7 +1315,7 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON clockOutDirectors called`);
             try {
-                await Timesheet.update({time_out: null}, {time_out: moment().toISOString(), approved: false})
+                await Timesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false})
                         .tolerate((err) => {
                         });
                 // Force reload all directors based on timesheets
