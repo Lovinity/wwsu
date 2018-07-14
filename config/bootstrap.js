@@ -66,14 +66,14 @@ module.exports.bootstrap = async function (done) {
 
     // Generate recipients based off of messages from the last hour... website only
     sails.log.verbose(`BOOTSTRAP: Adding recipients from messages sent within the last hour into database.`);
-    var records = await Messages.find({status: 'active', from: {'startsWith': 'website-'}, createdAt: {'>': moment().subtract(1, 'hours').toDate()}})
+    var records = await Messages.find({status: 'active', from: {"startsWith": 'website-'}, createdAt: {">": moment().subtract(1, 'hours').toDate()}}).sort('createdAt DESC')
             .tolerate((err) => {
             });
     if (records && records.length > 0)
     {
         var insertRecords = [];
         records.forEach(function (record) {
-            insertRecords.push({host: record.from, group: 'website', label: record.from_friendly, status: 0});
+            insertRecords.push({host: record.from, group: 'website', label: record.from_friendly, status: 0, time: record.createdAt});
         });
 
         await Recipients.createEach(insertRecords)

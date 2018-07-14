@@ -188,7 +188,7 @@ module.exports.cron = {
                                     var name = Playlists.active.tracks[i];
                                     if (name == autoTrack.ID) {
                                         // Waiting for the playlist to begin, and it has begun? Switch states.
-                                        if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing)
+                                        if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && !Meta.changingState)
                                         {
                                             await Meta.changeMeta({state: 'live_prerecord'});
                                         }
@@ -211,7 +211,7 @@ module.exports.cron = {
 
                     try {
                         // Finished the playlist? Go back to automation.
-                        if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing)
+                        if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && !Meta.changingState)
                         {
                             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Playlist has finished and we went to automation.'})
                                     .tolerate((err) => {
@@ -1315,8 +1315,8 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON recipientsCheck called.`);
             try {
-                    var searchto = moment().subtract(1, 'hours').toDate(); // Get recipients updated an hour or more ago
-                    await Recipients.destroy({host: {'!=': ['website']}, status: 0, time: {'<=': searchto}}).fetch();
+                    var searchto = moment().subtract(4, 'hours').toDate(); // Get recipients updated an hour or more ago
+                    await Recipients.destroy({host: {"!=": ["website"]}, status: 0, time: {"<=": searchto}}).fetch();
             } catch (e) {
                 sails.log.error(e);
                 return null;

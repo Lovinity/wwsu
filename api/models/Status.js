@@ -101,12 +101,14 @@ module.exports = {
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
+                        Meta.changingState = true;
                         sails.sockets.broadcast('system-error', 'system-error', true);
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                         await sails.helpers.rest.cmd('StopPlayer', 1);
                         await sails.helpers.rest.changeRadioDj();
                         await sails.helpers.error.post();
+                        Meta.changingState = false;
                         return resolve(0);
                     } catch (e) {
                         return reject(e);
@@ -129,6 +131,7 @@ module.exports = {
                             sails.log.verbose(`No recent error; attempting standard recovery.`);
                             await sails.helpers.error.post();
                         } else {
+                            Meta.changingState = true;
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
                             sails.sockets.broadcast('system-error', 'system-error', true);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
@@ -137,11 +140,12 @@ module.exports = {
                             await sails.helpers.rest.changeRadioDj();
                             await sails.helpers.rest.cmd('ClearPlaylist', 1);
                             await sails.helpers.error.post();
+                            Meta.changingState = false;
                         }
+                        return resolve(0);
                     } catch (e) {
                         return reject(e);
                     }
-                    return resolve(0);
                 });
             }
         },
@@ -165,6 +169,7 @@ module.exports = {
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                         } else {
+                            Meta.changingState = true;
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
                             sails.sockets.broadcast('system-error', 'system-error', true);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
@@ -175,6 +180,7 @@ module.exports = {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
+                            Meta.changingState = false;
                         }
                     } catch (e) {
                         return reject(e);
@@ -227,14 +233,14 @@ module.exports = {
                 return new Promise(async (resolve, reject) => {
                     // FIX CONDITION THEN RE-ENABLE
                     /*
-                    try {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-                    } catch (e) {
-                        return reject(e);
-                    }
-                    return resolve(1);
-                    */
-                   return resolve(0);
+                     try {
+                     await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
+                     } catch (e) {
+                     return reject(e);
+                     }
+                     return resolve(1);
+                     */
+                    return resolve(0);
                 });
             }
         }

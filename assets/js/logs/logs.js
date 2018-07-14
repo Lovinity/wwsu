@@ -52,7 +52,7 @@ function filterLogs(subtype = null) {
                             resHTML.forEach(function (logtype) {
                                 var newRow = tableData.insertRow(tableData.rows.length);
                                 var cell = newRow.insertCell(0);
-                                cell.innerHTML = `<a href="javascript:filterLogs(\`${logtype}\`)" title="Show the log" role="button" class="btn btn-primary">${logtype}</a>`;
+                                cell.innerHTML = `<a href="javascript:filterLogs(\`${logtype.logsubtype}\`)" title="Show the log" role="button" class="btn btn-primary">${logtype.logsubtype}</a>`;
                             });
                         },
                         function fail(data, status) {

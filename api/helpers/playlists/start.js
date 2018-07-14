@@ -46,7 +46,10 @@ module.exports = {
                 var theplaylist = await Playlists.findOne({name: inputs.name});
                 sails.log.silly(`Playlist: ${theplaylist}`);
                 if (!theplaylist)
+                {
+                    Meta.changingState = false;
                     throw new Error('Playlist not found!');
+                }
                 Playlists.active.name = theplaylist.name;
                 Playlists.active.ID = theplaylist.ID;
                 if (!inputs.resume)
@@ -63,7 +66,10 @@ module.exports = {
                             sails.log.verbose(`Playlists_list records retrieved: ${playlistTracks.length}`);
                             sails.log.silly(playlistTracks);
                             if (!playlistTracks)
+                            {
+                                Meta.changingState = false;
                                 throw new Error(`No playlist tracks were returned.`);
+                            }
                             Playlists.active.tracks = [];
                             playlistTracks.forEach(function (playlistTrack) {
                                 Playlists.active.tracks.push(playlistTrack.sID);
@@ -195,6 +201,7 @@ module.exports = {
                     await loadPlaylist();
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                 }
+                Meta.changingState = false;
                 return exits.success();
             } else {
                 sails.log.verbose('Helper SKIPPED.');

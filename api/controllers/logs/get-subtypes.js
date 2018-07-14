@@ -27,12 +27,12 @@ module.exports = {
             var end = moment(start).add(1, 'days');
 
             // Get DISTINCT records
-            var records = await Logs.getDatastore().sendNativeQuery(`SELECT DISTINCT logsubtype FROM logs WHERE (createdAt BETWEEN ? AND ?) AND logsubtype IS NOT NULL AND logsubtype NOT LIKE ''`, [start.toISOString(), end.toISOString()]);
+            var records = await Logs.getDatastore().sendNativeQuery(`SELECT DISTINCT logsubtype FROM logs WHERE (createdAt BETWEEN "${start.toISOString()}" AND "${end.toISOString()}") AND logsubtype IS NOT NULL AND logsubtype NOT LIKE ''`, []);
 
             sails.log.verbose(`Special records returned: ${records.length}`);
             sails.log.silly(records);
 
-            return exits.success(records);
+            return exits.success(records.rows);
 
         } catch (e) {
             return exits.error(e);

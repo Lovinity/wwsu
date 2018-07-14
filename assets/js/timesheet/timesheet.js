@@ -118,20 +118,20 @@ function filterDate() {
                         timesheets.forEach(function (record, index) {
                             var newRow = document.getElementById(`director-${record.name.replace(/\W/g, '')}`);
                             // If there is not a row for this director yet, create one
-                            if (!newRow)
+                            if (!newRow || newRow === null)
                             {
                                 var newRow = tableRef.insertRow(tableRef.rows.length);
                                 newRow.classList.add(`table-info`);
                                 hours[record.name] = moment.duration();
                                 newRow.setAttribute("id", `director-${record.name.replace(/\W/g, '')}`);
                                 // Create applicable cells
-                                for (var i; i < 16; i++)
+                                for (var i = 0; i < 16; i++)
                                 {
                                     var cell = newRow.insertCell(i);
                                     cell.setAttribute('id', `cell${i}-${record.name.replace(/\W/g, '')}`);
                                     // Cell 0 should be director name
                                     if (i === 0)
-                                        cell.innerHTML = index;
+                                        cell.innerHTML = record.name;
                                 }
                             }
 
@@ -161,13 +161,13 @@ function filterDate() {
 
                             // For certain clock-ins and clock-outs, we may need to display the date as well, not just the time.
                             // If clock-in happened last week, show its date
-                            if (moment(clockin).isBefore(moment(clocknow)))
+                            if (moment(clockin).isBefore(moment(clockout).startOf('day')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
                                 clockday = moment(clockout).format('d');
                             }
                             // If clock-out happened next week, show its date
-                            if (clockout !== null && moment(clockout).isAfter(moment(clocknext)))
+                            if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf('day').add(1, 'days')))
                             {
                                 outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
                                 clockday = moment(clockin).format('d');

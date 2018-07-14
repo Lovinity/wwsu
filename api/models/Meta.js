@@ -138,7 +138,10 @@ module.exports = {
                     }
                 }
             }
-            await Meta.update({ID: 1}).set(db)
+            
+            var criteria = _.cloneDeep(db);
+            
+            await Meta.update({ID: 1}, criteria)
                     .tolerate((err) => {
                         return reject(err);
                     });
