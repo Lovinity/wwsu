@@ -56,7 +56,7 @@ function waitFor(check, callback, count = 0)
 {
     if (!check())
     {
-        if (count < 1200)
+        if (count < 10000)
         {
             count++;
             window.requestAnimationFrame(function () {
@@ -86,106 +86,113 @@ function closeModal() {
     $('#trackModal').modal('hide');
 }
 
-// On socket connection, notify the user and do socket tasks.
-io.socket.on('connect', function () {
-    iziToast.show({
-        title: 'Connected to WWSU',
-        message: 'You will now receive metadata, can send or receive messages, and can place track requests.',
-        color: 'green',
-        zindex: 100,
-        layout: 2,
-        closeOnClick: true,
-        position: 'bottomCenter',
-        timeout: 5000
-    });
-    doSockets(firstTime);
-});
-
-// On socket disconnect, notify the user.
-io.socket.on('disconnect', function () {
-    try {
-        console.log('Lost connection');
-        nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
+// Wait for connection by io, then create event handlers and do the sockets
+waitFor(function () {
+    return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected());
+}, function () {
+    // On socket connection, notify the user and do socket tasks.
+    io.socket.on('connect', function () {
         iziToast.show({
-            title: 'Lost connection to WWSU',
-            message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
-            color: 'red',
+            title: 'Connected to WWSU',
+            message: 'You will now receive metadata, can send or receive messages, and can place track requests.',
+            color: 'green',
             zindex: 100,
             layout: 2,
             closeOnClick: true,
             position: 'bottomCenter',
-            timeout: 10000
+            timeout: 5000
         });
-        io.socket._raw.io._reconnection = true;
-        io.socket._raw.io._reconnectionAttempts = Infinity;
-    } catch (e) {
-    }
-});
+        doSockets(firstTime);
+    });
+
+    doSockets(firstTime);
+
+    // On socket disconnect, notify the user.
+    io.socket.on('disconnect', function () {
+        try {
+            console.log('Lost connection');
+            nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
+            iziToast.show({
+                title: 'Lost connection to WWSU',
+                message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
+                color: 'red',
+                zindex: 100,
+                layout: 2,
+                closeOnClick: true,
+                position: 'bottomCenter',
+                timeout: 10000
+            });
+            io.socket._raw.io._reconnection = true;
+            io.socket._raw.io._reconnectionAttempts = Infinity;
+        } catch (e) {
+        }
+    });
 
 // On meta changes, process meta
-io.socket.on('meta', function (data) {
-    for (var key in data)
-    {
-        if (data.hasOwnProperty(key))
-        {
-            Meta[key] = data[key];
-        }
-    }
-    doMeta(data);
-});
-
-// When a new message is received, process it.
-io.socket.on('messages', function (data) {
-    try {
+    io.socket.on('meta', function (data) {
         for (var key in data)
         {
             if (data.hasOwnProperty(key))
             {
-                switch (key)
-                {
-                    case 'insert':
-                        addMessage(data[key], firstTime);
-                        break;
-                    case 'remove':
-                        var temp = document.getElementById(`msg-${data[key]}`);
-                        if (temp !== null)
-                            temp.innerHTML = 'XXX This message was deleted XXX';
-                        break;
-                }
+                Meta[key] = data[key];
             }
         }
-    } catch (e) {
-        console.error(e);
-    }
-});
+        doMeta(data);
+    });
+
+// When a new message is received, process it.
+    io.socket.on('messages', function (data) {
+        try {
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    switch (key)
+                    {
+                        case 'insert':
+                            addMessage(data[key], firstTime);
+                            break;
+                        case 'remove':
+                            var temp = document.getElementById(`msg-${data[key]}`);
+                            if (temp !== null)
+                                temp.innerHTML = 'XXX This message was deleted XXX';
+                            break;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    });
 
 // When an announcement comes through
-io.socket.on('announcements', function (data) {
-    try {
-        if (announcementIDs.indexOf(data.ID) === -1)
-        {
-            addAnnouncement(data);
+    io.socket.on('announcements', function (data) {
+        try {
+            if (announcementIDs.indexOf(data.ID) === -1)
+            {
+                addAnnouncement(data);
+            }
+        } catch (e) {
+            console.error(e);
         }
-    } catch (e) {
-        console.error(e);
-    }
-});
+    });
 
 // On meta changes, process meta
-io.socket.on('discipline', function (data) {
-    console.dir(data);
-    iziToast.show({
-        title: `Notice`,
-        message: data.discipline,
-        color: 'red',
-        zindex: 1000,
-        layout: 2,
-        closeOnClick: false,
-        close: false,
-        overlay: true,
-        position: 'center',
-        timeout: false,
-        balloon: false
+    io.socket.on('discipline', function (data) {
+        console.dir(data);
+        iziToast.show({
+            title: `Notice`,
+            message: data.discipline,
+            color: 'red',
+            zindex: 1000,
+            layout: 2,
+            closeOnClick: false,
+            close: false,
+            overlay: true,
+            position: 'center',
+            timeout: false,
+            balloon: false
+        });
     });
 });
 

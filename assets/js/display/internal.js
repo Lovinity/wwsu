@@ -156,6 +156,178 @@ var restart = setTimeout(function () {
     window.location.reload(true);
 }, 15000);
 
+function waitFor(check, callback, count = 0)
+{
+    if (!check())
+    {
+        if (count < 10000)
+        {
+            count++;
+            window.requestAnimationFrame(function () {
+                waitFor(check, callback, count);
+            });
+        } else {
+        }
+    } else {
+        callback();
+}
+}
+
+waitFor(function () {
+    return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected());
+}, function () {
+    // When a director is passed as an event, process it.
+    io.socket.on('directors', function (data) {
+        for (var key in data)
+        {
+            if (data.hasOwnProperty(key))
+            {
+                switch (key)
+                {
+                    case 'insert':
+                        Directors.insert(data[key]);
+                        break;
+                    case 'update':
+                        Directors({ID: data[key].ID}).update(data[key]);
+                        break;
+                    case 'remove':
+                        Directors({ID: data[key]}).remove();
+                        break;
+                }
+            }
+        }
+        processDirectors();
+    });
+
+// When a socket connection is established
+    io.socket.on('connect', function () {
+        onlineSocket();
+        metaSocket();
+        taskSocket();
+        directorSocket();
+        statusSocket();
+        // Remove the lost connection overlay
+        if (disconnected)
+        {
+            //noConnection.style.display = "none";
+            disconnected = false;
+            clearTimeout(restart);
+            clearTimeout(slidetimer);
+            doSlide(true);
+        }
+    });
+
+    onlineSocket();
+    metaSocket();
+    taskSocket();
+    directorSocket();
+    statusSocket();
+    if (disconnected)
+    {
+        //noConnection.style.display = "none";
+        disconnected = false;
+        clearTimeout(restart);
+        clearTimeout(slidetimer);
+        doSlide(true);
+    }
+
+// When a socket connection is lost
+    io.socket.on('disconnect', function () {
+        console.log('Lost connection');
+        try {
+            io.socket._raw.io._reconnection = true;
+            io.socket._raw.io._reconnectionAttempts = Infinity;
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred trying to make socket reconnect indefinitely.'
+            });
+            console.error(e);
+        }
+        // Show the lost connection overlay
+        if (!disconnected)
+        {
+            //noConnection.style.display = "inline";
+            disconnected = true;
+            processStatus();
+        }
+    });
+
+// Display sign reload event
+    io.socket.on('display-refresh', function (data) {
+        window.location.reload(true);
+    });
+
+// Update meta information when meta is provided
+    io.socket.on('meta', function (data) {
+        try {
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    Meta[key] = data[key];
+
+                    // Do a status update if a state change was returned; this could impact power saving mode
+                    if (key === 'state')
+                        processStatus();
+                }
+            }
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred on meta event.'
+            });
+            console.error(e);
+        }
+    });
+
+// Update statuses when status events are passed
+    io.socket.on('status', function (data) {
+        for (var key in data)
+        {
+            if (data.hasOwnProperty(key))
+            {
+                switch (key)
+                {
+                    case 'insert':
+                        Status.insert(data[key]);
+                        break;
+                    case 'update':
+                        Status({ID: data[key].ID}).update(data[key]);
+                        break;
+                    case 'remove':
+                        Status({ID: data[key]}).remove();
+                        break;
+                }
+            }
+        }
+        processStatus();
+    });
+
+// Update tasks when task events are passed
+    io.socket.on('tasks', function (data) {
+        for (var key in data)
+        {
+            if (data.hasOwnProperty(key))
+            {
+                switch (key)
+                {
+                    case 'insert':
+                        Tasks.insert(data[key]);
+                        break;
+                    case 'update':
+                        Tasks({ID: data[key].ID}).update(data[key]);
+                        break;
+                    case 'remove':
+                        Tasks({ID: data[key]}).remove();
+                        break;
+                }
+            }
+        }
+        processTasks();
+    });
+});
+
 // Define data-specific functions
 // Run through operations of each WWSU status
 function processStatus()
@@ -503,142 +675,7 @@ function processTasks()
     }
 }
 
-// When a director is passed as an event, process it.
-io.socket.on('directors', function (data) {
-    for (var key in data)
-    {
-        if (data.hasOwnProperty(key))
-        {
-            switch (key)
-            {
-                case 'insert':
-                    Directors.insert(data[key]);
-                    break;
-                case 'update':
-                    Directors({ID: data[key].ID}).update(data[key]);
-                    break;
-                case 'remove':
-                    Directors({ID: data[key]}).remove();
-                    break;
-            }
-        }
-    }
-    processDirectors();
-});
 
-// When a socket connection is established
-io.socket.on('connect', function () {
-    onlineSocket();
-    metaSocket();
-    taskSocket();
-    directorSocket();
-    statusSocket();
-    // Remove the lost connection overlay
-    if (disconnected)
-    {
-        //noConnection.style.display = "none";
-        disconnected = false;
-        clearTimeout(restart);
-        clearTimeout(slidetimer);
-        doSlide(true);
-    }
-});
-
-// When a socket connection is lost
-io.socket.on('disconnect', function () {
-    console.log('Lost connection');
-    try {
-        io.socket._raw.io._reconnection = true;
-        io.socket._raw.io._reconnectionAttempts = Infinity;
-    } catch (e) {
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred trying to make socket reconnect indefinitely.'
-        });
-        console.error(e);
-    }
-    // Show the lost connection overlay
-    if (!disconnected)
-    {
-        //noConnection.style.display = "inline";
-        disconnected = true;
-        processStatus();
-    }
-});
-
-// Display sign reload event
-io.socket.on('display-refresh', function (data) {
-    window.location.reload(true);
-});
-
-// Update meta information when meta is provided
-io.socket.on('meta', function (data) {
-    try {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                Meta[key] = data[key];
-
-                // Do a status update if a state change was returned; this could impact power saving mode
-                if (key === 'state')
-                    processStatus();
-            }
-        }
-    } catch (e) {
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred on meta event.'
-        });
-        console.error(e);
-    }
-});
-
-// Update statuses when status events are passed
-io.socket.on('status', function (data) {
-    for (var key in data)
-    {
-        if (data.hasOwnProperty(key))
-        {
-            switch (key)
-            {
-                case 'insert':
-                    Status.insert(data[key]);
-                    break;
-                case 'update':
-                    Status({ID: data[key].ID}).update(data[key]);
-                    break;
-                case 'remove':
-                    Status({ID: data[key]}).remove();
-                    break;
-            }
-        }
-    }
-    processStatus();
-});
-
-// Update tasks when task events are passed
-io.socket.on('tasks', function (data) {
-    for (var key in data)
-    {
-        if (data.hasOwnProperty(key))
-        {
-            switch (key)
-            {
-                case 'insert':
-                    Tasks.insert(data[key]);
-                    break;
-                case 'update':
-                    Tasks({ID: data[key].ID}).update(data[key]);
-                    break;
-                case 'remove':
-                    Tasks({ID: data[key]}).remove();
-                    break;
-            }
-        }
-    }
-    processTasks();
-});
 
 function onlineSocket()
 {
@@ -764,6 +801,7 @@ function doSlide(same = false)
                 if (slide > highestslide)
                 {
                     slide = 1;
+                    /*
                     if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
                     {
                         slide = 0;
@@ -771,6 +809,7 @@ function doSlide(same = false)
                         if (restarted)
                             console.log(`Slide issue. Triggering marquee screensaver.`);
                     }
+                    */
                     restarted = true;
                 }
 

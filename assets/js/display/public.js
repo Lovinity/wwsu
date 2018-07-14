@@ -429,61 +429,94 @@ function processEas(data, replace = false)
 }
 }
 
-// When new Meta is received, update it in our memory and then run the process function.
-io.socket.on('meta', function (data) {
-    try {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                Meta[key] = data[key];
-            }
-        }
-        processNowPlaying(data);
-    } catch (e) {
-        console.error(e);
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred during the meta event.'
-        });
-    }
-});
-
-// On new calendar data, update our calendar memory and run the process function.
-io.socket.on('calendar', function (data) {
-    processCalendar(data);
-});
-
-// On new directors data, update our directors memory and run the process function.
-io.socket.on('directors', function (data) {
-    processDirectors(data);
-});
-
-// on messages, display message if event is an insert
-io.socket.on('messages', function (data) {
-    for (var key in data)
+function waitFor(check, callback, count = 0)
+{
+    if (!check())
     {
-        if (data.hasOwnProperty(key) && key === 'insert')
+        if (count < 10000)
         {
+            count++;
+            window.requestAnimationFrame(function () {
+                waitFor(check, callback, count);
+            });
+        } else {
+        }
+    } else {
+        callback();
+}
+}
+
+waitFor(function () {
+    return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected());
+}, function () {
+    // When new Meta is received, update it in our memory and then run the process function.
+    io.socket.on('meta', function (data) {
+        try {
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    Meta[key] = data[key];
+                }
+            }
+            processNowPlaying(data);
+        } catch (e) {
+            console.error(e);
             iziToast.show({
-                title: 'DJ says',
-                message: data[key].message,
-                timeout: 60000,
-                backgroundColor: '#FFF59D',
-                color: '#FFF59D',
-                progressBarColor: '#FFF59D',
-                overlayColor: 'rgba(255, 255, 54, 0.1)',
-                closeOnClick: true,
-                titleSize: '2em',
-                messageSize: '1.5em',
-                balloon: true
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred during the meta event.'
             });
         }
-    }
-});
+    });
+
+// On new calendar data, update our calendar memory and run the process function.
+    io.socket.on('calendar', function (data) {
+        processCalendar(data);
+    });
+
+// On new directors data, update our directors memory and run the process function.
+    io.socket.on('directors', function (data) {
+        processDirectors(data);
+    });
+
+// on messages, display message if event is an insert
+    io.socket.on('messages', function (data) {
+        for (var key in data)
+        {
+            if (data.hasOwnProperty(key) && key === 'insert')
+            {
+                iziToast.show({
+                    title: 'DJ says',
+                    message: data[key].message,
+                    timeout: 60000,
+                    backgroundColor: '#FFF59D',
+                    color: '#FFF59D',
+                    progressBarColor: '#FFF59D',
+                    overlayColor: 'rgba(255, 255, 54, 0.1)',
+                    closeOnClick: true,
+                    titleSize: '2em',
+                    messageSize: '1.5em',
+                    balloon: true
+                });
+            }
+        }
+    });
 
 
-io.socket.on('connect', function () {
+    io.socket.on('connect', function () {
+        onlineSocket();
+        MetaSocket();
+        eventSocket();
+        directorSocket();
+        easSocket();
+        if (disconnected)
+        {
+            //noConnection.style.display = "none";
+            disconnected = false;
+            clearTimeout(restart);
+        }
+    });
+
     onlineSocket();
     MetaSocket();
     eventSocket();
@@ -495,41 +528,41 @@ io.socket.on('connect', function () {
         disconnected = false;
         clearTimeout(restart);
     }
-});
 
-io.socket.on('disconnect', function () {
-    console.log('Lost connection');
-    try {
-        io.socket._raw.io._reconnection = true;
-        io.socket._raw.io._reconnectionAttempts = Infinity;
-    } catch (e) {
-        console.error(e);
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred trying to make socket reconnect indefinitely.'
-        });
-    }
-    if (!disconnected)
-    {
-        //noConnection.style.display = "inline";
-        disconnected = true;
-        // process now playing so that it displays that we are disconnected.
-        processNowPlaying(Meta);
-        /*
-         restart = setTimeout(function () {
-         window.location.reload(true);
-         }, 300000);
-         */
-    }
-});
+    io.socket.on('disconnect', function () {
+        console.log('Lost connection');
+        try {
+            io.socket._raw.io._reconnection = true;
+            io.socket._raw.io._reconnectionAttempts = Infinity;
+        } catch (e) {
+            console.error(e);
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred trying to make socket reconnect indefinitely.'
+            });
+        }
+        if (!disconnected)
+        {
+            //noConnection.style.display = "inline";
+            disconnected = true;
+            // process now playing so that it displays that we are disconnected.
+            processNowPlaying(Meta);
+            /*
+             restart = setTimeout(function () {
+             window.location.reload(true);
+             }, 300000);
+             */
+        }
+    });
 
 // On new eas data, update our eas memory and run the process function.
-io.socket.on('eas', function (data) {
-    processEas(data);
-});
+    io.socket.on('eas', function (data) {
+        processEas(data);
+    });
 
-io.socket.on('display-refresh', function (data) {
-    window.location.reload(true);
+    io.socket.on('display-refresh', function (data) {
+        window.location.reload(true);
+    });
 });
 
 function onlineSocket()
@@ -1950,6 +1983,7 @@ function doSlide(same = false)
                 if (slide > highestslide)
                 {
                     slide = 1;
+                    /*
                     if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
                     {
                         slide = 0;
@@ -1957,6 +1991,7 @@ function doSlide(same = false)
                         if (restarted)
                             console.log(`Slide issue. Triggering marquee screensaver.`);
                     }
+                    */
                     restarted = true;
                 }
 
