@@ -14,6 +14,18 @@ $(document).ready(function () {
         var lastDate = moment(value, "MM/DD/YYYY").day(6).format("MM/DD/YYYY");
         $("#weekly-date-picker").val(firstDate);
     });
+
+    document.querySelector(`#timesheet-records`).addEventListener("click", function (e) {
+        try {
+            if (e.target) {
+                if (e.target.id.startsWith(`timesheet-t`))
+                {
+                    editClock(parseInt(e.target.id.replace(`timesheet-t-`, ``)));
+                }
+            }
+        } catch (err) {
+        }
+    });
 });
 
 function closeModal() {
@@ -31,6 +43,7 @@ function escapeHTML(str) {
 
 // Edit a timesheet entry, or view a single entry
 function editClock(clockID, save = false) {
+    console.log(`editClock called.`);
     var modalBody = document.getElementById('clock-body');
     if (!save)
     {
@@ -53,11 +66,12 @@ function editClock(clockID, save = false) {
         <input type="text" class="form-control" id="clock-in" value="${moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss')}">
         <label for="clock-out">Clock Out:</label>
         <input type="text" class="form-control" id="clock-out" value="${moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss')}">
-        <label class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="clock-approved" ${(timesheet.approved) ? 'checked' : ''}>
-            <span class="custom-control-indicator"></span>
-            <span class="custom-control-description">Approved clock</span>
-        </label>
+                <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="clock-approved" ${(timesheet.approved) ? 'checked' : ''}>
+                            <label class="form-check-label" for="clock-approved">
+                                Approved Record
+                            </label>
+                        </div>
         <button type="submit" class="btn btn-primary">Edit</button>
         </form>`;
                 opened = true;
@@ -140,7 +154,7 @@ function filterDate() {
                             var clockout = moment(record.time_out);
                             var clocknow = moment(thedate.value);
                             var clocknext = moment(thedate.value).add(1, 'weeks');
-                            var clockday;
+                            var clockday = moment(clockin).format('e');
 
                             // Determine status. 1 = approved, 2 = no time_out (clocked in), 0 = not approved.
                             var status = 1;
@@ -161,56 +175,54 @@ function filterDate() {
 
                             // For certain clock-ins and clock-outs, we may need to display the date as well, not just the time.
                             // If clock-in happened last week, show its date
-                            if (moment(clockin).isBefore(moment(clockout).startOf('day')))
+                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
                                 clockday = moment(clockout).format('e');
                             }
                             // If clock-out happened next week, show its date
-                            if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf('day').add(1, 'days')))
+                            if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')))
                             {
                                 outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment(clockin).format('e');
                             }
                             // If clock-out was not on the same day as clock-in, show date for clock-out.
                             if (clockout !== null && !moment(clockout).isSame(moment(clockin), 'day'))
                             {
                                 outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment(clockin).format('e');
                             }
 
                             // Fill in the timesheet records for clock-ins
                             var cell = document.getElementById(`cell${(clockday * 2) + 1}-${record.name.replace(/\W/g, '')}`);
-                            if (cell)
+                            if (cell !== null)
                             {
                                 switch (status)
                                 {
                                     case 0:
-                                        cell.innerHTML += `<span class="badge badge-danger">${inT}</span><br />`;
+                                        cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-danger" id="timesheet-t-${record.ID}">${inT}</span><br />`;
                                         break;
                                     case 1:
-                                        cell.innerHTML += `<span class="badge badge-primary">${inT}</span><br />`;
+                                        cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-primary" id="timesheet-t-${record.ID}">${inT}</span><br />`;
                                         break;
                                     case 2:
-                                        cell.innerHTML += `<span class="badge badge-success">${inT}</span><br />`;
+                                        cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-success" id="timesheet-t-${record.ID}">${inT}</span><br />`;
                                         break;
                                 }
                             }
 
                             // Fill in the timesheet records for clock-outs
                             var cell = document.getElementById(`cell${(clockday * 2) + 2}-${record.name.replace(/\W/g, '')}`);
-                            if (cell)
+                            if (cell !== null)
                             {
                                 switch (status)
                                 {
                                     case 0:
-                                        cell.innerHTML += `<span class="badge badge-danger">${outT}</span><br />`;
+                                        cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-danger" id="timesheet-t-${record.ID}">${outT}</span><br />`;
                                         break;
                                     case 1:
-                                        cell.innerHTML += `<span class="badge badge-primary">${outT}</span><br />`;
+                                        cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-primary" id="timesheet-t-${record.ID}">${outT}</span><br />`;
                                         break;
                                     case 2:
-                                        cell.innerHTML += `<span class="badge badge-success">${outT}</span><br />`;
+                                        cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-success" id="timesheet-t-${record.ID}">${outT}</span><br />`;
                                         break;
                                 }
                             }
