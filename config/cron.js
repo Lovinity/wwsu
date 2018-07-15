@@ -52,36 +52,36 @@ module.exports.cron = {
                     var queue = await sails.helpers.rest.getQueue();
 
                     // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Also, calculate length of the queue
-                        try {
-                            sails.log.silly(`queueCheck executed.`);
-                            var theTracks = [];
-                            await sails.helpers.asyncForEach(queue, function (track, index) {
-                                return new Promise(async (resolve2, reject2) => {
-                                    var title = `${track.Artist} - ${track.Title}`;
+                    try {
+                        sails.log.silly(`queueCheck executed.`);
+                        var theTracks = [];
+                        await sails.helpers.asyncForEach(queue, function (track, index) {
+                            return new Promise(async (resolve2, reject2) => {
+                                var title = `${track.Artist} - ${track.Title}`;
 
-                                    // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again
-                                    if (theTracks.indexOf(title) > -1)
-                                    {
-                                        sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
-                                        if (track.TrackType !== 'Music')
-                                            Songs.pending.push(track.ID);
-                                        await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
-                                        theTracks = [];
-                                        queue = await sails.helpers.rest.getQueue();
-                                        change.queueLength = 0;
-                                        return resolve2(true);
-                                    } else {
-                                        theTracks.push(title);
-                                        change.queueLength += (track.Duration - track.Elapsed);
-                                        return resolve2(false);
-                                    }
-                                });
+                                // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again
+                                if (theTracks.indexOf(title) > -1)
+                                {
+                                    sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
+                                    if (track.TrackType !== 'Music')
+                                        Songs.pending.push(track.ID);
+                                    await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
+                                    theTracks = [];
+                                    queue = await sails.helpers.rest.getQueue();
+                                    change.queueLength = 0;
+                                    return resolve2(true);
+                                } else {
+                                    theTracks.push(title);
+                                    change.queueLength += (track.Duration - track.Elapsed);
+                                    return resolve2(false);
+                                }
                             });
-                        } catch (e) {
-                            sails.log.error(e);
-                            Meta.changeMeta({time: moment().toISOString(true)});
-                            return null;
-                        }
+                        });
+                    } catch (e) {
+                        sails.log.error(e);
+                        Meta.changeMeta({time: moment().toISOString(true)});
+                        return null;
+                    }
                     sails.log.silly(`Proceeding after queueCheck.`);
 
                     // If the currently playing track was a request, mark as played
@@ -616,6 +616,16 @@ module.exports.cron = {
                                 if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
                                     await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                             }
+                        }
+
+                        // Check if a break is needed
+                        var d = new Date();
+                        var n = d.getMinutes();
+                        if (!Meta['A'].state.includes("automation_") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown' && n < 10 && (Status.errorCheck.prevID === null || moment(Status.errorCheck.prevID).isBefore(moment().subtract(20, 'minutes'))))
+                        {
+                            change.breakneeded = true;
+                        } else {
+                            change.breakneeded = false;
                         }
 
 
@@ -1308,15 +1318,15 @@ module.exports.cron = {
         },
         start: true
     },
-    
-        // Every minute at second 11, prune out recipients that have been offline for an hour or more.
+
+    // Every minute at second 11, prune out recipients that have been offline for an hour or more.
     recipientsCheck: {
         schedule: '11 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON recipientsCheck called.`);
             try {
-                    var searchto = moment().subtract(4, 'hours').toDate(); // Get recipients updated an hour or more ago
-                    await Recipients.destroy({host: {"!=": ["website"]}, status: 0, time: {"<=": searchto}}).fetch();
+                var searchto = moment().subtract(4, 'hours').toDate(); // Get recipients updated an hour or more ago
+                await Recipients.destroy({host: {"!=": ["website"]}, status: 0, time: {"<=": searchto}}).fetch();
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -1324,7 +1334,6 @@ module.exports.cron = {
         },
         start: true
     },
-   
 
     // Every day at 11:59:50pm, clock out any directors still clocked in
     clockOutDirectors: {

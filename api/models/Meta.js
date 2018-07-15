@@ -115,6 +115,7 @@ module.exports = {
             for (var key in obj)
             {
                 if (obj.hasOwnProperty(key)) {
+                    // Exit if the key provided does not exist in Meta.A, or if the value in obj did not change from the current value
                     if (typeof Meta['A'][key] === 'undefined' || Meta['A'][key] === obj[key])
                         continue;
 
