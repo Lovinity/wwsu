@@ -564,7 +564,10 @@ function processTasks()
                     var sortvalue = 0;
                     if (typeof task.priority === 'undefined')
                         task.priority = 'undefined';
-                    if (task.priority.includes("High"))
+                    if (task.priority.includes("Immediate"))
+                    {
+                        sortvalue += 0;
+                    } else if (task.priority.includes("High"))
                     {
                         sortvalue += 100000000000000;
                     } else if (task.priority.includes("Normal"))
@@ -802,14 +805,14 @@ function doSlide(same = false)
                 {
                     slide = 1;
                     /*
-                    if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
-                    {
-                        slide = 0;
-                        lastBurnIn = moment();
-                        if (restarted)
-                            console.log(`Slide issue. Triggering marquee screensaver.`);
-                    }
-                    */
+                     if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
+                     {
+                     slide = 0;
+                     lastBurnIn = moment();
+                     if (restarted)
+                     console.log(`Slide issue. Triggering marquee screensaver.`);
+                     }
+                     */
                     restarted = true;
                 }
 
