@@ -172,7 +172,7 @@ module.exports.cron = {
                 }
 
                 // Clear manual metadata if it is old
-                if (moment().isAfter(moment(Meta['A'].trackstamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && !Meta['A'].state === 'live_prerecord' && Meta['A'].track !== '')
+                if (Meta['A'].trackstamp === null || (moment().isAfter(moment(Meta['A'].trackstamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && !Meta['A'].state === 'live_prerecord' && Meta['A'].track !== ''))
                     change.track = '';
 
                 // Playlist maintenance
@@ -242,7 +242,7 @@ module.exports.cron = {
                             change.percent = (queue[0].Elapsed / queue[0].Duration);
 
                         // In automation and something is currently playing
-                        if (Meta['A'].state.startsWith("automation_") && queue[0].ID !== 0 && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre')
+                        if (Meta['A'].state.startsWith("automation_") && queue[0].ID != 0 && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
@@ -274,7 +274,7 @@ module.exports.cron = {
                             }
 
                             // If we are playing a playlist
-                        } else if (queue[0].ID !== 0 && Meta['A'].state === 'automation_playlist')
+                        } else if (queue[0].ID != 0 && Meta['A'].state === 'automation_playlist')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
@@ -297,7 +297,7 @@ module.exports.cron = {
                                 change.stream = change.track;
                             }
                             // We are in genre automation
-                        } else if (queue[0].ID !== 0 && Meta['A'].state === 'automation_genre')
+                        } else if (queue[0].ID != 0 && Meta['A'].state === 'automation_genre')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
@@ -322,7 +322,7 @@ module.exports.cron = {
                         } else if (Meta['A'].state.startsWith("live_") && Meta['A'].state !== 'live_prerecord')
                         {
                             // Something is playing in RadioDJ
-                            if (queue[0].ID !== 0)
+                            if (queue[0].ID != 0)
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
@@ -361,7 +361,7 @@ module.exports.cron = {
                                 }
                             }
                             // Playing a prerecorded show
-                        } else if (queue[0].ID !== 0 && Meta['A'].state === 'live_prerecord')
+                        } else if (queue[0].ID != 0 && Meta['A'].state === 'live_prerecord')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
@@ -387,7 +387,7 @@ module.exports.cron = {
                         } else if (Meta['A'].state.startsWith("remote_"))
                         {
                             // The currently playing track is not an Internet Stream track
-                            if (queue[0].ID !== 0 && queue[0].TrackType !== 'InternetStream')
+                            if (queue[0].ID != 0 && queue[0].TrackType !== 'InternetStream')
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)

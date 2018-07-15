@@ -164,19 +164,19 @@ function filterDate() {
                             if (moment(clockin).isBefore(moment(clockout).startOf('day')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment(clockout).format('d');
+                                clockday = moment(clockout).format('e');
                             }
                             // If clock-out happened next week, show its date
                             if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf('day').add(1, 'days')))
                             {
                                 outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment(clockin).format('d');
+                                clockday = moment(clockin).format('e');
                             }
                             // If clock-out was not on the same day as clock-in, show date for clock-out.
                             if (clockout !== null && !moment(clockout).isSame(moment(clockin), 'day'))
                             {
                                 outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment(clockin).format('d');
+                                clockday = moment(clockin).format('e');
                             }
 
                             // Fill in the timesheet records for clock-ins
@@ -224,7 +224,7 @@ function filterDate() {
                                 var cell = document.getElementById(`cell15-${key.replace(/\W/g, '')}`);
                                 if (cell)
                                 {
-                                    cell.innerHTML = `${hours[key].hours.format('h', 1)}`;
+                                    cell.innerHTML = `${hours[key].format('h', 1)}`;
                                 }
                             }
                         }

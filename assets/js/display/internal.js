@@ -6,7 +6,7 @@ try {
     var Directors = TAFFY();
     var Tasks = TAFFY();
     var taskProjects = {};
-    var Meta = {};
+    var Meta = {time: moment().toISOString()};
     var Status = TAFFY();
 
 // Define HTML elements
@@ -511,7 +511,7 @@ function processTasks()
         Tasks().each(function (task) {
             try {
                 // Skip any tasks that are complete or have a start date later than today.
-                if (task.percent >= 100 || (task.start !== null && moment(task.start).isAfter(moment())))
+                if (task.percent >= 100 || (task.start !== null && moment(task.start).startOf('day').isAfter(moment(Meta.time))))
                     return null;
 
                 if (typeof taskProjects[task.project] === 'undefined')
