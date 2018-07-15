@@ -248,6 +248,11 @@ Issue a new alert through the internal emergency alert system, originating from 
 ### /eas/test [POST /eas/test]
 Send out a test through the internal emergency alert system. **Requires authorization**
 #### Response 200 OK
+## Embeds [/embeds]
+Embeds are specially designed pages used for other websites to embed WWSU on their website.
+### /embeds/guardian [GET /embeds/guardian]
+Retrieve a WWSU web player specially designed for Wright State's Guardian Newspaper website.
+#### Response 200 HTML
 ## Hosts [/hosts]
 Hosts endpoints regard DJ Controls instances.
 ### /hosts/get [POST /hosts/get]

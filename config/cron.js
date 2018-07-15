@@ -1319,14 +1319,21 @@ module.exports.cron = {
         start: true
     },
 
-    // Every minute at second 11, prune out recipients that have been offline for an hour or more.
+    // Every minute at second 11, prune out recipients that have been offline for 4 or more hours.
     recipientsCheck: {
         schedule: '11 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON recipientsCheck called.`);
             try {
-                var searchto = moment().subtract(4, 'hours').toDate(); // Get recipients updated an hour or more ago
-                await Recipients.destroy({host: {"!=": ["website"]}, status: 0, time: {"<=": searchto}}).fetch();
+                var records = await Recipients.find({host: {"!=": ["website"]}, status: 0});
+                var destroyIt = [];
+                var searchto = moment().subtract(4, 'hours');
+                records.forEach(function (record) {
+                    if (moment(record.time).isBefore(moment(searchto)))
+                        destroyIt.push(record.ID);
+                });
+                if (destroyIt.length > 0)
+                    await Recipients.destroy({ID: destroyIt}).fetch();
             } catch (e) {
                 sails.log.error(e);
                 return null;

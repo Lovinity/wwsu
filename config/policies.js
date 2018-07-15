@@ -45,5 +45,6 @@ module.exports.policies = {
   'timesheet/edit': 'isBanned',
   'timesheet/get': 'isBanned',
   'timesheet/view': 'isBanned',
-  'listen': 'isBanned'
+  'listen': 'isBanned',
+  'embeds/*': 'isBanned'
 };
