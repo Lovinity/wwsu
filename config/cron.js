@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs */
+/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements */
 
 module.exports.cron = {
 
@@ -1287,9 +1287,33 @@ module.exports.cron = {
         start: true
     },
 
-    // Every minute at second 10, check server memory and CPU use
-    serverCheck: {
+    // Every minute at second 10, prune out recipients that have been offline for 4 or more hours.
+    recipientsCheck: {
         schedule: '10 * * * * *',
+        onTick: async function () {
+            sails.log.debug(`CRON recipientsCheck called.`);
+            try {
+                var records = await Recipients.find({host: {"!=": ["website"]}, status: 0});
+                var destroyIt = [];
+                var searchto = moment().subtract(4, 'hours');
+                records.forEach(function (record) {
+                    if (moment(record.time).isBefore(moment(searchto)))
+                        destroyIt.push(record.ID);
+                });
+                if (destroyIt.length > 0)
+                    await Recipients.destroy({ID: destroyIt}).fetch();
+            } catch (e) {
+                sails.log.error(e);
+                return null;
+            }
+        },
+        start: true
+    },
+
+    // Every minute at second 11, check server memory and CPU use.
+    // ADVICE: It is advised that serverCheck is the last cron executed at the top of the minute. That way, the 1-minute CPU load will more likely detect issues.
+    serverCheck: {
+        schedule: '11 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON serverCheck called.`);
             try {
@@ -1311,29 +1335,6 @@ module.exports.cron = {
                 } else {
                     Status.changeStatus([{name: `server`, label: `Server`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 }
-            } catch (e) {
-                sails.log.error(e);
-                return null;
-            }
-        },
-        start: true
-    },
-
-    // Every minute at second 11, prune out recipients that have been offline for 4 or more hours.
-    recipientsCheck: {
-        schedule: '11 * * * * *',
-        onTick: async function () {
-            sails.log.debug(`CRON recipientsCheck called.`);
-            try {
-                var records = await Recipients.find({host: {"!=": ["website"]}, status: 0});
-                var destroyIt = [];
-                var searchto = moment().subtract(4, 'hours');
-                records.forEach(function (record) {
-                    if (moment(record.time).isBefore(moment(searchto)))
-                        destroyIt.push(record.ID);
-                });
-                if (destroyIt.length > 0)
-                    await Recipients.destroy({ID: destroyIt}).fetch();
             } catch (e) {
                 sails.log.error(e);
                 return null;
