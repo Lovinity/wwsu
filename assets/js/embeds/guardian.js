@@ -64,7 +64,7 @@ jQuery(function () {
         affiliatetoken: "1000lIPN",
         debug: "false",
         ownsongtitleurl: "",
-        radiocover: "http://server.wwsu1069.org/display/logoBlack.png",
+        radiocover: "http://server.wwsu1069.org/images/embeds/logo.png",
         songgooglefontname: "",
         songfontname: "",
         titlegooglefontname: "",
