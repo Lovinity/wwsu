@@ -649,139 +649,77 @@ module.exports.cron = {
                         if (Status.errorCheck.trueZero <= 0 && typeof queue[0] !== 'undefined' && typeof queue[0].Duration !== 'undefined' && typeof queue[0].Elapsed !== 'undefined')
                         {
 
-                            // First, get a moment instance for 20 past the current hour, 40 past the current hour, and the top of the next hour
-                            var psabreak20 = moment().minutes(20);
-                            var psabreak40 = moment().minutes(40);
-                            var idbreak = moment().minutes(0).add(1, 'hours');
-
-                            // Also get a moment instance for the estimated time when the currently playing track will finish
-                            var endtime = moment().add((queue[0].Duration - queue[0].Elapsed), 'seconds');
-
-
-
-                            // Determine if we should queue a PSA break. Start off with no by default.
-                            var doPSAbreak = false;
-
-                            // Consider queuing if the current time is before :20 and, after adding the remaining time from the current track, it passes :20 after
-                            if (moment().isBefore(moment(psabreak20)) && moment(endtime).isAfter(moment(psabreak20)))
-                                doPSAbreak = true;
-
-                            // Consider queuing if the current time is between :20 and :40, and, adding the remaining time from the current track passes :40
-                            if (moment().isAfter(moment(psabreak20)) && moment().isBefore(moment(psabreak40)) && moment(endtime).isAfter(moment(psabreak40)))
-                                doPSAbreak = true;
-
-                            // If the currently playing track will not end after :20,
-                            // but the following track will end further after :20 than the current track would finish before :20,
-                            // queue the PSA break early.
-                            if (moment().isBefore(moment(psabreak20)) && typeof queue[1] !== 'undefined' && typeof queue[1].Duration !== 'undefined')
+                            // Iterate through each configured break to see if it's time to do it
+                            for (var key in sails.config.custom.breaks)
                             {
-                                var distancebefore = moment(psabreak20).diff(moment(endtime));
-                                var endtime2 = moment(endtime).add(queue[1].Duration, 'seconds');
-                                var distanceafter = endtime2.diff(psabreak20);
-                                if (moment(endtime2).isAfter(moment(psabreak20)) && distanceafter > distancebefore)
-                                    doPSAbreak = true;
-                            }
+                                if (sails.config.custom.breaks.hasOwnProperty(key))
+                                {
+                                    // Helps determine if we are due for the break
+                                    var breakTime = moment().minutes(key);
+                                    var breakTime2 = moment().minutes(key).add(1, 'hours');
 
-                            // Do the same thing for :40 after
-                            if (moment().isAfter(moment(psabreak20)) && moment().isBefore(moment(psabreak40)) && typeof queue[1] !== 'undefined' && typeof queue[1].Duration !== 'undefined')
-                            {
-                                var distancebefore = moment(psabreak40).diff(moment(endtime));
-                                var endtime2 = moment(endtime).add(queue[1].Duration, 'seconds');
-                                var distanceafter = endtime2.diff(psabreak40);
-                                if (moment(endtime2).isAfter(moment(psabreak40)) && distanceafter > distancebefore)
-                                    doPSAbreak = true;
-                            }
+                                    // Determine when the current track in RadioDJ will finish.
+                                    var endTime = moment().add((queue[0].Duration - queue[0].Elapsed), 'seconds');
 
-                            sails.log.verbose(`PSA stage 1?: ${doPSAbreak}`);
+                                    var doBreak = false;
 
-                            // Do not queue if we are not in automation, playlist, or prerecord states
-                            if (Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'live_prerecord')
-                                doPSAbreak = false;
+                                    // If the current time is before scheduled break, but the currently playing track will finish after scheduled break, consider queuing the break.
+                                    if ((moment().isBefore(moment(breakTime)) && moment(endTime).isAfter(moment(breakTime))) || (moment().isBefore(moment(breakTime2)) && moment(endTime).isAfter(moment(breakTime2))))
+                                        doBreak = true;
 
-                            sails.log.verbose(`Good state?: ${doPSAbreak}`);
+                                    // If the currently playing track will not end after the scheduled break,
+                                    // but the following track will end further after the scheduled break than the current track would,
+                                    // queue the break early.
+                                    if (typeof queue[1] !== 'undefined' && typeof queue[1].Duration !== 'undefined')
+                                    {
+                                        if (moment().isBefore(moment(breakTime)))
+                                        {
+                                            var distancebefore = moment(breakTime).diff(moment(endTime));
+                                            var endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
+                                            var distanceafter = endtime2.diff(breakTime);
+                                            if (moment(endtime2).isAfter(moment(breakTime)) && distanceafter > distancebefore)
+                                                doBreak = true;
+                                        } else {
+                                            var distancebefore = moment(breakTime2).diff(moment(endTime));
+                                            var endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
+                                            var distanceafter = endtime2.diff(breakTime2);
+                                            if (moment(endtime2).isAfter(moment(breakTime2)) && distanceafter > distancebefore)
+                                                doBreak = true;
+                                        }
+                                    }
 
-                            // Do not queue if we queued a break less than 10 minutes ago
-                            if (Status.errorCheck.prevBreak !== null && moment(Status.errorCheck.prevBreak).isAfter(moment().subtract(10, 'minutes')))
-                                doPSAbreak = false;
+                                    // Do not queue if we are not in automation, playlist, or prerecord states
+                                    if (Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'live_prerecord')
+                                        doBreak = false;
 
-                            sails.log.verbose(`PSA not too soon?: ${doPSAbreak}`);
+                                    // Do not queue if we queued a break less than the configured failsafe time, and this isn't the 0 break
+                                    if (key !== 0 && Status.errorCheck.prevBreak !== null && moment(Status.errorCheck.prevBreak).isAfter(moment().subtract(sails.config.custom.breakCheck, 'minutes')))
+                                        doBreak = false;
 
-                            // Do not queue anything yet if the current track has 10 or more minutes left (resolves a discrepancy with the previous logic)
-                            if ((queue[0].Duration - queue[0].Elapsed) >= (60 * 10))
-                                doPSAbreak = false;
+                                    // The 0 break has its own hard coded failsafe of 10 minutes, separate from other breaks, since it's a FCC required break
+                                    if (key === 0 && Status.errorCheck.prevID !== null && moment(Status.errorCheck.prevID).isAfter(moment().subtract(10, 'minutes')))
+                                        doBreak = false;
 
-                            sails.log.verbose(`Current track not have more than 10 minutes left?: ${doPSAbreak}`);
+                                    // Do not queue anything yet if the current track has breakCheck minutes or more left (resolves a discrepancy with the previous logic)
+                                    if (key !== 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * sails.config.custom.breakCheck))
+                                        doBreak = false;
 
-                            // Finally, if we are to queue a PSA break, queue it and make note we queued it so we don't queue another one too soon.
-                            if (doPSAbreak)
-                            {
-                                sails.log.debug(`QUEUING PSA Break`);
-                                Status.errorCheck.prevBreak = moment();
-                                await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: 'Queued :20 / :40 PSA break'})
-                                        .tolerate((err) => {
-                                        });
-                                await sails.helpers.requests.queue(3, true, true);
-                                await sails.helpers.songs.queuePending();
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Top', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, true);
-                            }
+                                    if (key === 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * 10))
+                                        doBreak = false;
 
-                            // Determine if we are to queue a station ID break
+                                    // Do the break if we are supposed to
+                                    if (doBreak)
+                                    {
+                                        Status.errorCheck.prevBreak = moment();
+                                        if (key === 0)
+                                            Status.errorCheck.prevID = moment();
+                                        await sails.config.custom.breaks[key]()
+                                                .catch(err => {
+                                                    sails.log.error(err);
+                                                });
+                                    }
 
-                            // Determine false by default
-                            var doIDbreak = false;
-
-                            // If, adding the remaining time of the current track to the current time, passes the time we are to queue an ID break, then consider queuing it
-                            if (moment(endtime).isAfter(moment(idbreak)))
-                                doIDbreak = true;
-
-                            // If the currently playing track will not end after :00,
-                            // but the following track will end further after :00 than the current track would finish before :00,
-                            // queue the station ID early.
-                            if (typeof queue[1] !== 'undefined' && typeof queue[1].Duration !== 'undefined')
-                            {
-                                var distancebefore = moment(idbreak).diff(moment(endtime));
-                                var endtime2 = moment(endtime).add(queue[1].Duration, 'seconds');
-                                var distanceafter = endtime2.diff(idbreak);
-                                if (moment(endtime2).isAfter(moment(idbreak)) && distanceafter > distancebefore)
-                                    doIDbreak = true;
-                            }
-
-                            sails.log.verbose(`ID stage 1?: ${doIDbreak}`);
-
-                            // If the last time we queued a station ID break was less than 20 minutes ago, it's too soon!
-                            if (Status.errorCheck.prevID !== null && moment(Status.errorCheck.prevID).isAfter(moment().subtract(20, 'minutes')))
-                                doIDbreak = false;
-
-                            sails.log.verbose(`ID not too soon?: ${doIDbreak}`);
-
-                            // Do not queue anything yet if the current time is before :40 after (resolves a discrepancy with the previous logic)
-                            if (moment().isBefore(moment(idbreak).subtract(20, 'minutes')))
-                                doIDbreak = false;
-
-                            sails.log.verbose(`Not Before :40?: ${doIDbreak}`);
-
-                            // Do not queue if we are not in automation, playlist, or prerecord states
-                            if (Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'live_prerecord')
-                                doIDbreak = false;
-
-                            sails.log.verbose(`Good state?: ${doIDbreak}`);
-
-                            // If we are to queue an ID, queue it
-                            if (doIDbreak)
-                            {
-                                sails.log.debug(`QUEUING ID Break`);
-                                Status.errorCheck.prevID = moment();
-                                Status.errorCheck.prevBreak = moment();
-                                await sails.helpers.error.count('stationID');
-                                await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: 'Queued :00 Station ID Break'})
-                                        .tolerate((err) => {
-                                        });
-                                await sails.helpers.requests.queue(3, true, true);
-                                await sails.helpers.songs.queuePending();
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Top', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, true);
+                                }
                             }
                         }
                     } else {

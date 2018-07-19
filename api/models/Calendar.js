@@ -230,12 +230,17 @@ module.exports = {
                     await sails.helpers.asyncForEach(playlistsR, function (playlist, index) {
                         return new Promise(async (resolve, reject) => {
                             try {
+                                var playlistSongs = [];
+                                var playlistDuplicates = 0;
+
                                 var pTracks = await Playlists_list.find({pID: playlist.ID});
                                 sails.log.verbose(`Retrieved Playlists_list records: ${pTracks.length}`);
                                 sails.log.silly(pTracks);
 
                                 var temp = [];
                                 pTracks.forEach(function (track) {
+                                    if (temp.indexOf(track.sID) > -1)
+                                        playlistDuplicates++;
                                     temp.push(track.sID);
                                 });
 
@@ -245,10 +250,16 @@ module.exports = {
 
                                 var duration = 0;
                                 songs.forEach(function (song) {
-                                    duration += song.duration;
+                                    if (playlistSongs.indexOf(`${song.artist} - ${song.title}`) > -1)
+                                    {
+                                        playlistDuplicates++;
+                                    } else {
+                                        duration += song.duration;
+                                    }
+                                    playlistSongs.push(`${song.artist} - ${song.title}`);
                                 });
 
-                                playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration});
+                                playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates});
                                 return resolve(false);
                             } catch (e) {
                                 return reject(e);
@@ -370,13 +381,16 @@ module.exports = {
                                 if ((eventLength - 900) >= (playlists[summary].duration * 1.05)) // * 1.05 because this assumes 1 minute of break for every 20 minutes of programming
                                 {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is significantly short. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`;
+                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is significantly short. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
 
                                     // Check to see if the playlist is over 5 minutes too long
                                 } else if ((eventLength + 300) <= (playlists[summary].duration * 1.05))
                                 {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is too long. This could prevent other DJs from signing on the air, or other segments from playing. If this is not fixed, <strong>the prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>.`;
+                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is too long. This could prevent other DJs from signing on the air, or other segments from playing. If this is not fixed, <strong>the prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
+                                } else if (playlists[summary].duplicates > 0) {
+                                    criteria.verify = 'Check';
+                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, there were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.`;
                                 } else {
                                     criteria.verify = 'Valid';
                                     criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ.`;
@@ -400,13 +414,16 @@ module.exports = {
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`;
 
                                 // Check to see if the playlist duration is shorter than the event duration
-                                if (eventLength <= (playlists[summary].duration * 1.05))
+                                if (eventLength <= (playlists[summary].duration * 1.05) && playlists[summary].duplicates === 0)
                                 {
                                     criteria.verify = 'Valid';
                                     criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ.`;
-                                } else {
+                                } else if (playlists[summary].duplicates === 0) {
                                     criteria.verify = 'Check';
                                     criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`;
+                                } else {
+                                    criteria.verify = 'Check';
+                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
                                 }
                             }
 
@@ -433,7 +450,7 @@ module.exports = {
 
                                     // Event is enabled, but does not have a Load Rotation event
                                 } else if (djevents[summary].enabled === "True") {
-                                    criteria.verify = 'Check';
+                                    criteria.verify = 'Invalid';
                                     criteria.verify_message = `This is a valid genre, and the manual RadioDJ event highlighted in green exists. However, a "Load Rotation" action was not defined in this event. No rotation changes will happen when this genre executes. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`;
 
                                     // Event is not enabled
@@ -448,7 +465,7 @@ module.exports = {
                         } else {
                             criteria.verify_titleHTML = `<span style="background: rgba(128, 128, 128, 0.2);">${criteria.verify_titleHTML}</span>`;
                         }
-                        
+
 
                         sails.log.silly(`Event criteria: ${JSON.stringify(criteria)}`);
 

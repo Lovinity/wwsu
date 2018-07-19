@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment */
 
 /**
  * Bootstrap
@@ -160,14 +160,34 @@ module.exports.bootstrap = async function (done) {
         });
     }
 
+    // Load metadata
+    try {
+        sails.log.verbose(`BOOTSTRAP: Loading metadata.`);
+        var meta = await Meta.find().limit(1)
+                .tolerate((err) => {
+                    sails.log.error(err);
+                    Meta.changeMeta({time: moment().toISOString(true)});
+                    return resolve(err);
+                });
+        meta = meta[0];
+        meta.time = moment().toISOString(true);
+        sails.log.silly(meta);
+        await Meta.changeMeta(meta);
+    } catch (e) {
+        Meta.changeMeta({time: moment().toISOString(true)});
+    }
+
     // Load work orders.
-    Tasks.updateTasks();
+    sails.log.verbose(`BOOTSTRAP: Loading tasks.`);
+    await Tasks.updateTasks();
 
     // Load directors.
-    Directors.updateDirectors(true);
+    sails.log.verbose(`BOOTSTRAP: Loading directors.`);
+    await Directors.updateDirectors(true);
 
     // Load Google Calendar.
-    Calendar.preLoadEvents();
+    sails.log.verbose(`BOOTSTRAP: Loading calendar events.`);
+    await Calendar.preLoadEvents();
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 

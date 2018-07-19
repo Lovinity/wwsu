@@ -110,6 +110,10 @@ module.exports = {
                                     return new Promise(async (resolve2, reject2) => {
                                         try {
                                             // Prepare task information
+                                            
+                                            if (typeof element.id === 'undefined')
+                                                return resolve2(false);
+                                            
                                             tasks.push(element.id);
 
                                             var criteria = {
@@ -185,7 +189,6 @@ module.exports = {
                                 sails.log.silly(`Deleted tasks:`);
                                 sails.log.silly(removed);
                                 
-                                var counts = await Tasks.count({});
                                 return resolve();
                             } catch (e) {
                                 return reject(e);

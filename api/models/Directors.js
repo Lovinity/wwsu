@@ -96,6 +96,10 @@ module.exports = {
                                 if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)
                                     Directors.directors = {};
                                 stuff.forEach(function (director) {
+                                    // Check for valid returns
+                                    if (typeof director.login === 'undefined' || typeof director.name === 'undefined' || typeof director.admin === 'undefined' || typeof director.status === 'undefined')
+                                        return null;
+                                    
                                     // Skip non-active or non-invited users
                                     if (director.status === 'active' || director.status === 'invited')
                                     {
@@ -111,7 +115,7 @@ module.exports = {
                                                 .exec((err, user, wasCreated) => {
 
                                                     // Update director if anything changed.
-                                                    if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin || director.position !== user.position))
+                                                    if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin))
                                                     {
                                                         Directors.update({name: director.name}, {login: director.login, name: director.name, admin: director.admin, position: ''}).fetch().exec(function (err2, user2) {});
                                                     }
