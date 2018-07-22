@@ -27,7 +27,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper error.count called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             if (Status.errorCheck[inputs.name].count === 0 && inputs.ignoreZero)
             {

@@ -16,7 +16,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper discipline.banShow called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Remove all messages by the client
             await sails.helpers.messages.removeMass(inputs.host);

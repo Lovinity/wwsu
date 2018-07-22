@@ -31,7 +31,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.queue called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var query = {played: 0};
             if (typeof inputs.ID !== 0)

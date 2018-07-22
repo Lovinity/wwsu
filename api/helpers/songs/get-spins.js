@@ -18,7 +18,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper songs.getSpins called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var song = await Songs.findOne({ID: inputs.ID});
             sails.log.silly(`Song: ${song}`);
@@ -29,7 +29,7 @@ module.exports = {
             sails.log.silly(history);
 
             // Get history from manually logged track airs via DJs (EXPERIMENTAL: may need to revise to be more accurate, say, for mixed cases etc)
-            var history2 = await Logs.find({event: {'conains': 'DJ/Producer'}, trackArtist: song.artist, trackTitle: song.title});
+            var history2 = await Logs.find({event: {'contains': 'DJ/Producer'}, trackArtist: song.artist, trackTitle: song.title});
             sails.log.verbose(`Retrieved logs records: ${history2.length}`);
             sails.log.silly(history2);
 

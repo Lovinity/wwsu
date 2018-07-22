@@ -26,7 +26,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.get called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var searchto = moment().subtract(1, 'hours').toDate(); // Get messages sent within the last hour
             // First, grab data pertaining to the host that is retrieving messages (create the host record if it does not exist)

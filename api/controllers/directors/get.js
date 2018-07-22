@@ -28,7 +28,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller directors/get called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // If a username was specified, find only that director. Otherwise, get all directors.

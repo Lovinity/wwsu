@@ -16,7 +16,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.get called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             var records = await Requests.find({played: 0, ID: {'>': inputs.offset}});

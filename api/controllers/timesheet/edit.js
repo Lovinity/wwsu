@@ -58,7 +58,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller timesheet/edit called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Get the director as provided by admin

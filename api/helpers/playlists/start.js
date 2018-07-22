@@ -33,7 +33,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper playlists.start called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, and/or it was not specified we are resuming a playlist.
             if (!Meta.changingState && !Playlists.queuing && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre') || inputs.resume))

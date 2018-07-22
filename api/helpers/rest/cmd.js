@@ -26,7 +26,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper rest.cmd called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         var endstring = ''; // appends at the end of a REST call, say, if arg was supplied
         // arg supplied? Load it in memory.
         if (typeof inputs.arg !== 'undefined' && inputs.arg !== null)

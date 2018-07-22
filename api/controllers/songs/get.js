@@ -42,8 +42,9 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        //TODO: Find a way to speed up checkRequestable and getSpins. Perhaps use a cache engine.
         sails.log.debug('Controller songs/get called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
 
@@ -71,7 +72,7 @@ module.exports = {
             if (typeof inputs.ID === 'undefined' || inputs.ID === null)
             {
                 // Retrieve a list of subcategories that fall within a parent category defined in config as a music category.
-                var subcats2 = await Subcategory.find({parentid: sails.config.custom.subcats.music});
+                var subcats2 = await Subcategory.find({ID: sails.config.custom.subcats.music});
                 sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
                 sails.log.silly(subcats2);
 
@@ -85,8 +86,8 @@ module.exports = {
                 });
 
                 // Find songs in any of these subcategories
-                query = {ID: {'<': inputs.offset}, id_subcat: subcatIDs};
-                if (inputs.search !== null)
+                query = {ID: {'>': inputs.offset}, id_subcat: subcatIDs};
+                if (typeof inputs.search !== 'undefined' && inputs.search !== null)
                     query.or = [{artist: {'contains': inputs.search}}, {title: {'contains': inputs.search}}];
                 songs = await Songs.find(query).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
@@ -135,15 +136,20 @@ module.exports = {
             // Add additional necessary data to each song, such as request ability 
             await sails.helpers.asyncForEach(songs, function (song, index) {
                 return new Promise(async (resolve, reject) => {
-                    songs[index].category = subcats[song.id_subcat] || 'Unknown';
-                    songs[index].request = await sails.helpers.requests.checkRequestable(song.ID, from_IP);
+                    try {
+                        songs[index].category = subcats[song.id_subcat] || 'Unknown';
+                        songs[index].request = await sails.helpers.requests.checkRequestable(song.ID, from_IP);
 
-                    // Get spin counts from both RadioDJ and manually logged entries by DJs
-                    songs[index].spins = await sails.helpers.songs.getSpins(song.ID);
-                    resolve(false);
+                        // Get spin counts from both RadioDJ and manually logged entries by DJs
+                        songs[index].spins = await sails.helpers.songs.getSpins(song.ID);
+                        resolve(false);
+                    } catch (e) {
+                        sails.log.error(e);
+                        resolve(false);
+                    }
                 });
             });
-            
+
             return exits.success(songs);
 
         } catch (e) {

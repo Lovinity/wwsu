@@ -31,7 +31,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.place called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // First, confirm the track can actually be requested.
             var requestable = await sails.helpers.requests.checkRequestable(inputs.ID, inputs.IP);

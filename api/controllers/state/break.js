@@ -16,7 +16,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller state/break called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             if (Meta.changingState)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));

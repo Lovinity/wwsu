@@ -17,7 +17,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller recipients/add-web called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             if (!this.req.isSocket)

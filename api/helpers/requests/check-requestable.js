@@ -23,10 +23,10 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.checkRequestable called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            var d = moment().startOf('day');
+            var d = moment().startOf('day').toISOString(true);
 
             // First, check to see if the client has already exceeded their requests for the day
             var requests = await Requests.find({userIP: inputs.IP, requested: {'>=': d}});
@@ -71,9 +71,9 @@ module.exports = {
             }
 
 
-            var subcat = await Subcategory.findOne({id: record.id_subcat});
+            var subcat = await Subcategory.findOne({ID: record.id_subcat});
             sails.log.silly(`Track subcategory: ${subcat}`);
-            var parentcat = await Category.findOne({id: subcat.parentid});
+            var parentcat = await Category.findOne({ID: subcat.parentid});
             sails.log.silly(`Track category: ${parentcat}`);
 
             // Check if the track exists in any of the sails.config.custom.musicCatsN.

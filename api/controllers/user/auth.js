@@ -40,7 +40,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller user/auth called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var user = await Nodeusers.find({email: inputs.email}).limit(1);
             sails.log.verbose(`Nodeusers records retrieved: ${user.length}`);

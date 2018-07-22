@@ -61,7 +61,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller eas/send called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             await sails.helpers.eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, inputs.starts !== null ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(15, 'minutes').toISOString(true), inputs.color, inputs.information);
             await sails.helpers.eas.postParse();

@@ -648,6 +648,9 @@ Requests do not get a response until the entire process of starting a break is c
 |--|--|
 | halftime | boolean (optional; if true, will switch to a halftime / extended break. If false, will switch to a standard break. Defaults to false.) |
 #### Response 200 OK
+### /state/change-radio-dj [POST /state/change-radio-dj]
+Tell the system to switch to a different RadioDJ instance in the array of configured RadioDJ instances.  **Requires authorization**
+#### Response 200 OK
 ### /state/live [POST /state/live]
 Request to go live. **Requires authorization**
 Requests do not get a response until the entire process of preparing for live is completed on the backend. This could take several seconds.

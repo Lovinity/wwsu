@@ -64,7 +64,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper eas.addAlert called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
 
             // Get the alert if it already exists in the database

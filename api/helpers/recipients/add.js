@@ -37,7 +37,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper recipients.add called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
 
             // Determine the status color based off of the group and recipient

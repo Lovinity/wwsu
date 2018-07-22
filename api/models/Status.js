@@ -103,9 +103,9 @@ module.exports = {
                     try {
                         Meta.changingState = true;
                         sails.sockets.broadcast('system-error', 'system-error', true);
-                        await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        await sails.helpers.rest.cmd('EnableAutoDJ', 1);
-                        await sails.helpers.rest.cmd('StopPlayer', 1);
+                        await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
+                        await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0);
+                        await sails.helpers.rest.cmd('StopPlayer', 1, 0);
                         await sails.helpers.rest.changeRadioDj();
                         await sails.helpers.error.post();
                         Meta.changingState = false;

@@ -40,7 +40,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller state/remote called.');
-        sails.log.silly(`Parameters passed: ${inputs}`);
+        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Do not continue if not in automation mode; client should request automation before requesting remote
