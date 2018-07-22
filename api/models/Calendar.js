@@ -421,9 +421,12 @@ module.exports = {
                                 } else if (playlists[summary].duplicates === 0) {
                                     criteria.verify = 'Check';
                                     criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`;
-                                } else {
+                                } else if (eventLength <= (playlists[summary].duration * 1.05)) {
                                     criteria.verify = 'Check';
                                     criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
+                                } else {
+                                    criteria.verify = 'Check';
+                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. In addition, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
                                 }
                             }
 

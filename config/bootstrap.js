@@ -167,14 +167,13 @@ module.exports.bootstrap = async function (done) {
                 .tolerate((err) => {
                     sails.log.error(err);
                     Meta.changeMeta({time: moment().toISOString(true)});
-                    return resolve(err);
                 });
         meta = meta[0];
         meta.time = moment().toISOString(true);
         sails.log.silly(meta);
         await Meta.changeMeta(meta);
     } catch (e) {
-        Meta.changeMeta({time: moment().toISOString(true)});
+        await Meta.changeMeta({time: moment().toISOString(true)});
     }
 
     // Load work orders.

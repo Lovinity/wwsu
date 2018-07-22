@@ -234,7 +234,7 @@ module.exports.cron = {
                 }
 
                 try {
-
+                    // TODO: use nometa instead of TrackType to determine when to show alt meta
                     // Manage the metadata for when there is one or more tracks in the queue (RadioDJ should always return at least 1 "dummy" track, even if there are none in the queue)
                     if (queue.length > 0)
                     {
