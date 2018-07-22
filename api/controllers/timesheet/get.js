@@ -12,7 +12,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(true),
+            defaultsTo: () => moment().toISOString(true),
             description: `moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.`
         }
     },

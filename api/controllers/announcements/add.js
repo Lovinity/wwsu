@@ -31,7 +31,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(true),
+            defaultsTo: () => moment().toISOString(true),
             description: `moment() parsable string of when the announcement starts. Defaults to now. Recommended ISO string.`
         },
 
@@ -40,7 +40,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment({year: 3000}).toISOString(true),
+            defaultsTo: () => moment({year: 3000}).toISOString(true),
             description: `moment() parsable string of when the announcement expires. Defaults to the year 3000. Recommended ISO string.`
         }
 

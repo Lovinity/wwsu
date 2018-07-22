@@ -9,7 +9,7 @@ module.exports = {
     inputs: {
         str: {
             type: 'string',
-            required: true,
+            defaultsTo: '',
             description: 'The string to truncate'
         },
 

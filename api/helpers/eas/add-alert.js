@@ -38,7 +38,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(true),
+            defaultsTo: () => moment().toISOString(true),
             description: `moment() parsable string of when the alert starts. Recommended ISO string.`
         },
         expires: {
@@ -46,7 +46,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().add(15, 'minutes').toISOString(true),
+            defaultsTo: () => moment().add(15, 'minutes').toISOString(true),
             description: `moment() parsable string of when the alert expires. Recommended ISO string.`
         },
         color: {
@@ -87,8 +87,8 @@ module.exports = {
                     severity: inputs.severity,
                     color: inputs.color,
                     counties: temp,
-                    starts: inputs.starts,
-                    expires: inputs.expires
+                    starts: inputs.starts.toISOString(true),
+                    expires: inputs.expires.toISOString(true)
                 };
                 if (typeof inputs.information !== 'undefined' && inputs.information !== null)
                     criteria.information = inputs.information;
@@ -122,8 +122,8 @@ module.exports = {
                     severity: inputs.severity,
                     color: inputs.color,
                     counties: inputs.county,
-                    starts: inputs.starts,
-                    expires: inputs.expires,
+                    starts: inputs.starts.toISOString(true),
+                    expires: inputs.expires.toISOString(true),
                     information: inputs.information || ''
                 };
 

@@ -11,7 +11,7 @@ module.exports = {
     inputs: {
         message: {
             type: 'string',
-            required: true,
+            defaultsTo: '',
             description: 'The string to be filtered.'
         }
     },

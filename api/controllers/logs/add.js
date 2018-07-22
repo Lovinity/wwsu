@@ -12,7 +12,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(true),
+            defaultsTo: () => moment().toISOString(true),
             description: `moment() parsable string of a date in which this log took place. Defaults to now.`
         },
         logtype: {
@@ -70,7 +70,7 @@ module.exports = {
 
         try {
             // Create the log entry
-            await Logs.create({logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel});
+            await Logs.create({logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: moment(inputs.date).toISOString(true)});
 
             // Set manual meta if criteria matches
             if (inputs.logtype === 'manual' && inputs.trackArtist !== null && inputs.trackTitle !== null)

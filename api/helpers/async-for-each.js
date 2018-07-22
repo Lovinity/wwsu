@@ -26,6 +26,11 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper asyncForEach called.');
         try {
+            // No length? No call!
+            if (typeof inputs.array.length === 'undefined')
+                return exits.success();
+            
+            // Loop through each item in the array
             for (let index = 0; index < inputs.array.length; index++) {
                 sails.log.silly(`Calling iteration ${index}`);
                 var breakIt = await inputs.callback(inputs.array[index], index, inputs.array);

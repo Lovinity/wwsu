@@ -31,7 +31,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(true),
+            defaultsTo: () => moment().toISOString(true),
             description: `moment() parsable string of when the alert starts. Recommended ISO string.`
         },
 
@@ -40,7 +40,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().add(15, 'minutes').toISOString(true),
+            defaultsTo: () => moment().add(15, 'minutes').toISOString(true),
             description: `moment() parsable string of when the alert expires. Recommended ISO string.`
         },
         
@@ -63,7 +63,7 @@ module.exports = {
         sails.log.debug('Controller eas/send called.');
         sails.log.silly(`Parameters passed: ${inputs}`);
         try {
-            await sails.helpers.eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, moment(inputs.starts).toISOString(), moment(inputs.expires).toISOString(), inputs.color, inputs.information);
+            await sails.helpers.eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, moment(inputs.starts).toISOString(true), moment(inputs.expires).toISOString(true), inputs.color, inputs.information);
             await sails.helpers.eas.postParse();
             return exits.success();
         } catch (e) {

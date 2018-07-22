@@ -12,7 +12,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: moment().toISOString(true),
+            defaultsTo: () => moment().toISOString(true),
             description: `moment() parsable string of a date to get logs.`
         }
     },
@@ -27,7 +27,7 @@ module.exports = {
             var end = moment(start).add(1, 'days');
 
             // Get DISTINCT records
-            var records = await Logs.getDatastore().sendNativeQuery(`SELECT DISTINCT logsubtype FROM logs WHERE (createdAt BETWEEN "${start.toISOString()}" AND "${end.toISOString()}") AND logsubtype IS NOT NULL AND logsubtype NOT LIKE ''`, []);
+            var records = await Logs.getDatastore().sendNativeQuery(`SELECT DISTINCT logsubtype FROM logs WHERE (createdAt BETWEEN "${start.toISOString(true)}" AND "${end.toISOString(true)}") AND logsubtype IS NOT NULL AND logsubtype NOT LIKE ''`, []);
 
             sails.log.verbose(`Special records returned: ${records.length}`);
             sails.log.silly(records);
