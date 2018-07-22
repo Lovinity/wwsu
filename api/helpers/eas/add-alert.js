@@ -38,7 +38,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: () => moment().toISOString(true),
+            allowNull: true,
             description: `moment() parsable string of when the alert starts. Recommended ISO string.`
         },
         expires: {
@@ -46,7 +46,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: () => moment().add(15, 'minutes').toISOString(true),
+            allowNull: true,
             description: `moment() parsable string of when the alert expires. Recommended ISO string.`
         },
         color: {
@@ -87,8 +87,8 @@ module.exports = {
                     severity: inputs.severity,
                     color: inputs.color,
                     counties: temp,
-                    starts: inputs.starts.toISOString(true),
-                    expires: inputs.expires.toISOString(true)
+                    starts: inputs.starts !== null ? moment(inputs.starts).toISOString(true) : moment().toISOString(true),
+                    expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, 'hours').toISOString(true)
                 };
                 if (typeof inputs.information !== 'undefined' && inputs.information !== null)
                     criteria.information = inputs.information;
@@ -122,8 +122,8 @@ module.exports = {
                     severity: inputs.severity,
                     color: inputs.color,
                     counties: inputs.county,
-                    starts: inputs.starts.toISOString(true),
-                    expires: inputs.expires.toISOString(true),
+                    starts: inputs.starts !== null ? moment(inputs.starts).toISOString(true) : moment().toISOString(true),
+                    expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, 'hours').toISOString(true),
                     information: inputs.information || ''
                 };
 

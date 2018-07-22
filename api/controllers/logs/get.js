@@ -18,7 +18,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: () => moment().toISOString(true),
+            allowNull: true,
             description: `moment() parsable string of a date to get logs.`
         }
     },
@@ -29,7 +29,7 @@ module.exports = {
 
         try {
             // Get date range
-            var start = moment(inputs.date).startOf('day');
+            var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
             var end = moment(start).add(1, 'days');
 
             // Get records

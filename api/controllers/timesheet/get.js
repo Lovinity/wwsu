@@ -12,7 +12,7 @@ module.exports = {
             custom: function (value) {
                 return moment(value).isValid();
             },
-            defaultsTo: () => moment().toISOString(true),
+            allowNull: true,
             description: `moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.`
         }
     },
@@ -23,7 +23,7 @@ module.exports = {
 
         try {
             // Get a range of one week
-            var start = moment(inputs.date).startOf('week');
+            var start = inputs.date !== null ? moment(inputs.date).startOf('week') : moment().startOf('week');
             var end = moment(start).add(1, 'weeks');
 
             // Get timesheet records
