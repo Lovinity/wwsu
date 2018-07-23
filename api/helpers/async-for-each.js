@@ -27,7 +27,7 @@ module.exports = {
         sails.log.debug('Helper asyncForEach called.');
         try {
             // No length? No call!
-            if (typeof inputs.array.length === 'undefined')
+            if (typeof inputs.array === 'undefined' || typeof inputs.array.length === 'undefined')
                 return exits.success();
             
             // Loop through each item in the array

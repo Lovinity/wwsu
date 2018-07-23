@@ -545,12 +545,13 @@ true if the track was queued, false if the track was not queued. A track may fai
 ## Songs [/songs]
 Songs endpoints regard the available songs/tracks in the automation system.
 ### /songs/get [GET /songs/get]
-Get an array of tracks from the automation system. This was designed to be used with the track request system.
+Get an array of tracks from the automation system. This was designed to be used with the track request system. For performance reasons, song.category, song.request, and song.spins will only be included if ID was specified in the request parameters.
 #### Request
 | key | criteria |
 |--|--|
-| ID | number (If only getting a specific song, provide the song's ID number. If none provided, will return requestable songs.) |
+| ID | number (If only getting a specific song, provide the song's ID number. If provided, the return song array will also contain category, request, and spins. If not provided, will return an array of requestable songs without category, request, nor spins.) |
 | search | string (If provided, return only songs that contain the provided string in the artist or the title.) |
+| subcategory | number (optional; if provided, filter by the provided subcategory ID) |
 | limit | number (Maximum number of songs to return. Defaults to 25.) |
 | offset | number (If provided, songs with an ID number less than or equal to the offset will not be returned.) |
 #### Response 200
@@ -614,9 +615,19 @@ Get an array of tracks from the automation system. This was designed to be used 
 				"tdate_played": "2018-05-15T22:31:34.381Z" // internal
 				"tartist_played": "2018-05-15T22:31:34.381Z" // Internal,
 				"original_metadata": 0, // If 1, clients should use original metadata, not current metadata.
-				"category": "Podcasts >> Best of George Carlin", // String containing the name of the category and subcategory of the track
-				"request": {"requestable": false, "HTML": "<div class="alert alert-warning" role="alert">You cannot request a non-music track.</div>", "listDiv": "info", "type": "nonMusic"}, // Request object. If requestable is true, the track can be requested. HTML contains a bit of HTML for the request section, such as a form if the track can be requested. listDiv is the color class to use for color coding this track on a list. Type is a short phrase describing the reason for not being able to request the track.
-				"spins": {7: 1, 30: 4, "YTD": 12, 365: 28} // Spin counts. Keys... 7 = last 7 days, 30 = last 30 days, YTD = Since January 1, 365: last year.
+				"category": "Podcasts >> Best of George Carlin", // String containing the name of the category and subcategory of the track. This is only provided if ID was specified during the request.
+				"request": {"requestable": false, "HTML": "<div class="alert alert-warning" role="alert">You cannot request a non-music track.</div>", "listDiv": "info", "type": "nonMusic"}, // Request object. If requestable is true, the track can be requested. HTML contains a bit of HTML for the request section, such as a form if the track can be requested. listDiv is the color class to use for color coding this track on a list. Type is a short phrase describing the reason for not being able to request the track. This is only provided if ID was specified during the request.
+				"spins": {7: 1, 30: 4, "YTD": 12, 365: 28} // Spin counts. Keys... 7 = last 7 days, 30 = last 30 days, YTD = Since January 1, 365: last year. This is only provided if ID was specified during the request.
+			},
+			...
+        ]
+### /songs/get-subcategories [GET /songs/get-subcategories]
+Get an array of subcategories containing songs that can be requested by the public.
+#### Response 200
+        [
+			{
+				"ID": 33,
+				"name": "Music >> Adult Contemporary" // Format: Top category >> Subcategory
 			},
 			...
         ]

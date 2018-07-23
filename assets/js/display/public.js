@@ -786,6 +786,7 @@ function doEas()
             // Resume regular slides when no extreme alerts are in effect anymore
         } else if (!easExtreme && !easActive && document.getElementById('slide-interrupt-eas') !== null)
         {
+            clearInterval(flashInterval);
             doSlide(true);
         }
     } catch (e) {
@@ -1181,7 +1182,7 @@ function doSlide(same = false)
         // Failsafes
         clearTimeout(slidetimer);
         slidetimer = true;
-        if ((document.getElementById('slide-interrupt') !== null && (Meta.state.startsWith("automation_") || Meta.state.includes("returning"))) || (document.getElementById('slide-interrupt-eas') !== null && easActive))
+        if ((document.getElementById('slide-interrupt') !== null && (Meta.state.startsWith("automation_") || Meta.state.includes("returning"))) || (document.getElementById('slide-interrupt-eas') !== null && easActive) || easActive)
         {
             lines.stop();
             $('#wrapper').fadeOut(500, 'linear', function () {
@@ -1367,11 +1368,11 @@ function doSlide(same = false)
                                 });
                             } else {
                                 innercontent.className = '';
-                                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center;">There are no events today.</div>`;
+                                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: #ffffff;">There are no events today.</div>`;
                             }
                         } else {
                             innercontent.className = '';
-                            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center;">There was an error getting today's events.</div>`;
+                            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: #ffffff;">There was an error getting today's events.</div>`;
                         }
                         slidetimer = setTimeout(doSlide, 14000);
                     });
