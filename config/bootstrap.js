@@ -88,11 +88,11 @@ module.exports.bootstrap = async function (done) {
     {
         if (sails.config.custom.categories.hasOwnProperty(config))
         {
+            sails.config.custom.subcats[config] = [];
             for (var cat in sails.config.custom.categories[config])
             {
                 if (sails.config.custom.categories[config].hasOwnProperty(cat))
                 {
-                    sails.config.custom.subcats[config] = [];
                     var thecategory = await Category.findOne({name: cat})
                             .tolerate((err) => {
                             });
