@@ -678,7 +678,7 @@ function doEas()
                     <div class="m-3" style="color: ${color4}; font-size: 6em;">${alert}</div>
                     <div class="m-1 text-info-light" style="font-size: 2em;">${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
                     <div class="m-1 text-warning-light" style="font-size: 2em;">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
-                    <div id="alert-marquee" class="marquee m-3" style="color: #FFFFFF; background: rgba(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}, 0.5); font-size: 2.5em;">${text}</div>
+                    <div id="alert-marquee" class="marquee m-3" style="color: #FFFFFF; background: rgba(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}, 0.9); font-size: 2.5em;">${text}</div>
                     </div></div>`;
                 if (easExtreme)
                 {
@@ -766,9 +766,9 @@ function doEas()
                 try {
                     var color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color) ? hexRgb(dodo.color) : hexRgb('#787878');
                     var borderclass = 'black';
-                    var alpha = 0.7;
+                    var alpha = 0.9;
                     borderclass = 'danger';
-                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
+                    color = `rgba(${Math.round(color.red / 2)}, ${Math.round(color.green / 2)}, ${Math.round(color.blue / 2)}, ${alpha});`;
                     innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
                         <span style="font-size: 1em;" class="text-info-light">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
@@ -1295,14 +1295,14 @@ function doSlide(same = false)
                         var innercontent = document.getElementById('directors');
                         Directors().each(function (dodo) {
                             try {
-                                var color = 'rgba(244, 67, 54, 0.5)';
+                                var color = 'rgba(244, 67, 54, 0.9)';
                                 var text1 = 'OUT';
                                 var text2 = '';
                                 if (dodo.since !== null && moment(dodo.since).isValid())
                                     text2 = moment(dodo.since).from(moment(Meta.time), true);
                                 if (dodo.present)
                                 {
-                                    var color = 'rgba(76, 175, 80, 0.5)';
+                                    var color = 'rgba(76, 175, 80, 0.9)';
                                     var text1 = 'IN';
                                 }
                                 innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
@@ -1336,24 +1336,29 @@ function doSlide(same = false)
                                     try {
                                         var color = hexRgb(dodo.color);
                                         var borderclass = 'black';
-                                        var alpha = 0.3;
                                         var timeleft = '';
                                         if (moment(Meta.time).isBefore(moment(dodo.start)))
                                         {
                                             timeleft = `Starts ${moment(Meta.time).to(moment(dodo.start))}`;
-                                            alpha = 0.3;
+                                            color.red = Math.round(color.red / 3);
+                                            color.green = Math.round(color.green / 3);
+                                            color.blue = Math.round(color.blue / 3);
                                             borderclass = 'warning';
                                         } else if (moment(Meta.time).isAfter(moment(dodo.end)))
                                         {
+                                            color.red = Math.round(color.red / 4);
+                                            color.green = Math.round(color.green / 4);
+                                            color.blue = Math.round(color.blue / 4);
                                             timeleft = `Ended ${moment(dodo.ends).from(moment(Meta.time))}`;
-                                            alpha = 0.1;
                                             borderclass = 'danger';
                                         } else {
+                                            color.red = Math.round(color.red / 2);
+                                            color.green = Math.round(color.green / 2);
+                                            color.blue = Math.round(color.blue / 2);
                                             timeleft = `Ends ${moment(Meta.time).to(moment(dodo.ends))}`;
-                                            alpha = 0.5;
                                             borderclass = 'success';
                                         }
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
+                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                         innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;"><string>${dodo.title}</strong></span><br /><span class="text-warning-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span><br /><span class="text-danger-light" style="font-size: 1em;">${timeleft}</span><br /><span class="text-light" style="font-size: 0.75em; text-align: left;">${text_truncate(dodo.description, 140)}</div>
                         </div>
@@ -1414,7 +1419,10 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col1`);
                                         color = hexRgb(dodo.color);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.5);`;
+                                        color.red = Math.round(color.red / 2);
+                                        color.green = Math.round(color.green / 2);
+                                        color.blue = Math.round(color.blue / 2);
+                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
                                             <div class="col-8" style="text-align: left;">
@@ -1445,7 +1453,7 @@ function doSlide(same = false)
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col1`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.5);">
+                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.9);">
                                             No events this day.
                                             </div>`;
                             }
@@ -1461,7 +1469,7 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col1`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.5);">
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.9);">
                                             Error loading events for this day.
                                             </div>`;
                         }
@@ -1484,7 +1492,10 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col2`);
                                         color = hexRgb(dodo.color);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.5);`;
+                                        color.red = Math.round(color.red / 2);
+                                        color.green = Math.round(color.green / 2);
+                                        color.blue = Math.round(color.blue / 2);
+                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
                                             <div class="col-8" style="text-align: left;">
@@ -1515,7 +1526,7 @@ function doSlide(same = false)
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col2`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.5);">
+                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.9);">
                                             No events this day.
                                             </div>`;
                             }
@@ -1531,7 +1542,7 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col2`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.5);">
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.9);">
                                             Error loading events for this day.
                                             </div>`;
                         }
@@ -1554,7 +1565,10 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col3`);
                                         color = hexRgb(dodo.color);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.5);`;
+                                        color.red = Math.round(color.red / 2);
+                                        color.green = Math.round(color.green / 2);
+                                        color.blue = Math.round(color.blue / 2);
+                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
                                             <div class="col-8" style="text-align: left;">
@@ -1585,7 +1599,7 @@ function doSlide(same = false)
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col3`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.5);">
+                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.9);">
                                             No events this day.
                                             </div>`;
                             }
@@ -1601,7 +1615,7 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col3`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.5);">
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.9);">
                                             Error loading events for this day.
                                             </div>`;
                         }
@@ -1644,7 +1658,10 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col1`);
                                         color = hexRgb(dodo.color);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.5);`;
+                                        color.red = Math.round(color.red / 2);
+                                        color.green = Math.round(color.green / 2);
+                                        color.blue = Math.round(color.blue / 2);
+                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
                                             <div class="col-8" style="text-align: left;">
@@ -1675,7 +1692,7 @@ function doSlide(same = false)
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col1`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.5);">
+                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.9);">
                                             No events this day.
                                             </div>`;
                             }
@@ -1691,7 +1708,7 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col1`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.5);">
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.9);">
                                             Error loading events for this day.
                                             </div>`;
                         }
@@ -1714,7 +1731,10 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col2`);
                                         color = hexRgb(dodo.color);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.5);`;
+                                        color.red = Math.round(color.red / 2);
+                                        color.green = Math.round(color.green / 2);
+                                        color.blue = Math.round(color.blue / 2);
+                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
                                             <div class="col-8" style="text-align: left;">
@@ -1745,7 +1765,7 @@ function doSlide(same = false)
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col2`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.5);">
+                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.9);">
                                             No events this day.
                                             </div>`;
                             }
@@ -1761,7 +1781,7 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col2`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.5);">
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.9);">
                                             Error loading events for this day.
                                             </div>`;
                         }
@@ -1784,7 +1804,10 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col3`);
                                         color = hexRgb(dodo.color);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.5);`;
+                                        color.red = Math.round(color.red / 2);
+                                        color.green = Math.round(color.green / 2);
+                                        color.blue = Math.round(color.blue / 2);
+                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
                                             <div class="col-8" style="text-align: left;">
@@ -1815,7 +1838,7 @@ function doSlide(same = false)
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col3`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.5);">
+                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.9);">
                                             No events this day.
                                             </div>`;
                             }
@@ -1831,7 +1854,7 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col3`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.5);">
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.9);">
                                             Error loading events for this day.
                                             </div>`;
                         }
@@ -1898,7 +1921,9 @@ function doSlide(same = false)
                             try {
                                 var color = (typeof dodo.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb('#787878');
                                 var borderclass = 'black';
-                                var alpha = 0.7;
+                                color.red = Math.round(color.red / 2);
+                                color.green = Math.round(color.green / 2);
+                                color.blue = Math.round(color.blue / 2);
                                 if (typeof dodo['severity'] !== 'undefined')
                                 {
                                     if (dodo['severity'] === 'Extreme')
@@ -1922,7 +1947,7 @@ function doSlide(same = false)
                                 } else {
                                     timeleft = `Expires ${moment(Meta.time).to(moment(dodo.expires))}`;
                                 }
-                                color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
+                                color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.9);`;
                                 innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
                         <span style="font-size: 1em;" class="text-info-light">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
@@ -1985,14 +2010,14 @@ function doSlide(same = false)
                 {
                     slide = 1;
                     /*
-                    if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
-                    {
-                        slide = 0;
-                        lastBurnIn = moment();
-                        if (restarted)
-                            console.log(`Slide issue. Triggering marquee screensaver.`);
-                    }
-                    */
+                     if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
+                     {
+                     slide = 0;
+                     lastBurnIn = moment();
+                     if (restarted)
+                     console.log(`Slide issue. Triggering marquee screensaver.`);
+                     }
+                     */
                     restarted = true;
                 }
 
@@ -2058,7 +2083,9 @@ function doSlide(same = false)
                             try {
                                 var color = (typeof dodo.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb('#787878');
                                 var borderclass = 'black';
-                                var alpha = 0.3;
+                                color.red = Math.round(color.red / 2);
+                                color.green = Math.round(color.green / 2);
+                                color.blue = Math.round(color.blue / 2);
                                 if (typeof dodo['severity'] !== 'undefined')
                                 {
                                     if (dodo['severity'] === 'Extreme')
@@ -2082,7 +2109,7 @@ function doSlide(same = false)
                                 } else {
                                     timeleft = `Expires ${moment(Meta.time).to(moment(dodo.expires))}`;
                                 }
-                                color = `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha});`;
+                                color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.2);`;
                                 innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
                         <span style="font-size: 1em;">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
