@@ -27,10 +27,10 @@ module.exports = {
             defaultsTo: 25,
             description: 'Limit the number of songs returned to this number.'
         },
-        offset: {
+        skip: {
             type: 'number',
             defaultsTo: 0,
-            description: 'We will not return any songs whose ID is less than or equal to this number.'
+            description: 'Skip this number of records in the list.'
         }
     },
 
@@ -78,7 +78,7 @@ module.exports = {
                 });
 
                 // Find songs in any of the music subcategories, or in the provided subcategory.
-                query = {ID: {'>': inputs.offset}, id_subcat: subcatIDs};
+                query = {id_subcat: subcatIDs};
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
                     query.id_subcat = inputs.subcategory;
 
@@ -86,7 +86,7 @@ module.exports = {
                 if (typeof inputs.search !== 'undefined' && inputs.search !== null)
                     query.or = [{artist: {'contains': inputs.search}}, {title: {'contains': inputs.search}}];
 
-                songs = await Songs.find(query).limit(inputs.limit);
+                songs = await Songs.find(query).sort([{artist: 'ASC'}, {title: 'ASC'}]).skip(inputs.skip).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
                 sails.log.silly(songs);
 
@@ -95,7 +95,7 @@ module.exports = {
 
                 // Find the song matching the defined ID
                 query = {ID: inputs.ID};
-                songs = await Songs.find(query).limit(inputs.limit);
+                songs = await Songs.find(query).sort([{artist: 'ASC'}, {title: 'ASC'}]).skip(inputs.skip).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
                 sails.log.silly(songs);
 

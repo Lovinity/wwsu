@@ -1,4 +1,4 @@
-/* global Requests, sails, Songs, Subcategory, Category, Settings, moment */
+/* global Requests, sails, Songs, Subcategory, Category, Settings, moment, Meta */
 
 require("moment-duration-format");
 
@@ -64,7 +64,24 @@ module.exports = {
             sails.log.silly(`Requests of this song that are pending: ${requests2}`);
             if (requests2.length > 0)
             {
-                sails.log.verbose(`Track cannot be requested: Track is already in the request queue.`);
+                sails.log.verbose(`Track cannot be requested: it has already been requested and is pending to air.`);
+                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
+                                This track is already in the request queue and pending to air.
+                                </div>`, listDiv: 'warning', type: 'inQueue'});
+            }
+
+            var inQueue = false;
+            await sails.helpers.asyncForEach(Meta.automation, function (track, index) {
+                return new Promise(async (resolve2, reject2) => {
+                    if (parseInt(track.ID) === inputs.ID)
+                        inQueue = true;
+                    return resolve2(false);
+                });
+            });
+            
+            if (inQueue)
+            {
+                sails.log.verbose(`Track cannot be requested: Track is in the automation system queue and is pending to air.`);
                 return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
                                 This track is already in the request queue and pending to air.
                                 </div>`, listDiv: 'warning', type: 'inQueue'});
@@ -147,13 +164,12 @@ module.exports = {
                 // By this point, all rules passed and the track can be requested. Include the request form.
             } else {
                 sails.log.verbose(`Track can be requested.`);
-                return exits.success({requestable: true, HTML: `<form action="javascript:requestTrack(${record.ID})"><div class="form-group">
+                return exits.success({requestable: true, HTML: `<div class="form-group">
                                     <label for="request-name"><strong>Request this track</strong></label>
-                                    <input type="text" class="form-control" id="request-name" placeholder="Your name">
-                                    <textarea class="form-control" id="request-message" rows="2" placeholder="An optional message to be included with your request."></textarea>
+                                    <input type="text" class="form-control" id="track-request-name" placeholder="Your name (optional)">
+                                    <textarea class="form-control" id="track-request-message" rows="2" placeholder="Message for the DJ (optional)"></textarea>
                                     </div>                    
-                                    <button type="submit" class="btn btn-primary">Place Request</button>
-                                    </form>`, listDiv: 'success', type: 'requestable'});
+                                    <button type="submit" id="track-request-submit" class="btn btn-primary">Place Request</button>`, listDiv: 'success', type: 'requestable'});
             }
 
         } catch (e) {

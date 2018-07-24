@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists */
 
 /**
  * Bootstrap
@@ -172,6 +172,16 @@ module.exports.bootstrap = async function (done) {
         meta.time = moment().toISOString(true);
         sails.log.silly(meta);
         await Meta.changeMeta(meta);
+        Playlists.active.name = meta.playlist;
+        if (meta.playlist !== null && meta.playlist !== '')
+        {
+            var theplaylist = await Playlists.findOne({name: meta.playlist});
+            Playlists.active.ID = theplaylist.ID;
+        } else {
+            Playlists.active.ID = 0;
+        }
+        Playlists.active.position = meta.playlist_position;
+        Playlists.played = moment(meta.playlist_played);
     } catch (e) {
         await Meta.changeMeta({time: moment().toISOString(true)});
     }

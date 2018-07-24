@@ -1,4 +1,4 @@
-# WWSU 4.0 beta 3
+# WWSU 4.0 beta 4
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Beta stage, which means although this is a working build, bugs are to be expected.
@@ -553,7 +553,7 @@ Get an array of tracks from the automation system. This was designed to be used 
 | search | string (If provided, return only songs that contain the provided string in the artist or the title.) |
 | subcategory | number (optional; if provided, filter by the provided subcategory ID) |
 | limit | number (Maximum number of songs to return. Defaults to 25.) |
-| offset | number (If provided, songs with an ID number less than or equal to the offset will not be returned.) |
+| skip | number (If provided, will skip that many songs from the beginning.) |
 #### Response 200
         [
 			{

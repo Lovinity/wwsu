@@ -13,7 +13,7 @@ var announcementIDs = [];
 var automationpost = null;
 var Meta = {};
 var shouldScroll = false;
-var skipIt = 0;
+var skipIt = -1;
 var blocked = false;
 var firstTime = true;
 var nicknameTimer = null;
@@ -50,6 +50,40 @@ $("#nativeflashradio").flashradio({
     streamtype: "other",
     streamurl: "http://server.wwsu1069.org",
     songinformationinterval: "600000"
+});
+
+document.querySelector(`#song-data`).addEventListener("click", function (e) {
+    try {
+        if (e.target) {
+            if (e.target.id.startsWith(`track-`))
+            {
+                loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
+            }
+            else if (e.target.id.startsWith(`track-l-`))
+            {
+                loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)));
+            }
+        }
+    } catch (err) {
+
+    }
+});
+
+document.querySelector(`#track-info-request`).addEventListener("click", function (e) {
+    try {
+        if (e.target) {
+            if (e.target.id === "track-request-submit")
+            {
+                requestTrack(parseInt($('#track-info-ID').html()));
+            }
+        }
+    } catch (err) {
+
+    }
+});
+
+document.querySelector(`#filter-submit`).addEventListener("click", function (e) {
+    loadTracks(0);
 });
 
 function waitFor(check, callback, count = 0)
@@ -110,7 +144,6 @@ waitFor(function () {
     // On socket disconnect, notify the user.
     io.socket.on('disconnect', function () {
         try {
-            console.log('Lost connection');
             nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
             iziToast.show({
                 title: 'Lost connection to WWSU',
@@ -161,7 +194,6 @@ waitFor(function () {
                 }
             }
         } catch (e) {
-            console.error(e);
         }
     });
 
@@ -173,13 +205,11 @@ waitFor(function () {
                 addAnnouncement(data);
             }
         } catch (e) {
-            console.error(e);
         }
     });
 
 // On meta changes, process meta
     io.socket.on('discipline', function (data) {
-        console.dir(data);
         iziToast.show({
             title: `Notice`,
             message: data.discipline,
@@ -202,6 +232,7 @@ function doSockets(firsttime = false)
     messagesSocket();
     metaSocket();
     announcementsSocket();
+    loadGenres();
 }
 
 function onlineSocket()
@@ -212,7 +243,6 @@ function onlineSocket()
             nickname.value = nickname.value.replace('Web ', '');
             nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
         } catch (e) {
-            console.error(e);
             setTimeout(onlineSocket, 10000);
         }
     });
@@ -231,7 +261,6 @@ function messagesSocket()
             });
             firstTime = false;
         } catch (e) {
-            console.error(e);
             setTimeout(messagesSocket, 10000);
         }
     });
@@ -251,7 +280,6 @@ function metaSocket()
             }
             doMeta(body);
         } catch (e) {
-            console.error(e);
             setTimeout(metaSocket, 10000);
         }
     });
@@ -269,7 +297,6 @@ function announcementsSocket()
                 }
             });
         } catch (e) {
-            console.error(e);
             setTimeout(announcementsSocket, 10000);
         }
     });
@@ -458,7 +485,6 @@ function doMeta(response)
         if (temp)
             temp.remove();
     } catch (e) {
-        console.error(e);
     }
 }
 
@@ -491,59 +517,103 @@ function clearChat()
 
 // Used to get info about a specific track to display as an overlay box
 function loadTrackInfo(trackID) {
-    $('#trackModal').modal('show');
-    var modalBody = document.getElementById('track-info-body');
-    modalBody.innerHTML = 'Loading track information...';
-    $('#trackModal').modal('handleUpdate');
     io.socket.post('/songs/get', {ID: trackID}, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
             // WORK ON THIS: HTML table of song information
+            $('#trackModal').modal('show');
+            $('#track-info-ID').html(response[0].ID);
+            $('#track-info-status').html(response[0].enabled === 1 ? 'Enabled' : 'Disabled');
+            document.getElementById('track-info-status').className = `table-${response[0].enabled === 1 ? 'success' : 'dark'}`;
+            $('#track-info-artist').html(response[0].artist);
+            $('#track-info-title').html(response[0].title);
+            $('#track-info-album').html(response[0].album);
+            $('#track-info-genre').html(response[0].category);
+            $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format("HH:mm:ss"));
+            $('#track-info-lastplayed').html(moment(response[0].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[0].date_played).format('LLLL') : 'Unknown');
+            $('#track-info-limits').html(`<ul>
+            ${response[0].limit_action > 0 && response[0].count_played < response[0].play_limit ? `<li>Track has ${response[0].play_limit - response[0].count_played} spins left</li>` : ``}
+            ${response[0].limit_action > 0 && response[0].count_played >= response[0].play_limit ? `<li>Track expired (reached spin limit)</li>` : ``}
+            ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ``}
+            ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ``}
+            </ul>`);
+            $('#track-info-request').html(response[0].request.HTML);
             $('#trackModal').modal('handleUpdate');
         } catch (e) {
-            modalBody.innerHTML = 'Failed to load track information. Please try again later.';
-            $('#trackModal').modal('handleUpdate');
+            iziToast.show({
+                title: 'Request system failed',
+                message: 'Failed to load track info. Please try again later.',
+                color: 'red',
+                zindex: 100,
+                layout: 1,
+                closeOnClick: true,
+                position: 'bottomCenter',
+                timeout: 5000
+            });
         }
     });
 }
 
 // Used to place a track request
 function requestTrack(trackID) {
-    var modalBody = document.getElementById('track-info-body');
-    var requestName = document.getElementById('request-name');
-    var requestMessage = document.getElementById('request-message');
+    var requestName = document.getElementById('track-request-name');
+    var requestMessage = document.getElementById('track-request-message');
     var data = {ID: trackID, name: requestName.value, message: requestMessage.value};
-    modalBody.innerHTML = 'Requesting track...';
-    $('#trackModal').modal('handleUpdate');
     io.socket.post('/requests/place', data, function serverResponded(response, JWR) {
         try {
-            modalBody.innerHTML = response;
-            $('#trackModal').modal('handleUpdate');
+            iziToast.show({
+                title: 'Request system success',
+                message: 'Your request was placed. In automation, requests are played during breaks. During shows, it is up to DJ discretion.',
+                color: 'green',
+                zindex: 100,
+                layout: 1,
+                closeOnClick: true,
+                position: 'bottomCenter',
+                timeout: 15000
+            });
+            $('#trackModal').modal('hide');
         } catch (e) {
-            modalBody.innerHTML = 'Failed to place request at this time. Please try again later.';
-            $('#trackModal').modal('handleUpdate');
+            iziToast.show({
+                title: 'Request system failed',
+                message: 'Failed to request this track. Please try again later.',
+                color: 'red',
+                zindex: 100,
+                layout: 1,
+                closeOnClick: true,
+                position: 'bottomCenter',
+                timeout: 5000
+            });
         }
     });
 }
 
 // Used to load a list of tracks for the track request system
-function loadTracks(offset = 0) {
+function loadTracks(skip = 0) {
     var songData = document.getElementById('song-data');
     var search = document.getElementById('searchterm');
-    var query = {search: escapeHTML(search.value), offset: offset};
-    if (offset === 0)
+    var query = {search: escapeHTML(search.value), skip: skip};
+    var genreOptions = document.getElementById('filter-genre');
+    var selectedOption = genreOptions.options[genreOptions.selectedIndex].value;
+    if (selectedOption !== "0")
+        query.subcategory = parseInt(selectedOption);
+    if (skip === 0)
         songData.innerHTML = ``;
     io.socket.post('/songs/get', query, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
-            response.forEach(function (track) {
-                songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 border border-secondary bg-${(track.request.requestable) ? 'success' : 'danger'}" onclick="loadTrackInfo(${track.ID});" style="cursor: pointer;"><span>${track.artist} - ${track.title}</span></div>`;
-                if (track.ID > skipIt)
-                    skipIt = track.ID;
-            });
+            if (response.length > 0)
+            {
+                response.forEach(function (track) {
+                    songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 border border-secondary bg-${(track.enabled === 1) ? 'wwsu-red' : 'dark'}" style="cursor: pointer;"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
+                    skipIt++;
+                });
+            } else {
+                skipIt = -1;
+                songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`;
+            }
         } catch (e) {
             iziToast.show({
-                title: 'Request failed',
+                title: 'Request system failed',
                 message: 'Error loading tracks. Please try again later.',
                 color: 'red',
                 zindex: 100,
@@ -552,18 +622,41 @@ function loadTracks(offset = 0) {
                 position: 'bottomCenter',
                 timeout: 5000
             });
-            console.error(e);
         }
     });
 }
-loadTracks(0);
 
-$('#trackrequests').bind('scroll', function () {
-    if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
-        skipIt += 25;
+function loadGenres() {
+    io.socket.post('/songs/get-subcategories', {}, function serverResponded(response, JWR) {
+        try {
+            document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
+            var x = document.getElementById("filter-genre");
+            response.forEach(function (subcat) {
+                var c = document.createElement("option");
+                c.value = subcat.ID;
+                c.text = subcat.name;
+                x.options.add(c, 1);
+            });
+        } catch (e) {
+            iziToast.show({
+                title: 'Request system failed',
+                message: 'Error loading genres. Please try again later.',
+                color: 'red',
+                zindex: 100,
+                layout: 1,
+                closeOnClick: true,
+                position: 'bottomCenter',
+                timeout: 5000
+            });
+        }
+    });
+}
+
+window.onscroll = function (ev) {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight && skipIt > -1) {
         loadTracks(skipIt);
     }
-});
+};
 
 function addAnnouncement(announcement)
 {

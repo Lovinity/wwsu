@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements */
+/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements, _ */
 
 module.exports.cron = {
 
@@ -41,6 +41,16 @@ module.exports.cron = {
                         meta.time = moment().toISOString(true);
                         sails.log.silly(meta);
                         await Meta.changeMeta(meta);
+                        Playlists.active.name = meta.playlist;
+                        if (meta.playlist !== null && meta.playlist !== '')
+                        {
+                            var theplaylist = await Playlists.findOne({name: meta.playlist});
+                            Playlists.active.ID = theplaylist.ID;
+                        } else {
+                            Playlists.active.ID = 0;
+                        }
+                        Playlists.active.position = meta.playlist_position;
+                        Playlists.played = moment(meta.playlist_played);
                     } catch (e) {
                         Meta.changeMeta({time: moment().toISOString(true)});
                         return resolve(e);
@@ -85,13 +95,16 @@ module.exports.cron = {
                     sails.log.silly(`Proceeding after queueCheck.`);
 
                     // If the currently playing track was a request, mark as played
-                    if (Requests.pending.indexOf(queue[0].ID) > -1)
+                    if (_.includes(Requests.pending, parseInt(queue[0].ID)))
                     {
                         await Requests.update({songID: queue[0].ID}, {played: 1})
                                 .tolerate((err) => {
                                 });
-                        delete Requests.pending[Requests.pending.indexOf(queue[0].ID)];
+                        delete Requests.pending[Requests.pending.indexOf(parseInt(queue[0].ID))];
                     }
+                    
+                    // If any of the tracks in queue are in the Requests.pendingQueue, move to Requests.pending
+                    
 
                     await sails.helpers.error.reset('queueFail');
 

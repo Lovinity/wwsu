@@ -34,7 +34,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var query = {played: 0};
-            if (typeof inputs.ID !== 0)
+            if (inputs.ID !== 0)
                 query.ID = inputs.ID;
 
             // End if consider_playlist and we are not in automation mode.
@@ -140,7 +140,9 @@ module.exports = {
                     // Prepare the request
                     await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
                     if (!_.includes(Requests.pending, record.songID))
+                    {
                         Requests.pending.push(record.songID);
+                    }
                     return resolve(true);
                 });
             };
@@ -151,16 +153,30 @@ module.exports = {
                     sails.log.verbose(`getRequest called: ${quantity}`);
                     if (checked.length > 0)
                         query.ID = {'!=': checked};
+                    sails.log.silly(query);
                     record = await Requests.find(query).limit(1);
-                    sails.log.silly(`Request: ${record}`);
+                    sails.log.silly(record);
                     if (typeof record !== 'undefined' && typeof record[0] !== 'undefined' && typeof record[0].ID !== 'undefined')
                     {
-                        if (record.length > 0 && Requests.pending.indexOf(record[0].songID) !== -1)
+                        // Check if the request is already in the queue
+                        var inQueue = false;
+                        await sails.helpers.asyncForEach(Meta.automation, function (track, index) {
+                            return new Promise(async (resolve2, reject2) => {
+                                if (parseInt(track.ID) === record[0].songID)
+                                    inQueue = true;
+                                return resolve2(false);
+                            });
+                        });
+                        // Skip it if so
+                        if (inQueue)
                         {
                             sails.log.verbose(`getRequest abandoned: the track was already queued.`);
                             checked.push(record[0].ID);
                             await getRequest(quantity);
+                            return resolve();
+                            // Otherwise, queue it
                         } else {
+                            checked.push(record[0].ID);
                             if (quantity === inputs.quantity)
                                 await prepareRequests();
                             var temp = await queueRequest(record[0]);
@@ -168,18 +184,21 @@ module.exports = {
                                 queuedSomething = true;
                             if (quantity > 1) {
                                 await getRequest(quantity - 1);
+                                return resolve();
                             } else {
                                 await finalizeRequests();
                                 return resolve();
                             }
                         }
                     } else {
-                        queuedSomething = false;
+                        sails.log.verbose(`No more request records to process; exiting.`);
+                        await finalizeRequests();
                         return resolve();
                     }
                 });
             };
 
+            queuedSomething = false;
             await getRequest(inputs.quantity);
             if (queuedSomething)
                 return exits.success(true);
