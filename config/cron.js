@@ -1001,6 +1001,7 @@ module.exports.cron = {
             sails.log.debug(`CRON checkDB called`);
             try {
                 // Make sure all models have a record at ID 1, even if it's a dummy.
+                // TODO: Find a way to auto-populate these arrays.
                 var checksMemory = [Calendar, Directors, Recipients, Status, Tasks];
                 var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
                 var checksNodebase = [Announcements, Discipline, Eas, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet];
@@ -1116,11 +1117,11 @@ module.exports.cron = {
                 {
                     if (sails.config.custom.categories.hasOwnProperty(config))
                     {
+                        sails.config.custom.subcats[config] = [];
                         for (var cat in sails.config.custom.categories[config])
                         {
                             if (sails.config.custom.categories[config].hasOwnProperty(cat))
                             {
-                                sails.config.custom.subcats[config] = [];
                                 var thecategory = await Category.findOne({name: cat})
                                         .tolerate((err) => {
                                         });
