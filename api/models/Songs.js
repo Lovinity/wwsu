@@ -242,7 +242,24 @@ module.exports = {
 
         originalmetadata: {
             type: 'number'
-        }
+        },
+        /*
+        spins_7: {
+            type: 'number'
+        },
+        
+        spins_30: {
+            type: 'number'
+        },
+        
+        spins_ytd: {
+            type: 'number'
+        },
+        
+        spins_year: {
+            type: 'number'
+        },
+        */
   },
   
   pending: [] // Tracks that have been removed but need to air eventually, and will be re-queued at the next break.

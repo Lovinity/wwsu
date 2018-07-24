@@ -537,6 +537,10 @@ function loadTrackInfo(trackID) {
             ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ``}
             ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ``}
             </ul>`);
+            $('#track-info-spins7').html(`last 7 days: ${response[0].spins["7"]}`);
+            $('#track-info-spins30').html(`last 30 days: ${response[0].spins["30"]}`);
+            $('#track-info-spinsytd').html(`since January 1: ${response[0].spins["YTD"]}`);
+            $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins["365"]}`);
             $('#track-info-request').html(response[0].request.HTML);
             $('#trackModal').modal('handleUpdate');
         } catch (e) {
