@@ -55,12 +55,12 @@ $("#nativeflashradio").flashradio({
 document.querySelector(`#song-data`).addEventListener("click", function (e) {
     try {
         if (e.target) {
-            if (e.target.id.startsWith(`track-`))
-            {
-                loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
-            } else if (e.target.id.startsWith(`track-l-`))
+            if (e.target.id.startsWith(`track-l-`))
             {
                 loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)));
+            } else if (e.target.id.startsWith(`track-`))
+            {
+                loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
             }
         }
     } catch (err) {
@@ -516,6 +516,7 @@ function clearChat()
 
 // Used to get info about a specific track to display as an overlay box
 function loadTrackInfo(trackID) {
+    console.log(`getting ${trackID}`)
     io.socket.post('/songs/get', {ID: trackID}, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
@@ -539,6 +540,8 @@ function loadTrackInfo(trackID) {
             $('#track-info-request').html(response[0].request.HTML);
             $('#trackModal').modal('handleUpdate');
         } catch (e) {
+            console.dir(response[0]);
+            console.error(e);
         }
     });
 }
