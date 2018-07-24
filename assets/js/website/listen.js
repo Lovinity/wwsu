@@ -58,8 +58,7 @@ document.querySelector(`#song-data`).addEventListener("click", function (e) {
             if (e.target.id.startsWith(`track-`))
             {
                 loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
-            }
-            else if (e.target.id.startsWith(`track-l-`))
+            } else if (e.target.id.startsWith(`track-l-`))
             {
                 loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)));
             }
@@ -540,16 +539,6 @@ function loadTrackInfo(trackID) {
             $('#track-info-request').html(response[0].request.HTML);
             $('#trackModal').modal('handleUpdate');
         } catch (e) {
-            iziToast.show({
-                title: 'Request system failed',
-                message: 'Failed to load track info. Please try again later.',
-                color: 'red',
-                zindex: 100,
-                layout: 1,
-                closeOnClick: true,
-                position: 'bottomCenter',
-                timeout: 5000
-            });
         }
     });
 }
@@ -660,13 +649,20 @@ window.onscroll = function (ev) {
 
 function addAnnouncement(announcement)
 {
-    if (moment(Meta.time).isAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.ends)))
+    if (moment(Meta.time).isAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires)))
     {
+        var color = 'info';
+        if (announcement.level === 'success')
+            color = 'green';
+        if (announcement.level === 'danger')
+            color = 'red';
+        if (announcement.level === 'warning')
+            color = 'yellow';
         announcementIDs.push(announcement.ID);
         iziToast.show({
             title: 'Announcement from WWSU',
             message: announcement.announcement,
-            color: 'red',
+            color: color,
             zindex: 100,
             layout: 1,
             closeOnClick: true,

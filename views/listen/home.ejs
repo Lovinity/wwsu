@@ -55,6 +55,12 @@
 <div class="p-1 m-3 card text-white bg-dark">
   <div class="card-header text-center" style="font-size: 1.5em;">Request a Song</div>
   <div class="card-body">
+<div class="alert alert-info" role="alert">
+Each IP is limited to making <%= requestLimit %> requests per day (reset at midnight).
+</div>
+<div class="alert alert-info" role="alert">
+During automation, a few requests are played at each break. During a show, it is up to the DJ's discretion when/if to play requests.
+</div>
 <div class="container-fluid" id="trackrequests" style="background-color: #969696; color: #000000;">
 <div class="input-group">
 <input type="text" placeholder="Search artist or title..." value="" id="searchterm" class="form-control">
@@ -136,4 +142,4 @@
 
     <script>if (window.module)
                 module = window.module;</script>
-<script src="../../js/website/listen.js" defer></script>
+<script src="../../js/website/listen.js?t=<%= timestamp %>" defer></script>
