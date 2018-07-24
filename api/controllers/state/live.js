@@ -56,6 +56,9 @@ module.exports = {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
             if (inputs.showname !== '')
                 inputs.showname = await sails.helpers.filterProfane(inputs.showname);
+            
+            // Send meta so that DJ Controls does not think this person is interfering with another show
+            await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: ''});
 
             // If we are not already in live mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("live_"))

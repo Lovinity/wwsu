@@ -56,6 +56,9 @@ module.exports = {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
             if (inputs.showname !== '')
                 inputs.showname = await sails.helpers.filterProfane(inputs.showname);
+            
+            // Send meta to prevent accidental interfering messages in Dj Controls
+            await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: ''});
 
             // If we are not already in remote mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("remote_"))

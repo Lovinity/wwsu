@@ -56,6 +56,9 @@ module.exports = {
             // Filter profanity
             if (inputs.topic !== '')
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
+            
+            // Set meta to prevent accidental messages in DJ Controls
+            Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, track: ''});
 
             if (!Meta['A'].state.startsWith("sports"))
             {
