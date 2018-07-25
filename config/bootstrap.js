@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list */
 
 /**
  * Bootstrap
@@ -177,6 +177,16 @@ module.exports.bootstrap = async function (done) {
         {
             var theplaylist = await Playlists.findOne({name: meta.playlist});
             Playlists.active.ID = theplaylist.ID;
+            var playlistTracks = await Playlists_list.find({pID: Playlists.active.ID})
+                    .tolerate((err) => {
+                    });
+            Playlists.active.tracks = [];
+            if (typeof playlistTracks !== 'undefined')
+            {
+                playlistTracks.forEach(function (playlistTrack) {
+                    Playlists.active.tracks.push(playlistTrack.sID);
+                });
+            }
         } else {
             Playlists.active.ID = 0;
         }

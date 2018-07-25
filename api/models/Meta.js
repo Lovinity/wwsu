@@ -26,6 +26,11 @@ module.exports = {
             allowNull: true
         },
 
+        showstamp: {
+            type: 'ref',
+            columnType: 'datetime'
+        },
+
         track: {
             type: 'string',
             allowNull: true
@@ -75,6 +80,7 @@ module.exports = {
     A: {
         state: '', // State of the WWSU system
         dj: '', // If someone is on the air, host name - show name
+        showstamp: null, // When a show starts, this is the timestamp which the show began
         track: '', // Currently playing track either in automation or manually logged
         genre: '', // Name of the genre or rotation currently being played, if any
         trackstamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
@@ -139,9 +145,9 @@ module.exports = {
                     }
                 }
             }
-            
+
             var criteria = _.cloneDeep(db);
-            
+
             await Meta.update({ID: 1}, criteria)
                     .tolerate((err) => {
                         return reject(err);

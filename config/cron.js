@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements, _ */
+/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements, _, Listeners */
 
 module.exports.cron = {
 
@@ -46,6 +46,16 @@ module.exports.cron = {
                         {
                             var theplaylist = await Playlists.findOne({name: meta.playlist});
                             Playlists.active.ID = theplaylist.ID;
+                            var playlistTracks = await Playlists_list.find({pID: Playlists.active.ID})
+                                    .tolerate((err) => {
+                                    });
+                            Playlists.active.tracks = [];
+                            if (typeof playlistTracks !== 'undefined')
+                            {
+                                playlistTracks.forEach(function (playlistTrack) {
+                                    Playlists.active.tracks.push(playlistTrack.sID);
+                                });
+                            }
                         } else {
                             Playlists.active.ID = 0;
                         }
@@ -504,14 +514,14 @@ module.exports.cron = {
                         {
                             change.line2 = '';
                             change.track = '';
-                            await Meta.changeMeta({state: 'live_on'});
+                            await Meta.changeMeta({state: 'live_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
                         }
                         if (Meta['A'].state === 'automation_sports' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                         {
                             change.line2 = '';
                             change.track = '';
-                            await Meta.changeMeta({state: 'sports_on'});
+                            await Meta.changeMeta({state: 'sports_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
                         }
                         // If we are preparing for remote, so some stuff if we are playing the stream track
@@ -519,7 +529,7 @@ module.exports.cron = {
                         {
                             change.line2 = '';
                             change.track = '';
-                            await Meta.changeMeta({state: 'remote_on'});
+                            await Meta.changeMeta({state: 'remote_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
@@ -529,7 +539,7 @@ module.exports.cron = {
                         {
                             change.line2 = '';
                             change.track = '';
-                            await Meta.changeMeta({state: 'sportsremote_on'});
+                            await Meta.changeMeta({state: 'sportsremote_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
@@ -807,33 +817,53 @@ module.exports.cron = {
         start: true
     },
 
-    // Twice per minute, at 03 and 33, check the online status of the radio streams
+    // Twice per minute, at 03 and 33, check the online status of the radio streams, and log listener count
     checkRadioStreams: {
         schedule: '3,33 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON checkRadioStreams triggered.`);
             try {
-                needle('get', sails.config.custom.stream, {}, {headers: {'Content-Type': 'application/json'}})
+                needle('get', sails.config.custom.stream + `/status-json.xsl`, {}, {headers: {'Content-Type': 'application/json'}})
                         .then(async function (resp) {
-                            console.log(resp.body);
                             var publicStream = false;
                             var remoteStream = false;
-                            if (typeof resp.body.children !== 'undefined' && typeof resp.body.children[1] !== 'undefined' && typeof resp.body.children[1].children !== 'undefined')
+                            if (typeof resp.body.icestats.source !== 'undefined')
                             {
-                                resp.body.children[1].children.forEach(function (child) {
-                                    if (typeof child.children !== 'undefined' && typeof child.children[0] !== 'undefined' && typeof child.children[0].children !== 'undefined' && typeof child.children[0].children[0] !== 'undefined')
-                                    {
-                                        if (child.children[0].children[0].value === "Mount Point /public")
-                                        {
-                                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
-                                            publicStream = true;
+                                var sources = [];
+                                if (!_.isArray(resp.body.icestats.source))
+                                {
+                                    sources.push(resp.body.icestats.source);
+                                } else {
+                                    sources = resp.body.icestats.source;
+                                }
+                                await sails.helpers.asyncForEach(sources, function (source, index) {
+                                    return new Promise(async (resolve2, reject2) => {
+                                        try {
+                                            if (typeof source.listenurl !== 'undefined')
+                                            {
+                                                if (source.listenurl.endsWith("/public"))
+                                                {
+                                                    Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
+                                                    publicStream = true;
+                                                    if (typeof source.listeners !== 'undefined')
+                                                    {
+                                                        await Listeners.create({listeners: source.listeners})
+                                                                .tolerate((err) => {
+                                                                });
+                                                    }
+                                                }
+                                                if (source.listenurl.endsWith("/remote"))
+                                                {
+                                                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
+                                                    remoteStream = true;
+                                                }
+                                            }
+                                            return resolve2(false);
+                                        } catch (e) {
+                                            sails.log.error(e);
+                                            return resolve2(false);
                                         }
-                                        if (child.children[0].children[0].value === "Mount Point /remote")
-                                        {
-                                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
-                                            remoteStream = true;
-                                        }
-                                    }
+                                    });
                                 });
                             }
                             if (!publicStream)
@@ -1320,71 +1350,71 @@ module.exports.cron = {
             sails.log.debug(`CRON updateSpins called.`);
             try {
                 /*
-                var year = {};
-                var ytd = {};
-                var month = {};
-                var week = {};
-                // get radioDJ history records from the past year
-                var history = await History.find({date_played: {'>=': moment().subtract(1, 'years')}});
-                if (history.length > 0)
-                {
-                    history.forEach(function (record) {
-                        if (typeof year[`${record.artist} - ${record.title}`] === 'undefined')
-                            year[`${record.artist} - ${record.title}`] = 0;
-                        if (typeof ytd[`${record.artist} - ${record.title}`] === 'undefined')
-                            ytd[`${record.artist} - ${record.title}`] = 0;
-                        if (typeof month[`${record.artist} - ${record.title}`] === 'undefined')
-                            month[`${record.artist} - ${record.title}`] = 0;
-                        if (typeof week[`${record.artist} - ${record.title}`] === 'undefined')
-                            week[`${record.artist} - ${record.title}`] = 0;
-                        year[`${record.artist} - ${record.title}`]++;
-                        if (moment(record.date_played).isSameOrAfter(moment().startOf('year')))
-                            ytd[`${record.artist} - ${record.title}`]++;
-                        if (moment(record.date_played).isSameOrAfter(moment().subtract(30, 'days')))
-                            month[`${record.artist} - ${record.title}`]++;
-                        if (moment(record.date_played).isSameOrAfter(moment().subtract(7, 'days')))
-                            week[`${record.artist} - ${record.title}`]++;
-                    });
-                }
-                // Get history from manually logged track airs via DJs from the past year
-                var history2 = await Logs.find({event: {'contains': 'DJ/Producer'}, createdAt: {'>=': moment().subtract(1, 'years')}});
-                if (history2.length > 0)
-                {
-                    history2.forEach(function (record) {
-                        if (typeof year[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
-                            year[`${record.trackArtist} - ${record.trackTitle}`] = 0;
-                        if (typeof ytd[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
-                            ytd[`${record.trackArtist} - ${record.trackTitle}`] = 0;
-                        if (typeof month[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
-                            month[`${record.trackArtist} - ${record.trackTitle}`] = 0;
-                        if (typeof week[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
-                            week[`${record.trackArtist} - ${record.trackTitle}`] = 0;
-                        year[`${record.trackArtist} - ${record.trackTitle}`]++;
-                        if (moment(record.createdAt).isSameOrAfter(moment().startOf('year')))
-                            ytd[`${record.trackArtist} - ${record.trackTitle}`]++;
-                        if (moment(record.createdAt).isSameOrAfter(moment().subtract(30, 'days')))
-                            month[`${record.trackArtist} - ${record.trackTitle}`]++;
-                        if (moment(record.createdAt).isSameOrAfter(moment().subtract(7, 'days')))
-                            week[`${record.trackArtist} - ${record.trackTitle}`]++;
-                    });
-                }
-                // Get all song records
-                var songs = await Songs.find({});
-                if (songs.length > 0)
-                {
-                    await sails.helpers.asyncForEach(songs, function (record) {
-                        return new Promise(async (resolve2, reject2) => {
-                            try {
-                                await Songs.update({ID: record.ID}, {spins_7: week[`${record.artist} - ${record.title}`] || 0, spins_30: month[`${record.artist} - ${record.title}`] || 0, spins_ytd: ytd[`${record.artist} - ${record.title}`] || 0, spins_year: year[`${record.artist} - ${record.title}`] || 0});
-                                return resolve2(false);
-                            } catch (e) {
-                                sails.log.error(e);
-                                return resolve2(false);
-                            }
-                        });
-                    });
-                }
-                */
+                 var year = {};
+                 var ytd = {};
+                 var month = {};
+                 var week = {};
+                 // get radioDJ history records from the past year
+                 var history = await History.find({date_played: {'>=': moment().subtract(1, 'years')}});
+                 if (history.length > 0)
+                 {
+                 history.forEach(function (record) {
+                 if (typeof year[`${record.artist} - ${record.title}`] === 'undefined')
+                 year[`${record.artist} - ${record.title}`] = 0;
+                 if (typeof ytd[`${record.artist} - ${record.title}`] === 'undefined')
+                 ytd[`${record.artist} - ${record.title}`] = 0;
+                 if (typeof month[`${record.artist} - ${record.title}`] === 'undefined')
+                 month[`${record.artist} - ${record.title}`] = 0;
+                 if (typeof week[`${record.artist} - ${record.title}`] === 'undefined')
+                 week[`${record.artist} - ${record.title}`] = 0;
+                 year[`${record.artist} - ${record.title}`]++;
+                 if (moment(record.date_played).isSameOrAfter(moment().startOf('year')))
+                 ytd[`${record.artist} - ${record.title}`]++;
+                 if (moment(record.date_played).isSameOrAfter(moment().subtract(30, 'days')))
+                 month[`${record.artist} - ${record.title}`]++;
+                 if (moment(record.date_played).isSameOrAfter(moment().subtract(7, 'days')))
+                 week[`${record.artist} - ${record.title}`]++;
+                 });
+                 }
+                 // Get history from manually logged track airs via DJs from the past year
+                 var history2 = await Logs.find({event: {'contains': 'DJ/Producer'}, createdAt: {'>=': moment().subtract(1, 'years')}});
+                 if (history2.length > 0)
+                 {
+                 history2.forEach(function (record) {
+                 if (typeof year[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
+                 year[`${record.trackArtist} - ${record.trackTitle}`] = 0;
+                 if (typeof ytd[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
+                 ytd[`${record.trackArtist} - ${record.trackTitle}`] = 0;
+                 if (typeof month[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
+                 month[`${record.trackArtist} - ${record.trackTitle}`] = 0;
+                 if (typeof week[`${record.trackArtist} - ${record.trackTitle}`] === 'undefined')
+                 week[`${record.trackArtist} - ${record.trackTitle}`] = 0;
+                 year[`${record.trackArtist} - ${record.trackTitle}`]++;
+                 if (moment(record.createdAt).isSameOrAfter(moment().startOf('year')))
+                 ytd[`${record.trackArtist} - ${record.trackTitle}`]++;
+                 if (moment(record.createdAt).isSameOrAfter(moment().subtract(30, 'days')))
+                 month[`${record.trackArtist} - ${record.trackTitle}`]++;
+                 if (moment(record.createdAt).isSameOrAfter(moment().subtract(7, 'days')))
+                 week[`${record.trackArtist} - ${record.trackTitle}`]++;
+                 });
+                 }
+                 // Get all song records
+                 var songs = await Songs.find({});
+                 if (songs.length > 0)
+                 {
+                 await sails.helpers.asyncForEach(songs, function (record) {
+                 return new Promise(async (resolve2, reject2) => {
+                 try {
+                 await Songs.update({ID: record.ID}, {spins_7: week[`${record.artist} - ${record.title}`] || 0, spins_30: month[`${record.artist} - ${record.title}`] || 0, spins_ytd: ytd[`${record.artist} - ${record.title}`] || 0, spins_year: year[`${record.artist} - ${record.title}`] || 0});
+                 return resolve2(false);
+                 } catch (e) {
+                 sails.log.error(e);
+                 return resolve2(false);
+                 }
+                 });
+                 });
+                 }
+                 */
             } catch (e) {
                 sails.log.error(e);
                 return null;

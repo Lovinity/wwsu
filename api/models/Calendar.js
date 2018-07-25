@@ -193,6 +193,7 @@ module.exports = {
             sails.log.verbose(`Calendar.loadEvents called`);
             try {
                 var {google} = require('googleapis');
+                var toTrigger = null;
                 var calendar = google.calendar({version: 'v3', auth: auth});
                 var currentdate = moment().startOf('day');
                 var nextWeekDate = moment().startOf('day').add(7, 'days');
@@ -499,32 +500,42 @@ module.exports = {
                             await Calendar.update({unique: event.id}, criteria).fetch();
                         }
 
-                        // Check to see if any of the events are triggering events, and it is time to trigger them.
+                        // Check to see if any of the events are triggering events, and if so, see if it trumps the priority of the current event to be triggered.
+                        // Prerecords should take priority over playlists, which take priority over genres.
                         if (moment(criteria.start).isBefore() && moment(criteria.end).isAfter())
                         {
                             try {
                                 if (moment(criteria.start).isAfter(Playlists.played))
                                 {
-                                    if (event.summary.startsWith("Playlist: "))
+                                    if (event.summary.startsWith("Playlist: ") && (toTrigger === null || toTrigger.priority >= 2))
                                     {
-                                        await sails.helpers.playlists.start(event.summary.replace('Playlist: ', ''), false, 0);
+                                        toTrigger = {priority: 2, event: event.summary.replace('Playlist: ', ''), resume: false, type: 0, description: ''};
                                     }
-                                    if (event.summary.startsWith("Prerecord: "))
+                                    if (event.summary.startsWith("Prerecord: ") && (toTrigger === null || toTrigger.priority >= 1))
                                     {
-                                        await sails.helpers.playlists.start(event.summary.replace('Prerecord: ', ''), false, 1, criteria.description);
+                                        toTrigger = {priority: 1, event: event.summary.replace('Prerecord: ', ''), resume: false, type: 1, description: criteria.description};
                                     }
                                 }
-                                if (event.summary.startsWith("Genre: "))
+                                if (event.summary.startsWith("Genre: ") && (toTrigger === null || toTrigger.priority >= 3))
                                 {
-                                    genreActive = true;
-                                    if ((Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre' && Meta['A'].genre !== event.summary.replace('Genre: ', ''))))
-                                    {
-                                        await sails.helpers.genre.start(event.summary.replace('Genre: ', ''));
-                                    }
+                                    toTrigger = {priority: 3, event: event.summary.replace('Genre: ', '')};
                                 }
                             } catch (e) {
                                 sails.log.error(e);
                             }
+                        }
+                    }
+
+                    // Trigger playlist or genre, if there is one to trigger
+                    if (toTrigger !== null && toTrigger.priority < 3)
+                    {
+                        await sails.helpers.playlists.start(toTrigger.event, toTrigger.resume, toTrigger.type, toTrigger.description);
+                    } else if (toTrigger !== null && toTrigger.priority === 3)
+                    {
+                        genreActive = true;
+                        if ((Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre' && Meta['A'].genre !== toTrigger.event)))
+                        {
+                            await sails.helpers.genre.start(toTrigger.event);
                         }
                     }
 
