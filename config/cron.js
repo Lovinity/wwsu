@@ -710,7 +710,7 @@ module.exports.cron = {
                                         }
                                     }
 
-                                    // Do not queue if we are not in automation, playlist, or prerecord states
+                                    // Do not queue if we are not in automation, playlist, genre, or prerecord states
                                     if (Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'live_prerecord')
                                         doBreak = false;
 
@@ -733,12 +733,51 @@ module.exports.cron = {
                                     if (doBreak)
                                     {
                                         Status.errorCheck.prevBreak = moment();
+                                        // enforce station ID for top of the hour breaks
                                         if (key === 0)
+                                        {
                                             Status.errorCheck.prevID = moment();
-                                        await sails.config.custom.breaks[key]()
-                                                .catch(err => {
-                                                    sails.log.error(err);
+                                            await sails.helpers.error.count('stationID');
+                                        }
+                                        // Get the configured break tasks
+                                        var breakOpts = sails.config.custom.breaks[key];
+                                        // Reverse the order of execution so queued things are in the same order as configured.
+                                        breakOpts.reverse();
+                                        // Go through each task
+                                        if (breakOpts.length > 0)
+                                        {
+                                            await sails.helpers.asyncForEach(breakOpts, function (task, index) {
+                                                return new Promise(async (resolve2, reject2) => {
+                                                    try {
+                                                        switch (task.task)
+                                                        {
+                                                            // Log an entry
+                                                            case "log":
+                                                                await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: task.event})
+                                                                        .tolerate((err) => {
+                                                                        });
+                                                                break;
+                                                            // Add requested tracks
+                                                            case "queueRequests":
+                                                                await sails.helpers.requests.queue(task.quantity || 1, false, true);
+                                                                break;
+                                                            // Queue tracks from a configured categories.category
+                                                            case "queue":
+                                                                await sails.helpers.songs.queue(sails.config.custom.subcats[task.category], 'Top', task.quantity || 1);
+                                                                break;
+                                                            // Re-queue any underwritings etc that were removed due to duplicate track checking
+                                                            case "queueDuplicates":
+                                                                await sails.helpers.songs.queuePending();
+                                                                break;
+                                                        }
+                                                        return resolve2(false);
+                                                    } catch (e) {
+                                                        sails.log.error(e);
+                                                        return resolve2(false);
+                                                    }
                                                 });
+                                            });
+                                        }
                                     }
 
                                 }
@@ -850,12 +889,12 @@ module.exports.cron = {
                                                     // Mark stream as good
                                                     Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
                                                     publicStream = true;
-                                                    
+
                                                     // Log listeners
                                                     if (typeof source.listeners !== 'undefined')
                                                     {
                                                         var dj = '';
-                                                        
+
                                                         // Do not tie DJ with listener count unless DJ is actually on the air
                                                         if (!Meta['A'].state.startsWith("automation_"))
                                                         {
@@ -865,13 +904,13 @@ module.exports.cron = {
                                                                 dj = dj.split(" - ")[0];
                                                             }
                                                         }
-                                                        
+
                                                         await Listeners.create({dj: dj, listeners: source.listeners})
                                                                 .tolerate((err) => {
                                                                 });
                                                     }
                                                 }
-                                                
+
                                                 // Source is mountpoint /remote?
                                                 if (source.listenurl.endsWith("/remote"))
                                                 {
