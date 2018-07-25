@@ -58,20 +58,20 @@ module.exports = {
             // Determine what needs updating
             var criteria = {};
 
-            if (inputs.type !== null)
+            if (inputs.type !== null && typeof inputs.type !== 'undefined')
                 criteria.type = inputs.type;
 
-            if (inputs.level !== null)
+            if (inputs.level !== null && typeof inputs.level !== 'undefined')
                 criteria.level = inputs.level;
 
-            if (inputs.announcement !== null)
+            if (inputs.announcement !== null && typeof inputs.announcement !== 'undefined')
                 criteria.announcement = inputs.announcement;
 
-            if (inputs.starts !== null)
-                criteria.starts = inputs.starts;
+            if (inputs.starts !== null && typeof inputs.starts !== 'undefined')
+                criteria.starts = moment(inputs.starts).toISOString(true);
 
-            if (inputs.expires !== null)
-                criteria.expires = inputs.expires;
+            if (inputs.expires !== null && typeof inputs.expires !== 'undefined')
+                criteria.expires =moment(inputs.expires).toISOString(true);
 
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             var criteriaB = _.cloneDeep(criteria);

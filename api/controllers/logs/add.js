@@ -70,7 +70,7 @@ module.exports = {
 
         try {
             // Create the log entry
-            await Logs.create({logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null ? moment(inputs.date).toISOString(true) : moment().toISOString(true)});
+            await Logs.create({logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)});
 
             // Set manual meta if criteria matches
             if (inputs.logtype === 'manual' && inputs.trackArtist !== null && inputs.trackTitle !== null)
