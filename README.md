@@ -542,6 +542,22 @@ Immediately queue or play a request. If in automation, will queue it to the top.
 | ID | number (required; the ID of the request (NOT the song ID!) to queue now) |
 #### Response 200 boolean
 true if the track was queued, false if the track was not queued. A track may fail to queue if it is already in the queue, or it fails track rotation rules.
+## Silence [/silence]
+Silence endpoints should be hit by the silence detection application in order to trigger certain operations for audio silence.
+### /silence/active [GET /silence/active]
+This endpoint should be hit when silence was detected. It should be hit once every minute until silence is resolved. Will trigger silence alarms, and skip/disable the current track in automation, if one is playing.
+#### Request
+| key | criteria |
+|--|--|
+| key | string (required; the key/password as configured in the WWSU application, since silence detection program does not support /user/auth authorization.) |
+#### Response 200 OK
+### /silence/inactive [GET /silence/inactive]
+This endpoint should be hit when previously detected silence has been resolved.
+#### Request
+| key | criteria |
+|--|--|
+| key | string (required; the key/password as configured in the WWSU application, since silence detection program does not support /user/auth authorization.) |
+#### Response 200 OK
 ## Songs [/songs]
 Songs endpoints regard the available songs/tracks in the automation system.
 ### /songs/get [GET /songs/get]

@@ -38,6 +38,8 @@ module.exports.policies = {
     'recipients/edit-web': 'isBanned',
     'recipients/get': 'isBanned',
     'requests/place': 'isBanned',
+    'silence/active': 'isBanned',
+    'silence/inactive': 'isBanned',
     'songs/get': 'isBanned',
     'songs/get-subcategories': 'isBanned',
     'status/get': 'isBanned',
