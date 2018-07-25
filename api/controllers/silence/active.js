@@ -29,17 +29,14 @@ module.exports = {
                     .tolerate((err) => {
                     });
 
-            // If a track is playing in RadioDJ, disable it and skip it
+            // If a track is playing in RadioDJ, skip it and log it
             if (typeof Meta.automation[0] !== 'undefined' && parseInt(Meta.automation[0].ID) !== 0)
             {
-                // Disable the track
-                await Songs.update({ID: parseInt(Meta.automation[0].ID)}, {enabled: -1})
+                // Add a log about the track
+                await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `Track ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title}) was skipped due to silence alarm. Please check to ensure it does not contain silence.`})
                         .tolerate((err) => {
                         });
-                // Add another log about it
-                await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `Track ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title}) was skipped/disabled due to silence alarm. NOTE: status on the track was set to -1, which means the verify tracks tool in RadioDJ will re-enable it!`})
-                        .tolerate((err) => {
-                        });
+                
                 // Skip the track
                 if (typeof Meta.automation[1] !== 'undefined')
                 {
