@@ -199,7 +199,7 @@ module.exports.cron = {
                             try {
                                 for (var i = 0; i < Playlists.active.tracks.length; i++) {
                                     var name = Playlists.active.tracks[i];
-                                    if (name == autoTrack.ID) {
+                                    if (name === parseInt(autoTrack.ID)) {
                                         // Waiting for the playlist to begin, and it has begun? Switch states.
                                         if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && !Meta.changingState)
                                         {
@@ -247,7 +247,6 @@ module.exports.cron = {
                 }
 
                 try {
-                    // TODO: use nometa instead of TrackType to determine when to show alt meta
                     // Manage the metadata for when there is one or more tracks in the queue (RadioDJ should always return at least 1 "dummy" track, even if there are none in the queue)
                     if (queue.length > 0)
                     {
@@ -255,17 +254,17 @@ module.exports.cron = {
                             change.percent = (queue[0].Elapsed / queue[0].Duration);
 
                         // In automation and something is currently playing
-                        if (Meta['A'].state.startsWith("automation_") && queue[0].ID != 0 && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre')
+                        if (Meta['A'].state.startsWith("automation_") && parseInt(queue[0].ID) !== 0 && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
                             change.track = newmeta;
-                            // We do not want to display metadata for tracks that are not of type music, or have Unknown Artist as the artist
-                            if (queue[0].TrackType !== 'Music' || queue[0].Artist.includes("Unknown Artist"))
+                            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
+                            if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                             {
                                 change.line1 = sails.config.custom.meta.alt.automation;
                                 change.line2 = '';
@@ -287,18 +286,18 @@ module.exports.cron = {
                             }
 
                             // If we are playing a playlist
-                        } else if (queue[0].ID != 0 && Meta['A'].state === 'automation_playlist')
+                        } else if (parseInt(queue[0].ID) !== 0 && Meta['A'].state === 'automation_playlist')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'playlist', event: 'Automation playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: `playlist - ${Meta['A'].playlist}`, event: 'Automation playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
 
                             change.track = newmeta;
-                            // Do not display track meta for Non-music tracks or tracks with an unknown artist
-                            if (queue[0].TrackType !== 'Music' || queue[0].Artist.includes("Unknown Artist"))
+                            // Do not display track meta for tracks in config.custom.categories.noMeta or tracks with an unknown artist
+                            if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                             {
                                 change.line1 = sails.config.custom.meta.alt.playlist;
                                 change.line2 = `Playlist: ${Meta['A'].playlist}`;
@@ -310,17 +309,17 @@ module.exports.cron = {
                                 change.stream = change.track;
                             }
                             // We are in genre automation
-                        } else if (queue[0].ID != 0 && Meta['A'].state === 'automation_genre')
+                        } else if (parseInt(queue[0].ID) !== 0 && Meta['A'].state === 'automation_genre')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'automation', event: 'Genre automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: 'automation', event: 'Genre automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
                             change.track = newmeta;
-                            // Do not display track meta if the track is not type Music or the artist is unknown
-                            if (queue[0].TrackType !== 'Music' || queue[0].Artist.includes("Unknown Artist"))
+                            // Do not display track meta if the track is in config.custom.categories.noMeta or the artist is unknown
+                            if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                             {
                                 change.line1 = sails.config.custom.meta.alt.genre;
                                 change.line2 = `Genre: ${Meta['A'].genre}`;
@@ -335,16 +334,16 @@ module.exports.cron = {
                         } else if (Meta['A'].state.startsWith("live_") && Meta['A'].state !== 'live_prerecord')
                         {
                             // Something is playing in RadioDJ
-                            if (queue[0].ID != 0)
+                            if (parseInt(queue[0].ID) !== 0)
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
-                                    await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                    await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'DJ played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                             .tolerate((err) => {
                                             });
                                 change.track = newmeta;
-                                // Do not display meta for tracks that are not type Music or have an unknown artist
-                                if (queue[0].TrackType !== 'Music' || queue[0].Artist.includes("Unknown Artist"))
+                                // Do not display meta for tracks that are in config.custom.categories.noMeta or have an unknown artist
+                                if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                                 {
                                     change.line1 = `On the Air: ${Meta['A'].dj}`;
                                     change.line2 = sails.config.custom.meta.alt.live;
@@ -374,13 +373,13 @@ module.exports.cron = {
                                 }
                             }
                             // Playing a prerecorded show
-                        } else if (queue[0].ID != 0 && Meta['A'].state === 'live_prerecord')
+                        } else if (parseInt(queue[0].ID) !== 0 && Meta['A'].state === 'live_prerecord')
                         {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             change.dj = Meta['A'].playlist;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].playlist, event: 'Prerecorded show playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].playlist, event: 'Prerecorded show playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
                             change.track = newmeta;
@@ -400,16 +399,16 @@ module.exports.cron = {
                         } else if (Meta['A'].state.startsWith("remote_"))
                         {
                             // The currently playing track is not an Internet Stream track
-                            if (queue[0].ID != 0 && queue[0].TrackType !== 'InternetStream')
+                            if (parseInt(queue[0].ID) !== 0 && queue[0].TrackType !== 'InternetStream')
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
-                                    await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Remote producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                    await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Remote producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                             .tolerate((err) => {
                                             });
                                 change.track = newmeta;
-                                // If the currently playing track is a non-Music track, or if we are in disconnected remote mode, show alternative metadata
-                                if (queue[0].TrackType !== 'Music' || queue[0].Artist.includes("Unknown Artist") || Meta['A'].state.includes("disconnected"))
+                                // If the currently playing track is in config.custom.categories.noMeta, or artist is unknown, or if we are in disconnected remote mode, show alternative metadata
+                                if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist") || Meta['A'].state.includes("disconnected"))
                                 {
                                     change.line1 = `Broadcasting: ${Meta['A'].dj}`;
                                     change.line2 = sails.config.custom.meta.alt.remote;
@@ -444,7 +443,7 @@ module.exports.cron = {
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
-                                    await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                    await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                             .tolerate((err) => {
                                             });
                                 change.track = newmeta;

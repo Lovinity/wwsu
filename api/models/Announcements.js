@@ -22,7 +22,7 @@ module.exports = {
 
         level: {
             type: 'string',
-            isIn: ['danger', 'warning', 'info', 'success', 'primary', 'secondary']
+            isIn: ['danger', 'urgent', 'warning', 'info', 'success', 'primary', 'secondary']
         },
 
         announcement: {

@@ -27,13 +27,13 @@ function escapeHTML(str) {
 function filterLogs(subtype = null) {
     var datePicker = document.getElementById('weekly-date-picker');
     var tableData = document.getElementById('results-table');
-    
+
     // Remove all but the first table row
     for (var i = tableData.rows.length; i > 0; i--)
     {
         tableData.deleteRow(i - 1);
     }
-    
+
     // No subtype? get the groups to display
     if (subtype === null)
     {
@@ -49,6 +49,12 @@ function filterLogs(subtype = null) {
                             var newRow = header.insertRow(0);
                             var cell = newRow.insertCell(0);
                             cell.innerHTML = 'Choose a log for this day';
+                            var newRow = tableData.insertRow(tableData.rows.length);
+                            var cell = newRow.insertCell(0);
+                            cell.innerHTML = `<a href="javascript:filterLogs(\`\`)" title="Show the log" role="button" class="btn btn-success">View all logs for this day</a>`;
+                            var newRow = tableData.insertRow(tableData.rows.length);
+                            var cell = newRow.insertCell(0);
+                            cell.innerHTML = `<a href="javascript:filterLogs(\`ISSUES\`)" title="Show the log" role="button" class="btn btn-warning">View logged problems/issues for this day</a>`;
                             resHTML.forEach(function (logtype) {
                                 var newRow = tableData.insertRow(tableData.rows.length);
                                 var cell = newRow.insertCell(0);
@@ -58,7 +64,7 @@ function filterLogs(subtype = null) {
                         function fail(data, status) {
                         }
                 );
-        
+
         // subtype? Display logs by date and selected subtype
     } else {
         $.ajax({
@@ -81,8 +87,9 @@ function filterLogs(subtype = null) {
                             cell4.innerHTML = 'Title';
                             resHTML.forEach(function (thelog) {
                                 var newRow = tableData.insertRow(tableData.rows.length);
+                                newRow.classList.add(`table-${thelog.loglevel}`);
                                 var cell = newRow.insertCell(0);
-                                cell.innerHTML = thelog.createdAt;
+                                cell.innerHTML = moment(thelog.createdAt).format("LL hh:mm:ss A");
                                 var cell2 = newRow.insertCell(1);
                                 thelog.event = thelog.event.replace(/(?:\r\n|\r|\n)/g, '<br />');
                                 cell2.innerHTML = thelog.event;

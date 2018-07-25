@@ -1,4 +1,4 @@
-/* global sails, Status, _, Logs, moment, Meta */
+/* global sails, Status, _, Logs, moment, Meta, inputs, Announcements */
 
 /**
  * Status.js
@@ -103,6 +103,14 @@ module.exports = {
                     try {
                         Meta.changingState = true;
                         sails.sockets.broadcast('system-error', 'system-error', true);
+                        await Logs.create({logtype: 'system', loglevel: 'urgent', logsubtype: '', event: `Node failed repeatedly to get the RadioDJ queue. The system is switching to another RadioDJ.`})
+                                .tolerate((err) => {
+                                    sails.log.error(err);
+                                });
+                        await Announcements.findOrCreate({type: 'djcontrols', announcement: "(reported by system) System recently had switched RadioDJ instances due to queueFail. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', announcement: "(reported by system) System recently had switched RadioDJ instances due to queueFail. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                                .tolerate((err) => {
+                                    sails.log.error(err);
+                                });
                         await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
                         await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0);
                         await sails.helpers.rest.cmd('StopPlayer', 1, 0);
@@ -129,10 +137,22 @@ module.exports = {
                         if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
                         {
                             sails.log.verbose(`No recent error; attempting standard recovery.`);
+                            await Logs.create({logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing when it should have been. System attempted queue recovery.`})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
                             await sails.helpers.error.post();
                         } else {
                             Meta.changingState = true;
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
+                            await Logs.create({logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing when it should have been. System is assuming it crashed. Switching RadioDJs.`})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
+                            await Announcements.findOrCreate({type: 'djcontrols', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozen. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozen. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
                             sails.sockets.broadcast('system-error', 'system-error', true);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
@@ -161,6 +181,10 @@ module.exports = {
                         // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
                         if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
                         {
+                            await Logs.create({logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing the remote stream when it should have been. System attempted remote stream recovery.`})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
                             sails.log.verbose(`No recent error; attempting standard recovery.`);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
@@ -171,6 +195,14 @@ module.exports = {
                         } else {
                             Meta.changingState = true;
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
+                            await Logs.create({logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing remote stream when it should have been. System is assuming RadioDJ is unstable. Switching RadioDJs.`})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
+                            await Announcements.findOrCreate({type: 'djcontrols', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozenRemote. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozenRemote. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
                             sails.sockets.broadcast('system-error', 'system-error', true);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
@@ -221,7 +253,7 @@ module.exports = {
             condition: function () {
                 var inQueue = false;
                 Meta.automation.forEach(function (track) {
-                    if (sails.config.custom.subcats.IDs.indexOf(track.IDSubcat) > -1)
+                    if (sails.config.custom.subcats.IDs.indexOf(parseInt(track.IDSubcat)) > -1)
                     {
                         inQueue = true;
                         return true;
@@ -231,16 +263,12 @@ module.exports = {
             },
             fn: function () {
                 return new Promise(async (resolve, reject) => {
-                    // FIX CONDITION THEN RE-ENABLE
-                    /*
-                     try {
-                     await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-                     } catch (e) {
-                     return reject(e);
-                     }
-                     return resolve(1);
-                     */
-                    return resolve(0);
+                    try {
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
+                    } catch (e) {
+                        return reject(e);
+                    }
+                    return resolve(1);
                 });
             }
         }

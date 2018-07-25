@@ -25,7 +25,7 @@ module.exports = {
             Status.changeStatus([{name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio was detected! Please check the OnAir audio levels.`}]);
 
             // Add a log entry
-            await Logs.create({logtype: 'operation', loglevel: 'error', logsubtype: Meta['A'].dj, event: 'Silence / quiet audio detected for at least 15 seconds.'})
+            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: 'Silence / quiet audio detected for at least 15 seconds.'})
                     .tolerate((err) => {
                     });
 
@@ -37,7 +37,7 @@ module.exports = {
                         .tolerate((err) => {
                         });
                 // Add another log about it
-                await Logs.create({logtype: 'operation', loglevel: 'error', logsubtype: Meta['A'].dj, event: `Track ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title}) was skipped/disabled due to silence alarm. NOTE: status on the track was set to -1, which means the verify tracks tool in RadioDJ will re-enable it!`})
+                await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `Track ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title}) was skipped/disabled due to silence alarm. NOTE: status on the track was set to -1, which means the verify tracks tool in RadioDJ will re-enable it!`})
                         .tolerate((err) => {
                         });
                 // Skip the track

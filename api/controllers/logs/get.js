@@ -31,13 +31,21 @@ module.exports = {
             // Get date range
             var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
             var end = moment(start).add(1, 'days');
+            var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
+            if (inputs.subtype === "ISSUES")
+            {
+                query.loglevel = ['warning', 'urgent', 'danger'];
+            } else if (inputs.subtype !== '' && inputs.subtype !== null)
+            {
+                query.logsubtype = inputs.subtype;
+            }
 
             // Get records
-            var records = await Logs.find({createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}, logsubtype: inputs.subtype}).sort('createdAt ASC');
+            var records = await Logs.find(query).sort('createdAt ASC');
 
             sails.log.verbose(`Retrieved Logs records: ${records.length}`);
             sails.log.silly(records);
-            
+
             return exits.success(records);
 
         } catch (e) {

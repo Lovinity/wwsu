@@ -69,7 +69,7 @@ Adds an announcement into the system. **Requires authorization**.
 | key | criteria |
 |--|--|
 | type | string (required; the type of announcement, which often dictates what should display the announcement) |
-| level | string (required; Severity level. Must be in: ["danger", "warning", "info", "success", "primary", "secondary"]) |
+| level | string (required; Severity level. Must be in: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"]) |
 | announcement | string (required; The announcement text) |
 | starts | string (optional; the ISO moment.js compatible time that the announcement starts. Defaults to now.) |
 | expires | string (optional; the ISO moment.js compatible time that the announcement expires. Defaults to the year 3000.) |
@@ -81,7 +81,7 @@ Edits an existing announcement. **Requires authorization**.
 |--|--|
 | ID | number (required; the ID of the announcement to edit) |
 | type | string (optional, but edits original value if provided; the type of announcement, which often dictates what should display the announcement) |
-| level | string (optional, but edits original value when provided; Severity level. Must be in: ["danger", "warning", "info", "success", "primary", "secondary"]) |
+| level | string (optional, but edits original value when provided; Severity level. Must be in: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"]) |
 | announcement | string (optional, but edits original value if provided; The announcement text) |
 | starts | string (optional, but edits original value if provided; the ISO moment.js compatible time that the announcement starts.) |
 | expires | string (optional, but edits original value if provided; the ISO moment.js compatible time that the announcement expires.) |
@@ -100,7 +100,7 @@ This endpoint supports sockets, uses the "announcements" event, and returns data
                 "updatedAt": "2018-05-15T22:31:34.381Z",
                 "ID": 1,
 				"type": "display-public", // This announcement is applicable to the provided type. Examples: display-public, display-internal, djcontrols, website.
-				"level": "info", // Severity level. Must be in: ["danger", "warning", "info", "success", "primary", "secondary"].
+				"level": "info", // Severity level. Must be in: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"].
 				"announcement": "Do not forget to do your air checks. They are due August 3.", // The announcement text
 				"starts": "2018-05-15T22:31:34.381Z", // ISO string of when the announcement begins.
 				"expires": "2018-08-3T22:31:34.381Z" // ISO string of when the announcement expires.
@@ -281,7 +281,7 @@ Add a log into the system. **Requires authorization**
 |--|--|
 | date | string (optional; a moment.js parsable string containing the date this log took place. Defaults to now.) |
 | logtype | string (required; type of log. It is recommended to use "operation" for Node logs, "automation" for automation logs, and "manual" for manually logged entries. Manual-type logs will update manual metadata if running a show and a track artist and title was specified.) |
-| loglevel | string (required; level of severity. Must be one of: ["debug", "info", "warn", "error"]) |
+| loglevel | string (required; level of severity. Must be one of: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"]) |
 | logsubtype | string (optional; a subcategory of the log. Clients are advised to use "DJ/show host - show name" when logging things pertaining to a show.) |
 | event | string (required; details about the event that happened prompting the log. Do not include track info; include that in the track parameters.) |
 | trackArtist | string (optional; specify track artist if a track was played to be used for spin counts.) |
@@ -294,7 +294,7 @@ Get a list of logs for a specific subtype and a specific date. Returns logs for 
 #### Request
 | key | criteria |
 |--|--|
-| subtype | string (required; the name of the log subtype to get. Defaults to '' (no subtype).) |
+| subtype | string (optional; the name of the log subtype to get. If '' or null, will return all logs for date. If "ISSUES", will return all logs of warning, urgent, or danger level for date. Defaults to ''.) |
 | date | string (optional; a moment.js parsable date that falls within the day to get logs. Defaults to now.) |
 #### Response 200
 		[
@@ -303,7 +303,7 @@ Get a list of logs for a specific subtype and a specific date. Returns logs for 
                 "updatedAt": "2018-05-03T23:18:41.089Z",
 				"ID": 1,
 				"logtype": "operation", // A category for this log
-				"loglevel": "info", // Level of importance: debug, info, warn, error
+				"loglevel": "info", // Level of importance: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"]
 				"logsubtype": "automation", // A subcategory, such as the name of a radio show
 				"event": "Automation played a track.", // The log event and data
 				"trackArtist": "Alan Jackson", // If played a track, this is the track artist. Null if this is not a track entry.

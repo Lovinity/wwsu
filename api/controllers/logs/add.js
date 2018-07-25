@@ -23,8 +23,8 @@ module.exports = {
         loglevel: {
             type: 'string',
             required: true,
-            isIn: ["debug", "info", "warn", "error"],
-            description: 'Log severity: debug, info, warn, or error.'
+            isIn: ['danger', 'urgent', 'warning', 'info', 'success', 'primary', 'secondary'],
+            description: 'Log severity: danger, urgent, warning, info, success, primary, or secondary.'
         },
 
         logsubtype: {
