@@ -1,4 +1,4 @@
-/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events */
+/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events, Logs */
 
 /**
  * Calendar.js
@@ -228,7 +228,7 @@ module.exports = {
 
                     // Determine duration of the tracks in every playlist
                     await sails.helpers.asyncForEach(playlistsR, function (playlist, index) {
-                        return new Promise(async (resolve, reject) => {
+                        return new Promise(async (resolve2, reject2) => {
                             try {
                                 var playlistSongs = [];
                                 var playlistDuplicates = 0;
@@ -260,9 +260,9 @@ module.exports = {
                                 });
 
                                 playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates});
-                                return resolve(false);
+                                return resolve2(false);
                             } catch (e) {
-                                return reject(e);
+                                return reject2(e);
                             }
                         });
                     });
@@ -536,10 +536,76 @@ module.exports = {
                     }
 
                     // Destroy events in the database that no longer exist on the Google Calendar
-                    await Calendar.destroy({unique: {'!=': eventIds}})
+                    var destroyed = await Calendar.destroy({unique: {'!=': eventIds}})
                             .tolerate((err) => {
                             })
                             .fetch();
+
+                    // Go through every destroyed record and check for no-show broadcasts to log.
+                    if (destroyed && destroyed.length > 0)
+                    {
+                        await sails.helpers.asyncForEach(destroyed, function (event, index) {
+                            return new Promise(async (resolve2, reject2) => {
+                                try {
+                                    // First, check for live shows
+                                    if (moment().isAfter(moment(event.start)) && event.title.startsWith("Show: "))
+                                    {
+                                        var count = await Logs.count({logsubtype: event.title.replace("Show: ", ""), createdAt: {">=": moment(event.start).toISOString(true)}})
+                                                .tolerate((err) => {
+                                                    sails.log.error(err);
+                                                });
+                                        // No logs? The show probably didn't air. Log that.
+                                        if (!count || count === 0)
+                                        {
+                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Show: ", ""), event: `It appears ${event.title.replace("Show: ", "")} was scheduled to do a show from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this show. Maybe this person did not host a show?`})
+                                                    .tolerate((err) => {
+                                                        sails.log.error(err);
+                                                    });
+                                        }
+                                    }
+
+                                    // Next, check for remote broadcasts
+                                    if (moment().isAfter(moment(event.start)) && event.title.startsWith("Remote: "))
+                                    {
+                                        var count = await Logs.count({logsubtype: event.title.replace("Remote: ", ""), createdAt: {">=": moment(event.start).toISOString(true)}})
+                                                .tolerate((err) => {
+                                                    sails.log.error(err);
+                                                });
+                                        // No logs? The show probably didn't air. Log that.
+                                        if (!count || count === 0)
+                                        {
+                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Remote: ", ""), event: `It appears remote broadcast ${event.title.replace("Remote: ", "")} was scheduled to air from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this broadcast. Maybe this broadcast did not air?`})
+                                                    .tolerate((err) => {
+                                                        sails.log.error(err);
+                                                    });
+                                        }
+                                    }
+
+                                    // Finally, check for sports broadcasts
+                                    if (moment().isAfter(moment(event.start)) && event.title.startsWith("Sports: "))
+                                    {
+                                        var count = await Logs.count({logsubtype: event.title.replace("Sports: ", ""), createdAt: {">=": moment(event.start).toISOString(true)}})
+                                                .tolerate((err) => {
+                                                    sails.log.error(err);
+                                                });
+                                        // No logs? The show probably didn't air. Log that.
+                                        if (!count || count === 0)
+                                        {
+                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Sports: ", ""), event: `It appears a sports broadcast ${event.title.replace("Sports: ", "")} was scheduled to air from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this broadcast. Maybe this broadcast did not air?`})
+                                                    .tolerate((err) => {
+                                                        sails.log.error(err);
+                                                    });
+                                        }
+                                    }
+
+                                    return resolve2(false);
+                                } catch (e) {
+                                    sails.log.error(e);
+                                    return resolve2(false);
+                                }
+                            });
+                        });
+                    }
 
 
                     if (badEvent)
