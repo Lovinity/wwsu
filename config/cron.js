@@ -823,12 +823,14 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON checkRadioStreams triggered.`);
             try {
+                // Get the JSON status from Icecast
                 needle('get', sails.config.custom.stream + `/status-json.xsl`, {}, {headers: {'Content-Type': 'application/json'}})
                         .then(async function (resp) {
                             var publicStream = false;
                             var remoteStream = false;
                             if (typeof resp.body.icestats.source !== 'undefined')
                             {
+                                // Parse source data
                                 var sources = [];
                                 if (!_.isArray(resp.body.icestats.source))
                                 {
@@ -836,22 +838,41 @@ module.exports.cron = {
                                 } else {
                                     sources = resp.body.icestats.source;
                                 }
+                                // Go through each source
                                 await sails.helpers.asyncForEach(sources, function (source, index) {
                                     return new Promise(async (resolve2, reject2) => {
                                         try {
                                             if (typeof source.listenurl !== 'undefined')
                                             {
+                                                // Source is mountpoint /public?
                                                 if (source.listenurl.endsWith("/public"))
                                                 {
+                                                    // Mark stream as good
                                                     Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
                                                     publicStream = true;
+                                                    
+                                                    // Log listeners
                                                     if (typeof source.listeners !== 'undefined')
                                                     {
-                                                        await Listeners.create({listeners: source.listeners})
+                                                        var dj = '';
+                                                        
+                                                        // Do not tie DJ with listener count unless DJ is actually on the air
+                                                        if (!Meta['A'].state.startsWith("automation_"))
+                                                        {
+                                                            dj = Meta['A'].dj;
+                                                            if (dj.includes(" - "))
+                                                            {
+                                                                dj = dj.split(" - ")[0];
+                                                            }
+                                                        }
+                                                        
+                                                        await Listeners.create({dj: dj, listeners: source.listeners})
                                                                 .tolerate((err) => {
                                                                 });
                                                     }
                                                 }
+                                                
+                                                // Source is mountpoint /remote?
                                                 if (source.listenurl.endsWith("/remote"))
                                                 {
                                                     Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
@@ -870,8 +891,9 @@ module.exports.cron = {
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream appears to be offline.', status: 2}]);
                             if (!remoteStream)
                             {
-                                if (Meta['A'].state.includes("remote"))
+                                if (Meta['A'].state.includes("remote_"))
                                 {
+                                    // TODO: send system into disconnected mode (if not already) if remote stream is disconnected
                                     Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline.', status: 2}]);
                                 } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
                                     Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline, but that is not an issue at this time as a remote broadcast is not active.', status: 4}]);
