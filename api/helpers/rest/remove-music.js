@@ -36,7 +36,7 @@ module.exports = {
                     {
                         sails.log.verbose(`MUSIC`);
                         // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
-                        if (!inputs.keepRequests || Requests.pending.indexOf(queue[loopposition].ID) === -1)
+                        if (!inputs.keepRequests || Requests.pending.indexOf(parseInt(queue[loopposition].ID)) === -1)
                         {
                             sails.log.verbose(`REMOVING`);
                             terminateloop = true;

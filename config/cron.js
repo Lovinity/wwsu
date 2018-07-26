@@ -269,7 +269,6 @@ module.exports.cron = {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
-                                
                                 await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
@@ -764,15 +763,15 @@ module.exports.cron = {
                                                                         .tolerate((err) => {
                                                                         });
                                                                 break;
-                                                            // Add requested tracks
+                                                                // Add requested tracks
                                                             case "queueRequests":
                                                                 await sails.helpers.requests.queue(task.quantity || 1, false, true);
                                                                 break;
-                                                            // Queue tracks from a configured categories.category
+                                                                // Queue tracks from a configured categories.category
                                                             case "queue":
                                                                 await sails.helpers.songs.queue(sails.config.custom.subcats[task.category], 'Top', task.quantity || 1);
                                                                 break;
-                                                            // Re-queue any underwritings etc that were removed due to duplicate track checking
+                                                                // Re-queue any underwritings etc that were removed due to duplicate track checking
                                                             case "queueDuplicates":
                                                                 await sails.helpers.songs.queuePending();
                                                                 break;
@@ -911,10 +910,13 @@ module.exports.cron = {
                                                                 dj = dj.split(" - ")[0];
                                                             }
                                                         }
-
-                                                        await Listeners.create({dj: dj, listeners: source.listeners})
-                                                                .tolerate((err) => {
-                                                                });
+                                                        if (dj !== Listeners.memory.dj || source.listeners !== Listeners.memory.listeners)
+                                                        {
+                                                            await Listeners.create({dj: dj, listeners: source.listeners})
+                                                                    .tolerate((err) => {
+                                                                    });
+                                                        }
+                                                        Listeners.memory = {dj: dj, listeners: source.listeners};
                                                     }
                                                 }
 
