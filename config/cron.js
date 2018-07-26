@@ -269,10 +269,12 @@ module.exports.cron = {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
+                                
                                 await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
                             Meta.changeMeta({track: newmeta});
+                            change.track = newmeta;
                             // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
                             if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                             {
@@ -306,6 +308,7 @@ module.exports.cron = {
                                         });
 
                             Meta.changeMeta({track: newmeta});
+                            change.track = newmeta;
                             // Do not display track meta for tracks in config.custom.categories.noMeta or tracks with an unknown artist
                             if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                             {
@@ -328,6 +331,7 @@ module.exports.cron = {
                                         .tolerate((err) => {
                                         });
                             Meta.changeMeta({track: newmeta});
+                            change.track = newmeta;
                             // Do not display track meta if the track is in config.custom.categories.noMeta or the artist is unknown
                             if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                             {
@@ -352,6 +356,7 @@ module.exports.cron = {
                                             .tolerate((err) => {
                                             });
                                 Meta.changeMeta({track: newmeta});
+                                change.track = newmeta;
                                 // Do not display meta for tracks that are in config.custom.categories.noMeta or have an unknown artist
                                 if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
                                 {
@@ -393,6 +398,7 @@ module.exports.cron = {
                                         .tolerate((err) => {
                                         });
                             Meta.changeMeta({track: newmeta});
+                            change.track = newmeta;
                             // If the currently playing track is not a track that exists in the prerecord playlist, do not display meta for it
                             if (!playlistTrackPlaying)
                             {
@@ -457,6 +463,7 @@ module.exports.cron = {
                                             .tolerate((err) => {
                                             });
                                 Meta.changeMeta({track: newmeta});
+                                change.track = newmeta;
                                 change.line1 = `Raider Sports: ${Meta['A'].dj}`;
                                 change.line2 = sails.config.custom.meta.alt.sports;
                                 change.percent = 0;
