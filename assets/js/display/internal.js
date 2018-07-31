@@ -409,7 +409,7 @@ function processStatus()
                 break;
             case 1:
                 color = 'rgba(244, 67, 54, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Major Outage';
+                statusLine.innerHTML = 'WWSU Status: Unstable';
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
                     $("html, body").animate({
@@ -423,7 +423,7 @@ function processStatus()
                 break;
             case 2:
                 color = 'rgba(245, 124, 0, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Partial Outage';
+                statusLine.innerHTML = 'WWSU Status: Needs Attention';
                 // Flash screen for partial outages every 5 seconds
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
@@ -438,7 +438,7 @@ function processStatus()
                 break;
             case 3:
                 color = 'rgba(251, 192, 45, 0.5)';
-                statusLine.innerHTML = 'WWSU Status: Operational; minor issue';
+                statusLine.innerHTML = 'WWSU Status: Minor Issue';
                 break;
             case 5:
                 color = 'rgba(76, 175, 80, 0.5)';

@@ -798,6 +798,14 @@ function doEas()
     }
 }
 
+// Determine if something is overflowing
+function isElementOverflowing(element) {
+    var overflowX = element.offsetWidth < element.scrollWidth,
+            overflowY = element.offsetHeight < element.scrollHeight;
+
+    return (overflowX || overflowY);
+}
+
 // This function is called whenever meta is changed. The parameter response contains only the meta that has changed / to be updated.
 function processNowPlaying(response)
 {
@@ -835,15 +843,49 @@ function processNowPlaying(response)
             if (typeof response.line1 !== 'undefined')
             {
                 $('#nowplaying-line1').animateCss('fadeOut', function () {
-                    nowplayingline1.innerHTML = text_truncate(Meta.line1, 80);
-                    $('#nowplaying-line1').animateCss('fadeIn');
+                    nowplayingline1.innerHTML = Meta.line1;
+                    if (Meta.line1.length >= 80)
+                    {
+                        $('#nowplaying-line1')
+                                .marquee({
+                                    //duration in milliseconds of the marquee
+                                    speed: 100,
+                                    //gap in pixels between the tickers
+                                    gap: 100,
+                                    //time in milliseconds before the marquee will start animating
+                                    delayBeforeStart: 0,
+                                    //'left' or 'right'
+                                    direction: 'left',
+                                    //true or false - should the marquee be duplicated to show an effect of continues flow
+                                    duplicated: true
+                                });
+                    } else {
+                        $('#nowplaying-line1').animateCss('fadeIn');
+                    }
                 });
             }
             if (typeof response.line2 !== 'undefined')
             {
                 $('#nowplaying-line2').animateCss('fadeOut', function () {
-                    nowplayingline2.innerHTML = text_truncate(Meta.line2, 80);
-                    $('#nowplaying-line2').animateCss('fadeIn');
+                    nowplayingline2.innerHTML = Meta.line2;
+                    if (Meta.line2.length >= 80)
+                    {
+                        $('#nowplaying-line2')
+                                .marquee({
+                                    //duration in milliseconds of the marquee
+                                    speed: 100,
+                                    //gap in pixels between the tickers
+                                    gap: 100,
+                                    //time in milliseconds before the marquee will start animating
+                                    delayBeforeStart: 0,
+                                    //'left' or 'right'
+                                    direction: 'left',
+                                    //true or false - should the marquee be duplicated to show an effect of continues flow
+                                    duplicated: true
+                                });
+                    } else {
+                        $('#nowplaying-line2').animateCss('fadeIn');
+                    }
                 });
             }
             if ((moment(Meta.time).isAfter(moment({hour: 8, minute: 0})) && (moment(Meta.time).isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote') {
