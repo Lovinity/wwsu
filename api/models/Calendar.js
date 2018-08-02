@@ -233,6 +233,7 @@ module.exports = {
                             try {
                                 var playlistSongs = [];
                                 var playlistDuplicates = 0;
+                                var duplicateTracks = [];
 
                                 var pTracks = await Playlists_list.find({pID: playlist.ID});
                                 sails.log.verbose(`Retrieved Playlists_list records: ${pTracks.length}`);
@@ -254,13 +255,14 @@ module.exports = {
                                     if (playlistSongs.indexOf(`${song.artist} - ${song.title}`) > -1)
                                     {
                                         playlistDuplicates++;
+                                        duplicateTracks.push(`${song.artist} - ${song.title}`);
                                     } else {
                                         duration += song.duration;
                                     }
                                     playlistSongs.push(`${song.artist} - ${song.title}`);
                                 });
 
-                                playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates});
+                                playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates, duplicateTracks: duplicateTracks.join("<br />")});
                                 return resolve2(false);
                             } catch (e) {
                                 return reject2(e);
@@ -382,16 +384,16 @@ module.exports = {
                                 if ((eventLength - 900) >= (playlists[summary].duration * 1.05)) // * 1.05 because this assumes 1 minute of break for every 20 minutes of programming
                                 {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is significantly short. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
+                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is significantly short. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
 
                                     // Check to see if the playlist is over 5 minutes too long
                                 } else if ((eventLength + 300) <= (playlists[summary].duration * 1.05))
                                 {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is too long. This could prevent other DJs from signing on the air, or other segments from playing. If this is not fixed, <strong>the prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
+                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is too long. This could prevent other DJs from signing on the air, or other segments from playing. If this is not fixed, <strong>the prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
                                 } else if (playlists[summary].duplicates > 0) {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, there were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.`;
+                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, there were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}`;
                                 } else {
                                     criteria.verify = 'Valid';
                                     criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ.`;
@@ -424,10 +426,10 @@ module.exports = {
                                     criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`;
                                 } else if (eventLength <= (playlists[summary].duration * 1.05)) {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
+                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
                                 } else {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. In addition, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>.` : ''}`;
+                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. In addition, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
                                 }
                             }
 

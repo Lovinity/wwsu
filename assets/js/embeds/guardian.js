@@ -64,7 +64,7 @@ jQuery(function () {
         affiliatetoken: "1000lIPN",
         debug: "false",
         ownsongtitleurl: "",
-        radiocover: "http://server.wwsu1069.org/images/embeds/logo.png",
+        radiocover: "https://server.wwsu1069.org/images/embeds/logo.png",
         songgooglefontname: "",
         songfontname: "",
         titlegooglefontname: "",
@@ -77,7 +77,7 @@ jQuery(function () {
         streamid: "1",
         streampath: "/live",
         streamtype: "other",
-        streamurl: "http://server.wwsu1069.org",
+        streamurl: "https://server.wwsu1069.org",
         songinformationinterval: "5000"
     });
 });

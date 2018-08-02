@@ -48,7 +48,7 @@ $("#nativeflashradio").flashradio({
     streamid: "1",
     streampath: "/live",
     streamtype: "other",
-    streamurl: "http://server.wwsu1069.org",
+    streamurl: "https://server.wwsu1069.org",
     songinformationinterval: "600000"
 });
 

@@ -22,7 +22,7 @@ try {
     var flashInterval = null;
 
 // Define other variables
-    var nodeURL = 'http://server.wwsu1069.org';
+    var nodeURL = 'https://server.wwsu1069.org';
     var directorpresent = false;
     var disconnected = true;
     var slidetimer = false;
