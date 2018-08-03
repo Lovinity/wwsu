@@ -119,7 +119,20 @@ function doMeta(response)
     try {
         if ('line1' in response || 'line2' in response)
         {
-            nowPlaying.innerHTML = `${Meta.line1}<br />${Meta.line2}`;
+            nowPlaying.innerHTML = `${Meta.line1}. ${Meta.line2}`;
+            $('#nowplaying')
+                                .marquee({
+                                    //duration in milliseconds of the marquee
+                                    speed: 50,
+                                    //gap in pixels between the tickers
+                                    gap: 100,
+                                    //time in milliseconds before the marquee will start animating
+                                    delayBeforeStart: 0,
+                                    //'left' or 'right'
+                                    direction: 'left',
+                                    //true or false - should the marquee be duplicated to show an effect of continues flow
+                                    duplicated: true
+                                });
         }
     } catch (e) {
         console.error(e);
