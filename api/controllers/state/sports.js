@@ -74,7 +74,7 @@ module.exports = {
 
                 // Operation: Remove all music tracks, queue a station ID, queue an opener if one exists for this sport, and start the next track if current track is music.
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
-                await sails.helpers.rest.removeMusic();
+                await sails.helpers.rest.removeMusic(false, false);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 if (typeof sails.config.custom.sportscats[inputs.sport] !== 'undefined')

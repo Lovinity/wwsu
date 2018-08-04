@@ -11,6 +11,11 @@ module.exports = {
             type: 'boolean',
             defaultsTo: false,
             description: 'If true, we will not delete any tracks that are in the queue that were requested.'
+        },
+        general: {
+            type: 'boolean',
+            defaultsTo: true,
+            description: "If true, will NOT remove tracks found in config.categories.noClearGeneral. Otherwise, uses config.categories.noClearShow."
         }
     },
 
@@ -31,10 +36,10 @@ module.exports = {
                     sails.log.verbose(`TrackType: ${queue[loopposition].TrackType}`);
                     sails.log.verbose(`Elapsed: ${queue[loopposition].Elapsed}`);
                     sails.log.verbose(`ID: ${queue[loopposition].ID}`);
-                    // If the track is a music track, remove it
-                    if (queue[loopposition].TrackType === 'Music' && queue[loopposition].ID != 0)
+                    // If the track is not in a noClear category, remove it
+                    if (parseInt(queue[loopposition].ID) !== 0 && ((inputs.general && sails.config.custom.subcats.noClearGeneral.indexOf(parseInt(queue[loopposition].IDSubcat)) === -1) || (!inputs.general && sails.config.custom.subcats.noClearShow.indexOf(parseInt(queue[loopposition].IDSubcat)) === -1)))
                     {
-                        sails.log.verbose(`MUSIC`);
+                        sails.log.verbose(`CLEAR`);
                         // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
                         if (!inputs.keepRequests || Requests.pending.indexOf(parseInt(queue[loopposition].ID)) === -1)
                         {
