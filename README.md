@@ -1,4 +1,4 @@
-# WWSU 4.0 beta 5
+# WWSU 4.0.6
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Beta stage, which means although this is a working build, bugs are to be expected.
@@ -430,6 +430,7 @@ The value of the meta state key can be any of the following strings:
 |--|--|
 | unknown | WWSU's state is currently unknown. |
 | automation_on | WWSU is queuing and playing music automatically. |
+| automation_break | WWSU is in break mode and awaiting the next show/broadcast to begin. |
 | automation_genre | WWSU is automatically queuing and playing music from a specific genre. |
 | automation_playlist | WWSU is running through a manually-edited playlist of tracks. |
 | automation_live | A live show is about to begin. |
@@ -666,6 +667,10 @@ State endpoints are used to request to change states in WWSU's system (for examp
 ### /state/automation [POST /state/automation]
 Request to go into automation mode. If coming from a sports broadcast, this will also play the closer, if there is one. **Requires authorization**
 Requests do not get a response until the entire process of going to automation is completed on the backend. This could take several seconds.
+#### Request
+| key | criteria |
+|--|--|
+| transition | boolean (optional; if true, system will go into break instead of automation... used for quick transitioning between shows. NOTE: system will only wait 5 minutes in break. If a show does not begin in 5 minutes, system will go into full automation. Defaults to false.) |
 #### Response 200 OK
 ### /state/break [POST /state/break]
 Go into break mode (play PSAs, or music if halftime is true, until state/return is called). **Requires authorization**

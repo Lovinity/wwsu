@@ -106,6 +106,7 @@ module.exports = {
                         });
             }
             
+            await sails.helpers.error.reset('automationBreak');
             Meta.changingState = false;
             return exits.success();
         } catch (e) {

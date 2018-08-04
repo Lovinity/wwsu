@@ -597,6 +597,8 @@ module.exports.cron = {
                         if (Meta['A'].state.includes('_break') && queue.length < 2)
                         {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1, true);
+                            if (Meta['A'].state === 'automation_break')
+                                await sails.helpers.error.count('automationBreak');
                         }
 
                         // If we are in a sports break, switch it to returning mode because it should not be an indefinite break

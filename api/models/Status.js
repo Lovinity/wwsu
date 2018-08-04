@@ -1,4 +1,4 @@
-/* global sails, Status, _, Logs, moment, Meta, inputs, Announcements */
+/* global sails, Status, _, Logs, moment, Meta, inputs, Announcements, Calendar */
 
 /**
  * Status.js
@@ -269,6 +269,36 @@ module.exports = {
                         return reject(e);
                     }
                     return resolve(1);
+                });
+            }
+        },
+
+        // do not allow automation break to continue for more than 5 minutes.
+        automationBreak: {
+            count: 0,
+            trigger: 300,
+            active: false,
+            fn: function () {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        if (Meta.changingState)
+                            return resolve(0);
+                        
+                        Meta.changingState = true;
+                        await Meta.changeMeta({state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: null});
+
+                        // Add up to 3 track requests if any are pending
+                        await sails.helpers.requests.queue(3, true, true);
+
+                        // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
+                        await Calendar.preLoadEvents();
+                        
+                        Meta.changingState = false;
+                    } catch (e) {
+                        Meta.changingState = false;
+                        return reject(e);
+                    }
+                    return resolve(0);
                 });
             }
         }
