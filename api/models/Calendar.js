@@ -570,7 +570,7 @@ module.exports = {
                                         // No logs? The show probably didn't air. Log that.
                                         if (!count || count === 0)
                                         {
-                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Show: ", ""), event: `It appears ${event.title.replace("Show: ", "")} was scheduled to do a show from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this show. Maybe this person did not host a show?`})
+                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Show: ", ""), event: `It appears ${event.title.replace("Show: ", "")} was scheduled to do a show from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this show. Maybe this person did not host a show?`, createdAt: moment(event.start).toISOString(true)})
                                                     .tolerate((err) => {
                                                         sails.log.error(err);
                                                     });

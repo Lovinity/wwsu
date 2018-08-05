@@ -655,6 +655,13 @@ module.exports.cron = {
                         {
                             change.breakneeded = true;
                         } else {
+                            if (Meta['A'].breakneeded && n >= 10)
+                            {
+                                await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `${Meta['A'].dj} does not seem to have taken the required top of the hour ID break despite being asked to by the system.`})
+                                        .tolerate((err) => {
+                                            sails.log.error(err);
+                                        });
+                            }
                             change.breakneeded = false;
                         }
 

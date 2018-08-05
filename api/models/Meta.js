@@ -152,6 +152,9 @@ module.exports = {
                     .tolerate((err) => {
                         return reject(err);
                     });
+            // Do not push empty (no) changes through websockets
+            if (_.isEmpty(push))
+                return resolve();
             sails.log.silly(`meta socket: ${push}`);
             sails.sockets.broadcast('meta', 'meta', push);
             return resolve();
