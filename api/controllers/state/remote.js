@@ -56,7 +56,7 @@ module.exports = {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
             if (inputs.showname !== '')
                 inputs.showname = await sails.helpers.filterProfane(inputs.showname);
-            
+
             // Send meta to prevent accidental interfering messages in Dj Controls
             await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: ''});
 
@@ -79,6 +79,8 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
+                if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Openers"]], 'Bottom', 1);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await Meta.changeMeta({state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
@@ -92,7 +94,7 @@ module.exports = {
                             sails.log.error(err);
                         });
             }
-            
+
             await sails.helpers.error.reset('automationBreak');
             Meta.changingState = false;
             return exits.success();

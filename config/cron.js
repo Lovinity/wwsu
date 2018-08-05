@@ -1301,6 +1301,38 @@ module.exports.cron = {
                             sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
                     });
                 }
+
+                // Re-load show categories
+                var categories = await Category.find({name: ["Show Openers", "Show Returns", "Show Closers"]})
+                        .tolerate((err) => {
+                        });
+
+                var catIDs = [];
+                var cats = {};
+
+                if (categories.length > 0)
+                {
+                    categories.forEach(function (category) {
+                        catIDs.push(category.ID);
+                        cats[category.ID] = category.name;
+                    });
+                }
+
+                var subcategories = await Subcategory.find({parentid: catIDs})
+                        .tolerate((err) => {
+                        });
+
+
+                if (subcategories.length > 0)
+                {
+                    sails.config.custom.showcats = {};
+                    subcategories.forEach(function (subcategory) {
+                        if (typeof sails.config.custom.showcats[subcategory.name] === 'undefined')
+                            sails.config.custom.showcats[subcategory.name] = {"Show Openers": null, "Show Returns": null, "Show Closers": null};
+                        sails.config.custom.showcats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
+                    });
+                }
+
             } catch (e) {
                 sails.log.error(e);
                 return null;

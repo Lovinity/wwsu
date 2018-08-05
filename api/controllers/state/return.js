@@ -71,6 +71,8 @@ module.exports = {
                 switch (Meta['A'].state)
                 {
                     case 'live_break':
+                        if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Returns"]], 'Bottom', 1);
                         await Meta.changeMeta({state: 'live_returning'});
                         break;
                     case 'sports_break':
@@ -78,6 +80,8 @@ module.exports = {
                         break;
                     case 'remote_break':
                     case 'remote_break_disconnected':
+                        if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Returns"]], 'Bottom', 1);
                         await Meta.changeMeta({state: 'remote_returning'});
                         break;
                     case 'sportsremote_break':

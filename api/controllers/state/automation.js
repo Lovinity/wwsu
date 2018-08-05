@@ -71,6 +71,8 @@ module.exports = {
                     await sails.helpers.songs.queuePending();
                     Status.errorCheck.prevID = moment();
                     await sails.helpers.error.count('stationID');
+                    if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                        await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Closers"]], 'Top', 1);
 
                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
@@ -106,6 +108,8 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
+                if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Closers"]], 'Top', 1);
 
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
