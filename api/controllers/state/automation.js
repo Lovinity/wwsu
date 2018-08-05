@@ -54,7 +54,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
 
-                    await Meta.changeMeta({state: 'automation_on', dj: '', djcontrols: '', track: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: null});
+                    await Meta.changeMeta({state: 'automation_on', dj: '', djcontrols: '', track: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
 
                     // Add up to 3 track requests if any are pending
                     await sails.helpers.requests.queue(3, true, true);
@@ -114,7 +114,7 @@ module.exports = {
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
-                await Meta.changeMeta({state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: null});
+                await Meta.changeMeta({state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
             }
 
             Meta.changingState = false;

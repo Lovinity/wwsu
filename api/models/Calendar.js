@@ -535,16 +535,12 @@ module.exports = {
                     } else if (toTrigger !== null && toTrigger.priority === 3)
                     {
                         genreActive = true;
-                        if ((Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre' && Meta['A'].genre !== toTrigger.event)))
-                        {
-                            await sails.helpers.genre.start(toTrigger.event);
-                        }
+                        await sails.helpers.genre.start(toTrigger.event);
                     }
 
                     // No genre events active right now? Switch back to regular automation.
                     if (!genreActive && Meta['A'].state === 'automation_genre' && !Meta.changingState)
                     {
-                        await Meta.changeMeta({genre: '', state: 'automation_on'});
                         await sails.helpers.genre.start('Default');
                     }
 
