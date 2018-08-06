@@ -857,9 +857,9 @@ module.exports.cron = {
         start: true
     },
 
-    // Every minute on second 01, check for changes in directors on OpenProject.
+    // Every 5 minutes on second 01, check for changes in directors on OpenProject.
     updateDirectors: {
-        schedule: '1 * * * * *',
+        schedule: '1 */5 * * * *',
         onTick: async function () {
             sails.log.debug(`CRON updateDirectors triggered.`);
             try {
@@ -872,9 +872,9 @@ module.exports.cron = {
         start: true
     },
 
-    // Every minute on second 02, update Calendar.
+    // Every 5 minutes on second 02, update Calendar.
     updateCalendar: {
-        schedule: '2 * * * * *',
+        schedule: '2 */5 * * * *',
         onTick: async function () {
             sails.log.debug(`CRON updateCalendar triggered.`);
             try {
