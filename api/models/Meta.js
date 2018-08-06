@@ -97,6 +97,7 @@ module.exports = {
         listeners: 0, // Number of current online listeners
         listenerpeak: 0, // Number of peak online listeners
         queueLength: 0, // Amount of audio queued in radioDJ in seconds (can be a float)
+        playing: false, // Whether or not something is currently playing in the active RadioDJ
         breakneeded: false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
         webchat: true, // Set to false to restrict the ability to send chat messages through the website
         playlist: null, // Name of the playlist we are currently airing

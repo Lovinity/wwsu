@@ -71,14 +71,25 @@ module.exports.cron = {
                 try {
                     var queue = await sails.helpers.rest.getQueue();
 
-                    // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Also, calculate length of the queue
+                    // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). 
+                    // Also, calculate length of the queue, and determine if something is playing in RadioDJ right now
                     try {
                         sails.log.silly(`queueCheck executed.`);
                         var theTracks = [];
                         await sails.helpers.asyncForEach(queue, function (track, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 var title = `${track.Artist} - ${track.Title}`;
-
+                                
+                                // Determine if something is currently playing via whether or not track 0 has ID of 0.
+                                if (index === 0)
+                                {
+                                    if (parseInt(track.ID) === 0)
+                                    {
+                                        change.playing = false;
+                                    } else {
+                                        change.playing = true;
+                                    }
+                                } 
                                 // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again
                                 if (theTracks.indexOf(title) > -1)
                                 {
@@ -103,6 +114,8 @@ module.exports.cron = {
                         return null;
                     }
                     sails.log.silly(`Proceeding after queueCheck.`);
+
+
 
                     // If the currently playing track was a request, mark as played
                     if (_.includes(Requests.pending, parseInt(queue[0].ID)))
