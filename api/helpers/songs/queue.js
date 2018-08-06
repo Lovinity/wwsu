@@ -45,6 +45,15 @@ module.exports = {
         // Get the parent category
         try {
 
+            // Get rid of all the null entries
+            await sails.helpers.asyncForEach(inputs.subcategories, function (subcategory, index) {
+                return new Promise(async (resolve, reject) => {
+                    if (subcategory === null)
+                        delete inputs.subcategories[index];
+                    return resolve(false);
+                });
+            });
+
             // Find all applicable songs that are in the subcategory and load them in memory (have to do randomisation by Node, not by database)
             var thesongs = await Songs.find({id_subcat: inputs.subcategories, enabled: 1});
             sails.log.verbose(`Songs records retrieved: ${thesongs.length}`);
