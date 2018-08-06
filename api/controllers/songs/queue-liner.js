@@ -30,19 +30,9 @@ module.exports = {
             // Queue it
             if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
                 await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Top', 1);
+
             await sails.helpers.rest.cmd('EnableAssisted', 0);
             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-
-            // If necessary, change to the returning state so clients get a queue countdown. Also, start the Top Add if necessary.
-            switch (Meta['A'].state)
-            {
-                case 'sports_on':
-                    await Meta.changeMeta({state: 'sports_returning'});
-                    break;
-                case 'sportsremote_on':
-                    await Meta.changeMeta({state: 'sportsremote_returning'});
-                    break;
-            }
 
             return exits.success();
         } catch (e) {

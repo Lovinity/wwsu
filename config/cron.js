@@ -137,32 +137,35 @@ module.exports.cron = {
                     if (change.queueLength > (Status.errorCheck.prevQueueLength))
                     {
                         Status.errorCheck.trueZero = 0;
-                        Status.errorCheck.prevQueueLength = change.queueLength;
                     } else if (Status.errorCheck.trueZero > 0)
                     {
                         Status.errorCheck.trueZero -= 1;
                         if (Status.errorCheck.trueZero < 1)
                         {
                             Status.errorCheck.trueZero = 0;
-                            Status.errorCheck.prevQueueLength = change.queueLength;
                         } else {
                             //Statemeta.final.queueLength = (Statesystem.errors.prevqueuelength - 1);
-                            Status.errorCheck.prevQueueLength = change.queueLength;
                         }
                         if (change.queueLength < 0)
                             change.queueLength = 0;
                     } else { // No error wait time [remaining]? Use actual detected queue time.
-                        Status.errorCheck.prevQueueLength = change.queueLength;
                     }
                 } else {
                     Status.errorCheck.trueZero = 5; // Wait up to 5 seconds before considering the queue accurate
                     // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
                     //Statemeta.final.queueLength = (Statesystem.errors.prevqueuelength - 1);
-                    Status.errorCheck.prevQueueLength = change.queueLength;
                     if (change.queueLength < 0)
                         change.queueLength = 0;
                 }
 
+                // For remotes, when playing a liner etc, we need to know when to re-queue the remote stream
+                if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && Status.errorCheck.prevQueueLength > 0 && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
+                {
+                    await sails.helpers.rest.cmd('EnableAssisted', 1);
+                    await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
+                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                    await sails.helpers.rest.cmd('EnableAssisted', 0);
+                }
                 Status.errorCheck.prevQueueLength = change.queueLength;
 
                 // If we do not know active playlist, we need to populate the info
@@ -651,7 +654,7 @@ module.exports.cron = {
                         // Check if a break is needed
                         var d = new Date();
                         var n = d.getMinutes();
-                        if (!Meta['A'].state.includes("automation_") && !Meta['A'].state.includes("_break") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown' && n < 10 && (Status.errorCheck.prevID === null || moment(Status.errorCheck.prevID).isBefore(moment().subtract(20, 'minutes'))))
+                        if (!Meta['A'].state.includes("automation_") && !Meta['A'].state.includes("_break") && !Meta['A'].state.includes("_returning") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown' && n < 10 && (Status.errorCheck.prevID === null || moment(Status.errorCheck.prevID).isBefore(moment().subtract(20, 'minutes'))))
                         {
                             change.breakneeded = true;
                         } else {
