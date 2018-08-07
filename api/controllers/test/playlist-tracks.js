@@ -2,28 +2,23 @@
 
 module.exports = {
 
+    friendlyName: 'Playlist tracks',
 
-  friendlyName: 'Playlist tracks',
+    description: '',
 
+    inputs: {
 
-  description: '',
+    },
 
+    exits: {
 
-  inputs: {
+    },
 
-  },
+    fn: async function (inputs, exits) {
+        await sails.helpers.error.post();
+        return exits.success(Playlists.active.tracks);
 
-
-  exits: {
-
-  },
-
-
-  fn: async function (inputs, exits) {
-
-    return exits.success(Playlists.active.tracks);
-
-  }
+    }
 
 
 };
