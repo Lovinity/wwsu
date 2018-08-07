@@ -714,13 +714,10 @@ function doEas()
                         });
                 clearInterval(flashInterval);
                 flashInterval = setInterval(function () {
-                    $("html, body").animate({
-                        backgroundColor: color3
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", color3);
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }, 1000);
                 newEas.shift();
             } else {
@@ -746,14 +743,11 @@ function doEas()
             // Make background flash red every second
             clearInterval(flashInterval);
             flashInterval = setInterval(function () {
-                $("html, body").animate({
-                    backgroundColor: "#D50000"
-                }, 250, function () {
-                    $("html, body").animate({
-                        backgroundColor: "#000000"
+                    $("html, body").css("background-color", "#D50000");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
                     }, 250);
-                });
-            }, 1000);
+                }, 1000);
 
             // Display the extreme alerts
             content.innerHTML = `<div id="slide-interrupt-eas">
@@ -946,13 +940,10 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").animate({
-                        backgroundColor: "#F44336"
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#F44336");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }
 
                 // When a remote broadcast is about to start
@@ -989,13 +980,10 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").animate({
-                        backgroundColor: "#9C27B0"
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#9C27B0");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }
                 // Sports broadcast about to begin
             } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60)
@@ -1031,13 +1019,10 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").animate({
-                        backgroundColor: "#4CAF50"
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#4CAF50");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }
                 // DJ is returning from a break
             } else if (Meta.state === 'live_returning' && queuelength < 60)
@@ -1074,13 +1059,10 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").animate({
-                        backgroundColor: "#F44336"
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#F44336");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }
                 // Remote broadcast is returning from a break
             } else if (Meta.state === 'remote_returning' && queuelength < 60)
@@ -1116,13 +1098,10 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").animate({
-                        backgroundColor: "#9C27B0"
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#9C27B0");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }
                 // Returning to a sports broadcast
             } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60)
@@ -1158,13 +1137,10 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").animate({
-                        backgroundColor: "#4CAF50"
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#4CAF50");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }
                 // Nothing special to show
             } else {

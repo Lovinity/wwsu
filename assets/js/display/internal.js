@@ -398,13 +398,10 @@ function processStatus()
                 statusLine.innerHTML = 'DISPLAY SIGN NOT CONNECTED TO WWSU';
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
-                    $("html, body").animate({
-                        backgroundColor: '#D32F2F'
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#D32F2F");
+                    setTimeout(function () {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }, 1000);
                 break;
             case 1:
@@ -412,13 +409,10 @@ function processStatus()
                 statusLine.innerHTML = 'WWSU Status: Unstable';
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
-                    $("html, body").animate({
-                        backgroundColor: '#D32F2F'
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+                    $("html, body").css("background-color", "#D32F2F");
+                    setTimeout(function () {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }, 1000);
                 break;
             case 2:
@@ -426,14 +420,11 @@ function processStatus()
                 statusLine.innerHTML = 'WWSU Status: Needs Attention';
                 // Flash screen for partial outages every 5 seconds
                 // Flash screen for major outages every second
-                flashInterval = setInterval(function () {
-                    $("html, body").animate({
-                        backgroundColor: '#FF9800'
-                    }, 250, function () {
-                        $("html, body").animate({
-                            backgroundColor: "#000000"
-                        }, 250);
-                    });
+            flashInterval = setInterval(function () {
+                    $("html, body").css("background-color", "#FF9800");
+                    setTimeout(function() {
+                        $("html, body").css("background-color", "#000000");
+                    }, 250);
                 }, 5000);
                 break;
             case 3:
