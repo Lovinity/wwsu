@@ -31,6 +31,11 @@ module.exports = {
             defaultsTo: false
         },
 
+        avatar: {
+            type: 'string',
+            required: true
+        },
+
         position: {
             type: 'string',
             defaultsTo: 'Unknown'
@@ -99,7 +104,7 @@ module.exports = {
                                     // Check for valid returns
                                     if (typeof director.login === 'undefined' || typeof director.name === 'undefined' || typeof director.admin === 'undefined' || typeof director.status === 'undefined')
                                         return null;
-                                    
+
                                     // Skip non-active or non-invited users
                                     if (director.status === 'active' || director.status === 'invited')
                                     {
@@ -111,13 +116,13 @@ module.exports = {
                                             Directors.directors[director.login] = director;
                                         }
 
-                                        Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, position: '', present: false, since: moment().toISOString(true)})
+                                        Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: '', present: false, since: moment().toISOString(true)})
                                                 .exec((err, user, wasCreated) => {
 
                                                     // Update director if anything changed.
-                                                    if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin))
+                                                    if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin || director.avatar !== user.avatar))
                                                     {
-                                                        Directors.update({name: director.name}, {login: director.login, name: director.name, admin: director.admin, position: ''}).fetch().exec(function (err2, user2) {});
+                                                        Directors.update({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: ''}).fetch().exec(function (err2, user2) {});
                                                     }
                                                 });
                                     }
