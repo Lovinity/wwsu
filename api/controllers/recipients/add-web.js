@@ -1,6 +1,6 @@
 /* global sails */
 var sh = require("shorthash");
-
+var name = require("unique-names-generator");
 module.exports = {
 
     friendlyName: 'Recipients / Add-web',
@@ -23,7 +23,7 @@ module.exports = {
             var host = sh.unique(from_IP + sails.tokenSecret);
 
             // Mark the client as online; have Node announce the recipient on applicable web sockets.
-            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${host})`);
+            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${name.generate(" ")})`);
             return exits.success({label: label});
         } catch (e) {
             return exits.error(e);
