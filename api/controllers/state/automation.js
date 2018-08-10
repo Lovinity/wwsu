@@ -1,4 +1,4 @@
-/* global Meta, sails, Logs, Status, Playlists, Calendar */
+/* global Meta, sails, Logs, Status, Playlists, Calendar, moment */
 
 module.exports = {
 
@@ -35,6 +35,9 @@ module.exports = {
             Playlists.active.name = null;
             Playlists.active.ID = 0;
             Playlists.active.position = -1;
+
+            if (Meta['A'].state.startsWith("live_"))
+                sails.sockets.broadcast('show-stats', 'show-stats', {});
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);
 
