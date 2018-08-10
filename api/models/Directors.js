@@ -115,14 +115,20 @@ module.exports = {
                                         {
                                             Directors.directors[director.login] = director;
                                         }
+                                        
+                                        for (var key in sails.config.custom.pm.directors)
+                                        {
+                                            if (sails.config.custom.pm.directors.hasOwnProperty(key) && key === director.name)
+                                                director.position = sails.config.custom.pm.directors[key];
+                                        }
 
-                                        Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: '', present: false, since: moment().toISOString(true)})
+                                        Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: director.position, present: false, since: moment().toISOString(true)})
                                                 .exec((err, user, wasCreated) => {
 
                                                     // Update director if anything changed.
-                                                    if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin || director.avatar !== user.avatar))
+                                                    if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin || director.avatar !== user.avatar || director.position !== user.position))
                                                     {
-                                                        Directors.update({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: ''}).fetch().exec(function (err2, user2) {});
+                                                        Directors.update({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: director.position}).fetch().exec(function (err2, user2) {});
                                                     }
                                                 });
                                     }
