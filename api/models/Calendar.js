@@ -68,6 +68,8 @@ module.exports = {
             defaultsTo: '#D50000'
         }
     },
+    
+    calendar: [],
 
     // Google auth does not seem to support async/promises yet, so we need to have a sync function for that
     preLoadEvents: function () {
@@ -210,6 +212,7 @@ module.exports = {
                             //orderBy: 'startTime' does not work correctly, so ignoring as it's not a big deal if events are not in time order
                 });
                 events = events.data.items;
+                Calendar.calendar = events;
                 sails.log.silly(events);
                 if (events.length === 0) {
                     Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar is operational, but there are no events in the calendar in the next 7 days.', status: 5}]);

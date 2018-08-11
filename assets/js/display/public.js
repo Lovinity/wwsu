@@ -642,6 +642,7 @@ function directorSocket()
 function doEas()
 {
     try {
+        console.log(`DO EAS called`);
         // Display the new alert if conditions permit
         if ((newEas.length > 0 && !easActive))
         {
@@ -1197,6 +1198,7 @@ function text_truncate(str, length = 100, ending = '...') {
 function doSlide(same = false)
 {
     try {
+        console.log(`Do Slide Called`);
         // Failsafes
         clearTimeout(slidetimer);
         slidetimer = true;
@@ -2162,6 +2164,8 @@ function doSlide(same = false)
             slidebadges.innerHTML = ``;
             var afterFunction = function () {
                 try {
+                    if (easActive || easExtreme)
+                        return null;
                     background.style.display = "none";
                     // If there are weather alerts, show those instead of the logo
                     if (Eas().count() > 0)
