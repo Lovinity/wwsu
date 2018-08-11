@@ -43,7 +43,8 @@ module.exports = {
                 }
             } else {
 
-                var n = moment().minute();
+                var d = new Date();
+                var n = d.getMinutes();
                 await sails.helpers.rest.removeMusic(false, false);
                 // Queue station IDs if after :50 and before :10, or if it's been an hour or more since the last station ID.
                 if ((n > 50 && n < 10) || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
