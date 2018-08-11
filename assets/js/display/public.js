@@ -715,7 +715,7 @@ function doEas()
                 clearInterval(flashInterval);
                 flashInterval = setInterval(function () {
                     $("html, body").css("background-color", color3);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }, 1000);
@@ -743,11 +743,11 @@ function doEas()
             // Make background flash red every second
             clearInterval(flashInterval);
             flashInterval = setInterval(function () {
-                    $("html, body").css("background-color", "#D50000");
-                    setTimeout(function() {
-                        $("html, body").css("background-color", "#000000");
-                    }, 250);
-                }, 1000);
+                $("html, body").css("background-color", "#D50000");
+                setTimeout(function () {
+                    $("html, body").css("background-color", "#000000");
+                }, 250);
+            }, 1000);
 
             // Display the extreme alerts
             content.innerHTML = `<div id="slide-interrupt-eas">
@@ -941,7 +941,7 @@ function processNowPlaying(response)
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
                     $("html, body").css("background-color", "#F44336");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }
@@ -981,7 +981,7 @@ function processNowPlaying(response)
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
                     $("html, body").css("background-color", "#9C27B0");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }
@@ -1020,7 +1020,7 @@ function processNowPlaying(response)
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
                     $("html, body").css("background-color", "#4CAF50");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }
@@ -1060,7 +1060,7 @@ function processNowPlaying(response)
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
                     $("html, body").css("background-color", "#F44336");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }
@@ -1099,7 +1099,7 @@ function processNowPlaying(response)
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
                     $("html, body").css("background-color", "#9C27B0");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }
@@ -1138,7 +1138,7 @@ function processNowPlaying(response)
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
                     $("html, body").css("background-color", "#4CAF50");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }
@@ -1315,6 +1315,7 @@ function doSlide(same = false)
                             try {
                                 var color = 'rgba(211, 47, 47, 0.8)';
                                 var text1 = 'OUT';
+                                var theClass = 'danger';
                                 var text2 = '';
                                 if (dodo.since !== null && moment(dodo.since).isValid())
                                     text2 = moment(dodo.since).from(moment(Meta.time), true);
@@ -1322,13 +1323,20 @@ function doSlide(same = false)
                                 {
                                     var color = 'rgba(56, 142, 60, 0.8)';
                                     var text1 = 'IN';
+                                    var theClass = 'success';
                                 }
-                                innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
-                                <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
-                        <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
-                        <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
-                        </div>
-                        `;
+                                /*
+                                 innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
+                                 <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
+                                 <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
+                                 <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
+                                 </div>
+                                 `;
+                                 */
+                                innercontent.innerHTML += `<div style="width: 160px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;"><img src="${dodo.avatar}" width="96" class="rounded-circle"></div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1.25em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br><span style="font-size: 1em;">${dodo.position}</span></div>`;
                             } catch (e) {
                                 console.error(e);
                                 iziToast.show({
@@ -1354,34 +1362,100 @@ function doSlide(same = false)
                                 calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].forEach(function (dodo, index) {
                                     try {
                                         var color = hexRgb(dodo.color);
-                                        var borderclass = 'black';
+                                        var borderColor = '#000000';
                                         var timeleft = '';
                                         if (moment(Meta.time).isBefore(moment(dodo.start)))
                                         {
                                             timeleft = `Starts ${moment(Meta.time).to(moment(dodo.start))}`;
-                                            color.red = Math.round(color.red / 3);
-                                            color.green = Math.round(color.green / 3);
-                                            color.blue = Math.round(color.blue / 3);
-                                            borderclass = 'warning';
+                                            color.red = Math.round(color.red / 1.5);
+                                            color.green = Math.round(color.green / 1.5);
+                                            color.blue = Math.round(color.blue / 1.5);
+                                            borderColor = "#FFEB3B";
                                         } else if (moment(Meta.time).isAfter(moment(dodo.end)))
                                         {
-                                            color.red = Math.round(color.red / 4);
-                                            color.green = Math.round(color.green / 4);
-                                            color.blue = Math.round(color.blue / 4);
+                                            color.red = Math.round(color.red / 1.5);
+                                            color.green = Math.round(color.green / 1.5);
+                                            color.blue = Math.round(color.blue / 1.5);
                                             timeleft = `Ended ${moment(dodo.ends).from(moment(Meta.time))}`;
-                                            borderclass = 'danger';
+                                            borderColor = "#f44336";
                                         } else {
-                                            color.red = Math.round(color.red / 2);
-                                            color.green = Math.round(color.green / 2);
-                                            color.blue = Math.round(color.blue / 2);
+                                            color.red = Math.round(color.red / 1.5);
+                                            color.green = Math.round(color.green / 1.5);
+                                            color.blue = Math.round(color.blue / 1.5);
                                             timeleft = `Ends ${moment(Meta.time).to(moment(dodo.ends))}`;
-                                            borderclass = 'success';
+                                            borderColor = "#4CAF50";
+                                        }
+                                        if (dodo.title.startsWith("Show: "))
+                                        {
+                                            var stripped = dodo.title.replace("Show: ", "");
+                                            var eventType = "SHOW";
+                                            var eventClass = "danger";
+                                            var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
+                                            var temp = stripped.split(" - ");
+                                            if (temp.length === 2)
+                                            {
+                                                var line1 = temp[0];
+                                                var line2 = temp[1];
+                                            } else {
+                                                var line1 = "Unknown DJ"
+                                                var line2 = temp;
+                                            }
+                                        } else if (dodo.title.startsWith("Prerecord: "))
+                                        {
+                                            var stripped = dodo.title.replace("Prerecord: ", "");
+                                            var eventType = "PRERECORD";
+                                            var eventClass = "danger-light";
+                                            var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
+                                            var temp = stripped.split(" - ");
+                                            if (temp.length === 2)
+                                            {
+                                                var line1 = temp[0];
+                                                var line2 = temp[1];
+                                            } else {
+                                                var line1 = "Unknown DJ"
+                                                var line2 = temp;
+                                            }
+                                        } else if (dodo.title.startsWith("Remote: "))
+                                        {
+                                            var stripped = dodo.title.replace("Remote: ", "");
+                                            var eventType = "REMOTE";
+                                            var eventClass = "purple";
+                                            var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
+                                            var temp = stripped.split(" - ");
+                                            if (temp.length === 2)
+                                            {
+                                                var line1 = temp[0];
+                                                var line2 = temp[1];
+                                            } else {
+                                                var line1 = "Unknown Host"
+                                                var line2 = temp;
+                                            }
+                                        } else if (dodo.title.startsWith("Sports: "))
+                                        {
+                                            var stripped = dodo.title.replace("Sports: ", "");
+                                            var eventType = "SPORTS";
+                                            var eventClass = "success";
+                                            var line1 = "Raider Sports";
+                                            var line2 = stripped;
+                                            var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
+                                        } else {
+                                            var eventType = "Event";
+                                            var eventClass = "secondary";
+                                            var line1 = "";
+                                            var line2 = dodo.title;
+                                            var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
                                         }
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
-                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;"><string>${dodo.title}</strong></span><br /><span class="text-warning-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span><br /><span class="text-danger-light" style="font-size: 1em;">${timeleft}</span><br /><span class="text-light" style="font-size: 0.75em; text-align: left;">${text_truncate(dodo.description, 140)}</div>
-                        </div>
-                        `;
+                                        /*
+                                         innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
+                                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;"><string>${dodo.title}</strong></span><br /><span class="text-warning-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span><br /><span class="text-danger-light" style="font-size: 1em;">${timeleft}</span><br /><span class="text-light" style="font-size: 0.75em; text-align: left;">${text_truncate(dodo.description, 140)}</div>
+                                         </div>
+                                         `;
+                                         */
+                                        innercontent.innerHTML += `<div style="width: 190px; position: relative; background-color: ${color}; box-shadow: 0 0 12px 4px ${borderColor};" class="m-2 text-white rounded">
+  <div class="p-1 text-center" style="width: 100%;">${image}
+    <span class="notification badge badge-${eventClass}" style="font-size: 1em;">${eventType}</span>
+    <div class="m-1" style="text-align: center;"><span class="text-warning-light" style="font-size: 1em;">${line1}</span><br><span style="font-size: 1.25em;">${line2}</span><br /><span class="text-info-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span></div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1438,9 +1512,9 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col1`);
                                         color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 2);
-                                        color.green = Math.round(color.green / 2);
-                                        color.blue = Math.round(color.blue / 2);
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
@@ -1511,9 +1585,9 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col2`);
                                         color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 2);
-                                        color.green = Math.round(color.green / 2);
-                                        color.blue = Math.round(color.blue / 2);
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
@@ -1584,9 +1658,9 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col3`);
                                         color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 2);
-                                        color.green = Math.round(color.green / 2);
-                                        color.blue = Math.round(color.blue / 2);
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
@@ -1677,9 +1751,9 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col1`);
                                         color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 2);
-                                        color.green = Math.round(color.green / 2);
-                                        color.blue = Math.round(color.blue / 2);
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
@@ -1750,9 +1824,9 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col2`);
                                         color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 2);
-                                        color.green = Math.round(color.green / 2);
-                                        color.blue = Math.round(color.blue / 2);
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
@@ -1823,9 +1897,9 @@ function doSlide(same = false)
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col3`);
                                         color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 2);
-                                        color.green = Math.round(color.green / 2);
-                                        color.blue = Math.round(color.blue / 2);
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
                                             <div class="row">
@@ -1940,9 +2014,9 @@ function doSlide(same = false)
                             try {
                                 var color = (typeof dodo.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb('#787878');
                                 var borderclass = 'black';
-                                color.red = Math.round(color.red / 2);
-                                color.green = Math.round(color.green / 2);
-                                color.blue = Math.round(color.blue / 2);
+                                color.red = Math.round(color.red / 1.5);
+                                color.green = Math.round(color.green / 1.5);
+                                color.blue = Math.round(color.blue / 1.5);
                                 if (typeof dodo['severity'] !== 'undefined')
                                 {
                                     if (dodo['severity'] === 'Extreme')
