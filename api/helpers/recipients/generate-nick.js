@@ -139,14 +139,14 @@ module.exports = {
 
                         i = Math.floor(Math.random() * 10);
                         {
-                            if (i < 3) {
+                            if (i < 2) {
                                 rnd = Math.floor(Math.random() * nm1.length);
                                 names = nm1[rnd];
                             } else if (i < 5) {
                                 rnd = Math.floor(Math.random() * nm1.length);
                                 rnd2 = Math.floor(Math.random() * nm2.length);
                                 names = nm1[rnd] + " " + nm2[rnd2];
-                            } else if (i < 7) {
+                            } else if (i < 8) {
                                 rnd = Math.floor(Math.random() * nm3.length);
                                 rnd2 = Math.floor(Math.random() * nm4.length);
                                 names = nm3[rnd] + " " + nm4[rnd2];
@@ -299,7 +299,7 @@ module.exports = {
                                 names = "The " + names1[rnd] + " " + names2[rnd2];
                             } else {
                                 rnd = Math.floor(Math.random() * names3.length);
-                                names = names3[rnd];
+                                names = names1[rnd] + " " + names3[rnd];
                             }
                             return names;
                         }
@@ -386,7 +386,7 @@ module.exports = {
 
                         i = Math.floor(Math.random() * 10);
                         {
-                            if (i < 5) {
+                            if (i < 4) {
                                 rnd0 = Math.floor(Math.random() * names1.length);
                                 names = names1[rnd0];
                             } else {
