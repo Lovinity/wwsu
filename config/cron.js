@@ -790,7 +790,7 @@ module.exports.cron = {
                                                                 break;
                                                                 // Add requested tracks
                                                             case "queueRequests":
-                                                                await sails.helpers.requests.queue(task.quantity || 1, false, true);
+                                                                await sails.helpers.requests.queue(task.quantity || 1, true, true);
                                                                 break;
                                                                 // Queue tracks from a configured categories.category
                                                             case "queue":
