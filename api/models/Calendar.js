@@ -530,6 +530,8 @@ module.exports = {
                             }
                         }
                     }
+                    
+                    sails.log.debug(`toTrigger: ${JSON.stringify(toTrigger)}`);
 
                     // Trigger playlist or genre, if there is one to trigger
                     if (toTrigger !== null && toTrigger.priority < 3)
