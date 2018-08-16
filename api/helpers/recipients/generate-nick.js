@@ -414,6 +414,9 @@ module.exports = {
 
                         i = Math.floor(Math.random() * 10);
                         {
+                            rnd = Math.floor(Math.random() * nm1.length);
+                            rnd2 = Math.floor(Math.random() * nm2.length);
+                            rnd3 = Math.floor(Math.random() * nm3.length);
                             rnd4 = Math.floor(Math.random() * nm4.length);
                             rnd5 = Math.floor(Math.random() * nm5.length);
                             rnd6 = Math.floor(Math.random() * nm6.length);
