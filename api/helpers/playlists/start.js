@@ -28,6 +28,11 @@ module.exports = {
             type: 'string',
             defaultsTo: '',
             description: 'Topic to set on the metadata when this playlist plays (prerecord).'
+        },
+        ignoreChangingState: {
+            type: 'boolean',
+            defaultsTo: false,
+            description: 'Set to true if we should ignore the Meta.changingState conflict check.'
         }
     },
 
@@ -36,7 +41,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, and/or it was not specified we are resuming a playlist.
-            if (!Playlists.queuing && ((!Meta.changingState && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre'))) || inputs.resume))
+            if (!Playlists.queuing && (((!Meta.changingState || inputs.ignoreChangingState) && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre'))) || inputs.resume))
             {
                 sails.log.verbose(`Processing helper.`);
                 Playlists.queuing = true; // Mark that the playlist is being queued, to avoid app conflicts.
@@ -47,7 +52,7 @@ module.exports = {
                 sails.log.silly(`Playlist: ${theplaylist}`);
                 if (!theplaylist)
                 {
-                    if (!inputs.resume)
+                    if (!inputs.resume && !inputs.ignoreChangingState)
                         Meta.changingState = false;
                     throw new Error('Playlist not found!');
                 }
@@ -68,7 +73,7 @@ module.exports = {
                             sails.log.silly(playlistTracks);
                             if (!playlistTracks)
                             {
-                                if (!inputs.resume)
+                                if (!inputs.resume && !inputs.ignoreChangingState)
                                     Meta.changingState = false;
                                 throw new Error(`No playlist tracks were returned.`);
                             }
@@ -91,7 +96,7 @@ module.exports = {
                                         if (slot <= 0)
                                         {
                                             Playlists.queuing = false;
-                                            if (!inputs.resume)
+                                            if (!inputs.resume && !inputs.ignoreChangingState)
                                                 Meta.changingState = false;
                                             sails.log.verbose(`Considered playlist as queued. Proceeding.`);
                                             return resolve2();
@@ -204,7 +209,7 @@ module.exports = {
                     await loadPlaylist();
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                 }
-                if (!inputs.resume)
+                if (!inputs.resume && !inputs.ignoreChangingState)
                     Meta.changingState = false;
                 return exits.success();
             } else {
@@ -212,7 +217,7 @@ module.exports = {
                 return exits.success();
             }
         } catch (e) {
-            if (!inputs.resume)
+            if (!inputs.resume && !inputs.ignoreChangingState)
                 Meta.changingState = false;
             Playlists.queuing = false;
             return exits.error(e);

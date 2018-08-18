@@ -60,7 +60,7 @@ module.exports = {
                     await sails.helpers.requests.queue(3, true, true);
 
                     // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled. Load any scheduled playlists/rotations
-                    await Calendar.preLoadEvents();
+                    await Calendar.preLoadEvents(true);
                     await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                     await sails.helpers.songs.queuePending();
                     Status.errorCheck.prevID = moment();
@@ -84,7 +84,7 @@ module.exports = {
                     await sails.helpers.requests.queue(3, true, true);
 
                     // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-                    await Calendar.preLoadEvents();
+                    await Calendar.preLoadEvents(true);
                 }
 
                 // Enable Auto DJ

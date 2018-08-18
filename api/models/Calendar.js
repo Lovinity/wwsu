@@ -70,7 +70,7 @@ module.exports = {
     },
 
     // Google auth does not seem to support async/promises yet, so we need to have a sync function for that
-    preLoadEvents: function () {
+    preLoadEvents: function (ignoreChangingState = false) {
         return new Promise((resolve, reject) => {
             var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
             var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
@@ -177,7 +177,7 @@ module.exports = {
 
             authenticate()
                     .then(async (auth) => {
-                        await Calendar.loadEvents(auth);
+                        await Calendar.loadEvents(auth, ignoreChangingState);
                         return resolve();
                     })
                     .catch(err => {
@@ -188,7 +188,7 @@ module.exports = {
         });
     },
 
-    loadEvents: function (auth) {
+    loadEvents: function (auth, ignoreChangingState) {
         return new Promise(async (resolve, reject) => {
             sails.log.verbose(`Calendar.loadEvents called`);
             try {
@@ -531,11 +531,11 @@ module.exports = {
                     // Trigger playlist or genre, if there is one to trigger
                     if (toTrigger !== null && toTrigger.priority < 3)
                     {
-                        await sails.helpers.playlists.start(toTrigger.event, toTrigger.resume, toTrigger.type, toTrigger.description);
+                        await sails.helpers.playlists.start(toTrigger.event, toTrigger.resume, toTrigger.type, toTrigger.description, ignoreChangingState);
                     } else if (toTrigger !== null && toTrigger.priority === 3)
                     {
                         genreActive = true;
-                        await sails.helpers.genre.start(toTrigger.event);
+                        await sails.helpers.genre.start(toTrigger.event, ignoreChangingState);
                     }
 
                     // No genre events active right now? Switch back to regular automation.
