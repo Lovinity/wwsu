@@ -1,4 +1,4 @@
-/* global sails, Events, Meta */
+/* global sails, Events, Meta, Logs */
 
 module.exports = {
 
@@ -52,8 +52,16 @@ module.exports = {
                     if (inputs.event !== 'Default')
                     {
                         await Meta.changeMeta({state: 'automation_genre', genre: inputs.event});
+                        await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'A genre was scheduled to start.' + "\n" + 'Genre: ' + inputs.event})
+                                .tolerate((err) => {
+                                    sails.log.error(err);
+                                });
                     } else {
                         await Meta.changeMeta({state: 'automation_on', genre: ''});
+                        await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Genre automation has ended; we switched to Default rotation.'})
+                                .tolerate((err) => {
+                                    sails.log.error(err);
+                                });
                     }
                     if (!inputs.ignoreChangingState)
                         Meta.changingState = false;

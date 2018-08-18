@@ -126,9 +126,6 @@ module.exports.cron = {
                         delete Requests.pending[Requests.pending.indexOf(parseInt(queue[0].ID))];
                     }
 
-                    // If any of the tracks in queue are in the Requests.pendingQueue, move to Requests.pending
-
-
                     await sails.helpers.error.reset('queueFail');
 
                     // Error checks
@@ -208,6 +205,15 @@ module.exports.cron = {
                     } catch (e) {
                         sails.log.error(e);
                     }
+                }
+                
+                // If we are in automation_genre, check to see if the queue is empty. If so, the genre rotation may be out of tracks to play.
+                // In that case, flip to automation_on with Default rotation.
+                if (Meta['A'].state === 'automation_genre' && Meta.automation.length < 2)
+                {
+                    await sails.helpers.error.count('genreEmpty');
+                } else {
+                    await sails.helpers.error.reset('genreEmpty');
                 }
 
                 // Clear manual metadata if it is old

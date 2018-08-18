@@ -283,7 +283,7 @@ module.exports = {
                     try {
                         if (Meta.changingState)
                             return resolve(0);
-                        
+
                         Meta.changingState = true;
                         await Meta.changeMeta({state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: null});
 
@@ -292,7 +292,7 @@ module.exports = {
 
                         // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
                         await Calendar.preLoadEvents();
-                        
+
                         Meta.changingState = false;
                     } catch (e) {
                         Meta.changingState = false;
@@ -301,7 +301,24 @@ module.exports = {
                     return resolve(0);
                 });
             }
-        }
+        },
+
+        // Check to see if we are in genre rotation and the queue is empty (usually mean no more tracks can play)
+        genreEmpty: {
+            count: 0,
+            trigger: 10,
+            active: false,
+            fn: function () {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        await sails.helpers.genre.start('Default');
+                        return resolve(0);
+                    } catch (e) {
+                        return reject(e);
+                    }
+                });
+            }
+        },
 
     },
 
