@@ -1,4 +1,4 @@
-# WWSU 4.0.8
+# WWSU 4.0.9
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Beta stage, which means although this is a working build, bugs are to be expected.
@@ -570,6 +570,7 @@ Get an array of tracks from the automation system. This was designed to be used 
 | ID | number (If only getting a specific song, provide the song's ID number. If provided, the return song array will also contain category, request, and spins. If not provided, will return an array of requestable songs without category, request, nor spins.) |
 | search | string (If provided, return only songs that contain the provided string in the artist or the title.) |
 | subcategory | number (optional; if provided, filter by the provided subcategory ID) |
+| genre | number (optional; if provided, filter by the provided  genre ID) |
 | limit | number (Maximum number of songs to return. Defaults to 25.) |
 | skip | number (If provided, will skip that many songs from the beginning.) |
 #### Response 200
@@ -639,13 +640,13 @@ Get an array of tracks from the automation system. This was designed to be used 
 			},
 			...
         ]
-### /songs/get-subcategories [GET /songs/get-subcategories]
-Get an array of subcategories containing songs that can be requested by the public.
+### /songs/get-genres [GET /songs/get-genres]
+Get an array of genres.
 #### Response 200
         [
 			{
 				"ID": 33,
-				"name": "Music >> Adult Contemporary" // Format: Top category >> Subcategory
+				"name": "Hip-Hop / R&B"
 			},
 			...
         ]

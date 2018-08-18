@@ -79,7 +79,7 @@ module.exports.cron = {
                         await sails.helpers.asyncForEach(queue, function (track, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 var title = `${track.Artist} - ${track.Title}`;
-                                
+
                                 // Determine if something is currently playing via whether or not track 0 has ID of 0.
                                 if (index === 0)
                                 {
@@ -89,7 +89,7 @@ module.exports.cron = {
                                     } else {
                                         change.playing = true;
                                     }
-                                } 
+                                }
                                 // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again
                                 if (theTracks.indexOf(title) > -1)
                                 {
@@ -256,7 +256,7 @@ module.exports.cron = {
                                     .tolerate((err) => {
                                     });
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
-                            Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
+                            Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_played: moment('2002-01-01').toISOString(), playlist_position: 0});
                             Playlists.active.name = null;
                             Playlists.active.position = 0;
                             // Did not finish the playlist? Ensure the position is updated in meta.
@@ -790,7 +790,7 @@ module.exports.cron = {
                                                                 break;
                                                                 // Add requested tracks
                                                             case "queueRequests":
-                                                                await sails.helpers.requests.queue(task.quantity || 1, false, true);
+                                                                await sails.helpers.requests.queue(task.quantity || 1, true, true);
                                                                 break;
                                                                 // Queue tracks from a configured categories.category
                                                             case "queue":
@@ -1447,6 +1447,18 @@ module.exports.cron = {
                 sails.log.error(e);
                 return null;
             }
+        },
+        start: true
+    },
+
+    // Get the top stories from The Guardian every 5 minutes at second 12
+    guardianCheck: {
+        schedule: '12 */5 * * *',
+        onTick: async function () {
+            needle('get', sails.config.custom.guardianRSS, {}, {headers: {'Content-Type': 'application/json'}})
+                    .then(async function (resp) {
+                        
+                    });
         },
         start: true
     },

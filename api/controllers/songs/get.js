@@ -22,6 +22,11 @@ module.exports = {
             allowNull: true,
             description: 'Optionally filter returned songs by provided subcategory ID.'
         },
+        genre: {
+            type: 'number',
+            allowNull: true,
+            description: 'Optionally filter returned songs by provided genre ID.'
+        },
         limit: {
             type: 'number',
             defaultsTo: 25,
@@ -81,6 +86,8 @@ module.exports = {
                 query = {id_subcat: subcatIDs};
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
                     query.id_subcat = inputs.subcategory;
+                if (inputs.genre !== 'undefined' && inputs.genre !== null)
+                    query.id_genre = inputs.genre;
 
                 // Filter by search string, if provided
                 if (typeof inputs.search !== 'undefined' && inputs.search !== null)
@@ -122,7 +129,7 @@ module.exports = {
                             var subcats2 = await Subcategory.findOne({ID: song.id_subcat});
                             sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
                             sails.log.silly(subcats2);
-                            
+
                             songs[index].category = `${cats[subcats2.parentid]} >> ${subcats2.name}` || 'Unknown';
                             songs[index].request = await sails.helpers.requests.checkRequestable(song.ID, from_IP);
 
@@ -140,6 +147,36 @@ module.exports = {
             // If songs is undefined at this point, that is an internal error!
             if (typeof songs === 'undefined')
                 return exits.error(new Error(`Internal error: No songs returned!`));
+
+            // grab RadioDJ genres and put them in memory.
+            var genres = {};
+            var genre = await Genre.find();
+            sails.log.verbose(`Genres retrieved: ${genre.length}`);
+            sails.log.silly(genre);
+            await sails.helpers.asyncForEach(genre, function (genrea, index) {
+                return new Promise(async (resolve, reject) => {
+                    genres[genrea.ID] = genrea.name;
+                    resolve(false);
+                });
+            });
+
+            // Add genre data to the songs
+            await sails.helpers.asyncForEach(songs, function (song, index) {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        if (typeof genres[songs[index].id_genre] !== 'undefined')
+                        {
+                            songs[index].genre = genres[songs[index].id_genre];
+                        } else {
+                            songs[index].genre = 'Unknown';
+                        }
+                        resolve(false);
+                    } catch (e) {
+                        sails.log.error(e);
+                        resolve(false);
+                    }
+                });
+            });
 
             return exits.success(songs);
 

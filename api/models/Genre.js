@@ -9,6 +9,7 @@ module.exports = {
     datastore: 'radiodj',
     attributes: {
         ID: {
+            columnName: 'id',
             type: 'number',
             autoIncrement: true
         },

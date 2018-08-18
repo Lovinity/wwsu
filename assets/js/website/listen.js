@@ -528,7 +528,7 @@ function loadTrackInfo(trackID) {
             $('#track-info-artist').html(response[0].artist);
             $('#track-info-title').html(response[0].title);
             $('#track-info-album').html(response[0].album);
-            $('#track-info-genre').html(response[0].category);
+            $('#track-info-genre').html(response[0].genre);
             $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format("HH:mm:ss"));
             $('#track-info-lastplayed').html(moment(response[0].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[0].date_played).format('LLLL') : 'Unknown');
             $('#track-info-limits').html(`<ul>
@@ -591,7 +591,7 @@ function loadTracks(skip = 0) {
     var genreOptions = document.getElementById('filter-genre');
     var selectedOption = genreOptions.options[genreOptions.selectedIndex].value;
     if (selectedOption !== "0")
-        query.subcategory = parseInt(selectedOption);
+        query.genre = parseInt(selectedOption);
     if (skip === 0)
         songData.innerHTML = ``;
     io.socket.post('/songs/get', query, function serverResponded(response, JWR) {
@@ -623,7 +623,7 @@ function loadTracks(skip = 0) {
 }
 
 function loadGenres() {
-    io.socket.post('/songs/get-subcategories', {}, function serverResponded(response, JWR) {
+    io.socket.post('/songs/get-genres', {}, function serverResponded(response, JWR) {
         try {
             document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
             var x = document.getElementById("filter-genre");

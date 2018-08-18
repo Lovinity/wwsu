@@ -38,7 +38,7 @@ module.exports = {
                 query.ID = inputs.ID;
 
             // End if consider_playlist and we are not in automation mode.
-            if (inputs.consider_playlist && Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_genre')
+            if (inputs.consider_playlist && Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'automation_playlist')
             {
                 sails.log.verbose(`Helper abandoned: consider_playlist is true, and we are airing a playlist.`);
                 return exits.success(false);

@@ -116,6 +116,8 @@ module.exports = {
                                             Directors.directors[director.login] = director;
                                         }
                                         
+                                        // Get position from configuration
+                                        director.position = '';
                                         for (var key in sails.config.custom.pm.directors)
                                         {
                                             if (sails.config.custom.pm.directors.hasOwnProperty(key) && key === director.name)

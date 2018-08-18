@@ -21,9 +21,11 @@ module.exports = {
             if (!this.req.isSocket)
                 return exits.error(new Error('This controller requires a websocket.'));
 
-                var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.host, 'computers', inputs.host);
-                return exits.success({label: label});
-                
+            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.host, 'computers', inputs.host);
+            sails.sockets.join(this.req, 'show-stats');
+            sails.log.verbose('Request was a socket. Joining show-stats.');
+            return exits.success({label: label});
+
         } catch (e) {
             return exits.error(e);
         }
