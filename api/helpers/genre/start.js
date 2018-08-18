@@ -1,4 +1,4 @@
-/* global sails, Events, Meta, Logs */
+/* global sails, Events, Meta, Logs, Playlists, moment */
 
 module.exports = {
 
@@ -15,7 +15,7 @@ module.exports = {
         ignoreChangingState: {
             type: 'boolean',
             defaultsTo: false,
-            description: 'Set to true t0o ignore Meta.changingState conflict detection.'
+            description: 'Set to true to ignore Meta.changingState conflict detection.'
         }
     },
 
@@ -23,7 +23,7 @@ module.exports = {
         sails.log.debug('Helper genre.start called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            if (Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre' && Meta['A'].genre !== inputs.event))
+            if (Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre'))
             {
                 if (!Meta.changingState || inputs.ignoreChangingState)
                 {
@@ -51,13 +51,15 @@ module.exports = {
                     // If we are going back to default rotation, we don't want to activate genre mode; leave in automation_on mode
                     if (inputs.event !== 'Default')
                     {
-                        await Meta.changeMeta({state: 'automation_genre', genre: inputs.event});
+                        Playlists.played = moment();
+                        await Meta.changeMeta({state: 'automation_genre', genre: inputs.event, playlist_played: moment().toISOString(true)});
                         await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'A genre was scheduled to start.' + "\n" + 'Genre: ' + inputs.event})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
                     } else {
-                        await Meta.changeMeta({state: 'automation_on', genre: ''});
+                        Playlists.played = moment('2002-01-01');
+                        await Meta.changeMeta({state: 'automation_on', genre: '', playlist_played: moment("2002-01-01").toISOString(true)});
                         await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Genre automation has ended; we switched to Default rotation.'})
                                 .tolerate((err) => {
                                     sails.log.error(err);

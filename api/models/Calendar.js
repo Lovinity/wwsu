@@ -68,7 +68,7 @@ module.exports = {
             defaultsTo: '#D50000'
         }
     },
-    
+
     calendar: [],
 
     // Google auth does not seem to support async/promises yet, so we need to have a sync function for that
@@ -520,17 +520,17 @@ module.exports = {
                                     {
                                         toTrigger = {priority: 1, event: event.summary.replace('Prerecord: ', ''), resume: false, type: 1, description: criteria.description};
                                     }
-                                }
-                                if (event.summary.startsWith("Genre: ") && (toTrigger === null || toTrigger.priority >= 3))
-                                {
-                                    toTrigger = {priority: 3, event: event.summary.replace('Genre: ', '')};
+                                    if (event.summary.startsWith("Genre: ") && (toTrigger === null || toTrigger.priority >= 3))
+                                    {
+                                        toTrigger = {priority: 3, event: event.summary.replace('Genre: ', '')};
+                                    }
                                 }
                             } catch (e) {
                                 sails.log.error(e);
                             }
                         }
                     }
-                    
+
                     sails.log.debug(`toTrigger: ${JSON.stringify(toTrigger)}`);
 
                     // Trigger playlist or genre, if there is one to trigger
