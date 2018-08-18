@@ -525,6 +525,9 @@ module.exports = {
                                         toTrigger = {priority: 3, event: event.summary.replace('Genre: ', '')};
                                     }
                                 }
+                                // Mark when we are supposed to be in genre rotation
+                                if (event.summary.startsWith("Genre: "))
+                                    genreActive = true;
                             } catch (e) {
                                 sails.log.error(e);
                             }
@@ -539,7 +542,6 @@ module.exports = {
                         await sails.helpers.playlists.start(toTrigger.event, toTrigger.resume, toTrigger.type, toTrigger.description, ignoreChangingState);
                     } else if (toTrigger !== null && toTrigger.priority === 3)
                     {
-                        genreActive = true;
                         await sails.helpers.genre.start(toTrigger.event, ignoreChangingState);
                     }
 
