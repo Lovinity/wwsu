@@ -207,9 +207,9 @@ module.exports.cron = {
                     }
                 }
                 
-                // If we are in automation_genre, check to see if the queue is empty. If so, the genre rotation may be out of tracks to play.
+                // If we are in automation_genre, check to see if the queue is less than 20 seconds. If so, the genre rotation may be out of tracks to play.
                 // In that case, flip to automation_on with Default rotation.
-                if (Meta['A'].state === 'automation_genre' && Meta.automation.length < 2)
+                if (Meta['A'].state === 'automation_genre' && change.queueLength <= 20)
                 {
                     await sails.helpers.error.count('genreEmpty');
                 } else {

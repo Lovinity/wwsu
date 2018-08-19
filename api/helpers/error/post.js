@@ -18,13 +18,17 @@ module.exports = {
                 sails.log.verbose(`Automation recovery triggered.`);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.rest.cmd('ClearPlaylist', 1);
-                if (Meta['A'].state === 'automation_genre')
-                    await sails.helpers.genre.start(Meta['A'].genre);
-                await sails.helpers.songs.queue(sails.config.custom.subcats.music, 'Top', 3, true);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-                await sails.helpers.rest.cmd('EnableAssisted', 0);
-                await sails.helpers.rest.cmd('EnableAutoDJ', 1);
+                await sails.helpers.rest.cmd('EnableAssisted', 0)
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                if (Meta['A'].state === 'automation_genre')
+                {
+                    await sails.helpers.genre.start(Meta['A'].genre, true);
+                } else {
+                    await sails.helpers.genre.start('Default', true);
+                }
+                ;
+                await sails.helpers.rest.cmd('EnableAutoDJ', 1);
             } else if (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord')
             {
                 sails.log.verbose(`Playlist recovery triggered.`);
@@ -34,7 +38,7 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                await sails.helpers.playlists.start(Meta['A'].playlist, true, Meta['A'].state === 'live_prerecord' ? 1 : 0);
+                await sails.helpers.playlists.start(Meta['A'].playlist, true, Meta['A'].state === 'live_prerecord' ? 1 : 0, Meta['A'].topic, true);
             } else if (Meta['A'].state.includes("_break") || Meta['A'].state.includes("_returning") || Meta['A'].state.includes("_disconnected"))
             {
                 sails.log.verbose(`Break recovery triggered.`);

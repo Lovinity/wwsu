@@ -82,6 +82,7 @@ module.exports = {
         dj: '', // If someone is on the air, host name - show name
         showstamp: null, // When a show starts, this is the timestamp which the show began
         track: '', // Currently playing track either in automation or manually logged
+        trackID: 0, // The ID of the track currently playing
         genre: '', // Name of the genre or rotation currently being played, if any
         trackstamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
         topic: '', // If the DJ specified a show topic, this is the topic.

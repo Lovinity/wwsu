@@ -33,9 +33,10 @@ module.exports = {
                     sails.log.verbose(`Events returned ${event.length} matched events, but we're only going to use the first one.`);
                     sails.log.silly(event);
 
-                    if (event.length <= 0 && !inputs.ignoreChangingState)
+                    if (event.length <= 0)
                     {
-                        Meta.changingState = false;
+                        if (!inputs.ignoreChangingState)
+                            Meta.changingState = false;
                         return exits.error(new Error(`The provided event name was not found as an active manual event in RadioDJ.`));
                     }
 

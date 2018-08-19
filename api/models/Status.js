@@ -291,7 +291,7 @@ module.exports = {
                         await sails.helpers.requests.queue(3, true, true);
 
                         // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-                        await Calendar.preLoadEvents();
+                        await Calendar.preLoadEvents(true);
 
                         Meta.changingState = false;
                     } catch (e) {
@@ -311,9 +311,12 @@ module.exports = {
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
-                        await sails.helpers.genre.start('Default');
+                        Meta.changingState = true;
+                        await sails.helpers.genre.start('Default', true);
+                        Meta.changingState = false;
                         return resolve(0);
                     } catch (e) {
+                        Meta.changingState = false;
                         return reject(e);
                     }
                 });
