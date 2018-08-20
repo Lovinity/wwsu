@@ -358,7 +358,7 @@ module.exports = {
                             var summary = criteria.title.replace('Sports: ', '');
 
                             // Ensure the name of the sport is one that is implemented in the system.
-                            if (sails.config.custom.sports.indexOf(summary))
+                            if (sails.config.custom.sports.indexOf(summary) > -1)
                             {
                                 criteria.verify_titleHTML.title = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`;
                                 criteria.verify = 'Valid';

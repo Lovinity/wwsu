@@ -27,7 +27,7 @@ $("#nativeflashradio").flashradio({
     startvolume: "75",
     radioname: "WWSU 106.9 FM",
     scroll: "auto",
-    autoplay: "true",
+    autoplay: "false",
     useanalyzer: "real",
     analyzertype: "4",
     usecover: "true",
