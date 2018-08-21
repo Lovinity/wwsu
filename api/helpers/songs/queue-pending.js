@@ -17,7 +17,7 @@ module.exports = {
             await sails.helpers.asyncForEach(Songs.pending, function (track, index) {
                 return new Promise(async (resolve2, reject2) => {
                     await sails.helpers.rest.cmd('LoadTrackToTop', track);
-                    wait.for.time(1);
+                    //wait.for.time(1);
                     delete Songs.pending[index];
                     return resolve2(false);
                 });
