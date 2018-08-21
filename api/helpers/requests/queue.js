@@ -139,6 +139,7 @@ module.exports = {
 
                     // Prepare the request
                     await sails.helpers.rest.cmd('LoadTrackToTop', record.songID);
+                    wait.for.time(1);
                     if (!_.includes(Requests.pending, record.songID))
                     {
                         Requests.pending.push(record.songID);

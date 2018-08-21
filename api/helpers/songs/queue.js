@@ -1,4 +1,4 @@
-/* global Category, Subcategory, Songs, Statemeta, sails */
+/* global Category, Subcategory, Songs, Statemeta, sails, wait */
 
 module.exports = {
 
@@ -97,6 +97,7 @@ module.exports = {
                                 {
                                     sails.log.verbose(`Queued ${thesong.ID}`);
                                     await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
+                                    wait.for.time(1);
                                     queuedtracks += 1;
                                     // If we reached our limit of tracks to queue, break out of the async for each loop.
                                     if (queuedtracks >= inputs.quantity)
@@ -138,6 +139,7 @@ module.exports = {
                                 }
                                 sails.log.verbose(`Queued ${thesong.ID}`);
                                 await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
+                                wait.for.time(1);
                                 queuedtracks += 1;
                                 // If we reached our limit of tracks to queue, break out of the async for each loop.
                                 if (queuedtracks >= inputs.quantity)
