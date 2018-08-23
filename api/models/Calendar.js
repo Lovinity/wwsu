@@ -510,7 +510,7 @@ module.exports = {
                         if (moment(criteria.start).isBefore() && moment(criteria.end).isAfter())
                         {
                             try {
-                                if (moment(criteria.start).isAfter(Playlists.played))
+                                if (moment(criteria.start).isAfter(Playlists.played) || ignoreChangingState)
                                 {
                                     if (event.summary.startsWith("Playlist: ") && (toTrigger === null || toTrigger.priority >= 2))
                                     {

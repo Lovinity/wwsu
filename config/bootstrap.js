@@ -238,7 +238,7 @@ module.exports.bootstrap = async function (done) {
 
     // Load Google Calendar.
     sails.log.verbose(`BOOTSTRAP: Loading calendar events.`);
-    await Calendar.preLoadEvents();
+    await Calendar.preLoadEvents(true);
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 
