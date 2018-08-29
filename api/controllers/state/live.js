@@ -48,7 +48,7 @@ module.exports = {
                 return exits.error(new Error(`Cannot execute state/live unless in automation or live mode. Please go to automation first.`));
 
             if (Meta.changingState)
-                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+                //return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
             Meta.changingState = true;
 
             // Filter profanity

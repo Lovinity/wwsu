@@ -1,4 +1,4 @@
-# WWSU 4.0.10
+# WWSU 4.1.0
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Beta stage, which means although this is a working build, bugs are to be expected.
@@ -291,6 +291,7 @@ Add a log into the system. **Requires authorization**
 #### Response 200 OK
 ### /logs/get [POST /logs/get]
 Get a list of logs for a specific subtype and a specific date. Returns logs for the 24-hour period of the provided date.
+This endpoint supports sockets, uses the "logs" event, and returns data in the structure defined in the websockets section.
 #### Request
 | key | criteria |
 |--|--|

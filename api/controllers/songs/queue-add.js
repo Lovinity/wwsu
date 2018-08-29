@@ -1,4 +1,9 @@
-/* global sails, Meta, Logs */
+/* global sails, Meta, Logs, Xp */
+
+//TODO: rename to queue-top-add
+
+const UrlSafeString = require('url-safe-string'),
+        tagGenerator = new UrlSafeString();
 
 module.exports = {
 
@@ -28,6 +33,21 @@ module.exports = {
             // Play it
             await sails.helpers.rest.cmd('EnableAssisted', 0);
             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+
+            // Earn XP for playing a Top Add, if the show is live
+            if (Meta['A'].state.startsWith("live_"))
+            {
+                var dj = Meta['A'].dj;
+                if (dj.includes(" - "))
+                {
+                    dj = dj.split(" - ")[0];
+                }
+                await Xp.create({dj: tagGenerator.generate(dj), type: 'show', subtype: 'topadd', amount: sails.config.custom.XP.topAdd})
+                        .tolerate((err) => {
+                            // Do not throw for error, but log it
+                            sails.log.error(err);
+                        });
+            }
 
             return exits.success();
         } catch (e) {

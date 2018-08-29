@@ -12,7 +12,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller calendar/get called.');
-
         try {
             var records = await Calendar.find();
             sails.log.verbose(`Calendar records retrieved: ${records.length}`);

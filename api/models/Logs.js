@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Logs.js
  *
@@ -49,6 +51,28 @@ module.exports = {
             type: 'string',
             allowNull: true
         }
+    },
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`status socket: ${data}`);
+        sails.sockets.broadcast('logs', 'logs', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.log.silly(`status socket: ${data}`);
+        sails.sockets.broadcast('logs', 'logs', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`status socket: ${data}`);
+        sails.sockets.broadcast('logs', 'logs', data);
+        return proceed();
     }
 };
 

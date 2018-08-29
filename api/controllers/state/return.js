@@ -1,4 +1,6 @@
 /* global sails, Meta, Logs, moment, Status */
+const UrlSafeString = require('url-safe-string'),
+        tagGenerator = new UrlSafeString();
 
 module.exports = {
 
@@ -44,10 +46,10 @@ module.exports = {
             } else {
 
                 var d = new Date();
-                var n = d.getMinutes();
+                var num = d.getMinutes();
                 await sails.helpers.rest.removeMusic(false, false);
                 // Queue station IDs if after :50 and before :10, or if it's been an hour or more since the last station ID.
-                if (n => 50 || n < 10 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
+                if (num => 50 || num < 10 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
                 {
                     // Liners for sports broadcasts, promos for others.
                     if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
@@ -58,6 +60,22 @@ module.exports = {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                     }
+
+                    // Earn XP for doing the top of the hour ID break, if the show is live
+                    if (Meta['A'].state.startsWith("live_"))
+                    {
+                        var dj = Meta['A'].dj;
+                        if (dj.includes(" - "))
+                        {
+                            dj = dj.split(" - ")[0];
+                        }
+                        await Xp.create({dj: tagGenerator.generate(dj), type: 'show', subtype: 'id', amount: sails.config.custom.XP.ID})
+                                .tolerate((err) => {
+                                    // Do not throw for error, but log it
+                                    sails.log.error(err);
+                                });
+                    }
+
                     Status.errorCheck.prevID = moment();
                     Status.errorCheck.prevBreak = moment();
                     await sails.helpers.error.count('stationID');

@@ -814,7 +814,7 @@ function processNowPlaying(response)
             easDelay -= 1;
             if (disconnected || typeof Meta.state === 'undefined')
             {
-                statebadge = `<span class="badge badge-secondary">DISCONNECTED</span>`;
+                statebadge = `<span class="badge badge-secondary">OFFLINE</span>`;
             } else if (Meta.state.startsWith("automation_"))
             {
                 statebadge = `<span class="badge badge-primary">MUSIC</span>`;

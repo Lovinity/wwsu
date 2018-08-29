@@ -46,6 +46,12 @@ module.exports = {
             sails.log.verbose(`Retrieved Logs records: ${records.length}`);
             sails.log.silly(records);
 
+            if (this.req.isSocket)
+            {
+                sails.sockets.join(this.req, 'logs');
+                sails.log.verbose('Request was a socket. Joining logs.');
+            }
+
             return exits.success(records);
 
         } catch (e) {
