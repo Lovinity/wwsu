@@ -206,7 +206,7 @@ module.exports.cron = {
                         sails.log.error(e);
                     }
                 }
-                
+
                 // If we are in automation_genre, check to see if the queue is less than 20 seconds. If so, the genre rotation may be out of tracks to play.
                 // In that case, flip to automation_on with Default rotation.
                 if (Meta['A'].state === 'automation_genre' && change.queueLength <= 20)
@@ -619,9 +619,9 @@ module.exports.cron = {
                         if (Meta['A'].state.includes('_break') && queue.length < 2)
                         {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1, true);
-                            if (Meta['A'].state === 'automation_break')
-                                await sails.helpers.error.count('automationBreak');
                         }
+                        if (Meta['A'].state === 'automation_break')
+                            await sails.helpers.error.count('automationBreak');
 
                         // If we are in a sports break, switch it to returning mode because it should not be an indefinite break
                         // WE HAVE the system go to break mode for this to switch to returning. This avoids a bug where being immediately in returning causes switch to on because queue is initially 0.
@@ -1463,7 +1463,7 @@ module.exports.cron = {
         onTick: async function () {
             needle('get', sails.config.custom.guardianRSS, {}, {headers: {'Content-Type': 'application/json'}})
                     .then(async function (resp) {
-                        
+
                     });
         },
         start: true
