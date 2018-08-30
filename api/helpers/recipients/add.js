@@ -99,6 +99,16 @@ module.exports = {
                 await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, status: status, time: moment().toISOString(true)}).fetch();
             }
 
+            // Put the socket ID in memory
+            if (typeof Recipients.sockets[recipient.ID] === 'undefined')
+                Recipients.sockets[recipient.ID] = [];
+
+            // Make sure we do not add the same socket more than once
+            if (!_.includes(Recipients.sockets[recipient.ID], inputs.socket))
+            {
+                Recipients.sockets[recipient.ID].push(inputs.socket);
+            }
+
             // If the recipient group is computers, update Status
             if (inputs.group === 'computers')
             {
@@ -121,7 +131,7 @@ module.exports = {
                 });
             }
 
-            // If the recipient group is display, update Status
+            // If the recipient group is display, update Status if there are at least instances connections.
             if (inputs.group === 'display')
             {
                 var inConfig = false;
@@ -131,7 +141,8 @@ module.exports = {
                             if (inputs.host === `display-${display.name}`)
                             {
                                 inConfig = true;
-                                await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'This display sign is reporting operational.'}]);
+                                if (Recipients.sockets[recipient.ID].length >= display.instances)
+                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'This display sign is reporting operational.'}]);
                                 return resolve(true);
                             } else {
                                 return resolve(false);
@@ -141,16 +152,6 @@ module.exports = {
                         }
                     });
                 });
-            }
-
-            // Put the socket ID in memory
-            if (typeof Recipients.sockets[recipient.ID] === 'undefined')
-                Recipients.sockets[recipient.ID] = [];
-
-            // Make sure we do not add the same socket more than once
-            if (!_.includes(Recipients.sockets[recipient.ID], inputs.socket))
-            {
-                Recipients.sockets[recipient.ID].push(inputs.socket);
             }
 
             return exits.success(recipient.label);
