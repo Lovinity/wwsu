@@ -90,23 +90,24 @@ module.exports = {
                             }
                         });
                     });
-
-                    // If the recipient name is found in display sign config, reflect status
-                    await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
-                        return new Promise(async (resolve, reject) => {
-                            try {
-                                if (recipient.host === `display-${display.name}`)
-                                {
-                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 3, data: 'This display sign is reporting offline.'}]);
-                                    return resolve(true);
-                                }
-                                return resolve(false);
-                            } catch (e) {
-                                return reject(e);
-                            }
-                        });
-                    });
                 }
+
+                // If the recipient name is found in display sign config, reflect status if there are insufficient number of connections.
+                await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            if (recipient.host === `display-${display.name}`)
+                            {
+                                if (Recipients.sockets[recipient.ID].length < display.instances)
+                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `There should be ${display.instances} display signs connected, but only ${Recipients.sockets[recipient.ID].length} are connected.`}]);
+                                return resolve(true);
+                            }
+                            return resolve(false);
+                        } catch (e) {
+                            return reject(e);
+                        }
+                    });
+                });
             } else {
                 sails.log.verbose(`Recipient not found in database. Assuming already removed.`);
             }

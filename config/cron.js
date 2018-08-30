@@ -1020,31 +1020,16 @@ module.exports.cron = {
                                         {
                                             Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
                                         } else {
-                                            if (Meta['A'].radiodj === radiodj.rest)
-                                            {
-                                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
-                                            } else {
-                                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
-                                            }
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
                                         }
                                         return resolve(false);
                                     })
                                     .catch(function (err) {
-                                        if (Meta['A'].radiodj === radiodj.rest)
-                                        {
-                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
-                                        } else {
-                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
-                                        }
+                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
                                         return resolve(false);
                                     });
                         } catch (e) {
-                            if (Meta['A'].radiodj === radiodj.rest)
-                            {
-                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 2}]);
-                            } else {
-                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: 3}]);
-                            }
+                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
                             return resolve(false);
                         }
                     });
