@@ -16,7 +16,7 @@ module.exports = {
             var returnData = [];
 
             // Retrieve a list of genres.
-            var genres = await Genre.find({});
+            var genres = await Genre.find({}).sort('name ASC');
             sails.log.verbose(`Genre retrieved: ${genres.length}`);
             sails.log.silly(genres);
 
