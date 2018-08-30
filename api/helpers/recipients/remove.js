@@ -81,7 +81,7 @@ module.exports = {
                             try {
                                 if (djcontrols.host === recipient.host)
                                 {
-                                    await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 3, data: 'This DJ Controls is reporting offline.'}]);
+                                    await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'This DJ Controls is reporting offline.'}]);
                                     return resolve(true);
                                 }
                                 return resolve(false);
@@ -119,7 +119,5 @@ module.exports = {
         }
 
     }
-
-
 };
 
