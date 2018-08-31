@@ -180,10 +180,6 @@ $(document).ready(function () {
 
     // page is now ready, initialize the calendar...
     loadCalendar();
-    adaptScreen($(this).width());
-    $(window).on('resize', function (e) {
-        adaptScreen($(this).width());
-    });
 });
 
 document.querySelector(`#song-data`).addEventListener("click", function (e) {
@@ -999,12 +995,12 @@ function loadCalendar() {
     $('#calendar').fullCalendar({
         header: {
             left: '',
-            center: 'agendaThreeDay,agendaWeek',
+            center: 'listWeek,agendaDay,agendaThreeDay,agendaWeek',
             right: ''
         },
         footer: false,
         themeSystem: 'bootstrap4',
-        defaultView: 'agendaWeek',
+        defaultView: 'listWeek',
         slotEventOverlap: false,
         slotDuration: '01:00:00',
         nowIndicator: true,
@@ -1051,10 +1047,25 @@ function loadCalendar() {
             return false;
         },
         views: {
+            listWeek: {
+                type: 'list',
+                duration: {days:71},
+                buttonText: 'week (list)'
+            },
+            agendaDay: {
+                type: 'agenda',
+                duration: {days: 1},
+                buttonText: 'today'
+            },
             agendaThreeDay: {
                 type: 'agenda',
                 duration: {days: 3},
                 buttonText: '3 days'
+            },
+            agendaWeek: {
+                type: 'agenda',
+                duration: {days: 7},
+                buttonText: 'week'
             }
         },
         timezone: 'America/New_York',
