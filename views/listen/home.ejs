@@ -19,8 +19,43 @@
   <div class="row">
     <div class="col">
 <div class="p-1 m-3 card text-white bg-dark">
-  <div class="card-header text-center" style="font-size: 1.5em;">Chat with the DJ</div>
+  <div class="card-header text-center" style="font-size: 1.5em;">
+<ul class="nav nav-pills mb-3 justify-content-center" id="pills-tab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link text-white active border border-primary" id="pills-schedule-tab" data-toggle="pill" href="#pills-schedule" role="tab" aria-controls="pills-schedule" aria-selected="true">Schedule</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white border border-primary" id="pills-chat-tab" data-toggle="pill" href="#pills-chat" role="tab" aria-controls="pills-chat" aria-selected="false">Chat with DJ</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white border border-primary" id="pills-request-tab" data-toggle="pill" href="#pills-request" role="tab" aria-controls="pills-request" aria-selected="false">Request a Track</a>
+  </li>
+</ul>
+</div>
   <div class="card-body">
+<div class="tab-content" id="pills-tabContent">
+<div class="tab-pane fade show active" id="pills-schedule" role="tabpanel" aria-labelledby="pills-schedule-tab">
+<div id='calendar'></div>
+<div class="modal fade" id="dialog" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-describedby="dialogDesc" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dialogTitle">Title unavailable</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="dialogDesc">
+        Description unavailable
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="tab-pane fade" id="pills-chat" role="tabpanel" aria-labelledby="pills-chat-tab">
         <div class="container-fluid" id="messages" style="height: 360px; overflow-y: auto; background-color: #787878; color: #FFFFFF;">
         </div>
         <div class="form-group">
@@ -47,19 +82,9 @@
   <strong>Your IP address is logged when you send messages.</strong> Abuse of the chat system may result in a temporary or permanent ban from the listener's corner.
 </div>
   </div>
-</div>
-    </div>
-</div>
-  <div class="row">
-    <div class="col">
-<div class="p-1 m-3 card text-white bg-dark">
-  <div class="card-header text-center" style="font-size: 1.5em;">Request a Song</div>
-  <div class="card-body">
+  <div class="tab-pane fade" id="pills-request" role="tabpanel" aria-labelledby="pills-request-tab">
 <div class="alert alert-info" role="alert">
 Each IP is limited to making <%= requestLimit %> requests per day (reset at midnight).
-</div>
-<div class="alert alert-info" role="alert">
-During automation, a few requests are played at each break. During a show, it is up to the DJ's discretion when/if to play requests.
 </div>
 <div class="container-fluid" id="trackrequests" style="background-color: #969696; color: #000000;">
 <div class="input-group">
@@ -76,7 +101,7 @@ During automation, a few requests are played at each break. During a show, it is
 </div>
 </div>
 </div>
-</div>
+    </div>
 </div>
 </div>
 

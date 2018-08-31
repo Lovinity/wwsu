@@ -1,5 +1,13 @@
 /* global io, moment, iziToast, Infinity */
 
+// Define hexrgb constants
+var hexChars = 'a-f\\d';
+var match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`;
+var match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`;
+
+var nonHexChars = new RegExp(`[^#${hexChars}]`, 'gi');
+var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i');
+
 // Load HTML elements
 var nowPlaying = document.getElementById('nowplaying');
 var notificationsBox = document.getElementById('messages');
@@ -17,6 +25,8 @@ var skipIt = -1;
 var blocked = false;
 var firstTime = true;
 var nicknameTimer = null;
+var Calendar = TAFFY();
+var calendar = [];
 
 // Initialize the web player
 $("#nativeflashradio").flashradio({
@@ -50,6 +60,130 @@ $("#nativeflashradio").flashradio({
     streamtype: "other",
     streamurl: "https://server.wwsu1069.org",
     songinformationinterval: "600000"
+});
+
+// Set up schedule calendar
+var focusableElementsString = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+var focusedElementBeforeModal;
+var pwidth = null;
+function adaptScreen(width)
+{
+    if (width >= 1024 && (pwidth < 1024 || pwidth === null))
+    {
+        $('#calendar').fullCalendar('changeView', 'agendaWeek');
+    } else if (width < 1024 && (pwidth >= 1024 || pwidth === null)) {
+        $('#calendar').fullCalendar('changeView', 'agendaThreeDay');
+    }
+    pwidth = width;
+}
+function trapEscapeKey(obj, evt) {
+
+    // if escape pressed
+    if (evt.which == 27) {
+
+        // get list of all children elements in given object
+        var o = obj.find('*');
+
+        // get list of focusable items
+        var cancelElement;
+        cancelElement = o.filter("#cancel")
+
+        // close the modal window
+        cancelElement.click();
+        evt.preventDefault();
+    }
+
+}
+function trapTabKey(obj, evt) {
+
+    // if tab or shift-tab pressed
+    if (evt.which == 9) {
+
+        // get list of all children elements in given object
+        var o = obj.find('*');
+
+        // get list of focusable items
+        var focusableItems;
+        focusableItems = o.filter(focusableElementsString).filter(':visible')
+
+        // get currently focused item
+        var focusedItem;
+        focusedItem = jQuery(':focus');
+
+        // get the number of focusable items
+        var numberOfFocusableItems;
+        numberOfFocusableItems = focusableItems.length
+
+        // get the index of the currently focused item
+        var focusedItemIndex;
+        focusedItemIndex = focusableItems.index(focusedItem);
+
+        if (evt.shiftKey) {
+            //back tab
+            // if focused on first item and user preses back-tab, go to the last focusable item
+            if (focusedItemIndex == 0) {
+                focusableItems.get(numberOfFocusableItems - 1).focus();
+                evt.preventDefault();
+            }
+
+        } else {
+            //forward tab
+            // if focused on the last item and user preses tab, go to the first focusable item
+            if (focusedItemIndex == numberOfFocusableItems - 1) {
+                focusableItems.get(0).focus();
+                evt.preventDefault();
+            }
+        }
+    }
+
+}
+
+function setInitialFocusModal(obj) {
+    // get list of all children elements in given object
+    var o = obj.find('*');
+
+    // set focus to first focusable item
+    var focusableItems;
+    focusableItems = o.filter(focusableElementsString).filter(':visible').first().focus();
+
+}
+function setFocusToFirstItemInModal(obj) {
+    // get list of all children elements in given object
+    var o = obj.find('*');
+
+    // set the focus to the first keyboard focusable item
+    o.filter(focusableElementsString).filter(':visible').first().focus();
+}
+$(document).ready(function () {
+
+    $('#dialog').on('shown.bs.modal', function () {
+        $('#dialog').trigger('focus');
+        jQuery('body').on('focusin', '#mainPage', function () {
+            setFocusToFirstItemInModal(jQuery('#dialog'));
+        });
+        focusedElementBeforeModal = jQuery(':focus');
+        setFocusToFirstItemInModal($('#dialog'));
+    })
+
+    $('#dialog').on('hidden.bs.modal', function (e) {
+        jQuery('body').off('focusin', '#mainPage');
+        focusedElementBeforeModal.focus();
+    })
+
+    jQuery('#dialog').keydown(function (event) {
+        trapTabKey($(this), event);
+    })
+
+    jQuery('#dialog').keydown(function (event) {
+        trapEscapeKey($(this), event);
+    })
+
+    // page is now ready, initialize the calendar...
+    loadCalendar();
+    adaptScreen($(this).width());
+    $(window).on('resize', function (e) {
+        adaptScreen($(this).width());
+    });
 });
 
 document.querySelector(`#song-data`).addEventListener("click", function (e) {
@@ -207,6 +341,10 @@ waitFor(function () {
         }
     });
 
+    io.socket.on('calendar', function (data) {
+        processCalendar(data);
+    });
+
 // On meta changes, process meta
     io.socket.on('discipline', function (data) {
         iziToast.show({
@@ -231,6 +369,7 @@ function doSockets(firsttime = false)
     messagesSocket();
     metaSocket();
     announcementsSocket();
+    calendarSocket();
     loadGenres();
 }
 
@@ -241,6 +380,17 @@ function onlineSocket()
             nickname.value = body.label;
             nickname.value = nickname.value.replace('Web ', '');
             nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
+        } catch (e) {
+            setTimeout(onlineSocket, 10000);
+        }
+    });
+}
+
+function calendarSocket()
+{
+    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+        try {
+            processCalendar(body, true);
         } catch (e) {
             setTimeout(onlineSocket, 10000);
         }
@@ -678,4 +828,235 @@ function addAnnouncement(announcement)
             timeout: false
         });
     }
+}
+
+// When new calendar data is received, update the information in memory.
+function processCalendar(data, replace = false)
+{
+    try {
+
+        // Run data processing
+        if (replace)
+        {
+            Calendar = TAFFY();
+            Calendar.insert(data);
+        } else {
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    switch (key)
+                    {
+                        case 'insert':
+                            Calendar.insert(data[key]);
+                            break;
+                        case 'update':
+                            Calendar({ID: data[key].ID}).update(data[key]);
+                            break;
+                        case 'remove':
+                            Calendar({ID: data[key]}).remove();
+                            break;
+                    }
+                }
+            }
+        }
+
+        // Prepare the formatted calendar variable for our formatted events
+        calendar = [];
+
+        // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
+        Calendar().get().forEach(function (event)
+        {
+            try {
+                if (!event.title.startsWith("Show:") && !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && !event.title.startsWith("Prerecord:") && !event.title.startsWith("Remote:") && !event.title.startsWith("Sports:") && !event.title.startsWith("Podcast:"))
+                    return null;
+                var temp = {
+                    title: event.title,
+                    allDay: event.allDay,
+                    start: event.start,
+                    end: event.end,
+                    color: event.color,
+                    description: event.description
+                };
+                temp.color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(temp.color) ? hexRgb(temp.color) : hexRgb('#787878');
+                temp.color.red = Math.round(temp.color.red / 2);
+                temp.color.green = Math.round(temp.color.green / 2);
+                temp.color.blue = Math.round(temp.color.blue / 2);
+                temp.color = "#" + rgbHex(temp.color.red, temp.color.green, temp.color.blue);
+
+                calendar.push(temp);
+            } catch (e) {
+                console.error(e);
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: `Error occurred during calendar iteration in processCalendar.`
+                });
+            }
+        });
+
+        console.dir(calendar);
+        // Reload the schedule
+        loadCalendar();
+    } catch (e) {
+        console.error(e);
+        iziToast.show({
+            title: 'An error occurred - Please check the logs',
+            message: 'Error occurred during the call of processCalendar.'
+        });
+}
+}
+
+function hexRgb(hex, options = {}) {
+    try {
+        if (typeof hex !== 'string' || nonHexChars.test(hex) || !validHexSize.test(hex)) {
+            throw new TypeError('Expected a valid hex string');
+        }
+
+        hex = hex.replace(/^#/, '');
+        let alpha = 255;
+
+        if (hex.length === 8) {
+            alpha = parseInt(hex.slice(6, 8), 16) / 255;
+            hex = hex.substring(0, 6);
+        }
+
+        if (hex.length === 4) {
+            alpha = parseInt(hex.slice(3, 4).repeat(2), 16) / 255;
+            hex = hex.substring(0, 3);
+        }
+
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+
+        const num = parseInt(hex, 16);
+        const red = num >> 16;
+        const green = (num >> 8) & 255;
+        const blue = num & 255;
+
+        return options.format === 'array' ?
+                [red, green, blue, alpha] :
+                {red, green, blue, alpha};
+    } catch (e) {
+        console.error(e);
+        iziToast.show({
+            title: 'An error occurred - Please check the logs',
+            message: 'Error occurred during hexRgb.'
+        });
+}
+}
+
+function rgbHex(red, green, blue, alpha) {
+    try {
+        const isPercent = (red + (alpha || '')).toString().includes('%');
+
+        if (typeof red === 'string') {
+            const res = red.match(/(0?\.?\d{1,3})%?\b/g).map(Number);
+            // TODO: use destructuring when targeting Node.js 6
+            red = res[0];
+            green = res[1];
+            blue = res[2];
+            alpha = res[3];
+        } else if (alpha !== undefined) {
+            alpha = parseFloat(alpha);
+        }
+
+        if (typeof red !== 'number' ||
+                typeof green !== 'number' ||
+                typeof blue !== 'number' ||
+                red > 255 ||
+                green > 255 ||
+                blue > 255) {
+            throw new TypeError('Expected three numbers below 256');
+        }
+
+        if (typeof alpha === 'number') {
+            if (!isPercent && alpha >= 0 && alpha <= 1) {
+                alpha = Math.round(255 * alpha);
+            } else if (isPercent && alpha >= 0 && alpha <= 100) {
+                alpha = Math.round(255 * alpha / 100);
+            } else {
+                throw new TypeError(`Expected alpha value (${alpha}) as a fraction or percentage`);
+            }
+            alpha = (alpha | 1 << 8).toString(16).slice(1);
+        } else {
+            alpha = '';
+        }
+
+        return ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1) + alpha;
+    } catch (e) {
+        console.error(e);
+        iziToast.show({
+            title: 'An error occurred - Please check the logs',
+            message: 'Error occurred during rgbHex.'
+        });
+    }
+}
+;
+
+function loadCalendar() {
+    $('#calendar').fullCalendar('destroy');
+    $('#calendar').fullCalendar({
+        header: {
+            left: '',
+            center: 'agendaThreeDay,agendaWeek',
+            right: ''
+        },
+        footer: false,
+        themeSystem: 'bootstrap4',
+        defaultView: 'agendaWeek',
+        slotEventOverlap: false,
+        slotDuration: '01:00:00',
+        nowIndicator: true,
+        firstDay: moment().format('d'),
+        events: calendar,
+        eventClick: function (event) {
+            // opens events in a popup window
+            $('#dialogTitle').html(event.title);
+            $('#dialogDesc').html(`<div class="container">
+  <div class="row">
+    <div class="col-4 text-dark">
+      <strong>Title:</strong>
+    </div>
+    <div class="col-8 text-dark">
+      ${event.title}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4 text-dark">
+      <strong>Description:</strong>
+    </div>
+    <div class="col-8 text-dark">
+      ${event.description}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4 text-dark">
+      <strong>Start:</strong>
+    </div>
+    <div class="col-8 text-dark">
+      ${moment(event.start).format('LLLL')}
+    </div>
+  </div>
+<div class="row">
+    <div class="col-4 text-dark">
+      <strong>End:</strong>
+    </div>
+    <div class="col-8 text-dark">
+      ${moment(event.end).format('LLLL')}
+    </div>
+  </div>
+</div>`);
+            $('#dialog').modal('show');
+            return false;
+        },
+        views: {
+            agendaThreeDay: {
+                type: 'agenda',
+                duration: {days: 3},
+                buttonText: '3 days'
+            }
+        },
+        timezone: 'America/New_York',
+    });
 }
