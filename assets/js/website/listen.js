@@ -178,8 +178,6 @@ $(document).ready(function () {
         trapEscapeKey($(this), event);
     })
 
-    // page is now ready, initialize the calendar...
-    loadCalendar();
 });
 
 document.querySelector(`#song-data`).addEventListener("click", function (e) {
@@ -365,7 +363,6 @@ function doSockets(firsttime = false)
     messagesSocket();
     metaSocket();
     announcementsSocket();
-    calendarSocket();
     loadGenres();
 }
 
@@ -376,17 +373,6 @@ function onlineSocket()
             nickname.value = body.label;
             nickname.value = nickname.value.replace('Web ', '');
             nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
-        } catch (e) {
-            setTimeout(onlineSocket, 10000);
-        }
-    });
-}
-
-function calendarSocket()
-{
-    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
-        try {
-            processCalendar(body, true);
         } catch (e) {
             setTimeout(onlineSocket, 10000);
         }
@@ -424,6 +410,13 @@ function metaSocket()
                 }
             }
             doMeta(body);
+            io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+                try {
+                    processCalendar(body, true);
+                } catch (e) {
+                    setTimeout(metaSocket, 10000);
+                }
+            });
         } catch (e) {
             setTimeout(metaSocket, 10000);
         }
@@ -1003,8 +996,9 @@ function loadCalendar() {
         defaultView: 'listWeek',
         slotEventOverlap: false,
         slotDuration: '01:00:00',
-        nowIndicator: true,
-        firstDay: moment().format('d'),
+        nowIndicator: false,
+        firstDay: moment(Meta.time).format('d'),
+        now: moment(Meta.time),
         events: calendar,
         eventClick: function (event) {
             // opens events in a popup window
@@ -1049,7 +1043,7 @@ function loadCalendar() {
         views: {
             listWeek: {
                 type: 'list',
-                duration: {days:71},
+                duration: {days: 71},
                 buttonText: 'week (list)'
             },
             agendaDay: {
