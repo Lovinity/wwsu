@@ -62,6 +62,23 @@ $("#nativeflashradio").flashradio({
     songinformationinterval: "600000"
 });
 
+var quill = new Quill('#themessage', {
+    modules: {
+        toolbar: [
+            ['bold', 'italic', 'underline', 'strike', { 'color': [] }],
+            ['link'],
+            ['clean']
+        ],
+    },
+    theme: 'snow'
+});
+
+function quillGetHTML(inputDelta) {
+    var tempCont = document.createElement("div");
+    (new Quill(tempCont)).setContents(inputDelta);
+    return tempCont.getElementsByClassName("ql-editor")[0].innerHTML;
+}
+
 // Set up schedule calendar
 var focusableElementsString = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 var focusedElementBeforeModal;
@@ -630,7 +647,8 @@ function doMeta(response)
 function sendMessage(privateMsg) {
     if (blocked)
         return null;
-    io.socket.post('/messages/send-web', {message: messageText.value, nickname: nickname.value, private: privateMsg}, function serverResponded(response, JWR) {
+    var message = quillGetHTML(quill.getContents());
+    io.socket.post('/messages/send-web', {message: message, nickname: nickname.value, private: privateMsg}, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
             if (response !== 'OK')
@@ -639,7 +657,7 @@ function sendMessage(privateMsg) {
                 $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                 return null;
             }
-            messageText.value = '';
+            quill.setText('');
         } catch (e) {
             notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;
             $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);

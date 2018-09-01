@@ -65,7 +65,9 @@
 <label for="nickname">Nickname (Change if you want the DJ to know who you are)</label>
             <input type="text" class="form-control" id="nickname" maxlength="32" placeholder="">
 <label for="themessage">Message</label>
-            <textarea class="form-control" rows="2" id="themessage" placeholder=""></textarea>
+                    <div class="bg-light text-dark">
+                        <div id="themessage"></div>
+                    </div>
         </div>
         <div class="form-group">
             <button type="button" class="btn btn-wwsu-red m-1" id="sendmessage" onclick="sendMessage(false);">
@@ -91,7 +93,7 @@ Each IP is limited to making <%= requestLimit %> requests per day (reset at midn
 </div>
 <div class="container-fluid" id="trackrequests" style="background-color: #969696; color: #000000;">
 <div class="input-group">
-<input type="text" placeholder="Search artist or title..." value="" id="searchterm" class="form-control">
+<input type="text" placeholder="Search artist or title..." size="25" value="" id="searchterm" class="form-control">
 <div class="form-group">
                                 <select class="form-control" id="filter-genre">
                                     <option value="0">Filter by genre</option>
