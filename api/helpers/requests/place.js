@@ -39,7 +39,17 @@ module.exports = {
             // If so, do stuff
             if (requestable.requestable)
             {
+            // Filter disallowed HTML
+            inputs.name = await sails.helpers.sanitize(inputs.name);
+            inputs.message = await sails.helpers.sanitize(inputs.message);
 
+            // Filter profanity
+            inputs.name = await sails.helpers.filterProfane(inputs.name);
+            inputs.message = await sails.helpers.filterProfane(inputs.message);
+
+            // Truncate
+            inputs.name = await sails.helpers.truncateText(inputs.name, 64);
+            inputs.message = await sails.helpers.truncateText(inputs.message, 1024);
                 // Get the song data
                 var record2 = await Songs.findOne({ID: inputs.ID});
                 sails.log.silly(`Song: ${record2}`);

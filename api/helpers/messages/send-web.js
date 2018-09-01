@@ -39,9 +39,6 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            // Filter profanity
-            inputs.message = await sails.helpers.filterProfane(inputs.message);
-            sails.log.silly(`Profanity filtered. New message: ${inputs.message}`);
             var theid = inputs.host;
             // If no nickname provided, use host as the nickname
             if (inputs.nickname === null)
@@ -56,6 +53,15 @@ module.exports = {
             sails.log.verbose(`IP address sent ${check.length} messages within the last minute.`);
             if (check.length > 2)
                 return exits.error(new Error('Website visitors are only allowed to send 3 messages per minute.'));
+
+            // Filter disallowed HTML
+            inputs.message = await sails.helpers.sanitize(inputs.message);
+
+            // Filter profanity
+            inputs.message = await sails.helpers.filterProfane(inputs.message);
+
+            // Truncate after 1024 characters
+            inputs.message = await sails.helpers.truncateText(inputs.message, 1024);
 
             // Create and broadcast the message, depending on whether or not it was private
             if (inputs.private)

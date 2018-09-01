@@ -28,6 +28,7 @@
     "sails-hook-orm": "^2.1.0",
     "sails-hook-sockets": "^1.5.3",
     "sails-mysql": "^1.0.0",
+    "sanitize-html": "^1.18.4",
     "shorthash": "0.0.2",
     "unique-names-generator": "^1.0.13",
     "url-safe-string": "^1.1.0",
