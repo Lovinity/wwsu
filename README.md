@@ -406,6 +406,8 @@ This endpoint supports sockets under the "meta" event. However, the data sent is
             "state": 'unknown', // State of the WWSU system. Refer to the states section in meta
             "dj": '', // If someone is on the air, name of the host
             "track": '', // Currently playing track either in automation or manually logged
+			"trackID": 0, // The ID of the track currently playing
+            "listIt": false, // Whether or not the current track should be listed as a recently played track.
 			"genre": '', // Name of the genre or rotation currently being played, if any
             "trackstamp": null, // An ISO string used as a marker for when a manual track was logged. Clients displaying manual tracks should consider the track old if this is 10 or more minutes ago from now.
             "topic": '', // If the DJ specified a show topic, this is the topic.
@@ -651,6 +653,22 @@ Get an array of genres.
 			},
 			...
         ]
+### /songs/get-liked [GET /songs/get-liked]
+Retrieve an array of tracks that this host/IP has liked recently and cannot yet like again at this time.
+#### Response 200
+        [
+		    18293,
+		    45093,
+			...
+        ]
+### /songs/like [POST /songs/like]
+Mark a track as liked. Depending on configuration, this might also bump the track's priority in rotation.
+#### Request
+| key | criteria |
+|--|--|
+| trackID | number (required; the ID of the track to like) |
+#### Response 200 OK
+#### Response 500 various errors if a track cannot be liked at this time
 ### /songs/queue-add [POST /songs/queue-add]
 Queue a Top Add into RadioDJ. If in a show, will play the Add immediately and send into returning state. **Requires authorization**
 #### Response 200

@@ -67,30 +67,37 @@ module.exports.cron = {
                     }
                 }
 
-                // Try to get the current RadioDJ queue. Add an error count if we fail.
                 try {
+                    // Try to get the current RadioDJ queue.
                     var queue = await sails.helpers.rest.getQueue();
 
-                    // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). 
-                    // Also, calculate length of the queue, and determine if something is playing in RadioDJ right now
                     try {
                         sails.log.silly(`queueCheck executed.`);
                         var theTracks = [];
+                        change.trackID = parseInt(queue[0].ID);
+
+                        // Check if this track should be listed as a recently played track via whether or not the track is a noMeta track.
+                        if (parseInt(queue[0].ID) === 0 || sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1)
+                        {
+                            change.listIt = false;
+                        } else {
+                            change.listIt = true;
+                        }
+
+                        // Determine if something is currently playing via whether or not track 0 has ID of 0.
+                        if (parseInt(queue[0].ID) === 0)
+                        {
+                            change.playing = false;
+                        } else {
+                            change.playing = true;
+                        }
+
+                        // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). 
                         await sails.helpers.asyncForEach(queue, function (track, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 var title = `${track.Artist} - ${track.Title}`;
-
-                                // Determine if something is currently playing via whether or not track 0 has ID of 0.
-                                if (index === 0)
-                                {
-                                    if (parseInt(track.ID) === 0)
-                                    {
-                                        change.playing = false;
-                                    } else {
-                                        change.playing = true;
-                                    }
-                                }
-                                // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again
+                                // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again.
+                                // Also, calculate length of the queue
                                 if (theTracks.indexOf(title) > -1)
                                 {
                                     sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
@@ -304,7 +311,7 @@ module.exports.cron = {
                                 change.current = `WWSU 106.9FM - ${sails.config.custom.meta.alt.automation}`;
                                 change.percent = 0;
                             } else {
-                                change.line1 = `Now playing: ${change.track}`;
+                                change.line1 = `Now playing${_.includes(Requests.pending, parseInt(queue[0].ID)) ? ' requested track' : ''}: ${change.track}`;
                                 change.line2 = '';
                                 change.stream = change.track;
                             }
@@ -338,7 +345,7 @@ module.exports.cron = {
                                 change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.playlist}`;
                                 change.percent = 0;
                             } else {
-                                change.line1 = `Now playing: ${change.track}`;
+                                change.line1 = `Now playing${_.includes(Requests.pending, parseInt(queue[0].ID)) ? ' requested track' : ''}: ${change.track}`;
                                 change.line2 = `Playlist: ${Meta['A'].playlist}`;
                                 change.stream = change.track;
                             }
@@ -361,7 +368,7 @@ module.exports.cron = {
                                 change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.genre}`;
                                 change.percent = 0;
                             } else {
-                                change.line1 = `Now playing: ${change.track}`;
+                                change.line1 = `Now playing${_.includes(Requests.pending, parseInt(queue[0].ID)) ? ' requested track' : ''}: ${change.track}`;
                                 change.line2 = `Genre: ${Meta['A'].genre}`;
                                 change.stream = change.track;
                             }

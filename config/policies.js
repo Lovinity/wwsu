@@ -42,6 +42,8 @@ module.exports.policies = {
     'silence/inactive': 'isBanned',
     'songs/get': 'isBanned',
     'songs/get-genres': 'isBanned',
+    'songs/get-liked': 'isBanned',
+    'songs/like': 'isBanned',
     'status/get': 'isBanned',
     'tasks/get': 'isBanned',
     'timesheet/add': 'isBanned',

@@ -14,6 +14,7 @@ var notificationsBox = document.getElementById('messages');
 var messageText = document.getElementById('themessage');
 var nickname = document.getElementById('nickname');
 var sendButton = document.getElementById('sendmessage');
+var recentTracksDiv = document.getElementById('recent-tracks');
 
 // Load variables
 var messageIDs = [];
@@ -27,6 +28,9 @@ var firstTime = true;
 var nicknameTimer = null;
 var Calendar = TAFFY();
 var calendar = [];
+var likedTracks = [];
+var recentTracks = [];
+var currentTrack = {ID: 0, track: ''};
 
 // Initialize the web player
 $("#nativeflashradio").flashradio({
@@ -65,7 +69,7 @@ $("#nativeflashradio").flashradio({
 var quill = new Quill('#themessage', {
     modules: {
         toolbar: [
-            ['bold', 'italic', 'underline', 'strike', { 'color': [] }],
+            ['bold', 'italic', 'underline', 'strike', {'color': []}],
             ['link'],
             ['clean']
         ],
@@ -416,20 +420,27 @@ function messagesSocket()
 
 function metaSocket()
 {
-    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
-        //console.log(body);
+    io.socket.post('/songs/get-liked', {}, function serverResponded(body, JWR) {
         try {
-            for (var key in body)
-            {
-                if (body.hasOwnProperty(key))
-                {
-                    Meta[key] = body[key];
-                }
-            }
-            doMeta(body);
-            io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+            likedTracks = body;
+            io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
+                //console.log(body);
                 try {
-                    processCalendar(body, true);
+                    for (var key in body)
+                    {
+                        if (body.hasOwnProperty(key))
+                        {
+                            Meta[key] = body[key];
+                        }
+                    }
+                    doMeta(body);
+                    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+                        try {
+                            processCalendar(body, true);
+                        } catch (e) {
+                            setTimeout(metaSocket, 10000);
+                        }
+                    });
                 } catch (e) {
                     setTimeout(metaSocket, 10000);
                 }
@@ -639,7 +650,33 @@ function doMeta(response)
         var temp = document.getElementById('msg-disabled');
         if (temp)
             temp.remove();
+
+        // If a track ID change was passed, do some stuff in recent tracks
+        if (Meta.trackID !== 0 && Meta.listIt && currentTrack.ID !== Meta.trackID && currentTrack.track !== Meta.track)
+        {
+            currentTrack = {ID: Meta.trackID, track: Meta.track};
+            // Add the track to recent tracks
+            recentTracks.unshift({ID: Meta.trackID, track: Meta.track});
+
+            // Limit recent tracks to the most recent 3 tracks
+            recentTracks = recentTracks.slice(0, 3);
+
+            // reset recent tracks
+            recentTracksDiv.innerHTML = ``;
+            recentTracks.forEach(function (track) {
+                console.dir(track);
+                recentTracksDiv.innerHTML += `<div class="row">
+                <div class="col-8">
+                ${track.track}
+                </div>
+                <div class="col-4">
+                ${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}
+                </div>
+                </div>`;
+            });
+        }
     } catch (e) {
+        console.error(e);
     }
 }
 
@@ -794,6 +831,60 @@ function loadGenres() {
             iziToast.show({
                 title: 'Request system failed',
                 message: 'Error loading genres. Please try again later.',
+                color: 'red',
+                zindex: 100,
+                layout: 1,
+                closeOnClick: true,
+                position: 'bottomCenter',
+                timeout: 5000
+            });
+        }
+    });
+}
+
+function likeTrack(trackID) {
+    io.socket.post('/songs/like', {trackID: trackID}, function serverResponded(response, JWR) {
+        try {
+            if (response !== 'OK')
+            {
+                iziToast.show({
+                    title: 'Track liking failed',
+                    message: 'That track cannot be liked at this time.',
+                    color: 'red',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'bottomCenter',
+                    timeout: 5000
+                });
+            } else {
+                likedTracks.push(trackID);
+                recentTracksDiv.innerHTML = ``;
+                recentTracks.forEach(function (track) {
+                    recentTracksDiv.innerHTML += `<div class="row">
+                <div class="col-8">
+                ${track.track}
+                </div>
+                <div class="col-4">
+                ${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}
+                </div>
+                </div>`;
+                });
+                iziToast.show({
+                    title: 'Track liking success',
+                    message: 'You successfully liked that track.',
+                    color: 'green',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'bottomCenter',
+                    timeout: 5000
+                });
+            }
+        } catch (e) {
+            iziToast.show({
+                title: 'Track liking failed',
+                message: 'Error liking the track. Internal error.',
                 color: 'red',
                 zindex: 100,
                 layout: 1,
@@ -1011,7 +1102,7 @@ function loadCalendar() {
         },
         footer: false,
         themeSystem: 'bootstrap4',
-        defaultView: 'listWeek',
+        defaultView: 'agendaDay',
         slotEventOverlap: false,
         slotDuration: '01:00:00',
         nowIndicator: false,

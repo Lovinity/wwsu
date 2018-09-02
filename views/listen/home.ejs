@@ -12,6 +12,8 @@
 </div>
              <br style="clear:both;">
         <p class="card-text"><div style="text-align: center; color: #ffffff;" id="nowplaying"><div class="p-3 mb-2 bg-wwsu-red">Connecting...</div></div></p>
+        <p class="card-text" style="text-align: center; font-size: 1.5em;">Recent Tracks</p>
+        <div class="container" id="recent-tracks"></div>
   </div>
 </div>
     </div>
@@ -72,13 +74,13 @@
         <div class="form-group">
             <button type="button" class="btn btn-wwsu-red m-1" id="sendmessage" onclick="sendMessage(false);">
                 Send to Chat
-            </a>
+            </button>
             <button type="button" class="btn btn-secondary m-1" id="sendmessagep" onclick="sendMessage(true);">
                 DM the DJ
-            </a>
+            </button>
             <button type="button" class="btn btn-secondary m-1" id="clearchat" onclick="clearChat();">
                 Clear Messages
-            </a>
+            </button>
         </div>
 <div class="alert alert-info" role="alert">
   Each IP address is limited to sending 3 messages per minute.
