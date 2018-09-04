@@ -727,10 +727,10 @@ module.exports.cron = {
                             }
                         }
 
-                        // Check if a break is needed
+                        // Check if a break is needed (delay to :03 after... no need to remind unless the DJ forgot, which is assumed at :03 after)
                         var d = new Date();
                         var n = d.getMinutes();
-                        if (!Meta['A'].state.includes("automation_") && !Meta['A'].state.includes("_break") && !Meta['A'].state.includes("_returning") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown' && n < 10 && (Status.errorCheck.prevID === null || moment(Status.errorCheck.prevID).isBefore(moment().subtract(20, 'minutes'))))
+                        if (!Meta['A'].state.includes("automation_") && !Meta['A'].state.includes("_break") && !Meta['A'].state.includes("_returning") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown' && n > 2 && n < 10 && (Status.errorCheck.prevID === null || moment(Status.errorCheck.prevID).isBefore(moment().subtract(20, 'minutes'))))
                         {
                             change.breakneeded = true;
                         } else {
