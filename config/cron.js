@@ -75,6 +75,14 @@ module.exports.cron = {
                         sails.log.silly(`queueCheck executed.`);
                         var theTracks = [];
                         change.trackID = parseInt(queue[0].ID);
+                        
+                        // Check if this is a new track and if so, push to the history array
+                        if (parseInt(queue[0].ID) !== Meta['A'].trackID && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1)
+                        {
+                            change.history = Meta['A'].history;
+                            change.history.unshift({ID: parseInt(queue[0].ID), track: queue[0].Artist + ' - ' + queue[0].Title, likable: true});
+                            change.history = change.history.slice(0, 3);
+                        }
 
                         // Check if this track should be listed as a recently played track via whether or not the track is a noMeta track.
                         if (parseInt(queue[0].ID) === 0 || sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1)

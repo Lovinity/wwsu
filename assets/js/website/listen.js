@@ -14,7 +14,7 @@ var notificationsBox = document.getElementById('messages');
 var messageText = document.getElementById('themessage');
 var nickname = document.getElementById('nickname');
 var sendButton = document.getElementById('sendmessage');
-var recentTracksDiv = document.getElementById('recent-tracks');
+var recentTracks = document.getElementById('recent-tracks');
 
 // Load variables
 var messageIDs = [];
@@ -29,8 +29,6 @@ var nicknameTimer = null;
 var Calendar = TAFFY();
 var calendar = [];
 var likedTracks = [];
-var recentTracks = [];
-var currentTrack = {ID: 0, track: ''};
 
 // Initialize the web player
 $("#nativeflashradio").flashradio({
@@ -652,25 +650,18 @@ function doMeta(response)
             temp.remove();
 
         // If a track ID change was passed, do some stuff in recent tracks
-        if (Meta.trackID !== 0 && Meta.listIt && currentTrack.ID !== Meta.trackID && currentTrack.track !== Meta.track)
+        if (typeof response.history !== 'undefined')
         {
-            currentTrack = {ID: Meta.trackID, track: Meta.track};
-            // Add the track to recent tracks
-            recentTracks.unshift({ID: Meta.trackID, track: Meta.track});
-
-            // Limit recent tracks to the most recent 3 tracks
-            recentTracks = recentTracks.slice(0, 3);
-
             // reset recent tracks
-            recentTracksDiv.innerHTML = ``;
-            recentTracks.forEach(function (track) {
+            recentTracks.innerHTML = ``;
+            response.history.forEach(function (track) {
                 console.dir(track);
-                recentTracksDiv.innerHTML += `<div class="row">
+                recentTracks.innerHTML += `<div class="row">
                 <div class="col-8">
                 ${track.track}
                 </div>
                 <div class="col-4">
-                ${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                 </div>
                 </div>`;
             });
@@ -859,14 +850,16 @@ function likeTrack(trackID) {
                 });
             } else {
                 likedTracks.push(trackID);
-                recentTracksDiv.innerHTML = ``;
-                recentTracks.forEach(function (track) {
-                    recentTracksDiv.innerHTML += `<div class="row">
+                // reset recent tracks
+                recentTracks.innerHTML = ``;
+                Meta.history.forEach(function (track) {
+                    console.dir(track);
+                    recentTracks.innerHTML += `<div class="row">
                 <div class="col-8">
                 ${track.track}
                 </div>
                 <div class="col-4">
-                ${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                 </div>
                 </div>`;
                 });

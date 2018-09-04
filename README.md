@@ -407,7 +407,7 @@ This endpoint supports sockets under the "meta" event. However, the data sent is
             "dj": '', // If someone is on the air, name of the host
             "track": '', // Currently playing track either in automation or manually logged
 			"trackID": 0, // The ID of the track currently playing
-            "listIt": false, // Whether or not the current track should be listed as a recently played track.
+            "history": [], // An array of objects {ID: trackID, track: 'Artist - Title', likable: true if it can be liked} of the last 3 tracks that played 
 			"requested": false, // Whether or not this track was requested
             "requestedBy": '', // The user who requested this track, if requested
             "requestedMessage": '', // The provided message for this track request, if requested

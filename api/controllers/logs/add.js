@@ -73,9 +73,15 @@ module.exports = {
             await Logs.create({logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)});
 
             // Set manual meta if criteria matches
-            if (inputs.logtype === 'manual' && inputs.trackArtist !== null && inputs.trackTitle !== null)
+            if (inputs.logtype === 'manual' && inputs.trackArtist.length > 0 && inputs.trackTitle.length > 0)
             {
-                await Meta.changeMeta({track: `${inputs.trackArtist} - ${inputs.trackTitle}`, trackstamp: moment(inputs.date)});
+                var history = Meta['A'].history;
+                history.unshift({ID: 0, track: inputs.trackArtist + ' - ' + inputs.trackTitle, likable: false});
+                history = history.slice(0, 3);
+                await Meta.changeMeta({track: `${inputs.trackArtist} - ${inputs.trackTitle}`, history: history, trackstamp: moment(inputs.date).toISOString(true)});
+            } else if (inputs.logtype === 'manual')
+            {
+                await Meta.changeMeta({track: ``});
             }
 
             return exits.success();
