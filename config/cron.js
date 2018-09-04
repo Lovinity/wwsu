@@ -127,10 +127,18 @@ module.exports.cron = {
                     // If the currently playing track was a request, mark as played
                     if (_.includes(Requests.pending, parseInt(queue[0].ID)))
                     {
-                        await Requests.update({songID: queue[0].ID}, {played: 1})
+                        var requested = await Requests.update({songID: queue[0].ID}, {played: 1}).fetch()
                                 .tolerate((err) => {
                                 });
                         delete Requests.pending[Requests.pending.indexOf(parseInt(queue[0].ID))];
+                        change.requested = true;
+                        change.requestedBy = (requested[0].username === '') ? 'Anonymous' : requested[0].username;
+                        change.requestedMessage = requested[0].message;
+                    } else if (Meta['A'].requested && parseInt(queue[0].ID) !== Meta['A'].trackID)
+                    {
+                        change.requested = false;
+                        change.requestedBy = '';
+                        change.requestedMessage = '';
                     }
 
                     await sails.helpers.error.reset('queueFail');
@@ -311,9 +319,16 @@ module.exports.cron = {
                                 change.current = `WWSU 106.9FM - ${sails.config.custom.meta.alt.automation}`;
                                 change.percent = 0;
                             } else {
-                                change.line1 = `Now playing${_.includes(Requests.pending, parseInt(queue[0].ID)) ? ' requested track' : ''}: ${change.track}`;
-                                change.line2 = '';
-                                change.stream = change.track;
+                                if (Meta['A'].requested)
+                                {
+                                    change.line1 = `Now playing: ${change.track}`;
+                                    change.line2 = `Requested by: ${Meta['A'].requestedBy}`;
+                                    change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
+                                } else {
+                                    change.line1 = `Now playing: ${change.track}`;
+                                    change.line2 = '';
+                                    change.stream = change.track;
+                                }
                             }
                             // Someone is about to go live
                             if (Meta['A'].state === 'automation_live')
@@ -345,9 +360,16 @@ module.exports.cron = {
                                 change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.playlist}`;
                                 change.percent = 0;
                             } else {
-                                change.line1 = `Now playing${_.includes(Requests.pending, parseInt(queue[0].ID)) ? ' requested track' : ''}: ${change.track}`;
-                                change.line2 = `Playlist: ${Meta['A'].playlist}`;
-                                change.stream = change.track;
+                                if (Meta['A'].requested)
+                                {
+                                    change.line1 = `Now playing: ${change.track}`;
+                                    change.line2 = `Requested by: ${Meta['A'].requestedBy}`;
+                                    change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
+                                } else {
+                                    change.line1 = `Now playing: ${change.track}`;
+                                    change.line2 = `Playlist: ${Meta['A'].playlist}`;
+                                    change.stream = change.track;
+                                }
                             }
                             // We are in genre automation
                         } else if (parseInt(queue[0].ID) !== 0 && Meta['A'].state === 'automation_genre')
@@ -368,9 +390,16 @@ module.exports.cron = {
                                 change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.genre}`;
                                 change.percent = 0;
                             } else {
-                                change.line1 = `Now playing${_.includes(Requests.pending, parseInt(queue[0].ID)) ? ' requested track' : ''}: ${change.track}`;
-                                change.line2 = `Genre: ${Meta['A'].genre}`;
-                                change.stream = change.track;
+                                if (Meta['A'].requested)
+                                {
+                                    change.line1 = `Now playing: ${change.track}`;
+                                    change.line2 = `Requested by: ${Meta['A'].requestedBy}`;
+                                    change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
+                                } else {
+                                    change.line1 = `Now playing: ${change.track}`;
+                                    change.line2 = `Genre: ${Meta['A'].genre}`;
+                                    change.stream = change.track;
+                                }
                             }
                             // Live shows that are not prerecords
                         } else if (Meta['A'].state.startsWith("live_") && Meta['A'].state !== 'live_prerecord')
@@ -393,9 +422,16 @@ module.exports.cron = {
                                     change.stream = `${Meta['A'].dj} (${sails.config.custom.meta.alt.live})`;
                                     change.percent = 0;
                                 } else {
-                                    change.line1 = `On the Air: ${Meta['A'].dj}`;
-                                    change.line2 = `Playing: ${change.track}`;
-                                    change.stream = change.track;
+                                    if (Meta['A'].requested)
+                                    {
+                                        change.line1 = `On the Air: ${Meta['A'].dj}`;
+                                        change.line2 = `Playing request: ${change.track} (Requested by: ${Meta['A'].requestedBy})`;
+                                        change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
+                                    } else {
+                                        change.line1 = `On the Air: ${Meta['A'].dj}`;
+                                        change.line2 = `Playing: ${change.track}`;
+                                        change.stream = change.track;
+                                    }
                                 }
                                 // Not playing anything in RadioDJ
                             } else {
@@ -435,9 +471,16 @@ module.exports.cron = {
                                 change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.prerecord}`;
                                 change.percent = 0;
                             } else {
-                                change.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
-                                change.line2 = `Playing: ${change.track}`;
-                                change.stream = change.track;
+                                if (Meta['A'].requested)
+                                {
+                                    change.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
+                                    change.line2 = `Playing request: ${change.track} (Requested by: ${Meta['A'].requestedBy})`;
+                                    change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
+                                } else {
+                                    change.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
+                                    change.line2 = `Playing: ${change.track}`;
+                                    change.stream = change.track;
+                                }
                             }
                             // Remote broadcasts
                         } else if (Meta['A'].state.startsWith("remote_"))
@@ -459,9 +502,16 @@ module.exports.cron = {
                                     change.percent = 0;
                                     change.stream = `${Meta['A'].dj} (${sails.config.custom.meta.alt.remote})`;
                                 } else {
-                                    change.line1 = `Broadcasting: ${Meta['A'].dj}`;
-                                    change.line2 = `Playing: ${change.track}`;
-                                    change.stream = change.track;
+                                    if (Meta['A'].requested)
+                                    {
+                                        change.line1 = `Broadcasting: ${Meta['A'].dj}`;
+                                        change.line2 = `Playing request: ${change.track} (Requested by: ${Meta['A'].requestedBy})`;
+                                        change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
+                                    } else {
+                                        change.line1 = `Broadcasting: ${Meta['A'].dj}`;
+                                        change.line2 = `Playing: ${change.track}`;
+                                        change.stream = change.track;
+                                    }
                                 }
                             } else {
                                 // A manual track was logged

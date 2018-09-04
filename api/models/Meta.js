@@ -84,6 +84,9 @@ module.exports = {
         track: '', // Currently playing track either in automation or manually logged
         trackID: 0, // The ID of the track currently playing
         listIt: false, // Whether or not the current track should be listed as a recently played track.
+        requested: false, // Whether or not this track was requested
+        requestedBy: '', // The user who requested this track, if requested
+        requestedMessage: '', // The provided message for this track request, if requested
         genre: '', // Name of the genre or rotation currently being played, if any
         trackstamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
         topic: '', // If the DJ specified a show topic, this is the topic.
