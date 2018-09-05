@@ -47,9 +47,9 @@ module.exports = {
             if (!Meta['A'].state.startsWith("automation_") && !Meta['A'].state.startsWith("remote_"))
                 return exits.error(new Error(`Cannot execute state/remote unless in automation or remote. Please go to automation first.`));
 
-            if (Meta.changingState)
+            if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
-            Meta.changingState = true;
+            await Meta.changeMeta({changingState: `Switching to remote`});
 
             // Filter profanity
             if (inputs.topic !== '')
@@ -96,10 +96,10 @@ module.exports = {
             }
 
             await sails.helpers.error.reset('automationBreak');
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.success();
         } catch (e) {
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.error(e);
         }
 

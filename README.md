@@ -425,6 +425,7 @@ This endpoint supports sockets under the "meta" event. However, the data sent is
             "listenerpeak": 0, // Number of peak online listeners
             "queueLength": 0, // Amount of audio queued in radioDJ in seconds (can be a float)
 			"playing": false, // Whether or not something is currently playing in the active RadioDJ
+			"changingState": null, // If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. Will be state changing string otherwise.
             "breakneeded": false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
             "webchat": true, // Set to false to restrict the ability to send chat messages through the website. Clients should forbid the ability to send messages when this is true. /messages/send-web will reject attempts when this is true.
             "playlist": null, // Name of the playlist we are currently airing if any

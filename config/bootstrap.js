@@ -238,7 +238,13 @@ module.exports.bootstrap = async function (done) {
 
     // Load Google Calendar.
     sails.log.verbose(`BOOTSTRAP: Loading calendar events.`);
-    await Calendar.preLoadEvents(true);
+    await Meta.changeMeta({changingState: `Initializing program calendar`});
+    try {
+        await Calendar.preLoadEvents(true);
+        await Meta.changeMeta({changingState: null});
+    } catch (e) {
+        await Meta.changeMeta({changingState: null});
+    }
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 

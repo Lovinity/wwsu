@@ -22,9 +22,9 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            if (Meta.changingState)
+            if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
-            Meta.changingState = true;
+            await Meta.changeMeta({changingState: `Changing to automation`});
 
             // What to return for DJ Controls show stats, if applicable
             var returnData = {subtotalXP: 0};
@@ -230,11 +230,11 @@ module.exports = {
                 await Meta.changeMeta({state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
             }
 
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.success(returnData);
 
         } catch (e) {
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.error(e);
         }
 

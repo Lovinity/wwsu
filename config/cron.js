@@ -256,7 +256,7 @@ module.exports.cron = {
                                     var name = Playlists.active.tracks[i];
                                     if (name === parseInt(autoTrack.ID)) {
                                         // Waiting for the playlist to begin, and it has begun? Switch states.
-                                        if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && !Meta.changingState)
+                                        if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && Meta['A'].changingState === null)
                                         {
                                             await Meta.changeMeta({state: 'live_prerecord'});
                                         }
@@ -279,7 +279,7 @@ module.exports.cron = {
 
                     try {
                         // Finished the playlist? Go back to automation.
-                        if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && !Meta.changingState)
+                        if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && Meta['A'].changingState === null)
                         {
                             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Playlist has finished and we went to automation.'})
                                     .tolerate((err) => {

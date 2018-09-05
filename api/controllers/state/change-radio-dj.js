@@ -14,17 +14,17 @@ module.exports = {
         sails.log.debug('Controller state/change-radio-dj called.');
 
         try {
-            Meta.changingState = true;
+            await Meta.changeMeta({changingState: `Switching radioDJ instances`});
             await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
             await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0);
             await sails.helpers.rest.cmd('StopPlayer', 0, 0);
             await sails.helpers.rest.changeRadioDj();
             await sails.helpers.rest.cmd('ClearPlaylist', 1);
             await sails.helpers.error.post();
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.success();
         } catch (e) {
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.error(e);
         }
 

@@ -41,11 +41,12 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, and/or it was not specified we are resuming a playlist.
-            if (!Playlists.queuing && (((!Meta.changingState || inputs.ignoreChangingState) && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre'))) || inputs.resume))
+            if (!Playlists.queuing && (((Meta['A'].changingState === null || inputs.ignoreChangingState) && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre'))) || inputs.resume))
             {
                 sails.log.verbose(`Processing helper.`);
                 Playlists.queuing = true; // Mark that the playlist is being queued, to avoid app conflicts.
-                Meta.changingState = true;
+                if (!inputs.resume && !inputs.ignoreChangingState)
+                    await Meta.changeMeta({changingState: `Switching to playlist`});
 
                 // Find the playlist
                 var theplaylist = await Playlists.findOne({name: inputs.name});
@@ -53,8 +54,9 @@ module.exports = {
                 if (!theplaylist)
                 {
                     if (!inputs.resume && !inputs.ignoreChangingState)
-                        Meta.changingState = false;
-                    throw new Error('Playlist not found!');
+                        await Meta.changeMeta({changingState: null});
+                    Playlists.queuing = false;
+                    return exits.error(new Error('Playlist not found!'));
                 }
                 Playlists.active.name = theplaylist.name;
                 Playlists.active.ID = theplaylist.ID;
@@ -74,8 +76,9 @@ module.exports = {
                             if (!playlistTracks)
                             {
                                 if (!inputs.resume && !inputs.ignoreChangingState)
-                                    Meta.changingState = false;
-                                throw new Error(`No playlist tracks were returned.`);
+                                    await Meta.changeMeta({changingState: null});
+                                Playlists.queuing = false;
+                                return reject2(new Error(`No playlist tracks were returned.`));
                             }
                             Playlists.active.tracks = [];
                             playlistTracks.forEach(function (playlistTrack) {
@@ -97,7 +100,7 @@ module.exports = {
                                         {
                                             Playlists.queuing = false;
                                             if (!inputs.resume && !inputs.ignoreChangingState)
-                                                Meta.changingState = false;
+                                                Meta.changeMeta({changingState: null});
                                             sails.log.verbose(`Considered playlist as queued. Proceeding.`);
                                             return resolve2();
                                         } else {
@@ -210,7 +213,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                 }
                 if (!inputs.resume && !inputs.ignoreChangingState)
-                    Meta.changingState = false;
+                    await Meta.changeMeta({changingState: null});
                 return exits.success();
             } else {
                 sails.log.verbose('Helper SKIPPED.');
@@ -218,7 +221,7 @@ module.exports = {
             }
         } catch (e) {
             if (!inputs.resume && !inputs.ignoreChangingState)
-                Meta.changingState = false;
+                await Meta.changeMeta({changingState: null});
             Playlists.queuing = false;
             return exits.error(e);
         }

@@ -546,7 +546,7 @@ module.exports = {
                     }
 
                     // No genre events active right now? Switch back to regular automation.
-                    if (!genreActive && Meta['A'].state === 'automation_genre' && !Meta.changingState)
+                    if (!genreActive && Meta['A'].state === 'automation_genre' && Meta['A'].changingState === null)
                     {
                         await sails.helpers.genre.start('Default');
                     }

@@ -16,9 +16,9 @@ module.exports = {
         sails.log.debug('Controller state/return called.');
 
         try {
-            if (Meta.changingState)
+            if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
-            Meta.changingState = true;
+            await Meta.changeMeta({changingState: `Returning from break`});
 
             // log it
             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested to return from break.'})
@@ -112,10 +112,10 @@ module.exports = {
 
             await sails.helpers.rest.cmd('EnableAssisted', 0);
 
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.success();
         } catch (e) {
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.error(e);
         }
 

@@ -25,9 +25,10 @@ module.exports = {
         try {
             if (Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre'))
             {
-                if (!Meta.changingState || inputs.ignoreChangingState)
+                if (Meta['A'].changingState === null || inputs.ignoreChangingState)
                 {
-                    Meta.changingState = true;
+                    if (!inputs.ignoreChangingState)
+                        await Meta.changeMeta({changingState: `Switching to genre`});
                     // Find the manual RadioDJ event for Node to trigger
                     var event = await Events.find({type: 3, name: inputs.event, enabled: 'True'});
                     sails.log.verbose(`Events returned ${event.length} matched events, but we're only going to use the first one.`);
@@ -36,7 +37,7 @@ module.exports = {
                     if (event.length <= 0)
                     {
                         if (!inputs.ignoreChangingState)
-                            Meta.changingState = false;
+                            await Meta.changeMeta({changingState: null});
                         return exits.error(new Error(`The provided event name was not found as an active manual event in RadioDJ.`));
                     }
 
@@ -67,7 +68,7 @@ module.exports = {
                                 });
                     }
                     if (!inputs.ignoreChangingState)
-                        Meta.changingState = false;
+                        await Meta.changeMeta({changingState: null});
                 } else {
                     sails.log.debug(`Helper SKIPPED.`);
                 }
@@ -75,7 +76,7 @@ module.exports = {
             return exits.success();
         } catch (e) {
             if (!inputs.ignoreChangingState)
-                Meta.changingState = false;
+                await Meta.changeMeta({changingState: null});
             return exits.error(e);
         }
 

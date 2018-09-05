@@ -101,7 +101,7 @@ module.exports = {
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
-                        Meta.changingState = true;
+                        await Meta.changeMeta({changingState: `Switching radioDJ instances due to queueFail`});
                         sails.sockets.broadcast('system-error', 'system-error', true);
                         await Logs.create({logtype: 'system', loglevel: 'urgent', logsubtype: '', event: `Node failed repeatedly to get the RadioDJ queue. The system is switching to another RadioDJ.`})
                                 .tolerate((err) => {
@@ -116,9 +116,10 @@ module.exports = {
                         await sails.helpers.rest.cmd('StopPlayer', 1, 0);
                         await sails.helpers.rest.changeRadioDj();
                         await sails.helpers.error.post();
-                        Meta.changingState = false;
+                        await Meta.changeMeta({changingState: null});
                         return resolve(0);
                     } catch (e) {
+                        await Meta.changeMeta({changingState: null});
                         return reject(e);
                     }
                 });
@@ -143,7 +144,7 @@ module.exports = {
                                     });
                             await sails.helpers.error.post();
                         } else {
-                            Meta.changingState = true;
+                            await Meta.changeMeta({changingState: `Switching radioDJ instances due to frozen`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
                             await Logs.create({logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing when it should have been. System is assuming it crashed. Switching RadioDJs.`})
                                     .tolerate((err) => {
@@ -160,10 +161,11 @@ module.exports = {
                             await sails.helpers.rest.changeRadioDj();
                             await sails.helpers.rest.cmd('ClearPlaylist', 1);
                             await sails.helpers.error.post();
-                            Meta.changingState = false;
+                            await Meta.changeMeta({changingState: null});
                         }
                         return resolve(0);
                     } catch (e) {
+                        await Meta.changeMeta({changingState: null});
                         return reject(e);
                     }
                 });
@@ -193,7 +195,7 @@ module.exports = {
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                         } else {
-                            Meta.changingState = true;
+                            await Meta.changeMeta({changingState: `Switching radioDJ instances due to frozenRemote`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
                             await Logs.create({logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing remote stream when it should have been. System is assuming RadioDJ is unstable. Switching RadioDJs.`})
                                     .tolerate((err) => {
@@ -212,12 +214,13 @@ module.exports = {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
-                            Meta.changingState = false;
+                            await Meta.changeMeta({changingState: null});
                         }
+                        return resolve(0);
                     } catch (e) {
+                        await Meta.changeMeta({changingState: null});
                         return reject(e);
                     }
-                    return resolve(0);
                 });
             }
         },
@@ -281,10 +284,10 @@ module.exports = {
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
-                        if (Meta.changingState)
-                            return resolve(0);
+                        if (Meta['A'].changingState !== null)
+                            return resolve(295);
 
-                        Meta.changingState = true;
+                        await Meta.changeMeta({changingState: `Switching to automation via automationBreak`});
                         await Meta.changeMeta({state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: null});
 
                         // Add up to 3 track requests if any are pending
@@ -293,12 +296,12 @@ module.exports = {
                         // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
                         await Calendar.preLoadEvents(true);
 
-                        Meta.changingState = false;
+                        await Meta.changeMeta({changingState: null});
+                        return resolve(0);
                     } catch (e) {
-                        Meta.changingState = false;
+                        await Meta.changeMeta({changingState: null});
                         return reject(e);
                     }
-                    return resolve(0);
                 });
             }
         },
@@ -311,12 +314,12 @@ module.exports = {
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
-                        Meta.changingState = true;
+                        await Meta.changeMeta({changingState: `Switching to automation via genreEmpty`});
                         await sails.helpers.genre.start('Default', true);
-                        Meta.changingState = false;
+                        await Meta.changeMeta({changingState: null});
                         return resolve(0);
                     } catch (e) {
-                        Meta.changingState = false;
+                        await Meta.changeMeta({changingState: null});
                         return reject(e);
                     }
                 });

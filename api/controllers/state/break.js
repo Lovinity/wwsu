@@ -18,9 +18,9 @@ module.exports = {
         sails.log.debug('Controller state/break called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            if (Meta.changingState)
+            if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
-            Meta.changingState = true;
+            await Meta.changeMeta({changingState: `Going into break`});
             // Do not allow a halftime break if not in a sports broadcast
             if (!Meta['A'].state.startsWith("sports") && inputs.halftime)
                 inputs.halftime = false;
@@ -76,10 +76,10 @@ module.exports = {
                 }
             }
             
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.success();
         } catch (e) {
-            Meta.changingState = false;
+            await Meta.changeMeta({changingState: null});
             return exits.error(e);
         }
 
