@@ -75,9 +75,9 @@ module.exports.cron = {
                         sails.log.silly(`queueCheck executed.`);
                         var theTracks = [];
                         change.trackID = parseInt(queue[0].ID);
-                        
+
                         // Check if this is a new track and if so, push to the history array
-                        if (parseInt(queue[0].ID) !== Meta['A'].trackID && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1)
+                        if (parseInt(queue[0].ID) !== Meta['A'].trackID && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1)
                         {
                             change.history = Meta['A'].history;
                             change.history.unshift({ID: parseInt(queue[0].ID), track: queue[0].Artist + ' - ' + queue[0].Title, likable: true});
@@ -85,7 +85,7 @@ module.exports.cron = {
                         }
 
                         // Check if this track should be listed as a recently played track via whether or not the track is a noMeta track.
-                        if (parseInt(queue[0].ID) === 0 || sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1)
+                        if (parseInt(queue[0].ID) === 0 || (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1))
                         {
                             change.listIt = false;
                         } else {
@@ -126,7 +126,7 @@ module.exports.cron = {
                     } catch (e) {
                         sails.log.error(e);
                         Meta.changeMeta({time: moment().toISOString(true)});
-                        return null;
+                        return resolve(e);
                     }
                     sails.log.silly(`Proceeding after queueCheck.`);
 
@@ -320,7 +320,7 @@ module.exports.cron = {
                             Meta.changeMeta({track: newmeta});
                             change.track = newmeta;
                             // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-                            if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
+                            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
                             {
                                 change.line1 = sails.config.custom.meta.alt.automation;
                                 change.line2 = '';
@@ -361,7 +361,7 @@ module.exports.cron = {
                             Meta.changeMeta({track: newmeta});
                             change.track = newmeta;
                             // Do not display track meta for tracks in config.custom.categories.noMeta or tracks with an unknown artist
-                            if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
+                            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
                             {
                                 change.line1 = sails.config.custom.meta.alt.playlist;
                                 change.line2 = `Playlist: ${Meta['A'].playlist}`;
@@ -391,7 +391,7 @@ module.exports.cron = {
                             Meta.changeMeta({track: newmeta});
                             change.track = newmeta;
                             // Do not display track meta if the track is in config.custom.categories.noMeta or the artist is unknown
-                            if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
+                            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
                             {
                                 change.line1 = sails.config.custom.meta.alt.genre;
                                 change.line2 = `Genre: ${Meta['A'].genre}`;
@@ -423,7 +423,7 @@ module.exports.cron = {
                                 Meta.changeMeta({track: newmeta});
                                 change.track = newmeta;
                                 // Do not display meta for tracks that are in config.custom.categories.noMeta or have an unknown artist
-                                if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist"))
+                                if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
                                 {
                                     change.line1 = `On the Air: ${Meta['A'].dj}`;
                                     change.line2 = sails.config.custom.meta.alt.live;
@@ -503,7 +503,7 @@ module.exports.cron = {
                                             });
                                 change.track = newmeta;
                                 // If the currently playing track is in config.custom.categories.noMeta, or artist is unknown, or if we are in disconnected remote mode, show alternative metadata
-                                if (sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1 || queue[0].Artist.includes("Unknown Artist") || Meta['A'].state.includes("disconnected"))
+                                if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist") || Meta['A'].state.includes("disconnected"))
                                 {
                                     change.line1 = `Broadcasting: ${Meta['A'].dj}`;
                                     change.line2 = sails.config.custom.meta.alt.remote;
@@ -919,7 +919,7 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON workOrders triggered.`);
             try {
-                await Tasks.updateTasks();
+                return Tasks.updateTasks();
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -934,7 +934,7 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON updateDirectors triggered.`);
             try {
-                await Directors.updateDirectors();
+                return Directors.updateDirectors();
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -949,7 +949,7 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON updateCalendar triggered.`);
             try {
-                await Calendar.preLoadEvents();
+                return Calendar.preLoadEvents();
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -965,7 +965,7 @@ module.exports.cron = {
             sails.log.debug(`CRON checkRadioStreams triggered.`);
             try {
                 // Get the JSON status from Icecast
-                needle('get', sails.config.custom.stream + `/status-json.xsl`, {}, {headers: {'Content-Type': 'application/json'}})
+                return needle('get', sails.config.custom.stream + `/status-json.xsl`, {}, {headers: {'Content-Type': 'application/json'}})
                         .then(async function (resp) {
                             var publicStream = false;
                             var remoteStream = false;
@@ -1074,9 +1074,8 @@ module.exports.cron = {
         schedule: '4,34 * * * * *',
         onTick: async function () {
             sails.log.debug(`CRON checkRadioDJs triggered.`);
-
             try {
-                await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
+                return sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
                     return new Promise(async (resolve, reject) => {
                         try {
                             needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, {headers: {'Content-Type': 'application/json'}})
@@ -1178,7 +1177,8 @@ module.exports.cron = {
                 }
 
                 // Finish up
-                await sails.helpers.eas.postParse();
+                return sails.helpers.eas.postParse();
+
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -1285,6 +1285,8 @@ module.exports.cron = {
                 if (checkStatus.status === 5)
                     checkStatus.data = `This datastore is fully operational.`;
                 Status.changeStatus([{name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status}]);
+
+                return true;
             } catch (e) {
                 Status.changeStatus([{name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed.', status: 1}]);
                 Status.changeStatus([{name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed.', status: 1}]);
@@ -1412,6 +1414,7 @@ module.exports.cron = {
                     });
                 }
 
+                return true;
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -1443,6 +1446,8 @@ module.exports.cron = {
                 {
                     Status.changeStatus([{name: `music-library`, status: 5, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
                 }
+
+                return true;
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -1466,6 +1471,8 @@ module.exports.cron = {
                 });
                 if (destroyIt.length > 0)
                     await Recipients.destroy({ID: destroyIt}).fetch();
+
+                return true;
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -1499,6 +1506,8 @@ module.exports.cron = {
                 } else {
                     Status.changeStatus([{name: `server`, label: `Server`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 }
+
+                return true;
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -1511,9 +1520,9 @@ module.exports.cron = {
     guardianCheck: {
         schedule: '12 */5 * * *',
         onTick: async function () {
-            needle('get', sails.config.custom.guardianRSS, {}, {headers: {'Content-Type': 'application/json'}})
+            return needle('get', sails.config.custom.guardianRSS, {}, {headers: {'Content-Type': 'application/json'}})
                     .then(async function (resp) {
-
+                        // WORK ON THIS
                     });
         },
         start: true
@@ -1530,6 +1539,8 @@ module.exports.cron = {
                         });
                 // Force reload all directors based on timesheets
                 await Directors.updateDirectors(true);
+                
+                return true;
             } catch (e) {
                 sails.log.error(e);
                 return null;
@@ -1610,6 +1621,7 @@ module.exports.cron = {
                  });
                  }
                  */
+                return true;
             } catch (e) {
                 sails.log.error(e);
                 return null;
