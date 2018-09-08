@@ -692,6 +692,7 @@ function doEas()
                                 var temp = document.getElementById('alert-marquee');
                                 temp.innerHTML = '';
                                 clearInterval(flashInterval);
+                                newEas.shift();
                                 doEas();
                             } catch (e) {
                                 console.error(e);
@@ -719,8 +720,12 @@ function doEas()
                     setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
+                    if (easActive && document.getElementById('slide-interrupt-eas') === null)
+                    {
+                        easActive = false;
+                        doEas();
+                    }
                 }, 1000);
-                newEas.shift();
             } else {
                 easActive = false;
                 newEas.shift();
@@ -783,6 +788,11 @@ function doEas()
         {
             clearInterval(flashInterval);
             doSlide(true);
+            // If we are supposed to display an EAS alert, but it is not on the screen, this is an error; put it on the screen.
+        } else if (easActive && document.getElementById('slide-interrupt-eas') === null)
+        {
+            easActive = false;
+            doEas();
         }
     } catch (e) {
         console.error(e);
