@@ -165,6 +165,65 @@ $.fn.extend({
     }
 });
 
+// Define functions for the analog clock
+function computeTimePositions($h, $m, $s) {
+    console.log(`Compute Time`);
+    var now = new Date(),
+            h = now.getHours(),
+            m = now.getMinutes(),
+            s = now.getSeconds(),
+            ms = now.getMilliseconds(),
+            degS, degM, degH;
+
+    degS = (s * 6) + (6 / 1000 * ms);
+    degM = (m * 6) + (6 / 60 * s) + (6 / (60 * 1000) * ms);
+    degH = (h * 30) + (30 / 60 * m);
+
+    $s.css({"transform": "rotate(" + degS + "deg)"});
+    $m.css({"transform": "rotate(" + degM + "deg)"});
+    $h.css({"transform": "rotate(" + degH + "deg)"});
+
+    requestAnimationFrame(function () {
+        computeTimePositions($h, $m, $s);
+    });
+}
+
+function setUpFace() {
+    for (var x = 1; x <= 60; x += 1) {
+        addTick(x);
+    }
+
+    function addTick(n) {
+        var tickClass = "smallTick",
+                tickBox = $("<div class=\"faceBox\"></div>"),
+                tick = $("<div></div>"),
+                tickNum = "";
+
+        if (n % 5 === 0) {
+            tickClass = (n % 15 === 0) ? "largeTick" : "mediumTick";
+            tickNum = $("<div class=\"tickNum\"></div>").text(n / 5).css({"transform": "rotate(-" + (n * 6) + "deg)"});
+            if (n >= 50) {
+                tickNum.css({"left": "-0.5em"});
+            }
+        }
+
+
+        tickBox.append(tick.addClass(tickClass)).css({"transform": "rotate(" + (n * 6) + "deg)"});
+        tickBox.append(tickNum);
+
+        $("#clock").append(tickBox);
+    }
+}
+
+function setSize() {
+    var b = $(this), //html, body
+            w = b.width(),
+            x = Math.floor(w / 30) - 1,
+            px = (x > 25 ? 26 : x) + "px";
+
+    $("#clock").css({"font-size": px});
+}
+
 // Process Director data when received by updating local database and marking if a director is present.
 function processDirectors(data, replace = false)
 {
@@ -641,6 +700,7 @@ function directorSocket()
 // This function is called whenever a change in Eas alerts is detected, or when we are finished displaying an alert. It checks to see if we should display something Eas-related.
 function doEas()
 {
+    return null;
     try {
         console.log(`DO EAS called`);
         // Display the new alert if conditions permit
@@ -1293,8 +1353,8 @@ function doSlide(same = false)
                         if (Meta.topic.length > 2)
                         {
                             content.innerHTML = `<div class="animated fadeInDown">
-            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
-            <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
+             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
                             if ('webchat' in Meta && Meta.webchat)
                             {
                                 content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
@@ -1304,8 +1364,8 @@ function doSlide(same = false)
                             content.innerHTML += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic.replace(/[\r\n]+/g, ' ')}</div></div>`;
                         } else {
                             content.innerHTML = `<div class="animated fadeInDown">
-            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
-            <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
+             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
                             if ('webchat' in Meta && Meta.webchat)
                             {
                                 content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
@@ -1360,12 +1420,64 @@ function doSlide(same = false)
                         slidetimer = setTimeout(doSlide, 14000);
                     });
                 }},
+            /*
+             3: {name: 'Events', class: 'success', do: true, function: function () {
+             $('#slide').animateCss('fadeOutUp', function () {
+             content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Upcoming Events</h1>
+             
+             <div class="container" style="overflow: hidden;">
+             <div class="row">
+             <div class="col-4">
+             <section>
+             <div id="clock">
+             <svg class="chart" id="clock-program" style="z-index: 15; opacity: 0.66; position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></svg>
+             <div id="hour"></div>
+             <div id="minute"></div>
+             <div id="second"></div>
+             <div id="center"></div>
+             </div>
+             </section>
+             
+             </div>
+             <div class="col-8" style="overflow: hidden;" id="calendar-events">
+             </div>
+             </div>
+             </div>
+             </div>`;
+             
+             waitFor(function () {
+             return (document.getElementById('clock'));
+             }, function () {
+             
+             // Set up the clock
+             console.log(`CLOCK START`);
+             var $h = $("#hour"),
+             $m = $("#minute"),
+             $s = $("#second");
+             if (!window.requestAnimationFrame) {
+             window.requestAnimationFrame = window.mozRequestAnimationFrame ||
+             window.webkitRequestAnimationFrame ||
+             window.msRequestAnimationFrame ||
+             window.oRequestAnimationFrame ||
+             function (cb) {
+             setTimeout(cb, 1000 / 60);
+             };
+             }
+             
+             setUpFace();
+             computeTimePositions($h, $m, $s);
+             $("section").on("resize", setSize).trigger("resize");
+             $("section").resizable({handles: 'e'});
+             });
+             });
+             }},
+             */
             // Slide 4 is today's events
             4: {name: 'Events Today', class: 'success', do: true, function: function () {
                     $('#slide').animateCss('fadeOutUp', function () {
                         content.innerHTML = `<div class="animated fadeInDown">
-            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1>
-            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events"></div></div>`;
+             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1>
+             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events"></div></div>`;
                         var innercontent = document.getElementById('events');
                         if (typeof calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] !== 'undefined')
                         {
@@ -1458,16 +1570,10 @@ function doSlide(same = false)
                                             var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
                                         }
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        /*
-                                         innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
-                                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;"><string>${dodo.title}</strong></span><br /><span class="text-warning-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span><br /><span class="text-danger-light" style="font-size: 1em;">${timeleft}</span><br /><span class="text-light" style="font-size: 0.75em; text-align: left;">${text_truncate(dodo.description, 140)}</div>
-                                         </div>
-                                         `;
-                                         */
                                         innercontent.innerHTML += `<div style="width: 190px; position: relative; background-color: ${color}; box-shadow: 0 0 12px 4px ${borderColor};" class="m-2 text-white rounded">
-  <div class="p-1 text-center" style="width: 100%;">${image}
-    <span class="notification badge badge-${eventClass}" style="font-size: 1em;">${eventType}</span>
-    <div class="m-1" style="text-align: center;"><span class="text-warning-light" style="font-size: 1em;">${line1}</span><br><span style="font-size: 1.25em;">${line2}</span><br /><span class="text-info-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span></div>`;
+             <div class="p-1 text-center" style="width: 100%;">${image}
+             <span class="notification badge badge-${eventClass}" style="font-size: 1em;">${eventType}</span>
+             <div class="m-1" style="text-align: center;"><span class="text-warning-light" style="font-size: 1em;">${line1}</span><br><span style="font-size: 1.25em;">${line2}</span><br /><span class="text-info-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span></div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1491,19 +1597,19 @@ function doSlide(same = false)
             5: {name: 'Days 2-4', class: 'success', do: true, function: function () {
                     $('#slide').animateCss('fadeOutUp', function () {
                         content.innerHTML = `<div class="animated fadeInDown">
-                                <div class="table-responsive">
-                                <table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events">
-                                <thead>
-                                <tr style="border-style: none;">
-                                <th scope="col" width="32%" id="events-rowh-col1" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(1, 'days').format('dddd MM/DD')}</th>
-                                <th scope="col" width="32%" id="events-rowh-col2" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(2, 'days').format('dddd MM/DD')}</th>
-                                <th scope="col" width="32%" id="events-rowh-col3" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(3, 'days').format('dddd MM/DD')}</th>
-                                </tr>
-                                </thead>
-                                <tbody id="events-body">
-                                </tbody>
-                                </table>
-                                </div></div>`;
+             <div class="table-responsive">
+             <table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events">
+             <thead>
+             <tr style="border-style: none;">
+             <th scope="col" width="32%" id="events-rowh-col1" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(1, 'days').format('dddd MM/DD')}</th>
+             <th scope="col" width="32%" id="events-rowh-col2" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(2, 'days').format('dddd MM/DD')}</th>
+             <th scope="col" width="32%" id="events-rowh-col3" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(3, 'days').format('dddd MM/DD')}</th>
+             </tr>
+             </thead>
+             <tbody id="events-body">
+             </tbody>
+             </table>
+             </div></div>`;
                         var innercontent = document.getElementById('events-body');
                         if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')] !== 'undefined')
                         {
@@ -1516,10 +1622,10 @@ function doSlide(same = false)
                                         if (temp2 === null)
                                         {
                                             innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
-                                                <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
+             </tr>`;
                                             temp2 = document.getElementById(`events-row-${index}`);
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col1`);
@@ -1529,15 +1635,15 @@ function doSlide(same = false)
                                         color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
-                                            <div class="row">
-                                            <div class="col-8" style="text-align: left;">
-                                            <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
-                                            </div>
-                                            <div class="col" style="text-align: right;">
-                                            <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
-                                            </div>
-                                            </div>
-                                            </div>`;
+             <div class="row">
+             <div class="col-8" style="text-align: left;">
+             <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             </div>
+             <div class="col" style="text-align: right;">
+             <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
+             </div>
+             </div>
+             </div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1551,32 +1657,32 @@ function doSlide(same = false)
                                 if (temp2 === null)
                                 {
                                     innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col1`);
                                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-                                            No events this day.
-                                            </div>`;
+             No events this day.
+             </div>`;
                             }
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
                             {
                                 innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col1`);
                             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-                                            Error loading events for this day.
-                                            </div>`;
+             Error loading events for this day.
+             </div>`;
                         }
                         if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')] !== 'undefined')
                         {
@@ -1589,10 +1695,10 @@ function doSlide(same = false)
                                         if (temp2 === null)
                                         {
                                             innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
-                                                <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
+             </tr>`;
                                             temp2 = document.getElementById(`events-row-${index}`);
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col2`);
@@ -1602,15 +1708,15 @@ function doSlide(same = false)
                                         color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
-                                            <div class="row">
-                                            <div class="col-8" style="text-align: left;">
-                                            <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
-                                            </div>
-                                            <div class="col" style="text-align: right;">
-                                            <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
-                                            </div>
-                                            </div>
-                                            </div>`;
+             <div class="row">
+             <div class="col-8" style="text-align: left;">
+             <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             </div>
+             <div class="col" style="text-align: right;">
+             <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
+             </div>
+             </div>
+             </div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1624,32 +1730,32 @@ function doSlide(same = false)
                                 if (temp2 === null)
                                 {
                                     innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col2`);
                                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-                                            No events this day.
-                                            </div>`;
+             No events this day.
+             </div>`;
                             }
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
                             {
                                 innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col2`);
                             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-                                            Error loading events for this day.
-                                            </div>`;
+             Error loading events for this day.
+             </div>`;
                         }
                         if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')] !== 'undefined')
                         {
@@ -1662,10 +1768,10 @@ function doSlide(same = false)
                                         if (temp2 === null)
                                         {
                                             innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
-                                                <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
+             </tr>`;
                                             temp2 = document.getElementById(`events-row-${index}`);
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col3`);
@@ -1675,15 +1781,15 @@ function doSlide(same = false)
                                         color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
-                                            <div class="row">
-                                            <div class="col-8" style="text-align: left;">
-                                            <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
-                                            </div>
-                                            <div class="col" style="text-align: right;">
-                                            <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
-                                            </div>
-                                            </div>
-                                            </div>`;
+             <div class="row">
+             <div class="col-8" style="text-align: left;">
+             <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             </div>
+             <div class="col" style="text-align: right;">
+             <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
+             </div>
+             </div>
+             </div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1697,32 +1803,32 @@ function doSlide(same = false)
                                 if (temp2 === null)
                                 {
                                     innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col3`);
                                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-                                            No events this day.
-                                            </div>`;
+             No events this day.
+             </div>`;
                             }
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
                             {
                                 innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col3`);
                             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-                                            Error loading events for this day.
-                                            </div>`;
+             Error loading events for this day.
+             </div>`;
                         }
                         slidetimer = setTimeout(doSlide, 14000);
                     });
@@ -1730,19 +1836,19 @@ function doSlide(same = false)
             6: {name: 'Days 5-7', class: 'success', do: true, function() {
                     $('#slide').animateCss('fadeOutUp', function () {
                         content.innerHTML = `<div class="animated fadeInDown">
-                                <div class="table-responsive">
-                                <table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events">
-                                <thead>
-                                <tr style="border-style: none;">
-                                <th scope="col" width="32%" id="events-rowh-col1" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(4, 'days').format('dddd MM/DD')}</th>
-                                <th scope="col" width="32%" id="events-rowh-col2" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(5, 'days').format('dddd MM/DD')}</th>
-                                <th scope="col" width="32%" id="events-rowh-col3" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(6, 'days').format('dddd MM/DD')}</th>
-                                </tr>
-                                </thead>
-                                <tbody id="events-body">
-                                </tbody>
-                                </table>
-                                </div></div>`;
+             <div class="table-responsive">
+             <table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events">
+             <thead>
+             <tr style="border-style: none;">
+             <th scope="col" width="32%" id="events-rowh-col1" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(4, 'days').format('dddd MM/DD')}</th>
+             <th scope="col" width="32%" id="events-rowh-col2" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(5, 'days').format('dddd MM/DD')}</th>
+             <th scope="col" width="32%" id="events-rowh-col3" style="border-style: none; font-size: 1.5em;">${moment(Meta.time).add(6, 'days').format('dddd MM/DD')}</th>
+             </tr>
+             </thead>
+             <tbody id="events-body">
+             </tbody>
+             </table>
+             </div></div>`;
                         var innercontent = document.getElementById('events-body');
                         if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')] !== 'undefined')
                         {
@@ -1755,10 +1861,10 @@ function doSlide(same = false)
                                         if (temp2 === null)
                                         {
                                             innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
-                                                <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
+             </tr>`;
                                             temp2 = document.getElementById(`events-row-${index}`);
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col1`);
@@ -1768,15 +1874,15 @@ function doSlide(same = false)
                                         color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
-                                            <div class="row">
-                                            <div class="col-8" style="text-align: left;">
-                                            <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
-                                            </div>
-                                            <div class="col" style="text-align: right;">
-                                            <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
-                                            </div>
-                                            </div>
-                                            </div>`;
+             <div class="row">
+             <div class="col-8" style="text-align: left;">
+             <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             </div>
+             <div class="col" style="text-align: right;">
+             <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
+             </div>
+             </div>
+             </div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1790,32 +1896,32 @@ function doSlide(same = false)
                                 if (temp2 === null)
                                 {
                                     innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col1`);
                                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-                                            No events this day.
-                                            </div>`;
+             No events this day.
+             </div>`;
                             }
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
                             {
                                 innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col1`);
                             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-                                            Error loading events for this day.
-                                            </div>`;
+             Error loading events for this day.
+             </div>`;
                         }
                         if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')] !== 'undefined')
                         {
@@ -1828,10 +1934,10 @@ function doSlide(same = false)
                                         if (temp2 === null)
                                         {
                                             innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
-                                                <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
+             </tr>`;
                                             temp2 = document.getElementById(`events-row-${index}`);
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col2`);
@@ -1841,15 +1947,15 @@ function doSlide(same = false)
                                         color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
-                                            <div class="row">
-                                            <div class="col-8" style="text-align: left;">
-                                            <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
-                                            </div>
-                                            <div class="col" style="text-align: right;">
-                                            <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
-                                            </div>
-                                            </div>
-                                            </div>`;
+             <div class="row">
+             <div class="col-8" style="text-align: left;">
+             <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             </div>
+             <div class="col" style="text-align: right;">
+             <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
+             </div>
+             </div>
+             </div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1863,32 +1969,32 @@ function doSlide(same = false)
                                 if (temp2 === null)
                                 {
                                     innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col2`);
                                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-                                            No events this day.
-                                            </div>`;
+             No events this day.
+             </div>`;
                             }
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
                             {
                                 innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col2`);
                             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-                                            Error loading events for this day.
-                                            </div>`;
+             Error loading events for this day.
+             </div>`;
                         }
                         if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')] !== 'undefined')
                         {
@@ -1901,10 +2007,10 @@ function doSlide(same = false)
                                         if (temp2 === null)
                                         {
                                             innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
-                                                <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
+             </tr>`;
                                             temp2 = document.getElementById(`events-row-${index}`);
                                         }
                                         var innercontent2 = document.getElementById(`events-row${index}-col3`);
@@ -1914,15 +2020,15 @@ function doSlide(same = false)
                                         color.blue = Math.round(color.blue / 1.5);
                                         color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
                                         innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
-                                            <div class="row">
-                                            <div class="col-8" style="text-align: left;">
-                                            <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
-                                            </div>
-                                            <div class="col" style="text-align: right;">
-                                            <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
-                                            </div>
-                                            </div>
-                                            </div>`;
+             <div class="row">
+             <div class="col-8" style="text-align: left;">
+             <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             </div>
+             <div class="col" style="text-align: right;">
+             <span class="m-2 text-light" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
+             </div>
+             </div>
+             </div>`;
                                     } catch (e) {
                                         console.error(e);
                                         iziToast.show({
@@ -1936,32 +2042,32 @@ function doSlide(same = false)
                                 if (temp2 === null)
                                 {
                                     innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                     temp2 = document.getElementById(`events-row-0`);
                                 }
                                 var innercontent2 = document.getElementById(`events-row0-col3`);
                                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-                                            No events this day.
-                                            </div>`;
+             No events this day.
+             </div>`;
                             }
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
                             {
                                 innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-                                                <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-                                                <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-                                                </tr>`;
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col3`);
                             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-                                            Error loading events for this day.
-                                            </div>`;
+             Error loading events for this day.
+             </div>`;
                         }
                         slidetimer = setTimeout(doSlide, 14000);
                     });
@@ -2084,12 +2190,14 @@ function doSlide(same = false)
                 slides[102].do = true;
             }
             // Activate "on the air" slide if someone is on the air
-            if (Meta.state.startsWith("live_"))
-            {
-                slides[2].do = true;
-            } else {
-                slides[2].do = false;
-            }
+            /*
+             if (Meta.state.startsWith("live_"))
+             {
+             slides[2].do = true;
+             } else {
+             slides[2].do = false;
+             }
+             */
 
             // Generate the badge indications for each slide, and determine which slide is our highest in number (last)
             slidebadges.innerHTML = ``;
