@@ -81,6 +81,8 @@ module.exports = {
                         prevTime = moment(listener.createdAt);
                     });
                     
+                    returnData.listeners.push({ID: null, listeners: prevListeners, createdAt: moment(Meta['A'].time).toISOString(), updatedAt: moment(Meta['A'].time).toISOString()})
+                    
                     // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
                     listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                     
