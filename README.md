@@ -1,4 +1,4 @@
-# WWSU 4.1.0
+# WWSU 4.1.3
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Beta stage, which means although this is a working build, bugs are to be expected.
@@ -424,6 +424,7 @@ This endpoint supports sockets under the "meta" event. However, the data sent is
             "listeners": 0, // Number of current online listeners
             "listenerpeak": 0, // Number of peak online listeners
             "queueLength": 0, // Amount of audio queued in radioDJ in seconds (can be a float)
+			"queueMusic": false, // If returning from break, or going live, and there are music tracks in the queue not counted towards queueLength, this will be true
 			"playing": false, // Whether or not something is currently playing in the active RadioDJ
 			"changingState": null, // If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. Will be state changing string otherwise.
             "breakneeded": false, // If the current DJ needs to take the FCC required top of the hour break, this will be true

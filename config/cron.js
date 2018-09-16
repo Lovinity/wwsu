@@ -118,7 +118,20 @@ module.exports.cron = {
                                     return resolve2(true);
                                 } else {
                                     theTracks.push(title);
-                                    change.queueLength += (track.Duration - track.Elapsed);
+
+                                    if (Meta['A'].state.includes("_returning") || Meta['A'].state === 'automation_live' || Meta['A'].state === 'automation_remote' || Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote')
+                                    {
+                                        if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1)
+                                        {
+                                            change.queueMusic = true;
+                                        } else if (typeof change.queueMusic === 'undefined' || !change.queueMusic) {
+                                            change.queueLength += (track.Duration - track.Elapsed);
+                                            change.queueMusic = false;
+                                        }
+                                    } else {
+                                        change.queueLength += (track.Duration - track.Elapsed);
+                                        change.queueMusic = false;
+                                    }
                                     return resolve2(false);
                                 }
                             });
@@ -1539,7 +1552,7 @@ module.exports.cron = {
                         });
                 // Force reload all directors based on timesheets
                 await Directors.updateDirectors(true);
-                
+
                 return true;
             } catch (e) {
                 sails.log.error(e);
