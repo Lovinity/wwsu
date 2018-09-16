@@ -100,6 +100,29 @@ module.exports.cron = {
                             change.playing = true;
                         }
 
+                        // When on queue to go live or return from break, search for the position of the last noMeta track
+                        var breakQueueLength = -2;
+                        var firstNoMeta = 0;
+                        change.queueMusic = false;
+                        if ((Meta['A'].state.includes("_returning") || Meta['A'].state === 'automation_live' || Meta['A'].state === 'automation_remote' || Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote'))
+                        {
+                            breakQueueLength = -1;
+                            firstNoMeta = -1;
+                            queue.forEach(function (track, index) {
+                                if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1)
+                                {
+                                    if (firstNoMeta > -1 && breakQueueLength < 0)
+                                    {
+                                        breakQueueLength = index;
+                                        change.queueMusic = true;
+                                    }
+                                } else if (firstNoMeta < 0)
+                                {
+                                    firstNoMeta = index;
+                                }
+                            })
+                        }
+
                         // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). 
                         await sails.helpers.asyncForEach(queue, function (track, index) {
                             return new Promise(async (resolve2, reject2) => {
@@ -119,19 +142,11 @@ module.exports.cron = {
                                 } else {
                                     theTracks.push(title);
 
-                                    if (Meta['A'].state.includes("_returning") || Meta['A'].state === 'automation_live' || Meta['A'].state === 'automation_remote' || Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote')
+                                    if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
                                     {
-                                        if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1)
-                                        {
-                                            change.queueMusic = true;
-                                        } else if (typeof change.queueMusic === 'undefined' || !change.queueMusic) {
-                                            change.queueLength += (track.Duration - track.Elapsed);
-                                            change.queueMusic = false;
-                                        }
-                                    } else {
                                         change.queueLength += (track.Duration - track.Elapsed);
-                                        change.queueMusic = false;
                                     }
+
                                     return resolve2(false);
                                 }
                             });
