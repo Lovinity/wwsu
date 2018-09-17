@@ -84,14 +84,6 @@ module.exports.cron = {
                             change.history = change.history.slice(0, 3);
                         }
 
-                        // Check if this track should be listed as a recently played track via whether or not the track is a noMeta track.
-                        if (parseInt(queue[0].ID) === 0 || (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1))
-                        {
-                            change.listIt = false;
-                        } else {
-                            change.listIt = true;
-                        }
-
                         // Determine if something is currently playing via whether or not track 0 has ID of 0.
                         if (parseInt(queue[0].ID) === 0)
                         {
@@ -675,7 +667,8 @@ module.exports.cron = {
                                     change.line2 = '';
                                     change.track = '';
                                     await Meta.changeMeta({state: 'live_on'});
-                                    await sails.helpers.rest.cmd('EnableAssisted', 1);
+                                    if (!change.queueMusic)
+                                        await sails.helpers.rest.cmd('EnableAssisted', 1);
                                     break;
                                 case 'remote_returning':
                                     change.line2 = '';
@@ -683,14 +676,16 @@ module.exports.cron = {
                                     await Meta.changeMeta({state: 'remote_on'});
                                     await sails.helpers.rest.cmd('EnableAssisted', 1);
                                     await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                                    if (!change.queueMusic)
+                                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                                     break;
                                 case 'sports_returning':
                                     change.line2 = '';
                                     change.track = '';
                                     await Meta.changeMeta({state: 'sports_on'});
-                                    await sails.helpers.rest.cmd('EnableAssisted', 1);
+                                    if (!change.queueMusic)
+                                        await sails.helpers.rest.cmd('EnableAssisted', 1);
                                     break;
                                 case 'sportsremote_returning':
                                     change.line2 = '';
@@ -698,7 +693,8 @@ module.exports.cron = {
                                     await Meta.changeMeta({state: 'sportsremote_on'});
                                     await sails.helpers.rest.cmd('EnableAssisted', 1);
                                     await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                                    if (!change.queueMusic)
+                                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                                     break;
                             }
