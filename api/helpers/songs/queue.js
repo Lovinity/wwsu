@@ -91,6 +91,9 @@ module.exports = {
                     await sails.helpers.asyncForEach(thesongs, function (thesong) {
                         return new Promise(async (resolve, reject) => {
                             try {
+                                if (typeof thesong === 'undefined')
+                                    return resolve(false);
+                                
                                 // Check rotation rules first
                                 var canplay = await sails.helpers.songs.checkRotationRules(thesong.ID);
                                 if (canplay)
