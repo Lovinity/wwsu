@@ -155,7 +155,7 @@ module.exports.cron = {
                     // If the currently playing track was a request, mark as played
                     if (_.includes(Requests.pending, parseInt(queue[0].ID)))
                     {
-                        var requested = await Requests.update({songID: queue[0].ID}, {played: 1}).fetch()
+                        var requested = await Requests.update({songID: queue[0].ID, played: 0}, {played: 1}).fetch()
                                 .tolerate((err) => {
                                 });
                         delete Requests.pending[Requests.pending.indexOf(parseInt(queue[0].ID))];
