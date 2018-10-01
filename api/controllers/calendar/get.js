@@ -13,7 +13,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller calendar/get called.');
         try {
-            var records = await Calendar.find();
+            var records = await Calendar.find({status: {"!=": -1}});
             sails.log.verbose(`Calendar records retrieved: ${records.length}`);
             sails.log.silly(records);
             if (this.req.isSocket)

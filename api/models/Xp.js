@@ -26,6 +26,11 @@ module.exports = {
             type: 'string'
         },
 
+        description: {
+            type: 'string',
+            allowNull: true
+        },
+
         amount: {
             type: 'number',
             defaultsTo: 0

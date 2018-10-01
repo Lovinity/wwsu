@@ -193,6 +193,8 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                     await sails.helpers.rest.removeMusic(true); // Leave requests in the queue for standard playlists.
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
+                    await Calendar.update({title: `Playlist: ${Meta['A'].dj}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                    await Calendar.update({title: `Playlist: ${theplaylist.name}`, status: 1, start: {'<=': moment().toISOString(true)}, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
                     await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: 'playlist - ' + theplaylist.name, event: 'A playlist was scheduled to start.' + "\n" + 'Playlist: ' + inputs.name})
                             .tolerate((err) => {
@@ -204,6 +206,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                     await sails.helpers.rest.removeMusic(); // Do not leave requests in the queue for prerecords; the prerecord should be beginning ASAP.
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
+                    await Calendar.update({title: `Prerecord: ${Meta['A'].dj}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
                     await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), dj: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: theplaylist.name, event: 'A prerecorded show was scheduled to start.' + "\n" + 'Show: ' + inputs.name})
                             .tolerate((err) => {

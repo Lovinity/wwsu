@@ -30,7 +30,7 @@ module.exports = {
             var returnData = {subtotalXP: 0};
 
             // Log the request
-            await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off and went to automation.'})
+            await Logs.create({logtype: 'automation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off and went to automation.'})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
@@ -41,6 +41,23 @@ module.exports = {
             Playlists.active.name = null;
             Playlists.active.ID = 0;
             Playlists.active.position = -1;
+
+            // Log end time
+            switch (Meta['A'].state)
+            {
+                case "live_on":
+                    await Calendar.update({title: `Show: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                    break;
+                case "remote_on":
+                    await Calendar.update({title: `Remote: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                    break;
+                case "sports_on":
+                    await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                    break;
+                case "sportsremote_on":
+                    await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                    break;
+            }
 
             // Calculate XP
             if (Meta['A'].state.startsWith("live_"))
@@ -55,7 +72,7 @@ module.exports = {
                 returnData.showXP = Math.round(returnData.showTime / sails.config.custom.XP.showMinutes);
                 returnData.subtotalXP += returnData.showXP;
 
-                await Xp.create({dj: tagGenerator.generate(dj), type: 'show', subtype: 'showtime', amount: returnData.showXP})
+                await Xp.create({dj: dj, type: 'show', subtype: 'showtime', amount: returnData.showXP})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -80,18 +97,18 @@ module.exports = {
                         prevListeners = listener.listeners;
                         prevTime = moment(listener.createdAt);
                     });
-                    
+
                     returnData.listeners.push({ID: null, listeners: prevListeners, createdAt: moment(Meta['A'].time).toISOString(), updatedAt: moment(Meta['A'].time).toISOString()})
-                    
+
                     // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
                     listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
-                    
+
                     listenerMinutes = Math.round(listenerMinutes);
                     returnData.listenerMinutes = listenerMinutes;
                     returnData.listenerXP = Math.round(listenerMinutes / sails.config.custom.XP.listenerMinutes);
                     returnData.subtotalXP += returnData.listenerXP;
 
-                    await Xp.create({dj: tagGenerator.generate(dj), type: 'show', subtype: 'listeners', amount: returnData.listenerXP})
+                    await Xp.create({dj: dj, type: 'show', subtype: 'listeners', amount: returnData.listenerXP})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);
@@ -110,7 +127,7 @@ module.exports = {
                 {
                     returnData.messagesXP = Math.round(returnData.messagesWeb * sails.config.custom.XP.web);
                     returnData.subtotalXP += returnData.messagesXP;
-                    await Xp.create({dj: tagGenerator.generate(dj), type: 'show', subtype: 'messages', amount: returnData.messagesXP})
+                    await Xp.create({dj: dj, type: 'show', subtype: 'messages', amount: returnData.messagesXP})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);
@@ -121,12 +138,12 @@ module.exports = {
 
 
                 // Calculate XP earned this show from Top Adds
-                returnData.topAdds = await Xp.count({dj: tagGenerator.generate(dj), type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
+                returnData.topAdds = await Xp.count({dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
                         });
-                returnData.topAddsXP = await Xp.sum('amount', {dj: tagGenerator.generate(dj), type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
+                returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -134,21 +151,27 @@ module.exports = {
                 returnData.subtotalXP += returnData.topAddsXP || 0;
 
                 // Calculate XP earned this show from doing the mandatory Legal IDs
-                returnData.IDsXP = await Xp.sum('amount', {dj: tagGenerator.generate(dj), type: 'show', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
+                returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
                         });
-                        returnData.subtotalXP += returnData.IDsXP || 0;
+                returnData.subtotalXP += returnData.IDsXP || 0;
 
                 // Calculate a DJ's total XP earned ever
-                returnData.totalXP = await Xp.sum('amount', {dj: tagGenerator.generate(dj)})
+                returnData.totalXP = await Xp.sum('amount', {dj: dj, subtype: {'!=': 'remote'}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
                         });
 
-                // TODO: test this
+                // Add to total XP for remote credits
+                returnData.totalXP += (sails.config.custom.XP.remoteCredit * await Xp.sum('amount', {dj: dj, subtype: 'remote'})
+                        .tolerate((err) => {
+                            // Do not throw for error, but log it
+                            sails.log.error(err);
+                        }) || 0);
+
             }
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);

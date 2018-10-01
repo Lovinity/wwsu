@@ -315,6 +315,7 @@ module.exports = {
                 return new Promise(async (resolve, reject) => {
                     try {
                         await Meta.changeMeta({changingState: `Switching to automation via genreEmpty`});
+                        await Calendar.update({title: `Genre: ${Meta['A'].genre}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
                         await sails.helpers.genre.start('Default', true);
                         await Meta.changeMeta({changingState: null});
                         return resolve(0);

@@ -1,4 +1,4 @@
-# WWSU 4.1.3
+# WWSU 4.2.0 ALPHA
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 This application was re-developed from the version 3 application using Sails.js v1. Currently, this is in Beta stage, which means although this is a working build, bugs are to be expected.
@@ -131,9 +131,11 @@ This endpoint supports sockets, uses the "calendar" event, and returns data in t
                 "allDay": false, // True if this is an all day event
                 "start": "2018-05-16T04:00:00-04:00", // ISO string of the event start time
                 "end": "2018-05-16T08:00:00-04:00", // ISO string of the event end time
-				"verify": "Valid", // Verification status: Manual (event is not recognized by the system as a trigger), Valid (properly formatted event recognized by the system), Check (Event is valid but may require attention), Invalid (event will not work)
-				"verify_message": "", // Additional information regarding the verification status
-				"verify_titleHTML": "<span style=\"background: rgba(0, 0, 255, 0.2);\">Genre</span>: <span style=\"background: rgba(0, 255, 0, 0.2);\">New Rock</span>", // HTML formatted title for the calendar/verify page.
+                "actualStart": "2018-05-16T08:00:00-04:00", // the time the event actually started (for system events). Could be null.
+                "actualEnd": "2018-05-16T08:00:00-04:00", // the time the event actually ended (for system events). Could be null.
+		"verify": "Valid", // Verification status: Manual (event is not recognized by the system as a trigger), Valid (properly formatted event recognized by the system), Check (Event is valid but may require attention), Invalid (event will not work)
+		"verify_message": "", // Additional information regarding the verification status
+		"verify_titleHTML": "<span style=\"background: rgba(0, 0, 255, 0.2);\">Genre</span>: <span style=\"background: rgba(0, 255, 0, 0.2);\">New Rock</span>", // HTML formatted title for the calendar/verify page.
                 "color": "#5484ed", // Hexadecimal color representing this event
             },
             ...

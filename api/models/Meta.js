@@ -1,4 +1,4 @@
-/* global Meta, sails, _, moment */
+/* global Meta, sails, _, moment, Calendar */
 
 /**
  * Meta.js
@@ -132,6 +132,23 @@ module.exports = {
                     // Exit if the key provided does not exist in Meta.A, or if the value in obj did not change from the current value
                     if (typeof Meta['A'][key] === 'undefined' || Meta['A'][key] === obj[key])
                         continue;
+
+                    // Do stuff if we are changing states, mainly with regards to genres, playlists, and prerecords.
+                    if (key === "state" && obj[key] !== Meta['A'][key])
+                    {
+                        if (Meta['A'][key] === 'automation_genre')
+                            await Calendar.update({title: `Genre: ${Meta['A'].genre}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
+                        if (Meta['A'][key] === 'automation_playlist')
+                            await Calendar.update({title: `Playlist: ${Meta['A'].playlist}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)})
+                                    .tolerate((err) => {
+                                        sails.log.error(err);
+                                    });
+                        if (Meta['A'][key] === 'live_prerecord')
+                            await sails.helpers.xp.addPrerecord();
+                    }
 
                     Meta['A'][key] = obj[key];
                     push[key] = obj[key];

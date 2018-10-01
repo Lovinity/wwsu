@@ -14,7 +14,7 @@ var breakdance = require('breakdance');
 
 module.exports = {
     // We do not want this data to be persistent as it is being grabbed from Google Calendar
-    datastore: 'ram',
+    datastore: 'nodebase',
     attributes: {
 
         ID: {
@@ -26,6 +26,13 @@ module.exports = {
             type: 'string'
         },
 
+        status: {
+            type: 'number',
+            min: 0,
+            max: 1,
+            defaultsTo: 1
+        },
+
         title: {
             type: 'string',
             defaultsTo: 'Unnamed Event'
@@ -34,6 +41,11 @@ module.exports = {
         description: {
             type: 'string',
             defaultsTo: ''
+        },
+
+        color: {
+            type: 'string',
+            defaultsTo: '#D50000'
         },
 
         allDay: {
@@ -51,6 +63,16 @@ module.exports = {
             columnType: 'datetime'
         },
 
+        actualStart: {
+            type: 'ref',
+            columnType: 'datetime'
+        },
+
+        actualEnd: {
+            type: 'ref',
+            columnType: 'datetime'
+        },
+
         verify: {
             type: 'string'
         },
@@ -61,11 +83,6 @@ module.exports = {
 
         verify_titleHTML: {
             type: 'string'
-        },
-
-        color: {
-            type: 'string',
-            defaultsTo: '#D50000'
         }
     },
 
@@ -551,67 +568,80 @@ module.exports = {
                         await sails.helpers.genre.start('Default');
                     }
 
-                    // Destroy events in the database that no longer exist on the Google Calendar
-                    var destroyed = await Calendar.destroy({unique: {'!=': eventIds}})
+                    // Update entries in the calendar which passed their end time
+                    var destroyed = await Calendar.update({status: 1, end: {"<=": moment().toISOString(true)}}, {status: 0})
                             .tolerate((err) => {
                             })
                             .fetch();
 
-                    // Go through every destroyed record and check for no-show broadcasts to log.
+                    // Update entries in the calendar which no longer exist on Google Calendar
+                    if (events.length > 0)
+                    {
+                        await Calendar.update({status: {"!=": -1}, actualStart: null, actualEnd: null, unique: {'nin': eventIds}}, {status: -1})
+                                .tolerate((err) => {
+                                })
+                                .fetch();
+                    }
+
+                    // Go through every event record which passed the end time, and log absences where necessary.
                     if (destroyed && destroyed.length > 0)
                     {
                         await sails.helpers.asyncForEach(destroyed, function (event, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 try {
+
                                     // First, check for live shows
-                                    if (moment().isAfter(moment(event.start)) && event.title.startsWith("Show: "))
+                                    if (event.title.startsWith("Show: ") && event.actualStart === null)
                                     {
-                                        var count = await Logs.count({logsubtype: event.title.replace("Show: ", ""), createdAt: {">=": moment(event.start).toISOString(true)}})
+                                        await Logs.create({logtype: 'absent', loglevel: 'warning', logsubtype: event.title.replace("Show: ", ""), event: `It appears ${event.title.replace("Show: ", "")} was scheduled to do a show from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(event.start).toISOString(true)})
                                                 .tolerate((err) => {
                                                     sails.log.error(err);
                                                 });
-                                        // No logs? The show probably didn't air. Log that.
-                                        if (!count || count === 0)
-                                        {
-                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Show: ", ""), event: `It appears ${event.title.replace("Show: ", "")} was scheduled to do a show from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this show. Maybe this person did not host a show?`, createdAt: moment(event.start).toISOString(true)})
-                                                    .tolerate((err) => {
-                                                        sails.log.error(err);
-                                                    });
-                                        }
+                                    }
+
+                                    // Check for prerecords
+                                    if (event.title.startsWith("Prerecord: ") && event.actualStart === null)
+                                    {
+                                        await Logs.create({logtype: 'absent', loglevel: 'warning', logsubtype: event.title.replace("Prerecord: ", ""), event: `It appears the prerecord ${event.title.replace("Prerecord: ", "")} was scheduled from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but did not air.`, createdAt: moment(event.start).toISOString(true)})
+                                                .tolerate((err) => {
+                                                    sails.log.error(err);
+                                                });
                                     }
 
                                     // Next, check for remote broadcasts
-                                    if (moment().isAfter(moment(event.start)) && event.title.startsWith("Remote: "))
+                                    if (event.title.startsWith("Remote: ") && event.actualStart === null)
                                     {
-                                        var count = await Logs.count({logsubtype: event.title.replace("Remote: ", ""), createdAt: {">=": moment(event.start).toISOString(true)}})
+                                        await Logs.create({logtype: 'absent', loglevel: 'warning', logsubtype: event.title.replace("Remote: ", ""), event: `It appears a remote broadcast ${event.title.replace("Remote: ", "")} was scheduled to air from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(event.start).toISOString(true)})
                                                 .tolerate((err) => {
                                                     sails.log.error(err);
                                                 });
-                                        // No logs? The show probably didn't air. Log that.
-                                        if (!count || count === 0)
-                                        {
-                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Remote: ", ""), event: `It appears remote broadcast ${event.title.replace("Remote: ", "")} was scheduled to air from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this broadcast. Maybe this broadcast did not air?`})
-                                                    .tolerate((err) => {
-                                                        sails.log.error(err);
-                                                    });
-                                        }
                                     }
 
-                                    // Finally, check for sports broadcasts
-                                    if (moment().isAfter(moment(event.start)) && event.title.startsWith("Sports: "))
+                                    // Check for sports broadcasts
+                                    if (event.title.startsWith("Sports: ") && event.actualStart === null)
                                     {
-                                        var count = await Logs.count({logsubtype: event.title.replace("Sports: ", ""), createdAt: {">=": moment(event.start).toISOString(true)}})
+                                        await Logs.create({logtype: 'absent', loglevel: 'warning', logsubtype: event.title.replace("Sports: ", ""), event: `It appears ${event.title.replace("Sports: ", "")} was scheduled to air from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(event.start).toISOString(true)})
                                                 .tolerate((err) => {
                                                     sails.log.error(err);
                                                 });
-                                        // No logs? The show probably didn't air. Log that.
-                                        if (!count || count === 0)
-                                        {
-                                            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: event.title.replace("Sports: ", ""), event: `It appears a sports broadcast ${event.title.replace("Sports: ", "")} was scheduled to air from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but there are no logs for this broadcast. Maybe this broadcast did not air?`})
-                                                    .tolerate((err) => {
-                                                        sails.log.error(err);
-                                                    });
-                                        }
+                                    }
+
+                                    // Check for playlists
+                                    if (event.title.startsWith("Playlist: ") && event.actualStart === null)
+                                    {
+                                        await Logs.create({logtype: 'absent', loglevel: 'warning', logsubtype: event.title.replace("Playlist: ", ""), event: `It appears the playlist ${event.title.replace("Playlist: ", "")} was scheduled from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but did not air.`, createdAt: moment(event.start).toISOString(true)})
+                                                .tolerate((err) => {
+                                                    sails.log.error(err);
+                                                });
+                                    }
+
+                                    // Check for genres
+                                    if (event.title.startsWith("Genre: ") && event.actualStart === null)
+                                    {
+                                        await Logs.create({logtype: 'absent', loglevel: 'warning', logsubtype: event.title.replace("Genre: ", ""), event: `It appears the genre ${event.title.replace("Genre: ", "")} was scheduled from ${moment(event.start).format("LL hh:mm A")} to ${moment(event.end).format("LL hh:mm A")}, but did not air.`, createdAt: moment(event.start).toISOString(true)})
+                                                .tolerate((err) => {
+                                                    sails.log.error(err);
+                                                });
                                     }
 
                                     return resolve2(false);
@@ -650,6 +680,9 @@ module.exports = {
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
+        // status of -1 means it no longer exists in our Google Calendar week fetch, so it should be a remove entry.
+        if (updatedRecord.status === -1)
+            var data = {remove: updatedRecord.ID};
         sails.log.silly(`calendar socket: ${data}`);
         sails.sockets.broadcast('calendar', 'calendar', data);
         return proceed();

@@ -20,6 +20,22 @@ module.exports = {
             },
             allowNull: true,
             description: `moment() parsable string of a date to get logs.`
+        },
+        start: {
+            type: 'string',
+            custom: function (value) {
+                return moment(value).isValid();
+            },
+            allowNull: true,
+            description: `moment() parsable string of a date which the returned logs should start from.`
+        },
+        end: {
+            type: 'string',
+            custom: function (value) {
+                return moment(value).isValid();
+            },
+            allowNull: true,
+            description: `moment() parsable string of a date which the returned logs should end at.`
         }
     },
 
@@ -31,6 +47,11 @@ module.exports = {
             // Get date range
             var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
             var end = moment(start).add(1, 'days');
+            if (inputs.start !== null)
+                start = moment(inputs.start);
+            if (inputs.end !== null)
+                end = moment(inputs.end);
+            
             var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
             if (inputs.subtype === "ISSUES")
             {

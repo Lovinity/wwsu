@@ -21,7 +21,7 @@ module.exports = {
             await Meta.changeMeta({changingState: `Returning from break`});
 
             // log it
-            await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested to return from break.'})
+            await Logs.create({logtype: 'return', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested to return from break.'})
                     .tolerate((err) => {
                         // Don't throw errors, but log them
                         sails.log.error(err);
@@ -69,7 +69,7 @@ module.exports = {
                         {
                             dj = dj.split(" - ")[0];
                         }
-                        await Xp.create({dj: tagGenerator.generate(dj), type: 'show', subtype: 'id', amount: sails.config.custom.XP.ID})
+                        await Xp.create({dj: dj, type: 'show', subtype: 'id', amount: sails.config.custom.XP.ID})
                                 .tolerate((err) => {
                                     // Do not throw for error, but log it
                                     sails.log.error(err);

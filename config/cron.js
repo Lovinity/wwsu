@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements, _, Listeners */
+/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements, _, Listeners, Xp */
 
 module.exports.cron = {
 
@@ -212,7 +212,7 @@ module.exports.cron = {
                 }
 
                 // For remotes, when playing a liner etc, we need to know when to re-queue the remote stream
-                if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && Status.errorCheck.prevQueueLength > 0 && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
+                if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && Status.errorCheck.prevQueueLength > 0 && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0 && queue[0].TrackType !== 'InternetStream')
                 {
                     await sails.helpers.rest.cmd('EnableAssisted', 1);
                     await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
@@ -260,6 +260,8 @@ module.exports.cron = {
                 }
 
                 // Clear manual metadata if it is old
+                if (queue[0].ID !== 0)
+                    change.trackstamp = null;
                 if (Meta['A'].trackstamp === null || (moment().isAfter(moment(Meta['A'].trackstamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && !Meta['A'].state === 'live_prerecord' && Meta['A'].track !== ''))
                     change.track = '';
 
@@ -278,7 +280,8 @@ module.exports.cron = {
                                         // Waiting for the playlist to begin, and it has begun? Switch states.
                                         if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && Meta['A'].changingState === null)
                                         {
-                                            await Meta.changeMeta({state: 'live_prerecord'});
+                                            await Meta.changeMeta({state: 'live_prerecord', showstamp: moment().toISOString(true)});
+                                            await Calendar.update({title: `Prerecord: ${Meta['A'].playlist}`, status: 1, start: {'<=': moment().toISOString(true)}, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
                                         }
                                         if (index === 0)
                                             playlistTrackPlaying = true;
@@ -301,6 +304,15 @@ module.exports.cron = {
                         // Finished the playlist? Go back to automation.
                         if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && Meta['A'].changingState === null)
                         {
+                            switch (Meta['A'].state)
+                            {
+                                case "automation_playlist":
+                                    await Calendar.update({title: `Playlist: ${Meta['A'].playlist}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                                    break;
+                                case "live_prerecord":
+                                    await Calendar.update({title: `Prerecord: ${Meta['A'].dj}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                                    break;
+                            }
                             await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Playlist has finished and we went to automation.'})
                                     .tolerate((err) => {
                                     });
@@ -629,6 +641,7 @@ module.exports.cron = {
                             change.track = '';
                             await Meta.changeMeta({state: 'live_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
+                            await Calendar.update({title: `Show: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
                         }
                         if (Meta['A'].state === 'automation_sports' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                         {
@@ -636,8 +649,9 @@ module.exports.cron = {
                             change.track = '';
                             await Meta.changeMeta({state: 'sports_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
+                            await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
                         }
-                        // If we are preparing for remote, so some stuff if we are playing the stream track
+                        // If we are preparing for remote, do some stuff if we are playing the stream track
                         if (Meta['A'].state === 'automation_remote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                         {
                             change.line2 = '';
@@ -647,6 +661,7 @@ module.exports.cron = {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
+                            await Calendar.update({title: `Remote: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
                         }
                         if (Meta['A'].state === 'automation_sportsremote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                         {
@@ -657,6 +672,7 @@ module.exports.cron = {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
+                            await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
                         }
                         // If returning from break, do stuff once queue is empty
                         if (Meta['A'].state.includes('_returning') && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
@@ -864,6 +880,21 @@ module.exports.cron = {
                                         {
                                             Status.errorCheck.prevID = moment();
                                             await sails.helpers.error.count('stationID');
+                                        }
+
+                                        // Add XP for prerecords
+                                        if (Meta['A'].state === 'live_prerecorded')
+                                        {
+                                            var dj = Meta['A'].dj;
+                                            if (dj.includes(" - "))
+                                            {
+                                                dj = dj.split(" - ")[0];
+                                            }
+                                            await Xp.create({dj: dj, type: 'show', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak})
+                                                    .tolerate((err) => {
+                                                        // Do not throw for error, but log it
+                                                        sails.log.error(err);
+                                                    });
                                         }
                                         // Get the configured break tasks
                                         var breakOpts = sails.config.custom.breaks[key];
@@ -1219,9 +1250,9 @@ module.exports.cron = {
             try {
                 // Make sure all models have a record at ID 1, even if it's a dummy.
                 // TODO: Find a way to auto-populate these arrays.
-                var checksMemory = [Calendar, Directors, Recipients, Status, Tasks];
+                var checksMemory = [Directors, Recipients, Status, Tasks];
                 var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
-                var checksNodebase = [Announcements, Discipline, Eas, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet];
+                var checksNodebase = [Announcements, Discipline, Eas, Calendar, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet];
 
                 // Memory checks
                 var checkStatus = {data: ``, status: 5};

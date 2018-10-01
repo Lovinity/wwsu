@@ -1,4 +1,4 @@
-/* global sails, Events, Meta, Logs, Playlists, moment */
+/* global sails, Events, Meta, Logs, Playlists, moment, Calendar */
 
 module.exports = {
 
@@ -53,6 +53,8 @@ module.exports = {
                     // If we are going back to default rotation, we don't want to activate genre mode; leave in automation_on mode
                     if (inputs.event !== 'Default')
                     {
+                        await Calendar.update({title: `Genre: ${Meta['A'].genre}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                        await Calendar.update({title: `Genre: ${inputs.event}`, status: 1, start: {'<=': moment().toISOString(true)}, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
                         Playlists.played = moment();
                         await Meta.changeMeta({state: 'automation_genre', genre: inputs.event, playlist_played: moment().toISOString(true)});
                         await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'A genre was scheduled to start.' + "\n" + 'Genre: ' + inputs.event})
@@ -61,6 +63,7 @@ module.exports = {
                                 });
                     } else {
                         Playlists.played = moment('2002-01-01');
+                        await Calendar.update({title: `Genre: ${Meta['A'].genre}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
                         await Meta.changeMeta({state: 'automation_on', genre: '', playlist_played: moment("2002-01-01").toISOString(true)});
                         await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Genre automation has ended; we switched to Default rotation.'})
                                 .tolerate((err) => {

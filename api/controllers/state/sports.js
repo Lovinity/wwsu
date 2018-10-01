@@ -64,7 +64,7 @@ module.exports = {
             {
 
                 // Log this request
-                await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast.' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
+                await Logs.create({logtype: 'sports', loglevel: 'success', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast.' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
                             // Don't throw errors, but log them
                             sails.log.error(err);
@@ -99,7 +99,7 @@ module.exports = {
                 Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
 
                 // Log this request
-                await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast (immediate transition from another sports broadcast).' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
+                await Logs.create({logtype: 'sports', loglevel: 'success', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast (immediate transition from another sports broadcast).' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
                         .tolerate((err) => {
                             // Don't throw errors, but log them
                             sails.log.error(err);
