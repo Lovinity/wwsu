@@ -25,7 +25,7 @@ module.exports = {
             Status.changeStatus([{name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio was detected! Please check the OnAir audio levels.`}]);
 
             // Add a log entry
-            await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: 'Silence / quiet audio detected for at least 15 seconds.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence', loglevel: 'urgent', logsubtype: Meta['A'].dj, event: 'Silence / quiet audio detected for at least 15 seconds.'})
                     .tolerate((err) => {
                     });
 
@@ -33,7 +33,7 @@ module.exports = {
             if (typeof Meta.automation[0] !== 'undefined' && parseInt(Meta.automation[0].ID) !== 0)
             {
                 // Add a log about the track
-                await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `Track ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title}) was skipped due to silence alarm. Please check to ensure it does not contain silence.`})
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `Track ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title}) was skipped due to silence alarm. Please check to ensure it does not contain silence.`})
                         .tolerate((err) => {
                         });
                 

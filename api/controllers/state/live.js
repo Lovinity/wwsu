@@ -63,12 +63,6 @@ module.exports = {
             // If we are not already in live mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("live_"))
             {
-                // Log this request
-                await Logs.create({logtype: 'live', loglevel: 'success', logsubtype: inputs.showname, event: 'DJ requested to go live.' + "\n" + 'DJ - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
-                        .tolerate((err) => {
-                            // Do not throw for errors, but log it.
-                            sails.log.error(err);
-                        });
 
                 //await sails.helpers.error.count('goLive');
 
@@ -86,13 +80,6 @@ module.exports = {
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-
-                // Log this request
-                await Logs.create({logtype: 'live', loglevel: 'success', logsubtype: inputs.showname, event: 'DJ requested to go live (immediate transition from another live show).' + "\n" + 'DJ - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
-                        .tolerate((err) => {
-                            // Do not throw for errors, but log it.
-                            sails.log.error(err);
-                        });
             }
 
             await sails.helpers.error.reset('automationBreak');

@@ -1,4 +1,4 @@
-/* global sails, Logs, Xp, Calendar */
+/* global sails, Logs, Xp, Calendar, Attendance */
 
 module.exports = {
 
@@ -25,7 +25,7 @@ module.exports = {
         var resp = {XP: {totalXP: 0, remote: 0, rows: []}, attendance: []};
 
         try {
-            resp.attendance = await Calendar.find({status: {"!=": -1}, or: [{title: {"startsWith": `Show: ${inputs.dj}`}}, {title: {"startsWith": `Prerecord: ${inputs.dj}`}}]}).sort('start DESC');
+            resp.attendance = await Attendance.find({DJ: inputs.dj}).sort('scheduledStart DESC');
             
             var records = await Xp.getDatastore().sendNativeQuery(`SELECT * FROM xp WHERE dj LIKE $1 ORDER BY FIELD(type,"remote") DESC, createdAt DESC`, [inputs.dj]);
             records = records.rows;

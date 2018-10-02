@@ -15,6 +15,11 @@ module.exports = {
             autoIncrement: true
         },
 
+        attendanceID: {
+            type: 'number',
+            allowNull: true
+        },
+
         logtype: {
             type: 'string'
         },

@@ -1,4 +1,4 @@
-/* global moment, sails, Xp */
+/* global moment, sails, Xp, Attendance */
 
 module.exports = {
 
@@ -24,6 +24,8 @@ module.exports = {
 
         try {
             await Xp.destroy({dj: inputs.dj});
+            await Attendance.update({DJ: inputs.dj}, {DJ: ``});
+            
             return exits.success();
         } catch (e) {
             return exits.error(e);

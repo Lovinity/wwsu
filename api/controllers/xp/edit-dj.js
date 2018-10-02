@@ -1,4 +1,4 @@
-/* global sails, Xp */
+/* global sails, Xp, Attendance */
 
 module.exports = {
 
@@ -29,6 +29,7 @@ module.exports = {
 
         try {
             await Xp.update({dj: inputs.old}, {dj: inputs.new});
+            await Attendance.update({DJ: inputs.old}, {DJ: inputs.new});
 
             return exits.success();
         } catch (e) {

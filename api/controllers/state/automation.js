@@ -1,4 +1,4 @@
-/* global Meta, sails, Logs, Status, Playlists, Calendar, moment, Listeners, Xp, Messages */
+/* global Meta, sails, Logs, Status, Playlists, Calendar, moment, Listeners, Xp, Messages, Attendance */
 const UrlSafeString = require('url-safe-string'),
         tagGenerator = new UrlSafeString();
 
@@ -30,7 +30,7 @@ module.exports = {
             var returnData = {subtotalXP: 0};
 
             // Log the request
-            await Logs.create({logtype: 'automation', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off and went to automation.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off.'})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
@@ -42,22 +42,8 @@ module.exports = {
             Playlists.active.ID = 0;
             Playlists.active.position = -1;
 
-            // Log end time
-            switch (Meta['A'].state)
-            {
-                case "live_on":
-                    await Calendar.update({title: `Show: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
-                    break;
-                case "remote_on":
-                    await Calendar.update({title: `Remote: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
-                    break;
-                case "sports_on":
-                    await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
-                    break;
-                case "sportsremote_on":
-                    await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
-                    break;
-            }
+            // Log end time in attendance logs
+            await Attendance.update({ID: Meta['A'].attendanceID}, {actualEnd: moment().toISOString(true)});
 
             // Calculate XP
             if (Meta['A'].state.startsWith("live_"))
@@ -191,7 +177,8 @@ module.exports = {
 
                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
-
+                    await Attendance.createRecord(`Genre: Default`);
+                    
                     await Meta.changeMeta({state: 'automation_on', dj: '', djcontrols: '', track: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
 
                     // Add up to 3 track requests if any are pending
@@ -214,6 +201,7 @@ module.exports = {
 
                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
+                    await Attendance.createRecord(`Genre: Default`);
 
                     await Meta.changeMeta({state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: null});
                     await sails.helpers.error.reset('automationBreak');
@@ -251,6 +239,7 @@ module.exports = {
 
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
+                await Attendance.createRecord(`Genre: Default`);
 
                 await Meta.changeMeta({state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
             }

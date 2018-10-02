@@ -27,8 +27,6 @@ module.exports = {
                     dj = dj.split(" - ")[0];
                 }
 
-                await Calendar.update({title: `Prerecord: ${Meta['A'].playlist}`, status: 2, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
-
                 // Award XP based on time on the air
                 var showTime = moment().diff(moment(Meta['A'].showstamp), 'minutes');
                 var showXP = Math.round(showTime / sails.config.custom.XP.prerecordShowMinutes);

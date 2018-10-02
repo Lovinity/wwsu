@@ -1,4 +1,4 @@
-/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements, _, Listeners, Xp */
+/* global Directors, sails, Status, Calendar, Meta, Tasks, Playlists, Playlists_list, moment, Timesheet, needle, Statelogs, Logs, Recipients, Category, History, Requests, Events, Subcategory, Genre, Settings, Hosts, Nodeusers, Discipline, Messages, Eas, Songs, Announcements, _, Listeners, Xp, Attendance */
 
 module.exports.cron = {
 
@@ -281,7 +281,12 @@ module.exports.cron = {
                                         if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && Meta['A'].changingState === null)
                                         {
                                             await Meta.changeMeta({state: 'live_prerecord', showstamp: moment().toISOString(true)});
-                                            await Calendar.update({title: `Prerecord: ${Meta['A'].playlist}`, status: 1, start: {'<=': moment().toISOString(true)}, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
+                                            await Attendance.createRecord(`Prerecord: ${Meta['A'].playlist}`);
+                                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].playlist, event: `A prerecord started airing.` + "\n" + "Prerecord: " + Meta['A'].playlist})
+                                                    .tolerate((err) => {
+                                                        // Do not throw for errors, but log it.
+                                                        sails.log.error(err);
+                                                    });
                                         }
                                         if (index === 0)
                                             playlistTrackPlaying = true;
@@ -304,22 +309,38 @@ module.exports.cron = {
                         // Finished the playlist? Go back to automation.
                         if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && Meta['A'].changingState === null)
                         {
+                            await Meta.changeMeta({changingState: `Switching to automation`});
                             switch (Meta['A'].state)
                             {
                                 case "automation_playlist":
-                                    await Calendar.update({title: `Playlist: ${Meta['A'].playlist}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'success', logsubtype: Meta['A'].playlist, event: `A playlist finished airing.`})
+                                            .tolerate((err) => {
+                                                // Do not throw for errors, but log it.
+                                                sails.log.error(err);
+                                            });
                                     break;
                                 case "live_prerecord":
-                                    await Calendar.update({title: `Prerecord: ${Meta['A'].dj}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)});
+                                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'success', logsubtype: Meta['A'].playlist, event: `A prerecord finished airing.`})
+                                            .tolerate((err) => {
+                                                // Do not throw for errors, but log it.
+                                                sails.log.error(err);
+                                            });
                                     break;
                             }
-                            await Logs.create({logtype: 'operation', loglevel: 'info', logsubtype: '', event: 'Playlist has finished and we went to automation.'})
-                                    .tolerate((err) => {
-                                    });
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
+                            await Attendance.createRecord(`Genre: Default`);
                             Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_played: moment('2002-01-01').toISOString(), playlist_position: 0});
                             Playlists.active.name = null;
                             Playlists.active.position = 0;
+
+                            // Add up to 3 track requests if any are pending
+                            await sails.helpers.requests.queue(3, true, true);
+
+                            // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
+                            await Calendar.preLoadEvents(true);
+
+                            await Meta.changeMeta({changingState: null});
+
                             // Did not finish the playlist? Ensure the position is updated in meta.
                         } else if (thePosition !== -1) {
                             if (thePosition !== Meta['A'].playlist_position)
@@ -346,7 +367,7 @@ module.exports.cron = {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
                             Meta.changeMeta({track: newmeta});
@@ -386,7 +407,7 @@ module.exports.cron = {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: `playlist - ${Meta['A'].playlist}`, event: 'Automation playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: `playlist - ${Meta['A'].playlist}`, event: 'Automation playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
 
@@ -417,7 +438,7 @@ module.exports.cron = {
                             change.webchat = true;
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: 'automation', event: 'Genre automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: 'Genre automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
                             Meta.changeMeta({track: newmeta});
@@ -449,7 +470,7 @@ module.exports.cron = {
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
-                                    await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'DJ played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'DJ played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                             .tolerate((err) => {
                                             });
                                 Meta.changeMeta({track: newmeta});
@@ -498,7 +519,7 @@ module.exports.cron = {
                             var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                             change.dj = Meta['A'].playlist;
                             if (Meta['A'].track !== newmeta)
-                                await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].playlist, event: 'Prerecorded show playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].playlist, event: 'Prerecorded show playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
                             Meta.changeMeta({track: newmeta});
@@ -530,7 +551,7 @@ module.exports.cron = {
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
-                                    await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Remote producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Remote producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                             .tolerate((err) => {
                                             });
                                 change.track = newmeta;
@@ -577,7 +598,7 @@ module.exports.cron = {
                             {
                                 var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
                                 if (Meta['A'].track !== newmeta)
-                                    await Logs.create({logtype: 'operation', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
+                                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                             .tolerate((err) => {
                                             });
                                 Meta.changeMeta({track: newmeta});
@@ -641,7 +662,12 @@ module.exports.cron = {
                             change.track = '';
                             await Meta.changeMeta({state: 'live_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
-                            await Calendar.update({title: `Show: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
+                            await Attendance.createRecord(`Show: ${Meta['A'].dj}`);
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'DJ is now live.' + "\n" + 'DJ - Show: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                                    .tolerate((err) => {
+                                        // Do not throw for errors, but log it.
+                                        sails.log.error(err);
+                                    });
                         }
                         if (Meta['A'].state === 'automation_sports' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                         {
@@ -649,7 +675,12 @@ module.exports.cron = {
                             change.track = '';
                             await Meta.changeMeta({state: 'sports_on', showstamp: moment().toISOString(true)});
                             await sails.helpers.rest.cmd('EnableAssisted', 1);
-                            await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
+                            await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A sports broadcast has started.' + "\n" + 'Sport: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                                    .tolerate((err) => {
+                                        // Do not throw for errors, but log it.
+                                        sails.log.error(err);
+                                    });
                         }
                         // If we are preparing for remote, do some stuff if we are playing the stream track
                         if (Meta['A'].state === 'automation_remote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
@@ -661,7 +692,12 @@ module.exports.cron = {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
-                            await Calendar.update({title: `Remote: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
+                            await Attendance.createRecord(`Remote: ${Meta['A'].dj}`);
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote broadcast is now on the air.' + "\n" + 'Host - Show: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                                    .tolerate((err) => {
+                                        // Do not throw for errors, but log it.
+                                        sails.log.error(err);
+                                    });
                         }
                         if (Meta['A'].state === 'automation_sportsremote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                         {
@@ -672,7 +708,12 @@ module.exports.cron = {
                             await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
-                            await Calendar.update({title: `Sports: ${Meta['A'].dj}`, status: 1, actualStart: null}, {status: 2, actualStart: moment().toISOString(true)});
+                            await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote sports broadcast has started.' + "\n" + 'Sport: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                                    .tolerate((err) => {
+                                        // Do not throw for errors, but log it.
+                                        sails.log.error(err);
+                                    });
                         }
                         // If returning from break, do stuff once queue is empty
                         if (Meta['A'].state.includes('_returning') && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
@@ -784,7 +825,7 @@ module.exports.cron = {
                         } else {
                             if (Meta['A'].breakneeded && n >= 10)
                             {
-                                await Logs.create({logtype: 'operation', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `${Meta['A'].dj} does not seem to have taken the required top of the hour ID break despite being asked to by the system.`})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `${Meta['A'].dj} does not seem to have taken the required top of the hour ID break despite being asked to by the system.`})
                                         .tolerate((err) => {
                                             sails.log.error(err);
                                         });
@@ -910,7 +951,7 @@ module.exports.cron = {
                                                         {
                                                             // Log an entry
                                                             case "log":
-                                                                await Logs.create({logtype: 'system', loglevel: 'info', logsubtype: 'automation', event: task.event})
+                                                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: 'automation', event: task.event})
                                                                         .tolerate((err) => {
                                                                         });
                                                                 break;

@@ -63,13 +63,6 @@ module.exports = {
             if (!Meta['A'].state.startsWith("sports"))
             {
 
-                // Log this request
-                await Logs.create({logtype: 'sports', loglevel: 'success', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast.' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
-                        .tolerate((err) => {
-                            // Don't throw errors, but log them
-                            sails.log.error(err);
-                        });
-
                 //await sails.helpers.error.count('goLive');
 
                 // Operation: Remove all music tracks, queue a station ID, queue an opener if one exists for this sport, and start the next track if current track is music.
@@ -97,13 +90,6 @@ module.exports = {
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-
-                // Log this request
-                await Logs.create({logtype: 'sports', loglevel: 'success', logsubtype: inputs.sport, event: 'Producer requested to start a sports broadcast (immediate transition from another sports broadcast).' + "\n" + 'Sport: ' + inputs.sport + "\n" + 'Remote?: ' + inputs.remote + "\n" + 'Topic: ' + inputs.topic})
-                        .tolerate((err) => {
-                            // Don't throw errors, but log them
-                            sails.log.error(err);
-                        });
             }
             
             await sails.helpers.error.reset('automationBreak');

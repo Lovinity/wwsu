@@ -31,6 +31,11 @@ module.exports = {
             columnType: 'datetime'
         },
 
+        attendanceID: {
+            type: 'number',
+            allowNull: true
+        },
+
         track: {
             type: 'string',
             allowNull: true
@@ -81,6 +86,7 @@ module.exports = {
         state: '', // State of the WWSU system
         dj: '', // If someone is on the air, host name - show name
         showstamp: null, // When a show starts, this is the timestamp which the show began
+        attendanceID: null, // The ID of the Attendance record the system is currently running under
         track: '', // Currently playing track either in automation or manually logged
         trackID: 0, // The ID of the track currently playing
         history: [], // An array of objects {ID: trackID, track: 'Artist - Title', likable: true if it can be liked} of the last 3 tracks that played 
@@ -136,16 +142,6 @@ module.exports = {
                     // Do stuff if we are changing states, mainly with regards to genres, playlists, and prerecords.
                     if (key === "state" && obj[key] !== Meta['A'][key])
                     {
-                        if (Meta['A'][key] === 'automation_genre')
-                            await Calendar.update({title: `Genre: ${Meta['A'].genre}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)})
-                                    .tolerate((err) => {
-                                        sails.log.error(err);
-                                    });
-                        if (Meta['A'][key] === 'automation_playlist')
-                            await Calendar.update({title: `Playlist: ${Meta['A'].playlist}`, status: 2, start: {'<=': moment().toISOString(true)}, actualStart: {'!=': null}, actualEnd: null}, {status: 1, actualEnd: moment().toISOString(true)})
-                                    .tolerate((err) => {
-                                        sails.log.error(err);
-                                    });
                         if (Meta['A'][key] === 'live_prerecord')
                             await sails.helpers.xp.addPrerecord();
                     }

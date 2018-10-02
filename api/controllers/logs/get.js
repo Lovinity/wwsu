@@ -13,6 +13,12 @@ module.exports = {
             description: 'The log subtype to retrieve.'
         },
 
+        attendanceID: {
+            type: 'number',
+            allowNull: true,
+            description: 'If provided, logs pertaining to this attendance record ID will be returned. This overwrites start, end, and date.'
+        },
+
         date: {
             type: 'string',
             custom: function (value) {
@@ -51,8 +57,11 @@ module.exports = {
                 start = moment(inputs.start);
             if (inputs.end !== null)
                 end = moment(inputs.end);
-            
+
             var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
+            if (inputs.attendanceID !== null && inputs.attendanceID > 0)
+                query = {attendanceID: inputs.attendanceID};
+            
             if (inputs.subtype === "ISSUES")
             {
                 query.loglevel = ['warning', 'urgent', 'danger'];

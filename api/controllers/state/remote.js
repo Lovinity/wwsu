@@ -63,12 +63,6 @@ module.exports = {
             // If we are not already in remote mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("remote_"))
             {
-                // Log this request
-                await Logs.create({logtype: 'remote', loglevel: 'success', logsubtype: inputs.showname, event: 'Remote show requested.' + "\n" + 'Producer - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
-                        .tolerate((err) => {
-                            // Do not throw for errors, but log it
-                            sails.log.error(err);
-                        });
 
                 //await sails.helpers.error.count('goRemote');
 
@@ -86,13 +80,6 @@ module.exports = {
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-
-                // Log this request
-                await Logs.create({logtype: 'remote', loglevel: 'success', logsubtype: inputs.showname, event: 'Remote show requested (immediate transition from another show).' + "\n" + 'Host - Show: ' + inputs.showname + "\n" + 'Topic: ' + inputs.topic})
-                        .tolerate((err) => {
-                            // Do not throw for errors, but log it
-                            sails.log.error(err);
-                        });
             }
 
             await sails.helpers.error.reset('automationBreak');
