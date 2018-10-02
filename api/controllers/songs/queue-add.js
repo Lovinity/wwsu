@@ -42,7 +42,7 @@ module.exports = {
                 {
                     dj = dj.split(" - ")[0];
                 }
-                await Xp.create({dj: dj, type: 'show', subtype: 'topadd', amount: sails.config.custom.XP.topAdd})
+                await Xp.create({dj: dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: "DJ played a Top Add."})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);

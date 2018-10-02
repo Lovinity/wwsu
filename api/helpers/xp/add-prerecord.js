@@ -33,7 +33,7 @@ module.exports = {
                 var showTime = moment().diff(moment(Meta['A'].showstamp), 'minutes');
                 var showXP = Math.round(showTime / sails.config.custom.XP.prerecordShowMinutes);
 
-                await Xp.create({dj: dj, type: 'show', subtype: 'showtime', amount: showXP})
+                await Xp.create({dj: dj, type: 'xp', subtype: 'showtime', amount: showXP, description: `Prerecord was on the air for ${showTime} minutes.`})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -64,7 +64,7 @@ module.exports = {
                     listenerMinutes = Math.round(listenerMinutes);
                     var listenerXP = Math.round(listenerMinutes / sails.config.custom.XP.prerecordListenerMinutes);
 
-                    await Xp.create({dj: dj, type: 'show', subtype: 'listeners', amount: listenerXP})
+                    await Xp.create({dj: dj, type: 'xp', subtype: 'listeners', amount: listenerXP, description: `There were ${listenerMinutes} online listener minutes during the prerecord.`})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);

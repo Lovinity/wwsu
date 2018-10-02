@@ -890,7 +890,7 @@ module.exports.cron = {
                                             {
                                                 dj = dj.split(" - ")[0];
                                             }
-                                            await Xp.create({dj: dj, type: 'show', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak})
+                                            await Xp.create({dj: dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.`})
                                                     .tolerate((err) => {
                                                         // Do not throw for error, but log it
                                                         sails.log.error(err);

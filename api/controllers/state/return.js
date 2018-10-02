@@ -69,7 +69,7 @@ module.exports = {
                         {
                             dj = dj.split(" - ")[0];
                         }
-                        await Xp.create({dj: dj, type: 'show', subtype: 'id', amount: sails.config.custom.XP.ID})
+                        await Xp.create({dj: dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: "DJ played an on-time Top of the Hour ID break."})
                                 .tolerate((err) => {
                                     // Do not throw for error, but log it
                                     sails.log.error(err);

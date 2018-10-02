@@ -72,7 +72,7 @@ module.exports = {
                 returnData.showXP = Math.round(returnData.showTime / sails.config.custom.XP.showMinutes);
                 returnData.subtotalXP += returnData.showXP;
 
-                await Xp.create({dj: dj, type: 'show', subtype: 'showtime', amount: returnData.showXP})
+                await Xp.create({dj: dj, type: 'xp', subtype: 'showtime', amount: returnData.showXP, description: `DJ was on the air for ${returnData.showTime} minutes.`})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -108,7 +108,7 @@ module.exports = {
                     returnData.listenerXP = Math.round(listenerMinutes / sails.config.custom.XP.listenerMinutes);
                     returnData.subtotalXP += returnData.listenerXP;
 
-                    await Xp.create({dj: dj, type: 'show', subtype: 'listeners', amount: returnData.listenerXP})
+                    await Xp.create({dj: dj, type: 'xp', subtype: 'listeners', amount: returnData.listenerXP, description: `DJ had ${returnData.listenerMinutes} online listener minutes during their show.`})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);
@@ -127,7 +127,7 @@ module.exports = {
                 {
                     returnData.messagesXP = Math.round(returnData.messagesWeb * sails.config.custom.XP.web);
                     returnData.subtotalXP += returnData.messagesXP;
-                    await Xp.create({dj: dj, type: 'show', subtype: 'messages', amount: returnData.messagesXP})
+                    await Xp.create({dj: dj, type: 'xp', subtype: 'messages', amount: returnData.messagesXP, description: `DJ sent ${returnData.messagesWeb} messages to web visitors during their show.`})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);
