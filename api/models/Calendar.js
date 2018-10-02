@@ -29,7 +29,7 @@ module.exports = {
         status: {
             type: 'number',
             min: 0,
-            max: 1,
+            max: 9,
             defaultsTo: 1
         },
 
