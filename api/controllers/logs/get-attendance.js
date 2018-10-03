@@ -27,13 +27,13 @@ module.exports = {
             {
                 var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(1, 'days');
-                var query = {createdAt: [{">=": start.toISOString(true)}, {"<=": end.toISOString(true)}]};
+                var query = {or: [{createdAt: {">=": start.toISOString(true)}}, {createdAt: {"<=": end.toISOString(true)}}]};
             } else {
-                query = {};
+                var query = {};
             }
 
             // Get records
-            var records = await Attendance.find(query);
+            var records = await Attendance.find(query).sort("createdAt DESC");
 
             sails.log.verbose(`Special records returned: ${records.length}`);
             sails.log.silly(records);

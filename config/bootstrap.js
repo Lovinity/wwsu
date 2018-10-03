@@ -32,6 +32,11 @@ module.exports.bootstrap = async function (done) {
     // Don't forget to trigger `done()` when this bootstrap function's logic is finished.
     // (otherwise your server will never lift, since it's waiting on the bootstrap)
 
+    await Logs.create({attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', event: 'The Node server was rebooted.'})
+            .tolerate((err) => {
+                // Don't throw errors, but log them
+                sails.log.error(err);
+            });
 
     sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);
     Meta.template = _.cloneDeep(Meta['A']);

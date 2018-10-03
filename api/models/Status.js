@@ -372,6 +372,30 @@ module.exports = {
                                 }
                             }
                         }
+                        if (updateIt === 1 && typeof criteria.status !== 'undefined' && criteria.status <= 3 && (!record.status || (record.status !== criteria.status)))
+                        {
+                            var loglevel = `warning`;
+                            if (criteria.status < 2)
+                            {
+                                loglevel = `danger`;
+                            } else if (criteria.status < 3)
+                            {
+                                loglevel = `urgent`;
+                            }
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `Problem reported by Status system: ${criteria.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
+                                    .tolerate((err) => {
+                                        // Don't throw errors, but log them
+                                        sails.log.error(err);
+                                    });
+                        }
+                        if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
+                        {
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `Status system ${criteria.name || `Unknown System`} is now good and no longer reporting issues.`})
+                                    .tolerate((err) => {
+                                        // Don't throw errors, but log them
+                                        sails.log.error(err);
+                                    });
+                        }
                         if (updateIt === 1)
                         {
                             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.

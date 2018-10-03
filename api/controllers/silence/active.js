@@ -24,11 +24,6 @@ module.exports = {
             // Activate status issue
             Status.changeStatus([{name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio was detected! Please check the OnAir audio levels.`}]);
 
-            // Add a log entry
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence', loglevel: 'urgent', logsubtype: Meta['A'].dj, event: 'Silence / quiet audio detected for at least 15 seconds.'})
-                    .tolerate((err) => {
-                    });
-
             // If a track is playing in RadioDJ, skip it and log it
             if (typeof Meta.automation[0] !== 'undefined' && parseInt(Meta.automation[0].ID) !== 0)
             {

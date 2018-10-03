@@ -55,7 +55,7 @@ module.exports = {
                                     {id: user[0].ID},
                                     sails.tokenSecret, // Token Secret that we sign it with
                                     {
-                                        expiresIn: (60 * 15) // Token Expire time
+                                        expiresIn: (60 * 60) // Token Expire time (1 hour)
                                     }
                             )
                         });

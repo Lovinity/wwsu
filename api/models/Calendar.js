@@ -189,7 +189,7 @@ module.exports = {
                     })
                     .catch(err => {
                         sails.log.error(err);
-                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Authentication Error: ' + err.message, status: 2}]);
+                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar Error: ' + err.message, status: 2}]);
                         return reject(err);
                     });
         });
@@ -220,7 +220,7 @@ module.exports = {
                 Calendar.calendar = events;
                 sails.log.silly(events);
                 if (events.length === 0) {
-                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar is operational, but there are no events in the calendar in the next 7 days.', status: 5}]);
+                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar is operational, but there are no events in the calendar in the next 7 days.', status: 3}]);
                     return resolve();
                 } else {
                     // Iterate through each returned event from Google Calendar
@@ -646,14 +646,14 @@ module.exports = {
 
                     if (badEvent)
                     {
-                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'There are bad events in the Google Calendar. Please see serverurl/calendar/verify', status: 3}]);
+                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'There are bad events in the Google Calendar. Please see DJ Controls administration / Calendar Verification.', status: 3}]);
                     } else {
                         Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'The Google Calendar is operational, and there are no significant issues with the scheduled events.', status: 5}]);
                     }
                     return resolve();
                 }
             } catch (e) {
-                Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google events error: ' + e.message, status: 2}]);
+                Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar error: ' + e.message, status: 2}]);
                 sails.log.error(e);
                 return reject(e);
             }
