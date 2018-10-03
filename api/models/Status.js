@@ -382,7 +382,7 @@ module.exports = {
                             {
                                 loglevel = `urgent`;
                             }
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `Problem reported by Status system: ${criteria.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `Problem reported by Status system: ${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
                                     .tolerate((err) => {
                                         // Don't throw errors, but log them
                                         sails.log.error(err);
@@ -390,7 +390,7 @@ module.exports = {
                         }
                         if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
                         {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `Status system ${criteria.name || `Unknown System`} is now good and no longer reporting issues.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `Status system ${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good and no longer reporting issues.`})
                                     .tolerate((err) => {
                                         // Don't throw errors, but log them
                                         sails.log.error(err);
