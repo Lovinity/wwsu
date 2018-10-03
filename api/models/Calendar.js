@@ -320,7 +320,7 @@ module.exports = {
                         // Verify the event
                         criteria.verify = 'Manual';
                         criteria.verify_message = 'This was not detected as an event dealing with OnAir programming. If this event was meant to trigger OnAir programming, <strong>please ensure the event title formatting is correct and that everything is spelled correctly</strong>.';
-                        criteria.verify_titleHTML = ``;
+                        criteria.verify_titleHTML = event.summary;
 
                         // Live shows
                         if (criteria.title.startsWith("Show: ")) {
