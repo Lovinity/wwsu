@@ -565,7 +565,7 @@ module.exports = {
                     // Destroy entries in the calendar which no longer exist on Google Calendar
                     if (events.length > 0)
                     {
-                        await Calendar.destroy({active: true, unique: {'nin': eventIds}})
+                        await Calendar.destroy({unique: {'nin': eventIds}})
                                 .tolerate((err) => {
                                 })
                                 .fetch();
@@ -585,56 +585,59 @@ module.exports = {
                                     } else {
                                         dj = null;
                                     }
-                                    Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, DJ: dj, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
-                                            .exec(async(err, record, wasCreated) => {
-                                                // if wasCreated, then the event never aired; Log an absence.
-                                                if (wasCreated)
-                                                {
-                                                    if (record.event.startsWith("Show: "))
+                                    // Do not attendance-track events which did not get a Valid or Check mark on the verification system (for example, Invalid or Manual events)
+                                    if (event.verify === "Valid" || event.verify === "Check")
+                                    {
+                                        Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, DJ: dj, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
+                                                .exec(async(err, record, wasCreated) => {
+                                                    // if wasCreated, then the event never aired; Log an absence.
+                                                    if (wasCreated)
                                                     {
-                                                        await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Show: ", ""), event: `It appears ${record.event.replace("Show: ", "")} was scheduled to do a show from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
-                                                                .tolerate((err) => {
-                                                                    sails.log.error(err);
-                                                                });
+                                                        if (record.event.startsWith("Show: "))
+                                                        {
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Show: ", ""), event: `It appears ${record.event.replace("Show: ", "")} was scheduled to do a show from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                                    .tolerate((err) => {
+                                                                        sails.log.error(err);
+                                                                    });
+                                                        }
+
+                                                        if (record.event.startsWith("Prerecord: "))
+                                                        {
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Prerecord: ", ""), event: `It appears ${record.event.replace("Prerecord: ", "")} had a scheduled prerecord from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not air.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                                    .tolerate((err) => {
+                                                                        sails.log.error(err);
+                                                                    });
+                                                        }
+
+                                                        if (record.event.startsWith("Remote: "))
+                                                        {
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Remote: ", ""), event: `It appears the remote ${record.event.replace("Remote: ", "")} was scheduled to broadcast from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                                    .tolerate((err) => {
+                                                                        sails.log.error(err);
+                                                                    });
+                                                        }
+
+                                                        if (record.event.startsWith("Sports: "))
+                                                        {
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Sports: ", ""), event: `It appears sports broadcast ${record.event.replace("Sports: ", "")} was scheduled from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not air.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                                    .tolerate((err) => {
+                                                                        sails.log.error(err);
+                                                                    });
+                                                        }
+
+                                                        if (record.event.startsWith("Playlist: "))
+                                                        {
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Playlist: ", ""), event: `It appears the playlist ${record.event.replace("Playlist: ", "")} was scheduled to air from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                                    .tolerate((err) => {
+                                                                        sails.log.error(err);
+                                                                    });
+                                                        }
+
+                                                        // We do not care about genres
                                                     }
-
-                                                    if (record.event.startsWith("Prerecord: "))
-                                                    {
-                                                        await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Prerecord: ", ""), event: `It appears ${record.event.replace("Prerecord: ", "")} had a scheduled prerecord from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not air.`, createdAt: moment(record.scheduledStart).toISOString(true)})
-                                                                .tolerate((err) => {
-                                                                    sails.log.error(err);
-                                                                });
-                                                    }
-
-                                                    if (record.event.startsWith("Remote: "))
-                                                    {
-                                                        await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Remote: ", ""), event: `It appears the remote ${record.event.replace("Remote: ", "")} was scheduled to broadcast from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
-                                                                .tolerate((err) => {
-                                                                    sails.log.error(err);
-                                                                });
-                                                    }
-
-                                                    if (record.event.startsWith("Sports: "))
-                                                    {
-                                                        await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Sports: ", ""), event: `It appears sports broadcast ${record.event.replace("Sports: ", "")} was scheduled from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not air.`, createdAt: moment(record.scheduledStart).toISOString(true)})
-                                                                .tolerate((err) => {
-                                                                    sails.log.error(err);
-                                                                });
-                                                    }
-
-                                                    if (record.event.startsWith("Playlist: "))
-                                                    {
-                                                        await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Playlist: ", ""), event: `It appears the playlist ${record.event.replace("Playlist: ", "")} was scheduled to air from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
-                                                                .tolerate((err) => {
-                                                                    sails.log.error(err);
-                                                                });
-                                                    }
-
-                                                    // We do not care about genres
-                                                }
-                                                return resolve2(false);
-                                            });
-
+                                                    return resolve2(false);
+                                                });
+                                    }
                                 } catch (e) {
                                     sails.log.error(e);
                                     return resolve2(false);
