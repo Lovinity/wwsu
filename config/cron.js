@@ -116,6 +116,7 @@ module.exports.cron = {
                         }
 
                         // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). 
+                        sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`);
                         await sails.helpers.asyncForEach(queue, function (track, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 var title = `${track.Artist} - ${track.Title}`;
@@ -271,6 +272,7 @@ module.exports.cron = {
                 if ((Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_prerecord' || Meta['A'].state === 'live_prerecord'))
                 {
                     // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
+                    sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`);
                     await sails.helpers.asyncForEach(queue, function (autoTrack, index) {
                         return new Promise(async (resolve2, reject2) => {
                             try {
@@ -944,6 +946,7 @@ module.exports.cron = {
                                         // Go through each task
                                         if (breakOpts.length > 0)
                                         {
+                                            sails.log.debug(`Calling asyncForEach in cron checks for tasks in a break to be queued`);
                                             await sails.helpers.asyncForEach(breakOpts, function (task, index) {
                                                 return new Promise(async (resolve2, reject2) => {
                                                     try {
@@ -1076,6 +1079,7 @@ module.exports.cron = {
                                     sources = resp.body.icestats.source;
                                 }
                                 // Go through each source
+                                sails.log.debug(`Calling asyncForEach in cron checkRadioStreams for each source returned`);
                                 await sails.helpers.asyncForEach(sources, function (source, index) {
                                     return new Promise(async (resolve2, reject2) => {
                                         try {
@@ -1171,6 +1175,7 @@ module.exports.cron = {
         onTick: async function () {
             sails.log.debug(`CRON checkRadioDJs triggered.`);
             try {
+                sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`);
                 return sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
                     return new Promise(async (resolve, reject) => {
                         try {
@@ -1241,6 +1246,7 @@ module.exports.cron = {
 
                 // Iterate through every configured county and get their weather alerts
                 var complete = 0;
+                sails.log.debug(`Calling asyncForEach in cron EAS for checking every EAS source`);
                 await sails.helpers.asyncForEach(sails.config.custom.EAS.NWSX, function (county, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
@@ -1298,6 +1304,7 @@ module.exports.cron = {
                 // Memory checks
                 var checkStatus = {data: ``, status: 5};
                 sails.log.debug(`CHECK: DB Memory`);
+                sails.log.debug(`Calling asyncForEach in cron checkDB for memory tests`);
                 await sails.helpers.asyncForEach(checksMemory, function (check, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
@@ -1327,6 +1334,7 @@ module.exports.cron = {
                 // RadioDJ checks
                 sails.log.debug(`CHECK: DB RadioDJ`);
                 var checkStatus = {data: ``, status: 5};
+                sails.log.debug(`Calling asyncForEach in cron checkDB for RadioDJ database checks`);
                 await sails.helpers.asyncForEach(checksRadioDJ, function (check, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
@@ -1356,6 +1364,7 @@ module.exports.cron = {
                 // Nodebase checks
                 sails.log.debug(`CHECK: DB Nodebase`);
                 var checkStatus = {data: ``, status: 5};
+                sails.log.debug(`Calling asyncForEach in cron checkDB for nodebase database checks`);
                 await sails.helpers.asyncForEach(checksNodebase, function (check, index) {
                     return new Promise(async (resolve, reject) => {
                         try {

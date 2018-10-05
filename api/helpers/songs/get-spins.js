@@ -43,6 +43,7 @@ module.exports = {
                 var spins30 = 0;
                 var spinsYTD = 0;
                 var spins365 = 0;
+                sails.log.debug(`Calling asyncForEach in songs.getSpins on each RadioDJ history entry.`);
                 await sails.helpers.asyncForEach(history, function (record, index) {
                     return new Promise(async (resolve2, reject2) => {
                         if (moment(record.date_played).isAfter(lastplayed))
@@ -58,6 +59,7 @@ module.exports = {
                         return resolve2(false);
                     });
                 });
+                sails.log.debug(`Calling asyncForEach in songs.getSpins on each logged song.`);
                 await sails.helpers.asyncForEach(history2, function (record, index) {
                     return new Promise(async (resolve2, reject2) => {
                         if (moment(record.createdAt).isAfter(lastplayed))

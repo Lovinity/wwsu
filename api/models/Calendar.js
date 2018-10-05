@@ -236,6 +236,7 @@ module.exports = {
                     sails.log.silly(playlistsR);
 
                     // Determine duration of the tracks in every playlist
+                    sails.log.debug(`Calling asyncForEach in Calendar for determining duration of playlists`);
                     await sails.helpers.asyncForEach(playlistsR, function (playlist, index) {
                         return new Promise(async (resolve2, reject2) => {
                             try {
@@ -575,11 +576,12 @@ module.exports = {
                     // Go through every event record which passed the end time, and log absences where necessary.
                     if (destroyed && destroyed.length > 0)
                     {
+                        sails.log.debug(`Calling asyncForEach in Calendar for looping through calendar records that expires.`);
                         await sails.helpers.asyncForEach(destroyed, function (event, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 try {
                                     var dj = event.title;
-                                    if (dj.includes(" - "))
+                                    if (dj.includes(" - ") && dj.includes(": "))
                                     {
                                         dj = dj.split(" - ")[0];
                                         dj = dj.substring(dj.indexOf(": ") + 2);
@@ -638,6 +640,8 @@ module.exports = {
                                                     }
                                                     return resolve2(false);
                                                 });
+                                    } else {
+                                        return resolve2(false);
                                     }
                                 } catch (e) {
                                     sails.log.error(e);

@@ -22,6 +22,7 @@ module.exports = {
 
            
             // Push the genres out
+            sails.log.debug(`Calling asyncForEach in songs/get-genres`);
             await sails.helpers.asyncForEach(genres, function (genre, index) {
                 return new Promise(async (resolve, reject) => {
                     var temp = {};

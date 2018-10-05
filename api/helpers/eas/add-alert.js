@@ -139,6 +139,7 @@ module.exports = {
                                         sails.log.silly(resp.body);
 
                                         // Go through each child
+                                        sails.log.debug(`Calling asyncForEach in eas.addAlert for going through each child of CAPS data`);
                                         await sails.helpers.asyncForEach(resp.body.children, function (entry, index) {
                                             return new Promise(async (resolve2, reject2) => {
                                                 try {

@@ -76,6 +76,7 @@ module.exports = {
                     await Recipients.update({host: recipient.host}, {host: recipient.host, status: 0, time: moment().toISOString(true)}).fetch();
 
                     // If the recipient name is found in djcontrols config, reflect status
+                    sails.log.debug(`Calling asyncForEach in recipients.remove for finding djcontrols in config`);
                     await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
                         return new Promise(async (resolve, reject) => {
                             try {
@@ -93,6 +94,7 @@ module.exports = {
                 }
 
                 // If the recipient name is found in display sign config, reflect status if there are insufficient number of connections.
+                sails.log.debug(`Calling asyncForEach in recipients.remove for finding displaysigns in config`);
                 await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
                     return new Promise(async (resolve, reject) => {
                         try {

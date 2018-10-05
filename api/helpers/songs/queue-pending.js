@@ -14,6 +14,7 @@ module.exports = {
         // Load in any duplicate non-music tracks that were removed prior, to ensure underwritings etc get proper play counts.
         if (Songs.pending.length > 0)
         {
+            sails.log.debug(`Calling asyncForEach in songs.queuePending for queuing pending tracks`);
             await sails.helpers.asyncForEach(Songs.pending, function (track, index) {
                 return new Promise(async (resolve2, reject2) => {
                     await sails.helpers.rest.cmd('LoadTrackToTop', track);

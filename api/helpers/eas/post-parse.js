@@ -21,6 +21,7 @@ module.exports = {
             sails.log.verbose(`Eas records retrieved: ${records.length}`);
             sails.log.silly(records);
             // Async is tricky for forEach loops! Use the helper.
+            sails.log.debug(`Calling asyncForEach in eas.postParse for Eas record maintenance`);
             await sails.helpers.asyncForEach(records, (record, index) => {
                 return new Promise(async (resolve2) => {
 

@@ -45,6 +45,7 @@ module.exports = {
             // Finally, re-queue the remaining tracks
             if (queue.length > 0)
             {
+                sails.log.debug(`Calling asyncForEach in rest.removeMusic for re-queuing non-music tracks`);
                 await sails.helpers.asyncForEach(queue, function (track, index) {
                     return new Promise(async (resolve, reject) => {
                         await sails.helpers.rest.cmd("LoadTrackToBottom", track.ID);

@@ -106,6 +106,7 @@ module.exports = {
                                 var tasks = []; // Push task IDs into this array so we can detect deleted tasks
 
                                 // Iterate over each task
+                                sails.log.debug(`Calling asyncForEach in Tasks.updateTasks for every element returned by OpenProject`);
                                 await sails.helpers.asyncForEach(elements, function (element, index) {
                                     return new Promise(async (resolve2, reject2) => {
                                         try {

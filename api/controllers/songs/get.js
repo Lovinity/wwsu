@@ -75,6 +75,7 @@ module.exports = {
                 sails.log.silly(subcats2);
 
                 // Make note of all the subcategories in the retrieved songs
+                sails.log.debug(`Calling asyncForEach in songs/get for grabbing subcatIDs`);
                 await sails.helpers.asyncForEach(songs, function (song, index) {
                     return new Promise(async (resolve, reject) => {
                         subcatIDs.push(song.id_subcat);
@@ -114,6 +115,7 @@ module.exports = {
                 var cats2 = await Category.find();
                 sails.log.verbose(`Categories retrieved: ${cats2.length}`);
                 sails.log.silly(cats2);
+                sails.log.debug(`Calling asyncForEach in songs/get for mapping categories`);
                 await sails.helpers.asyncForEach(cats2, function (cat, index) {
                     return new Promise(async (resolve, reject) => {
                         cats[cat.ID] = cat.name;
@@ -122,6 +124,7 @@ module.exports = {
                 });
 
                 // Add additional data to the song(s), such as request ability, category info, and spin counts.
+                sails.log.debug(`Calling asyncForEach in songs/get for adding additional song data`);
                 await sails.helpers.asyncForEach(songs, function (song, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
@@ -153,6 +156,7 @@ module.exports = {
             var genre = await Genre.find();
             sails.log.verbose(`Genres retrieved: ${genre.length}`);
             sails.log.silly(genre);
+            sails.log.debug(`Calling asyncForEach in songs/get for mapping genres`);
             await sails.helpers.asyncForEach(genre, function (genrea, index) {
                 return new Promise(async (resolve, reject) => {
                     genres[genrea.ID] = genrea.name;
@@ -161,6 +165,7 @@ module.exports = {
             });
 
             // Add genre data to the songs
+            sails.log.debug(`Calling asyncForEach in songs/get for mapping genres to songs.`);
             await sails.helpers.asyncForEach(songs, function (song, index) {
                 return new Promise(async (resolve, reject) => {
                     try {

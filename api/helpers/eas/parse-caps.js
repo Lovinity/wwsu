@@ -23,6 +23,7 @@ module.exports = {
         sails.log.debug('Helper eas.parseCaps called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            sails.log.debug(`Calling asyncForEach in eas.parseCaps for each CAPS entry`);
             await sails.helpers.asyncForEach(inputs.body.children, function (entry, index) {
                 return new Promise(async (resolve2, reject2) => {
                     try {

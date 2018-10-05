@@ -161,6 +161,7 @@ module.exports = {
                     {
                         // Check if the request is already in the queue
                         var inQueue = false;
+                        sails.log.debug(`Calling asyncForEach in requests.queue for seeing if request is in automation queue`);
                         await sails.helpers.asyncForEach(Meta.automation, function (track, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 if (parseInt(track.ID) === record[0].songID)

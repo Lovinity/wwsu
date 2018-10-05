@@ -338,6 +338,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             sails.log.debug(`Status.changeStatus called.`);
             try {
+                sails.log.debug(`Calling asyncForEach in Status.changeStatus for each status to be changed`);
                 await sails.helpers.asyncForEach(array, function (status, index) {
                     return new Promise(async (resolve2, reject2) => {
                         var criteria = {name: status.name, status: status.status, data: status.data || '', label: status.label || status.name};

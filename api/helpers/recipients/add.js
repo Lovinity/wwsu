@@ -113,6 +113,7 @@ module.exports = {
             if (inputs.group === 'computers')
             {
                 var inConfig = false;
+                sails.log.debug(`Calling asyncForEach in recipients.add for finding djcontrols in config`);
                 await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
                     return new Promise(async (resolve, reject) => {
                         try {
@@ -135,6 +136,7 @@ module.exports = {
             if (inputs.group === 'display')
             {
                 var inConfig = false;
+                sails.log.debug(`Calling asyncForEach in recipients.add for finding displaysigns in config`);
                 await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
                     return new Promise(async (resolve, reject) => {
                         try {

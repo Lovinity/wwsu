@@ -46,6 +46,7 @@ module.exports = {
         try {
 
             // Get rid of all the null entries
+            sails.log.debug(`Calling asyncForEach in songs.queue for getting rid of null entries`);
             await sails.helpers.asyncForEach(inputs.subcategories, function (subcategory, index) {
                 return new Promise(async (resolve, reject) => {
                     if (subcategory === null)
@@ -88,6 +89,7 @@ module.exports = {
                 // Queue up the chosen tracks if they pass rotation rules, and if rules is not set to false
                 if (inputs.rules)
                 {
+                    sails.log.debug(`Calling asyncForEach in songs.queue for possible tracks we can queue`);
                     await sails.helpers.asyncForEach(thesongs, function (thesong) {
                         return new Promise(async (resolve, reject) => {
                             try {
@@ -132,6 +134,7 @@ module.exports = {
                     });
 
                     // Go through all the songs again
+                    sails.log.debug(`Calling asyncForEach in songs.queue for finding more tracks to queue, ignoring rotation rules`);
                     await sails.helpers.asyncForEach(thesongs, function (thesong) {
                         return new Promise(async (resolve, reject) => {
                             try {
