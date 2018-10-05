@@ -582,6 +582,7 @@ module.exports = {
                                     if (dj.includes(" - "))
                                     {
                                         dj = dj.split(" - ")[0];
+                                        dj = dj.substring(dj.indexOf(": ") + 2);
                                     } else {
                                         dj = null;
                                     }
