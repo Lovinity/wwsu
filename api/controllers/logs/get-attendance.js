@@ -1,4 +1,4 @@
-/* global moment, sails, Logs */
+/* global moment, sails, Logs, Attendance */
 
 module.exports = {
 
@@ -27,7 +27,7 @@ module.exports = {
             {
                 var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(1, 'days');
-                var query = {or: [{createdAt: {">=": start.toISOString(true)}}, {createdAt: {"<=": end.toISOString(true)}}]};
+                var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
             } else {
                 var query = {};
             }

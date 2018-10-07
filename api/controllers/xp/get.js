@@ -25,7 +25,7 @@ module.exports = {
         var resp = {XP: {totalXP: 0, remote: 0, rows: []}, attendance: []};
 
         try {
-            resp.attendance = await Attendance.find({DJ: inputs.dj}).sort('scheduledStart DESC');
+            resp.attendance = await Attendance.find({DJ: inputs.dj}).sort('createdAt DESC');
             
             var records = await Xp.getDatastore().sendNativeQuery(`SELECT * FROM xp WHERE dj LIKE $1 ORDER BY FIELD(type,"remote") DESC, createdAt DESC`, [inputs.dj]);
             records = records.rows;

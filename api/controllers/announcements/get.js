@@ -10,7 +10,12 @@ module.exports = {
         type: {
             type: 'string',
             required: true,
-            description: 'Return announcements of the specified type; ensure websockets only include announcements of this type.'
+            description: 'Return announcements of the specified type; ensure websockets only include announcements of this type. Use "all" to return all announcements, but do not subscribe to a websocket.'
+        },
+        ID: {
+            type: 'number',
+            allowNull: true,
+            description: "If provided, will only return the announcement matching this ID. If provided, type is ignored (but still required, so use all), and websockets is not subscribed."
         }
     },
 
@@ -19,17 +24,22 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-
-            var records = await Announcements.find({type: inputs.type});
+            if (inputs.type !== "all" && (!inputs.ID || inputs.ID === null))
+            {
+                var records = await Announcements.find({type: inputs.type});
+                if (this.req.isSocket)
+                {
+                    sails.sockets.join(this.req, `announcements-${inputs.type}`);
+                    sails.log.verbose(`Request was a socket. Joined announcements-${inputs.type}.`);
+                }
+            } else if (!inputs.ID || inputs.ID === null) {
+                var records = await Announcements.find();
+            } else {
+                var records = await Announcements.findOne({ID: inputs.ID});
+            }
 
             sails.log.verbose(`${records.length} records retrieved.`);
             sails.log.silly(records);
-
-            if (this.req.isSocket)
-            {
-                sails.sockets.join(this.req, `announcements-${inputs.type}`);
-                sails.log.verbose(`Request was a socket. Joined announcements-${inputs.type}.`);
-            }
 
             return exits.success(records);
         } catch (e) {
