@@ -24,7 +24,7 @@ module.exports = {
         // All done.
         
         jwt.verify(inputs.token, sails.tokenSecret, {}, function(err, token) {
-            if (err) return exits.error({err: 'Invalid Token!'});
+            if (err) return exits.success({err: 'Invalid Token!'});
             return exits.success(token);
         });
     }
