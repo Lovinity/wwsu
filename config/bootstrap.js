@@ -1407,11 +1407,12 @@ module.exports.bootstrap = async function (done) {
     // Twice per minute at 04 and 34 seconds, check all RadioDJs for connectivity.
     sails.log.verbose(`BOOTSTRAP: scheduling checkRadioDJs CRON.`);
     cron.schedule('4,34 * * * * *', () => {
+        new Promise(async (resolve, reject) => {
         sails.log.debug(`CRON checkRadioDJs triggered.`);
         try {
             sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`);
-            sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
-                return new Promise(async (resolve, reject) => {
+            await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
+                return new Promise(async (resolve2, reject2) => {
                     try {
                         needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, {headers: {'Content-Type': 'application/json'}})
                                 .then(async function (resp) {
@@ -1421,21 +1422,24 @@ module.exports.bootstrap = async function (done) {
                                     } else {
                                         Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
                                     }
-                                    return resolve(false);
+                                    return resolve2(false);
                                 })
                                 .catch(function (err) {
                                     Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
-                                    return resolve(false);
+                                    return resolve2(false);
                                 });
                     } catch (e) {
                         Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
-                        return resolve(false);
+                        return resolve2(false);
                     }
                 });
             });
+            return resolve();
         } catch (e) {
             sails.log.error(e);
+            return reject(e);
         }
+    });
     });
 
     // Twice per minute at 05 and 35 seconds, check for connectivity to the website.
