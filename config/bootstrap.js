@@ -516,7 +516,7 @@ module.exports.bootstrap = async function (done) {
             // Clear manual metadata if it is old
             if (queue[0].ID !== 0)
                 change.trackstamp = null;
-            if (Meta['A'].trackstamp === null || (moment().isAfter(moment(Meta['A'].trackstamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && !Meta['A'].state === 'live_prerecord' && Meta['A'].track !== ''))
+            if (Meta['A'].trackstamp === null || (moment().isAfter(moment(Meta['A'].trackstamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'live_prerecord' && Meta['A'].track !== ''))
                 change.track = '';
 
             // Playlist maintenance
@@ -665,7 +665,6 @@ module.exports.bootstrap = async function (done) {
                             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: `playlist - ${Meta['A'].playlist}`, event: 'Automation playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                     .tolerate((err) => {
                                     });
-
                         Meta.changeMeta({track: newmeta});
                         change.track = newmeta;
                         // Do not display track meta for tracks in config.custom.categories.noMeta or tracks with an unknown artist
@@ -809,6 +808,7 @@ module.exports.bootstrap = async function (done) {
                                 await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Remote producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
                                         .tolerate((err) => {
                                         });
+                            Meta.changeMeta({track: newmeta});
                             change.track = newmeta;
                             // If the currently playing track is in config.custom.categories.noMeta, or artist is unknown, or if we are in disconnected remote mode, show alternative metadata
                             if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist") || Meta['A'].state.includes("disconnected"))
@@ -918,7 +918,7 @@ module.exports.bootstrap = async function (done) {
                         await Meta.changeMeta({state: 'live_on', showstamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Show: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'DJ is now live.' + "\n" + 'DJ - Show: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -931,7 +931,7 @@ module.exports.bootstrap = async function (done) {
                         await Meta.changeMeta({state: 'sports_on', showstamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A sports broadcast has started.' + "\n" + 'Sport: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -948,7 +948,7 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Remote: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote broadcast is now on the air.' + "\n" + 'Host - Show: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -964,7 +964,7 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote sports broadcast has started.' + "\n" + 'Sport: ' + Meta['A'].dj + "\n" + 'Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -1787,7 +1787,7 @@ module.exports.bootstrap = async function (done) {
             }
         });
     });
-    
+
     // Every minute at second 10, prune out recipients that have been offline for 4 or more hours.
     sails.log.verbose(`BOOTSTRAP: scheduling recipientsCheck CRON.`);
     cron.schedule('10 * * * * *', () => {
@@ -1811,7 +1811,7 @@ module.exports.bootstrap = async function (done) {
             }
         });
     });
-    
+
     // Every minute at second 12, check server memory and CPU use.
     // ADVICE: It is advised that serverCheck is the last cron executed at the top of the minute. That way, the 1-minute CPU load will more likely detect issues.
     sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`);
@@ -1845,7 +1845,7 @@ module.exports.bootstrap = async function (done) {
             }
         });
     });
-    
+
     // Every day at 11:59:50pm, clock out any directors still clocked in
     sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`);
     cron.schedule('50 59 23 * * *', () => {
@@ -1865,9 +1865,9 @@ module.exports.bootstrap = async function (done) {
             }
         });
     });
-    
-    
-    
+
+
+
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 
