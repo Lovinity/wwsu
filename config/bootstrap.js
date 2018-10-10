@@ -514,7 +514,7 @@ module.exports.bootstrap = async function (done) {
             }
 
             // Clear manual metadata if it is old
-            if (queue[0].ID !== 0)
+            if (parseInt(queue[0].ID) !== 0)
                 change.trackstamp = null;
             if (Meta['A'].trackstamp === null || (moment().isAfter(moment(Meta['A'].trackstamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'live_prerecord' && Meta['A'].track !== ''))
                 change.track = '';

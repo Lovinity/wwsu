@@ -78,7 +78,7 @@ module.exports = {
                 var history = Meta['A'].history;
                 history.unshift({ID: 0, track: inputs.trackArtist + ' - ' + inputs.trackTitle, likable: false});
                 history = history.slice(0, 3);
-                await Meta.changeMeta({track: `${inputs.trackArtist} - ${inputs.trackTitle}`, history: history, trackstamp: moment(inputs.date).toISOString(true)});
+                await Meta.changeMeta({track: `${inputs.trackArtist} - ${inputs.trackTitle}`, history: history, trackstamp: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)});
             } else if (inputs.logtype === 'manual')
             {
                 await Meta.changeMeta({track: ``});
