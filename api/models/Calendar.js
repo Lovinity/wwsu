@@ -333,12 +333,12 @@ module.exports = {
                             {
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`;
                                 criteria.verify = 'Valid';
-                                criteria.verify_message = `This is a valid live show. Detected DJ handle in yellow, show name in green.`;
+                                criteria.verify_message = `Valid. DJ in yellow, show in green.`;
                             } else {
                                 badEvent = true;
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                                 criteria.verify = 'Invalid';
-                                criteria.verify_message = `Although this was detected as a show, system could not determine what the DJ handle is versus what the show name is. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>. There should only be one of these in the title.`;
+                                criteria.verify_message = `Invalid; cannot determine DJ and show. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>.`;
                             }
 
                             // Remote broadcasts
@@ -351,12 +351,12 @@ module.exports = {
                             {
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`;
                                 criteria.verify = 'Valid';
-                                criteria.verify_message = `This is a valid remote broadcast. Detected host / organization in yellow, broadcast name in green.`;
+                                criteria.verify_message = `Valid. Host / org in yellow, show name in green.`;
                             } else {
                                 badEvent = true;
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                                 criteria.verify = 'Invalid';
-                                criteria.verify_message = `Although this was detected as a remote broadcast, system could not determine what the host / organization is versus what the name of the broadcast is. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>. There should only be one of these in the title.`;
+                                criteria.verify_message = `Invalid; cannot determine host and show. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>.`;
                             }
 
                             // Sports broadcast
@@ -366,14 +366,14 @@ module.exports = {
                             // Ensure the name of the sport is one that is implemented in the system.
                             if (sails.config.custom.sports.indexOf(summary) > -1)
                             {
-                                criteria.verify_titleHTML.title = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`;
+                                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`;
                                 criteria.verify = 'Valid';
-                                criteria.verify_message = `This is a valid sports broadcast. Sport in green.`;
+                                criteria.verify_message = `Valid. Sport in green.`;
                             } else {
                                 badEvent = true;
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                                 criteria.verify = 'Invalid';
-                                criteria.verify_message = `Although this was detected as a sports broadcast, the sport provided was not detected as a valid sport in the system. <strong>Please ensure you spelled the sport correctly, began the gender and the sport each with a capital letter, and the sport exists in the system</strong>. Please contact the engineer if this is a sport we have not programmed into the system yet. If this is not fixed, appropriate openers, closers, and liners may not play during the broadcast!`;
+                                criteria.verify_message = `Invalid; sport is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.`;
                             }
 
                             // Prerecord (via RadioDJ Playlists)
@@ -382,7 +382,7 @@ module.exports = {
                             var eventLength = (moment(criteria.end).diff(moment(criteria.start)) / 1000);
                             criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                             criteria.verify = 'Invalid';
-                            criteria.verify_message = `Although this was detected as a prerecord, the playlist name highlighted in red does not exist in RadioDJ. <strong>Please ensure the playlist exists and that you spelled it correctly</strong>. If this is not fixed, the prerecord probably will not air!`;
+                            criteria.verify_message = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`;
 
                             // Check to see a playlist exists
                             if (typeof playlists[summary] !== 'undefined')
@@ -393,19 +393,19 @@ module.exports = {
                                 if ((eventLength - 900) >= (playlists[summary].duration * 1.05)) // * 1.05 because this assumes 1 minute of break for every 20 minutes of programming
                                 {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is significantly short. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
+                                    criteria.verify_message = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`;
 
                                     // Check to see if the playlist is over 5 minutes too long
                                 } else if ((eventLength + 300) <= (playlists[summary].duration * 1.05))
                                 {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is too long. This could prevent other DJs from signing on the air, or other segments from playing. If this is not fixed, <strong>the prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
+                                    criteria.verify_message = `Valid, but duration exceeds scheduled time. <strong>The prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`;
                                 } else if (playlists[summary].duplicates > 0) {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ. However, there were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}`;
+                                    criteria.verify_message = `Valid, but duplicates detected. <strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.`;
                                 } else {
                                     criteria.verify = 'Valid';
-                                    criteria.verify_message = `This is a valid prerecord, and the playlist highlighted in green exists in RadioDJ.`;
+                                    criteria.verify_message = `Valid; playlist in green.`;
                                 }
                             }
 
@@ -418,7 +418,7 @@ module.exports = {
                             var eventLength = (moment(criteria.end).diff(moment(criteria.start)) / 1000);
                             criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                             criteria.verify = 'Invalid';
-                            criteria.verify_message = `Although this was detected as a playlist, the playlist name highlighted in red does not exist in RadioDJ. <strong>Please ensure the playlist exists and that you spelled it correctly</strong>. If this is not fixed, the playlist probably will not air!`;
+                            criteria.verify_message = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`;
 
                             // Check to see that playlist exists
                             if (typeof playlists[summary] !== 'undefined')
@@ -429,16 +429,16 @@ module.exports = {
                                 if (eventLength <= (playlists[summary].duration * 1.05) && playlists[summary].duplicates === 0)
                                 {
                                     criteria.verify = 'Valid';
-                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ.`;
+                                    criteria.verify_message = `Valid; playlist in green.`;
                                 } else if (playlists[summary].duplicates === 0) {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`;
+                                    criteria.verify_message = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`;
                                 } else if (eventLength <= (playlists[summary].duration * 1.05)) {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
+                                    criteria.verify_message = `Valid, but duplicate tracks detected. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped` : ''}`;
                                 } else {
                                     criteria.verify = 'Check';
-                                    criteria.verify_message = `This is a valid playlist, and the playlist highlighted in green exists in RadioDJ. However, the duration of the tracks in the saved playlist is less than the duration of this event. To avoid this segment ending early, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. In addition, ${playlists[summary].duplicates > 0 ? `There were ${playlists[summary].duplicates} duplicate tracks detected. Since duplicates get filtered out in the queue, they were not counted towards the playlist duration. <strong>You may want to remove duplicates from this playlist since they will not play</strong>. The duplicate tracks detected are the following: <br>${playlists[summary].duplicateTracks}` : ''}`;
+                                    criteria.verify_message = `Valid, but duration is shorter than scheduled time, and duplicate tracks detected. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`;
                                 }
                             }
 
@@ -450,7 +450,7 @@ module.exports = {
                             var summary = criteria.title.replace('Genre: ', '');
                             criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Genre</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                             criteria.verify = 'Invalid';
-                            criteria.verify_message = `Although this was detected as a genre, a manual event was not detected in RadioDJ matching the name of this genre. <strong>Please ensure the RadioDJ event exists.</strong>. The event should trigger a rotation change in RadioDJ when executed.`;
+                            criteria.verify_message = `Invalid; event with same name does not exist in RadioDJ. <strong>Please ensure there is an event with the same name in RadioDJ.</strong>. The event should trigger a rotation change in RadioDJ when executed.`;
 
                             // Check to see if the manual event exists in RadioDJ
                             if (typeof djevents[summary] !== 'undefined')
@@ -461,17 +461,17 @@ module.exports = {
                                 if (djevents[summary].data.includes("Load Rotation") && djevents[summary].enabled === "True")
                                 {
                                     criteria.verify = `Valid`;
-                                    criteria.verify_message = `This is a valid genre, and the manual RadioDJ event highlighted in green exists.`;
+                                    criteria.verify_message = `Valid; genre in green.`;
 
                                     // Event is enabled, but does not have a Load Rotation event
                                 } else if (djevents[summary].enabled === "True") {
                                     criteria.verify = 'Invalid';
-                                    criteria.verify_message = `This is a valid genre, and the manual RadioDJ event highlighted in green exists. However, a "Load Rotation" action was not defined in this event. No rotation changes will happen when this genre executes. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`;
+                                    criteria.verify_message = `Invalid; a "Load Rotation" action does not exist in the RadioDJ event. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`;
 
                                     // Event is not enabled
                                 } else {
                                     criteria.verify = 'Invalid';
-                                    criteria.verify_message = `This is a valid genre, and the manual RadioDJ event highlighted in green exists. However, the manual event is disabled. <strong>Please enable the manual event in RadioDJ</strong>, or the rotation will not change.`;
+                                    criteria.verify_message = `Invalid; the event in RadioDJ is disabled. <strong>Please enable the manual event in RadioDJ</strong>.`;
                                 }
                             }
 

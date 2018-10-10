@@ -23,17 +23,12 @@ module.exports = {
 
         try {
             // Get date range
-            if (inputs.date !== null)
-            {
-                var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
-                var end = moment(start).add(1, 'days');
-                var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
-            } else {
-                var query = {};
-            }
+            var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
+            var end = moment(start).add(1, 'days');
+            var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
 
             // Get records
-            var records = await Attendance.find(query).sort("createdAt DESC");
+            var records = await Attendance.find(query).sort("createdAt ASC");
 
             sails.log.verbose(`Special records returned: ${records.length}`);
             sails.log.silly(records);
