@@ -25,6 +25,10 @@ module.exports = {
             isIn: ['danger', 'urgent', 'warning', 'info', 'success', 'primary', 'secondary']
         },
 
+        title: {
+            type: 'string'
+        },
+
         announcement: {
             type: 'string'
         },
