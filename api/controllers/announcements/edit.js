@@ -29,7 +29,7 @@ module.exports = {
             required: true,
             description: 'The announcement title.'
         },
-        
+
         announcement: {
             type: 'string',
             description: 'The announcement text.'
@@ -69,6 +69,9 @@ module.exports = {
 
             if (inputs.level !== null && typeof inputs.level !== 'undefined')
                 criteria.level = inputs.level;
+
+            if (inputs.title !== null && typeof inputs.title !== 'undefined')
+                criteria.title = inputs.title;
 
             if (inputs.announcement !== null && typeof inputs.announcement !== 'undefined')
                 criteria.announcement = inputs.announcement;

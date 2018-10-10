@@ -107,7 +107,7 @@ module.exports = {
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
-                        await Announcements.findOrCreate({type: 'djcontrols', announcement: "(reported by system) System recently had switched RadioDJ instances due to queueFail. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', announcement: "(reported by system) System recently had switched RadioDJ instances due to queueFail. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                        await Announcements.findOrCreate({type: 'djcontrols', title: `queueFail (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to return what was in the queue. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to return what was in the queue. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
@@ -150,7 +150,7 @@ module.exports = {
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
-                            await Announcements.findOrCreate({type: 'djcontrols', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozen. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozen. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozen (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ's queue seems to have frozen. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ's queue seems to have frozen. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -201,7 +201,7 @@ module.exports = {
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
-                            await Announcements.findOrCreate({type: 'djcontrols', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozenRemote. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', announcement: "(reported by system) System recently had switched RadioDJ instances due to frozenRemote. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozenRemote (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to broadcast a remote stream. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `frozenRemote (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to broadcast a remote stream. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
