@@ -12,20 +12,26 @@ module.exports = {
             required: true,
             description: 'The type of announcement; determines which subsystems receive the announcement.'
         },
-        
+
         level: {
             type: 'string',
             required: true,
             isIn: ['danger', 'urgent', 'warning', 'info', 'success', 'primary', 'secondary'],
             description: 'Announcement warning level. Must be danger, yrgent, warning, info, success, primary, or secondary.'
         },
-        
+
+        title: {
+            type: 'string',
+            required: true,
+            description: 'The announcement title.'
+        },
+
         announcement: {
             type: 'string',
             required: true,
             description: 'The announcement text.'
         },
-        
+
         starts: {
             type: 'string',
             custom: function (value) {
@@ -51,9 +57,9 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            
-            await Announcements.create({type: inputs.type, level: inputs.level, announcement: inputs.announcement, starts: inputs.starts !== null && typeof inputs.starts !== 'undefined' ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), expires: inputs.expires !== null && typeof inputs.expires !== 'undefined' ? moment(inputs.expires).toISOString(true) : moment({year: 3000}).toISOString(true)}).fetch();
-            
+
+            await Announcements.create({type: inputs.type, level: inputs.level, title: inputs.title, announcement: inputs.announcement, starts: inputs.starts !== null && typeof inputs.starts !== 'undefined' ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), expires: inputs.expires !== null && typeof inputs.expires !== 'undefined' ? moment(inputs.expires).toISOString(true) : moment({year : 3000}).toISOString(true)}).fetch();
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

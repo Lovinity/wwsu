@@ -24,6 +24,12 @@ module.exports = {
             description: 'Announcement warning level. Must be danger, urgent, warning, info, success, primary, or secondary.'
         },
 
+        title: {
+            type: 'string',
+            required: true,
+            description: 'The announcement title.'
+        },
+
         announcement: {
             type: 'string',
             description: 'The announcement text.'
@@ -54,7 +60,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            
+
             // Determine what needs updating
             var criteria = {};
 
@@ -64,6 +70,9 @@ module.exports = {
             if (inputs.level !== null && typeof inputs.level !== 'undefined')
                 criteria.level = inputs.level;
 
+            if (inputs.title !== null && typeof inputs.title !== 'undefined')
+                criteria.title = inputs.title;
+
             if (inputs.announcement !== null && typeof inputs.announcement !== 'undefined')
                 criteria.announcement = inputs.announcement;
 
@@ -71,7 +80,7 @@ module.exports = {
                 criteria.starts = moment(inputs.starts).toISOString(true);
 
             if (inputs.expires !== null && typeof inputs.expires !== 'undefined')
-                criteria.expires =moment(inputs.expires).toISOString(true);
+                criteria.expires = moment(inputs.expires).toISOString(true);
 
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             var criteriaB = _.cloneDeep(criteria);
