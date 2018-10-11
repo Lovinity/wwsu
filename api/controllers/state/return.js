@@ -21,7 +21,7 @@ module.exports = {
             await Meta.changeMeta({changingState: `Returning from break`});
 
             // log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'return', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested to return from break.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'return', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Return from break requested.'})
                     .tolerate((err) => {
                         // Don't throw errors, but log them
                         sails.log.error(err);

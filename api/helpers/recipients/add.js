@@ -120,7 +120,7 @@ module.exports = {
                             if (djcontrols.host === inputs.host)
                             {
                                 inConfig = true;
-                                await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 5, data: 'This DJ Controls is reporting operational.'}]);
+                                await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 5, data: 'Operational.'}]);
                                 return resolve(true);
                             } else {
                                 return resolve(false);
@@ -144,7 +144,7 @@ module.exports = {
                             {
                                 inConfig = true;
                                 if (Recipients.sockets[recipient.ID].length >= display.instances)
-                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'This display sign is reporting operational.'}]);
+                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'Operational.'}]);
                                 return resolve(true);
                             } else {
                                 return resolve(false);

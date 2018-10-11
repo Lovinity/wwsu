@@ -22,13 +22,13 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Activate status issue
-            Status.changeStatus([{name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio was detected! Please check the OnAir audio levels.`}]);
+            Status.changeStatus([{name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio detected.`}]);
 
             // If a track is playing in RadioDJ, skip it and log it
             if (typeof Meta.automation[0] !== 'undefined' && parseInt(Meta.automation[0].ID) !== 0)
             {
                 // Add a log about the track
-                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `Track ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title}) was skipped due to silence alarm. Please check to ensure it does not contain silence.`})
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `Track skipped due to silence.<br />Track: ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title})`})
                         .tolerate((err) => {
                         });
                 

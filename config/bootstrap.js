@@ -752,7 +752,7 @@ module.exports.bootstrap = async function (done) {
                     } else {
                         if (Meta['A'].breakneeded && n >= 10)
                         {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].dj, event: `${Meta['A'].dj} does not seem to have taken the required top of the hour ID break.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].dj, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].dj}`})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -999,7 +999,7 @@ module.exports.bootstrap = async function (done) {
                                             if (source.listenurl.endsWith("/public"))
                                             {
                                                 // Mark stream as good
-                                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream is operational.', status: 5}]);
+                                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Operational.', status: 5}]);
                                                 publicStream = true;
 
                                                 // Log listeners
@@ -1029,7 +1029,7 @@ module.exports.bootstrap = async function (done) {
                                             // Source is mountpoint /remote?
                                             if (source.listenurl.endsWith("/remote"))
                                             {
-                                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet radio stream is operational.', status: 5}]);
+                                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Operational.', status: 5}]);
                                                 remoteStream = true;
                                             }
                                         }
@@ -1042,35 +1042,35 @@ module.exports.bootstrap = async function (done) {
                             });
                         }
                         if (!publicStream)
-                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Public internet radio stream appears to be offline.', status: 2}]);
+                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Offline.', status: 2}]);
                         if (!remoteStream)
                         {
                             if (Meta['A'].state.includes("remote_"))
                             {
                                 // TODO: send system into disconnected mode (if not already) if remote stream is disconnected
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline.', status: 2}]);
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline.', status: 2}]);
                             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote internet stream appears offline, but that is not an issue at this time as a remote broadcast is not active.', status: 4}]);
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline (OK, as we do not need it right now).', status: 4}]);
                             }
                         }
                     })
                     .catch(function (err) {
-                        Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
+                        Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
                         if (Meta['A'].state.includes("remote"))
                         {
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
+                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error.', status: 2}]);
                         } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 4}]);
+                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error (OK, as we do not need remote stream right now)', status: 4}]);
                         }
                         sails.log.error(err);
                     });
         } catch (e) {
-            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
+            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
             if (Meta['A'].state.includes("remote"))
             {
-                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 2}]);
+                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error.', status: 2}]);
             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error trying to connect to internet stream server.', status: 4}]);
+                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error (OK, as we do not need remote stream right now)', status: 4}]);
             }
             sails.log.error(e);
         }
@@ -1090,18 +1090,18 @@ module.exports.bootstrap = async function (done) {
                                     .then(async function (resp) {
                                         if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
                                         {
-                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'Operational.', status: 5}]);
                                         } else {
-                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'REST error / not returning data', status: radiodj.level}]);
                                         }
                                         return resolve2(false);
                                     })
                                     .catch(function (err) {
-                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
+                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'REST error / not returning data', status: radiodj.level}]);
                                         return resolve2(false);
                                     });
                         } catch (e) {
-                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
+                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'REST error / not returning data', status: radiodj.level}]);
                             return resolve2(false);
                         }
                     });
@@ -1123,16 +1123,16 @@ module.exports.bootstrap = async function (done) {
                     .then(async function (resp) {
                         if (typeof resp.body !== 'undefined')
                         {
-                            Status.changeStatus([{name: `website`, label: `Website`, data: 'WWSU website appears online', status: 5}]);
+                            Status.changeStatus([{name: `website`, label: `Website`, data: 'Operational', status: 5}]);
                         } else {
-                            Status.changeStatus([{name: `website`, label: `Website`, data: 'WWSU website appears to have an issue; expected body data was not returned.', status: 2}]);
+                            Status.changeStatus([{name: `website`, label: `Website`, data: 'No body returned', status: 2}]);
                         }
                     })
                     .catch(function (err) {
-                        Status.changeStatus([{name: `website`, label: `Website`, data: 'There was an error connecting to the WWSU website.', status: 2}]);
+                        Status.changeStatus([{name: `website`, label: `Website`, data: 'Connection error', status: 2}]);
                     });
         } catch (e) {
-            Status.changeStatus([{name: `website`, label: `Website`, data: 'There was an error connecting to the WWSU website.', status: 2}]);
+            Status.changeStatus([{name: `website`, label: `Website`, data: 'COnnection error', status: 2}]);
             sails.log.error(e);
         }
     });
@@ -1174,9 +1174,9 @@ module.exports.bootstrap = async function (done) {
                 // If all counties succeeded, mark EAS-internal as operational
                 if (complete >= sails.config.custom.EAS.NWSX.length)
                 {
-                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: 'All EAS NWS CAPS are operational.', status: 5}]);
+                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: 'Operational.', status: 5}]);
                 } else {
-                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: `${complete} out of ${sails.config.custom.EAS.NWSX.length} EAS NWS CAPS are operational.`, status: 3}]);
+                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: `${complete} out of ${sails.config.custom.EAS.NWSX.length} CAPS are operational.`, status: 3}]);
                 }
 
                 // Finish up
@@ -1443,13 +1443,13 @@ module.exports.bootstrap = async function (done) {
 
                 if (found && found >= sails.config.custom.status.musicLibrary.verify.error)
                 {
-                    Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+                    Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `Music library has ${found} bad tracks.`}]);
                 } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn)
                 {
-                    Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+                    Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `Music library has ${found} bad tracks.`}]);
                 } else
                 {
-                    Status.changeStatus([{name: `music-library`, status: 5, label: `Music Library`, data: `There were ${found} detected bad tracks in the RadioDJ music library.`}]);
+                    Status.changeStatus([{name: `music-library`, status: 5, label: `Music Library`, data: `Operational; Music library has ${found} bad tracks.`}]);
                 }
 
                 return resolve();
@@ -1499,15 +1499,15 @@ module.exports.bootstrap = async function (done) {
 
                 if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical)
                 {
-                    Status.changeStatus([{name: `server`, label: `Server`, status: 1, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 1, data: `Critically unstable server!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error)
                 {
-                    Status.changeStatus([{name: `server`, label: `Server`, status: 2, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 2, data: `Unstable server! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn)
                 {
-                    Status.changeStatus([{name: `server`, label: `Server`, status: 3, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 3, data: `Server resource use is high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 } else {
-                    Status.changeStatus([{name: `server`, label: `Server`, status: 5, data: `Server CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
+                    Status.changeStatus([{name: `server`, label: `Server`, status: 5, data: `Server operational. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`}]);
                 }
 
                 return resolve();

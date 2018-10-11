@@ -91,7 +91,7 @@ module.exports = {
                             var body = resp.body;
                             if (!body)
                             {
-                                Status.changeStatus([{name: `openproject`, status: 2, data: 'OpenProject API did not return any data.', label: `OpenProject`}]);
+                                Status.changeStatus([{name: `openproject`, status: 2, data: 'No data returned', label: `OpenProject`}]);
                                 return resolve();
                             }
                             try {
@@ -159,7 +159,7 @@ module.exports = {
                                         },
                                         sort: 'time_in DESC'})
                                             .tolerate((err) => {
-                                                Status.changeStatus([{name: `openproject`, status: 3, data: 'Error with Timesheet.', label: `OpenProject`}]);
+                                                Status.changeStatus([{name: `openproject`, status: 3, data: 'Timesheet error', label: `OpenProject`}]);
                                                 return reject(err);
                                             });
                                     if (records.length > 0)
@@ -185,15 +185,15 @@ module.exports = {
                                         });
                                     }
                                     // Report OpenProject as good, since parsing of API response has happened earlier.
-                                    Status.changeStatus([{name: `openproject`, status: 5, data: 'OpenProject API is operational.', label: `OpenProject`}]);
+                                    Status.changeStatus([{name: `openproject`, status: 5, data: 'Operational.', label: `OpenProject`}]);
                                     endFunction();
                                 } else {
                                     // Report OpenProject as good, since parsing of API response has happened earlier.
-                                    Status.changeStatus([{name: `openproject`, status: 5, data: 'OpenProject API is operational.', label: `OpenProject`}]);
+                                    Status.changeStatus([{name: `openproject`, status: 5, data: 'Operational.', label: `OpenProject`}]);
                                     endFunction();
                                 }
                             } catch (e) {
-                                Status.changeStatus([{name: `openproject`, status: 2, data: 'Encountered an error with loading directors. Please check OpenProject.', label: `OpenProject`}]);
+                                Status.changeStatus([{name: `openproject`, status: 2, data: 'Error loading directors.', label: `OpenProject`}]);
                                 sails.log.error(e);
                                 return resolve();
                             }

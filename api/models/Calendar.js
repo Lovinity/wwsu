@@ -220,7 +220,7 @@ module.exports = {
                 Calendar.calendar = events;
                 sails.log.silly(events);
                 if (events.length === 0) {
-                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar is operational, but there are no events in the calendar in the next 7 days.', status: 3}]);
+                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'No events detected for the next 7 days. Is this normal?', status: 3}]);
                     return resolve();
                 } else {
                     // Iterate through each returned event from Google Calendar
@@ -598,7 +598,7 @@ module.exports = {
                                                     {
                                                         if (record.event.startsWith("Show: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Show: ", ""), event: `It appears ${record.event.replace("Show: ", "")} was scheduled to do a show from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Show: ", ""), event: `Show did not air!<br />Show: ${record.event.replace("Show: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -606,7 +606,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Prerecord: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Prerecord: ", ""), event: `It appears ${record.event.replace("Prerecord: ", "")} had a scheduled prerecord from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not air.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Prerecord: ", ""), event: `Prerecord did not air!<br />Prerecord: ${record.event.replace("Prerecord: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -614,7 +614,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Remote: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Remote: ", ""), event: `It appears the remote ${record.event.replace("Remote: ", "")} was scheduled to broadcast from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Remote: ", ""), event: `Remote broadcast did not air!<br />Remote: ${record.event.replace("Remote: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -622,7 +622,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Sports: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Sports: ", ""), event: `It appears sports broadcast ${record.event.replace("Sports: ", "")} was scheduled from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not air.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Sports: ", ""), event: `Sports broadcast did not air!<br />Sport: ${record.event.replace("Sports: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -630,7 +630,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Playlist: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Playlist: ", ""), event: `It appears the playlist ${record.event.replace("Playlist: ", "")} was scheduled to air from ${moment(record.scheduledStart).format("LL hh:mm A")} to ${moment(record.scheduledEnd).format("LL hh:mm A")}, but did not do so.`, createdAt: moment(record.scheduledStart).toISOString(true)})
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Playlist: ", ""), event: `Playlist did not air!<br />Playlist: ${record.event.replace("Playlist: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -654,9 +654,9 @@ module.exports = {
 
                     if (badEvent)
                     {
-                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'There are bad events in the Google Calendar. Please see DJ Controls administration / Calendar Verification.', status: 3}]);
+                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Invalid events in Google Calendar. Please see DJ Controls administration / Calendar Verification.', status: 3}]);
                     } else {
-                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'The Google Calendar is operational, and there are no significant issues with the scheduled events.', status: 5}]);
+                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational', status: 5}]);
                     }
                     return resolve();
                 }

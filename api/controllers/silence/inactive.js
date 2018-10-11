@@ -23,10 +23,6 @@ module.exports = {
         try {
             // Status for silence set to good
             Status.changeStatus([{name: `silence`, status: 5, label: `Silence`, data: `Audio levels are acceptable.`}]);
-            // Add a log entry
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'Audio has returned to acceptable levels.'})
-                    .tolerate((err) => {
-                    });
             return exits.success();
         } catch (e) {
             return exits.error(e);

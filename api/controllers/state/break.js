@@ -26,7 +26,7 @@ module.exports = {
                 inputs.halftime = false;
 
             // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer went into break. Halftime?: ' + inputs.halftime})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Break requested.'})
                     .tolerate((err) => {
                         // Do not throw for errors, but log it.
                         sails.log.error(err);

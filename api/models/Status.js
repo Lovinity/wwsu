@@ -103,11 +103,11 @@ module.exports = {
                     try {
                         await Meta.changeMeta({changingState: `Switching radioDJ instances due to queueFail`});
                         sails.sockets.broadcast('system-error', 'system-error', true);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Node failed repeatedly to get the RadioDJ queue. The system is switching to another RadioDJ.`})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; active RadioDJ was failing to return queue data.`})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
-                        await Announcements.findOrCreate({type: 'djcontrols', title: `queueFail (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to return what was in the queue. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to return what was in the queue. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                        await Announcements.findOrCreate({type: 'djcontrols', title: `queueFail (system)`, announcement: "System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: "System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
@@ -138,19 +138,19 @@ module.exports = {
                         if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
                         {
                             sails.log.verbose(`No recent error; attempting standard recovery.`);
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing when it should have been. System attempted queue recovery.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Queue recovery attempted; queue was frozen.`})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
                             await sails.helpers.error.post();
                         } else {
-                            await Meta.changeMeta({changingState: `Switching radioDJ instances due to frozen`});
+                            await Meta.changeMeta({changingState: `Switching automation instances due to frozen`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing when it should have been. System is assuming it crashed. Switching RadioDJs.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; queue was frozen.`})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
-                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozen (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ's queue seems to have frozen. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ's queue seems to have frozen. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozen (system)`, announcement: "System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: "System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -183,7 +183,7 @@ module.exports = {
                         // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
                         if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
                         {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'urgent', logsubtype: '', event: `RadioDJ was not playing the remote stream when it should have been. System attempted remote stream recovery.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'urgent', logsubtype: '', event: `Remote stream not playing; attempting to re-queue it.`})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -197,11 +197,11 @@ module.exports = {
                         } else {
                             await Meta.changeMeta({changingState: `Switching radioDJ instances due to frozenRemote`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `RadioDJ was not playing remote stream when it should have been. System is assuming RadioDJ is unstable. Switching RadioDJs.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; remote stream was not playing.`})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
-                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozenRemote (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to broadcast a remote stream. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `frozenRemote (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to broadcast a remote stream. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozenRemote (system)`, announcement: "System recently had switched automation instances because automation was failing to broadcast a remote stream. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `frozenRemote (system)`, announcement: "System recently had switched RadioDJ instances because RadioDJ was failing to broadcast a remote stream. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -383,7 +383,7 @@ module.exports = {
                             {
                                 loglevel = `urgent`;
                             }
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `Problem reported by Status system: ${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
                                     .tolerate((err) => {
                                         // Don't throw errors, but log them
                                         sails.log.error(err);
@@ -391,7 +391,7 @@ module.exports = {
                         }
                         if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
                         {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `Status system ${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good and no longer reporting issues.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good.`})
                                     .tolerate((err) => {
                                         // Don't throw errors, but log them
                                         sails.log.error(err);

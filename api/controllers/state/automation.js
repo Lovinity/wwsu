@@ -30,7 +30,7 @@ module.exports = {
             var returnData = {subtotalXP: 0};
 
             // Log the request
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'Show ended.'})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);

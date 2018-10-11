@@ -82,7 +82,7 @@ module.exports = {
                             try {
                                 if (djcontrols.host === recipient.host)
                                 {
-                                    await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'This DJ Controls is reporting offline.'}]);
+                                    await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'DJ Controls is offline'}]);
                                     return resolve(true);
                                 }
                                 return resolve(false);
@@ -101,7 +101,7 @@ module.exports = {
                             if (recipient.host === `display-${display.name}`)
                             {
                                 if (Recipients.sockets[recipient.ID].length < display.instances)
-                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `There should be ${display.instances} display signs connected, but only ${Recipients.sockets[recipient.ID].length} are connected.`}]);
+                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `${display.instances} out of ${Recipients.sockets[recipient.ID].length} displays are operational.`}]);
                                 return resolve(true);
                             }
                             return resolve(false);

@@ -21,7 +21,7 @@ module.exports = {
 
         try {
             // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'DJ/Producer requested a single Top Add.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Top Add requested.'})
                     .tolerate((err) => {
                         // Do not throw for an error, but log it.
                         sails.log.error(err);
