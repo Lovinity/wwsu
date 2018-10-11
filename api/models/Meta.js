@@ -185,33 +185,28 @@ module.exports = {
                     push2.trackStamp = null;
 
                     // If the currently playing track was a request, mark as played and update meta
-                    if (_.includes(Requests.pending, Meta['A'].trackID))
+                    if (typeof push.trackID !== 'undefined')
                     {
-                        var requested = await Requests.update({songID: Meta['A'].trackID, played: 0}, {played: 1}).fetch()
-                                .tolerate((err) => {
-                                });
-                        delete Requests.pending[Requests.pending.indexOf(Meta['A'].trackID)];
-                        if (requested && typeof requested[0] !== 'undefined')
+                        if (_.includes(Requests.pending, Meta['A'].trackID))
                         {
-                            push2.requested = true;
-                            push2.requestedBy = (requested[0].username === '') ? 'Anonymous' : requested[0].username;
-                            push2.requestedMessage = requested[0].message;
+                            var requested = await Requests.update({songID: Meta['A'].trackID, played: 0}, {played: 1}).fetch()
+                                    .tolerate((err) => {
+                                    });
+                            delete Requests.pending[Requests.pending.indexOf(Meta['A'].trackID)];
+                            if (requested && typeof requested[0] !== 'undefined')
+                            {
+                                push2.requested = true;
+                                push2.requestedBy = (requested[0].username === '') ? 'Anonymous' : requested[0].username;
+                                push2.requestedMessage = requested[0].message;
+                            }
+
+                            // If we are finished playing requests, clear request meta
+                        } else if (Meta['A'].requested)
+                        {
+                            push2.requested = false;
+                            push2.requestedBy = '';
+                            push2.requestedMessage = '';
                         }
-
-                        // If we are finished playing requests, clear request meta
-                    } else if (Meta['A'].requested)
-                    {
-                        push2.requested = false;
-                        push2.requestedBy = '';
-                        push2.requestedMessage = '';
-                    }
-
-                    // Push to the history array if not a track that falls under noMeta
-                    if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(Meta['A'].trackIDSubcat) === -1)
-                    {
-                        push2.history = Meta['A'].history;
-                        push2.history.unshift({ID: Meta['A'].trackID, track: Meta['A'].trackArtist || "Unknown Artist" + ' - ' + Meta['A'].trackTitle || "Unknown Title", likable: true});
-                        push2.history = push2.history.slice(0, 3);
                     }
 
                     // Manage metadata based on our current state when something is playing in automation
@@ -340,9 +335,19 @@ module.exports = {
 
                     // Log the new track playing if the track was new
                     if (typeof push.trackID !== 'undefined')
+                    {
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: `A track was played in automation${push2.requested ? `, requested by ${push2.requestedBy || `Unknown User`}` : ``}.`, trackArtist: Meta['A'].trackArtist || null, trackTitle: Meta['A'].trackTitle || null, trackAlbum: Meta['A'].trackAlbum || null, trackLabel: Meta['A'].trackLabel || null})
                                 .tolerate((err) => {
                                 });
+
+                        // Push to the history array if not a track that falls under noMeta
+                        if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(Meta['A'].trackIDSubcat) === -1)
+                        {
+                            push2.history = Meta['A'].history;
+                            push2.history.unshift({ID: Meta['A'].trackID, track: (Meta['A'].trackArtist || "Unknown Artist") + ' - ' + (Meta['A'].trackTitle || "Unknown Title"), likable: true});
+                            push2.history = push2.history.slice(0, 3);
+                        }
+                    }
 
                     // Perform metadata for when nothing is playing in automation
                 } else {
@@ -355,9 +360,19 @@ module.exports = {
                         push2.trackTitle = null;
                         push2.trackAlbum = null;
                         push2.trackLabel = null;
-                    }
+                        var manual = false;
+                    } else {
 
-                    var manual = Meta['A'].trackArtist !== null && Meta['A'].trackArtist !== '' && Meta['A'].trackTitle !== null && Meta['A'].trackTitle !== '';
+                        // New track? push it to the history array
+                        if (typeof push.trackStamp !== 'undefined')
+                        {
+                            push2.history = Meta['A'].history;
+                            push2.history.unshift({ID: null, track: (Meta['A'].trackArtist || "Unknown Artist") + ' - ' + (Meta['A'].trackTitle || "Unknown Title"), likable: false});
+                            push2.history = push2.history.slice(0, 3);
+                        }
+                        // Determine if a manually logged track is playing
+                        var manual = Meta['A'].trackArtist !== null && Meta['A'].trackArtist !== '' && Meta['A'].trackTitle !== null && Meta['A'].trackTitle !== '';
+                    }
 
                     // Live shows
                     if (Meta['A'].state.startsWith("live_") && Meta['A'].state !== 'live_prerecord')
