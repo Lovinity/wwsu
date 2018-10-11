@@ -58,7 +58,7 @@ module.exports = {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
             
             // Set meta to prevent accidental messages in DJ Controls
-            Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, track: ''});
+            Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, trackStamp: null});
 
             if (!Meta['A'].state.startsWith("sports"))
             {
@@ -83,13 +83,13 @@ module.exports = {
                 // Change meta
                 if (inputs.remote)
                 {
-                    Meta.changeMeta({state: 'automation_sportsremote', dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                    Meta.changeMeta({state: 'automation_sportsremote', dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
                 } else {
-                    Meta.changeMeta({state: 'automation_sports', dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                    Meta.changeMeta({state: 'automation_sports', dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
                 }
             } else {
                 // Otherwise, just update metadata but do not do anything else
-                Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             }
             
             await sails.helpers.error.reset('automationBreak');

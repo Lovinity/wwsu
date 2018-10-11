@@ -56,7 +56,7 @@ module.exports = {
                         await Attendance.createRecord(`Genre: ${inputs.event}`);
                         Playlists.played = moment();
                         await Meta.changeMeta({state: 'automation_genre', genre: inputs.event, playlist_played: moment().toISOString(true)});
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: '', event: 'A genre rotation started.' + "\n" + 'Genre: ' + inputs.event})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: 'A genre rotation started.<br />Genre: ' + inputs.event})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
@@ -64,7 +64,7 @@ module.exports = {
                         Playlists.played = moment('2002-01-01');
                         await Attendance.createRecord(`Genre: Default`);
                         await Meta.changeMeta({state: 'automation_on', genre: '', playlist_played: moment("2002-01-01").toISOString(true)});
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: '', event: 'Default rotation started.'})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: 'Default rotation started.'})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });

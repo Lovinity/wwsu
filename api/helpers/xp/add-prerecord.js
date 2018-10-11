@@ -28,7 +28,7 @@ module.exports = {
                 }
 
                 // Award XP based on time on the air
-                var showTime = moment().diff(moment(Meta['A'].showstamp), 'minutes');
+                var showTime = moment().diff(moment(Meta['A'].showStamp), 'minutes');
                 var showXP = Math.round(showTime / sails.config.custom.XP.prerecordShowMinutes);
 
                 await Xp.create({dj: dj, type: 'xp', subtype: 'showtime', amount: showXP, description: `Prerecord was on the air for ${showTime} minutes.`})
@@ -39,7 +39,7 @@ module.exports = {
 
                 // Calculate number of listener minutes for the show, and award XP based on configured values.
                 var listenerMinutes = 0;
-                var listeners = await Listeners.find({dj: dj, createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}}).sort("createdAt ASC")
+                var listeners = await Listeners.find({dj: dj, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort("createdAt ASC")
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -47,7 +47,7 @@ module.exports = {
 
                 if (listeners && listeners.length > 0)
                 {
-                    var prevTime = moment(Meta['A'].showstamp);
+                    var prevTime = moment(Meta['A'].showStamp);
                     var prevListeners = 0;
                     var listenerMinutes = 0;
                     listeners.forEach(function (listener) {

@@ -75,13 +75,10 @@ module.exports = {
             // Set manual meta if criteria matches
             if (inputs.logtype === 'manual' && inputs.trackArtist.length > 0 && inputs.trackTitle.length > 0)
             {
-                var history = Meta['A'].history;
-                history.unshift({ID: 0, track: inputs.trackArtist + ' - ' + inputs.trackTitle, likable: false});
-                history = history.slice(0, 3);
-                await Meta.changeMeta({track: `${inputs.trackArtist} - ${inputs.trackTitle}`, history: history, trackstamp: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)});
+                await Meta.changeMeta({trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, trackStamp: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)});
             } else if (inputs.logtype === 'manual')
             {
-                await Meta.changeMeta({track: ``});
+                await Meta.changeMeta({trackArtist: null, trackTitle: null, trackAlbum: null, trackLabel: null, trackStamp: null});
             }
 
             return exits.success();

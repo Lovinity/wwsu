@@ -30,7 +30,7 @@ module.exports = {
             var returnData = {subtotalXP: 0};
 
             // Log the request
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'DJ/Producer signed off.'})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
@@ -54,7 +54,7 @@ module.exports = {
                     dj = dj.split(" - ")[0];
                 }
                 // Award XP based on time on the air
-                returnData.showTime = moment().diff(moment(Meta['A'].showstamp), 'minutes');
+                returnData.showTime = moment().diff(moment(Meta['A'].showStamp), 'minutes');
                 returnData.showXP = Math.round(returnData.showTime / sails.config.custom.XP.showMinutes);
                 returnData.subtotalXP += returnData.showXP;
 
@@ -68,7 +68,7 @@ module.exports = {
 
                 // Calculate number of listener minutes for the show, and award XP based on configured values.
                 var listenerMinutes = 0;
-                returnData.listeners = await Listeners.find({dj: dj, createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}}).sort("createdAt ASC")
+                returnData.listeners = await Listeners.find({dj: dj, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort("createdAt ASC")
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -76,7 +76,7 @@ module.exports = {
 
                 if (returnData.listeners && returnData.listeners.length > 0)
                 {
-                    var prevTime = moment(Meta['A'].showstamp);
+                    var prevTime = moment(Meta['A'].showStamp);
                     var prevListeners = 0;
                     returnData.listeners.forEach(function (listener) {
                         listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
@@ -104,7 +104,7 @@ module.exports = {
                 }
 
                 // Earn XP for sending messages to website visitors
-                returnData.messagesWeb = await Messages.count({from: Meta['A'].djcontrols, to: {startsWith: 'website'}, createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
+                returnData.messagesWeb = await Messages.count({from: Meta['A'].djcontrols, to: {startsWith: 'website'}, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -124,12 +124,12 @@ module.exports = {
 
 
                 // Calculate XP earned this show from Top Adds
-                returnData.topAdds = await Xp.count({dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
+                returnData.topAdds = await Xp.count({dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
                         });
-                returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
+                returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -137,7 +137,7 @@ module.exports = {
                 returnData.subtotalXP += returnData.topAddsXP || 0;
 
                 // Calculate XP earned this show from doing the mandatory Legal IDs
-                returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showstamp).toISOString(true)}})
+                returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);

@@ -328,14 +328,8 @@ module.exports.bootstrap = async function (done) {
                     sails.log.silly(`queueCheck executed.`);
                     var theTracks = [];
                     change.trackID = parseInt(queue[0].ID);
+                    change.trackIDSubcat = parseInt(queue[0].IDSubcat) || 0;
 
-                    // Check if this is a new track and if so, push to the history array
-                    if (parseInt(queue[0].ID) !== Meta['A'].trackID && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1)
-                    {
-                        change.history = Meta['A'].history;
-                        change.history.unshift({ID: parseInt(queue[0].ID), track: queue[0].Artist + ' - ' + queue[0].Title, likable: true});
-                        change.history = change.history.slice(0, 3);
-                    }
 
                     // Determine if something is currently playing via whether or not track 0 has ID of 0.
                     if (parseInt(queue[0].ID) === 0)
@@ -343,6 +337,10 @@ module.exports.bootstrap = async function (done) {
                         change.playing = false;
                     } else {
                         change.playing = true;
+                        change.trackArtist = queue[0].Artist || null;
+                        change.trackTitle = queue[0].Title || null;
+                        change.trackAlbum = queue[0].Album || null;
+                        change.trackLabel = queue[0].Label || null;
                     }
 
                     // When on queue to go live or return from break, search for the position of the last noMeta track
@@ -401,26 +399,6 @@ module.exports.bootstrap = async function (done) {
                     sails.log.error(e);
                     Meta.changeMeta({time: moment().toISOString(true)});
                     return resolve(e);
-                }
-                sails.log.silly(`Proceeding after queueCheck.`);
-
-
-
-                // If the currently playing track was a request, mark as played
-                if (_.includes(Requests.pending, parseInt(queue[0].ID)))
-                {
-                    var requested = await Requests.update({songID: queue[0].ID, played: 0}, {played: 1}).fetch()
-                            .tolerate((err) => {
-                            });
-                    delete Requests.pending[Requests.pending.indexOf(parseInt(queue[0].ID))];
-                    change.requested = true;
-                    change.requestedBy = (requested[0].username === '') ? 'Anonymous' : requested[0].username;
-                    change.requestedMessage = requested[0].message;
-                } else if (Meta['A'].requested && parseInt(queue[0].ID) !== Meta['A'].trackID)
-                {
-                    change.requested = false;
-                    change.requestedBy = '';
-                    change.requestedMessage = '';
                 }
 
                 await sails.helpers.error.reset('queueFail');
@@ -514,10 +492,14 @@ module.exports.bootstrap = async function (done) {
             }
 
             // Clear manual metadata if it is old
-            if (parseInt(queue[0].ID) !== 0)
-                change.trackstamp = null;
-            if (Meta['A'].trackstamp === null || (moment().isAfter(moment(Meta['A'].trackstamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'live_prerecord' && Meta['A'].track !== ''))
-                change.track = '';
+            if (Meta['A'].trackStamp !== null && (moment().isAfter(moment(Meta['A'].trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'live_prerecord'))
+            {
+                change.trackStamp = null;
+                change.trackArtist = null;
+                change.trackTitle = null;
+                change.trackAlbum = null;
+                change.trackLabel = null;
+            }
 
             // Playlist maintenance
             var thePosition = -1;
@@ -535,9 +517,9 @@ module.exports.bootstrap = async function (done) {
                                     // Waiting for the playlist to begin, and it has begun? Switch states.
                                     if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && Meta['A'].changingState === null)
                                     {
-                                        await Meta.changeMeta({state: 'live_prerecord', showstamp: moment().toISOString(true)});
+                                        await Meta.changeMeta({state: 'live_prerecord', showStamp: moment().toISOString(true)});
                                         await Attendance.createRecord(`Prerecord: ${Meta['A'].playlist}`);
-                                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].playlist, event: `A prerecord started airing.` + "\n" + "Prerecord: " + Meta['A'].playlist})
+                                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord started airing.` + "\n" + "Prerecord: " + Meta['A'].playlist})
                                                 .tolerate((err) => {
                                                     // Do not throw for errors, but log it.
                                                     sails.log.error(err);
@@ -568,14 +550,14 @@ module.exports.bootstrap = async function (done) {
                         switch (Meta['A'].state)
                         {
                             case "automation_playlist":
-                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'success', logsubtype: Meta['A'].playlist, event: `A playlist finished airing.`})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A playlist finished airing.`})
                                         .tolerate((err) => {
                                             // Do not throw for errors, but log it.
                                             sails.log.error(err);
                                         });
                                 break;
                             case "live_prerecord":
-                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'success', logsubtype: Meta['A'].playlist, event: `A prerecord finished airing.`})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord finished airing.`})
                                         .tolerate((err) => {
                                             // Do not throw for errors, but log it.
                                             sails.log.error(err);
@@ -616,309 +598,13 @@ module.exports.bootstrap = async function (done) {
                     if (queue[0].Duration > 0)
                         change.percent = (queue[0].Elapsed / queue[0].Duration);
 
-                    // In automation and something is currently playing
-                    if (Meta['A'].state.startsWith("automation_") && parseInt(queue[0].ID) !== 0 && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre')
-                    {
-                        change.webchat = true;
-                        var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
-                        if (Meta['A'].track !== newmeta)
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: 'Automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                    .tolerate((err) => {
-                                    });
-                        Meta.changeMeta({track: newmeta});
-                        change.track = newmeta;
-                        // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-                        if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
-                        {
-                            change.line1 = sails.config.custom.meta.alt.automation;
-                            change.line2 = '';
-                            change.current = `WWSU 106.9FM - ${sails.config.custom.meta.alt.automation}`;
-                            change.percent = 0;
-                        } else {
-                            if (Meta['A'].requested)
-                            {
-                                change.line1 = `Now playing: ${change.track}`;
-                                change.line2 = `Requested by: ${Meta['A'].requestedBy}`;
-                                change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
-                            } else {
-                                change.line1 = `Now playing: ${change.track}`;
-                                change.line2 = '';
-                                change.stream = change.track;
-                            }
-                        }
-                        // Someone is about to go live
-                        if (Meta['A'].state === 'automation_live')
-                        {
-                            change.line2 = `About to go live: ${Meta['A'].dj}`;
-                            // Prerecord about to begin
-                        } else if (Meta['A'].state === 'automation_prerecord')
-                        {
-                            change.line2 = `Prerecord about to start: ${Meta['A'].dj}`;
-                        }
-
-                        // If we are playing a playlist
-                    } else if (parseInt(queue[0].ID) !== 0 && Meta['A'].state === 'automation_playlist')
-                    {
-                        change.webchat = true;
-                        var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
-                        if (Meta['A'].track !== newmeta)
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: `playlist - ${Meta['A'].playlist}`, event: 'Automation playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                    .tolerate((err) => {
-                                    });
-                        Meta.changeMeta({track: newmeta});
-                        change.track = newmeta;
-                        // Do not display track meta for tracks in config.custom.categories.noMeta or tracks with an unknown artist
-                        if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
-                        {
-                            change.line1 = sails.config.custom.meta.alt.playlist;
-                            change.line2 = `Playlist: ${Meta['A'].playlist}`;
-                            change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.playlist}`;
-                            change.percent = 0;
-                        } else {
-                            if (Meta['A'].requested)
-                            {
-                                change.line1 = `Now playing: ${change.track}`;
-                                change.line2 = `Requested by: ${Meta['A'].requestedBy}`;
-                                change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
-                            } else {
-                                change.line1 = `Now playing: ${change.track}`;
-                                change.line2 = `Playlist: ${Meta['A'].playlist}`;
-                                change.stream = change.track;
-                            }
-                        }
-                        // We are in genre automation
-                    } else if (parseInt(queue[0].ID) !== 0 && Meta['A'].state === 'automation_genre')
-                    {
-                        change.webchat = true;
-                        var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
-                        if (Meta['A'].track !== newmeta)
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: 'Genre automation played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                    .tolerate((err) => {
-                                    });
-                        Meta.changeMeta({track: newmeta});
-                        change.track = newmeta;
-                        // Do not display track meta if the track is in config.custom.categories.noMeta or the artist is unknown
-                        if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
-                        {
-                            change.line1 = sails.config.custom.meta.alt.genre;
-                            change.line2 = `Genre: ${Meta['A'].genre}`;
-                            change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.genre}`;
-                            change.percent = 0;
-                        } else {
-                            if (Meta['A'].requested)
-                            {
-                                change.line1 = `Now playing: ${change.track}`;
-                                change.line2 = `Requested by: ${Meta['A'].requestedBy}`;
-                                change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
-                            } else {
-                                change.line1 = `Now playing: ${change.track}`;
-                                change.line2 = `Genre: ${Meta['A'].genre}`;
-                                change.stream = change.track;
-                            }
-                        }
-                        // Live shows that are not prerecords
-                    } else if (Meta['A'].state.startsWith("live_") && Meta['A'].state !== 'live_prerecord')
-                    {
-                        // Something is playing in RadioDJ
-                        if (parseInt(queue[0].ID) !== 0)
-                        {
-                            var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
-                            if (Meta['A'].track !== newmeta)
-                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'DJ played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                        .tolerate((err) => {
-                                        });
-                            Meta.changeMeta({track: newmeta});
-                            change.track = newmeta;
-                            // Do not display meta for tracks that are in config.custom.categories.noMeta or have an unknown artist
-                            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist"))
-                            {
-                                change.line1 = `On the Air: ${Meta['A'].dj}`;
-                                change.line2 = sails.config.custom.meta.alt.live;
-                                change.stream = `${Meta['A'].dj} (${sails.config.custom.meta.alt.live})`;
-                                change.percent = 0;
-                            } else {
-                                if (Meta['A'].requested)
-                                {
-                                    change.line1 = `On the Air: ${Meta['A'].dj}`;
-                                    change.line2 = `Playing request: ${change.track} (Requested by: ${Meta['A'].requestedBy})`;
-                                    change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
-                                } else {
-                                    change.line1 = `On the Air: ${Meta['A'].dj}`;
-                                    change.line2 = `Playing: ${change.track}`;
-                                    change.stream = change.track;
-                                }
-                            }
-                            // Not playing anything in RadioDJ
-                        } else {
-                            // A track was manually logged
-                            if (Meta['A'].track !== '')
-                            {
-                                change.line1 = `On the Air: ${Meta['A'].dj}`;
-                                change.line2 = `Playing: ${Meta['A'].track}`;
-                                change.percent = 0;
-                                change.stream = Meta['A'].track;
-                                // No tracks playing
-                            } else {
-                                change.track = '';
-                                change.line1 = `On the Air: ${Meta['A'].dj}`;
-                                change.line2 = '';
-                                change.percent = 0;
-                                change.stream = `${Meta['A'].dj} (LIVE)`;
-                            }
-                        }
-                        // Playing a prerecorded show
-                    } else if (parseInt(queue[0].ID) !== 0 && Meta['A'].state === 'live_prerecord')
-                    {
-                        change.webchat = true;
-                        var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
-                        change.dj = Meta['A'].playlist;
-                        if (Meta['A'].track !== newmeta)
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].playlist, event: 'Prerecorded show playlist played a track', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                    .tolerate((err) => {
-                                    });
-                        Meta.changeMeta({track: newmeta});
-                        change.track = newmeta;
-                        // If the currently playing track is not a track that exists in the prerecord playlist, do not display meta for it
-                        if (!playlistTrackPlaying)
-                        {
-                            change.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
-                            change.line2 = sails.config.custom.meta.alt.prerecord;
-                            change.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.prerecord}`;
-                            change.percent = 0;
-                        } else {
-                            if (Meta['A'].requested)
-                            {
-                                change.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
-                                change.line2 = `Playing request: ${change.track} (Requested by: ${Meta['A'].requestedBy})`;
-                                change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
-                            } else {
-                                change.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
-                                change.line2 = `Playing: ${change.track}`;
-                                change.stream = change.track;
-                            }
-                        }
-                        // Remote broadcasts
-                    } else if (Meta['A'].state.startsWith("remote_"))
-                    {
-                        // The currently playing track is not an Internet Stream track
-                        if (parseInt(queue[0].ID) !== 0 && queue[0].TrackType !== 'InternetStream')
-                        {
-                            var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
-                            if (Meta['A'].track !== newmeta)
-                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Remote producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                        .tolerate((err) => {
-                                        });
-                            Meta.changeMeta({track: newmeta});
-                            change.track = newmeta;
-                            // If the currently playing track is in config.custom.categories.noMeta, or artist is unknown, or if we are in disconnected remote mode, show alternative metadata
-                            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) > -1) || queue[0].Artist.includes("Unknown Artist") || Meta['A'].state.includes("disconnected"))
-                            {
-                                change.line1 = `Broadcasting: ${Meta['A'].dj}`;
-                                change.line2 = sails.config.custom.meta.alt.remote;
-                                change.percent = 0;
-                                change.stream = `${Meta['A'].dj} (${sails.config.custom.meta.alt.remote})`;
-                            } else {
-                                if (Meta['A'].requested)
-                                {
-                                    change.line1 = `Broadcasting: ${Meta['A'].dj}`;
-                                    change.line2 = `Playing request: ${change.track} (Requested by: ${Meta['A'].requestedBy})`;
-                                    change.stream = change.track + ` (Requested by: ${Meta['A'].requestedBy})`;
-                                } else {
-                                    change.line1 = `Broadcasting: ${Meta['A'].dj}`;
-                                    change.line2 = `Playing: ${change.track}`;
-                                    change.stream = change.track;
-                                }
-                            }
-                        } else {
-                            // A manual track was logged
-                            if (Meta['A'].track !== '')
-                            {
-                                change.line1 = `Broadcasting: ${Meta['A'].dj}`;
-                                change.line2 = `Playing: ${Meta['A'].track}`;
-                                change.percent = 0;
-                                change.stream = Meta['A'].track;
-                            } else {
-                                change.track = '';
-                                change.line1 = `Broadcasting: ${Meta['A'].dj}`;
-                                change.line2 = "";
-                                change.percent = 0;
-                                change.stream = `${Meta['A'].dj} (REMOTE)`;
-                            }
-                        }
-                        // Sports broadcast
-                    } else if (Meta['A'].state.startsWith("sports_") || Meta['A'].state.startsWith("sportsremote_"))
-                    {
-                        // Something is playing in automation
-                        if (queue[0].Duration > 0)
-                        {
-                            var newmeta = queue[0].Artist + ' - ' + queue[0].Title;
-                            if (Meta['A'].track !== newmeta)
-                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: Meta['A'].dj, event: 'Producer played a track in automation', trackArtist: queue[0].Artist, trackTitle: queue[0].Title})
-                                        .tolerate((err) => {
-                                        });
-                            Meta.changeMeta({track: newmeta});
-                            change.track = newmeta;
-                            change.line1 = `Raider Sports: ${Meta['A'].dj}`;
-                            change.line2 = sails.config.custom.meta.alt.sports;
-                            change.percent = 0;
-                            change.stream = `Raider Sports - ${Meta['A'].dj} (${sails.config.custom.meta.alt.sports})`;
-                        } else {
-                            // Manual track playing
-                            if (Meta['A'].track !== '')
-                            {
-                                change.line1 = `Raider Sports: ${Meta['A'].dj}`;
-                                change.line2 = sails.config.custom.meta.alt.sports;
-                                change.percent = 0;
-                                change.stream = `Raider Sports - ${Meta['A'].dj} (${sails.config.custom.meta.alt.sports})`;
-                            } else {
-                                change.track = '';
-                                change.line1 = `Raider Sports: ${Meta['A'].dj}`;
-                                change.line2 = "";
-                                change.percent = 0;
-                                change.stream = `Raider Sports - ${Meta['A'].dj}`;
-                            }
-                        }
-                    }
-
-                    // Clean up profanity in metadata
-                    if (typeof change.line1 !== 'undefined' && change.line1 !== '')
-                        change.line1 = await sails.helpers.filterProfane(change.line1);
-                    if (typeof change.line2 !== 'undefined' && change.line2 !== '')
-                        change.line2 = await sails.helpers.filterProfane(change.line2);
-                    if (typeof change.stream !== 'undefined' && change.stream !== '')
-                        change.stream = await sails.helpers.filterProfane(change.stream);
-
-                    // parse metadata
-                    if (typeof change.stream !== 'undefined' && change.stream !== Meta['A'].stream)
-                    {
-                        var thearray = [];
-                        thearray = change.stream.split(' - ');
-                        if (thearray.length < 1)
-                            thearray[0] = '';
-                        if (thearray.length < 2)
-                            thearray[1] = '';
-                        var theartist = thearray[0];
-                        var thetitle = thearray[1];
-                        change.artist = theartist;
-                        change.title = thetitle;
-
-                        Meta.history.unshift(`${theartist} - ${thetitle}`);
-                        if (Meta.history.length > 5)
-                            delete Meta.history[5];
-
-                        // WORK ON THIS: publishing stream changes to Shoutcast/Icecast
-                    }
-
-
                     // If we are preparing for live, so some stuff if queue is done
                     if (Meta['A'].state === 'automation_live' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
-                        change.line2 = '';
-                        change.track = '';
-                        await Meta.changeMeta({state: 'live_on', showstamp: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'live_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Show: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -926,12 +612,10 @@ module.exports.bootstrap = async function (done) {
                     }
                     if (Meta['A'].state === 'automation_sports' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
-                        change.line2 = '';
-                        change.track = '';
-                        await Meta.changeMeta({state: 'sports_on', showstamp: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'sports_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -940,15 +624,13 @@ module.exports.bootstrap = async function (done) {
                     // If we are preparing for remote, do some stuff if we are playing the stream track
                     if (Meta['A'].state === 'automation_remote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
-                        change.line2 = '';
-                        change.track = '';
-                        await Meta.changeMeta({state: 'remote_on', showstamp: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'remote_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Remote: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -956,15 +638,13 @@ module.exports.bootstrap = async function (done) {
                     }
                     if (Meta['A'].state === 'automation_sportsremote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
-                        change.line2 = '';
-                        change.track = '';
-                        await Meta.changeMeta({state: 'sportsremote_on', showstamp: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'sportsremote_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'success', logsubtype: Meta['A'].dj, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -976,15 +656,11 @@ module.exports.bootstrap = async function (done) {
                         switch (Meta['A'].state)
                         {
                             case 'live_returning':
-                                change.line2 = '';
-                                change.track = '';
                                 await Meta.changeMeta({state: 'live_on'});
                                 if (!change.queueMusic)
                                     await sails.helpers.rest.cmd('EnableAssisted', 1);
                                 break;
                             case 'remote_returning':
-                                change.line2 = '';
-                                change.track = '';
                                 await Meta.changeMeta({state: 'remote_on'});
                                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
@@ -993,15 +669,11 @@ module.exports.bootstrap = async function (done) {
                                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                                 break;
                             case 'sports_returning':
-                                change.line2 = '';
-                                change.track = '';
                                 await Meta.changeMeta({state: 'sports_on'});
                                 if (!change.queueMusic)
                                     await sails.helpers.rest.cmd('EnableAssisted', 1);
                                 break;
                             case 'sportsremote_returning':
-                                change.line2 = '';
-                                change.track = '';
                                 await Meta.changeMeta({state: 'sportsremote_on'});
                                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
@@ -1080,7 +752,7 @@ module.exports.bootstrap = async function (done) {
                     } else {
                         if (Meta['A'].breakneeded && n >= 10)
                         {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'warning', logsubtype: Meta['A'].dj, event: `${Meta['A'].dj} does not seem to have taken the required top of the hour ID break despite being asked to by the system.`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].dj, event: `${Meta['A'].dj} does not seem to have taken the required top of the hour ID break.`})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -1103,7 +775,7 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.error.reset('frozenRemote');
                     }
 
-                    // Manage PSAs and IDs intelligently using track queue length. This gets complicated, so comments explain the process.
+                    // Manage breaks intelligently using track queue length. This gets complicated, so comments explain the process.
 
                     // Do not run this process if we cannot get a duration for the currently playing track, or if we suspect the current queue duration to be inaccurate
                     if (Status.errorCheck.trueZero <= 0 && typeof queue[0] !== 'undefined' && typeof queue[0].Duration !== 'undefined' && typeof queue[0].Elapsed !== 'undefined')
@@ -1408,38 +1080,38 @@ module.exports.bootstrap = async function (done) {
     sails.log.verbose(`BOOTSTRAP: scheduling checkRadioDJs CRON.`);
     cron.schedule('4,34 * * * * *', () => {
         new Promise(async (resolve, reject) => {
-        sails.log.debug(`CRON checkRadioDJs triggered.`);
-        try {
-            sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`);
-            await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
-                return new Promise(async (resolve2, reject2) => {
-                    try {
-                        needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, {headers: {'Content-Type': 'application/json'}})
-                                .then(async function (resp) {
-                                    if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
-                                    {
-                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
-                                    } else {
+            sails.log.debug(`CRON checkRadioDJs triggered.`);
+            try {
+                sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`);
+                await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
+                    return new Promise(async (resolve2, reject2) => {
+                        try {
+                            needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, {headers: {'Content-Type': 'application/json'}})
+                                    .then(async function (resp) {
+                                        if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
+                                        {
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ reports operational.', status: 5}]);
+                                        } else {
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
+                                        }
+                                        return resolve2(false);
+                                    })
+                                    .catch(function (err) {
                                         Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
-                                    }
-                                    return resolve2(false);
-                                })
-                                .catch(function (err) {
-                                    Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
-                                    return resolve2(false);
-                                });
-                    } catch (e) {
-                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
-                        return resolve2(false);
-                    }
+                                        return resolve2(false);
+                                    });
+                        } catch (e) {
+                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'This RadioDJ is not reporting operational.', status: radiodj.level}]);
+                            return resolve2(false);
+                        }
+                    });
                 });
-            });
-            return resolve();
-        } catch (e) {
-            sails.log.error(e);
-            return reject(e);
-        }
-    });
+                return resolve();
+            } catch (e) {
+                sails.log.error(e);
+                return reject(e);
+            }
+        });
     });
 
     // Twice per minute at 05 and 35 seconds, check for connectivity to the website.

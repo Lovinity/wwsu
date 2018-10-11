@@ -58,7 +58,7 @@ module.exports = {
                 inputs.showname = await sails.helpers.filterProfane(inputs.showname);
 
             // Send meta so that DJ Controls does not think this person is interfering with another show
-            await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: ''});
+            await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null});
 
             // If we are not already in live mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("live_"))
@@ -76,10 +76,10 @@ module.exports = {
                 if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Openers"]], 'Bottom', 1);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                await Meta.changeMeta({state: 'automation_live', dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({state: 'automation_live', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else
-                await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, track: '', webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             }
 
             await sails.helpers.error.reset('automationBreak');
