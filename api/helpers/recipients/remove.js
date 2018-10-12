@@ -101,7 +101,7 @@ module.exports = {
                             if (recipient.host === `display-${display.name}`)
                             {
                                 if (Recipients.sockets[recipient.ID].length < display.instances)
-                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `${display.instances} out of ${Recipients.sockets[recipient.ID].length} displays are operational.`}]);
+                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `${Recipients.sockets[recipient.ID].length} out of ${display.instances} displays are operational.`}]);
                                 return resolve(true);
                             }
                             return resolve(false);
