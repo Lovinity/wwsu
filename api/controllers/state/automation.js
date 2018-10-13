@@ -124,12 +124,12 @@ module.exports = {
 
 
                 // Calculate XP earned this show from Top Adds
-                returnData.topAdds = await Xp.count({dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
+                returnData.topAdds = await Xp.count({dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
                         });
-                returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
+                returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -137,7 +137,7 @@ module.exports = {
                 returnData.subtotalXP += returnData.topAddsXP || 0;
 
                 // Calculate XP earned this show from doing the mandatory Legal IDs
-                returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'show', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
+                returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -145,14 +145,14 @@ module.exports = {
                 returnData.subtotalXP += returnData.IDsXP || 0;
 
                 // Calculate a DJ's total XP earned ever
-                returnData.totalXP = await Xp.sum('amount', {dj: dj, subtype: {'!=': 'remote'}})
+                returnData.totalXP = await Xp.sum('amount', {dj: dj, type: {'!=': 'remote'}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
                         });
 
                 // Add to total XP for remote credits
-                returnData.totalXP += (sails.config.custom.XP.remoteCredit * await Xp.sum('amount', {dj: dj, subtype: 'remote'})
+                returnData.totalXP += (sails.config.custom.XP.remoteCredit * await Xp.sum('amount', {dj: dj, type: 'remote'})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
