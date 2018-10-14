@@ -74,7 +74,11 @@ module.exports = {
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
                 if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                {
                     await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Openers"]], 'Bottom', 1);
+                } else {
+                    await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
+                }
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await Meta.changeMeta({state: 'automation_live', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {

@@ -28,11 +28,11 @@ module.exports = {
                     });
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);
+            await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak);
 
             // Perform the break
             if (Meta['A'].state.includes('halftime'))
             {
-                await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak);
                 // Sports liners for sports halftime
                 if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
@@ -91,20 +91,32 @@ module.exports = {
                 {
                     case 'live_break':
                         if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                        {
                             await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Returns"]], 'Bottom', 1);
+                        } else {
+                            await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
+                        }
                         await Meta.changeMeta({state: 'live_returning'});
                         break;
                     case 'sports_break':
+                        if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                            await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                         await Meta.changeMeta({state: 'sports_returning'});
                         break;
                     case 'remote_break':
                     case 'remote_break_disconnected':
                         if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                        {
                             await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Returns"]], 'Bottom', 1);
+                        } else {
+                            await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
+                        }
                         await Meta.changeMeta({state: 'remote_returning'});
                         break;
                     case 'sportsremote_break':
                     case 'sportsremote_break_disconnected':
+                        if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                            await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                         await Meta.changeMeta({state: 'sportsremote_returning'});
                         break;
                 }

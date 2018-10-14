@@ -88,118 +88,11 @@ module.exports.bootstrap = async function (done) {
                 });
     }
 
-    // Load subcats IDs for each consigured categories
-    sails.log.verbose(`BOOTSTRAP: loading subcats into configuration.`);
-    for (var config in sails.config.custom.categories)
-    {
-        if (sails.config.custom.categories.hasOwnProperty(config))
-        {
-            sails.config.custom.subcats[config] = [];
-            for (var cat in sails.config.custom.categories[config])
-            {
-                if (sails.config.custom.categories[config].hasOwnProperty(cat))
-                {
-                    var thecategory = await Category.findOne({name: cat})
-                            .tolerate((err) => {
-                            });
-                    if (!thecategory || thecategory === null)
-                        continue;
-
-                    if (sails.config.custom.categories[config][cat].length <= 0)
-                    {
-                        var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
-                                .tolerate((err) => {
-                                });
-                    } else {
-                        var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
-                                .tolerate((err) => {
-                                });
-                    }
-                    if (!thesubcategories || thesubcategories.length <= 0)
-                        continue;
-
-                    thesubcategories.forEach(function (thesubcategory) {
-                        sails.config.custom.subcats[config].push(thesubcategory.ID);
-                    });
-
-                    sails.log.silly(`Subcategories for ${config}: ${sails.config.custom.subcats[config]}`);
-                }
-            }
-        }
-    }
-
-    // Load subcats IDs for each consigured sport
-    sails.log.verbose(`BOOTSTRAP: Loading sportscats into configuration.`);
-    sails.config.custom.sportscats = {};
-    sails.config.custom.sports.forEach(function (sport) {
-        sails.config.custom.sportscats[sport] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
-    });
-
-    var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
-            .tolerate((err) => {
-            });
-
-    var catIDs = [];
-    var cats = {};
-
-    if (categories.length > 0)
-    {
-        categories.forEach(function (category) {
-            catIDs.push(category.ID);
-            cats[category.ID] = category.name;
-        });
-    }
-
-    var subcategories = await Subcategory.find({parentid: catIDs})
-            .tolerate((err) => {
-            });
-
-
-    if (subcategories.length > 0)
-    {
-        subcategories.forEach(function (subcategory) {
-            if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
-            {
-                sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
-            }
-        });
-    }
-
-    // Load subcats IDs for each show
-    sails.log.verbose(`BOOTSTRAP: Loading showcats into configuration.`);
-
-    var categories = await Category.find({name: ["Show Openers", "Show Returns", "Show Closers"]})
-            .tolerate((err) => {
-            });
-
-    var catIDs = [];
-    var cats = {};
-
-    if (categories.length > 0)
-    {
-        categories.forEach(function (category) {
-            catIDs.push(category.ID);
-            cats[category.ID] = category.name;
-        });
-    }
-
-    var subcategories = await Subcategory.find({parentid: catIDs})
-            .tolerate((err) => {
-            });
-
-
-    if (subcategories.length > 0)
-    {
-        sails.config.custom.showcats = {};
-        subcategories.forEach(function (subcategory) {
-            if (typeof sails.config.custom.showcats[subcategory.name] === 'undefined')
-                sails.config.custom.showcats[subcategory.name] = {"Show Openers": null, "Show Returns": null, "Show Closers": null};
-            sails.config.custom.showcats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
-        });
-    }
-
-    // Load metadata
     try {
+        // Load subcategories into config
+        await reloadSubcategories();
+
+        // Load metadata
         sails.log.verbose(`BOOTSTRAP: Loading metadata.`);
         var meta = await Meta.find().limit(1)
                 .tolerate((err) => {
@@ -844,10 +737,10 @@ module.exports.bootstrap = async function (done) {
                                 {
                                     // Reset the break clock
                                     Status.errorCheck.prevBreak = moment();
-                                    
+
                                     // Reset the liner clock as well so liners do not play too close to breaks
                                     Status.errorCheck.prevLiner = moment();
-                                    
+
                                     // enforce station ID for top of the hour breaks
                                     if (key === 0)
                                     {
@@ -869,10 +762,10 @@ module.exports.bootstrap = async function (done) {
                                                     sails.log.error(err);
                                                 });
                                     }
-                                    
+
                                     // Remove liners in the queue. Do not do the playlist re-queue method as there may be a big prerecord or playlist in the queue.
                                     await sails.helpers.songs.remove(false, sails.config.custom.subcats.liners, true, true);
-                                    
+
                                     // Get the configured break tasks
                                     var breakOpts = sails.config.custom.breaks[key];
                                     // Reverse the order of execution so queued things are in the same order as configured.
@@ -1334,116 +1227,9 @@ module.exports.bootstrap = async function (done) {
     cron.schedule('8 */5 * * * *', () => {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON reloadSubcats called.`);
-
             try {
-                // Load subcats IDs for each consigured categories
-                sails.config.custom.subcats = {};
-
-                for (var config in sails.config.custom.categories)
-                {
-                    if (sails.config.custom.categories.hasOwnProperty(config))
-                    {
-                        sails.config.custom.subcats[config] = [];
-                        for (var cat in sails.config.custom.categories[config])
-                        {
-                            if (sails.config.custom.categories[config].hasOwnProperty(cat))
-                            {
-                                var thecategory = await Category.findOne({name: cat})
-                                        .tolerate((err) => {
-                                        });
-                                if (!thecategory || thecategory === null)
-                                    continue;
-
-                                if (sails.config.custom.categories[config][cat].length <= 0)
-                                {
-                                    var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
-                                            .tolerate((err) => {
-                                            });
-                                } else {
-                                    var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
-                                            .tolerate((err) => {
-                                            });
-                                }
-                                if (!thesubcategories || thesubcategories.length <= 0)
-                                    continue;
-
-                                thesubcategories.forEach(function (thesubcategory) {
-                                    sails.config.custom.subcats[config].push(thesubcategory.ID);
-                                });
-
-                                sails.log.silly(`Subcategories for ${config}: ${sails.config.custom.subcats[config]}`);
-                            }
-                        }
-                    }
-                }
-
-                // Load subcats IDs for each consigured sport
-                sails.config.custom.sportscats = {};
-                for (var config in sails.config.custom.sports)
-                {
-                    if (sails.config.custom.sports.hasOwnProperty(config))
-                    {
-                        sails.config.custom.sportscats[config] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
-                    }
-                }
-
-                var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
-                        .tolerate((err) => {
-                        });
-
-                var catIDs = [];
-                var cats = {};
-
-                if (categories.length > 0)
-                {
-                    categories.forEach(function (category) {
-                        catIDs.push(category.ID);
-                        cats[category.ID] = category.name;
-                    });
-                }
-
-                var subcategories = await Subcategory.find({parentid: catIDs})
-                        .tolerate((err) => {
-                        });
-
-                if (subcategories.length > 0)
-                {
-                    subcategories.forEach(function (subcategory) {
-                        if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
-                            sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentID]] = subcategory.ID;
-                    });
-                }
-
-                // Re-load show categories
-                var categories = await Category.find({name: ["Show Openers", "Show Returns", "Show Closers"]})
-                        .tolerate((err) => {
-                        });
-
-                var catIDs = [];
-                var cats = {};
-
-                if (categories.length > 0)
-                {
-                    categories.forEach(function (category) {
-                        catIDs.push(category.ID);
-                        cats[category.ID] = category.name;
-                    });
-                }
-
-                var subcategories = await Subcategory.find({parentid: catIDs})
-                        .tolerate((err) => {
-                        });
-
-
-                if (subcategories.length > 0)
-                {
-                    sails.config.custom.showcats = {};
-                    subcategories.forEach(function (subcategory) {
-                        if (typeof sails.config.custom.showcats[subcategory.name] === 'undefined')
-                            sails.config.custom.showcats[subcategory.name] = {"Show Openers": null, "Show Returns": null, "Show Closers": null};
-                        sails.config.custom.showcats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
-                    });
-                }
+                // Load subcategories into config
+                await reloadSubcategories();
 
                 return resolve(true);
             } catch (e) {
@@ -1569,5 +1355,125 @@ module.exports.bootstrap = async function (done) {
     sails.log.verbose(`BOOTSTRAP: Done.`);
 
     return done();
+
+    function reloadSubcategories() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Load subcats IDs for each consigured categories
+                sails.log.verbose(`BOOTSTRAP: loading subcats into configuration.`);
+                for (var config in sails.config.custom.categories)
+                {
+                    if (sails.config.custom.categories.hasOwnProperty(config))
+                    {
+                        sails.config.custom.subcats[config] = [];
+                        for (var cat in sails.config.custom.categories[config])
+                        {
+                            if (sails.config.custom.categories[config].hasOwnProperty(cat))
+                            {
+                                var thecategory = await Category.findOne({name: cat})
+                                        .tolerate((err) => {
+                                        });
+                                if (!thecategory || thecategory === null)
+                                    continue;
+
+                                if (sails.config.custom.categories[config][cat].length <= 0)
+                                {
+                                    var thesubcategories = await Subcategory.find({parentid: thecategory.ID})
+                                            .tolerate((err) => {
+                                            });
+                                } else {
+                                    var thesubcategories = await Subcategory.find({parentid: thecategory.ID, name: sails.config.custom.categories[config][cat]})
+                                            .tolerate((err) => {
+                                            });
+                                }
+                                if (!thesubcategories || thesubcategories.length <= 0)
+                                    continue;
+
+                                thesubcategories.forEach(function (thesubcategory) {
+                                    sails.config.custom.subcats[config].push(thesubcategory.ID);
+                                });
+
+                                sails.log.silly(`Subcategories for ${config}: ${sails.config.custom.subcats[config]}`);
+                            }
+                        }
+                    }
+                }
+
+                // Load subcats IDs for each consigured sport
+                sails.log.verbose(`BOOTSTRAP: Loading sportscats into configuration.`);
+                sails.config.custom.sportscats = {};
+                sails.config.custom.sports.forEach(function (sport) {
+                    sails.config.custom.sportscats[sport] = {"Sports Openers": null, "Sports Liners": null, "Sports Closers": null};
+                });
+
+                var categories = await Category.find({name: ["Sports Openers", "Sports Liners", "Sports Closers"]})
+                        .tolerate((err) => {
+                        });
+
+                var catIDs = [];
+                var cats = {};
+
+                if (categories.length > 0)
+                {
+                    categories.forEach(function (category) {
+                        catIDs.push(category.ID);
+                        cats[category.ID] = category.name;
+                    });
+                }
+
+                var subcategories = await Subcategory.find({parentid: catIDs})
+                        .tolerate((err) => {
+                        });
+
+
+                if (subcategories.length > 0)
+                {
+                    subcategories.forEach(function (subcategory) {
+                        if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined')
+                        {
+                            sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
+                        }
+                    });
+                }
+
+                // Load subcats IDs for each show
+                sails.log.verbose(`BOOTSTRAP: Loading showcats into configuration.`);
+
+                var categories = await Category.find({name: ["Show Openers", "Show Returns", "Show Closers"]})
+                        .tolerate((err) => {
+                        });
+
+                var catIDs = [];
+                var cats = {};
+
+                if (categories.length > 0)
+                {
+                    categories.forEach(function (category) {
+                        catIDs.push(category.ID);
+                        cats[category.ID] = category.name;
+                    });
+                }
+
+                var subcategories = await Subcategory.find({parentid: catIDs})
+                        .tolerate((err) => {
+                        });
+
+
+                if (subcategories.length > 0)
+                {
+                    sails.config.custom.showcats = {};
+                    subcategories.forEach(function (subcategory) {
+                        if (typeof sails.config.custom.showcats[subcategory.name] === 'undefined')
+                            sails.config.custom.showcats[subcategory.name] = {"Show Openers": null, "Show Returns": null, "Show Closers": null};
+                        sails.config.custom.showcats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
+                    });
+                }
+                
+                return resolve();
+            } catch (e) {
+                return reject(e);
+            }
+        });
+    }
 
 };
