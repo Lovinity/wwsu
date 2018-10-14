@@ -842,7 +842,12 @@ module.exports.bootstrap = async function (done) {
                                 // Do the break if we are supposed to
                                 if (doBreak)
                                 {
+                                    // Reset the break clock
                                     Status.errorCheck.prevBreak = moment();
+                                    
+                                    // Reset the liner clock as well so liners do not play too close to breaks
+                                    Status.errorCheck.prevLiner = moment();
+                                    
                                     // enforce station ID for top of the hour breaks
                                     if (key === 0)
                                     {
@@ -864,6 +869,10 @@ module.exports.bootstrap = async function (done) {
                                                     sails.log.error(err);
                                                 });
                                     }
+                                    
+                                    // Remove liners in the queue. Do not do the playlist re-queue method as there may be a big prerecord or playlist in the queue.
+                                    await sails.helpers.songs.remove(false, sails.config.custom.subcats.liners, true, true);
+                                    
                                     // Get the configured break tasks
                                     var breakOpts = sails.config.custom.breaks[key];
                                     // Reverse the order of execution so queued things are in the same order as configured.
@@ -903,6 +912,22 @@ module.exports.bootstrap = async function (done) {
                                                 }
                                             });
                                         });
+                                    }
+                                    // If not doing a break, check to see if it's time to do a liner
+                                } else {
+                                    // Don't do a liner if it was too soon.
+                                    if (Status.errorCheck.prevLiner === null || moment().diff(moment(Status.errorCheck.prevLiner), 'minutes') > sails.config.custom.linerTime)
+                                    {
+                                        // Only do liners when in automation
+                                        if (Meta['A'].state.startsWith("automation_"))
+                                        {
+                                            // If there is at least 1 track in the queue, and both the current track and the next track are not noMeta tracks, queue a liner
+                                            if (queue.length > 1 && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[1].IDSubcat)) === -1)
+                                            {
+                                                Status.errorCheck.prevLiner = moment();
+                                                await sails.helpers.songs.queue(sails.config.custom.subcats.liners, 'Top', 1);
+                                            }
+                                        }
                                     }
                                 }
 

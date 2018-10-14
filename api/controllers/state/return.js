@@ -32,7 +32,7 @@ module.exports = {
             // Perform the break
             if (Meta['A'].state.includes('halftime'))
             {
-                await sails.helpers.rest.removeMusic(false, false);
+                await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak);
                 // Sports liners for sports halftime
                 if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
@@ -47,7 +47,7 @@ module.exports = {
 
                 var d = new Date();
                 var num = d.getMinutes();
-                await sails.helpers.rest.removeMusic(false, false);
+                await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak);
                 // Queue station IDs if after :50 and before :10, or if it's been an hour or more since the last station ID.
                 if (num >= 50 || num < 10 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
                 {

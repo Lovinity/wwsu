@@ -68,7 +68,7 @@ module.exports = {
 
                 // Operation: Remove all music tracks, queue a station ID, and disable auto DJ. CRON will queue and play the remote stream track once queue is empty.
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
-                await sails.helpers.rest.removeMusic(false, false);
+                await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();

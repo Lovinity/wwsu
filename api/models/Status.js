@@ -82,6 +82,9 @@ module.exports = {
 
         // moment stamp of when the most recent PSA break was queued.
         prevBreak: null,
+        
+        // moment stamp of when the most recent standard liner was queued.
+        prevLiner: null,
 
         // Used for determining if we have a sudden jump in queue time in RadioDJ
         trueZero: 0,

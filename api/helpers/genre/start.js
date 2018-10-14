@@ -44,7 +44,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('RefreshEvents', 0, 10000); // Reload events in RadioDJ just in case
 
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Don't want RadioDJ queuing tracks until we have switched rotations
-                    await sails.helpers.rest.removeMusic(true); // We want the rotation change to be immediate; clear out any music tracks in the queue. But, leave requested tracks in the queue.
+                    await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, true); // We want the rotation change to be immediate; clear out any music tracks in the queue. But, leave requested tracks in the queue.
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                     await sails.helpers.rest.cmd('RunEvent', event[0].ID, 5000);

@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'songs.queueFromSubcategory',
+    friendlyName: 'songs.queue',
 
     description: 'Queue a track or tracks from a specified array of subcategories. This is designed to be used with sails.config.custom.subcats .',
 
