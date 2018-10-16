@@ -459,7 +459,7 @@ module.exports.bootstrap = async function (done) {
                         }
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Genre: Default`);
-                        Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_played: moment('2002-01-01').toISOString(), playlist_position: 0});
+                        Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
                         Playlists.active.name = null;
                         Playlists.active.position = 0;
 

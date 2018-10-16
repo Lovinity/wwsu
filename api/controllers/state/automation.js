@@ -203,7 +203,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                     await Attendance.createRecord(`Genre: Default`);
 
-                    await Meta.changeMeta({state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: null});
+                    await Meta.changeMeta({state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
                     await sails.helpers.error.reset('automationBreak');
 
                     // Add up to 3 track requests if any are pending

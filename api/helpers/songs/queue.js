@@ -1,4 +1,4 @@
-/* global Category, Subcategory, Songs, Statemeta, sails, wait */
+/* global Category, Subcategory, Songs, Statemeta, sails, wait, moment */
 
 module.exports = {
 
@@ -60,6 +60,15 @@ module.exports = {
             sails.log.verbose(`Songs records retrieved: ${thesongs.length}`);
             sails.log.silly(thesongs);
 
+            // Remove songs that are expired
+            if (thesongs.length > 0)
+            {
+                thesongs.forEach(function (thesong, index) {
+                    if (moment(thesong.start_date).isAfter(moment()) || (moment(thesong.end_date).isAfter(moment("2002-01-01 00:00:02")) && moment().isAfter(moment(thesong.end_date))) || (thesong.play_limit > 0 && thesong.count_played > thesong.play_limit))
+                        delete thesongs[index];
+                });
+            }
+
             // If duration is provided, remove songs that fail the duration check
             if (inputs.duration !== null && thesongs.length > 0)
             {
@@ -95,7 +104,7 @@ module.exports = {
                             try {
                                 if (typeof thesong === 'undefined')
                                     return resolve(false);
-                                
+
                                 // Check rotation rules first
                                 var canplay = await sails.helpers.songs.checkRotationRules(thesong.ID);
                                 if (canplay)
