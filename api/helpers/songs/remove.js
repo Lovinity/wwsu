@@ -1,4 +1,4 @@
-/* global sails, Requests, _ */
+/* global sails, Requests, _, Meta */
 
 module.exports = {
 
@@ -26,6 +26,11 @@ module.exports = {
             type: 'boolean',
             defaultsTo: false,
             description: 'If false, system will clear the entire queue and re-queue tracks that meet criteria. If true, system will remove tracks that fail specified criteria one by one instead of clearing the entire queue and re-queuing appropriate tracks.'
+        },
+        includeCurrentTrack: {
+            type: 'boolean',
+            defaultsTo: false,
+            description: 'If true, then if the currently playing track fails criteria, PlayPlaylistTrack will be sent to skip to the next track in automation in 5 seconds (to allow any queuing of new tracks first).'
         }
     },
 
@@ -54,7 +59,8 @@ module.exports = {
                 await sails.helpers.rest.cmd("ClearPlaylist");
 
                 // Next, filter out all the necessary tracks
-                for (i = queue.length - 1; i >= 0; i -= 1) {
+                var skipCurrent = false;
+                for (var i = queue.length - 1; i >= 0; i -= 1) {
                     if (parseInt(queue[i].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) !== -1)))
                     {
                         // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
@@ -62,6 +68,8 @@ module.exports = {
                         {
                             sails.log.verbose(`REMOVING`);
                             queue.splice(i, 1);
+                            if (i === 0 && inputs.includeCurrentTrack)
+                                skipCurrent = true;
                         }
                     }
                 }
@@ -77,10 +85,19 @@ module.exports = {
                         });
                     });
                 }
-                
+
+                if (skipCurrent && (parseInt(queue[0].Duration) - parseInt(queue[0].Elapsed)) > 10)
+                    setTimeout(function () {
+                        return new Promise(async (resolve2) => {
+                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                            return resolve2();
+                        });
+                    }, 5000);
+
                 // Remove tracks one at a time instead of re-queuing a new playlist
             } else {
-                for (i = queue.length - 1; i > 0; i -= 1) {
+                var skipCurrent = false;
+                for (var i = queue.length - 1; i >= 0; i -= 1) {
                     if (parseInt(queue[i].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) !== -1)))
                     {
                         // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
@@ -88,9 +105,19 @@ module.exports = {
                         {
                             sails.log.verbose(`REMOVING`);
                             await sails.helpers.rest.cmd('RemovePlaylistTrack', i - 1);
+                            if (i === 0 && inputs.includeCurrentTrack)
+                                skipCurrent = true;
                         }
                     }
                 }
+
+                if (skipCurrent && (parseInt(queue[0].Duration) - parseInt(queue[0].Elapsed)) > 10)
+                    setTimeout(function () {
+                        return new Promise(async (resolve2) => {
+                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                            return resolve2();
+                        });
+                    }, 5000);
             }
 
             return exits.success();

@@ -203,7 +203,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                 } else if (inputs.type === 1) {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
-                    await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow); // Do not leave requests in the queue for prerecords; the prerecord should be beginning ASAP.
+                    await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false, (Meta.automation[0] && (parseInt(Meta.automation[0].Duration) - parseInt(Meta.automation[0].Elapsed) > (sails.config.custom.liveSkip * 60))));
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                     await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), dj: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await loadPlaylist();

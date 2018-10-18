@@ -31,7 +31,7 @@ module.exports = {
             defaultsTo: false
         },
 
-        avatar: {
+        avatar: { // HTML path relative to assets/images/avatars/
             type: 'string',
             required: true
         },

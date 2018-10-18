@@ -28,7 +28,7 @@ module.exports = {
                     });
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);
-            await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak);
+            await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false, true);
 
             // Perform the break
             if (Meta['A'].state.includes('halftime'))
@@ -47,7 +47,6 @@ module.exports = {
 
                 var d = new Date();
                 var num = d.getMinutes();
-                await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak);
                 // Queue station IDs if after :50 and before :10, or if it's been an hour or more since the last station ID.
                 if (num >= 50 || num < 10 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
                 {

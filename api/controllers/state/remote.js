@@ -68,7 +68,7 @@ module.exports = {
 
                 // Operation: Remove all music tracks, queue a station ID, and disable auto DJ. CRON will queue and play the remote stream track once queue is empty.
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
-                await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow);
+                await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false, true);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
@@ -81,6 +81,10 @@ module.exports = {
                 }
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await Meta.changeMeta({state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+
+                // Check for duration of current track. If it is greater than configured time, skip it.
+                if (Meta.automation[0] && (parseInt(Meta.automation[0].Duration) - parseInt(Meta.automation[0].Elapsed)) > (sails.config.custom.liveSkip * 60))
+                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});

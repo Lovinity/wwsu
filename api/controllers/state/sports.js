@@ -67,7 +67,7 @@ module.exports = {
 
                 // Operation: Remove all music tracks, queue a station ID, queue an opener if one exists for this sport, and start the next track if current track is music.
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
-                await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow);
+                await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false, true);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 if (typeof sails.config.custom.sportscats[inputs.sport] !== 'undefined')
@@ -75,10 +75,6 @@ module.exports = {
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-
-                // Due to timeliness of sports, skip currently playing track if it is a music track
-                if (Meta.automation[0].TrackType === 'Music')
-                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
 
                 // Change meta
                 if (inputs.remote)
