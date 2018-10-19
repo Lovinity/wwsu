@@ -78,12 +78,12 @@ module.exports = {
                         // If there's an entry with a null time_out, then consider the director clocked in
                         if (record.time_out === null)
                         {
-                            await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString(true)})
+                            await Directors.update({name: record.name}, {present: true, since: moment(record.time_in).toISOString(true)})
                                     .tolerate((err) => {
                                     })
                                     .fetch();
                         } else {
-                            await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString(true)})
+                            await Directors.update({name: record.name}, {present: false, since: moment(record.time_out).toISOString(true)})
                                     .tolerate((err) => {
                                     })
                                     .fetch();
