@@ -468,10 +468,10 @@ function processDirectors()
                              </div>
                              `;
                              */
-                            innercontent.innerHTML += `<div style="width: 160px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="96" class="rounded-circle"></div>
-    <span class="notification badge badge-${theClass}" style="font-size: 1.25em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br><span style="font-size: 1em;">${dodo.position}</span></div>`;
+                            innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
@@ -483,6 +483,49 @@ function processDirectors()
                     slidetimer = setTimeout(doSlide, 14000);
                 });
             }};
+        slides[1].do = false;
+
+        if (slide === 2)
+        {
+            var innercontent = document.getElementById('directors');
+            innercontent.innerHTML = '';
+            Directors().each(function (dodo) {
+                try {
+                    if (dodo.present)
+                        directorpresent = true;
+                    var color = 'rgba(211, 47, 47, 0.8)';
+                    var text1 = 'OUT';
+                    var theClass = 'danger';
+                    var text2 = '';
+                    if (dodo.since !== null && moment(dodo.since).isValid())
+                        text2 = moment(dodo.since).from(moment(Meta.time), true);
+                    if (dodo.present)
+                    {
+                        var color = 'rgba(56, 142, 60, 0.8)';
+                        var text1 = 'IN';
+                        var theClass = 'success';
+                    }
+                    /*
+                     innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
+                     <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
+                     <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
+                     <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
+                     </div>
+                     `;
+                     */
+                    innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred in Directors iteration in doSlide.`
+                    });
+                }
+            });
+        }
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
@@ -565,6 +608,7 @@ function statusSocket()
 function doSlide(same = false)
 {
     try {
+        var prevslide = slide;
         clearTimeout(slidetimer);
         slidetimer = true;
         if (!same)
@@ -627,21 +671,27 @@ function doSlide(same = false)
                             });
                         }, 30000);
                     });
-
                 } else if (typeof slides[slide] !== 'undefined' && slides[slide].do)
                 {
-                    done = true;
-                    console.log(`Doing slide ${slide}`);
-                    try {
-                        slides[slide].function();
-                    } catch (e) {
-                        console.log(e);
-                        iziToast.show({
-                            title: 'An error occurred - Please check the logs',
-                            message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
-                        });
-                        doSlide();
-                        return null;
+                    if (slide !== prevslide && !same)
+                    {
+                        done = true;
+                        console.log(`Doing slide ${slide}`);
+                        try {
+                            slides[slide].function();
+                        } catch (e) {
+                            console.log(e);
+                            iziToast.show({
+                                title: 'An error occurred - Please check the logs',
+                                message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
+                            });
+                            doSlide();
+                            return null;
+                        }
+                    } else {
+                        done = true;
+                        console.log(`Slide ${slide} already active. Setting new 14-second timer.`);
+                        slidetimer = setTimeout(doSlide, 14000);
                     }
                     var temp = document.getElementById(`slidebadge-${slide}`);
                     if (temp !== null)
@@ -666,6 +716,7 @@ function doSlide(same = false)
 <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: 937-775-5555</h1>
             </div>
             </div>`;
+                    slide = 1;
                 } catch (e) {
                     iziToast.show({
                         title: 'An error occurred - Please check the logs',
