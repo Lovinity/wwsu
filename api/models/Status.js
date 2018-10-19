@@ -56,7 +56,6 @@ module.exports = {
         {name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream for remote broadcasts has not reported online since initialization.', status: 4, time: null},
         {name: 'silence', label: 'Silence', data: 'The silence detection system has not reported silence since initialization.', status: 5, time: null},
         {name: 'EAS-internal', label: 'EAS NWS CAPS', data: 'No successful connection to all EAS NWS CAPS has been made yet since initialization.', status: 4, time: null},
-        {name: 'openproject', label: 'OpenProject', data: 'No successful connection to OpenProject since initialization.', status: 4, time: null},
         {name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 4, time: null},
         {name: 'music-library', label: 'Music Library', data: 'Music library tests have not yet executed since initialization.', status: 4, time: null},
         {name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar has not been loaded since initialization.', status: 4, time: null}

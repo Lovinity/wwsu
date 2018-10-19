@@ -127,13 +127,9 @@ module.exports.bootstrap = async function (done) {
         await Meta.changeMeta({time: moment().toISOString(true)});
     }
 
-    // Load work orders.
-    sails.log.verbose(`BOOTSTRAP: Loading tasks.`);
-    await Tasks.updateTasks();
-
     // Load directors.
-    sails.log.verbose(`BOOTSTRAP: Loading directors.`);
-    await Directors.updateDirectors(true);
+    sails.log.verbose(`BOOTSTRAP: Refreshing directors.`);
+    await Directors.updateDirectors();
 
     // Load Google Calendar.
     sails.log.verbose(`BOOTSTRAP: Loading calendar events.`);
@@ -853,28 +849,6 @@ module.exports.bootstrap = async function (done) {
         });
     });
 
-    // Every 5 minutes at second 00, update work orders. This is only done every 5 minutes because it puts a lot of load on OpenProject.
-    sails.log.verbose(`BOOTSTRAP: scheduling workOrders CRON.`);
-    cron.schedule('0 */5 * * * *', () => {
-        sails.log.debug(`CRON workOrders triggered.`);
-        try {
-            Tasks.updateTasks();
-        } catch (e) {
-            sails.log.error(e);
-        }
-    });
-
-    // Every 5 minutes on second 01, check for changes in directors on OpenProject.
-    sails.log.verbose(`BOOTSTRAP: scheduling updateDirectors CRON.`);
-    cron.schedule('1 */5 * * * *', () => {
-        sails.log.debug(`CRON updateDirectors triggered.`);
-        try {
-            Directors.updateDirectors();
-        } catch (e) {
-            sails.log.error(e);
-        }
-    });
-
     // Every 5 minutes on second 02, update Calendar.
     sails.log.verbose(`BOOTSTRAP: scheduling updateCalendar CRON.`);
     cron.schedule('2 */5 * * * *', () => {
@@ -1117,9 +1091,9 @@ module.exports.bootstrap = async function (done) {
             try {
                 // Make sure all models have a record at ID 1, even if it's a dummy.
                 // TODO: Find a way to auto-populate these arrays.
-                var checksMemory = [Directors, Recipients, Status, Tasks];
+                var checksMemory = [Recipients, Status];
                 var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
-                var checksNodebase = [Announcements, Discipline, Eas, Calendar, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet];
+                var checksNodebase = [Announcements, Discipline, Eas, Calendar, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors];
 
                 // Memory checks
                 var checkStatus = {data: ``, status: 5};
@@ -1339,7 +1313,7 @@ module.exports.bootstrap = async function (done) {
                         .tolerate((err) => {
                         });
                 // Force reload all directors based on timesheets
-                await Directors.updateDirectors(true);
+                await Directors.updateDirectors();
 
                 return resolve();
             } catch (e) {

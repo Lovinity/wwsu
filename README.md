@@ -768,32 +768,6 @@ This endpoint supports sockets, uses the "status" event, and returns data in the
 			},
 			...
         ]
-## Tasks [/tasks]
-Tasks endpoints regard work orders for directors.
-### /tasks/get [GET /tasks/get]
-Get an array of the OpenProject work orders for all directors and all projects.
-This endpoint supports sockets, uses the "tasks" event, and returns data in the structure defined in the websockets section.
-#### Response 200
-		[
-			{
-				"createdAt": "2018-05-29T18:13:01.763Z",
-				"updatedAt": "2018-05-29T18:13:01.763Z",
-				"ID": 8,
-				"unique": 63, // OpenProject ID
-				"subject": "Outline Process for Liner Adds", // Task
-				"category": "Unknown",
-				"project": "Liner Creation", // Tasks are grouped by projects
-				"type": "Task", // Types are defined in OpenProject configuration
-				"priority": "Normal", // Priorities are defined in OpenProject configuration
-				"status": "Completed / Pending Review", // Statuses are defined in OpenProject configuration
-				"start": "2018-05-10", // Start date. Will be null for no start date.
-				"due": "2018-05-13", // Task due date. Will be null for no due date.
-				"percent": 100, // Percent completed, 0-100
-				"assignee": "Tyler Pike", // The name of the Director/user who should complete this task
-				"responsible": "Patrick Schmalstig" // The name of the director/user overseeing this task; typically, the assignee will report updates to responsible.
-			},
-			...
-		]
 ## Timesheet [/timesheet]
 Timesheet endpoints regard the internal timesheet and clock in/out system for WWSU directors.
 ### /timesheet/add [POST /timesheet/add]

@@ -73,7 +73,7 @@ module.exports = {
             await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(true), time_out: moment(inputs.time_out).toISOString(true), approved: inputs.approved});
 
             // Force a re-load of all directors to update any possible changes in presence
-            await Directors.updateDirectors(true);
+            await Directors.updateDirectors();
 
             return exits.success();
         } catch (e) {

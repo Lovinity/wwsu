@@ -4,8 +4,6 @@ try {
 
 // Define data variables
     var Directors = TAFFY();
-    var Tasks = TAFFY();
-    var taskProjects = {};
     var Meta = {time: moment().toISOString()};
     var Status = TAFFY();
 
@@ -30,8 +28,8 @@ try {
     var lastBurnIn = null;
 
 // Define initial slides
-    var slides = {1000: {
-            name: 'WWSU', class: 'primary', do: true, function: function () {
+    var slides = {1: {
+            name: 'WWSU', class: 'wwsu-red', do: true, function: function () {
                 $('#slide').animateCss('fadeOutUp', function () {
                     content.innerHTML = `<div class="animated bounceIn">
                     <div style="text-align: center; width: 100%;"><img src="../../images/display/logo.png" style="max-height: 300px; width: auto;"></div>
@@ -43,7 +41,7 @@ try {
             </div>
             </div>
             `;
-                    slidetimer = setTimeout(doSlide, 7000);
+                    slidetimer = setTimeout(doSlide, 14000);
                 });
             }
         }};
@@ -203,7 +201,6 @@ waitFor(function () {
     io.socket.on('connect', function () {
         onlineSocket();
         metaSocket();
-        taskSocket();
         directorSocket();
         statusSocket();
         // Remove the lost connection overlay
@@ -219,7 +216,6 @@ waitFor(function () {
 
     onlineSocket();
     metaSocket();
-    taskSocket();
     directorSocket();
     statusSocket();
     if (disconnected)
@@ -302,29 +298,6 @@ waitFor(function () {
             }
         }
         processStatus();
-    });
-
-// Update tasks when task events are passed
-    io.socket.on('tasks', function (data) {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                switch (key)
-                {
-                    case 'insert':
-                        Tasks.insert(data[key]);
-                        break;
-                    case 'update':
-                        Tasks({ID: data[key].ID}).update(data[key]);
-                        break;
-                    case 'remove':
-                        Tasks({ID: data[key]}).remove();
-                        break;
-                }
-            }
-        }
-        processTasks();
     });
 });
 
@@ -420,9 +393,9 @@ function processStatus()
                 statusLine.innerHTML = 'WWSU Status: Needs Attention';
                 // Flash screen for partial outages every 5 seconds
                 // Flash screen for major outages every second
-            flashInterval = setInterval(function () {
+                flashInterval = setInterval(function () {
                     $("html, body").css("background-color", "#FF9800");
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }, 5000);
@@ -464,18 +437,52 @@ function processDirectors()
 {
     try {
         directorpresent = false;
-        Directors().each(function (director) {
-            try {
-                if (director.present)
-                    directorpresent = true;
-            } catch (e) {
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: `Error occurred during Directors iteration in processDirectors call.`
+
+        // Slide 3 is a list of WWSU directors and whether or not they are currently clocked in
+        slides[2] = {name: 'Directors', class: 'info', do: true, function: function () {
+                $('#slide').animateCss('lightSpeedOut', function () {
+                    content.innerHTML = `<div class="animated fadeInDown" ><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1>
+            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div></div>`;
+                    var innercontent = document.getElementById('directors');
+                    Directors().each(function (dodo) {
+                        try {
+                            if (dodo.present)
+                                directorpresent = true;
+                            var color = 'rgba(211, 47, 47, 0.8)';
+                            var text1 = 'OUT';
+                            var theClass = 'danger';
+                            var text2 = '';
+                            if (dodo.since !== null && moment(dodo.since).isValid())
+                                text2 = moment(dodo.since).from(moment(Meta.time), true);
+                            if (dodo.present)
+                            {
+                                var color = 'rgba(56, 142, 60, 0.8)';
+                                var text1 = 'IN';
+                                var theClass = 'success';
+                            }
+                            /*
+                             innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
+                             <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
+                             <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
+                             <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
+                             </div>
+                             `;
+                             */
+                            innercontent.innerHTML += `<div style="width: 160px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="96" class="rounded-circle"></div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1.25em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br><span style="font-size: 1em;">${dodo.position}</span></div>`;
+                        } catch (e) {
+                            console.error(e);
+                            iziToast.show({
+                                title: 'An error occurred - Please check the logs',
+                                message: `Error occurred in Directors iteration in doSlide.`
+                            });
+                        }
+                    });
+                    slidetimer = setTimeout(doSlide, 14000);
                 });
-                console.error(e);
-            }
-        });
+            }};
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
@@ -485,192 +492,6 @@ function processDirectors()
     }
 }
 
-// Do task related stuff when tasks changes
-function processTasks()
-{
-    try {
-        taskProjects = {};
-
-        // Delete all project slides
-        for (var key in slides)
-        {
-            if (key < 100)
-                delete slides[key];
-        }
-
-        // Process each task
-        Tasks().each(function (task) {
-            try {
-                // Skip any tasks that are complete or have a start date later than today.
-                if (task.percent >= 100 || (task.start !== null && moment(task.start).startOf('day').isAfter(moment(Meta.time))))
-                    return null;
-
-                if (typeof taskProjects[task.project] === 'undefined')
-                    taskProjects[task.project] = [];
-                taskProjects[task.project].push(task);
-            } catch (e) {
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: `Error occurred during Tasks iteration in processTasks call.`
-                });
-                console.error(e);
-            }
-        });
-
-        // Iterate through each project and create a slide for it
-        var projects = 0;
-        for (var key in taskProjects)
-        {
-            if (taskProjects.hasOwnProperty(key))
-            {
-                projects++;
-                slides[projects] = {name: 'Work Orders', class: 'primary', do: true};
-                slides[projects].content = `<div class="animated fadeInDown">
-                                    <h1 style="text-align: center; font-size: 3em; color: #FFFFFF; width: 100%">Work Orders - ${key}</h1>
-                                    <div style="overflow-y: hidden; font-size: 1em; width: 100%; color: #ffffff;" class="container">
-                                    <div class="row">
-                                        <div class="col-4">
-                                            Task
-                                        </div>
-                                        <div class="col-2">
-                                            Type
-                                        </div>
-                                        <div class="col-2">
-                                            Assigned To
-                                        </div>
-                                        <div class="col-2">
-                                            Status
-                                        </div>
-                                        <div class="col-2">
-                                            Due
-                                        </div>
-                                    </div>
-                                    `;
-            }
-            var tasksP = {};
-
-            // Determine order of each task
-            taskProjects[key].forEach(function (task, index) {
-                try {
-                    var sortvalue = 0;
-                    if (typeof task.priority === 'undefined')
-                        task.priority = 'undefined';
-                    if (task.priority.includes("Immediate"))
-                    {
-                        sortvalue += 0;
-                    } else if (task.priority.includes("High"))
-                    {
-                        sortvalue += 100000000000000;
-                    } else if (task.priority.includes("Normal"))
-                    {
-                        sortvalue += 200000000000000;
-                    } else {
-                        sortvalue += 300000000000000;
-                    }
-                    if (moment(task.due).isValid())
-                    {
-                        sortvalue += moment(task.due).valueOf();
-                    } else {
-                        sortvalue += 100000000000000;
-                    }
-                    tasksP[sortvalue] = task;
-                } catch (e) {
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred during iteration ${index} of taskProjects[${key}] in Tasks[0] call.`
-                    });
-                    console.error(e);
-                }
-            });
-            var tasksO = {};
-            Object.keys(tasksP).sort().forEach(function (key) {
-                tasksO[key] = tasksP[key];
-            });
-
-            // Now, create the tasks in the slide
-            for (var key in tasksO)
-            {
-                if (tasksO.hasOwnProperty(key))
-                {
-                    var dodo = tasksO[key];
-                    var color = `rgba(96, 125, 139, 0.4);`;
-                    var border = `success`;
-                    if (typeof dodo.priority === 'undefined')
-                        dodo.priority = 'Undefined';
-                    if (typeof dodo.status === 'undefined')
-                        dodo.status = 'Undefined';
-                    if (dodo.priority.includes("Immediate"))
-                    {
-                        color = `rgba(244, 67, 54, 0.4);`;
-                    } else if (dodo.priority.includes("High"))
-                    {
-                        color = `rgba(255, 235, 59, 0.4);`;
-                    } else if (dodo.priority.includes("Normal"))
-                    {
-                        color = `rgba(0, 188, 212, 0.4);`;
-                    }
-                    if (moment(dodo.due).isValid())
-                    {
-                        if (dodo.status.includes("Deferred"))
-                        {
-                            border = 'secondary';
-                        } else if (moment(dodo.due).add(1, 'days').isBefore(moment()))
-                        {
-                            border = 'danger';
-                        } else if (moment(dodo.due).add(1, 'days').isBefore(moment().add(1, 'days')))
-                        {
-                            border = 'warning';
-                        }
-                    } else {
-                        border = 'primary';
-                    }
-                    slides[projects].content += `
-                    <div class="row task m-1 border border-${border}" style="width: 100%; background: ${color}; text-align: left; font-size: 1em;">
-                        <div class="order-progress" style="background: #ffffff; opacity: 0.25; width: ${(typeof dodo.percent !== 'undefined') ? dodo.percent : 0}%;"></div>
-                        <div class="col-4">
-                            <span class="text-light">${(typeof dodo.subject !== 'undefined') ? dodo.subject : 'Undefined task'}</span>
-                        </div>
-                        <div class="col-2">
-                            <span class="text-info-light">${(typeof dodo.type !== 'undefined') ? dodo.type : 'Undefined'}</span>
-                        </div>
-                        <div class="col-2">
-                            <span class="text-warning-light">${(typeof dodo.assignee !== 'undefined') ? dodo.assignee : 'Not assigned'}</span>
-                        </div>
-                        <div class="col-2">
-                            <span class="text-success-light">${(typeof dodo.status !== 'undefined') ? dodo.status : 'Undefined'}</span>
-                        </div>
-                        <div class="col-2">
-                            <span class="text-danger-light">${(typeof dodo.due !== 'undefined' && moment(dodo.due).isValid()) ? dodo.due : 'Not specified'}</span>
-                        </div>
-                    </div>`;
-                }
-            }
-            slides[projects].content += `</div></div>`;
-            slides[projects].function = function () {
-                $('#slide').animateCss('fadeOutUp', function () {
-                    if (typeof slides[slide] !== 'undefined' && typeof slides[slide].content !== 'undefined')
-                    {
-                        content.innerHTML = slides[slide].content;
-                        slidetimer = setTimeout(doSlide, 14000);
-                    } else {
-                        slide = 1000;
-                        Tasks[0](Tasks);
-                        doSlide(true);
-                    }
-                });
-            };
-        }
-    } catch (e) {
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred during the call of Tasks[0].'
-        });
-        console.error(e);
-    }
-}
-
-
-
 function onlineSocket()
 {
     console.log('attempting online socket');
@@ -679,22 +500,6 @@ function onlineSocket()
         } catch (e) {
             console.log('FAILED ONLINE CONNECTION');
             setTimeout(onlineSocket, 10000);
-        }
-    });
-}
-
-// Called to replace all data in Tasks with body of request
-function taskSocket()
-{
-    console.log('attempting orders socket');
-    io.socket.post('/tasks/get', {}, function serverResponded(body, JWR) {
-        try {
-            Tasks = TAFFY();
-            Tasks.insert(body);
-            processTasks();
-        } catch (e) {
-            console.log('FAILED TASKS CONNECTION');
-            setTimeout(taskSocket, 10000);
         }
     });
 }
@@ -764,19 +569,17 @@ function doSlide(same = false)
         slidetimer = true;
         if (!same)
             slide += 1;
-        var projects = taskProjects;
         console.log(`Slide ${slide}.`);
 
         // Do slides if we are not to be in power saving mode
         if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote'))
         {
-            slidebadges.innerHTML = `<span class="m-1 btn btn-outline-primary btn-sm" id="slidebadge-orders">Work Orders</span>`;
-
+            slidebadges.innerHTML = ``;
             // Determine highest slide number so we know when we are done
             var highestslide = 0;
             for (var key in slides) {
                 if (slides.hasOwnProperty(key)) {
-                    if (slides[key].do && key > 99)
+                    if (slides[key].do)
                     {
                         if (highestslide < parseInt(key))
                             highestslide = parseInt(key);
@@ -825,28 +628,7 @@ function doSlide(same = false)
                         }, 30000);
                     });
 
-                    // Non work order slides
-                } else if (typeof slides[slide] !== 'undefined' && slides[slide].do && slide > 99)
-                {
-                    done = true;
-                    console.log(`Doing slide ${slide}`);
-                    try {
-                        slides[slide].function();
-                    } catch (e) {
-                        console.error(e);
-                        iziToast.show({
-                            title: 'An error occurred - Please check the logs',
-                            message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
-                        });
-                        doSlide();
-                        return null;
-                    }
-                    var temp = document.getElementById(`slidebadge-${slide}`);
-                    if (temp !== null)
-                        temp.className = `m-1 btn btn-${slides[slide].class} btn-sm`;
-
-                    // Work order slides
-                } else if (typeof slides[slide] !== 'undefined' && slides[slide].do && slide < 100)
+                } else if (typeof slides[slide] !== 'undefined' && slides[slide].do)
                 {
                     done = true;
                     console.log(`Doing slide ${slide}`);
@@ -861,9 +643,9 @@ function doSlide(same = false)
                         doSlide();
                         return null;
                     }
-                    var temp = document.getElementById(`slidebadge-orders`);
+                    var temp = document.getElementById(`slidebadge-${slide}`);
                     if (temp !== null)
-                        temp.className = `m-1 btn btn-primary btn-sm`;
+                        temp.className = `m-1 btn btn-${slides[slide].class} btn-sm`;
                 } else {
                     slide += 1;
                 }

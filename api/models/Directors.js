@@ -9,7 +9,7 @@
 
 module.exports = {
     // This model is only a container for temporary data. It should not persist. Use memory instead of SQL.
-    datastore: 'ram',
+    datastore: 'timesheets',
     attributes: {
         ID: {
             type: 'number',
@@ -31,9 +31,9 @@ module.exports = {
             defaultsTo: false
         },
 
-        avatar: { // HTML path relative to assets/images/avatars/
+        avatar: {// HTML path relative to assets/images/avatars/
             type: 'string',
-            required: true
+            defaultsTo: 'default.png'
         },
 
         position: {
@@ -51,159 +51,47 @@ module.exports = {
             columnType: 'datetime'
         }
     },
-    directors: {}, // Object of OpenProject director users
-    directorKeys: 0, // Number of directors in memory
 
     /**
-     * Re-updates directors in database from OpenProject
-     * @constructor
-     * @param {boolean} forced - true if we are to re-determine the presence of all directors from the Timesheet database
+     * Re-updates director presence
      */
-    updateDirectors: function (forced = false) {
+    updateDirectors: function () {
         return new Promise(async (resolve, reject) => {
             sails.log.debug(`updateDirectors called.`);
-            var directorNames = [];
-            // Get users from OpenProject via API
-            var req = {
-                headers: {
-                    Authorization: 'Basic ' + sails.config.custom.pm.auth,
-                    'Content-Type': 'application/json'
-                }
-            };
-            try {
-                needle('get', sails.config.custom.pm.host + sails.config.custom.pm.path + 'users', {}, req)
-                        .then(async function (resp) {
-                            // Because this code is used twice, condense it into a variable
-                            var endFunction = async function () {
-                                sails.log.verbose(`endFunction called.`);
+            var names = {};
 
-                                sails.log.verbose(`Removed ${removed.length} directors.`);
-                                sails.log.silly(removed);
-
-                                // Remove deleted directors from memory
-                                removed.forEach(function (record) {
-                                    delete Directors.directors[record.login];
-                                });
-
-                                Directors.directorKeys = Object.keys(Directors.directors).length;
-                                return resolve();
-                            };
-                            var body = resp.body;
-                            if (!body)
-                            {
-                                Status.changeStatus([{name: `openproject`, status: 2, data: 'No data returned', label: `OpenProject`}]);
-                                return resolve();
-                            }
-                            try {
-                                body = JSON.parse(body);
-                                var stuff = body._embedded.elements;
-                                sails.log.silly(stuff);
-                                if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)
-                                    Directors.directors = {};
-                                stuff.forEach(function (director) {
-                                    // Check for valid returns
-                                    if (typeof director.login === 'undefined' || typeof director.name === 'undefined' || typeof director.admin === 'undefined' || typeof director.status === 'undefined')
-                                        return null;
-
-                                    // Skip non-active or non-invited users
-                                    if (director.status === 'active' || director.status === 'invited')
-                                    {
-                                        directorNames.push(director.name);
-
-                                        // If user does not exist in the database, create it
-                                        if (typeof Directors.directors[director.login] === 'undefined')
-                                        {
-                                            Directors.directors[director.login] = director;
-                                        }
-                                        
-                                        // Get position from configuration
-                                        director.position = '';
-                                        for (var key in sails.config.custom.pm.directors)
-                                        {
-                                            if (sails.config.custom.pm.directors.hasOwnProperty(key) && key === director.name)
-                                                director.position = sails.config.custom.pm.directors[key];
-                                        }
-
-                                        Directors.findOrCreate({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: director.position, present: false, since: moment().toISOString(true)})
-                                                .exec((err, user, wasCreated) => {
-
-                                                    // Update director if anything changed.
-                                                    if (!wasCreated && (director.login !== user.login || director.name !== user.name || director.admin !== user.admin || director.avatar !== user.avatar || director.position !== user.position))
-                                                    {
-                                                        Directors.update({name: director.name}, {login: director.login, name: director.name, admin: director.admin, avatar: director.avatar, position: director.position}).fetch().exec(function (err2, user2) {});
-                                                    }
-                                                });
-                                    }
-                                });
-
-                                // Remove directors which no longer exist in OpenProject
-                                var removed = await Directors.destroy({name: {'!=': directorNames}})
-                                        .tolerate((err) => {
-                                            return reject(err);
-                                        })
-                                        .fetch();
-
-                                // If there was a change in the number of users, or we are forcing a reload, then reload all directors' presence.
-                                if (forced || Object.keys(Directors.directors).length !== Directors.directorKeys)
-                                {
-                                    sails.log.verbose(`Re-calculating directors and presence.`);
-                                    var names = {};
-                                    // Determine presence by analyzing timesheet records up to 14 days ago
-                                    var records = await Timesheet.find({
-                                        where: {
-                                            name: directorNames,
-                                            or: [
-                                                {time_out: {'>=': moment().subtract(14, 'days').toDate()}},
-                                                {time_out: null}
-                                            ]
-                                        },
-                                        sort: 'time_in DESC'})
-                                            .tolerate((err) => {
-                                                Status.changeStatus([{name: `openproject`, status: 3, data: 'Timesheet error', label: `OpenProject`}]);
-                                                return reject(err);
-                                            });
-                                    if (records.length > 0)
-                                    {
-                                        records.forEach(async function (record) {
-                                            if (typeof names[record.name] === 'undefined')
-                                            {
-                                                names[record.name] = true; // This director is to be listed
-                                                // If there's an entry with a null time_out, then consider the director clocked in
-                                                if (record.time_out === null)
-                                                {
-                                                    await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString(true)})
-                                                            .tolerate((err) => {
-                                                            })
-                                                            .fetch();
-                                                } else {
-                                                    await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString(true)})
-                                                            .tolerate((err) => {
-                                                            })
-                                                            .fetch();
-                                                }
-                                            }
-                                        });
-                                    }
-                                    // Report OpenProject as good, since parsing of API response has happened earlier.
-                                    Status.changeStatus([{name: `openproject`, status: 5, data: 'Operational.', label: `OpenProject`}]);
-                                    endFunction();
-                                } else {
-                                    // Report OpenProject as good, since parsing of API response has happened earlier.
-                                    Status.changeStatus([{name: `openproject`, status: 5, data: 'Operational.', label: `OpenProject`}]);
-                                    endFunction();
-                                }
-                            } catch (e) {
-                                Status.changeStatus([{name: `openproject`, status: 2, data: 'Error loading directors.', label: `OpenProject`}]);
-                                sails.log.error(e);
-                                return resolve();
-                            }
-                        })
-                        .catch(function (err) {
-                            return reject(err);
-                        });
-            } catch (e) {
-                return reject(e);
+            // Determine presence by analyzing timesheet records up to 14 days ago
+            var records = await Timesheet.find({
+                where: {
+                    or: [
+                        {time_out: {'>=': moment().subtract(14, 'days').toDate()}},
+                        {time_out: null}
+                    ]
+                },
+                sort: 'time_in DESC'});
+            if (records.length > 0)
+            {
+                records.forEach(async function (record) {
+                    if (typeof names[record.name] === 'undefined')
+                    {
+                        names[record.name] = true;
+                        // If there's an entry with a null time_out, then consider the director clocked in
+                        if (record.time_out === null)
+                        {
+                            await Directors.update({name: record.name}, {present: true, since: record.time_in.toISOString(true)})
+                                    .tolerate((err) => {
+                                    })
+                                    .fetch();
+                        } else {
+                            await Directors.update({name: record.name}, {present: false, since: record.time_out.toISOString(true)})
+                                    .tolerate((err) => {
+                                    })
+                                    .fetch();
+                        }
+                    }
+                });
             }
+            return resolve();
         });
     },
 
