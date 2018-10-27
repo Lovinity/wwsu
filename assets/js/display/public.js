@@ -321,6 +321,10 @@ function processCalendar(data, replace = false)
                     return -1;
                 if (moment(a.start).valueOf() > moment(b.start).valueOf())
                     return 1;
+                if (a.ID < b.ID)
+                    return -1;
+                if (a.ID > b.ID)
+                    return 1;
                 return 0;
             } catch (e) {
                 console.error(e);

@@ -20,7 +20,7 @@ var recentTracks = document.getElementById('recent-tracks');
 var messageIDs = [];
 var announcementIDs = [];
 var automationpost = null;
-var Meta = {};
+var Meta = {time: moment().toISOString(true)};
 var shouldScroll = false;
 var skipIt = -1;
 var blocked = false;
@@ -585,6 +585,8 @@ function doMeta(response)
                 position: 'bottomCenter',
                 timeout: 10000
             });
+            // Reload calendar each time a new track is given
+            processCalendar({});
         }
 
         // If a false was returned for web chatting, then disable it
@@ -925,7 +927,6 @@ function addAnnouncement(announcement)
 function processCalendar(data, replace = false)
 {
     try {
-
         // Run data processing
         if (replace)
         {
@@ -952,30 +953,51 @@ function processCalendar(data, replace = false)
             }
         }
 
+        var caldata = document.querySelector("#calendar");
+        caldata.innerHTML = ``;
+
         // Prepare the formatted calendar variable for our formatted events
         calendar = [];
 
+        // Define a comparison function that will order calendar events by start time when we run the iteration
+        var compare = function (a, b) {
+            try {
+                if (moment(a.start).valueOf() < moment(b.start).valueOf())
+                    return -1;
+                if (moment(a.start).valueOf() > moment(b.start).valueOf())
+                    return 1;
+                if (a.ID < b.ID)
+                    return -1;
+                if (a.ID > b.ID)
+                    return 1;
+                return 0;
+            } catch (e) {
+            }
+        };
+
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-        Calendar().get().forEach(function (event)
+        Calendar().get().sort(compare).forEach(function (event)
         {
             try {
                 if (!event.title.startsWith("Show:") && !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && !event.title.startsWith("Prerecord:") && !event.title.startsWith("Remote:") && !event.title.startsWith("Sports:") && !event.title.startsWith("Podcast:"))
                     return null;
-                var temp = {
-                    title: event.title,
-                    allDay: event.allDay,
-                    start: event.start,
-                    end: event.end,
-                    color: event.color,
-                    description: event.description
-                };
-                temp.color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(temp.color) ? hexRgb(temp.color) : hexRgb('#787878');
-                temp.color.red = Math.round(temp.color.red / 2);
-                temp.color.green = Math.round(temp.color.green / 2);
-                temp.color.blue = Math.round(temp.color.blue / 2);
-                temp.color = "#" + rgbHex(temp.color.red, temp.color.green, temp.color.blue);
-
-                calendar.push(temp);
+                if (moment(event.start).subtract(1, 'days').isAfter(moment(Meta.time)) || moment(event.end).isBefore(moment(Meta.time)))
+                    return null;
+                var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
+                finalColor.red = Math.round(finalColor.red);
+                finalColor.green = Math.round(finalColor.green);
+                finalColor.blue = Math.round(finalColor.blue);
+                caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
+                                            </div>
+                                            <div class="col-8">
+                                                ${event.title}
+                                            </div>
+                                        </div>
+                                    </div></div>`;
             } catch (e) {
                 console.error(e);
                 iziToast.show({
@@ -984,10 +1006,6 @@ function processCalendar(data, replace = false)
                 });
             }
         });
-
-        console.dir(calendar);
-        // Reload the schedule
-        loadCalendar();
     } catch (e) {
         console.error(e);
         iziToast.show({
@@ -1084,86 +1102,3 @@ function rgbHex(red, green, blue, alpha) {
     }
 }
 ;
-
-function loadCalendar() {
-    $('#calendar').fullCalendar('destroy');
-    $('#calendar').fullCalendar({
-        header: {
-            left: '',
-            center: 'listWeek,agendaDay,agendaThreeDay,agendaWeek',
-            right: ''
-        },
-        footer: false,
-        themeSystem: 'bootstrap4',
-        defaultView: 'agendaDay',
-        slotEventOverlap: false,
-        slotDuration: '01:00:00',
-        nowIndicator: false,
-        firstDay: moment(Meta.time).format('d'),
-        now: moment(Meta.time),
-        events: calendar,
-        eventClick: function (event) {
-            // opens events in a popup window
-            $('#dialogTitle').html(event.title);
-            $('#dialogDesc').html(`<div class="container">
-  <div class="row">
-    <div class="col-4 text-dark">
-      <strong>Title:</strong>
-    </div>
-    <div class="col-8 text-dark">
-      ${event.title}
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-4 text-dark">
-      <strong>Description:</strong>
-    </div>
-    <div class="col-8 text-dark">
-      ${event.description}
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-4 text-dark">
-      <strong>Start:</strong>
-    </div>
-    <div class="col-8 text-dark">
-      ${moment(event.start).format('LLLL')}
-    </div>
-  </div>
-<div class="row">
-    <div class="col-4 text-dark">
-      <strong>End:</strong>
-    </div>
-    <div class="col-8 text-dark">
-      ${moment(event.end).format('LLLL')}
-    </div>
-  </div>
-</div>`);
-            $('#dialog').modal('show');
-            return false;
-        },
-        views: {
-            listWeek: {
-                type: 'list',
-                duration: {days: 71},
-                buttonText: 'week (list)'
-            },
-            agendaDay: {
-                type: 'agenda',
-                duration: {days: 1},
-                buttonText: 'today'
-            },
-            agendaThreeDay: {
-                type: 'agenda',
-                duration: {days: 3},
-                buttonText: '3 days'
-            },
-            agendaWeek: {
-                type: 'agenda',
-                duration: {days: 7},
-                buttonText: 'week'
-            }
-        },
-        timezone: 'America/New_York',
-    });
-}
