@@ -31,49 +31,51 @@ var calendar = [];
 var likedTracks = [];
 
 // Initialize the web player
-$("#nativeflashradio").flashradio({
-    userinterface: "small",
-    backgroundcolor: "#263238",
-    themecolor: "#d31e38",
-    themefontcolor: "#ffffff",
-    startvolume: "75",
-    radioname: "WWSU 106.9 FM",
-    scroll: "auto",
-    autoplay: "false",
-    useanalyzer: "real",
-    analyzertype: "4",
-    usecover: "true",
-    usestreamcorsproxy: "false",
-    affiliatetoken: "1000lIPN",
-    debug: "false",
-    ownsongtitleurl: "",
-    radiocover: "",
-    songgooglefontname: "",
-    songfontname: "",
-    titlegooglefontname: "",
-    titlefontname: "",
-    corsproxy: "https://html5radioplayer2us.herokuapp.com/?q=",
-    streamprefix: "/stream",
-    mountpoint: "",
-    radiouid: "",
-    apikey: "",
-    streamid: "1",
-    streampath: "/live",
-    streamtype: "other",
-    streamurl: "https://server.wwsu1069.org",
-    songinformationinterval: "600000"
-});
+if (document.querySelector('#nativeflashradio'))
+    $("#nativeflashradio").flashradio({
+        userinterface: "small",
+        backgroundcolor: "#263238",
+        themecolor: "#d31e38",
+        themefontcolor: "#ffffff",
+        startvolume: "75",
+        radioname: "WWSU 106.9 FM",
+        scroll: "auto",
+        autoplay: "false",
+        useanalyzer: "real",
+        analyzertype: "4",
+        usecover: "true",
+        usestreamcorsproxy: "false",
+        affiliatetoken: "1000lIPN",
+        debug: "false",
+        ownsongtitleurl: "",
+        radiocover: "",
+        songgooglefontname: "",
+        songfontname: "",
+        titlegooglefontname: "",
+        titlefontname: "",
+        corsproxy: "https://html5radioplayer2us.herokuapp.com/?q=",
+        streamprefix: "/stream",
+        mountpoint: "",
+        radiouid: "",
+        apikey: "",
+        streamid: "1",
+        streampath: "/live",
+        streamtype: "other",
+        streamurl: "https://server.wwsu1069.org",
+        songinformationinterval: "600000"
+    });
 
-var quill = new Quill('#themessage', {
-    modules: {
-        toolbar: [
-            ['bold', 'italic', 'underline', 'strike', {'color': []}],
-            ['link'],
-            ['clean']
-        ],
-    },
-    theme: 'snow'
-});
+if (document.querySelector('#themessage'))
+    var quill = new Quill('#themessage', {
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike', {'color': []}],
+                ['link'],
+                ['clean']
+            ],
+        },
+        theme: 'snow'
+    });
 
 function quillGetHTML(inputDelta) {
     var tempCont = document.createElement("div");
@@ -85,16 +87,6 @@ function quillGetHTML(inputDelta) {
 var focusableElementsString = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 var focusedElementBeforeModal;
 var pwidth = null;
-function adaptScreen(width)
-{
-    if (width >= 1024 && (pwidth < 1024 || pwidth === null))
-    {
-        $('#calendar').fullCalendar('changeView', 'agendaWeek');
-    } else if (width < 1024 && (pwidth >= 1024 || pwidth === null)) {
-        $('#calendar').fullCalendar('changeView', 'agendaThreeDay');
-    }
-    pwidth = width;
-}
 function trapEscapeKey(obj, evt) {
 
     // if escape pressed
@@ -174,63 +166,66 @@ function setFocusToFirstItemInModal(obj) {
     o.filter(focusableElementsString).filter(':visible').first().focus();
 }
 $(document).ready(function () {
+    if (document.querySelector('#dialog'))
+    {
+        $('#dialog').on('shown.bs.modal', function () {
+            $('#dialog').trigger('focus');
+            jQuery('body').on('focusin', '#mainPage', function () {
+                setFocusToFirstItemInModal(jQuery('#dialog'));
+            });
+            focusedElementBeforeModal = jQuery(':focus');
+            setFocusToFirstItemInModal($('#dialog'));
+        })
 
-    $('#dialog').on('shown.bs.modal', function () {
-        $('#dialog').trigger('focus');
-        jQuery('body').on('focusin', '#mainPage', function () {
-            setFocusToFirstItemInModal(jQuery('#dialog'));
-        });
-        focusedElementBeforeModal = jQuery(':focus');
-        setFocusToFirstItemInModal($('#dialog'));
-    })
+        $('#dialog').on('hidden.bs.modal', function (e) {
+            jQuery('body').off('focusin', '#mainPage');
+            focusedElementBeforeModal.focus();
+        })
 
-    $('#dialog').on('hidden.bs.modal', function (e) {
-        jQuery('body').off('focusin', '#mainPage');
-        focusedElementBeforeModal.focus();
-    })
+        jQuery('#dialog').keydown(function (event) {
+            trapTabKey($(this), event);
+        })
 
-    jQuery('#dialog').keydown(function (event) {
-        trapTabKey($(this), event);
-    })
-
-    jQuery('#dialog').keydown(function (event) {
-        trapEscapeKey($(this), event);
-    })
-
-});
-
-document.querySelector(`#song-data`).addEventListener("click", function (e) {
-    try {
-        if (e.target) {
-            if (e.target.id.startsWith(`track-l-`))
-            {
-                loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)));
-            } else if (e.target.id.startsWith(`track-`))
-            {
-                loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
-            }
-        }
-    } catch (err) {
-
+        jQuery('#dialog').keydown(function (event) {
+            trapEscapeKey($(this), event);
+        })
     }
 });
-
-document.querySelector(`#track-info-request`).addEventListener("click", function (e) {
-    try {
-        if (e.target) {
-            if (e.target.id === "track-request-submit")
-            {
-                requestTrack(parseInt($('#track-info-ID').html()));
+if (document.querySelector('#song-data'))
+    document.querySelector(`#song-data`).addEventListener("click", function (e) {
+        try {
+            if (e.target) {
+                if (e.target.id.startsWith(`track-l-`))
+                {
+                    loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)));
+                } else if (e.target.id.startsWith(`track-`))
+                {
+                    loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
+                }
             }
+        } catch (err) {
+
         }
-    } catch (err) {
+    });
 
-    }
-});
+if (document.querySelector('#track-info-request'))
+    document.querySelector(`#track-info-request`).addEventListener("click", function (e) {
+        try {
+            if (e.target) {
+                if (e.target.id === "track-request-submit")
+                {
+                    requestTrack(parseInt($('#track-info-ID').html()));
+                }
+            }
+        } catch (err) {
 
-document.querySelector(`#filter-submit`).addEventListener("click", function (e) {
-    loadTracks(0);
-});
+        }
+    });
+
+if (document.querySelector('#filter-submit'))
+    document.querySelector(`#filter-submit`).addEventListener("click", function (e) {
+        loadTracks(0);
+    });
 
 function waitFor(check, callback, count = 0)
 {
@@ -263,7 +258,8 @@ function escapeHTML(str) {
 }
 
 function closeModal() {
-    $('#trackModal').modal('hide');
+    if (document.querySelector('#trackModal'))
+        $('#trackModal').modal('hide');
 }
 
 // Wait for connection by io, then create event handlers and do the sockets
@@ -290,7 +286,8 @@ waitFor(function () {
     // On socket disconnect, notify the user.
     io.socket.on('disconnect', function () {
         try {
-            nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
+            if (nowPlaying)
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
             iziToast.show({
                 title: 'Lost connection to WWSU',
                 message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
@@ -389,9 +386,12 @@ function onlineSocket()
 {
     io.socket.post('/recipients/add-web', {}, function serverResponded(body, JWR) {
         try {
-            nickname.value = body.label;
-            nickname.value = nickname.value.replace('Web ', '');
-            nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
+            if (nickname)
+            {
+                nickname.value = body.label;
+                nickname.value = nickname.value.replace('Web ', '');
+                nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
+            }
         } catch (e) {
             setTimeout(onlineSocket, 10000);
         }
@@ -467,15 +467,17 @@ function announcementsSocket()
 }
 
 // Whenever the nickname is changed, (re)set a 5 second timeout. After 5 seconds, if nickname is not changed, send the new nickname to the server for all clients to see.
-nickname.addEventListener("change", function () {
-    io.socket.post('/recipients/edit-web', {label: nickname.value}, function serverResponded(body, JWR) {
+if (nickname)
+    nickname.addEventListener("change", function () {
+        io.socket.post('/recipients/edit-web', {label: nickname.value}, function serverResponded(body, JWR) {
+        });
     });
-});
 
 // Function called when a new message arrived that should be displayed
 function addMessage(data, firsttime = false)
 {
-    shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;
+    if (notificationsBox)
+        shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;
 
     // Note the ID; used to determine new messages upon reconnection of a socket disconnect
     messageIDs.push(data.ID);
@@ -483,7 +485,8 @@ function addMessage(data, firsttime = false)
     // Private website message
     if (data.to.startsWith("website-"))
     {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (Only you see this message)</span></div>`;
+        if (notificationsBox)
+            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (Only you see this message)</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -502,7 +505,8 @@ function addMessage(data, firsttime = false)
         // Public website message for all visitors
     } else if (data.to === 'website')
     {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
+        if (notificationsBox)
+            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -520,7 +524,8 @@ function addMessage(data, firsttime = false)
 
         // Private message sent from visitor
     } else if (data.to === 'DJ-private') {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (only the DJ sees this message)</span></div>`;
+        if (notificationsBox)
+            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (only the DJ sees this message)</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -537,7 +542,8 @@ function addMessage(data, firsttime = false)
         }
         // All other messages
     } else {
-        notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
+        if (notificationsBox)
+            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -553,7 +559,7 @@ function addMessage(data, firsttime = false)
             });
         }
     }
-    if (shouldScroll) {
+    if (shouldScroll && document.querySelector('#messages')) {
         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
 }
 }
@@ -562,10 +568,11 @@ function addMessage(data, firsttime = false)
 function doMeta(response)
 {
     try {
-        shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;
+        if (notificationsBox)
+            shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;
 
         // Update meta and color code it, if new meta was provided
-        if ('line1' in response || 'line2' in response)
+        if (('line1' in response || 'line2' in response) && nowPlaying)
         {
             if (Meta.state.includes("live_"))
                 nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
@@ -590,13 +597,14 @@ function doMeta(response)
         }
 
         // If a false was returned for web chatting, then disable it
-        if ('webchat' in response && !response.webchat)
+        if ('webchat' in response && !response.webchat && messageText)
         {
             blocked = true;
             messageText.disabled = true;
             sendButton.disabled = true;
-            notificationsBox.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red" id="msg-disabled">The web chat is currently disabled for this show.</div>`;
-            if (shouldScroll) {
+            if (notificationsBox)
+                notificationsBox.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red" id="msg-disabled">The web chat is currently disabled for this show.</div>`;
+            if (shouldScroll && document.querySelector('#messages')) {
                 $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
             }
             return null;
@@ -612,8 +620,9 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">No one is on the air at this time. There may not be anyone in the studio to read your messages.</div>`;
-                    if (shouldScroll) {
+                    if (notificationsBox)
+                        notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">No one is on the air at this time. There may not be anyone in the studio to read your messages.</div>`;
+                    if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                     }
                     automationpost = 'automation';
@@ -624,9 +633,10 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">The current show airing is a prerecord. There may not be anyone in the studio to read your messages.</div>`;
+                    if (notificationsBox)
+                        notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">The current show airing is a prerecord. There may not be anyone in the studio to read your messages.</div>`;
                     automationpost = response.live;
-                    if (shouldScroll) {
+                    if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                     }
                 }
@@ -636,17 +646,21 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">There is a show airing now. Your messages should be received by the host.</div>`;
+                    if (notificationsBox)
+                        notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">There is a show airing now. Your messages should be received by the host.</div>`;
                     automationpost = response.live;
-                    if (shouldScroll) {
+                    if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                     }
                 }
             }
         }
         blocked = false;
-        messageText.disabled = false;
-        sendButton.disabled = false;
+        if (messageText)
+        {
+            messageText.disabled = false;
+            sendButton.disabled = false;
+        }
         var temp = document.getElementById('msg-disabled');
         if (temp)
             temp.remove();
@@ -655,10 +669,12 @@ function doMeta(response)
         if (typeof response.history !== 'undefined')
         {
             // reset recent tracks
-            recentTracks.innerHTML = ``;
+            if (recentTracks)
+                recentTracks.innerHTML = ``;
             response.history.forEach(function (track) {
                 console.dir(track);
-                recentTracks.innerHTML += `<div class="row">
+                if (recentTracks)
+                    recentTracks.innerHTML += `<div class="row">
                 <div class="col-8">
                 ${track.track}
                 </div>
@@ -675,7 +691,7 @@ function doMeta(response)
 
 // Send a message through the system
 function sendMessage(privateMsg) {
-    if (blocked)
+    if (blocked || !nickname)
         return null;
     var message = quillGetHTML(quill.getContents());
     io.socket.post('/messages/send-web', {message: message, nickname: nickname.value, private: privateMsg}, function serverResponded(response, JWR) {
@@ -683,14 +699,18 @@ function sendMessage(privateMsg) {
             //response = JSON.parse(response);
             if (response !== 'OK')
             {
-                notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message: ${response}</div>`;
-                $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
+                if (notificationsBox)
+                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message: ${response}</div>`;
+                if (document.querySelector('#messages'))
+                    $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                 return null;
             }
             quill.setText('');
         } catch (e) {
-            notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;
-            $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
+            if (notificationsBox)
+                notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;
+            if (document.querySelector('#messages'))
+                $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
         }
     });
 }
@@ -698,7 +718,8 @@ function sendMessage(privateMsg) {
 // Used to empty the chat box
 function clearChat()
 {
-    notificationsBox.innerHTML = '';
+    if (notificationsBox)
+        notificationsBox.innerHTML = '';
 }
 
 // Used to get info about a specific track to display as an overlay box
@@ -708,28 +729,31 @@ function loadTrackInfo(trackID) {
         try {
             //response = JSON.parse(response);
             // WORK ON THIS: HTML table of song information
-            $('#trackModal').modal('show');
-            $('#track-info-ID').html(response[0].ID);
-            $('#track-info-status').html(response[0].enabled === 1 ? 'Enabled' : 'Disabled');
-            document.getElementById('track-info-status').className = `table-${response[0].enabled === 1 ? 'success' : 'dark'}`;
-            $('#track-info-artist').html(response[0].artist);
-            $('#track-info-title').html(response[0].title);
-            $('#track-info-album').html(response[0].album);
-            $('#track-info-genre').html(response[0].genre);
-            $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format("HH:mm:ss"));
-            $('#track-info-lastplayed').html(moment(response[0].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[0].date_played).format('LLLL') : 'Unknown');
-            $('#track-info-limits').html(`<ul>
+            if (document.querySelector('#trackModal'))
+            {
+                $('#trackModal').modal('show');
+                $('#track-info-ID').html(response[0].ID);
+                $('#track-info-status').html(response[0].enabled === 1 ? 'Enabled' : 'Disabled');
+                document.getElementById('track-info-status').className = `table-${response[0].enabled === 1 ? 'success' : 'dark'}`;
+                $('#track-info-artist').html(response[0].artist);
+                $('#track-info-title').html(response[0].title);
+                $('#track-info-album').html(response[0].album);
+                $('#track-info-genre').html(response[0].genre);
+                $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format("HH:mm:ss"));
+                $('#track-info-lastplayed').html(moment(response[0].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[0].date_played).format('LLLL') : 'Unknown');
+                $('#track-info-limits').html(`<ul>
             ${response[0].limit_action > 0 && response[0].count_played < response[0].play_limit ? `<li>Track has ${response[0].play_limit - response[0].count_played} spins left</li>` : ``}
             ${response[0].limit_action > 0 && response[0].count_played >= response[0].play_limit ? `<li>Track expired (reached spin limit)</li>` : ``}
             ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ``}
             ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ``}
             </ul>`);
-            $('#track-info-spins7').html(`last 7 days: ${response[0].spins["7"]}`);
-            $('#track-info-spins30').html(`last 30 days: ${response[0].spins["30"]}`);
-            $('#track-info-spinsytd').html(`since January 1: ${response[0].spins["YTD"]}`);
-            $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins["365"]}`);
-            $('#track-info-request').html(response[0].request.HTML);
-            $('#trackModal').modal('handleUpdate');
+                $('#track-info-spins7').html(`last 7 days: ${response[0].spins["7"]}`);
+                $('#track-info-spins30').html(`last 30 days: ${response[0].spins["30"]}`);
+                $('#track-info-spinsytd').html(`since January 1: ${response[0].spins["YTD"]}`);
+                $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins["365"]}`);
+                $('#track-info-request').html(response[0].request.HTML);
+                $('#trackModal').modal('handleUpdate');
+            }
         } catch (e) {
             console.dir(response[0]);
             console.error(e);
@@ -754,7 +778,8 @@ function requestTrack(trackID) {
                 position: 'bottomCenter',
                 timeout: 15000
             });
-            $('#trackModal').modal('hide');
+            if (document.querySelector('#trackModal'))
+                $('#trackModal').modal('hide');
         } catch (e) {
             iziToast.show({
                 title: 'Request system failed',
@@ -810,29 +835,32 @@ function loadTracks(skip = 0) {
 }
 
 function loadGenres() {
-    io.socket.post('/songs/get-genres', {}, function serverResponded(response, JWR) {
-        try {
-            document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
-            var x = document.getElementById("filter-genre");
-            response.forEach(function (subcat) {
-                var c = document.createElement("option");
-                c.value = subcat.ID;
-                c.text = subcat.name;
-                x.options.add(c, 1);
-            });
-        } catch (e) {
-            iziToast.show({
-                title: 'Request system failed',
-                message: 'Error loading genres. Please try again later.',
-                color: 'red',
-                zindex: 100,
-                layout: 1,
-                closeOnClick: true,
-                position: 'bottomCenter',
-                timeout: 5000
-            });
-        }
-    });
+    if (document.getElementById('filter-genre'))
+    {
+        io.socket.post('/songs/get-genres', {}, function serverResponded(response, JWR) {
+            try {
+                document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
+                var x = document.getElementById("filter-genre");
+                response.forEach(function (subcat) {
+                    var c = document.createElement("option");
+                    c.value = subcat.ID;
+                    c.text = subcat.name;
+                    x.options.add(c, 1);
+                });
+            } catch (e) {
+                iziToast.show({
+                    title: 'Request system failed',
+                    message: 'Error loading genres. Please try again later.',
+                    color: 'red',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'bottomCenter',
+                    timeout: 5000
+                });
+            }
+        });
+    }
 }
 
 function likeTrack(trackID) {
@@ -853,10 +881,12 @@ function likeTrack(trackID) {
             } else {
                 likedTracks.push(trackID);
                 // reset recent tracks
-                recentTracks.innerHTML = ``;
+                if (recentTracks)
+                    recentTracks.innerHTML = ``;
                 Meta.history.forEach(function (track) {
                     console.dir(track);
-                    recentTracks.innerHTML += `<div class="row">
+                    if (recentTracks)
+                        recentTracks.innerHTML += `<div class="row">
                 <div class="col-8">
                 ${track.track}
                 </div>
@@ -953,41 +983,43 @@ function processCalendar(data, replace = false)
             }
         }
 
-        var caldata = document.querySelector("#calendar");
-        caldata.innerHTML = ``;
-
-        // Prepare the formatted calendar variable for our formatted events
-        calendar = [];
-
-        // Define a comparison function that will order calendar events by start time when we run the iteration
-        var compare = function (a, b) {
-            try {
-                if (moment(a.start).valueOf() < moment(b.start).valueOf())
-                    return -1;
-                if (moment(a.start).valueOf() > moment(b.start).valueOf())
-                    return 1;
-                if (a.ID < b.ID)
-                    return -1;
-                if (a.ID > b.ID)
-                    return 1;
-                return 0;
-            } catch (e) {
-            }
-        };
-
-        // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-        Calendar().get().sort(compare).forEach(function (event)
+        if (document.querySelector('#calendar'))
         {
-            try {
-                if (!event.title.startsWith("Show:") && !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && !event.title.startsWith("Prerecord:") && !event.title.startsWith("Remote:") && !event.title.startsWith("Sports:") && !event.title.startsWith("Podcast:"))
-                    return null;
-                if (moment(event.start).subtract(1, 'days').isAfter(moment(Meta.time)) || moment(event.end).isBefore(moment(Meta.time)))
-                    return null;
-                var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
-                finalColor.red = Math.round(finalColor.red);
-                finalColor.green = Math.round(finalColor.green);
-                finalColor.blue = Math.round(finalColor.blue);
-                caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
+            var caldata = document.querySelector("#calendar");
+            caldata.innerHTML = ``;
+
+            // Prepare the formatted calendar variable for our formatted events
+            calendar = [];
+
+            // Define a comparison function that will order calendar events by start time when we run the iteration
+            var compare = function (a, b) {
+                try {
+                    if (moment(a.start).valueOf() < moment(b.start).valueOf())
+                        return -1;
+                    if (moment(a.start).valueOf() > moment(b.start).valueOf())
+                        return 1;
+                    if (a.ID < b.ID)
+                        return -1;
+                    if (a.ID > b.ID)
+                        return 1;
+                    return 0;
+                } catch (e) {
+                }
+            };
+
+            // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
+            Calendar().get().sort(compare).forEach(function (event)
+            {
+                try {
+                    if (!event.title.startsWith("Show:") && !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && !event.title.startsWith("Prerecord:") && !event.title.startsWith("Remote:") && !event.title.startsWith("Sports:") && !event.title.startsWith("Podcast:"))
+                        return null;
+                    if (moment(event.start).subtract(1, 'days').isAfter(moment(Meta.time)) || moment(event.end).isBefore(moment(Meta.time)))
+                        return null;
+                    var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
+                    finalColor.red = Math.round(finalColor.red);
+                    finalColor.green = Math.round(finalColor.green);
+                    finalColor.blue = Math.round(finalColor.blue);
+                    caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-4">
@@ -998,14 +1030,73 @@ function processCalendar(data, replace = false)
                                             </div>
                                         </div>
                                     </div></div>`;
-            } catch (e) {
-                console.error(e);
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: `Error occurred during calendar iteration in processCalendar.`
-                });
-            }
-        });
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred during calendar iteration in processCalendar.`
+                    });
+                }
+            });
+        }
+        
+        if (document.querySelector('#calendar3h'))
+        {
+            var caldata = document.querySelector("#calendar3h");
+            caldata.innerHTML = ``;
+
+            // Prepare the formatted calendar variable for our formatted events
+            calendar = [];
+
+            // Define a comparison function that will order calendar events by start time when we run the iteration
+            var compare = function (a, b) {
+                try {
+                    if (moment(a.start).valueOf() < moment(b.start).valueOf())
+                        return -1;
+                    if (moment(a.start).valueOf() > moment(b.start).valueOf())
+                        return 1;
+                    if (a.ID < b.ID)
+                        return -1;
+                    if (a.ID > b.ID)
+                        return 1;
+                    return 0;
+                } catch (e) {
+                }
+            };
+
+            // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
+            Calendar().get().sort(compare).forEach(function (event)
+            {
+                try {
+                    if (!event.title.startsWith("Show:") && !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && !event.title.startsWith("Prerecord:") && !event.title.startsWith("Remote:") && !event.title.startsWith("Sports:") && !event.title.startsWith("Podcast:"))
+                        return null;
+                    if (moment(event.start).subtract(3, 'hours').isAfter(moment(Meta.time)) || moment(event.end).isBefore(moment(Meta.time)))
+                        return null;
+                    var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
+                    finalColor.red = Math.round(finalColor.red);
+                    finalColor.green = Math.round(finalColor.green);
+                    finalColor.blue = Math.round(finalColor.blue);
+                    caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
+                                            </div>
+                                            <div class="col-8">
+                                                <p class="text-warning-light">${event.title}</p>
+                                                <p class="text-info-light">${event.description}</p>
+                                            </div>
+                                        </div>
+                                    </div></div>`;
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred during calendar iteration in processCalendar.`
+                    });
+                }
+            });
+        }
     } catch (e) {
         console.error(e);
         iziToast.show({

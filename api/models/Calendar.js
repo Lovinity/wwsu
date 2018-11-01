@@ -1,4 +1,4 @@
-/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events, Logs, Attendance */
+/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events, Logs, Attendance, Directorhours, Timesheet */
 
 /**
  * Calendar.js
@@ -203,7 +203,8 @@ module.exports = {
                 var toTrigger = null;
                 var calendar = google.calendar({version: 'v3', auth: auth});
                 var currentdate = moment().startOf('day');
-                var nextWeekDate = moment().startOf('day').add(7, 'days');
+                var nextWeekDate = moment().startOf('day').add(8, 'days');
+                var badEvent = false;
                 //formatted.push(currentdate.format("YYYY-MM-DDTHH:mm:ssZ"));
                 //formatted.push(tomorrowdate.format("YYYY-MM-DDTHH:mm:ssZ"));
                 var colors = await calendar.colors.get();
@@ -288,7 +289,6 @@ module.exports = {
                         djevents[event.name] = event;
                     });
 
-                    var badEvent = false;
                     for (var i = 0; i < events.length; i++) {
                         var event = events[i];
                         eventIds.push(event.id);
@@ -658,6 +658,139 @@ module.exports = {
                     } else {
                         Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational', status: 5}]);
                     }
+                }
+
+                // Now, load Director hours
+                var {google} = require('googleapis');
+                var toTrigger = null;
+                var calendar = google.calendar({version: 'v3', auth: auth});
+                var currentdate = moment().startOf('day');
+                var nextWeekDate = moment().startOf('day').add(8, 'days');
+                var genreActive = false;
+                var events = await calendar.events.list({
+                    calendarId: sails.config.custom.GoogleAPI.directorHoursId,
+                    timeMin: currentdate.toISOString(),
+                    timeMax: nextWeekDate.toISOString(),
+                    singleEvents: true
+                });
+                events = events.data.items;
+                Directorhours.calendar = events;
+                sails.log.silly(events);
+
+                if (events.length === 0) {
+                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'No director hours are listed. Is this normal?', status: 3}]);
+                    return resolve();
+                } else {
+                    // Iterate through each returned event from Google Calendar
+                    var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
+                    var retData = [];
+
+                    for (var i = 0; i < events.length; i++) {
+                        var event = events[i];
+                        eventIds.push(event.id);
+                        // Skip events without a start time or without an end time or without a summary
+                        if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined')
+                        {
+                            sails.log.verbose(`SKIPPING ${i}: invalid event parameters.`);
+                            continue;
+                        }
+
+                        // Prepare data structure for event
+                        var criteria = {
+                            unique: event.id,
+                            director: event.summary,
+                            start: event.start.dateTime || event.start.date,
+                            end: event.end.dateTime || event.end.date
+                        };
+
+                        sails.log.silly(`Directorhours criteria: ${JSON.stringify(criteria)}`);
+
+                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+                        var criteriaB = _.cloneDeep(criteria);
+
+                        // TODO: Make so that new records do not also trigger an update
+
+                        // Find existing record of event. If does not exist, create it in the Calendar.
+                        var theEvent = await Directorhours.findOrCreate({unique: event.id}, criteriaB);
+
+                        //sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
+                        // Check if the event changed. If so, update it and push it out to clients.
+                        var needsUpdate = false;
+                        for (var key in theEvent)
+                        {
+                            if (theEvent.hasOwnProperty(key))
+                            {
+                                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID')
+                                {
+                                    needsUpdate = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (needsUpdate)
+                        {
+                            await Directorhours.update({unique: event.id}, criteria).fetch();
+                        }
+                    }
+
+                    // Update entries in the calendar which passed their end time
+                    var destroyed = await Directorhours.update({active: true, end: {"<=": moment().toISOString(true)}}, {active: false})
+                            .tolerate((err) => {
+                            })
+                            .fetch();
+
+                    // Destroy entries in the calendar which no longer exist on Google Calendar
+                    if (events.length > 0)
+                    {
+                        await Directorhours.destroy({unique: {'nin': eventIds}})
+                                .tolerate((err) => {
+                                })
+                                .fetch();
+
+                    }
+
+                    // Go through every event record which passed the end time, and log absences where necessary.
+                    if (destroyed && destroyed.length > 0)
+                    {
+                        sails.log.debug(`Calling asyncForEach in Calendar for looping through calendar records that expires for Director Hours.`);
+                        await sails.helpers.asyncForEach(destroyed, function (event, index) {
+                            return new Promise(async (resolve2, reject2) => {
+                                try {
+                                    var records = Timesheet.find({name: destroyed.director, start: {'>=': moment().startOf('day').toISOString(true)}});
+                                    var absent = true;
+                                    if (records.length > 0)
+                                    {
+                                        records.forEach(function (therecord) {
+                                            if (moment(therecord.time_in).isSameOrAfter(moment(destroyed.start)) && moment(therecord.time_in).isSameOrBefore(moment(destroyed.end)))
+                                            {
+                                                absent = false;
+                                            }
+                                            if (moment(therecord.time_out).isSameOrBefore(moment(destroyed.end)) && moment(therecord.time_out).isSameOrAfter(moment(destroyed.start)))
+                                            {
+                                                absent = false;
+                                            }
+                                        });
+                                    }
+                                    if (absent)
+                                    {
+                                        await Logs.create({attendanceID: null, logtype: 'absent-director', loglevel: 'warning', logsubtype: destroyed.director, event: `A director did not come in for scheduled office hours!<br />Director: ${destroyed.director}<br />Scheduled time: ${moment(destroyed.start).format("hh:mm A")} - ${moment(destroyed.end).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
+                                                .tolerate((err) => {
+                                                    sails.log.error(err);
+                                                });
+                                    }
+
+                                    return resolve2(false);
+                                } catch (e) {
+                                    sails.log.error(e);
+                                    return resolve2(false);
+                                }
+                            });
+                        });
+                    }
+
+                    if (!badEvent)
+                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational', status: 5}]);
+
                     return resolve();
                 }
             } catch (e) {

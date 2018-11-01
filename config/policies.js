@@ -24,6 +24,7 @@ module.exports.policies = {
     'calendar/verify': 'isBanned',
     'calendar/verify-data': 'isBanned',
     'directors/get': 'isBanned',
+    'directors/get-hours': 'isBanned',
     'display/public': 'isBanned',
     'display/internal': 'isBanned',
     'eas/get': 'isBanned',
@@ -51,5 +52,9 @@ module.exports.policies = {
     'timesheet/get': 'isBanned',
     'timesheet/view': 'isBanned',
     'listen': 'isBanned',
+    'listen/listen': 'isBanned',
+    'listen/chat': 'isBanned',
+    'listen/calendar': 'isBanned',
+    'listen/requests': 'isBanned',
     'embeds/*': 'isBanned'
 };
