@@ -1343,11 +1343,11 @@ module.exports.bootstrap = async function (done) {
                             if (song.weight < minPriority)
                                 await Songs.update({ID: song.ID}, {weight: minPriority});
                             
-                            return resolve(false);
+                            return resolve2(false);
                             
                         } catch (e) {
                             sails.log.error(e);
-                            return resolve(false);
+                            return resolve2(false);
                         }
                     });
                 });
