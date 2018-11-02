@@ -4,7 +4,6 @@ try {
 
 // Define data variables
     var Directors = TAFFY();
-    var Directorhours = TAFFY();
     var Meta = {time: moment().toISOString()};
     var Status = TAFFY();
 
@@ -198,35 +197,11 @@ waitFor(function () {
         processDirectors();
     });
 
-    // When a director is passed as an event, process it.
-    io.socket.on('directorhours', function (data) {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                switch (key)
-                {
-                    case 'insert':
-                        Directorhours.insert(data[key]);
-                        break;
-                    case 'update':
-                        Directorhours({ID: data[key].ID}).update(data[key]);
-                        break;
-                    case 'remove':
-                        Directorhours({ID: data[key]}).remove();
-                        break;
-                }
-            }
-        }
-        processDirectorHours();
-    });
-
 // When a socket connection is established
     io.socket.on('connect', function () {
         onlineSocket();
         metaSocket();
         directorSocket();
-        directorHourSocket();
         statusSocket();
         // Remove the lost connection overlay
         if (disconnected)
@@ -242,7 +217,6 @@ waitFor(function () {
     onlineSocket();
     metaSocket();
     directorSocket();
-    directorHoursSocket();
     statusSocket();
     if (disconnected)
     {
@@ -494,10 +468,10 @@ function processDirectors()
                              </div>
                              `;
                              */
-                            innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
-    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
+                            innercontent.innerHTML += `<div style="width: 160px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="96" class="rounded-circle"></div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1.25em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br><span style="font-size: 1em;">${dodo.position}</span></div>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
@@ -509,195 +483,10 @@ function processDirectors()
                     slidetimer = setTimeout(doSlide, 14000);
                 });
             }};
-        slides[1].do = false;
-
-        if (slide === 2)
-        {
-            var innercontent = document.getElementById('directors');
-            innercontent.innerHTML = '';
-            Directors().each(function (dodo) {
-                try {
-                    if (dodo.present)
-                        directorpresent = true;
-                    var color = 'rgba(211, 47, 47, 0.8)';
-                    var text1 = 'OUT';
-                    var theClass = 'danger';
-                    var text2 = '';
-                    if (dodo.since !== null && moment(dodo.since).isValid())
-                        text2 = moment(dodo.since).from(moment(Meta.time), true);
-                    if (dodo.present)
-                    {
-                        var color = 'rgba(56, 142, 60, 0.8)';
-                        var text1 = 'IN';
-                        var theClass = 'success';
-                    }
-                    /*
-                     innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
-                     <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
-                     <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
-                     <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
-                     </div>
-                     `;
-                     */
-                    innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
-    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
-                } catch (e) {
-                    console.error(e);
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred in Directors iteration in doSlide.`
-                    });
-                }
-            });
-        }
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
             message: 'Error occurred during the call of Directors[0].'
-        });
-        console.error(e);
-    }
-}
-
-// Mark if a director is present or not
-function processDirectorHours()
-{
-    try {
-        // A list of Office Hours for the directors
-
-        // Define a comparison function that will order calendar events by start time when we run the iteration
-        var compare = function (a, b) {
-            try {
-                if (moment(a.start).valueOf() < moment(b.start).valueOf())
-                    return -1;
-                if (moment(a.start).valueOf() > moment(b.start).valueOf())
-                    return 1;
-                if (a.ID < b.ID)
-                    return -1;
-                if (a.ID > b.ID)
-                    return 1;
-                return 0;
-            } catch (e) {
-                console.error(e);
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
-                });
-            }
-        };
-
-        // Prepare the formatted calendar variable for our formatted events
-        var calendar = {};
-        calendar[`Today ${moment(Meta.time).format('MM/DD')}`] = {};
-        calendar[moment(Meta.time).add(1, 'days').format('dddd MM/DD')] = {};
-        calendar[moment(Meta.time).add(2, 'days').format('dddd MM/DD')] = {};
-        calendar[moment(Meta.time).add(3, 'days').format('dddd MM/DD')] = {};
-        calendar[moment(Meta.time).add(4, 'days').format('dddd MM/DD')] = {};
-        calendar[moment(Meta.time).add(5, 'days').format('dddd MM/DD')] = {};
-        calendar[moment(Meta.time).add(6, 'days').format('dddd MM/DD')] = {};
-
-        Directorhours().get().sort(compare).forEach(function (event)
-        {
-            // null start or end? Use a default to prevent errors.
-            if (!moment(event.start).isValid())
-                event.start = moment(Meta.time).startOf('day');
-            if (!moment(event.end).isValid())
-                event.end = moment(Meta.time).add(1, 'days').startOf('day');
-
-            // Cycle through each day of the week, and add in director hours
-            for (var i = 0; i < 7; i++) {
-                var looptime = moment(Meta.time).startOf('day').add(i, 'days');
-                var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
-                var start2;
-                var end2;
-                if (moment(event.start).isBefore(looptime))
-                {
-                    start2 = moment(looptime);
-                } else {
-                    start2 = moment(event.start);
-                }
-                if (moment(event.end).isAfter(looptime2))
-                {
-                    end2 = moment(looptime2);
-                } else {
-                    end2 = moment(event.end);
-                }
-                if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
-                {
-                    event.startT = moment(event.start).format('hh:mm A');
-                    event.endT = moment(event.end).format('hh:mm A');
-
-                    // Update strings if need be, if say, start time was before this day, or end time is after this day.
-                    if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
-                    {
-                        event.endT = moment(event.start).format('MM/DD hh:mm A');
-                    }
-                    if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
-                    {
-                        event.startT = moment(event.start).format('MM/DD hh:mm A');
-                    }
-
-                    // Push the final products into our formatted variable
-                    if (i === 0)
-                    {
-                        if (typeof calendar[`Today ${moment(Meta.time).format('MM/DD')}`][event.director] === 'undefined')
-                            calendar[`Today ${moment(Meta.time).format('MM/DD')}`][event.director] = [];
-                        calendar[`Today ${moment(Meta.time).format('MM/DD')}`][event.director].push(event);
-                    } else
-                    {
-                        if (typeof calendar[moment(Meta.time).add(i, 'days').format('dddd MM/DD')][event.director] === 'undefined')
-                            calendar[moment(Meta.time).add(i, 'days').format('dddd MM/DD')][event.director] = [];
-                        calendar[moment(Meta.time).add(i, 'days').format('dddd MM/DD')][event.director].push(event);
-                    }
-                }
-            }
-        });
-
-        slides[3] = {name: 'Office Hours', class: 'info', do: true, function: function () {
-                $('#slide').animateCss('lightSpeedOut', function () {
-                    content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours</h1>
-            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="office-hours"></div></div>`;
-                    var innercontent = document.getElementById('office-hours');
-                    for (var day in calendar)
-                    {
-                        if (calendar.hasOwnProperty(day))
-                        {
-                            var stuff = `<h4>${day}</h4>`;
-                            for (var director in calendar[day])
-                            {
-                                if (calendar[day].hasOwnProperty(director))
-                                {
-                                    stuff += `<div class="p-1">
-<div class="container">
-                    <div class="row">
-                      <div class="col-6 text-light">
-                  		${director}:
-                      </div>
-                      <div class="col-6 text-info-light">`;
-                                    if (calendar[day][director].length > 0)
-                                    {
-                                        calendar[day][director].forEach(function (event, index) {
-                                            if (index > 0)
-                                                stuff += `<br />`;
-                                            stuff += `${event.startT} - ${event.endT}`;
-                                        });
-                                    }
-                                    stuff += `</div></div></div></div>`;
-                                }
-                            }
-                            innercontent.innerHTML += `<div style="width: 32%; min-width: 320px; position: relative;" class="m-2 bs-callout bs-callout-danger">${stuff}</div>`;
-                        }
-                    }
-                    
-                    slidetimer = setTimeout(doSlide, 14000);
-                });
-            }};
-    } catch (e) {
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred during the call of office hours slide.'
         });
         console.error(e);
     }
@@ -728,23 +517,6 @@ function directorSocket()
             console.error(e);
             console.log('FAILED DIRECTORS CONNECTION');
             setTimeout(directorSocket, 10000);
-        }
-    });
-}
-
-// Called to replace all Directors data with body of request
-function directorHoursSocket()
-{
-    console.log('attempting director socket');
-    io.socket.post('/directors/get-hours', {}, function serverResponded(body, JWR) {
-        try {
-            Directorhours = TAFFY();
-            Directorhours.insert(body);
-            processDirectorHours();
-        } catch (e) {
-            console.error(e);
-            console.log('FAILED DIRECTOR HOURS CONNECTION');
-            setTimeout(directorHoursSocket, 10000);
         }
     });
 }
@@ -793,7 +565,6 @@ function statusSocket()
 function doSlide(same = false)
 {
     try {
-        var prevslide = slide;
         clearTimeout(slidetimer);
         slidetimer = true;
         if (!same)
@@ -856,27 +627,21 @@ function doSlide(same = false)
                             });
                         }, 30000);
                     });
+
                 } else if (typeof slides[slide] !== 'undefined' && slides[slide].do)
                 {
-                    if (slide !== prevslide && !same)
-                    {
-                        done = true;
-                        console.log(`Doing slide ${slide}`);
-                        try {
-                            slides[slide].function();
-                        } catch (e) {
-                            console.log(e);
-                            iziToast.show({
-                                title: 'An error occurred - Please check the logs',
-                                message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
-                            });
-                            doSlide();
-                            return null;
-                        }
-                    } else {
-                        done = true;
-                        console.log(`Slide ${slide} already active. Setting new 14-second timer.`);
-                        slidetimer = setTimeout(doSlide, 14000);
+                    done = true;
+                    console.log(`Doing slide ${slide}`);
+                    try {
+                        slides[slide].function();
+                    } catch (e) {
+                        console.log(e);
+                        iziToast.show({
+                            title: 'An error occurred - Please check the logs',
+                            message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
+                        });
+                        doSlide();
+                        return null;
                     }
                     var temp = document.getElementById(`slidebadge-${slide}`);
                     if (temp !== null)
@@ -901,7 +666,6 @@ function doSlide(same = false)
 <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: 937-775-5555</h1>
             </div>
             </div>`;
-                    slide = 1;
                 } catch (e) {
                     iziToast.show({
                         title: 'An error occurred - Please check the logs',

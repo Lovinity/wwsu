@@ -1,0 +1,35 @@
+<%- partial('listen.ejs') %>
+<div class="row">
+    <div class="col">
+        <div class="p-1 m-3 text-white bg-dark">
+            <ul class="nav nav-pills mb-3 justify-content-center" id="pills-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link text-white active border border-primary" id="pills-chat-tab" data-toggle="pill" href="#pills-chat" role="tab" aria-controls="pills-chat" aria-selected="false">Chat with DJ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white border border-primary" id="pills-schedule-tab" data-toggle="pill" href="#pills-schedule" role="tab" aria-controls="pills-schedule" aria-selected="true">Next 3 hours</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white border border-primary" id="pills-request-tab" data-toggle="pill" href="#pills-request" role="tab" aria-controls="pills-request" aria-selected="false">Request a Track</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane show active" id="pills-chat" role="tabpanel" aria-labelledby="pills-chat-tab">
+                    <div id="container">
+                        <%- partial('chat.ejs') %>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pills-schedule" role="tabpanel" aria-labelledby="pills-schedule-tab">
+                    <div id="container">
+                        <%- partial('calendar3h.ejs') %>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pills-request" role="tabpanel" aria-labelledby="pills-request-tab">
+                    <div id="container">
+                        <%- partial('requests.ejs') %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
