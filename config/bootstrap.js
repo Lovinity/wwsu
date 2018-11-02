@@ -78,8 +78,13 @@ module.exports.bootstrap = async function (done) {
     if (records && records.length > 0)
     {
         var insertRecords = [];
+        var hosts = [];
         records.forEach(function (record) {
-            insertRecords.push({host: record.from, group: 'website', label: record.from_friendly, status: 0, time: record.createdAt});
+            if (hosts.indexOf(record.from) === -1)
+            {
+                hosts.push(record.from);
+                insertRecords.push({host: record.from, group: 'website', label: record.from_friendly, status: 0, time: record.createdAt});
+            }
         });
 
         await Recipients.createEach(insertRecords)
@@ -148,9 +153,9 @@ module.exports.bootstrap = async function (done) {
     cron.schedule('* * * * * *', () => {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON checks triggered.`);
-            
+
             Meta.changeMeta({time: moment().toISOString(true)}); // Always casually send the current time through Meta as a separate socket
-            
+
             var change = {queueLength: 0, percent: 0}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
             //
             // Skip all checks and use default meta template if sails.config.custom.lofi = true
@@ -1326,25 +1331,25 @@ module.exports.bootstrap = async function (done) {
             try {
                 // First, get the value of default priority
                 var defaultPriority = await Settings.find({source: "settings_general", setting: "DefaultTrackPriority"}).limit(1);
-                
+
                 if (typeof defaultPriority[0] === 'undefined' || defaultPriority === null || defaultPriority[0] === null)
                     throw new Error("Could not find DefaultTrackPriority setting in the RadioDJ database");
-                
+
                 var songs = await Songs.find();
-                
+
                 sails.log.debug(`Calling asyncForEach in cron priorityCheck for every RadioDJ song`);
                 await sails.helpers.asyncForEach(songs, function (song) {
                     return new Promise(async (resolve2, reject2) => {
                         try {
-                            
+
                             var minPriority = song.rating === 0 ? 0 : (defaultPriority[0] * (song.rating / 9));
-                            minPriority = Math.round( minPriority * 10 ) / 10;
-                            
+                            minPriority = Math.round(minPriority * 10) / 10;
+
                             if (song.weight < minPriority)
                                 await Songs.update({ID: song.ID}, {weight: minPriority});
-                            
+
                             return resolve2(false);
-                            
+
                         } catch (e) {
                             sails.log.error(e);
                             return resolve2(false);
@@ -1477,7 +1482,7 @@ module.exports.bootstrap = async function (done) {
                         sails.config.custom.showcats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID;
                     });
                 }
-                
+
                 return resolve();
             } catch (e) {
                 return reject(e);
