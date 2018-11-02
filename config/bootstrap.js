@@ -1318,7 +1318,45 @@ module.exports.bootstrap = async function (done) {
         });
     });
 
+    // Every day at 11:59:51pm, check for minimum priorities on tracks and fix them as necessary
+    sails.log.verbose(`BOOTSTRAP: scheduling priorityCheck CRON.`);
+    cron.schedule('51 59 23 * * *', () => {
+        new Promise(async (resolve, reject) => {
+            sails.log.debug(`CRON priorityCheck called`);
+            try {
+                // First, get the value of default priority
+                var defaultPriority = await Settings.find({source: "settings_general", setting: "DefaultTrackPriority"}).limit(1);
+                
+                if (typeof defaultPriority[0] === 'undefined' || defaultPriority === null || defaultPriority[0] === null)
+                    throw new Error("Could not find DefaultTrackPriority setting in the RadioDJ database");
+                
+                var songs = await Songs.find();
+                
+                sails.log.debug(`Calling asyncForEach in cron priorityCheck for every RadioDJ song`);
+                await sails.helpers.asyncForEach(songs, function (song) {
+                    return new Promise(async (resolve2, reject2) => {
+                        try {
+                            
+                            var minPriority = song.rating === 0 ? 0 : (defaultPriority[0] * (song.rating / 9));
+                            minPriority = Math.round( minPriority * 10 ) / 10;
+                            
+                            if (song.weight < minPriority)
+                                await Songs.update({ID: song.ID}, {weight: minPriority});
+                            
+                        } catch (e) {
+                            sails.log.error(e);
+                            return resolve(false);
+                        }
+                    });
+                });
 
+                return resolve();
+            } catch (e) {
+                sails.log.error(e);
+                return reject(e);
+            }
+        });
+    });
 
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
