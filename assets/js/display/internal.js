@@ -4,6 +4,7 @@ try {
 
 // Define data variables
     var Directors = TAFFY();
+    var Directorhours = TAFFY();
     var Meta = {time: moment().toISOString()};
     var Status = TAFFY();
 
@@ -197,11 +198,35 @@ waitFor(function () {
         processDirectors();
     });
 
+    // When a director is passed as an event, process it.
+    io.socket.on('directorhours', function (data) {
+        for (var key in data)
+        {
+            if (data.hasOwnProperty(key))
+            {
+                switch (key)
+                {
+                    case 'insert':
+                        Directorhours.insert(data[key]);
+                        break;
+                    case 'update':
+                        Directorhours({ID: data[key].ID}).update(data[key]);
+                        break;
+                    case 'remove':
+                        Directorhours({ID: data[key]}).remove();
+                        break;
+                }
+            }
+        }
+        processDirectorHours();
+    });
+
 // When a socket connection is established
     io.socket.on('connect', function () {
         onlineSocket();
         metaSocket();
         directorSocket();
+        directorHoursSocket();
         statusSocket();
         // Remove the lost connection overlay
         if (disconnected)
@@ -217,6 +242,7 @@ waitFor(function () {
     onlineSocket();
     metaSocket();
     directorSocket();
+    directorHoursSocket();
     statusSocket();
     if (disconnected)
     {
@@ -468,10 +494,10 @@ function processDirectors()
                              </div>
                              `;
                              */
-                            innercontent.innerHTML += `<div style="width: 160px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="96" class="rounded-circle"></div>
-    <span class="notification badge badge-${theClass}" style="font-size: 1.25em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br><span style="font-size: 1em;">${dodo.position}</span></div>`;
+                            innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
@@ -483,10 +509,323 @@ function processDirectors()
                     slidetimer = setTimeout(doSlide, 14000);
                 });
             }};
+        slides[1].do = false;
+
+        if (slide === 2)
+        {
+            var innercontent = document.getElementById('directors');
+            innercontent.innerHTML = '';
+            Directors().each(function (dodo) {
+                try {
+                    if (dodo.present)
+                        directorpresent = true;
+                    var color = 'rgba(211, 47, 47, 0.8)';
+                    var text1 = 'OUT';
+                    var theClass = 'danger';
+                    var text2 = '';
+                    if (dodo.since !== null && moment(dodo.since).isValid())
+                        text2 = moment(dodo.since).from(moment(Meta.time), true);
+                    if (dodo.present)
+                    {
+                        var color = 'rgba(56, 142, 60, 0.8)';
+                        var text1 = 'IN';
+                        var theClass = 'success';
+                    }
+                    /*
+                     innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
+                     <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
+                     <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
+                     <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
+                     </div>
+                     `;
+                     */
+                    innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred in Directors iteration in doSlide.`
+                    });
+                }
+            });
+        }
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
             message: 'Error occurred during the call of Directors[0].'
+        });
+        console.error(e);
+    }
+}
+
+// Mark if a director is present or not
+function processDirectorHours()
+{
+    try {
+        // A list of Office Hours for the directors
+
+        // Define a comparison function that will order calendar events by start time when we run the iteration
+        var compare = function (a, b) {
+            try {
+                if (moment(a.start).valueOf() < moment(b.start).valueOf())
+                    return -1;
+                if (moment(a.start).valueOf() > moment(b.start).valueOf())
+                    return 1;
+                if (a.ID < b.ID)
+                    return -1;
+                if (a.ID > b.ID)
+                    return 1;
+                return 0;
+            } catch (e) {
+                console.error(e);
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
+                });
+            }
+        };
+
+        // Prepare the formatted calendar variable for our formatted events
+        var calendar = {};
+        var asstcalendar = {};
+
+        Directorhours().get().sort(compare).forEach(function (event)
+        {
+            var assistant = Directors({name: event.director}).first().assistant || true; // If we cannot determine if a director is an assistant, assume they are.
+            // Format calendar for the director
+            if (!assistant && typeof calendar[event.director] === 'undefined')
+            {
+                calendar[event.director] = {};
+                calendar[event.director][0] = ``;
+                calendar[event.director][1] = ``;
+                calendar[event.director][2] = ``;
+                calendar[event.director][3] = ``;
+                calendar[event.director][4] = ``;
+                calendar[event.director][5] = ``;
+                calendar[event.director][6] = ``;
+            }
+            if (assistant && typeof asstcalendar[event.director] === 'undefined')
+            {
+                asstcalendar[event.director] = {};
+                asstcalendar[event.director][0] = ``;
+                asstcalendar[event.director][1] = ``;
+                asstcalendar[event.director][2] = ``;
+                asstcalendar[event.director][3] = ``;
+                asstcalendar[event.director][4] = ``;
+                asstcalendar[event.director][5] = ``;
+                asstcalendar[event.director][6] = ``;
+            }
+
+            // null start or end? Use a default to prevent errors.
+            if (!moment(event.start).isValid())
+                event.start = moment(Meta.time).startOf('day');
+            if (!moment(event.end).isValid())
+                event.end = moment(Meta.time).add(1, 'days').startOf('day');
+
+            // Cycle through each day of the week, and add in director hours
+            for (var i = 0; i < 7; i++) {
+                var looptime = moment(Meta.time).startOf('day').add(i, 'days');
+                var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
+                var start2;
+                var end2;
+                if (moment(event.start).isBefore(looptime))
+                {
+                    start2 = moment(looptime);
+                } else {
+                    start2 = moment(event.start);
+                }
+                if (moment(event.end).isAfter(looptime2))
+                {
+                    end2 = moment(looptime2);
+                } else {
+                    end2 = moment(event.end);
+                }
+                if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
+                {
+                    event.startT = moment(event.start).format('hh:mm A');
+                    event.endT = moment(event.end).format('hh:mm A');
+
+                    // Update strings if need be, if say, start time was before this day, or end time is after this day.
+                    if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
+                    {
+                        event.endT = moment(event.start).format('MM/DD hh:mm A');
+                    }
+                    if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
+                    {
+                        event.startT = moment(event.start).format('MM/DD hh:mm A');
+                    }
+
+                    // Push the final products into our formatted variable
+                    if (!assistant)
+                        calendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success-light">IN ${event.startT}</div><div class="m-1 text-danger-light">OUT ${event.endT}</div></div>`;
+                    if (assistant)
+                        asstcalendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success-light">IN ${event.startT}</div><div class="m-1 text-danger-light">OUT ${event.endT}</div></div>`;
+                }
+            }
+        });
+
+        slides[3] = {name: 'Hours - Directors', class: 'info', do: true, function: function () {
+                $('#slide').animateCss('lightSpeedOut', function () {
+                    content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1>
+            <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
+                    var innercontent = document.getElementById('office-hours');
+
+                    var stuff = `<div class="row">
+                      <div class="col-3 text-primary-light">
+                  	<strong>Director</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>Today</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(1, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(2, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(3, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(4, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(5, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(6, 'days').format('MM/DD')}</strong>
+                      </div>
+                    </div>`;
+                    var doShade = false;
+                    for (var director in calendar)
+                    {
+                        if (calendar.hasOwnProperty(director))
+                        {
+                            stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+                      <div class="col-3 text-warning">
+                  	${director}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${calendar[director][0]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${calendar[director][1]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${calendar[director][2]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${calendar[director][3]}
+                      </div>
+                       <div class="col" style="font-size: 0.75em;">
+                            ${calendar[director][4]}
+                      </div>
+                       <div class="col" style="font-size: 0.75em;">
+                            ${calendar[director][5]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${calendar[director][6]}
+                      </div>
+                    </div>`;
+                            if (doShade)
+                            {
+                                doShade = false;
+                            } else {
+                                doShade = true;
+                            }
+                        }
+                    }
+
+                    innercontent.innerHTML += stuff;
+
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+        
+        slides[4] = {name: 'Hours - Assistants', class: 'info', do: true, function: function () {
+                $('#slide').animateCss('lightSpeedOut', function () {
+                    content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1>
+            <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
+                    var innercontent = document.getElementById('office-hours');
+
+                    var stuff = `<div class="row">
+                      <div class="col-3 text-primary-light">
+                  	<strong>Asst. Director</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>Today</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(1, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(2, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(3, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(4, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(5, 'days').format('MM/DD')}</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>${moment(Meta.time).add(6, 'days').format('MM/DD')}</strong>
+                      </div>
+                    </div>`;
+                    var doShade = false;
+                    for (var director in asstcalendar)
+                    {
+                        if (asstcalendar.hasOwnProperty(director))
+                        {
+                            stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+                      <div class="col-3 text-warning">
+                  	${director}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${asstcalendar[director][0]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${asstcalendar[director][1]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${asstcalendar[director][2]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${asstcalendar[director][3]}
+                      </div>
+                       <div class="col" style="font-size: 0.75em;">
+                            ${asstcalendar[director][4]}
+                      </div>
+                       <div class="col" style="font-size: 0.75em;">
+                            ${asstcalendar[director][5]}
+                      </div>
+                      <div class="col" style="font-size: 0.75em;">
+                            ${asstcalendar[director][6]}
+                      </div>
+                    </div>`;
+                            if (doShade)
+                            {
+                                doShade = false;
+                            } else {
+                                doShade = true;
+                            }
+                        }
+                    }
+
+                    innercontent.innerHTML += stuff;
+
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+    } catch (e) {
+        iziToast.show({
+            title: 'An error occurred - Please check the logs',
+            message: 'Error occurred during the call of office hours slide.'
         });
         console.error(e);
     }
@@ -517,6 +856,23 @@ function directorSocket()
             console.error(e);
             console.log('FAILED DIRECTORS CONNECTION');
             setTimeout(directorSocket, 10000);
+        }
+    });
+}
+
+// Called to replace all Directors data with body of request
+function directorHoursSocket()
+{
+    console.log('attempting director socket');
+    io.socket.post('/directors/get-hours', {}, function serverResponded(body, JWR) {
+        try {
+            Directorhours = TAFFY();
+            Directorhours.insert(body);
+            processDirectorHours();
+        } catch (e) {
+            console.error(e);
+            console.log('FAILED DIRECTOR HOURS CONNECTION');
+            setTimeout(directorHoursSocket, 10000);
         }
     });
 }
@@ -565,6 +921,7 @@ function statusSocket()
 function doSlide(same = false)
 {
     try {
+        var prevslide = slide;
         clearTimeout(slidetimer);
         slidetimer = true;
         if (!same)
@@ -627,21 +984,27 @@ function doSlide(same = false)
                             });
                         }, 30000);
                     });
-
                 } else if (typeof slides[slide] !== 'undefined' && slides[slide].do)
                 {
-                    done = true;
-                    console.log(`Doing slide ${slide}`);
-                    try {
-                        slides[slide].function();
-                    } catch (e) {
-                        console.log(e);
-                        iziToast.show({
-                            title: 'An error occurred - Please check the logs',
-                            message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
-                        });
-                        doSlide();
-                        return null;
+                    if (slide !== prevslide && !same)
+                    {
+                        done = true;
+                        console.log(`Doing slide ${slide}`);
+                        try {
+                            slides[slide].function();
+                        } catch (e) {
+                            console.log(e);
+                            iziToast.show({
+                                title: 'An error occurred - Please check the logs',
+                                message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
+                            });
+                            doSlide();
+                            return null;
+                        }
+                    } else {
+                        done = true;
+                        console.log(`Slide ${slide} already active. Setting new 14-second timer.`);
+                        slidetimer = setTimeout(doSlide, 14000);
                     }
                     var temp = document.getElementById(`slidebadge-${slide}`);
                     if (temp !== null)
@@ -666,6 +1029,7 @@ function doSlide(same = false)
 <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: 937-775-5555</h1>
             </div>
             </div>`;
+                    slide = 1;
                 } catch (e) {
                     iziToast.show({
                         title: 'An error occurred - Please check the logs',

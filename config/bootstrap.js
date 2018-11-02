@@ -97,7 +97,6 @@ module.exports.bootstrap = async function (done) {
         var meta = await Meta.find().limit(1)
                 .tolerate((err) => {
                     sails.log.error(err);
-                    Meta.changeMeta({time: moment().toISOString(true)});
                 });
         meta = meta[0];
         meta.time = moment().toISOString(true);
@@ -124,7 +123,6 @@ module.exports.bootstrap = async function (done) {
         Playlists.active.position = meta.playlist_position;
         Playlists.played = moment(meta.playlist_played);
     } catch (e) {
-        await Meta.changeMeta({time: moment().toISOString(true)});
     }
 
     // Load directors.
@@ -150,8 +148,10 @@ module.exports.bootstrap = async function (done) {
     cron.schedule('* * * * * *', () => {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON checks triggered.`);
-
-            var change = {queueLength: 0, percent: 0, time: moment().toISOString(true)}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
+            
+            Meta.changeMeta({time: moment().toISOString(true)}); // Always casually send the current time through Meta as a separate socket
+            
+            var change = {queueLength: 0, percent: 0}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
             //
             // Skip all checks and use default meta template if sails.config.custom.lofi = true
             if (sails.config.custom.lofi)
@@ -161,7 +161,6 @@ module.exports.bootstrap = async function (done) {
                     change.time = moment().toISOString(true);
                     await Meta.changeMeta(change);
                 } catch (e) {
-                    Meta.changeMeta({time: moment().toISOString(true)});
                     sails.log.error(e);
                     return resolve(e);
                 }
@@ -176,7 +175,6 @@ module.exports.bootstrap = async function (done) {
                     var meta = await Meta.find().limit(1)
                             .tolerate((err) => {
                                 sails.log.error(err);
-                                Meta.changeMeta({time: moment().toISOString(true)});
                                 return resolve(err);
                             });
                     meta = meta[0];
@@ -204,7 +202,6 @@ module.exports.bootstrap = async function (done) {
                     Playlists.active.position = meta.playlist_position;
                     Playlists.played = moment(meta.playlist_played);
                 } catch (e) {
-                    Meta.changeMeta({time: moment().toISOString(true)});
                     return resolve(e);
                 }
             }
@@ -286,7 +283,6 @@ module.exports.bootstrap = async function (done) {
                     });
                 } catch (e) {
                     sails.log.error(e);
-                    Meta.changeMeta({time: moment().toISOString(true)});
                     return resolve(e);
                 }
 
@@ -297,7 +293,6 @@ module.exports.bootstrap = async function (done) {
             } catch (e) {
                 await sails.helpers.error.count('queueFail');
                 sails.log.error(e);
-                Meta.changeMeta({time: moment().toISOString(true)});
                 return resolve(e);
             }
 
@@ -406,6 +401,7 @@ module.exports.bootstrap = async function (done) {
                                     // Waiting for the playlist to begin, and it has begun? Switch states.
                                     if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && Meta['A'].changingState === null)
                                     {
+                                        // State switching should be pushed in sockets 
                                         await Meta.changeMeta({state: 'live_prerecord', showStamp: moment().toISOString(true)});
                                         await Attendance.createRecord(`Prerecord: ${Meta['A'].playlist}`);
                                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord started airing.` + "\n" + "Prerecord: " + Meta['A'].playlist})
@@ -455,7 +451,7 @@ module.exports.bootstrap = async function (done) {
                         }
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Genre: Default`);
-                        Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
+                        await Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
                         Playlists.active.name = null;
                         Playlists.active.position = 0;
 
@@ -843,7 +839,6 @@ module.exports.bootstrap = async function (done) {
                 // Uncomment once we confirmed this CRON is fully operational
                 //  await sails.helpers.error.count('frozen');
                 sails.log.error(e);
-                Meta.changeMeta({time: moment().toISOString()});
                 return resolve(e);
             }
         });

@@ -756,16 +756,16 @@ module.exports = {
                         await sails.helpers.asyncForEach(destroyed, function (event, index) {
                             return new Promise(async (resolve2, reject2) => {
                                 try {
-                                    var records = Timesheet.find({name: destroyed.director, start: {'>=': moment().startOf('day').toISOString(true)}});
+                                    var records = Timesheet.find({name: event.director, time_in: {'>=': moment().startOf('day').toISOString(true)}});
                                     var absent = true;
                                     if (records.length > 0)
                                     {
                                         records.forEach(function (therecord) {
-                                            if (moment(therecord.time_in).isSameOrAfter(moment(destroyed.start)) && moment(therecord.time_in).isSameOrBefore(moment(destroyed.end)))
+                                            if (moment(therecord.time_in).isSameOrAfter(moment(event.start)) && moment(therecord.time_in).isSameOrBefore(moment(event.end)))
                                             {
                                                 absent = false;
                                             }
-                                            if (moment(therecord.time_out).isSameOrBefore(moment(destroyed.end)) && moment(therecord.time_out).isSameOrAfter(moment(destroyed.start)))
+                                            if (moment(therecord.time_out).isSameOrBefore(moment(event.end)) && moment(therecord.time_out).isSameOrAfter(moment(event.start)))
                                             {
                                                 absent = false;
                                             }
@@ -773,7 +773,7 @@ module.exports = {
                                     }
                                     if (absent)
                                     {
-                                        await Logs.create({attendanceID: null, logtype: 'absent-director', loglevel: 'warning', logsubtype: destroyed.director, event: `A director did not come in for scheduled office hours!<br />Director: ${destroyed.director}<br />Scheduled time: ${moment(destroyed.start).format("hh:mm A")} - ${moment(destroyed.end).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
+                                        await Logs.create({attendanceID: null, logtype: 'absent-director', loglevel: 'warning', logsubtype: event.director, event: `A director did not come in for scheduled office hours!<br />Director: ${event.director}<br />Scheduled time: ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
                                                 .tolerate((err) => {
                                                     sails.log.error(err);
                                                 });

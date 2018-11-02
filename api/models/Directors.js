@@ -31,6 +31,11 @@ module.exports = {
             defaultsTo: false
         },
 
+        assistant: {
+            type: 'boolean',
+            defaultsTo: false
+        },
+
         avatar: {// HTML path relative to assets/images/avatars/
             type: 'string',
             defaultsTo: 'default.png'
