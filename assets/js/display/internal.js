@@ -1,4 +1,4 @@
-/* global io, moment, Infinity, iziToast */
+/* global io, moment, Infinity, iziToast, responsiveVoice */
 
 try {
 
@@ -27,6 +27,7 @@ try {
     var slidetimer = false;
     var slide = 1;
     var lastBurnIn = null;
+    var prevStatus = 5;
 
 // Define initial slides
     var slides = {1: {
@@ -226,7 +227,6 @@ waitFor(function () {
         onlineSocket();
         metaSocket();
         directorSocket();
-        directorHoursSocket();
         statusSocket();
         // Remove the lost connection overlay
         if (disconnected)
@@ -242,7 +242,6 @@ waitFor(function () {
     onlineSocket();
     metaSocket();
     directorSocket();
-    directorHoursSocket();
     statusSocket();
     if (disconnected)
     {
@@ -386,6 +385,7 @@ function processStatus()
 
         if (disconnected)
             globalStatus = 0;
+       
 
         var status = document.getElementById('status-div');
         var color = 'rgba(158, 158, 158, 0.3)';
@@ -395,6 +395,8 @@ function processStatus()
             case 0:
                 color = 'rgba(244, 67, 54, 0.5)';
                 statusLine.innerHTML = 'DISPLAY SIGN NOT CONNECTED TO WWSU';
+                if (globalStatus !== prevStatus)
+                    responsiveVoice.speak("Warning! The WWSU display sign lost connection. Ensure the server is functioning correctly. If this was intentional, ignore.");
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
                     $("html, body").css("background-color", "#D32F2F");
@@ -406,6 +408,8 @@ function processStatus()
             case 1:
                 color = 'rgba(244, 67, 54, 0.5)';
                 statusLine.innerHTML = 'WWSU Status: Unstable';
+                if (globalStatus !== prevStatus)
+                    responsiveVoice.speak("Warning! The WWSU system is in a critical state.");
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
                     $("html, body").css("background-color", "#D32F2F");
@@ -417,6 +421,8 @@ function processStatus()
             case 2:
                 color = 'rgba(245, 124, 0, 0.5)';
                 statusLine.innerHTML = 'WWSU Status: Needs Attention';
+                if (globalStatus !== prevStatus)
+                    responsiveVoice.speak("Warning! The WWSU system needs attention.");
                 // Flash screen for partial outages every 5 seconds
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
@@ -438,6 +444,8 @@ function processStatus()
                 color = 'rgba(158, 158, 158, 0.3)';
                 statusLine.innerHTML = 'WWSU Status: Unknown';
         }
+        
+        prevStatus = globalStatus;
 
         // Have dim elements if we are to be in power saving mode
         if ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || directorpresent) {
@@ -552,6 +560,8 @@ function processDirectors()
                 }
             });
         }
+        
+        processDirectorHours();
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
@@ -594,7 +604,15 @@ function processDirectorHours()
 
         Directorhours().get().sort(compare).forEach(function (event)
         {
-            var assistant = Directors({name: event.director}).first().assistant || true; // If we cannot determine if a director is an assistant, assume they are.
+            var temp = Directors({name: event.director}).first();
+            if (typeof temp.assistant !== 'undefined')
+            {
+                var assistant = temp.assistant;
+                console.log(event.director + " " + assistant);
+            } else {
+                var assistant = true;
+                console.log(event.director + " is an unknown assistant.");
+            }
             // Format calendar for the director
             if (!assistant && typeof calendar[event.director] === 'undefined')
             {
@@ -744,7 +762,7 @@ function processDirectorHours()
                     slidetimer = setTimeout(doSlide, 14000);
                 });
             }};
-        
+
         slides[4] = {name: 'Hours - Assistants', class: 'info', do: true, function: function () {
                 $('#slide').animateCss('lightSpeedOut', function () {
                     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1>
@@ -852,27 +870,21 @@ function directorSocket()
             Directors = TAFFY();
             Directors.insert(body);
             processDirectors();
+            io.socket.post('/directors/get-hours', {}, function serverResponded(body, JWR) {
+                try {
+                    Directorhours = TAFFY();
+                    Directorhours.insert(body);
+                    processDirectorHours();
+                } catch (e) {
+                    console.error(e);
+                    console.log('FAILED DIRECTOR CONNECTION');
+                    setTimeout(directorSocket, 10000);
+                }
+            });
         } catch (e) {
             console.error(e);
             console.log('FAILED DIRECTORS CONNECTION');
             setTimeout(directorSocket, 10000);
-        }
-    });
-}
-
-// Called to replace all Directors data with body of request
-function directorHoursSocket()
-{
-    console.log('attempting director socket');
-    io.socket.post('/directors/get-hours', {}, function serverResponded(body, JWR) {
-        try {
-            Directorhours = TAFFY();
-            Directorhours.insert(body);
-            processDirectorHours();
-        } catch (e) {
-            console.error(e);
-            console.log('FAILED DIRECTOR HOURS CONNECTION');
-            setTimeout(directorHoursSocket, 10000);
         }
     });
 }

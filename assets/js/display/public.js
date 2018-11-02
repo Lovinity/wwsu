@@ -1,4 +1,4 @@
-/* global moment, ProgressBar, io, Infinity, iziToast */
+/* global moment, ProgressBar, io, Infinity, iziToast, responsiveVoice */
 
 try {
 
@@ -561,6 +561,7 @@ waitFor(function () {
                     messageSize: '1.5em',
                     balloon: true
                 });
+                responsiveVoice.speak(`There is a message from the DJ: ${data[key].message}`);
             }
         }
     });
@@ -745,6 +746,7 @@ function doEas()
                     <div class="m-1 text-warning-light" style="font-size: 2em;">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3" style="color: #FFFFFF; background: rgba(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}, 0.8); font-size: 2.5em;">${text}</div>
                     </div></div>`;
+                responsiveVoice.speak(`Warning! The emergency alert system is reporting an alert. A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
                 if (easExtreme)
                 {
                     content.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-danger"><strong>Life-threatening alert(s) in effect!</strong> Please stand by...</h2>`;
@@ -1007,6 +1009,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
+                    responsiveVoice.speak(`Oh snap! ${temp[0]} is about to go on the air on WWSU.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1047,6 +1050,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = "Remote Broadcast starting in";
+                    responsiveVoice.speak(`A remote broadcast is about to begin on WWSU.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1086,6 +1090,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-success">${Meta.dj}</span><br />about to broadcast in`;
+                    responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.dj}, is about to begin on WWSU.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1126,6 +1131,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is returning live in`;
+                    responsiveVoice.speak(`${temp[0]} is about to go back on the air on WWSU.`);
                 }
                 if (queuelength >= 15)
                 {

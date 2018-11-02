@@ -750,6 +750,8 @@ module.exports = {
                     }
 
                     // Go through every event record which passed the end time, and log absences where necessary.
+                    // DOES NOT WORK YET
+                    /*
                     if (destroyed && destroyed.length > 0)
                     {
                         sails.log.debug(`Calling asyncForEach in Calendar for looping through calendar records that expires for Director Hours.`);
@@ -787,6 +789,7 @@ module.exports = {
                             });
                         });
                     }
+                    */
 
                     if (!badEvent)
                         Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational', status: 5}]);
