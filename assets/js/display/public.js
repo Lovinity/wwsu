@@ -12,6 +12,8 @@ try {
 
 // Define HTML elements
     var content = document.getElementById('slide');
+    var djAlert = document.getElementById('dj-alert');
+    var easAlert = document.getElementById('eas-alert');
     var nowplaying = document.getElementById('nowplaying');
     var nowplayingseek = document.getElementById('nowplaying-seek');
     var nowplayingtime = document.getElementById('nowplaying-time');
@@ -20,7 +22,7 @@ try {
     var nowplayingline2 = document.getElementById('nowplaying-line2');
     var slidebadges = document.getElementById('slide-badges');
     var noConnection = document.getElementById("no-connection");
-    var background = document.getElementById("bg");
+    var background = document.getElementById("bg-canvas");
     var wrapper = document.getElementById("wrapper");
     var flashInterval = null;
 // Define variables
@@ -105,6 +107,7 @@ try {
     });
 
     var colors = ['#FF0000', '#00FF00', '#0000FF'], Scolor = 0, delay = 300000, scrollDelay = 15000;
+
 } catch (e) {
     console.error(e);
     iziToast.show({
@@ -586,6 +589,7 @@ waitFor(function () {
     eventSocket();
     directorSocket();
     easSocket();
+    doSlide();
     if (disconnected)
     {
         //noConnection.style.display = "none";
@@ -710,10 +714,6 @@ function doEas()
         // Display the new alert if conditions permit
         if ((newEas.length > 0 && !easActive))
         {
-            // Stop slide timers
-            clearTimeout(slidetimer);
-            slidetimer = null;
-            slidebadges.innerHTML = ``;
             // Make sure alert is valid
             if (typeof newEas[0] !== 'undefined')
             {
@@ -738,7 +738,8 @@ function doEas()
                 color4.green = Math.round((color4.green / 2) + 127);
                 color4.blue = Math.round((color4.blue / 2) + 127);
                 color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`;
-                content.innerHTML = `<div class="animated wobble" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
+                easAlert.style.display = "inline";
+                easAlert.innerHTML = `<div class="animated wobble" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em;">WWSU Emergency Alert System</h1>
                     <div class="m-3" style="color: ${color4}; font-size: 6em;">${alert}</div>
                     <div class="m-1 text-info-light" style="font-size: 2em;">${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
@@ -748,7 +749,8 @@ function doEas()
                 responsiveVoice.speak(`Warning! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
                 if (easExtreme)
                 {
-                    content.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-danger"><strong>Life-threatening alert(s) in effect!</strong> Please stand by...</h2>`;
+                    easAlert.style.display = "inline";
+                    easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-danger"><strong>Life-threatening alert(s) in effect!</strong> Please stand by...</h2>`;
                 }
                 $('#alert-marquee')
                         .bind('finished', function () {
@@ -781,9 +783,9 @@ function doEas()
                         });
                 clearInterval(flashInterval);
                 flashInterval = setInterval(function () {
-                    $("html, body").css("background-color", color3);
+                    $("#eas-alert").css("background-color", color3);
                     setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                        $("#eas-alert").css("background-color", "#000000");
                     }, 250);
                     if (easActive && document.getElementById('slide-interrupt-eas') === null)
                     {
@@ -799,11 +801,6 @@ function doEas()
             // If there is an extreme alert in effect, we want it to be permanently on the screen while it is in effect
         } else if (easExtreme && !easActive)
         {
-            // Stop slide timers
-            clearTimeout(slidetimer);
-            slidetimer = null;
-            slidebadges.innerHTML = ``;
-
             // Stop marquee screensaver if it is running
             lines.stop();
             $('#wrapper').fadeOut(500, 'linear', function () {
@@ -813,13 +810,13 @@ function doEas()
 
             // Make background flash red every second
             clearInterval(flashInterval);
-            var voiceCount = 120;
+            var voiceCount = 180;
             flashInterval = setInterval(function () {
-                $("html, body").css("background-color", "#D50000");
+                $("#eas-alert").css("background-color", "#D50000");
                 setTimeout(function () {
-                    $("html, body").css("background-color", "#000000");
+                    $("#eas-alert").css("background-color", "#000000");
                     voiceCount++;
-                    if (voiceCount > 119)
+                    if (voiceCount > 179)
                     {
                         voiceCount = 0;
                         responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`);
@@ -828,7 +825,8 @@ function doEas()
             }, 1000);
 
             // Display the extreme alerts
-            content.innerHTML = `<div id="slide-interrupt-eas">
+            easAlert.style.display = "inline";
+            easAlert.innerHTML = `<div id="slide-interrupt-eas">
             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">WWSU Emergency Alert System</h1>
             <h2 style="text-align: center; font-size: 3em;" class="text-warning">Extreme Alerts in effect</h2>
             <h2 style="text-align: center; font-size: 3em;" class="text-danger">SEEK SHELTER NOW!!!</h2>
@@ -859,7 +857,8 @@ function doEas()
         } else if (!easExtreme && !easActive && document.getElementById('slide-interrupt-eas') !== null)
         {
             clearInterval(flashInterval);
-            doSlide(true);
+            easAlert.style.display = "none";
+            easAlert.innerHTML = ``;
             // If we are supposed to display an EAS alert, but it is not on the screen, this is an error; put it on the screen.
         } else if (easActive && document.getElementById('slide-interrupt-eas') === null)
         {
@@ -897,6 +896,7 @@ function processNowPlaying(response)
             if (disconnected || typeof Meta.state === 'undefined')
             {
                 statebadge = `<span class="badge badge-secondary">OFFLINE</span>`;
+                djAlert.style.display = "none";
             } else if (Meta.state.startsWith("automation_"))
             {
                 statebadge = `<span class="badge badge-primary">MUSIC</span>`;
@@ -985,16 +985,9 @@ function processNowPlaying(response)
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
                         </div>
                         `;
-            if (easActive || easExtreme)
+            if (Meta.state === 'automation_live' && queuelength < 60)
             {
-                // Do nothing with slides if we are displaying anything Eas related
-
-                // DJ about to go live and less than 60 seconds until they do so; display a big countdown
-            } else if (Meta.state === 'automation_live' && queuelength < 60)
-            {
-                clearTimeout(slidetimer);
-                slidetimer = null;
-                slidebadges.innerHTML = ``;
+                djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
                 var countdowntext = document.getElementById('countdown-text');
                 var countdownclock = document.getElementById('countdown-clock');
@@ -1007,7 +1000,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.dj.split(" - ");
-                    content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
                     </div></div>`;
@@ -1024,18 +1017,16 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").css("background-color", "#F44336");
+                    $("#dj-alert").css("background-color", "#F44336");
                     setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                        $("#dj-alert").css("background-color", "#000000");
                     }, 250);
                 }
 
                 // When a remote broadcast is about to start
             } else if (Meta.state === 'automation_remote' && queuelength < 60)
             {
-                clearTimeout(slidetimer);
-                slidetimer = null;
-                slidebadges.innerHTML = ``;
+                djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
                 var countdowntext = document.getElementById('countdown-text');
                 var countdownclock = document.getElementById('countdown-clock');
@@ -1048,7 +1039,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.dj.split(" - ");
-                    content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
                     </div>
@@ -1066,17 +1057,15 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").css("background-color", "#9C27B0");
+                    $("#dj-alert").css("background-color", "#9C27B0");
                     setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                        $("#dj-alert").css("background-color", "#000000");
                     }, 250);
                 }
                 // Sports broadcast about to begin
             } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60)
             {
-                clearTimeout(slidetimer);
-                slidetimer = null;
-                slidebadges.innerHTML = ``;
+                djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
                 var countdowntext = document.getElementById('countdown-text');
                 var countdownclock = document.getElementById('countdown-clock');
@@ -1088,7 +1077,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
                     </div>
@@ -1106,17 +1095,15 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").css("background-color", "#4CAF50");
+                    $("#dj-alert").css("background-color", "#4CAF50");
                     setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                        $("#dj-alert").css("background-color", "#000000");
                     }, 250);
                 }
                 // DJ is returning from a break
             } else if (Meta.state === 'live_returning' && queuelength < 60)
             {
-                clearTimeout(slidetimer);
-                slidetimer = null;
-                slidebadges.innerHTML = ``;
+                djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
                 var countdowntext = document.getElementById('countdown-text');
                 var countdownclock = document.getElementById('countdown-clock');
@@ -1129,7 +1116,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.dj.split(" - ");
-                    content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
                     </div>
@@ -1147,17 +1134,15 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").css("background-color", "#F44336");
+                    $("#dj-alert").css("background-color", "#F44336");
                     setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                        $("#dj-alert").css("background-color", "#000000");
                     }, 250);
                 }
                 // Remote broadcast is returning from a break
             } else if (Meta.state === 'remote_returning' && queuelength < 60)
             {
-                clearTimeout(slidetimer);
-                slidetimer = null;
-                slidebadges.innerHTML = ``;
+                djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
                 var countdowntext = document.getElementById('countdown-text');
                 var countdownclock = document.getElementById('countdown-clock');
@@ -1169,7 +1154,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
                     </div>
@@ -1187,17 +1172,15 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").css("background-color", "#9C27B0");
+                    $("#dj-alert").css("background-color", "#9C27B0");
                     setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                        $("#dj-alert").css("background-color", "#000000");
                     }, 250);
                 }
                 // Returning to a sports broadcast
             } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60)
             {
-                clearTimeout(slidetimer);
-                slidetimer = null;
-                slidebadges.innerHTML = ``;
+                djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
                 var countdowntext = document.getElementById('countdown-text');
                 var countdownclock = document.getElementById('countdown-clock');
@@ -1209,7 +1192,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
                     </div>
@@ -1227,35 +1210,17 @@ function processNowPlaying(response)
                 } else {
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
-                    $("html, body").css("background-color", "#4CAF50");
+                    $("#dj-alert").css("background-color", "#4CAF50");
                     setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                        $("#dj-alert").css("background-color", "#000000");
                     }, 250);
                 }
                 // Nothing special to show
             } else {
-                if ((moment(Meta.time).isAfter(moment({hour: 8, minute: 0})) && (moment(Meta.time).isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote' || (Meta.state.includes("_returning") && queuelength >= 60)) {
-                    if (document.getElementById('dim-slide') !== null || content.innerHTML === 'TESTING' || document.getElementById('slide-interrupt') !== null || document.getElementById('slide-interrupt-eas') !== null)
-                    {
-                        doSlide(true);
-                    }
-                } else {
-                    if (document.getElementById('dim-slide') === null)
-                    {
-                        clearTimeout(slidetimer);
-                        slidetimer = null;
-                        slidebadges.innerHTML = ``;
-                        doSlide();
-                    }
-                }
+                djAlert.style.display = "none";
+                djAlert.innerHTML = ``;
             }
         } catch (e) {
-            if (easActive)
-            {
-                easActive = false;
-                newEas.shift();
-            }
-
             console.error(e);
             iziToast.show({
                 title: 'An error occurred - Please check the logs',
@@ -1287,19 +1252,10 @@ function doSlide(same = false)
 {
     try {
         console.log(`Do Slide Called`);
+        
         // Failsafes
         clearTimeout(slidetimer);
         slidetimer = true;
-        if ((document.getElementById('slide-interrupt') !== null && (Meta.state.startsWith("automation_") || Meta.state.includes("returning"))) || (document.getElementById('slide-interrupt-eas') !== null && easActive) || easActive)
-        {
-            lines.stop();
-            $('#wrapper').fadeOut(500, 'linear', function () {
-                lines.clear();
-                wrapper.style.display = "none";
-            });
-            slidetimer = setTimeout(doSlide, 10000);
-            return null;
-        }
 
         if (!same)
             slide += 1;

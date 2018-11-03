@@ -29,7 +29,11 @@
             .content {
                 padding: 5px;
                 min-height: 100%;
+                width: 100%;
                 margin: 0 auto -225px;
+                position: absolute;
+                top: 0;
+                left: 0;
             }
 .foot {position: relative;}
 .footer {
@@ -38,6 +42,7 @@
    bottom: 0;
    width: 100%;
    text-align: center;
+   z-index: 1000;
 }
      #wrapper {
        position: absolute;
@@ -60,6 +65,12 @@
 }
 #nowplaying-line2 {
     overflow: hidden;
+}
+#dj-alert {
+    z-index: 100;
+}
+#eas-alert {
+    z-index: 200;
 }
 #alert-marquee {
     overflow: hidden;
@@ -86,7 +97,7 @@
                 right: 0;
                 bottom: 0;
                 background-color: rgba(0,0,0,0.8);
-                z-index: 90;
+                z-index: 149;
             }
 
             .toast {
@@ -97,7 +108,7 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                z-index: 999;
+                z-index: 150;
             }
 
             .text{
