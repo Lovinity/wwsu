@@ -396,7 +396,7 @@ function processStatus()
                 color = 'rgba(244, 67, 54, 0.5)';
                 statusLine.innerHTML = 'DISPLAY SIGN NOT CONNECTED TO WWSU';
                 if (globalStatus !== prevStatus)
-                    responsiveVoice.speak("Warning! The WWSU display sign lost connection. Ensure the server is functioning correctly. If this was intentional, ignore.");
+                    responsiveVoice.speak("Attention! The display sign is not connected to WWSU. This could indicate the server has crashed or is rebooting.");
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
                     $("html, body").css("background-color", "#D32F2F");
@@ -409,7 +409,7 @@ function processStatus()
                 color = 'rgba(244, 67, 54, 0.5)';
                 statusLine.innerHTML = 'WWSU Status: Unstable';
                 if (globalStatus !== prevStatus)
-                    responsiveVoice.speak("Warning! The WWSU system is in a critical state.");
+                    responsiveVoice.speak("Attention! Attention! The WWSU system is in a critically unstable state.");
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {
                     $("html, body").css("background-color", "#D32F2F");
@@ -422,7 +422,7 @@ function processStatus()
                 color = 'rgba(245, 124, 0, 0.5)';
                 statusLine.innerHTML = 'WWSU Status: Needs Attention';
                 if (globalStatus !== prevStatus)
-                    responsiveVoice.speak("Warning! The WWSU system needs attention.");
+                    responsiveVoice.speak("Attention! The WWSU system needs attention.");
                 // Flash screen for partial outages every 5 seconds
                 // Flash screen for major outages every second
                 flashInterval = setInterval(function () {

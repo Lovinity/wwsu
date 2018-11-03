@@ -745,7 +745,7 @@ function doEas()
                     <div class="m-1 text-warning-light" style="font-size: 2em;">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3" style="color: #FFFFFF; background: rgba(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}, 0.8); font-size: 2.5em;">${text}</div>
                     </div></div>`;
-                responsiveVoice.speak(`Warning! The emergency alert system is reporting an alert. A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
+                responsiveVoice.speak(`Warning! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
                 if (easExtreme)
                 {
                     content.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-danger"><strong>Life-threatening alert(s) in effect!</strong> Please stand by...</h2>`;
@@ -813,10 +813,17 @@ function doEas()
 
             // Make background flash red every second
             clearInterval(flashInterval);
+            var voiceCount = 120;
             flashInterval = setInterval(function () {
                 $("html, body").css("background-color", "#D50000");
                 setTimeout(function () {
                     $("html, body").css("background-color", "#000000");
+                    voiceCount++;
+                    if (voiceCount > 119)
+                    {
+                        voiceCount = 0;
+                        responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`);
+                    }
                 }, 250);
             }, 1000);
 
@@ -1008,7 +1015,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
-                    responsiveVoice.speak(`Oh snap! ${temp[0]} is about to go on the air on WWSU.`);
+                    responsiveVoice.speak(`Hello guests! ${temp[0]} is about to go on the air on WWSU radio for ${temp[1]}.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1040,6 +1047,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
+                    var temp = Meta.dj.split(" - ");
                     content.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -1049,7 +1057,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = "Remote Broadcast starting in";
-                    responsiveVoice.speak(`A remote broadcast is about to begin on WWSU.`);
+                    responsiveVoice.speak(`Hello guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1089,7 +1097,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-success">${Meta.dj}</span><br />about to broadcast in`;
-                    responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.dj}, is about to begin on WWSU.`);
+                    responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.dj}, is about to begin on WWSU radio.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1130,7 +1138,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is returning live in`;
-                    responsiveVoice.speak(`${temp[0]} is about to go back on the air on WWSU.`);
+                    responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1170,6 +1178,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = "Returning to remote broadcast in";
+                    responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1209,6 +1218,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-success">${Meta.dj}</span></br>returning in`;
+                    responsiveVoice.speak(`Raider up! The broadcast of ${Meta.dj} is about to resume.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1246,7 +1256,6 @@ function processNowPlaying(response)
                 newEas.shift();
             }
 
-            console.error(e);
             console.error(e);
             iziToast.show({
                 title: 'An error occurred - Please check the logs',
