@@ -705,7 +705,6 @@ function directorSocket()
 // This function is called whenever a change in Eas alerts is detected, or when we are finished displaying an alert. It checks to see if we should display something Eas-related.
 function doEas()
 {
-    return null;
     try {
         console.log(`DO EAS called`);
         // Display the new alert if conditions permit
