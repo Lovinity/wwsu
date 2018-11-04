@@ -16,6 +16,7 @@ try {
     var content = document.getElementById('slide');
     var title = document.getElementById('title');
     var wrapper = document.getElementById("wrapper");
+    var background = document.getElementById("bg-canvas");
     wrapper.width = window.innerWidth;
     wrapper.height = window.innerHeight;
     var flashInterval = null;
@@ -87,6 +88,29 @@ try {
         position: 'center',
         timeout: 30000
     });
+    
+    function generateBG() {
+
+        var hexValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e"];
+
+        function populate(a) {
+            for (var i = 0; i < 6; i++) {
+                var x = Math.round(Math.random() * 14);
+                var y = hexValues[x];
+                a += y;
+            }
+            return a;
+        }
+
+        var newColor1 = populate('#');
+        var newColor2 = populate('#');
+        var angle = Math.round(Math.random() * 360);
+
+        var gradient = "linear-gradient(" + angle + "deg, " + newColor1 + ", " + newColor2 + ")";
+
+        background.style.background = gradient;
+
+    }
 
 } catch (e) {
     iziToast.show({
@@ -977,6 +1001,7 @@ function doSlide(same = false)
                      }
                      */
                     restarted = true;
+                    generateBG();
                 }
 
                 // Do marquee screensaver
@@ -1025,11 +1050,15 @@ function doSlide(same = false)
                     slide += 1;
                 }
             }
+            
+            background.style.display = "inline";
+            
 
             // Power saving slide
         } else {
             slidetimer = setTimeout(doSlide, 14000);
             slidebadges.innerHTML = ``;
+            background.style.display = "none";
             var afterFunction = function () {
                 try {
                     console.log(`Doing inactive slide - WWSU`);

@@ -94,7 +94,7 @@ try {
         'top': '0px',
         'left': '0px',
         'display': 'none',
-        'z-index': 99
+        'z-index': 9999
     }).appendTo('body');
 
     // lines is the periodic line marquee screensaver that also helps prevent burn-in
@@ -107,6 +107,31 @@ try {
     });
 
     var colors = ['#FF0000', '#00FF00', '#0000FF'], Scolor = 0, delay = 300000, scrollDelay = 15000;
+
+    function generateBG() {
+
+        var hexValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e"];
+
+        function populate(a) {
+            for (var i = 0; i < 6; i++) {
+                var x = Math.round(Math.random() * 14);
+                var y = hexValues[x];
+                a += y;
+            }
+            return a;
+        }
+
+        var newColor1 = populate('#');
+        var newColor2 = populate('#');
+        var angle = Math.round(Math.random() * 360);
+
+        var gradient = "linear-gradient(" + angle + "deg, " + newColor1 + ", " + newColor2 + ")";
+
+        background.style.background = gradient;
+
+    }
+
+    generateBG();
 
 } catch (e) {
     console.error(e);
@@ -564,7 +589,7 @@ waitFor(function () {
                     messageSize: '1.5em',
                     balloon: true
                 });
-                responsiveVoice.speak(`There is a message from the DJ: ${data[key].message}`);
+                responsiveVoice.speak(`Attention guests! There is a message from the DJ: ${data[key].message}`);
             }
         }
     });
@@ -589,7 +614,6 @@ waitFor(function () {
     eventSocket();
     directorSocket();
     easSocket();
-    doSlide();
     if (disconnected)
     {
         //noConnection.style.display = "none";
@@ -672,6 +696,7 @@ function MetaSocket()
                 }
             }
             processNowPlaying(temp);
+            doSlide();
         } catch (e) {
             console.log('FAILED CONNECTION');
             setTimeout(MetaSocket, 10000);
@@ -746,7 +771,7 @@ function doEas()
                     <div class="m-1 text-warning-light" style="font-size: 2em;">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3" style="color: #FFFFFF; background: rgba(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}, 0.8); font-size: 2.5em;">${text}</div>
                     </div></div>`;
-                responsiveVoice.speak(`Warning! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
+                responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
                 if (easExtreme)
                 {
                     easAlert.style.display = "inline";
@@ -985,7 +1010,7 @@ function processNowPlaying(response)
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
                         </div>
                         `;
-            if (Meta.state === 'automation_live' && queuelength < 60)
+            if (Meta.state === 'automation_live' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1008,7 +1033,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
-                    responsiveVoice.speak(`Hello guests! ${temp[0]} is about to go on the air on WWSU radio for ${temp[1]}.`);
+                    responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1024,7 +1049,7 @@ function processNowPlaying(response)
                 }
 
                 // When a remote broadcast is about to start
-            } else if (Meta.state === 'automation_remote' && queuelength < 60)
+            } else if (Meta.state === 'automation_remote' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1048,7 +1073,7 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = "Remote Broadcast starting in";
-                    responsiveVoice.speak(`Hello guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
+                    responsiveVoice.speak(`Attention guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1063,7 +1088,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // Sports broadcast about to begin
-            } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60)
+            } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1101,7 +1126,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // DJ is returning from a break
-            } else if (Meta.state === 'live_returning' && queuelength < 60)
+            } else if (Meta.state === 'live_returning' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1140,7 +1165,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // Remote broadcast is returning from a break
-            } else if (Meta.state === 'remote_returning' && queuelength < 60)
+            } else if (Meta.state === 'remote_returning' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1178,7 +1203,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // Returning to a sports broadcast
-            } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60)
+            } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1252,7 +1277,7 @@ function doSlide(same = false)
 {
     try {
         console.log(`Do Slide Called`);
-        
+
         // Failsafes
         clearTimeout(slidetimer);
         slidetimer = true;
@@ -2111,6 +2136,7 @@ function doSlide(same = false)
                      }
                      */
                     restarted = true;
+                    generateBG();
                 }
 
                 // Slide 0 is marquee screensaver for 30 seconds
