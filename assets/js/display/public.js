@@ -30,6 +30,7 @@ try {
     var slide = 1;
     var Meta = {time: moment().toISOString(true)};
     var Calendar = TAFFY();
+    var Announcements = TAFFY();
 // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
     var calendar = [{}, [{}, {}, {}], [{}, {}, {}]];
     var Directors = TAFFY();
@@ -601,6 +602,7 @@ waitFor(function () {
         eventSocket();
         directorSocket();
         easSocket();
+        announcementsSocket();
         if (disconnected)
         {
             //noConnection.style.display = "none";
@@ -614,6 +616,7 @@ waitFor(function () {
     eventSocket();
     directorSocket();
     easSocket();
+    announcementsSocket();
     if (disconnected)
     {
         //noConnection.style.display = "none";
@@ -654,6 +657,19 @@ waitFor(function () {
 
     io.socket.on('display-refresh', function (data) {
         window.location.reload(true);
+    });
+
+    // When an announcement comes through
+    io.socket.on('announcements', function (data) {
+        try {
+            processAnnouncements(data);
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred on announcements event.'
+            });
+            console.error(e);
+        }
     });
 });
 
@@ -727,6 +743,19 @@ function directorSocket()
         } catch (e) {
             console.log('FAILED CONNECTION');
             setTimeout(directorSocket, 10000);
+        }
+    });
+}
+
+function announcementsSocket()
+{
+    console.log('attempting announcements socket');
+    io.socket.post('/announcements/get', {type: 'display-public'}, function serverResponded(body, JWR) {
+        try {
+            processAnnouncements(body, true);
+        } catch (e) {
+            console.log('FAILED CONNECTION');
+            setTimeout(announcementsSocket, 10000);
         }
     });
 }
@@ -2319,4 +2348,113 @@ function hexRgb(hex, options = {}) {
             message: 'Error occurred during hexRgb.'
         });
 }
+}
+
+function processAnnouncements(data = {}, replace = false){
+    if (replace)
+    {
+        Announcements = TAFFY();
+        Announcements.insert(data);
+    } else {
+        for (var key in data)
+        {
+            if (data.hasOwnProperty(key))
+            {
+                switch (key)
+                {
+                    case 'insert':
+                        Announcements.insert(data[key]);
+                        break;
+                    case 'update':
+                        Announcements({ID: data[key].ID}).update(data[key]);
+                        break;
+                    case 'remove':
+                        Announcements({ID: data[key]}).remove();
+                        break;
+                }
+            }
+        }
+    }
+
+    // Define a comparison function that will order announcements by createdAt
+    var compare = function (a, b) {
+        try {
+            if (moment(a.createdAt).valueOf() < moment(b.createdAt).valueOf())
+                return 1;
+            if (moment(a.createdAt).valueOf() > moment(b.createdAt).valueOf())
+                return -1;
+            if (a.ID < b.ID)
+                return -1;
+            if (a.ID > b.ID)
+                return 1;
+            return 0;
+        } catch (e) {
+            console.error(e);
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: `Error occurred in the compare function of processAnnouncements call.`
+            });
+        }
+    };
+
+    // Process non-sticky announcements first
+    var tempslide = 10;
+
+    // Remove all slides with announcements so as to refresh them
+    for (var i = 10; i < 100; i++)
+    {
+        if (typeof slides[i] !== 'undefined')
+            delete slides[i];
+    }
+
+    Announcements({type: 'display-internal'}).get().sort(compare).forEach(function (announcement)
+    {
+        if (moment(Meta.time).isBefore(moment(announcement.starts)) || moment(Meta.time).isAfter(moment(announcement.expires)))
+            return null;
+        slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
+                $('#slide').animateCss('slideOutUp', function () {
+                    content.innerHTML = `<div class="animated slideInDown scaleable-wrapper" id="scaleable-wrapper">
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content" id="scale-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+
+                    var $el = $("#scale-content");
+                    var elHeight = $el.outerHeight();
+                    var elWidth = $el.outerWidth();
+
+                    var $wrapper = $("#scaleable-wrapper");
+
+                    $wrapper.resizable({
+                        resize: doResize
+                    });
+
+                    function doResize(event, ui) {
+
+                        var scale, origin;
+
+                        scale = Math.min(
+                                ui.size.width / elWidth,
+                                ui.size.height / elHeight
+                                );
+
+                        $el.css({
+                            transform: "scale(" + scale + ")"
+                        });
+
+                    }
+
+                    var starterData = {
+                        size: {
+                            width: $wrapper.width(),
+                            height: $wrapper.height()
+                        }
+                    }
+
+                    doResize(null, starterData);
+
+                    slidetimer = setTimeout(doSlide, 14000);
+
+                });
+            }};
+
+        tempslide++;
+    });
 }

@@ -5,6 +5,7 @@ try {
 // Define data variables
     var Directors = TAFFY();
     var Directorhours = TAFFY();
+    var Announcements = TAFFY();
     var Meta = {time: moment().toISOString()};
     var Status = TAFFY();
 
@@ -88,7 +89,7 @@ try {
         position: 'center',
         timeout: 30000
     });
-    
+
     function generateBG() {
 
         var hexValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e"];
@@ -202,48 +203,12 @@ waitFor(function () {
 }, function () {
     // When a director is passed as an event, process it.
     io.socket.on('directors', function (data) {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                switch (key)
-                {
-                    case 'insert':
-                        Directors.insert(data[key]);
-                        break;
-                    case 'update':
-                        Directors({ID: data[key].ID}).update(data[key]);
-                        break;
-                    case 'remove':
-                        Directors({ID: data[key]}).remove();
-                        break;
-                }
-            }
-        }
-        processDirectors();
+        processDirectors(data);
     });
 
     // When a director is passed as an event, process it.
     io.socket.on('directorhours', function (data) {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                switch (key)
-                {
-                    case 'insert':
-                        Directorhours.insert(data[key]);
-                        break;
-                    case 'update':
-                        Directorhours({ID: data[key].ID}).update(data[key]);
-                        break;
-                    case 'remove':
-                        Directorhours({ID: data[key]}).remove();
-                        break;
-                }
-            }
-        }
-        processDirectorHours();
+        processDirectorHours(data);
     });
 
 // When a socket connection is established
@@ -252,6 +217,7 @@ waitFor(function () {
         metaSocket();
         directorSocket();
         statusSocket();
+        announcementsSocket();
         // Remove the lost connection overlay
         if (disconnected)
         {
@@ -267,6 +233,7 @@ waitFor(function () {
     metaSocket();
     directorSocket();
     statusSocket();
+    announcementsSocket();
     if (disconnected)
     {
         //noConnection.style.display = "none";
@@ -348,6 +315,19 @@ waitFor(function () {
         }
         processStatus();
     });
+
+    // When an announcement comes through
+    io.socket.on('announcements', function (data) {
+        try {
+            processAnnouncements(data);
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred on announcements event.'
+            });
+            console.error(e);
+        }
+    });
 });
 
 // Define data-specific functions
@@ -409,7 +389,7 @@ function processStatus()
 
         if (disconnected)
             globalStatus = 0;
-       
+
 
         var status = document.getElementById('status-div');
         var color = 'rgba(158, 158, 158, 0.3)';
@@ -468,7 +448,7 @@ function processStatus()
                 color = 'rgba(158, 158, 158, 0.3)';
                 statusLine.innerHTML = 'WWSU Status: Unknown';
         }
-        
+
         prevStatus = globalStatus;
 
         // Have dim elements if we are to be in power saving mode
@@ -491,9 +471,34 @@ function processStatus()
 }
 
 // Mark if a director is present or not
-function processDirectors()
+function processDirectors(data = {}, replace = false)
 {
     try {
+        if (replace)
+        {
+            Directors = TAFFY();
+            Directors.insert(data);
+        } else {
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    switch (key)
+                    {
+                        case 'insert':
+                            Directors.insert(data[key]);
+                            break;
+                        case 'update':
+                            Directors({ID: data[key].ID}).update(data[key]);
+                            break;
+                        case 'remove':
+                            Directors({ID: data[key]}).remove();
+                            break;
+                    }
+                }
+            }
+        }
+
         directorpresent = false;
 
         // Slide 3 is a list of WWSU directors and whether or not they are currently clocked in
@@ -584,7 +589,7 @@ function processDirectors()
                 }
             });
         }
-        
+
         processDirectorHours();
     } catch (e) {
         iziToast.show({
@@ -592,13 +597,38 @@ function processDirectors()
             message: 'Error occurred during the call of Directors[0].'
         });
         console.error(e);
-    }
+}
 }
 
 // Mark if a director is present or not
-function processDirectorHours()
+function processDirectorHours(data = {}, replace = false)
 {
     try {
+        if (replace)
+        {
+            Directorhours = TAFFY();
+            Directorhours.insert(data);
+        } else {
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    switch (key)
+                    {
+                        case 'insert':
+                            Directorhours.insert(data[key]);
+                            break;
+                        case 'update':
+                            Directorhours({ID: data[key].ID}).update(data[key]);
+                            break;
+                        case 'remove':
+                            Directorhours({ID: data[key]}).remove();
+                            break;
+                    }
+                }
+            }
+        }
+
         // A list of Office Hours for the directors
 
         // Define a comparison function that will order calendar events by start time when we run the iteration
@@ -870,7 +900,7 @@ function processDirectorHours()
             message: 'Error occurred during the call of office hours slide.'
         });
         console.error(e);
-    }
+}
 }
 
 function onlineSocket()
@@ -891,14 +921,10 @@ function directorSocket()
     console.log('attempting director socket');
     io.socket.post('/directors/get', {}, function serverResponded(body, JWR) {
         try {
-            Directors = TAFFY();
-            Directors.insert(body);
-            processDirectors();
+            processDirectors(body, true);
             io.socket.post('/directors/get-hours', {}, function serverResponded(body, JWR) {
                 try {
-                    Directorhours = TAFFY();
-                    Directorhours.insert(body);
-                    processDirectorHours();
+                    processDirectorHours(body, true);
                 } catch (e) {
                     console.error(e);
                     console.log('FAILED DIRECTOR CONNECTION');
@@ -953,6 +979,23 @@ function statusSocket()
     });
 }
 
+function announcementsSocket()
+{
+    try {
+        Announcements = TAFFY();
+        io.socket.post('/announcements/get', {type: 'display-internal'}, function serverResponded(body, JWR) {
+            processAnnouncements({insert: body});
+        });
+        io.socket.post('/announcements/get', {type: 'display-internal-sticky'}, function serverResponded(body, JWR) {
+            processAnnouncements({insert: body});
+        });
+    } catch (e) {
+        console.error(e);
+        console.log('FAILED ANNOUNCEMENTS CONNECTION');
+        setTimeout(announcementsSocket, 10000);
+    }
+}
+
 // Process slides
 function doSlide(same = false)
 {
@@ -967,6 +1010,7 @@ function doSlide(same = false)
         // Do slides if we are not to be in power saving mode
         if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote'))
         {
+            processAnnouncements();
             slidebadges.innerHTML = ``;
             // Determine highest slide number so we know when we are done
             var highestslide = 0;
@@ -1050,9 +1094,9 @@ function doSlide(same = false)
                     slide += 1;
                 }
             }
-            
+
             background.style.display = "inline";
-            
+
 
             // Power saving slide
         } else {
@@ -1093,4 +1137,113 @@ function doSlide(same = false)
         });
         console.error(e);
 }
+}
+
+function processAnnouncements(data = {}, replace = false){
+    if (replace)
+    {
+        Announcements = TAFFY();
+        Announcements.insert(data);
+    } else {
+        for (var key in data)
+        {
+            if (data.hasOwnProperty(key))
+            {
+                switch (key)
+                {
+                    case 'insert':
+                        Announcements.insert(data[key]);
+                        break;
+                    case 'update':
+                        Announcements({ID: data[key].ID}).update(data[key]);
+                        break;
+                    case 'remove':
+                        Announcements({ID: data[key]}).remove();
+                        break;
+                }
+            }
+        }
+    }
+
+    // Define a comparison function that will order announcements by createdAt
+    var compare = function (a, b) {
+        try {
+            if (moment(a.createdAt).valueOf() < moment(b.createdAt).valueOf())
+                return 1;
+            if (moment(a.createdAt).valueOf() > moment(b.createdAt).valueOf())
+                return -1;
+            if (a.ID < b.ID)
+                return -1;
+            if (a.ID > b.ID)
+                return 1;
+            return 0;
+        } catch (e) {
+            console.error(e);
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: `Error occurred in the compare function of processAnnouncements call.`
+            });
+        }
+    };
+
+    // Process non-sticky announcements first
+    var tempslide = 100;
+
+    // Remove all slides with announcements so as to refresh them
+    for (var i = 100; i < 1000; i++)
+    {
+        if (typeof slides[i] !== 'undefined')
+            delete slides[i];
+    }
+
+    Announcements({type: 'display-internal'}).get().sort(compare).forEach(function (announcement)
+    {
+        if (moment(Meta.time).isBefore(moment(announcement.starts)) || moment(Meta.time).isAfter(moment(announcement.expires)))
+            return null;
+        slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
+                $('#slide').animateCss('slideOutUp', function () {
+                    content.innerHTML = `<div class="animated slideInDown scaleable-wrapper" id="scaleable-wrapper">
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content" id="scale-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+
+                    var $el = $("#scale-content");
+                    var elHeight = $el.outerHeight();
+                    var elWidth = $el.outerWidth();
+
+                    var $wrapper = $("#scaleable-wrapper");
+
+                    $wrapper.resizable({
+                        resize: doResize
+                    });
+
+                    function doResize(event, ui) {
+
+                        var scale, origin;
+
+                        scale = Math.min(
+                                ui.size.width / elWidth,
+                                ui.size.height / elHeight
+                                );
+
+                        $el.css({
+                            transform: "scale(" + scale + ")"
+                        });
+
+                    }
+
+                    var starterData = {
+                        size: {
+                            width: $wrapper.width(),
+                            height: $wrapper.height()
+                        }
+                    }
+
+                    doResize(null, starterData);
+
+                    slidetimer = setTimeout(doSlide, 14000);
+
+                });
+            }};
+
+        tempslide++;
+    });
 }
