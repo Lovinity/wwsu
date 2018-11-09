@@ -28,6 +28,8 @@ module.exports = {
                     });
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);
+            
+            // Remove clearBreak tracks to speed up the return
             await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false, true);
 
             // Perform the break
@@ -44,7 +46,6 @@ module.exports = {
                     await Meta.changeMeta({state: 'sports_returning'});
                 }
             } else {
-
                 var d = new Date();
                 var num = d.getMinutes();
                 // Queue station IDs if after :50 and before :10, or if it's been an hour or more since the last station ID.

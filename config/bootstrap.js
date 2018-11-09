@@ -586,53 +586,6 @@ module.exports.bootstrap = async function (done) {
                     if (Meta['A'].state === 'automation_break')
                         await sails.helpers.error.count('automationBreak');
 
-                    // If we are in a sports break, switch it to returning mode because it should not be an indefinite break
-                    // WE HAVE the system go to break mode for this to switch to returning. This avoids a bug where being immediately in returning causes switch to on because queue is initially 0.
-                    var d = new Date();
-                    var n = d.getMinutes();
-                    if (Meta['A'].state === 'sports_break')
-                    {
-                        await Meta.changeMeta({state: 'sports_returning'});
-
-                        // Begin error check for sports Return
-                        await sails.helpers.error.count('sportsReturn');
-
-                        // Do a station ID
-                        if (n >= 50 || n <= 10)
-                        {
-                            // Begin error check for legal ID
-                            await sails.helpers.error.count('stationID');
-                            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
-                            Status.errorCheck.prevID = moment();
-                            if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                                await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
-                        } else {
-                            if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                                await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
-                        }
-                    }
-                    if (Meta['A'].state === 'sportsremote_break')
-                    {
-                        await Meta.changeMeta({state: 'sportsremote_returning'});
-
-                        // Begin error check for sports Return
-                        await sails.helpers.error.count('sportsReturn');
-
-                        // Do a station ID
-                        if (n >= 50 || n <= 10)
-                        {
-                            // Begin error check for legal ID
-                            await sails.helpers.error.count('stationID');
-                            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
-                            Status.errorCheck.prevID = moment();
-                            if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                                await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
-                        } else {
-                            if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                                await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
-                        }
-                    }
-
                     // Check if a break is needed (delay to :03 after... no need to remind unless the DJ forgot, which is assumed at :03 after)
                     var d = new Date();
                     var n = d.getMinutes();
