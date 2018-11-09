@@ -723,22 +723,22 @@ function processDirectorHours()
                   	<strong>Today</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(1, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(2, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(3, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(4, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(5, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(6, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
                       </div>
                     </div>`;
                     var doShade = false;
@@ -801,22 +801,22 @@ function processDirectorHours()
                   	<strong>Today</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(1, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(2, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(3, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(4, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(5, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
                       </div>
                       <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(6, 'days').format('MM/DD')}</strong>
+                  	<strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
                       </div>
                     </div>`;
                     var doShade = false;
