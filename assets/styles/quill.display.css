@@ -1,0 +1,352 @@
+.scale-content p,
+.scale-content ol,
+.scale-content ul,
+.scale-content pre,
+.scale-content blockquote,
+.scale-content h1,
+.scale-content h2,
+.scale-content h3,
+.scale-content h4,
+.scale-content h5,
+.scale-content h6 {
+  margin: 0;
+  padding: 0;
+  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.scale-content ol,
+.scale-content ul {
+  padding-left: 1.5em;
+}
+.scale-content ol > li,
+.scale-content ul > li {
+  list-style-type: none;
+}
+.scale-content ul > li::before {
+  content: '\2022';
+}
+.scale-content ul[data-checked=true],
+.scale-content ul[data-checked=false] {
+  pointer-events: none;
+}
+.scale-content ul[data-checked=true] > li *,
+.scale-content ul[data-checked=false] > li * {
+  pointer-events: all;
+}
+.scale-content ul[data-checked=true] > li::before,
+.scale-content ul[data-checked=false] > li::before {
+  color: #777;
+  cursor: pointer;
+  pointer-events: all;
+}
+.scale-content ul[data-checked=true] > li::before {
+  content: '\2611';
+}
+.scale-content ul[data-checked=false] > li::before {
+  content: '\2610';
+}
+.scale-content li::before {
+  display: inline-block;
+  white-space: nowrap;
+  width: 1.2em;
+}
+.scale-content li:not(.ql-direction-rtl)::before {
+  margin-left: -1.5em;
+  margin-right: 0.3em;
+  text-align: right;
+}
+.scale-content li.ql-direction-rtl::before {
+  margin-left: 0.3em;
+  margin-right: -1.5em;
+}
+.scale-content ol li:not(.ql-direction-rtl),
+.scale-content ul li:not(.ql-direction-rtl) {
+  padding-left: 1.5em;
+}
+.scale-content ol li.ql-direction-rtl,
+.scale-content ul li.ql-direction-rtl {
+  padding-right: 1.5em;
+}
+.scale-content ol li {
+  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+  counter-increment: list-0;
+}
+.scale-content ol li:before {
+  content: counter(list-0, decimal) '. ';
+}
+.scale-content ol li.ql-indent-1 {
+  counter-increment: list-1;
+}
+.scale-content ol li.ql-indent-1:before {
+  content: counter(list-1, lower-alpha) '. ';
+}
+.scale-content ol li.ql-indent-1 {
+  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.scale-content ol li.ql-indent-2 {
+  counter-increment: list-2;
+}
+.scale-content ol li.ql-indent-2:before {
+  content: counter(list-2, lower-roman) '. ';
+}
+.scale-content ol li.ql-indent-2 {
+  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.scale-content ol li.ql-indent-3 {
+  counter-increment: list-3;
+}
+.scale-content ol li.ql-indent-3:before {
+  content: counter(list-3, decimal) '. ';
+}
+.scale-content ol li.ql-indent-3 {
+  counter-reset: list-4 list-5 list-6 list-7 list-8 list-9;
+}
+.scale-content ol li.ql-indent-4 {
+  counter-increment: list-4;
+}
+.scale-content ol li.ql-indent-4:before {
+  content: counter(list-4, lower-alpha) '. ';
+}
+.scale-content ol li.ql-indent-4 {
+  counter-reset: list-5 list-6 list-7 list-8 list-9;
+}
+.scale-content ol li.ql-indent-5 {
+  counter-increment: list-5;
+}
+.scale-content ol li.ql-indent-5:before {
+  content: counter(list-5, lower-roman) '. ';
+}
+.scale-content ol li.ql-indent-5 {
+  counter-reset: list-6 list-7 list-8 list-9;
+}
+.scale-content ol li.ql-indent-6 {
+  counter-increment: list-6;
+}
+.scale-content ol li.ql-indent-6:before {
+  content: counter(list-6, decimal) '. ';
+}
+.scale-content ol li.ql-indent-6 {
+  counter-reset: list-7 list-8 list-9;
+}
+.scale-content ol li.ql-indent-7 {
+  counter-increment: list-7;
+}
+.scale-content ol li.ql-indent-7:before {
+  content: counter(list-7, lower-alpha) '. ';
+}
+.scale-content ol li.ql-indent-7 {
+  counter-reset: list-8 list-9;
+}
+.scale-content ol li.ql-indent-8 {
+  counter-increment: list-8;
+}
+.scale-content ol li.ql-indent-8:before {
+  content: counter(list-8, lower-roman) '. ';
+}
+.scale-content ol li.ql-indent-8 {
+  counter-reset: list-9;
+}
+.scale-content ol li.ql-indent-9 {
+  counter-increment: list-9;
+}
+.scale-content ol li.ql-indent-9:before {
+  content: counter(list-9, decimal) '. ';
+}
+.scale-content .ql-indent-1:not(.ql-direction-rtl) {
+  padding-left: 3em;
+}
+.scale-content li.ql-indent-1:not(.ql-direction-rtl) {
+  padding-left: 4.5em;
+}
+.scale-content .ql-indent-1.ql-direction-rtl.ql-align-right {
+  padding-right: 3em;
+}
+.scale-content li.ql-indent-1.ql-direction-rtl.ql-align-right {
+  padding-right: 4.5em;
+}
+.scale-content .ql-indent-2:not(.ql-direction-rtl) {
+  padding-left: 6em;
+}
+.scale-content li.ql-indent-2:not(.ql-direction-rtl) {
+  padding-left: 7.5em;
+}
+.scale-content .ql-indent-2.ql-direction-rtl.ql-align-right {
+  padding-right: 6em;
+}
+.scale-content li.ql-indent-2.ql-direction-rtl.ql-align-right {
+  padding-right: 7.5em;
+}
+.scale-content .ql-indent-3:not(.ql-direction-rtl) {
+  padding-left: 9em;
+}
+.scale-content li.ql-indent-3:not(.ql-direction-rtl) {
+  padding-left: 10.5em;
+}
+.scale-content .ql-indent-3.ql-direction-rtl.ql-align-right {
+  padding-right: 9em;
+}
+.scale-content li.ql-indent-3.ql-direction-rtl.ql-align-right {
+  padding-right: 10.5em;
+}
+.scale-content .ql-indent-4:not(.ql-direction-rtl) {
+  padding-left: 12em;
+}
+.scale-content li.ql-indent-4:not(.ql-direction-rtl) {
+  padding-left: 13.5em;
+}
+.scale-content .ql-indent-4.ql-direction-rtl.ql-align-right {
+  padding-right: 12em;
+}
+.scale-content li.ql-indent-4.ql-direction-rtl.ql-align-right {
+  padding-right: 13.5em;
+}
+.scale-content .ql-indent-5:not(.ql-direction-rtl) {
+  padding-left: 15em;
+}
+.scale-content li.ql-indent-5:not(.ql-direction-rtl) {
+  padding-left: 16.5em;
+}
+.scale-content .ql-indent-5.ql-direction-rtl.ql-align-right {
+  padding-right: 15em;
+}
+.scale-content li.ql-indent-5.ql-direction-rtl.ql-align-right {
+  padding-right: 16.5em;
+}
+.scale-content .ql-indent-6:not(.ql-direction-rtl) {
+  padding-left: 18em;
+}
+.scale-content li.ql-indent-6:not(.ql-direction-rtl) {
+  padding-left: 19.5em;
+}
+.scale-content .ql-indent-6.ql-direction-rtl.ql-align-right {
+  padding-right: 18em;
+}
+.scale-content li.ql-indent-6.ql-direction-rtl.ql-align-right {
+  padding-right: 19.5em;
+}
+.scale-content .ql-indent-7:not(.ql-direction-rtl) {
+  padding-left: 21em;
+}
+.scale-content li.ql-indent-7:not(.ql-direction-rtl) {
+  padding-left: 22.5em;
+}
+.scale-content .ql-indent-7.ql-direction-rtl.ql-align-right {
+  padding-right: 21em;
+}
+.scale-content li.ql-indent-7.ql-direction-rtl.ql-align-right {
+  padding-right: 22.5em;
+}
+.scale-content .ql-indent-8:not(.ql-direction-rtl) {
+  padding-left: 24em;
+}
+.scale-content li.ql-indent-8:not(.ql-direction-rtl) {
+  padding-left: 25.5em;
+}
+.scale-content .ql-indent-8.ql-direction-rtl.ql-align-right {
+  padding-right: 24em;
+}
+.scale-content li.ql-indent-8.ql-direction-rtl.ql-align-right {
+  padding-right: 25.5em;
+}
+.scale-content .ql-indent-9:not(.ql-direction-rtl) {
+  padding-left: 27em;
+}
+.scale-content li.ql-indent-9:not(.ql-direction-rtl) {
+  padding-left: 28.5em;
+}
+.scale-content .ql-indent-9.ql-direction-rtl.ql-align-right {
+  padding-right: 27em;
+}
+.scale-content li.ql-indent-9.ql-direction-rtl.ql-align-right {
+  padding-right: 28.5em;
+}
+.scale-content .ql-video {
+  display: block;
+  max-width: 100%;
+}
+.scale-content .ql-video.ql-align-center {
+  margin: 0 auto;
+}
+.scale-content .ql-video.ql-align-right {
+  margin: 0 0 0 auto;
+}
+.scale-content .ql-bg-black {
+  background-color: #000;
+}
+.scale-content .ql-bg-red {
+  background-color: #e60000;
+}
+.scale-content .ql-bg-orange {
+  background-color: #f90;
+}
+.scale-content .ql-bg-yellow {
+  background-color: #ff0;
+}
+.scale-content .ql-bg-green {
+  background-color: #008a00;
+}
+.scale-content .ql-bg-blue {
+  background-color: #06c;
+}
+.scale-content .ql-bg-purple {
+  background-color: #93f;
+}
+.scale-content .ql-color-white {
+  color: #fff;
+}
+.scale-content .ql-color-red {
+  color: #e60000;
+}
+.scale-content .ql-color-orange {
+  color: #f90;
+}
+.scale-content .ql-color-yellow {
+  color: #ff0;
+}
+.scale-content .ql-color-green {
+  color: #008a00;
+}
+.scale-content .ql-color-blue {
+  color: #06c;
+}
+.scale-content .ql-color-purple {
+  color: #93f;
+}
+.scale-content .ql-font-serif {
+  font-family: Georgia, Times New Roman, serif;
+}
+.scale-content .ql-font-monospace {
+  font-family: Monaco, Courier New, monospace;
+}
+.scale-content .ql-size-small {
+  font-size: 0.75em;
+}
+.scale-content .ql-size-large {
+  font-size: 1.5em;
+}
+.scale-content .ql-size-huge {
+  font-size: 2.5em;
+}
+.scale-content .ql-direction-rtl {
+  direction: rtl;
+  text-align: inherit;
+}
+.scale-content .ql-align-center {
+  text-align: center;
+}
+.scale-content .ql-align-justify {
+  text-align: justify;
+}
+.scale-content .ql-align-right {
+  text-align: right;
+}
+.scale-content.ql-blank::before {
+  color: rgba(0,0,0,0.6);
+  content: attr(data-placeholder);
+  font-style: italic;
+  left: 15px;
+  pointer-events: none;
+  position: absolute;
+  right: 15px;
+}
+
+

@@ -1268,7 +1268,7 @@ function processAnnouncements(data = {}, replace = false){
         slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                 $('#slide').animateCss('slideOutUp', function () {
                     content.innerHTML = `<div class="animated slideInDown scaleable-wrapper" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 2em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scaled-content text-white" id="scale-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 2em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
                     var pageWidth, pageHeight;
 
