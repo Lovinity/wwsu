@@ -15,6 +15,7 @@
 <script src="../../js/moment.min.js"></script>
 <script src="../../js/iziToast.min.js"></script>
 <script src="../../js/taffy-min.js"></script>
+<script src="../../js/underscore-min.js"></script>
 <link rel="stylesheet" href="../../styles/iziToast.min.css">
 <script type="text/javascript" src="../../js/display/lines.js"></script>
 <link rel="stylesheet" href="../../styles/bootstrap/mytheme.min.css">
@@ -375,23 +376,22 @@ section {
                 color: #fda45a;
             }
 
-.scaleable-wrapper {
-  padding: 10px;
-  resize: both;
-  position: relative;
-  height: 75%;
+#scale-wrapper{
+  position:absolute;
+  left:0px;
+  top:0px;
+  right:0px;
+  bottom:0px;
+}
+.scale-content{
   width: 100%;
+  -ms-transform-origin: top left;
+  -webkit-transform-origin: top left;
+  transform-origin: top left;
+  -webkit-transition: all 500ms ease-in-out !important;
+  transition: all 500ms ease-in-out !important;
+  position: absolute;
 }
-
-.scale-content {
-  padding: 20px;
-  text-align: center;
-  position: relative;
-  left: 0%;
-  top: 0%;
-  transform-origin: center center;
-}
-
         </style>
     </head>
 <%- body %>

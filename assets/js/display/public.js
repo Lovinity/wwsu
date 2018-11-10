@@ -31,6 +31,7 @@ try {
     var Meta = {time: moment().toISOString(true)};
     var Calendar = TAFFY();
     var Announcements = TAFFY();
+    var slides = {};
 // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
     var calendar = [{}, [{}, {}, {}], [{}, {}, {}]];
     var Directors = TAFFY();
@@ -1315,11 +1316,37 @@ function doSlide(same = false)
             slide += 1;
 
         // Each call, we need to re-generate our collection of slides
-        var slides = {
-            // Slide 1 is the WWSU logo and standard information
-            1: {name: 'WWSU', class: 'wwsu-red', do: true, function: function () {
-                    if (content.innerHTML === "TESTING")
-                    {
+        // Slide 1 is the WWSU logo and standard information
+        slides[1] = {name: 'WWSU', class: 'wwsu-red', do: true, function: function () {
+                if (content.innerHTML === "TESTING")
+                {
+                    content.innerHTML = `<div class="animated bounceIn">
+                    <div style="text-align: center; width: 100%;"><img src="../images/display/logo.png" style="max-height: 300px; width: auto;"></div>
+                            <div id="thebottom">
+                            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Website: <span class="text-primary">wwsu1069.org</span></h1>
+<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Line: <span class="text-warning">937-775-5554</span></h1>
+<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: <span class="text-warning">937-775-5555</span></h1>
+            </div>
+            </div>
+            </div>
+            `;
+                    slidetimer = setTimeout(function () {
+                        $('#thebottom').animateCss('fadeOut', function () {
+                            var temp = document.getElementById('thebottom');
+                            if (temp !== null)
+                            {
+                                temp.innerHTML = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Follow Us <span class="text-warning">@wwsu1069</span> On</h1>
+            <div style="width: 100%; align-items: center; justify-content: center;" class="d-flex flex-nowrap p-3 m-3">
+            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/facebook.png"></div>
+            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/twitter.png"></div>
+            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/instagram.png"></div>`;
+                                $('#thebottom').animateCss('fadeIn');
+                            }
+                            slidetimer = setTimeout(doSlide, 7000);
+                        });
+                    }, 7000);
+                } else {
+                    $('#slide').animateCss('fadeOutUp', function () {
                         content.innerHTML = `<div class="animated bounceIn">
                     <div style="text-align: center; width: 100%;"><img src="../images/display/logo.png" style="max-height: 300px; width: auto;"></div>
                             <div id="thebottom">
@@ -1345,191 +1372,164 @@ function doSlide(same = false)
                                 slidetimer = setTimeout(doSlide, 7000);
                             });
                         }, 7000);
-                    } else {
-                        $('#slide').animateCss('fadeOutUp', function () {
-                            content.innerHTML = `<div class="animated bounceIn">
-                    <div style="text-align: center; width: 100%;"><img src="../images/display/logo.png" style="max-height: 300px; width: auto;"></div>
-                            <div id="thebottom">
-                            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Website: <span class="text-primary">wwsu1069.org</span></h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Line: <span class="text-warning">937-775-5554</span></h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: <span class="text-warning">937-775-5555</span></h1>
-            </div>
-            </div>
-            </div>
-            `;
-                            slidetimer = setTimeout(function () {
-                                $('#thebottom').animateCss('fadeOut', function () {
-                                    var temp = document.getElementById('thebottom');
-                                    if (temp !== null)
-                                    {
-                                        temp.innerHTML = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Follow Us <span class="text-warning">@wwsu1069</span> On</h1>
-            <div style="width: 100%; align-items: center; justify-content: center;" class="d-flex flex-nowrap p-3 m-3">
-            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/facebook.png"></div>
-            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/twitter.png"></div>
-            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/instagram.png"></div>`;
-                                        $('#thebottom').animateCss('fadeIn');
-                                    }
-                                    slidetimer = setTimeout(doSlide, 7000);
-                                });
-                            }, 7000);
-                        });
-                    }
-                }},
-            // Slide 2 is only visible if we are not in automation, and displays who is on the air, as well as the topic if one is set.
-            2: {name: 'On the Air', class: 'light', do: false, function() {
-                    $('#slide').animateCss('lightSpeedOut', function () {
-                        if (Meta.topic.length > 2)
-                        {
-                            content.innerHTML = `<div class="animated fadeInDown">
-             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
-             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
-                            if ('webchat' in Meta && Meta.webchat)
-                            {
-                                content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
-                            } else {
-                                content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
-                            }
-                            content.innerHTML += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic.replace(/[\r\n]+/g, ' ')}</div></div>`;
-                        } else {
-                            content.innerHTML = `<div class="animated fadeInDown">
-             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
-             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
-                            if ('webchat' in Meta && Meta.webchat)
-                            {
-                                content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
-                            } else {
-                                content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
-                            }
-                            content.innerHTML += `</div>`;
-                        }
-                        slidetimer = setTimeout(doSlide, 14000);
                     });
-                }},
-            // Slide 4 is today's events
-            4: {name: 'Events Today', class: 'success', do: true, function: function () {
-                    $('#slide').animateCss('fadeOutUp', function () {
+                }
+            }};
+        // Slide 2 is only visible if we are not in automation, and displays who is on the air, as well as the topic if one is set.
+        slides[2] = {name: 'On the Air', class: 'light', do: false, function() {
+                $('#slide').animateCss('lightSpeedOut', function () {
+                    if (Meta.topic.length > 2)
+                    {
                         content.innerHTML = `<div class="animated fadeInDown">
+             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
+             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+                        if ('webchat' in Meta && Meta.webchat)
+                        {
+                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
+                        } else {
+                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
+                        }
+                        content.innerHTML += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic.replace(/[\r\n]+/g, ' ')}</div></div>`;
+                    } else {
+                        content.innerHTML = `<div class="animated fadeInDown">
+             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
+             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+                        if ('webchat' in Meta && Meta.webchat)
+                        {
+                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
+                        } else {
+                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
+                        }
+                        content.innerHTML += `</div>`;
+                    }
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+        // Slide 4 is today's events
+        slides[4] = {name: 'Events Today', class: 'success', do: true, function: function () {
+                $('#slide').animateCss('fadeOutUp', function () {
+                    content.innerHTML = `<div class="animated fadeInDown">
              <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1>
              <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events"></div></div>`;
-                        var innercontent = document.getElementById('events');
-                        if (typeof calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] !== 'undefined')
+                    var innercontent = document.getElementById('events');
+                    if (typeof calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] !== 'undefined')
+                    {
+                        if (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length > 0)
                         {
-                            if (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length > 0)
-                            {
-                                calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].forEach(function (dodo, index) {
-                                    try {
-                                        var color = hexRgb(dodo.color);
-                                        var borderColor = '#000000';
-                                        var timeleft = '';
-                                        if (moment(Meta.time).isBefore(moment(dodo.start)))
+                            calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].forEach(function (dodo, index) {
+                                try {
+                                    var color = hexRgb(dodo.color);
+                                    var borderColor = '#000000';
+                                    var timeleft = '';
+                                    if (moment(Meta.time).isBefore(moment(dodo.start)))
+                                    {
+                                        timeleft = `Starts ${moment(Meta.time).to(moment(dodo.start))}`;
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
+                                        borderColor = "#FFEB3B";
+                                    } else if (moment(Meta.time).isAfter(moment(dodo.end)))
+                                    {
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
+                                        timeleft = `Ended ${moment(dodo.ends).from(moment(Meta.time))}`;
+                                        borderColor = "#f44336";
+                                    } else {
+                                        color.red = Math.round(color.red / 1.5);
+                                        color.green = Math.round(color.green / 1.5);
+                                        color.blue = Math.round(color.blue / 1.5);
+                                        timeleft = `Ends ${moment(Meta.time).to(moment(dodo.ends))}`;
+                                        borderColor = "#4CAF50";
+                                    }
+                                    if (dodo.title.startsWith("Show: "))
+                                    {
+                                        var stripped = dodo.title.replace("Show: ", "");
+                                        var eventType = "SHOW";
+                                        var eventClass = "danger";
+                                        var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
+                                        var temp = stripped.split(" - ");
+                                        if (temp.length === 2)
                                         {
-                                            timeleft = `Starts ${moment(Meta.time).to(moment(dodo.start))}`;
-                                            color.red = Math.round(color.red / 1.5);
-                                            color.green = Math.round(color.green / 1.5);
-                                            color.blue = Math.round(color.blue / 1.5);
-                                            borderColor = "#FFEB3B";
-                                        } else if (moment(Meta.time).isAfter(moment(dodo.end)))
-                                        {
-                                            color.red = Math.round(color.red / 1.5);
-                                            color.green = Math.round(color.green / 1.5);
-                                            color.blue = Math.round(color.blue / 1.5);
-                                            timeleft = `Ended ${moment(dodo.ends).from(moment(Meta.time))}`;
-                                            borderColor = "#f44336";
+                                            var line1 = temp[0];
+                                            var line2 = temp[1];
                                         } else {
-                                            color.red = Math.round(color.red / 1.5);
-                                            color.green = Math.round(color.green / 1.5);
-                                            color.blue = Math.round(color.blue / 1.5);
-                                            timeleft = `Ends ${moment(Meta.time).to(moment(dodo.ends))}`;
-                                            borderColor = "#4CAF50";
+                                            var line1 = "Unknown DJ"
+                                            var line2 = temp;
                                         }
-                                        if (dodo.title.startsWith("Show: "))
+                                    } else if (dodo.title.startsWith("Prerecord: "))
+                                    {
+                                        var stripped = dodo.title.replace("Prerecord: ", "");
+                                        var eventType = "PRERECORD";
+                                        var eventClass = "danger-light";
+                                        var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
+                                        var temp = stripped.split(" - ");
+                                        if (temp.length === 2)
                                         {
-                                            var stripped = dodo.title.replace("Show: ", "");
-                                            var eventType = "SHOW";
-                                            var eventClass = "danger";
-                                            var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
-                                            var temp = stripped.split(" - ");
-                                            if (temp.length === 2)
-                                            {
-                                                var line1 = temp[0];
-                                                var line2 = temp[1];
-                                            } else {
-                                                var line1 = "Unknown DJ"
-                                                var line2 = temp;
-                                            }
-                                        } else if (dodo.title.startsWith("Prerecord: "))
-                                        {
-                                            var stripped = dodo.title.replace("Prerecord: ", "");
-                                            var eventType = "PRERECORD";
-                                            var eventClass = "danger-light";
-                                            var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
-                                            var temp = stripped.split(" - ");
-                                            if (temp.length === 2)
-                                            {
-                                                var line1 = temp[0];
-                                                var line2 = temp[1];
-                                            } else {
-                                                var line1 = "Unknown DJ"
-                                                var line2 = temp;
-                                            }
-                                        } else if (dodo.title.startsWith("Remote: "))
-                                        {
-                                            var stripped = dodo.title.replace("Remote: ", "");
-                                            var eventType = "REMOTE";
-                                            var eventClass = "purple";
-                                            var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
-                                            var temp = stripped.split(" - ");
-                                            if (temp.length === 2)
-                                            {
-                                                var line1 = temp[0];
-                                                var line2 = temp[1];
-                                            } else {
-                                                var line1 = "Unknown Host"
-                                                var line2 = temp;
-                                            }
-                                        } else if (dodo.title.startsWith("Sports: "))
-                                        {
-                                            var stripped = dodo.title.replace("Sports: ", "");
-                                            var eventType = "SPORTS";
-                                            var eventClass = "success";
-                                            var line1 = "Raider Sports";
-                                            var line2 = stripped;
-                                            var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
+                                            var line1 = temp[0];
+                                            var line2 = temp[1];
                                         } else {
-                                            var eventType = "Event";
-                                            var eventClass = "secondary";
-                                            var line1 = "";
-                                            var line2 = dodo.title;
-                                            var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
+                                            var line1 = "Unknown DJ"
+                                            var line2 = temp;
                                         }
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent.innerHTML += `<div style="width: 190px; position: relative; background-color: ${color}; box-shadow: 0 0 12px 4px ${borderColor};" class="m-2 text-white rounded">
+                                    } else if (dodo.title.startsWith("Remote: "))
+                                    {
+                                        var stripped = dodo.title.replace("Remote: ", "");
+                                        var eventType = "REMOTE";
+                                        var eventClass = "purple";
+                                        var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
+                                        var temp = stripped.split(" - ");
+                                        if (temp.length === 2)
+                                        {
+                                            var line1 = temp[0];
+                                            var line2 = temp[1];
+                                        } else {
+                                            var line1 = "Unknown Host"
+                                            var line2 = temp;
+                                        }
+                                    } else if (dodo.title.startsWith("Sports: "))
+                                    {
+                                        var stripped = dodo.title.replace("Sports: ", "");
+                                        var eventType = "SPORTS";
+                                        var eventClass = "success";
+                                        var line1 = "Raider Sports";
+                                        var line2 = stripped;
+                                        var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
+                                    } else {
+                                        var eventType = "Event";
+                                        var eventClass = "secondary";
+                                        var line1 = "";
+                                        var line2 = dodo.title;
+                                        var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
+                                    }
+                                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                                    innercontent.innerHTML += `<div style="width: 190px; position: relative; background-color: ${color}; box-shadow: 0 0 12px 4px ${borderColor};" class="m-2 text-white rounded">
              <div class="p-1 text-center" style="width: 100%;">${image}
              <span class="notification badge badge-${eventClass}" style="font-size: 1em;">${eventType}</span>
              <div class="m-1" style="text-align: center;"><span class="text-warning-light" style="font-size: 1em;">${line1}</span><br><span style="font-size: 1.25em;">${line2}</span><br /><span class="text-info-light" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span></div>`;
-                                    } catch (e) {
-                                        console.error(e);
-                                        iziToast.show({
-                                            title: 'An error occurred - Please check the logs',
-                                            message: `Error occurred in iteration ${index} of calendar[0].`
-                                        });
-                                    }
-                                });
-                            } else {
-                                innercontent.className = '';
-                                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: #ffffff;">There are no events today.</div>`;
-                            }
+                                } catch (e) {
+                                    console.error(e);
+                                    iziToast.show({
+                                        title: 'An error occurred - Please check the logs',
+                                        message: `Error occurred in iteration ${index} of calendar[0].`
+                                    });
+                                }
+                            });
                         } else {
                             innercontent.className = '';
-                            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: #ffffff;">There was an error getting today's events.</div>`;
+                            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: #ffffff;">There are no events today.</div>`;
                         }
-                        slidetimer = setTimeout(doSlide, 14000);
-                    });
-                }},
-            // Slide 5 are events for days 2-4
-            5: {name: 'Days 2-4', class: 'success', do: true, function: function () {
-                    $('#slide').animateCss('fadeOutUp', function () {
-                        content.innerHTML = `<div class="animated fadeInDown">
+                    } else {
+                        innercontent.className = '';
+                        innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: #ffffff;">There was an error getting today's events.</div>`;
+                    }
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+        // Slide 5 are events for days 2-4
+        slides[5] = {name: 'Days 2-4', class: 'success', do: true, function: function () {
+                $('#slide').animateCss('fadeOutUp', function () {
+                    content.innerHTML = `<div class="animated fadeInDown">
              <div class="table-responsive">
              <table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events">
              <thead>
@@ -1543,31 +1543,31 @@ function doSlide(same = false)
              </tbody>
              </table>
              </div></div>`;
-                        var innercontent = document.getElementById('events-body');
-                        if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')] !== 'undefined')
+                    var innercontent = document.getElementById('events-body');
+                    if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')] !== 'undefined')
+                    {
+                        if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].length > 0)
-                            {
-                                calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
-                                    try {
-                                        var color = null;
-                                        var temp2 = document.getElementById(`events-row-${index}`);
-                                        if (temp2 === null)
-                                        {
-                                            innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
+                            calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                                try {
+                                    var color = null;
+                                    var temp2 = document.getElementById(`events-row-${index}`);
+                                    if (temp2 === null)
+                                    {
+                                        innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
              <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
              </tr>`;
-                                            temp2 = document.getElementById(`events-row-${index}`);
-                                        }
-                                        var innercontent2 = document.getElementById(`events-row${index}-col1`);
-                                        color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 1.5);
-                                        color.green = Math.round(color.green / 1.5);
-                                        color.blue = Math.round(color.blue / 1.5);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
+                                        temp2 = document.getElementById(`events-row-${index}`);
+                                    }
+                                    var innercontent2 = document.getElementById(`events-row${index}-col1`);
+                                    color = hexRgb(dodo.color);
+                                    color.red = Math.round(color.red / 1.5);
+                                    color.green = Math.round(color.green / 1.5);
+                                    color.blue = Math.round(color.blue / 1.5);
+                                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                                    innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
              <div class="row">
              <div class="col-8" style="text-align: left;">
              <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
@@ -1577,30 +1577,14 @@ function doSlide(same = false)
              </div>
              </div>
              </div>`;
-                                    } catch (e) {
-                                        console.error(e);
-                                        iziToast.show({
-                                            title: 'An error occurred - Please check the logs',
-                                            message: `Error occurred in iteration ${index} of calendar[1][0].`
-                                        });
-                                    }
-                                });
-                            } else {
-                                var temp2 = document.getElementById(`events-row-0`);
-                                if (temp2 === null)
-                                {
-                                    innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-             </tr>`;
-                                    temp2 = document.getElementById(`events-row-0`);
+                                } catch (e) {
+                                    console.error(e);
+                                    iziToast.show({
+                                        title: 'An error occurred - Please check the logs',
+                                        message: `Error occurred in iteration ${index} of calendar[1][0].`
+                                    });
                                 }
-                                var innercontent2 = document.getElementById(`events-row0-col1`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-             No events this day.
-             </div>`;
-                            }
+                            });
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
@@ -1613,34 +1597,50 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col1`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-             Error loading events for this day.
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
+             No events this day.
              </div>`;
                         }
-                        if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')] !== 'undefined')
+                    } else {
+                        var temp2 = document.getElementById(`events-row-0`);
+                        if (temp2 === null)
                         {
-                            if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].length > 0)
-                            {
-                                calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
-                                    try {
-                                        var color = null;
-                                        var temp2 = document.getElementById(`events-row-${index}`);
-                                        if (temp2 === null)
-                                        {
-                                            innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
+                            innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
+                            temp2 = document.getElementById(`events-row-0`);
+                        }
+                        var innercontent2 = document.getElementById(`events-row0-col1`);
+                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
+             Error loading events for this day.
+             </div>`;
+                    }
+                    if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')] !== 'undefined')
+                    {
+                        if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].length > 0)
+                        {
+                            calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                                try {
+                                    var color = null;
+                                    var temp2 = document.getElementById(`events-row-${index}`);
+                                    if (temp2 === null)
+                                    {
+                                        innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
              <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
              </tr>`;
-                                            temp2 = document.getElementById(`events-row-${index}`);
-                                        }
-                                        var innercontent2 = document.getElementById(`events-row${index}-col2`);
-                                        color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 1.5);
-                                        color.green = Math.round(color.green / 1.5);
-                                        color.blue = Math.round(color.blue / 1.5);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
+                                        temp2 = document.getElementById(`events-row-${index}`);
+                                    }
+                                    var innercontent2 = document.getElementById(`events-row${index}-col2`);
+                                    color = hexRgb(dodo.color);
+                                    color.red = Math.round(color.red / 1.5);
+                                    color.green = Math.round(color.green / 1.5);
+                                    color.blue = Math.round(color.blue / 1.5);
+                                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                                    innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
              <div class="row">
              <div class="col-8" style="text-align: left;">
              <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
@@ -1650,30 +1650,14 @@ function doSlide(same = false)
              </div>
              </div>
              </div>`;
-                                    } catch (e) {
-                                        console.error(e);
-                                        iziToast.show({
-                                            title: 'An error occurred - Please check the logs',
-                                            message: `Error occurred in iteration ${index} of calendar[1][1].`
-                                        });
-                                    }
-                                });
-                            } else {
-                                var temp2 = document.getElementById(`events-row-0`);
-                                if (temp2 === null)
-                                {
-                                    innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-             </tr>`;
-                                    temp2 = document.getElementById(`events-row-0`);
+                                } catch (e) {
+                                    console.error(e);
+                                    iziToast.show({
+                                        title: 'An error occurred - Please check the logs',
+                                        message: `Error occurred in iteration ${index} of calendar[1][1].`
+                                    });
                                 }
-                                var innercontent2 = document.getElementById(`events-row0-col2`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-             No events this day.
-             </div>`;
-                            }
+                            });
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
@@ -1686,34 +1670,50 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col2`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-             Error loading events for this day.
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
+             No events this day.
              </div>`;
                         }
-                        if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')] !== 'undefined')
+                    } else {
+                        var temp2 = document.getElementById(`events-row-0`);
+                        if (temp2 === null)
                         {
-                            if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].length > 0)
-                            {
-                                calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
-                                    try {
-                                        var color = null;
-                                        var temp2 = document.getElementById(`events-row-${index}`);
-                                        if (temp2 === null)
-                                        {
-                                            innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
+                            innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
+                            temp2 = document.getElementById(`events-row-0`);
+                        }
+                        var innercontent2 = document.getElementById(`events-row0-col2`);
+                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
+             Error loading events for this day.
+             </div>`;
+                    }
+                    if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')] !== 'undefined')
+                    {
+                        if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].length > 0)
+                        {
+                            calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                                try {
+                                    var color = null;
+                                    var temp2 = document.getElementById(`events-row-${index}`);
+                                    if (temp2 === null)
+                                    {
+                                        innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
              <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
              </tr>`;
-                                            temp2 = document.getElementById(`events-row-${index}`);
-                                        }
-                                        var innercontent2 = document.getElementById(`events-row${index}-col3`);
-                                        color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 1.5);
-                                        color.green = Math.round(color.green / 1.5);
-                                        color.blue = Math.round(color.blue / 1.5);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
+                                        temp2 = document.getElementById(`events-row-${index}`);
+                                    }
+                                    var innercontent2 = document.getElementById(`events-row${index}-col3`);
+                                    color = hexRgb(dodo.color);
+                                    color.red = Math.round(color.red / 1.5);
+                                    color.green = Math.round(color.green / 1.5);
+                                    color.blue = Math.round(color.blue / 1.5);
+                                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                                    innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
              <div class="row">
              <div class="col-8" style="text-align: left;">
              <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
@@ -1723,30 +1723,14 @@ function doSlide(same = false)
              </div>
              </div>
              </div>`;
-                                    } catch (e) {
-                                        console.error(e);
-                                        iziToast.show({
-                                            title: 'An error occurred - Please check the logs',
-                                            message: `Error occurred in iteration ${index} of calendar[1][2].`
-                                        });
-                                    }
-                                });
-                            } else {
-                                var temp2 = document.getElementById(`events-row-0`);
-                                if (temp2 === null)
-                                {
-                                    innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-             </tr>`;
-                                    temp2 = document.getElementById(`events-row-0`);
+                                } catch (e) {
+                                    console.error(e);
+                                    iziToast.show({
+                                        title: 'An error occurred - Please check the logs',
+                                        message: `Error occurred in iteration ${index} of calendar[1][2].`
+                                    });
                                 }
-                                var innercontent2 = document.getElementById(`events-row0-col3`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-             No events this day.
-             </div>`;
-                            }
+                            });
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
@@ -1759,16 +1743,32 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col3`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-             Error loading events for this day.
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
+             No events this day.
              </div>`;
                         }
-                        slidetimer = setTimeout(doSlide, 14000);
-                    });
-                }},
-            6: {name: 'Days 5-7', class: 'success', do: true, function() {
-                    $('#slide').animateCss('fadeOutUp', function () {
-                        content.innerHTML = `<div class="animated fadeInDown">
+                    } else {
+                        var temp2 = document.getElementById(`events-row-0`);
+                        if (temp2 === null)
+                        {
+                            innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
+                            temp2 = document.getElementById(`events-row-0`);
+                        }
+                        var innercontent2 = document.getElementById(`events-row0-col3`);
+                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
+             Error loading events for this day.
+             </div>`;
+                    }
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+        slides[6] = {name: 'Days 5-7', class: 'success', do: true, function() {
+                $('#slide').animateCss('fadeOutUp', function () {
+                    content.innerHTML = `<div class="animated fadeInDown">
              <div class="table-responsive">
              <table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events">
              <thead>
@@ -1782,31 +1782,31 @@ function doSlide(same = false)
              </tbody>
              </table>
              </div></div>`;
-                        var innercontent = document.getElementById('events-body');
-                        if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')] !== 'undefined')
+                    var innercontent = document.getElementById('events-body');
+                    if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')] !== 'undefined')
+                    {
+                        if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].length > 0)
-                            {
-                                calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
-                                    try {
-                                        var color = null;
-                                        var temp2 = document.getElementById(`events-row-${index}`);
-                                        if (temp2 === null)
-                                        {
-                                            innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
+                            calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                                try {
+                                    var color = null;
+                                    var temp2 = document.getElementById(`events-row-${index}`);
+                                    if (temp2 === null)
+                                    {
+                                        innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
              <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
              </tr>`;
-                                            temp2 = document.getElementById(`events-row-${index}`);
-                                        }
-                                        var innercontent2 = document.getElementById(`events-row${index}-col1`);
-                                        color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 1.5);
-                                        color.green = Math.round(color.green / 1.5);
-                                        color.blue = Math.round(color.blue / 1.5);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
+                                        temp2 = document.getElementById(`events-row-${index}`);
+                                    }
+                                    var innercontent2 = document.getElementById(`events-row${index}-col1`);
+                                    color = hexRgb(dodo.color);
+                                    color.red = Math.round(color.red / 1.5);
+                                    color.green = Math.round(color.green / 1.5);
+                                    color.blue = Math.round(color.blue / 1.5);
+                                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                                    innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
              <div class="row">
              <div class="col-8" style="text-align: left;">
              <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
@@ -1816,30 +1816,14 @@ function doSlide(same = false)
              </div>
              </div>
              </div>`;
-                                    } catch (e) {
-                                        console.error(e);
-                                        iziToast.show({
-                                            title: 'An error occurred - Please check the logs',
-                                            message: `Error occurred in iteration ${index} of calendar[2][0].`
-                                        });
-                                    }
-                                });
-                            } else {
-                                var temp2 = document.getElementById(`events-row-0`);
-                                if (temp2 === null)
-                                {
-                                    innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-             </tr>`;
-                                    temp2 = document.getElementById(`events-row-0`);
+                                } catch (e) {
+                                    console.error(e);
+                                    iziToast.show({
+                                        title: 'An error occurred - Please check the logs',
+                                        message: `Error occurred in iteration ${index} of calendar[2][0].`
+                                    });
                                 }
-                                var innercontent2 = document.getElementById(`events-row0-col1`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-             No events this day.
-             </div>`;
-                            }
+                            });
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
@@ -1852,34 +1836,50 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col1`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-             Error loading events for this day.
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
+             No events this day.
              </div>`;
                         }
-                        if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')] !== 'undefined')
+                    } else {
+                        var temp2 = document.getElementById(`events-row-0`);
+                        if (temp2 === null)
                         {
-                            if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].length > 0)
-                            {
-                                calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
-                                    try {
-                                        var color = null;
-                                        var temp2 = document.getElementById(`events-row-${index}`);
-                                        if (temp2 === null)
-                                        {
-                                            innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
+                            innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
+                            temp2 = document.getElementById(`events-row-0`);
+                        }
+                        var innercontent2 = document.getElementById(`events-row0-col1`);
+                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
+             Error loading events for this day.
+             </div>`;
+                    }
+                    if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')] !== 'undefined')
+                    {
+                        if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].length > 0)
+                        {
+                            calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                                try {
+                                    var color = null;
+                                    var temp2 = document.getElementById(`events-row-${index}`);
+                                    if (temp2 === null)
+                                    {
+                                        innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
              <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
              </tr>`;
-                                            temp2 = document.getElementById(`events-row-${index}`);
-                                        }
-                                        var innercontent2 = document.getElementById(`events-row${index}-col2`);
-                                        color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 1.5);
-                                        color.green = Math.round(color.green / 1.5);
-                                        color.blue = Math.round(color.blue / 1.5);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
+                                        temp2 = document.getElementById(`events-row-${index}`);
+                                    }
+                                    var innercontent2 = document.getElementById(`events-row${index}-col2`);
+                                    color = hexRgb(dodo.color);
+                                    color.red = Math.round(color.red / 1.5);
+                                    color.green = Math.round(color.green / 1.5);
+                                    color.blue = Math.round(color.blue / 1.5);
+                                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                                    innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
              <div class="row">
              <div class="col-8" style="text-align: left;">
              <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
@@ -1889,30 +1889,14 @@ function doSlide(same = false)
              </div>
              </div>
              </div>`;
-                                    } catch (e) {
-                                        console.error(e);
-                                        iziToast.show({
-                                            title: 'An error occurred - Please check the logs',
-                                            message: `Error occurred in iteration ${index} of calendar[2][1].`
-                                        });
-                                    }
-                                });
-                            } else {
-                                var temp2 = document.getElementById(`events-row-0`);
-                                if (temp2 === null)
-                                {
-                                    innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-             </tr>`;
-                                    temp2 = document.getElementById(`events-row-0`);
+                                } catch (e) {
+                                    console.error(e);
+                                    iziToast.show({
+                                        title: 'An error occurred - Please check the logs',
+                                        message: `Error occurred in iteration ${index} of calendar[2][1].`
+                                    });
                                 }
-                                var innercontent2 = document.getElementById(`events-row0-col2`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-             No events this day.
-             </div>`;
-                            }
+                            });
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
@@ -1925,34 +1909,50 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col2`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-             Error loading events for this day.
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
+             No events this day.
              </div>`;
                         }
-                        if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')] !== 'undefined')
+                    } else {
+                        var temp2 = document.getElementById(`events-row-0`);
+                        if (temp2 === null)
                         {
-                            if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].length > 0)
-                            {
-                                calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
-                                    try {
-                                        var color = null;
-                                        var temp2 = document.getElementById(`events-row-${index}`);
-                                        if (temp2 === null)
-                                        {
-                                            innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
+                            innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
+                            temp2 = document.getElementById(`events-row-0`);
+                        }
+                        var innercontent2 = document.getElementById(`events-row0-col2`);
+                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
+             Error loading events for this day.
+             </div>`;
+                    }
+                    if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')] !== 'undefined')
+                    {
+                        if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].length > 0)
+                        {
+                            calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                                try {
+                                    var color = null;
+                                    var temp2 = document.getElementById(`events-row-${index}`);
+                                    if (temp2 === null)
+                                    {
+                                        innercontent.innerHTML += `<tr id="events-row-${index}" style="border-style: none;">
              <td width="32%" id="events-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col2" style="border-style: none;"></td>
              <td width="32%" id="events-row${index}-col3" style="border-style: none;"></td>
              </tr>`;
-                                            temp2 = document.getElementById(`events-row-${index}`);
-                                        }
-                                        var innercontent2 = document.getElementById(`events-row${index}-col3`);
-                                        color = hexRgb(dodo.color);
-                                        color.red = Math.round(color.red / 1.5);
-                                        color.green = Math.round(color.green / 1.5);
-                                        color.blue = Math.round(color.blue / 1.5);
-                                        color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
+                                        temp2 = document.getElementById(`events-row-${index}`);
+                                    }
+                                    var innercontent2 = document.getElementById(`events-row${index}-col3`);
+                                    color = hexRgb(dodo.color);
+                                    color.red = Math.round(color.red / 1.5);
+                                    color.green = Math.round(color.green / 1.5);
+                                    color.blue = Math.round(color.blue / 1.5);
+                                    color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                                    innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; background: ${color}">
              <div class="row">
              <div class="col-8" style="text-align: left;">
              <span class="m-1 text-light" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
@@ -1962,30 +1962,14 @@ function doSlide(same = false)
              </div>
              </div>
              </div>`;
-                                    } catch (e) {
-                                        console.error(e);
-                                        iziToast.show({
-                                            title: 'An error occurred - Please check the logs',
-                                            message: `Error occurred in iteration ${index} of calendar[2][2].`
-                                        });
-                                    }
-                                });
-                            } else {
-                                var temp2 = document.getElementById(`events-row-0`);
-                                if (temp2 === null)
-                                {
-                                    innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
-             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
-             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
-             </tr>`;
-                                    temp2 = document.getElementById(`events-row-0`);
+                                } catch (e) {
+                                    console.error(e);
+                                    iziToast.show({
+                                        title: 'An error occurred - Please check the logs',
+                                        message: `Error occurred in iteration ${index} of calendar[2][2].`
+                                    });
                                 }
-                                var innercontent2 = document.getElementById(`events-row0-col3`);
-                                innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
-             No events this day.
-             </div>`;
-                            }
+                            });
                         } else {
                             var temp2 = document.getElementById(`events-row-0`);
                             if (temp2 === null)
@@ -1998,19 +1982,35 @@ function doSlide(same = false)
                                 temp2 = document.getElementById(`events-row-0`);
                             }
                             var innercontent2 = document.getElementById(`events-row0-col3`);
-                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
-             Error loading events for this day.
+                            innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
+             No events this day.
              </div>`;
                         }
-                        slidetimer = setTimeout(doSlide, 14000);
-                    });
-                }},
-            101: {name: 'Be a DJ', class: 'purple', do: true, function() {
-                    $('#slide').animateCss('fadeOutUp', function () {
-                        if (Meta.state.startsWith("live_"))
+                    } else {
+                        var temp2 = document.getElementById(`events-row-0`);
+                        if (temp2 === null)
                         {
-                            var temp = Meta.dj.split(" - ");
-                            content.innerHTML = `<div class="animated bounceIn">
+                            innercontent.innerHTML += `<tr id="events-row-0" style="border-style: none;">
+             <td width="32%" id="events-row0-col1" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col2" style="border-style: none;"></td>
+             <td width="32%" id="events-row0-col3" style="border-style: none;"></td>
+             </tr>`;
+                            temp2 = document.getElementById(`events-row-0`);
+                        }
+                        var innercontent2 = document.getElementById(`events-row0-col3`);
+                        innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
+             Error loading events for this day.
+             </div>`;
+                    }
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+        slides[101] = {name: 'Be a DJ', class: 'purple', do: true, function() {
+                $('#slide').animateCss('fadeOutUp', function () {
+                    if (Meta.state.startsWith("live_"))
+                    {
+                        var temp = Meta.dj.split(" - ");
+                        content.innerHTML = `<div class="animated bounceIn">
                     <div style="text-align: center; width: 100%; font-size: 4em; color: #FFFFFF;">Interested in being <div class="text-warning jump-text">on the air</div>just like <span class="text-danger">${temp[0]}</span>?</div>
                             <div id="thebottom">
                             <div style="text-align: center; font-size: 3em; color: #FFFFFF">Send an email to <span class="text-primary">production@wwsu1069.org</span>!</div>
@@ -2019,9 +2019,9 @@ function doSlide(same = false)
             </div>
             </div>
             </div>`;
-                        } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_"))
-                        {
-                            content.innerHTML = `<div class="animated bounceIn">
+                    } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_"))
+                    {
+                        content.innerHTML = `<div class="animated bounceIn">
                     <div style="text-align: center; width: 100%; font-size: 4em; color: #FFFFFF;">Want to be a <div class="text-success jump-text">sports broadcaster?</div></div>
                             <div id="thebottom">
                             <div style="text-align: center; font-size: 3em; color: #FFFFFF">Send an email to <span class="text-primary">sports@wwsu1069.org</span>!</div>
@@ -2029,9 +2029,9 @@ function doSlide(same = false)
             </div>
             </div>
             </div>`;
-                        } else
-                        {
-                            content.innerHTML = `<div class="animated bounceIn">
+                    } else
+                    {
+                        content.innerHTML = `<div class="animated bounceIn">
                     <div style="text-align: center; width: 100%; font-size: 4em; color: #FFFFFF;">Interested in becoming a<div class="text-warning jump-text">DJ / radio personality?</div></div>
                             <div id="thebottom">
                             <div style="text-align: center; font-size: 3em; color: #FFFFFF">Send an email to <span class="text-primary">production@wwsu1069.org</span>!</div>
@@ -2040,77 +2040,76 @@ function doSlide(same = false)
             </div>
             </div>
             </div>`;
-                        }
-                        setTimeout(function () {
-                            $('.jump-text').animateCss('tada');
-                        }, 1500);
-                        setTimeout(function () {
-                            $('.jump-text').animateCss('tada');
-                        }, 3500);
-                        setTimeout(function () {
-                            $('.jump-text').animateCss('tada');
-                        }, 5500);
-                        slidetimer = setTimeout(doSlide, 14000);
-                    });
-                }},
-            // This slide is for active Eas alerts
-            102: {name: 'Weather Alerts', class: 'danger', do: false, function() {
-                    $('#slide').animateCss('fadeOutUp', function () {
-                        content.innerHTML = `<div class="animated fadeInDown">
+                    }
+                    setTimeout(function () {
+                        $('.jump-text').animateCss('tada');
+                    }, 1500);
+                    setTimeout(function () {
+                        $('.jump-text').animateCss('tada');
+                    }, 3500);
+                    setTimeout(function () {
+                        $('.jump-text').animateCss('tada');
+                    }, 5500);
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+        // This slide is for active Eas alerts
+        slides[102] = {name: 'Weather Alerts', class: 'danger', do: false, function() {
+                $('#slide').animateCss('fadeOutUp', function () {
+                    content.innerHTML = `<div class="animated fadeInDown">
             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">WWSU EAS - Active Alerts</h1>
             <h2 style="text-align: center; font-size: 1.5em; color: #FFFFFF">Clark, Greene, and Montgomery counties</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
-                        var innercontent = document.getElementById('alerts');
-                        Eas().each(function (dodo) {
-                            try {
-                                var color = (typeof dodo.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb('#787878');
-                                var borderclass = 'black';
-                                color.red = Math.round(color.red / 1.5);
-                                color.green = Math.round(color.green / 1.5);
-                                color.blue = Math.round(color.blue / 1.5);
-                                if (typeof dodo['severity'] !== 'undefined')
+                    var innercontent = document.getElementById('alerts');
+                    Eas().each(function (dodo) {
+                        try {
+                            var color = (typeof dodo.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb('#787878');
+                            var borderclass = 'black';
+                            color.red = Math.round(color.red / 1.5);
+                            color.green = Math.round(color.green / 1.5);
+                            color.blue = Math.round(color.blue / 1.5);
+                            if (typeof dodo['severity'] !== 'undefined')
+                            {
+                                if (dodo['severity'] === 'Extreme')
                                 {
-                                    if (dodo['severity'] === 'Extreme')
-                                    {
-                                        borderclass = 'danger';
-                                    } else if (dodo['severity'] === 'Severe')
-                                    {
-                                        borderclass = 'warning';
-                                    } else if (dodo['severity'] === 'Moderate')
-                                    {
-                                        borderclass = 'primary';
-                                    }
+                                    borderclass = 'danger';
+                                } else if (dodo['severity'] === 'Severe')
+                                {
+                                    borderclass = 'warning';
+                                } else if (dodo['severity'] === 'Moderate')
+                                {
+                                    borderclass = 'primary';
                                 }
-                                var timeleft = '';
-                                if (moment(Meta.time).isBefore(moment(dodo.starts)))
-                                {
-                                    timeleft = `Effective ${moment(Meta.time).to(moment(dodo.starts))}`;
-                                } else if (moment(Meta.time).isAfter(moment(dodo.expires)))
-                                {
-                                    timeleft = `Expired ${moment(dodo.expires).from(moment(Meta.time))}`;
-                                } else {
-                                    timeleft = `Expires ${moment(Meta.time).to(moment(dodo.expires))}`;
-                                }
-                                color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
-                                innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
+                            }
+                            var timeleft = '';
+                            if (moment(Meta.time).isBefore(moment(dodo.starts)))
+                            {
+                                timeleft = `Effective ${moment(Meta.time).to(moment(dodo.starts))}`;
+                            } else if (moment(Meta.time).isAfter(moment(dodo.expires)))
+                            {
+                                timeleft = `Expired ${moment(dodo.expires).from(moment(Meta.time))}`;
+                            } else {
+                                timeleft = `Expires ${moment(Meta.time).to(moment(dodo.expires))}`;
+                            }
+                            color = `rgba(${color.red}, ${color.green}, ${color.blue}, 0.8);`;
+                            innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass}">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
                         <span style="font-size: 1em;" class="text-info-light">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
 <span style="font-size: 1em;" class="text-warning-light">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
 <span style="font-size: 1em;" class="text-danger-light">${timeleft}</span></div>
                         </div>
                         `;
-                            } catch (e) {
-                                console.error(e);
-                                iziToast.show({
-                                    title: 'An error occurred - Please check the logs',
-                                    message: `Error occurred in Eas iteration in doSlide.`
-                                });
-                            }
-                        });
-                        slidetimer = setTimeout(doSlide, 14000);
+                        } catch (e) {
+                            console.error(e);
+                            iziToast.show({
+                                title: 'An error occurred - Please check the logs',
+                                message: `Error occurred in Eas iteration in doSlide.`
+                            });
+                        }
                     });
-                }}
-        };
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
 
         // If not in power saving mode...
         if ((moment(Meta.time).isAfter(moment({hour: 8, minute: 0})) && (moment(Meta.time).isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote')
@@ -2407,48 +2406,57 @@ function processAnnouncements(data = {}, replace = false){
             delete slides[i];
     }
 
-    Announcements({type: 'display-internal'}).get().sort(compare).forEach(function (announcement)
+    Announcements({type: 'display-public'}).get().sort(compare).forEach(function (announcement)
     {
         if (moment(Meta.time).isBefore(moment(announcement.starts)) || moment(Meta.time).isAfter(moment(announcement.expires)))
             return null;
         slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                 $('#slide').animateCss('slideOutUp', function () {
-                    content.innerHTML = `<div class="animated slideInDown scaleable-wrapper" id="scaleable-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content" id="scale-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+                    content.innerHTML = `<div class="animated slideInDown scale-wrapper" id="scale-wrapper">
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
-                    var $el = $("#scale-content");
-                    var elHeight = $el.outerHeight();
-                    var elWidth = $el.outerWidth();
+                    var pageWidth, pageHeight;
 
-                    var $wrapper = $("#scaleable-wrapper");
+                    var basePage = {
+                        width: 1600,
+                        height: 900,
+                        scale: 1,
+                        scaleX: 1,
+                        scaleY: 1
+                    };
 
-                    $wrapper.resizable({
-                        resize: doResize
-                    });
+                    $(function () {
+                        var $page = $('.scale-content');
 
-                    function doResize(event, ui) {
+                        getPageSize();
+                        scalePages($page, pageWidth, pageHeight);
 
-                        var scale, origin;
+                        //using underscore to delay resize method till finished resizing window
+                        $(window).resize(_.debounce(function () {
+                            getPageSize();
+                            scalePages($page, pageWidth, pageHeight);
+                        }, 150));
 
-                        scale = Math.min(
-                                ui.size.width / elWidth,
-                                ui.size.height / elHeight
-                                );
 
-                        $el.css({
-                            transform: "scale(" + scale + ")"
-                        });
-
-                    }
-
-                    var starterData = {
-                        size: {
-                            width: $wrapper.width(),
-                            height: $wrapper.height()
+                        function getPageSize() {
+                            pageHeight = $('#scale-wrapper').height();
+                            pageWidth = $('#scale-wrapper').width();
                         }
-                    }
 
-                    doResize(null, starterData);
+                        function scalePages(page, maxWidth, maxHeight) {
+                            var scaleX = 1, scaleY = 1;
+                            scaleX = maxWidth / $('#scaled-content').width();
+                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.75;
+                            basePage.scaleX = scaleX;
+                            basePage.scaleY = scaleY;
+                            basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
+
+                            var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
+                            var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
+
+                            page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
+                        }
+                    });
 
                     slidetimer = setTimeout(doSlide, 14000);
 
