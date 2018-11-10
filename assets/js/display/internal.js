@@ -1203,8 +1203,8 @@ function processAnnouncements(data = {}, replace = false){
             return null;
         slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                 $('#slide').animateCss('slideOutUp', function () {
-                    content.innerHTML = `<div class="animated slideInDown" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 2em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+                    content.innerHTML = `<div class="animated fadeIn" id="scale-wrapper">
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
                     var pageWidth, pageHeight;
 
@@ -1221,12 +1221,11 @@ function processAnnouncements(data = {}, replace = false){
 
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
-
-                        //using underscore to delay resize method till finished resizing window
-                        $(window).resize(_.debounce(function () {
+                        
+                        setTimeout(function () {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
-                        }, 150));
+                        }, 100);
 
 
                         function getPageSize() {
@@ -1235,9 +1234,10 @@ function processAnnouncements(data = {}, replace = false){
                         }
 
                         function scalePages(page, maxWidth, maxHeight) {
+                            page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
                             var scaleX = 1, scaleY = 1;
                             scaleX = maxWidth / $('#scaled-content').width();
-                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.75;
+                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
                             basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
@@ -1267,8 +1267,8 @@ function processAnnouncements(data = {}, replace = false){
 
         slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                 $('#slide').animateCss('slideOutUp', function () {
-                    content.innerHTML = `<div class="animated slideInDown scaleable-wrapper" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 2em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+                    content.innerHTML = `<div class="animated fadeIn scaleable-wrapper" id="scale-wrapper">
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
                     var pageWidth, pageHeight;
 
@@ -1285,12 +1285,11 @@ function processAnnouncements(data = {}, replace = false){
 
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
-
-                        //using underscore to delay resize method till finished resizing window
-                        $(window).resize(_.debounce(function () {
+                        
+                        setTimeout(function () {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
-                        }, 150));
+                        }, 100);
 
 
                         function getPageSize() {
@@ -1299,9 +1298,10 @@ function processAnnouncements(data = {}, replace = false){
                         }
 
                         function scalePages(page, maxWidth, maxHeight) {
+                            page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
                             var scaleX = 1, scaleY = 1;
                             scaleX = maxWidth / $('#scaled-content').width();
-                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.75;
+                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
                             basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
