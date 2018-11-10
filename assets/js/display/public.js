@@ -2431,11 +2431,10 @@ function processAnnouncements(data = {}, replace = false){
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
 
-                        setTimeout(function () {
+                        window.requestAnimationFrame(function () {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
-                        }, 100);
-
+                        });
 
                         function getPageSize() {
                             pageHeight = $('#scale-wrapper').height();
@@ -2443,10 +2442,10 @@ function processAnnouncements(data = {}, replace = false){
                         }
 
                         function scalePages(page, maxWidth, maxHeight) {
-                            page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 75)}%`);
+                            page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
                             var scaleX = 1, scaleY = 1;
                             scaleX = maxWidth / $('#scaled-content').width();
-                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.75;
+                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
                             basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;

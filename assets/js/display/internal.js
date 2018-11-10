@@ -1222,10 +1222,10 @@ function processAnnouncements(data = {}, replace = false){
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
                         
-                        setTimeout(function () {
+                        window.requestAnimationFrame(function () {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
-                        }, 100);
+                        });
 
 
                         function getPageSize() {
@@ -1286,10 +1286,10 @@ function processAnnouncements(data = {}, replace = false){
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
                         
-                        setTimeout(function () {
+                        window.requestAnimationFrame(function () {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
-                        }, 100);
+                        });
 
 
                         function getPageSize() {
