@@ -1378,29 +1378,27 @@ function doSlide(same = false)
         // Slide 2 is only visible if we are not in automation, and displays who is on the air, as well as the topic if one is set.
         slides[2] = {name: 'On the Air', class: 'light', do: false, function() {
                 $('#slide').animateCss('lightSpeedOut', function () {
+                    var innercontent = ``;
                     if (Meta.topic.length > 2)
                     {
-                        content.innerHTML = `<div class="animated fadeInDown">
-             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
-             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+                        innercontent = `<h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
                         } else {
-                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
                         }
-                        content.innerHTML += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic.replace(/[\r\n]+/g, ' ')}</div></div>`;
+                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic.replace(/[\r\n]+/g, ' ')}</div></div>`;
                     } else {
-                        content.innerHTML = `<div class="animated fadeInDown">
-             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>
-             <h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+                        innercontent = `<h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
                         } else {
-                            content.innerHTML += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
                         }
-                        content.innerHTML += `</div>`;
+                        content.innerHTML = `<div class="animated fadeInDown">
+                        <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>${innercontent}</div>`;
                     }
                     slidetimer = setTimeout(doSlide, 14000);
                 });
@@ -2122,14 +2120,14 @@ function doSlide(same = false)
                 slides[102].do = true;
             }
             // Activate "on the air" slide if someone is on the air
-            /*
+            
              if (Meta.state.startsWith("live_"))
              {
              slides[2].do = true;
              } else {
              slides[2].do = false;
              }
-             */
+             
 
             // Generate the badge indications for each slide, and determine which slide is our highest in number (last)
             slidebadges.innerHTML = ``;
@@ -2406,10 +2404,13 @@ function processAnnouncements(data = {}, replace = false){
             delete slides[i];
     }
 
+    var anncCount = 0;
     Announcements({type: 'display-public'}).get().sort(compare).forEach(function (announcement)
     {
         if (moment(Meta.time).isBefore(moment(announcement.starts)) || moment(Meta.time).isAfter(moment(announcement.expires)))
             return null;
+
+        anncCount++;
         slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                 $('#slide').animateCss('slideOutUp', function () {
                     content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
@@ -2464,4 +2465,18 @@ function processAnnouncements(data = {}, replace = false){
 
         tempslide++;
     });
+
+    // If there are more than 2 announcement slides, disable the days 2-4 and days 5-7 calendar slides to reduce clutter.
+    if (anncCount > 2)
+    {
+        if (typeof slides[5] !== 'undefined')
+            slides[5].do = false;
+        if (typeof slides[6] !== 'undefined')
+            slides[6].do = false;
+    } else {
+        if (typeof slides[5] !== 'undefined')
+            slides[5].do = true;
+        if (typeof slides[6] !== 'undefined')
+            slides[6].do = true;
+    }
 }
