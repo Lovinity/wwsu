@@ -63,6 +63,8 @@ module.exports = {
     
     weeklyAnalytics: {
       topShows: [],
+      topGenre: 'None',
+      topPlaylist: 'None',
       onAir: 0,
       onAirListeners: 0,
       tracksLiked: 0,

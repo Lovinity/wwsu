@@ -18,6 +18,8 @@ module.exports = {
 
             Attendance.weeklyAnalytics = {
                 topShows: [],
+                topGenre: 'None',
+                topPlaylist: 'None',
                 onAir: 0,
                 onAirListeners: 0,
                 tracksLiked: 0,
@@ -36,31 +38,45 @@ module.exports = {
                 return 0;
             };
 
-            // Grab attendance records from the last 7 days which regard some form of OnAir programming
-            var records = await Attendance.find({
-                or: [
-                    {event: {'startsWith': 'Sports:'}},
-                    {event: {'startsWith': 'Show:'}},
-                    {event: {'startsWith': 'Remote:'}},
-                    {event: {'startsWith': 'Prerecord:'}},
-                    {event: {'startsWith': 'Podcast:'}},
-                ], showTime: {'!=': null}, listenerMinutes: {'!=': null}, 'actualEnd': {'>=': earliest.toISOString(true)}});
+            // Grab attendance records from the last 7 days
+            var records = await Attendance.find({showTime: {'!=': null}, listenerMinutes: {'!=': null}, 'actualEnd': {'>=': earliest.toISOString(true)}});
 
             var totals = {};
+            var totalsG = {};
+            var totalsP = {};
 
             // Go through each record of attendance and populate topShows, onAir, and onAirListeners
             records.forEach(function (attendance) {
                 var show = attendance.event;
                 show = show.substring(show.indexOf(": ") + 2);
 
-                Attendance.weeklyAnalytics.onAir += attendance.showTime;
-                Attendance.weeklyAnalytics.onAirListeners += attendance.listenerMinutes;
+                if (attendance.event.startsWith("Sports:") || attendance.event.startsWith("Show:") || attendance.event.startsWith("Remote:") || attendance.event.startsWith("Prerecord:"))
+                {
+                    Attendance.weeklyAnalytics.onAir += attendance.showTime;
+                    Attendance.weeklyAnalytics.onAirListeners += attendance.listenerMinutes;
 
-                // Group showTime and listenerMinutes by show; we only want one record per show to use when comparing top shows
-                if (typeof totals[show] === 'undefined')
-                    totals[show] = {showTime: 0, listenerMinutes: 0};
-                totals[show].showTime += attendance.showTime;
-                totals[show].listenerMinutes += attendance.listenerMinutes;
+                    // Sports broadcasts should not count towards the top 3 shows
+                    if (!attendance.event.startsWith("Sports:"))
+                    {
+                        // Group showTime and listenerMinutes by show; we only want one record per show to use when comparing top shows
+                        if (typeof totals[show] === 'undefined')
+                            totals[show] = {showTime: 0, listenerMinutes: 0};
+                        totals[show].showTime += attendance.showTime;
+                        totals[show].listenerMinutes += attendance.listenerMinutes;
+                    }
+                } else if (attendance.event.startsWith("Genre:"))
+                {
+                    if (typeof totalsG[show] === 'undefined')
+                        totalsG[show] = {showTime: 0, listenerMinutes: 0};
+                    totalsG[show].showTime += attendance.showTime;
+                    totalsG[show].listenerMinutes += attendance.listenerMinutes;
+                } else if (attendance.event.startsWith("Playlist:"))
+                {
+                    if (typeof totalsP[show] === 'undefined')
+                        totalsP[show] = {showTime: 0, listenerMinutes: 0};
+                    totalsP[show].showTime += attendance.showTime;
+                    totalsP[show].listenerMinutes += attendance.listenerMinutes;
+                }
             });
 
             // Convert our show data into an array so we can sort it
@@ -74,10 +90,38 @@ module.exports = {
             }
 
             // Gather the top shows into analytics
-            totalsA.sort(compare).forEach(function (show, index) {
-                if (index < 3)
-                    Attendance.weeklyAnalytics.topShows.push(show.name);
-            });
+            if (totalsA.length > 0)
+            {
+                totalsA.sort(compare).forEach(function (show, index) {
+                    if (index < 3)
+                        Attendance.weeklyAnalytics.topShows.push(show.name);
+                });
+            }
+
+            // Convert our show data into an array so we can sort it
+            var totalsA = [];
+            for (var item in totalsG)
+            {
+                if (totalsG.hasOwnProperty(item))
+                {
+                    totalsA.push({name: item, showTime: totalsG[item].showTime, listenerMinutes: totalsG[item].listenerMinutes});
+                }
+            }
+            if (totalsA.length > 0)
+                Attendance.weeklyAnalytics.topGenre = totalsA.sort(compare)[0].name;
+
+            // Convert our show data into an array so we can sort it
+            var totalsA = [];
+            for (var item in totalsP)
+            {
+                if (totalsP.hasOwnProperty(item))
+                {
+                    totalsA.push({name: item, showTime: totalsP[item].showTime, listenerMinutes: totalsP[item].listenerMinutes});
+                }
+            }
+
+            if (totalsA.length > 0)
+            Attendance.weeklyAnalytics.topPlaylist = totalsA.sort(compare)[0].name;
 
             // Grab count of liked tracks from last week
             Attendance.weeklyAnalytics.tracksLiked = await Songsliked.count({'createdAt': {'>=': earliest.toISOString(true)}});

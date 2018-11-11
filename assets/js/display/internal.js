@@ -1359,6 +1359,7 @@ function processWeeklyStats(data) {
             <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics">
                 <p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
                 <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
+                <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>
                 <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>
             </div></div>`;
 
