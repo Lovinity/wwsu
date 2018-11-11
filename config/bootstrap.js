@@ -818,97 +818,163 @@ module.exports.bootstrap = async function (done) {
     cron.schedule('3,33 * * * * *', () => {
         sails.log.debug(`CRON checkRadioStreams triggered.`);
         try {
-            // Get the JSON status from Icecast
-            needle('get', sails.config.custom.stream + `/status-json.xsl`, {}, {headers: {'Content-Type': 'application/json'}})
+            // SHOUTCAST 2.6
+            needle('get', sails.config.custom.stream + `/statistics?json=1`, {}, {headers: {'Content-Type': 'application/json'}})
                     .then(async function (resp) {
-                        var publicStream = false;
-                        var remoteStream = false;
-                        if (typeof resp.body.icestats.source !== 'undefined')
-                        {
-                            // Parse source data
-                            var sources = [];
-                            if (!_.isArray(resp.body.icestats.source))
+                        try {
+                            var streams = resp.body.streams;
+                            var publicStream = false;
+                            var remoteStream = false;
+
+                            // Check public stream
+                            if (streams[0] && streams[0].streamstatus !== 0)
                             {
-                                sources.push(resp.body.icestats.source);
-                            } else {
-                                sources = resp.body.icestats.source;
-                            }
-                            // Go through each source
-                            sails.log.debug(`Calling asyncForEach in cron checkRadioStreams for each source returned`);
-                            await sails.helpers.asyncForEach(sources, function (source, index) {
-                                return new Promise(async (resolve2, reject2) => {
-                                    try {
-                                        if (typeof source.listenurl !== 'undefined')
-                                        {
-                                            // Source is mountpoint /public?
-                                            if (source.listenurl.endsWith("/public"))
-                                            {
-                                                // Mark stream as good
-                                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Operational.', status: 5}]);
-                                                publicStream = true;
+                                // Mark stream as good
+                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Operational.', status: 5}]);
+                                publicStream = true;
 
-                                                // Log listeners
-                                                if (typeof source.listeners !== 'undefined')
-                                                {
-                                                    var dj = '';
+                                // Log listeners
+                                var dj = '';
 
-                                                    // Do not tie DJ with listener count unless DJ is actually on the air
-                                                    if (!Meta['A'].state.startsWith("automation_"))
-                                                    {
-                                                        dj = Meta['A'].dj;
-                                                        if (dj.includes(" - "))
-                                                        {
-                                                            dj = dj.split(" - ")[0];
-                                                        }
-                                                    }
-                                                    if (dj !== Listeners.memory.dj || source.listeners !== Listeners.memory.listeners)
-                                                    {
-                                                        await Listeners.create({dj: dj, listeners: source.listeners})
-                                                                .tolerate((err) => {
-                                                                });
-                                                    }
-                                                    Listeners.memory = {dj: dj, listeners: source.listeners};
-                                                }
-                                            }
-
-                                            // Source is mountpoint /remote?
-                                            if (source.listenurl.endsWith("/remote"))
-                                            {
-                                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Operational.', status: 5}]);
-                                                remoteStream = true;
-                                            }
-                                        }
-                                        return resolve2(false);
-                                    } catch (e) {
-                                        sails.log.error(e);
-                                        return resolve2(false);
+                                // Do not tie DJ with listener count unless DJ is actually on the air
+                                if (!Meta['A'].state.startsWith("automation_"))
+                                {
+                                    dj = Meta['A'].dj;
+                                    if (dj.includes(" - "))
+                                    {
+                                        dj = dj.split(" - ")[0];
                                     }
-                                });
-                            });
-                        }
-                        if (!publicStream)
-                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Offline.', status: 2}]);
-                        if (!remoteStream)
-                        {
-                            if (Meta['A'].state.includes("remote_"))
+                                }
+                                if (dj !== Listeners.memory.dj || streams[0].uniquelisteners !== Listeners.memory.listeners)
+                                {
+                                    await Listeners.create({dj: dj, listeners: streams[0].uniquelisteners})
+                                            .tolerate((err) => {
+                                            });
+                                }
+                                Listeners.memory = {dj: dj, listeners: streams[0].uniquelisteners};
+                            } else {
+                                Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream is offline.', status: 2}]);
+                            }
+
+                            // Check remote stream
+                            if (streams[1] && streams[1].streamstatus !== 0)
                             {
-                                // TODO: send system into disconnected mode (if not already) if remote stream is disconnected
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline.', status: 2}]);
+                                // Mark stream as good
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Operational.', status: 5}]);
+                                remoteStream = true;
+                            } else {
+                                if (Meta['A'].state.includes("remote"))
+                                {
+                                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote stream is offline.', status: 2}]);
+                                } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
+                                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Remote stream is offline (OK, as we do not need remote stream right now)', status: 4}]);
+                                }
+                            }
+
+                        } catch (e) {
+                            sails.log.error(e);
+                            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server statistics parsing error.', status: 2}]);
+                            if (Meta['A'].state.includes("remote"))
+                            {
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server statistics parsing error.', status: 2}]);
                             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline (OK, as we do not need it right now).', status: 4}]);
+                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server statistics parsing error (OK, as we do not need remote stream right now)', status: 4}]);
                             }
                         }
-                    })
-                    .catch(function (err) {
-                        Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
-                        if (Meta['A'].state.includes("remote"))
-                        {
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error.', status: 2}]);
-                        } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error (OK, as we do not need remote stream right now)', status: 4}]);
-                        }
-                        sails.log.error(err);
                     });
+            /*ICECAST 2.3
+             // Get the JSON status from Icecast
+             needle('get', sails.config.custom.stream + `/status-json.xsl`, {}, {headers: {'Content-Type': 'application/json'}})
+             .then(async function (resp) {
+             var publicStream = false;
+             var remoteStream = false;
+             if (typeof resp.body.icestats.source !== 'undefined')
+             {
+             // Parse source data
+             var sources = [];
+             if (!_.isArray(resp.body.icestats.source))
+             {
+             sources.push(resp.body.icestats.source);
+             } else {
+             sources = resp.body.icestats.source;
+             }
+             // Go through each source
+             sails.log.debug(`Calling asyncForEach in cron checkRadioStreams for each source returned`);
+             await sails.helpers.asyncForEach(sources, function (source, index) {
+             return new Promise(async (resolve2, reject2) => {
+             try {
+             if (typeof source.listenurl !== 'undefined')
+             {
+             // Source is mountpoint /public?
+             if (source.listenurl.endsWith("/public"))
+             {
+             // Mark stream as good
+             Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Operational.', status: 5}]);
+             publicStream = true;
+             
+             // Log listeners
+             if (typeof source.listeners !== 'undefined')
+             {
+             var dj = '';
+             
+             // Do not tie DJ with listener count unless DJ is actually on the air
+             if (!Meta['A'].state.startsWith("automation_"))
+             {
+             dj = Meta['A'].dj;
+             if (dj.includes(" - "))
+             {
+             dj = dj.split(" - ")[0];
+             }
+             }
+             if (dj !== Listeners.memory.dj || source.listeners !== Listeners.memory.listeners)
+             {
+             await Listeners.create({dj: dj, listeners: source.listeners})
+             .tolerate((err) => {
+             });
+             }
+             Listeners.memory = {dj: dj, listeners: source.listeners};
+             }
+             }
+             
+             // Source is mountpoint /remote?
+             if (source.listenurl.endsWith("/remote"))
+             {
+             Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Operational.', status: 5}]);
+             remoteStream = true;
+             }
+             }
+             return resolve2(false);
+             } catch (e) {
+             sails.log.error(e);
+             return resolve2(false);
+             }
+             });
+             });
+             }
+             if (!publicStream)
+             Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Offline.', status: 2}]);
+             if (!remoteStream)
+             {
+             if (Meta['A'].state.includes("remote_"))
+             {
+             // TODO: send system into disconnected mode (if not already) if remote stream is disconnected
+             Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline.', status: 2}]);
+             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
+             Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline (OK, as we do not need it right now).', status: 4}]);
+             }
+             }
+             })
+             .catch(function (err) {
+             Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
+             if (Meta['A'].state.includes("remote"))
+             {
+             Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error.', status: 2}]);
+             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
+             Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error (OK, as we do not need remote stream right now)', status: 4}]);
+             }
+             sails.log.error(err);
+             });
+             */
         } catch (e) {
             Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
             if (Meta['A'].state.includes("remote"))
