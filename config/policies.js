@@ -18,6 +18,7 @@ module.exports.policies = {
      ***************************************************************************/
 
     '*': 'isAuthorized', // Everything resctricted here
+    'analytics/weekly-dj': 'isBanned',
     'user/auth': 'isBanned',
     'announcements/get': 'isBanned',
     'calendar/get': 'isBanned',

@@ -348,5 +348,12 @@
   position: absolute;
   right: 15px;
 }
-
-
+.scale-content .ql-size-small {
+  font-size: 0.75em;
+}
+.scale-content .ql-size-large {
+  font-size: 1.5em;
+}
+.scale-content .ql-size-huge {
+  font-size: 2.5em;
+}

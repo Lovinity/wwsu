@@ -1318,6 +1318,8 @@ module.exports.bootstrap = async function (done) {
         });
     });
 
+    sails.log.verbose(`BOOTSTRAP: calculate weekly analytics.`);
+    await sails.helpers.attendance.calculateStats();
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 

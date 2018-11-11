@@ -219,6 +219,7 @@ waitFor(function () {
         directorSocket();
         statusSocket();
         announcementsSocket();
+        weeklyDJSocket();
         // Remove the lost connection overlay
         if (disconnected)
         {
@@ -235,6 +236,7 @@ waitFor(function () {
     directorSocket();
     statusSocket();
     announcementsSocket();
+    weeklyDJSocket();
     if (disconnected)
     {
         //noConnection.style.display = "none";
@@ -325,6 +327,19 @@ waitFor(function () {
             iziToast.show({
                 title: 'An error occurred - Please check the logs',
                 message: 'Error occurred on announcements event.'
+            });
+            console.error(e);
+        }
+    });
+
+    // When an announcement comes through
+    io.socket.on('analytics-weekly-dj', function (data) {
+        try {
+            processWeeklyStats(data);
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred on analytics-weekly-dj event.'
             });
             console.error(e);
         }
@@ -983,6 +998,21 @@ function statusSocket()
     });
 }
 
+// Replace all Status data with that of body request
+function weeklyDJSocket()
+{
+    console.log('attempting weeklyDJ socket');
+    io.socket.post('/analytics/weekly-dj', function serverResponded(body, JWR) {
+        try {
+            processWeeklyStats(body);
+        } catch (e) {
+            console.error(e);
+            console.log('FAILED WEEKLYDJ CONNECTION');
+            setTimeout(weeklyDJSocket, 10000);
+        }
+    });
+}
+
 function announcementsSocket()
 {
     try {
@@ -1221,7 +1251,7 @@ function processAnnouncements(data = {}, replace = false){
 
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
-                        
+
                         window.requestAnimationFrame(function () {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
@@ -1236,7 +1266,7 @@ function processAnnouncements(data = {}, replace = false){
                         function scalePages(page, maxWidth, maxHeight) {
                             page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
                             var scaleX = 1, scaleY = 1;
-                            scaleX = maxWidth / $('#scaled-content').width();
+                            scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
                             scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
@@ -1285,7 +1315,7 @@ function processAnnouncements(data = {}, replace = false){
 
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
-                        
+
                         window.requestAnimationFrame(function () {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
@@ -1300,7 +1330,7 @@ function processAnnouncements(data = {}, replace = false){
                         function scalePages(page, maxWidth, maxHeight) {
                             page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
                             var scaleX = 1, scaleY = 1;
-                            scaleX = maxWidth / $('#scaled-content').width();
+                            scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
                             scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
@@ -1320,4 +1350,19 @@ function processAnnouncements(data = {}, replace = false){
 
         tempslide++;
     });
+}
+
+function processWeeklyStats(data) {
+    slides[5] = {name: 'Weekly Stats', class: 'success', do: true, function: function () {
+            $('#slide').animateCss('lightSpeedOut', function () {
+                content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1>
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics">
+                <p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+                <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
+                <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>
+            </div></div>`;
+
+                slidetimer = setTimeout(doSlide, 14000);
+            });
+        }};
 }

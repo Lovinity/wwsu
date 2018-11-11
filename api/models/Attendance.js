@@ -1,4 +1,4 @@
-/* global Calendar, sails, moment, Attendance, Meta */
+/* global Calendar, sails, moment, Attendance, Meta, Listeners */
 
 /**
  * Attendance.js
@@ -29,6 +29,16 @@ module.exports = {
             type: 'string'
         },
 
+        showTime: {
+            type: 'number',
+            allowNull: true
+        },
+
+        listenerMinutes: {
+            type: 'number',
+            allowNull: true
+        },
+
         scheduledStart: {
             type: 'ref',
             columnType: 'datetime'
@@ -49,6 +59,15 @@ module.exports = {
             columnType: 'datetime'
         },
 
+    },
+    
+    weeklyAnalytics: {
+      topShows: [],
+      onAir: 0,
+      onAirListeners: 0,
+      tracksLiked: 0,
+      tracksRequested: 0,
+      webMessagesExchanged: 0
     },
 
     // Create a new record in the attendance table. 
@@ -75,9 +94,45 @@ module.exports = {
                 var record = await Calendar.find({title: event, start: {"<=": moment().add(10, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
                 sails.log.debug(`Calendar records found: ${record.length || 0}`);
 
-                // Add actualEnd to the previous attendance record
+                // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast
                 if (Meta['A'].attendanceID !== null)
-                    await Attendance.update({ID: Meta['A'].attendanceID}, {actualEnd: moment().toISOString(true)});
+                {
+                    // Get Attendance record
+                    var currentRecord = await Attendance.findOne({ID: Meta['A'].attendanceID});
+
+                    // Pre-load update data
+                    var updateData = {showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true)};
+
+                    // Fetch listenerRecords since beginning of Attendance, as well as the listener count prior to start of attendance record.
+                    var listenerRecords = await Listeners.find({'createdAt': {'>': currentRecord.actualStart}}).sort('ID ASC');
+                    var prevListeners = await Listeners.find({'createdAt': {'<=': currentRecord.actualStart}}).sort('createdAt DESC').limit(1) || 0;
+                    if (prevListeners[0])
+                        prevListeners = prevListeners[0].listeners || 0;
+
+                    // Calculate listener minutes
+                    var prevTime = moment(currentRecord.actualStart);
+                    var listenerMinutes = 0;
+                    listenerRecords.forEach(function (listener) {
+                        if (moment(listener.createdAt).isBefore(moment(currentRecord.actualStart)))
+                            return null;
+                        if (moment(listener.createdAt).isAfter(moment(currentRecord.actualEnd)))
+                            return null;
+
+                        listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+                        prevListeners = listener.listeners;
+                        prevTime = moment(listener.createdAt);
+                    });
+
+                    // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
+                    listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+
+                    listenerMinutes = Math.round(listenerMinutes);
+                    updateData.listenerMinutes = listenerMinutes;
+
+                    await Attendance.update({ID: Meta['A'].attendanceID}, updateData);
+                    
+                    
+                }
 
                 // Create the new attendance record
                 var created = null;
