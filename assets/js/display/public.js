@@ -663,7 +663,24 @@ waitFor(function () {
     // When an announcement comes through
     io.socket.on('announcements', function (data) {
         try {
-            processAnnouncements(data);
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    switch (key)
+                    {
+                        case 'insert':
+                            Announcements.insert(data[key]);
+                            break;
+                        case 'update':
+                            Announcements({ID: data[key].ID}).update(data[key]);
+                            break;
+                        case 'remove':
+                            Announcements({ID: data[key]}).remove();
+                            break;
+                    }
+                }
+            }
         } catch (e) {
             iziToast.show({
                 title: 'An error occurred - Please check the logs',
@@ -753,7 +770,8 @@ function announcementsSocket()
     console.log('attempting announcements socket');
     io.socket.post('/announcements/get', {type: 'display-public'}, function serverResponded(body, JWR) {
         try {
-            processAnnouncements(body, true);
+            Announcements = TAFFY();
+            Announcements.insert(body);
         } catch (e) {
             console.log('FAILED CONNECTION');
             setTimeout(announcementsSocket, 10000);
@@ -2120,14 +2138,14 @@ function doSlide(same = false)
                 slides[102].do = true;
             }
             // Activate "on the air" slide if someone is on the air
-            
-             if (Meta.state.startsWith("live_"))
-             {
-             slides[2].do = true;
-             } else {
-             slides[2].do = false;
-             }
-             
+
+            if (Meta.state.startsWith("live_"))
+            {
+                slides[2].do = true;
+            } else {
+                slides[2].do = false;
+            }
+
 
             // Generate the badge indications for each slide, and determine which slide is our highest in number (last)
             slidebadges.innerHTML = ``;
@@ -2151,6 +2169,7 @@ function doSlide(same = false)
                 // If we passed the last slide, reset. If we reset twice in a row, this is an error; trigger marquee screensaver.
                 if (slide > highestslide)
                 {
+                    processAnnouncements();
                     slide = 1;
                     /*
                      if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
@@ -2347,32 +2366,7 @@ function hexRgb(hex, options = {}) {
 }
 }
 
-function processAnnouncements(data = {}, replace = false){
-    if (replace)
-    {
-        Announcements = TAFFY();
-        Announcements.insert(data);
-    } else {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                switch (key)
-                {
-                    case 'insert':
-                        Announcements.insert(data[key]);
-                        break;
-                    case 'update':
-                        Announcements({ID: data[key].ID}).update(data[key]);
-                        break;
-                    case 'remove':
-                        Announcements({ID: data[key]}).remove();
-                        break;
-                }
-            }
-        }
-    }
-
+function processAnnouncements() {
     // Define a comparison function that will order announcements by createdAt
     var compare = function (a, b) {
         try {
