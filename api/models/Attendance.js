@@ -94,7 +94,11 @@ module.exports = {
 
                 // Store the current ID in a variable; we want to start a new record before processing the old one
                 var currentID = Meta['A'].attendanceID;
-                
+
+                // Find a calendar record with the provided event name. Allow up to 10 grace minutes before start time
+                var record = await Calendar.find({title: event, start: {"<=": moment().add(10, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
+                sails.log.debug(`Calendar records found: ${record.length || 0}`);
+
                 // Create the new attendance record
                 var created = null;
 
@@ -107,10 +111,6 @@ module.exports = {
 
                 // Switch to the new record in the system
                 await Meta.changeMeta({attendanceID: created.ID});
-
-                // Find a calendar record with the provided event name. Allow up to 10 grace minutes before start time
-                var record = await Calendar.find({title: event, start: {"<=": moment().add(10, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
-                sails.log.debug(`Calendar records found: ${record.length || 0}`);
 
                 // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast
                 if (currentID !== null)
