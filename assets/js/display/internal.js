@@ -1088,11 +1088,16 @@ function doSlide(same = false)
                 // Restart if we passed the highest slide number; do 30 second marquee screensaver first if it has been 15 minutes.
                 if (slide > highestslide)
                 {
-                    processAnnouncements();
-                    slide = 1;
-                    if (stickySlides)
-                        slide = 1000;
-                    restarted = true;
+                    if (!restarted)
+                    {
+                        processAnnouncements();
+                        slide = 1;
+                        if (stickySlides)
+                            slide = 1000;
+                        restarted = true;
+                    } else { // We have a problem if we reach this point! Trigger marquee screensaver as failsafe
+                        slide = 0;
+                    }
                 }
 
                 // Do marquee screensaver
@@ -1282,10 +1287,10 @@ function processAnnouncements() {
     stickySlides = false;
     Announcements({type: 'display-internal-sticky'}).get().sort(compare).forEach(function (announcement)
     {
-        stickySlides = true;
-
         if (moment(Meta.time).isBefore(moment(announcement.starts)) || moment(Meta.time).isAfter(moment(announcement.expires)))
             return null;
+
+        stickySlides = true;
 
         slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                 $('#slide').animateCss('slideOutUp', function () {

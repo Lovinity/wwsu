@@ -2169,19 +2169,24 @@ function doSlide(same = false)
                 // If we passed the last slide, reset. If we reset twice in a row, this is an error; trigger marquee screensaver.
                 if (slide > highestslide)
                 {
-                    processAnnouncements();
-                    slide = 1;
-                    /*
-                     if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
-                     {
-                     slide = 0;
-                     lastBurnIn = moment();
-                     if (restarted)
-                     console.log(`Slide issue. Triggering marquee screensaver.`);
-                     }
-                     */
-                    restarted = true;
-                    generateBG();
+                    if (!restarted)
+                    {
+                        processAnnouncements();
+                        slide = 1;
+                        /*
+                         if (restarted || lastBurnIn === null || moment().isAfter(moment(lastBurnIn).add(15, 'minutes')))
+                         {
+                         slide = 0;
+                         lastBurnIn = moment();
+                         if (restarted)
+                         console.log(`Slide issue. Triggering marquee screensaver.`);
+                         }
+                         */
+                        restarted = true;
+                        generateBG();
+                    } else { // Should never happen! Trigger marquee screensaver if this happens.
+                        slide = 0;
+                    }
                 }
 
                 // Slide 0 is marquee screensaver for 30 seconds
