@@ -934,13 +934,13 @@ function addAnnouncement(announcement)
         var color = 'info';
         if (announcement.level === 'success')
             color = 'green';
-        if (announcement.level === 'danger')
+        if (announcement.level === 'danger' || announcement.level === 'urgent')
             color = 'red';
         if (announcement.level === 'warning')
             color = 'yellow';
         announcementIDs.push(announcement.ID);
         iziToast.show({
-            title: 'Announcement from WWSU',
+            title: announcement.title,
             message: announcement.announcement,
             color: color,
             zindex: 100,
