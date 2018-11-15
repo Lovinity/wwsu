@@ -28,7 +28,7 @@ module.exports = {
                     });
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);
-            
+
             // Remove clearBreak tracks to speed up the return
             await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false, true);
 
@@ -81,9 +81,12 @@ module.exports = {
                     await sails.helpers.error.count('stationID');
                 } else {
                     // Liners for sports broadcasts
-                    await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
                     if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                    {
                         await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
+                    } else {
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
+                    }
                     Status.errorCheck.prevBreak = moment();
                 }
 
@@ -99,8 +102,6 @@ module.exports = {
                         await Meta.changeMeta({state: 'live_returning'});
                         break;
                     case 'sports_break':
-                        if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                            await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                         await Meta.changeMeta({state: 'sports_returning'});
                         break;
                     case 'remote_break':
@@ -115,8 +116,6 @@ module.exports = {
                         break;
                     case 'sportsremote_break':
                     case 'sportsremote_break_disconnected':
-                        if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                            await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
                         await Meta.changeMeta({state: 'sportsremote_returning'});
                         break;
                 }
