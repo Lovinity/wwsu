@@ -54,14 +54,12 @@ module.exports = {
                     if (inputs.event !== 'Default')
                     {
                         await Attendance.createRecord(`Genre: ${inputs.event}`);
-                        Playlists.played = moment();
                         await Meta.changeMeta({state: 'automation_genre', genre: inputs.event, playlist_played: moment().toISOString(true)});
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: 'Genre started.<br />Genre: ' + inputs.event})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
                     } else {
-                        Playlists.played = moment('2002-01-01');
                         await Attendance.createRecord(`Genre: Default`);
                         await Meta.changeMeta({state: 'automation_on', genre: '', playlist_played: moment("2002-01-01").toISOString(true)});
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: 'Default rotation started.'})

@@ -21,6 +21,7 @@ module.exports = {
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
             await Meta.changeMeta({changingState: `Going into break`});
+            
             // Do not allow a halftime break if not in a sports broadcast
             if (!Meta['A'].state.startsWith("sports") && inputs.halftime)
                 inputs.halftime = false;

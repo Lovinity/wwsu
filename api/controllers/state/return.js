@@ -35,15 +35,17 @@ module.exports = {
             // Perform the break
             if (Meta['A'].state.includes('halftime'))
             {
+                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                
                 // Sports liners for sports halftime
                 if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
 
                 if (Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected')
                 {
-                    await Meta.changeMeta({state: 'sportsremote_returning'});
+                    await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'sportsremote_returning'});
                 } else {
-                    await Meta.changeMeta({state: 'sports_returning'});
+                    await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'sports_returning'});
                 }
             } else {
                 var d = new Date();
@@ -99,10 +101,10 @@ module.exports = {
                         } else {
                             await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
                         }
-                        await Meta.changeMeta({state: 'live_returning'});
+                        await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'live_returning'});
                         break;
                     case 'sports_break':
-                        await Meta.changeMeta({state: 'sports_returning'});
+                        await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'sports_returning'});
                         break;
                     case 'remote_break':
                     case 'remote_break_disconnected':
@@ -112,11 +114,11 @@ module.exports = {
                         } else {
                             await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
                         }
-                        await Meta.changeMeta({state: 'remote_returning'});
+                        await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'remote_returning'});
                         break;
                     case 'sportsremote_break':
                     case 'sportsremote_break_disconnected':
-                        await Meta.changeMeta({state: 'sportsremote_returning'});
+                        await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'sportsremote_returning'});
                         break;
                 }
             }

@@ -107,12 +107,10 @@ module.exports.bootstrap = async function (done) {
         meta.time = moment().toISOString(true);
         sails.log.silly(meta);
         await Meta.changeMeta(meta);
-        Playlists.active.name = meta.playlist;
         if (meta.playlist !== null && meta.playlist !== '')
         {
             var theplaylist = await Playlists.findOne({name: meta.playlist});
-            Playlists.active.ID = theplaylist.ID;
-            var playlistTracks = await Playlists_list.find({pID: Playlists.active.ID})
+            var playlistTracks = await Playlists_list.find({pID: theplaylist.ID})
                     .tolerate((err) => {
                     });
             Playlists.active.tracks = [];
@@ -122,11 +120,7 @@ module.exports.bootstrap = async function (done) {
                     Playlists.active.tracks.push(playlistTrack.sID);
                 });
             }
-        } else {
-            Playlists.active.ID = 0;
         }
-        Playlists.active.position = meta.playlist_position;
-        Playlists.played = moment(meta.playlist_played);
     } catch (e) {
     }
 
@@ -186,12 +180,10 @@ module.exports.bootstrap = async function (done) {
                     meta.time = moment().toISOString(true);
                     sails.log.silly(meta);
                     await Meta.changeMeta(meta);
-                    Playlists.active.name = meta.playlist;
                     if (meta.playlist !== null && meta.playlist !== '')
                     {
                         var theplaylist = await Playlists.findOne({name: meta.playlist});
-                        Playlists.active.ID = theplaylist.ID;
-                        var playlistTracks = await Playlists_list.find({pID: Playlists.active.ID})
+                        var playlistTracks = await Playlists_list.find({pID: theplaylist.ID})
                                 .tolerate((err) => {
                                 });
                         Playlists.active.tracks = [];
@@ -201,11 +193,7 @@ module.exports.bootstrap = async function (done) {
                                 Playlists.active.tracks.push(playlistTrack.sID);
                             });
                         }
-                    } else {
-                        Playlists.active.ID = 0;
                     }
-                    Playlists.active.position = meta.playlist_position;
-                    Playlists.played = moment(meta.playlist_played);
                 } catch (e) {
                     return resolve(e);
                 }
@@ -343,18 +331,14 @@ module.exports.bootstrap = async function (done) {
             Status.errorCheck.prevQueueLength = change.queueLength;
 
             // If we do not know active playlist, we need to populate the info
-            if (Playlists.active.ID === -1 && (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord'))
+            if (Meta['A'].playlist !== null && Meta['A'].playlist !== '' && Playlists.active.tracks.length <= 0 && (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord'))
             {
                 try {
                     var theplaylist = await Playlists.findOne({name: Meta['A'].playlist})
                             .tolerate((err) => {
-                                Playlists.active.ID = 0;
                             });
-                    if (typeof theplaylist === 'undefined')
+                    if (typeof theplaylist !== 'undefined')
                     {
-                        Playlists.active.ID = 0;
-                    } else {
-                        Playlists.active.ID = theplaylist.ID;
                         var playlistTracks = await Playlists_list.find({pID: Playlists.active.ID})
                                 .tolerate((err) => {
                                 });
@@ -365,6 +349,8 @@ module.exports.bootstrap = async function (done) {
                                 Playlists.active.tracks.push(playlistTrack.sID);
                             });
                         }
+                    } else {
+                        await Meta.changeMeta({playlist: null});
                     }
                 } catch (e) {
                     sails.log.error(e);
@@ -436,7 +422,7 @@ module.exports.bootstrap = async function (done) {
                     // Finished the playlist? Go back to automation.
                     if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && Meta['A'].changingState === null)
                     {
-                        await Meta.changeMeta({changingState: `Switching to automation`});
+                        await Meta.changeMeta({changingState: `Ending playlist`});
                         switch (Meta['A'].state)
                         {
                             case "automation_playlist":
@@ -455,24 +441,19 @@ module.exports.bootstrap = async function (done) {
                                 break;
                         }
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
-                        await Attendance.createRecord(`Genre: Default`);
-                        await Meta.changeMeta({state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
-                        Playlists.active.name = null;
-                        Playlists.active.position = 0;
 
                         // Add up to 3 track requests if any are pending
                         await sails.helpers.requests.queue(3, true, true);
 
-                        // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-                        await Calendar.preLoadEvents(true);
+                        await Meta.changeMeta({changingState: null, state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
 
-                        await Meta.changeMeta({changingState: null});
+                        // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
+                        await Calendar.preLoadEvents();
 
                         // Did not finish the playlist? Ensure the position is updated in meta.
                     } else if (thePosition !== -1) {
                         if (thePosition !== Meta['A'].playlist_position)
                         {
-                            Playlists.active.position = thePosition;
                             change.playlist_position = thePosition;
                         }
                     }

@@ -79,9 +79,9 @@ module.exports = {
                 // Change meta
                 if (inputs.remote)
                 {
-                    Meta.changeMeta({state: 'automation_sportsremote', dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                    Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_sportsremote', dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
                 } else {
-                    Meta.changeMeta({state: 'automation_sports', dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                    Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_sports', dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
                 }
             } else {
                 // Otherwise, just update metadata but do not do anything else

@@ -513,7 +513,7 @@ module.exports = {
 
                         // Check to see if any of the events are triggering events, and if so, see if it trumps the priority of the current event to be triggered.
                         // Prerecords should take priority over playlists, which take priority over genres.
-                        if (moment(criteria.start).isBefore() && moment(criteria.end).isAfter())
+                        if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter())
                         {
                             try {
                                 if (moment(criteria.start).isAfter(moment(Meta['A'].playlist_played)) || ignoreChangingState)

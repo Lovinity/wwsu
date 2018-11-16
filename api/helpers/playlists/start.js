@@ -58,11 +58,6 @@ module.exports = {
                     Playlists.queuing = false;
                     return exits.error(new Error('Playlist not found!'));
                 }
-                Playlists.active.name = theplaylist.name;
-                Playlists.active.ID = theplaylist.ID;
-                if (!inputs.resume)
-                    Playlists.active.position = 0;
-                Playlists.played = moment();
 
 
                 // This private function will load the playlist from the variable theplaylist, gather playlist tracks in memory, wait until deemed queued, then resolve.
@@ -132,7 +127,7 @@ module.exports = {
 
                     // If we are resuming, we need to remove tracks that already played;
                     var toRemove = [];
-                    var i = Playlists.active.position;
+                    var i = Meta['A'].playlist_position;
                     var x = 0;
                     while (i > 0)
                     {

@@ -49,6 +49,7 @@ module.exports = {
 
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+            
             await Meta.changeMeta({changingState: `Switching to remote`});
 
             // Filter profanity
@@ -80,11 +81,7 @@ module.exports = {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                await Meta.changeMeta({state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-
-                // Check for duration of current track. If it is greater than configured time, skip it.
-                if (Meta.automation[0] && (parseInt(Meta.automation[0].Duration) - parseInt(Meta.automation[0].Elapsed)) > (sails.config.custom.liveSkip * 60))
-                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});

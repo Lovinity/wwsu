@@ -36,14 +36,40 @@ module.exports = {
                         sails.log.error(err);
                     });
 
-            // Reset playlist information; if any playlists / events are scheduled, we want them to start up immediately.
-            Playlists.played = moment('2002-01-01');
-            Playlists.active.name = null;
-            Playlists.active.ID = 0;
-            Playlists.active.position = -1;
+            // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
+            await sails.helpers.rest.cmd('EnableAssisted', 1);
 
-            // Log end time in attendance logs
-            await Attendance.update({ID: Meta['A'].attendanceID}, {actualEnd: moment().toISOString(true)});
+            // If coming out of a sports broadcast, queue a closer if exists.
+            if (Meta['A'].state.startsWith("sports"))
+            {
+                if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                {
+                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Closers"]], 'Bottom', 1);
+                }
+            } else {
+                if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Closers"]], 'Bottom', 1);
+            }
+
+            // Queue a station ID
+            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+
+            // Start playing something
+            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+            Status.errorCheck.prevID = moment();
+            await sails.helpers.error.count('stationID');
+
+            // Queue a random music track in case Google Calendar takes a while
+            if (!inputs.transition)
+            {
+                await sails.helpers.songs.queue(sails.config.custom.subcats.music, 'Bottom', 1);
+            } else {
+                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1);
+            }
+
+            // Finish up
+            await sails.helpers.songs.queuePending();
+            await sails.helpers.rest.cmd('EnableAssisted', 0);
 
             // Calculate XP and other stats
             var dj = Meta['A'].dj;
@@ -51,10 +77,10 @@ module.exports = {
             {
                 dj = dj.split(" - ")[0];
             }
-            
+
             if (Meta['A'].state.startsWith("live_"))
                 returnData.subtotalXP = 0;
-            
+
             // Award XP based on time on the air
             returnData.showTime = moment().diff(moment(Meta['A'].showStamp), 'minutes');
 
@@ -179,88 +205,26 @@ module.exports = {
                         sails.log.error(err);
                     }) || 0);
 
-            await sails.helpers.rest.cmd('EnableAssisted', 1);
-
             // We are going to automation
             if (!inputs.transition)
             {
-                // If coming out of a sports broadcast, queue a closer if exists, a station ID, and up to 3 pending requests. Load any scheduled playlists/rotations.
-                if (Meta['A'].state.startsWith("sports"))
-                {
-                    if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                    {
-                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Closers"]], 'Top', 1);
-                    } else {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
-                    }
+                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                await sails.helpers.error.reset('automationBreak');
 
-                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                    await sails.helpers.rest.cmd('EnableAssisted', 0);
-                    await Attendance.createRecord(`Genre: Default`);
+                // Add up to 3 track requests if any are pending
+                await sails.helpers.requests.queue(3, true, true);
 
-                    await Meta.changeMeta({state: 'automation_on', dj: '', djcontrols: '', track: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
-
-                    // Add up to 3 track requests if any are pending
-                    await sails.helpers.requests.queue(3, true, true);
-
-                    // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled. Load any scheduled playlists/rotations
-                    await Calendar.preLoadEvents(true);
-                    await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-                    await sails.helpers.songs.queuePending();
-                    Status.errorCheck.prevID = moment();
-                    await sails.helpers.error.count('stationID');
-                    // otherwise queue a station ID, and up to 3 pending requests.
-                } else {
-                    await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-                    await sails.helpers.songs.queuePending();
-                    Status.errorCheck.prevID = moment();
-                    await sails.helpers.error.count('stationID');
-                    if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
-                        await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Closers"]], 'Top', 1);
-
-                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                    await sails.helpers.rest.cmd('EnableAssisted', 0);
-                    await Attendance.createRecord(`Genre: Default`);
-
-                    await Meta.changeMeta({state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
-                    await sails.helpers.error.reset('automationBreak');
-
-                    // Add up to 3 track requests if any are pending
-                    await sails.helpers.requests.queue(3, true, true);
-
-                    // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-                    await Calendar.preLoadEvents(true);
-                }
+                // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
+                await Calendar.preLoadEvents(true);
 
                 // Enable Auto DJ
                 await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
                 // We are going to break
             } else {
-                // If coming out of a sports broadcast, queue a closer if exists, a station ID, and up to 3 pending requests. Load any scheduled playlists/rotations.
-                if (Meta['A'].state.startsWith("sports"))
-                {
-                    if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                    {
-                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Closers"]], 'Top', 1);
-                    } else {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
-                    }
-                }
-
-                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-                await sails.helpers.songs.queuePending();
-                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
-                Status.errorCheck.prevID = moment();
-                await sails.helpers.error.count('stationID');
-                if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
-                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Closers"]], 'Top', 1);
-
-                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await Attendance.createRecord(`Genre: Default`);
 
-                await Meta.changeMeta({state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
             }
 
             await Meta.changeMeta({changingState: null});

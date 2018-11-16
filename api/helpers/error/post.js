@@ -26,8 +26,7 @@ module.exports = {
                     await sails.helpers.genre.start(Meta['A'].genre, true);
                 } else {
                     await sails.helpers.genre.start('Default', true);
-                }
-                ;
+                };
                 await sails.helpers.rest.cmd('EnableAutoDJ', 1);
             } else if (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord')
             {
