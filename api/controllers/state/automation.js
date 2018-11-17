@@ -208,7 +208,7 @@ module.exports = {
             // We are going to automation
             if (!inputs.transition)
             {
-                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), genre: '', state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
                 await sails.helpers.error.reset('automationBreak');
 
                 // Add up to 3 track requests if any are pending
@@ -224,7 +224,7 @@ module.exports = {
             } else {
                 await Attendance.createRecord(`Genre: Default`);
 
-                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), genre: '', state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
             }
 
             await Meta.changeMeta({changingState: null});

@@ -445,7 +445,8 @@ module.exports.bootstrap = async function (done) {
                         // Add up to 3 track requests if any are pending
                         await sails.helpers.requests.queue(3, true, true);
 
-                        await Meta.changeMeta({changingState: null, state: 'automation_on', dj: '', topic: '', playlist: null, playlist_position: 0});
+                        // Switch back to automation
+                        await Meta.changeMeta({changingState: null, state: 'automation_on', genre: '', dj: '', topic: '', playlist: null, playlist_position: 0});
 
                         // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
                         await Calendar.preLoadEvents();

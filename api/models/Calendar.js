@@ -516,6 +516,7 @@ module.exports = {
                         if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter())
                         {
                             try {
+                                // Do not trigger playlists or prerecords if they were already triggered, unless we are restarting them
                                 if (moment(criteria.start).isAfter(moment(Meta['A'].playlist_played)) || ignoreChangingState)
                                 {
                                     if (event.summary.startsWith("Playlist: ") && (toTrigger === null || toTrigger.priority >= 2))
@@ -526,6 +527,10 @@ module.exports = {
                                     {
                                         toTrigger = {priority: 1, event: event.summary.replace('Prerecord: ', ''), resume: false, type: 1, description: criteria.description};
                                     }
+                                }
+                                // Do not re-trigger an already active genre, unless we are restarting it
+                                if (ignoreChangingState || Meta['A'].genre !== event.summary.replace('Genre: ', ''))
+                                {
                                     if (event.summary.startsWith("Genre: ") && (toTrigger === null || toTrigger.priority >= 3))
                                     {
                                         toTrigger = {priority: 3, event: event.summary.replace('Genre: ', '')};
@@ -552,9 +557,9 @@ module.exports = {
                     }
 
                     // No genre events active right now? Switch back to regular automation.
-                    if (!genreActive && Meta['A'].state === 'automation_genre' && Meta['A'].changingState === null)
+                    if (toTrigger === null && !genreActive && Meta['A'].genre !== 'Default')
                     {
-                        await sails.helpers.genre.start('Default');
+                        await sails.helpers.genre.start('Default', ignoreChangingState);
                     }
 
                     // Update entries in the calendar which passed their end time
