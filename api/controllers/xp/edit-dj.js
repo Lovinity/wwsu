@@ -28,7 +28,11 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            
+            // Update all XP records to the new DJ name
             await Xp.update({dj: inputs.old}, {dj: inputs.new});
+            
+            // Update all attendance records to the name of the new DJ
             await Attendance.update({DJ: inputs.old}, {DJ: inputs.new});
 
             return exits.success();

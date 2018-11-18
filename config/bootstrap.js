@@ -33,12 +33,14 @@ module.exports.bootstrap = async function (done) {
     // Don't forget to trigger `done()` when this bootstrap function's logic is finished.
     // (otherwise your server will never lift, since it's waiting on the bootstrap)
 
+    // Log that the server was rebooted
     await Logs.create({attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', event: 'The Node server was rebooted.'})
             .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err);
             });
 
+    // Load blank Meta template
     sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);
     Meta.template = _.cloneDeep(Meta['A']);
 
@@ -70,7 +72,7 @@ module.exports.bootstrap = async function (done) {
                 return done(err);
             });
 
-    // Generate recipients based off of messages from the last hour... website only
+    // Generate recipients based off of messages from the last hour... website only.
     sails.log.verbose(`BOOTSTRAP: Adding recipients from messages sent within the last hour into database.`);
     var records = await Messages.find({status: 'active', from: {"startsWith": 'website-'}, createdAt: {">": moment().subtract(1, 'hours').toDate()}}).sort('createdAt DESC')
             .tolerate((err) => {
@@ -97,7 +99,7 @@ module.exports.bootstrap = async function (done) {
         // Load subcategories into config
         await reloadSubcategories();
 
-        // Load metadata
+        // Load metadata into memory
         sails.log.verbose(`BOOTSTRAP: Loading metadata.`);
         var meta = await Meta.find().limit(1)
                 .tolerate((err) => {
@@ -200,6 +202,18 @@ module.exports.bootstrap = async function (done) {
             }
 
             try {
+                // Execute one queued REST task if there are any in the queue
+                if (Songs.pendingCmd.length > 0)
+                {
+                    var task = Songs.pendingCmd.shift();
+                    try {
+                        var result = await sails.helpers.rest.cmd(task.command, task.arg, task.timeout);
+                        task.resolve(result);
+                    } catch (e2) {
+                        task.resolve(false);
+                    }
+                }
+
                 // Try to get the current RadioDJ queue.
                 var queue = await sails.helpers.rest.getQueue();
 
@@ -245,43 +259,45 @@ module.exports.bootstrap = async function (done) {
                         });
                     }
 
-                    // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). 
-                    sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`);
-                    await sails.helpers.asyncForEach(queue, function (track, index) {
-                        return new Promise(async (resolve2, reject2) => {
-                            var title = `${track.Artist} - ${track.Title}`;
-                            // If there is a duplicate, remove the track, store for later queuing if necessary, and start duplicate checking over again.
-                            // Also, calculate length of the queue
-                            if (theTracks.indexOf(title) > -1)
-                            {
-                                sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
-                                if (track.TrackType !== 'Music')
-                                    Songs.pending.push(track.ID);
-                                await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
-                                theTracks = [];
-                                queue = await sails.helpers.rest.getQueue();
-                                change.queueLength = 0;
-                                return resolve2(true);
-                            } else {
-                                theTracks.push(title);
-
-                                if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
+                    // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
+                    if (Meta['A'].changingState === null)
+                    {
+                        sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`);
+                        await sails.helpers.asyncForEach(queue, function (track, index) {
+                            return new Promise(async (resolve2, reject2) => {
+                                var title = `${track.Artist} - ${track.Title}`;
+                                // If there is a duplicate, remove the track, store for later queuing if necessary.
+                                // Also, calculate length of the queue
+                                if (theTracks.indexOf(title) > -1)
                                 {
-                                    change.queueLength += (track.Duration - track.Elapsed);
-                                }
+                                    sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
+                                    if (track.TrackType !== 'Music')
+                                        Songs.pending.push(track.ID);
+                                    await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
+                                    theTracks = [];
+                                    queue = await sails.helpers.rest.getQueue();
+                                    change.queueLength = 0;
+                                    return resolve2(true);
+                                } else {
+                                    theTracks.push(title);
 
-                                return resolve2(false);
-                            }
+                                    if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
+                                    {
+                                        change.queueLength += (track.Duration - track.Elapsed);
+                                    }
+
+                                    return resolve2(false);
+                                }
+                            });
                         });
-                    });
+                    }
                 } catch (e) {
                     sails.log.error(e);
                     return resolve(e);
                 }
 
-                await sails.helpers.error.reset('queueFail');
-
                 // Error checks
+                await sails.helpers.error.reset('queueFail');
                 await sails.helpers.error.count('stationID', true);
             } catch (e) {
                 await sails.helpers.error.count('queueFail');
@@ -321,7 +337,7 @@ module.exports.bootstrap = async function (done) {
             }
 
             // For remotes, when playing a liner etc, we need to know when to re-queue the remote stream
-            if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && Status.errorCheck.prevQueueLength > 0 && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0 && queue[0].TrackType !== 'InternetStream')
+            if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0 && queue[0].TrackType !== 'InternetStream')
             {
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
@@ -464,7 +480,6 @@ module.exports.bootstrap = async function (done) {
             }
 
             try {
-                // Manage the metadata for when there is one or more tracks in the queue (RadioDJ should always return at least 1 "dummy" track, even if there are none in the queue)
                 if (queue.length > 0)
                 {
                     if (queue[0].Duration > 0)
@@ -482,6 +497,7 @@ module.exports.bootstrap = async function (done) {
                                     sails.log.error(err);
                                 });
                     }
+                    // If we are preparing for sports, do some stuff if queue is done
                     if (Meta['A'].state === 'automation_sports' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'sports_on', showStamp: moment().toISOString(true)});
@@ -508,6 +524,7 @@ module.exports.bootstrap = async function (done) {
                                     sails.log.error(err);
                                 });
                     }
+                    // If we are preparing for sportsremote, do some stuff if we are playing the stream track
                     if (Meta['A'].state === 'automation_sportsremote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'sportsremote_on', showStamp: moment().toISOString(true)});
@@ -556,14 +573,17 @@ module.exports.bootstrap = async function (done) {
                         }
                     }
 
-                    // If we are in break, queue something if the queue is under 2 items to keep the break going
-                    if ((Meta['A'].state === 'sports_halftime' || Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected') && queue.length < 2)
+                    // If we are in break, queue something if the queue is under 2 items to keep the break going, and if we are not changing states
+                    if (Meta['A'].changingState === null)
                     {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 1);
-                    }
-                    if (Meta['A'].state.includes('_break') && queue.length < 2)
-                    {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1, true);
+                        if ((Meta['A'].state === 'sports_halftime' || Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected') && queue.length < 2)
+                        {
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 1);
+                        }
+                        if (Meta['A'].state.includes('_break') && queue.length < 2)
+                        {
+                            await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1, true);
+                        }
                     }
                     if (Meta['A'].state === 'automation_break')
                         await sails.helpers.error.count('automationBreak');
@@ -795,9 +815,9 @@ module.exports.bootstrap = async function (done) {
         }
     });
 
-    // Twice per minute, at 03 and 33, check the online status of the radio streams, and log listener count
+    // Four times per minute, at 03, 18, 33, and 48 past the minute, check the online status of the radio streams, and log listener count
     sails.log.verbose(`BOOTSTRAP: scheduling checkRadioStreams CRON.`);
-    cron.schedule('3,33 * * * * *', () => {
+    cron.schedule('3,18,33,48 * * * * *', () => {
         sails.log.debug(`CRON checkRadioStreams triggered.`);
         try {
             // SHOUTCAST 2.6
@@ -815,7 +835,6 @@ module.exports.bootstrap = async function (done) {
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Operational.', status: 5}]);
                                 publicStream = true;
 
-                                // Log listeners
                                 var dj = '';
 
                                 // Do not tie DJ with listener count unless DJ is actually on the air
@@ -827,6 +846,8 @@ module.exports.bootstrap = async function (done) {
                                         dj = dj.split(" - ")[0];
                                     }
                                 }
+
+                                // Log listeners if there are any changes
                                 if (dj !== Listeners.memory.dj || streams[0].uniquelisteners !== Listeners.memory.listeners)
                                 {
                                     await Listeners.create({dj: dj, listeners: streams[0].uniquelisteners})
@@ -1273,7 +1294,7 @@ module.exports.bootstrap = async function (done) {
     // Every minute at second 12, check server memory and CPU use.
     // ADVICE: It is advised that serverCheck is the last cron executed at the top of the minute. That way, the 1-minute CPU load will more likely detect issues.
     sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`);
-    cron.schedule('11 * * * * *', () => {
+    cron.schedule('12 * * * * *', () => {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON serverCheck called.`);
             try {

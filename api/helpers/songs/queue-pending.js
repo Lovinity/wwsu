@@ -1,3 +1,5 @@
+/* global sails, Songs */
+
 module.exports = {
 
     friendlyName: 'songs.queuePending',

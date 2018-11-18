@@ -1,4 +1,4 @@
-/* global sails, Meta, Logs, needle */
+/* global sails, Meta, Logs, needle, Songs */
 
 module.exports = {
 
@@ -21,6 +21,11 @@ module.exports = {
             type: 'number',
             defaultsTo: 10000,
             description: 'Amount of time allowed for waiting for a connection, a response header, and response data (each). If this value is set to 0, the promise will resolve immediately without waiting for needle to finish, and will assume 10000 for needle timeout.'
+        },
+        queue: {
+            type: 'boolean',
+            defaultsTo: false,
+            description: 'If true, instead of executing right away, this cmd request will be added to a queue where one cmd is executed every execution of the check CRON. In addition, this helper call will not resolve until the cmd is executed in the queue.'
         }
     },
 
@@ -39,19 +44,26 @@ module.exports = {
             inputs.timeout = 10000;
         }
 
-        // Query REST
         try {
-            needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout, headers: {'Content-Type': 'application/json'}})
-                    .then(async function (resp) {
-                        try {
-                            return exits.success(true);
-                        } catch (e) {
+            if (!inputs.queue)
+            {
+                // Query REST
+                needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout, headers: {'Content-Type': 'application/json'}})
+                        .then(async function (resp) {
+                            try {
+                                return exits.success(true);
+                            } catch (e) {
+                                return exits.success(false);
+                            }
+                        })
+                        .catch(async function (err) {
                             return exits.success(false);
-                        }
-                    })
-                    .catch(async function (err) {
-                       return exits.success(false);
-                    });
+                        });
+                // Add to queue, triggered by checks CRON, if queue is true
+            } else {
+                Songs.pendingCmd.push({command: inputs.command, arg: inputs.arg, timeout: inputs.timeout, resolve: exits.success});
+                // Do not resolve yet... when cron triggers this pendingCmd entry, it will then call the resolve function with either true or false as its parameter.
+            }
         } catch (e) {
             return exits.success(false);
         }

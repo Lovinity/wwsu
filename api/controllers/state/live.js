@@ -47,16 +47,25 @@ module.exports = {
             if (!Meta['A'].state.startsWith("live_") && !Meta['A'].state.startsWith("automation_"))
                 return exits.error(new Error(`Cannot execute state/live unless in automation or live mode. Please go to automation first.`));
 
+            // Block the request if we are changing states right now
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
 
+            // Lock so other state changing requests get blocked until we are done
             await Meta.changeMeta({changingState: `Switching to live`});
 
-            // Filter profanity
+            // Filter profanity and sanitize
             if (inputs.topic !== '')
+            {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
+                inputs.topic = await sails.helpers.sanitize(inputs.topic);
+                inputs.topic = await sails.helpers.truncateText(inputs.topic, 140);
+            }
             if (inputs.showname !== '')
+            {
                 inputs.showname = await sails.helpers.filterProfane(inputs.showname);
+                inputs.showname = await sails.helpers.sanitize(inputs.showname);
+            }
 
             // Send meta early so that DJ Controls does not think this person is interfering with another show
             await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null});
@@ -74,12 +83,15 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
+                
+                // Queue a show opener if applicable
                 if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
                 {
                     await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Openers"]], 'Bottom', 1);
                 } else {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
+                
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                 await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_live', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});

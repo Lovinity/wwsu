@@ -36,17 +36,20 @@ module.exports = {
             if (inputs.username !== null)
                 query = {login: inputs.username};
 
+            // Subscribe to websockets if applicable
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'directors');
                 sails.log.verbose('Request was a socket. Joined directors.');
             }
 
-            // See if the specified director is in memory. If not, return 404 not found.
+            // Get records
             var records = await Directors.find(query);
 
             sails.log.verbose(`Director records retrieved: ${records.length}`);
             sails.log.silly(records);
+            
+            // Return records
             if (!records || records.length < 1)
             {
                 return exits.success([]);

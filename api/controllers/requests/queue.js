@@ -22,7 +22,10 @@ module.exports = {
         sails.log.debug('Controller requests/queue called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Queue the request
             var response = await sails.helpers.requests.queue(1, false, false, inputs.ID);
+            
+            // Return true if the request was queued, false if it was not
             return exits.success(response);
         } catch (e) {
             return exits.error(e);

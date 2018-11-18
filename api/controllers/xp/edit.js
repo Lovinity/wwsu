@@ -12,6 +12,16 @@ module.exports = {
             required: true,
             description: 'The ID of the record to modify.'
         },
+        type: {
+            type: 'string',
+            allowNull: true,
+            description: 'The type of XP record (xp, or remote). If provided, will overwrite the original value.'
+        },
+        subtype: {
+            type: 'string',
+            allowNull: true,
+            description: 'A monikor of what the XP was earned for. If provided, will overwrite the original value.'
+        },
         description: {
             type: 'string',
             allowNull: true,
@@ -39,25 +49,27 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller xp/edit called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
-        
+
         try {
             // Determine what needs updating
             var criteria = {};
-
+            if (inputs.type !== null && typeof inputs.type !== 'undefined')
+                criteria.type = inputs.type;
+            if (inputs.subtype !== null && typeof inputs.subtype !== 'undefined')
+                criteria.subtype = inputs.subtype;
             if (inputs.description !== null && typeof inputs.description !== 'undefined')
                 criteria.description = inputs.description;
-
             if (inputs.amount !== null && typeof inputs.amount !== 'undefined')
                 criteria.amount = inputs.amount;
-
             if (inputs.date !== null && typeof inputs.date !== 'undefined')
                 criteria.createdAt = inputs.date;
 
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             var criteriaB = _.cloneDeep(criteria);
-            
+
+            // Edit it
             await Xp.update({ID: inputs.ID}, criteriaB);
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

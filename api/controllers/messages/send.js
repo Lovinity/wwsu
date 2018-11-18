@@ -36,6 +36,7 @@ module.exports = {
         sails.log.debug('Controller messages/send called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Send the message
             await sails.helpers.messages.send(inputs.from, inputs.to, inputs.to_friendly, inputs.message);
             return exits.success();
         } catch (e) {

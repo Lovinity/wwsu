@@ -29,6 +29,7 @@ module.exports = {
 
         try {
 
+            // Get the director
             var record = await Directors.findOne({login: inputs.login});
             sails.log.silly(record);
 

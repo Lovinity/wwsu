@@ -47,7 +47,7 @@ module.exports = {
             }
             var records = null;
 
-            // Check how many messages were sent by this host within the last minute. If more than 2 are returned, the host is not allowed to send messages yet.
+            // Check how many messages were sent by this host within the last minute. If more than configured limit are returned, the host is not allowed to send messages yet.
             var searchto = moment().subtract(1, 'minutes').toDate();
             var check = await Messages.find({from_IP: inputs.from_IP, createdAt: {'>': searchto}});
             sails.log.verbose(`IP address sent ${check.length} messages within the last minute.`);

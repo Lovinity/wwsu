@@ -20,8 +20,6 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper user.verify called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
-
-        // All done.
         
         jwt.verify(inputs.token, sails.tokenSecret, {}, function(err, token) {
             if (err) return exits.success({err: 'Invalid Token!'});

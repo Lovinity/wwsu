@@ -22,12 +22,16 @@ module.exports = {
         var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
         
         try {
+            // Get messages
             var records = await sails.helpers.messages.get(inputs.host, from_IP, this.req.isSocket ? sails.sockets.getId(this.req) : null);
+            
+            // Subscribe to web socket if applicable
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'messages');
                 sails.log.verbose('Request was a socket. Joining messages.');
             }
+            
             return exits.success(records);
         } catch (e) {
             return exits.error(e);

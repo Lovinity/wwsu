@@ -49,17 +49,25 @@ module.exports = {
             if (!Meta['A'].state.startsWith("sports") && !Meta['A'].state.startsWith("automation_"))
                 return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`));
 
+            // Block this request if we are already switching states
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+
+            // Lock so that any other state changing requests are blocked until we are done
             await Meta.changeMeta({changingState: `Switching to sports`});
 
             // Filter profanity
             if (inputs.topic !== '')
+            {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
-            
+                inputs.topic = await sails.helpers.sanitize(inputs.topic);
+                inputs.topic = await sails.helpers.truncateText(inputs.topic, 140);
+            }
+
             // Set meta to prevent accidental messages in DJ Controls
             Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, trackStamp: null});
 
+            // Start the sports broadcast
             if (!Meta['A'].state.startsWith("sports"))
             {
 
@@ -70,8 +78,11 @@ module.exports = {
                 await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false, true);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                
+                // Queue a Sports opener if there is one
                 if (typeof sails.config.custom.sportscats[inputs.sport] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[inputs.sport]["Sports Openers"]], 'Bottom', 1);
+                
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
@@ -87,7 +98,7 @@ module.exports = {
                 // Otherwise, just update metadata but do not do anything else
                 Meta.changeMeta({dj: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             }
-            
+
             await sails.helpers.error.reset('automationBreak');
             await Meta.changeMeta({changingState: null});
             return exits.success();

@@ -23,7 +23,10 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            
+            // Remove this XP record
             await Xp.destroy({ID: inputs.ID});
+            
             return exits.success();
         } catch (e) {
             return exits.error(e);

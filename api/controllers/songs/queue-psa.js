@@ -18,7 +18,10 @@ module.exports = {
         sails.log.debug('Controller songs/queue-psa called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            
+            // Queue applicable PSA
             await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, true, inputs.duration);
+            
             return exits.success();
         } catch (e) {
             return exits.error(e);

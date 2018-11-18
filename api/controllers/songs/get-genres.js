@@ -16,13 +16,14 @@ module.exports = {
             var returnData = [];
 
             // Retrieve a list of genres.
-            var genres = await Genre.find({}).sort('name ASC');
+            var genres = await Genre.find({}).sort('name DESC');
             sails.log.verbose(`Genre retrieved: ${genres.length}`);
             sails.log.silly(genres);
 
            
             // Push the genres out
             sails.log.debug(`Calling asyncForEach in songs/get-genres`);
+            
             await sails.helpers.asyncForEach(genres, function (genre, index) {
                 return new Promise(async (resolve, reject) => {
                     var temp = {};

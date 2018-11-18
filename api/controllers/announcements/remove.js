@@ -18,6 +18,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Destroy the announcement
             await Announcements.destroy({ID: inputs.ID}).fetch();
             return exits.success();
         } catch (e) {

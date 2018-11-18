@@ -19,7 +19,7 @@ module.exports = {
             var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
 
             var opts = {};
-            opts = {ip: from_IP, host: inputs.host, nickname: inputs.nickname || null};
+            opts = {ip: from_IP, host: null, nickname: null};
 
             if (this.req.isSocket)
             {
@@ -42,6 +42,7 @@ module.exports = {
 
             // Get messages for this client
             var records = await sails.helpers.messages.getWeb(opts.host);
+            
             return exits.success(records);
         } catch (e) {
             return exits.error(e);

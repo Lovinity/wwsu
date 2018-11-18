@@ -42,7 +42,6 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper songs.queueFromSubcategory called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
-        // Get the parent category
         try {
 
             // Get rid of all the null entries
@@ -83,11 +82,10 @@ module.exports = {
             {
 
                 // Randomise the list of songs
-                thesongs.sort(function (a, b) {
-                    return 0.5 - Math.random();
-                });
+                thesongs = await sails.helpers.shuffle(thesongs);
                 sails.log.silly(`Array shuffled. Resulting array: ${thesongs}`);
 
+                // Determine which tracks are already queued
                 var queuedtracks = 0;
                 var queuedtracksa = [];
                 var tracks = await sails.helpers.rest.getQueue();
@@ -102,6 +100,12 @@ module.exports = {
                     await sails.helpers.asyncForEach(thesongs, function (thesong) {
                         return new Promise(async (resolve, reject) => {
                             try {
+                                if (queuedtracksa.indexOf(thesong.ID) > -1)
+                                {
+                                    sails.log.verbose(`Skipped ${thesong.ID}: already in queue.`);
+                                    return resolve(false);
+                                }
+                                
                                 if (typeof thesong === 'undefined')
                                     return resolve(false);
 

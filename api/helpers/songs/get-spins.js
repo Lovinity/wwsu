@@ -22,6 +22,10 @@ module.exports = {
         try {
             var song = await Songs.findOne({ID: inputs.ID});
             sails.log.silly(`Song: ${song}`);
+            
+            // Reject if no song was returned
+            if (!song)
+                return exits.error(new Error("The song was not found."));
 
             // Get history from RadioDJ
             var history = await History.find({artist: song.artist, title: song.title});

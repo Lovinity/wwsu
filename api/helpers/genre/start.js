@@ -23,17 +23,22 @@ module.exports = {
         sails.log.debug('Helper genre.start called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Do not start a genre if we're not in genre rotation or automation.
             if (Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre'))
             {
+                // Do not start a genre if we are in the middle of changing states, unless ignoreChangingState was provided true.
                 if (Meta['A'].changingState === null || inputs.ignoreChangingState)
                 {
+                    // Lock future state changes until we are done if ignoreChangingState is false.
                     if (!inputs.ignoreChangingState)
                         await Meta.changeMeta({changingState: `Switching to genre`});
+                    
                     // Find the manual RadioDJ event for Node to trigger
                     var event = await Events.find({type: 3, name: inputs.event, enabled: 'True'});
                     sails.log.verbose(`Events returned ${event.length} matched events, but we're only going to use the first one.`);
                     sails.log.silly(event);
 
+                    // We cannot find the event. Throw an error.
                     if (event.length <= 0)
                     {
                         if (!inputs.ignoreChangingState)
@@ -47,7 +52,7 @@ module.exports = {
                     await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, true); // We want the rotation change to be immediate; clear out any music tracks in the queue. But, leave requested tracks in the queue.
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
 
-                    await sails.helpers.rest.cmd('RunEvent', event[0].ID, 5000);
+                    await sails.helpers.rest.cmd('RunEvent', event[0].ID, 5000); // This triggers the change in rotation.
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
                     // If we are going back to default rotation, we don't want to activate genre mode; leave in automation_on mode

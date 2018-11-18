@@ -13,6 +13,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper rest.getQueue called.');
         try {
+            // Query for the radioDJ queue and update Meta.automation with the queue.
             needle('get', Meta['A'].radiodj + '/p?auth=' + sails.config.custom.rest.auth, {}, {open_timeout: 2000, response_timeout: 2000, read_timeout: 2000, headers: {'Content-Type': 'application/json'}})
                     .then(async function (resp) {
                         try {

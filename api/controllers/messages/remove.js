@@ -17,6 +17,7 @@ module.exports = {
         sails.log.debug('Controller messages/remove called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Remove the message
             await sails.helpers.messages.remove(inputs.ID);
             return exits.success();
         } catch (e)

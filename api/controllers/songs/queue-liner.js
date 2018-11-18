@@ -31,6 +31,7 @@ module.exports = {
             if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
                 await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Top', 1);
 
+            // Play it
             await sails.helpers.rest.cmd('EnableAssisted', 0);
             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
 

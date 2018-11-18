@@ -36,6 +36,7 @@ module.exports = {
                 });
             }
 
+            // Determine the queue length
             queue.forEach(function (track, index) {
                 if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
                 {

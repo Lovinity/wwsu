@@ -18,12 +18,14 @@ module.exports = {
         sails.log.debug('Controller recipients/add-computers called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Must be a websocket request
             if (!this.req.isSocket)
                 return exits.error(new Error('This controller requires a websocket.'));
 
+            // Add the recipient
             var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.host, 'computers', inputs.host);
-            sails.sockets.join(this.req, 'show-stats');
-            sails.log.verbose('Request was a socket. Joining show-stats.');
+            
+            // Return the host label object
             return exits.success({label: label});
 
         } catch (e) {

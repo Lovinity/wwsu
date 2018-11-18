@@ -20,6 +20,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            
             // Log it
             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Top Add requested.'})
                     .tolerate((err) => {

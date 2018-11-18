@@ -14,8 +14,10 @@ module.exports = {
         sails.log.debug('Helper attendance.calculateStats called.');
 
         try {
+            // Get stats for the last 7 days
             var earliest = moment().subtract(1, 'weeks');
 
+            // Prepare with a clean template
             Attendance.weeklyAnalytics = {
                 topShows: [],
                 topGenre: 'None',
@@ -50,6 +52,7 @@ module.exports = {
                 var show = attendance.event;
                 show = show.substring(show.indexOf(": ") + 2);
 
+                // OnAir programming of Sports, Show, Remote, or Prerecord counts as show time.
                 if (attendance.event.startsWith("Sports:") || attendance.event.startsWith("Show:") || attendance.event.startsWith("Remote:") || attendance.event.startsWith("Prerecord:"))
                 {
                     Attendance.weeklyAnalytics.onAir += attendance.showTime;
@@ -89,7 +92,7 @@ module.exports = {
                 }
             }
 
-            // Gather the top shows into analytics
+            // Gather the top shows into analytics. Push the first 3 into the topShows array.
             if (totalsA.length > 0)
             {
                 totalsA.sort(compare).forEach(function (show, index) {
@@ -98,7 +101,7 @@ module.exports = {
                 });
             }
 
-            // Convert our show data into an array so we can sort it
+            // Convert genre data into an array so we can sort it
             var totalsA = [];
             for (var item in totalsG)
             {
@@ -107,10 +110,12 @@ module.exports = {
                     totalsA.push({name: item, showTime: totalsG[item].showTime, listenerMinutes: totalsG[item].listenerMinutes});
                 }
             }
+            
+            // Use the first one as our top genre
             if (totalsA.length > 0)
                 Attendance.weeklyAnalytics.topGenre = totalsA.sort(compare)[0].name;
 
-            // Convert our show data into an array so we can sort it
+            // Convert our playlist data into an array so we can sort it
             var totalsA = [];
             for (var item in totalsP)
             {
@@ -120,6 +125,7 @@ module.exports = {
                 }
             }
 
+            // Use the first one as our top playlist
             if (totalsA.length > 0)
             Attendance.weeklyAnalytics.topPlaylist = totalsA.sort(compare)[0].name;
 

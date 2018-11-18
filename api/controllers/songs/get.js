@@ -83,7 +83,7 @@ module.exports = {
                     });
                 });
 
-                // Find songs in any of the music subcategories, or in the provided subcategory.
+                // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 query = {id_subcat: subcatIDs};
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
                     query.id_subcat = inputs.subcategory;

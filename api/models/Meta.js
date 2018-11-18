@@ -175,7 +175,7 @@ module.exports = {
                 }
             }
 
-            // Changes in certain meta should warrant a re-processing of metadata information
+            // Changes in certain meta should warrant a re-processing of nowplaying metadata information
             if (typeof push.dj !== 'undefined' || typeof push.state !== 'undefined' || typeof push.playlist !== 'undefined' || typeof push.genre !== 'undefined' || typeof push.trackArtist !== 'undefined' || typeof push.trackTitle !== 'undefined' || typeof push.trackID !== 'undefined')
             {
                 // New track playing in automation?

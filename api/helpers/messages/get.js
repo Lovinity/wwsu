@@ -29,6 +29,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var searchto = moment().subtract(1, 'hours').toDate(); // Get messages sent within the last hour
+            //
             // First, grab data pertaining to the host that is retrieving messages (create the host record if it does not exist)
             var thehost = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: inputs.host});
             sails.log.silly(thehost);
@@ -37,6 +38,8 @@ module.exports = {
             var records = await Messages.find({status: 'active', or: [{createdAt: {'>': searchto}}, {to: 'emergency'}]});
             sails.log.verbose(`Messages records retrieved: ${records.length}`);
             sails.log.silly(records);
+            
+            // Return empty array if no messages were returned
             if (typeof records === 'undefined' || records.length === 0)
             {
                 return exits.success([]);

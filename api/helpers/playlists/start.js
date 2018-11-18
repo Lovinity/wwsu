@@ -40,17 +40,21 @@ module.exports = {
         sails.log.debug('Helper playlists.start called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, and/or it was not specified we are resuming a playlist.
+            // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, we're in the middle of changing states and ignoreChangingState is false, and/or it was not specified we are resuming a playlist.
             if (!Playlists.queuing && (((Meta['A'].changingState === null || inputs.ignoreChangingState) && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre'))) || inputs.resume))
             {
                 sails.log.verbose(`Processing helper.`);
                 Playlists.queuing = true; // Mark that the playlist is being queued, to avoid app conflicts.
+
+                // Lock state changes when necessary until we are done
                 if (!inputs.resume && !inputs.ignoreChangingState)
                     await Meta.changeMeta({changingState: `Switching to playlist`});
 
                 // Find the playlist
                 var theplaylist = await Playlists.findOne({name: inputs.name});
                 sails.log.silly(`Playlist: ${theplaylist}`);
+
+                // Error if we cannot find the playlist
                 if (!theplaylist)
                 {
                     if (!inputs.resume && !inputs.ignoreChangingState)
@@ -64,7 +68,9 @@ module.exports = {
                 var loadPlaylist = function () {
                     return new Promise(async (resolve2, reject2) => {
                         try {
-                            await sails.helpers.rest.cmd('LoadPlaylist', theplaylist.ID);
+                            await sails.helpers.rest.cmd('LoadPlaylist', theplaylist.ID); // Queue the playlist
+
+                            // Load the playlist tracks into memory so CRON can check when the playlist has finished.
                             var playlistTracks = await Playlists_list.find({pID: theplaylist.ID}).sort('ord ASC');
                             sails.log.verbose(`Playlists_list records retrieved: ${playlistTracks.length}`);
                             sails.log.silly(playlistTracks);
@@ -79,11 +85,25 @@ module.exports = {
                             playlistTracks.forEach(function (playlistTrack) {
                                 Playlists.active.tracks.push(playlistTrack.sID);
                             });
+
                             var slot = 10;
                             var prevLength = 0;
                             sails.log.verbose(`Waiting for playlist queue...`);
+                            var bail = 60;
                             var theFunction = function () {
                                 try {
+
+                                    // Bail after waiting for a max of 60 seconds.
+                                    bail -= 1;
+                                    if (bail < 1)
+                                    {
+                                        Playlists.queuing = false;
+                                        if (!inputs.resume && !inputs.ignoreChangingState)
+                                            Meta.changeMeta({changingState: null});
+                                        sails.log.verbose(`Failed to queue playlist after 60 seconds.`);
+                                        return reject2(new Error("The playlist was not considered queued after 60 seconds."));
+                                    }
+
                                     var tracks = Meta.automation;
 
                                     // If the number of tracks detected in queue is less than or equal to the previous check, count down on the slot counter.
@@ -183,6 +203,7 @@ module.exports = {
                         };
                         await removetracks();
                     }
+                    // Playlists
                 } else if (inputs.type === 0)
                 {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
@@ -196,6 +217,8 @@ module.exports = {
                             });
                     await loadPlaylist();
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
+
+                    // Prerecords
                 } else if (inputs.type === 1) {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                     await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false, (Meta.automation[0] && (parseInt(Meta.automation[0].Duration) - parseInt(Meta.automation[0].Elapsed) > (sails.config.custom.liveSkip * 60))));

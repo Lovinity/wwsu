@@ -23,6 +23,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Add a "0 xp" entry so that this DJ is in the system.
             await Xp.create({dj: inputs.dj, type: 'add-dj', subtype: 'add-dj', description: "New DJ added to the system", amount: 0});
 
             return exits.success();

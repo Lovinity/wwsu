@@ -18,6 +18,7 @@ module.exports = {
         sails.log.debug('Helper messages.remove called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Mark message as removed.
             var records = await Messages.update({ID: inputs.ID}, {status: 'deleted'})
                     .fetch();
             if (!records || records.length === 0)

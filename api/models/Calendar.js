@@ -76,6 +76,7 @@ module.exports = {
 
     calendar: [],
 
+    // Authenticate to Google Calendar
     // Google auth does not seem to support async/promises yet, so we need to have a sync function for that
     preLoadEvents: function (ignoreChangingState = false) {
         return new Promise((resolve, reject) => {
@@ -195,10 +196,13 @@ module.exports = {
         });
     },
 
+    // Get calendar events
     loadEvents: function (auth, ignoreChangingState) {
         return new Promise(async (resolve, reject) => {
             sails.log.verbose(`Calendar.loadEvents called`);
             try {
+                
+                // First, calendarID for WWSU Events
                 var {google} = require('googleapis');
                 var toTrigger = null;
                 var calendar = google.calendar({version: 'v3', auth: auth});
@@ -220,6 +224,7 @@ module.exports = {
                 events = events.data.items;
                 Calendar.calendar = events;
                 sails.log.silly(events);
+                // Alert if no events returned; this may be a problem. Also exit.
                 if (events.length === 0) {
                     Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'No events detected for the next 7 days. Is this normal?', status: 3}]);
                     return resolve();
@@ -245,22 +250,28 @@ module.exports = {
                                 var playlistDuplicates = 0;
                                 var duplicateTracks = [];
 
+                                // Get the playlist tracks
                                 var pTracks = await Playlists_list.find({pID: playlist.ID});
                                 sails.log.verbose(`Retrieved Playlists_list records: ${pTracks.length}`);
                                 sails.log.silly(pTracks);
 
                                 var temp = [];
+                                
+                                // Check for duplicates
                                 pTracks.forEach(function (track) {
                                     if (temp.indexOf(track.sID) > -1)
                                         playlistDuplicates++;
                                     temp.push(track.sID);
                                 });
 
+                                // Get the song records for each playlist track
                                 var songs = await Songs.find({ID: temp});
                                 sails.log.verbose(`Retrieved Songs records: ${songs.length}`);
                                 sails.log.silly(songs);
 
                                 var duration = 0;
+                                
+                                // Determine duration, ignoring duplicates
                                 songs.forEach(function (song) {
                                     if (playlistSongs.indexOf(`${song.artist} - ${song.title}`) > -1)
                                     {
@@ -272,6 +283,7 @@ module.exports = {
                                     playlistSongs.push(`${song.artist} - ${song.title}`);
                                 });
 
+                                // Generate playlist object
                                 playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates, duplicateTracks: duplicateTracks.join("<br />")});
                                 return resolve2(false);
                             } catch (e) {
@@ -289,9 +301,11 @@ module.exports = {
                         djevents[event.name] = event;
                     });
 
+                    // Loop through each calendar event
                     for (var i = 0; i < events.length; i++) {
                         var event = events[i];
                         eventIds.push(event.id);
+                        
                         // Skip events without a start time or without an end time or without a summary
                         if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined')
                         {
@@ -307,7 +321,6 @@ module.exports = {
                             start: event.start.dateTime || event.start.date,
                             end: event.end.dateTime || event.end.date
                         };
-
                         criteria.allDay = (moment(criteria.start).isSameOrBefore(moment().startOf('day')) && moment(criteria.end).isSameOrAfter(moment().startOf('day').add(1, 'days')));
                         if (event.colorId && event.colorId in colors)
                         {
@@ -665,7 +678,9 @@ module.exports = {
                     }
                 }
 
-                // Now, load Director hours
+
+
+                // Now, load Director hours google calendar
                 var {google} = require('googleapis');
                 var toTrigger = null;
                 var calendar = google.calendar({version: 'v3', auth: auth});
@@ -681,18 +696,20 @@ module.exports = {
                 events = events.data.items;
                 Directorhours.calendar = events;
                 sails.log.silly(events);
-
+                
+                // Should have at least one event.
                 if (events.length === 0) {
                     Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'No director hours are listed. Is this normal?', status: 3}]);
                     return resolve();
                 } else {
-                    // Iterate through each returned event from Google Calendar
                     var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
                     var retData = [];
 
+                    // Iterate through each returned event from Google Calendar
                     for (var i = 0; i < events.length; i++) {
                         var event = events[i];
                         eventIds.push(event.id);
+                        
                         // Skip events without a start time or without an end time or without a summary
                         if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined')
                         {
@@ -755,7 +772,7 @@ module.exports = {
                     }
 
                     // Go through every event record which passed the end time, and log absences where necessary.
-                    // DOES NOT WORK YET
+                    // TODO: DOES NOT WORK YET
                     /*
                     if (destroyed && destroyed.length > 0)
                     {

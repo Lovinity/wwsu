@@ -22,6 +22,7 @@ module.exports = {
             var records = await Requests.find({played: 0, ID: {'>': inputs.offset}});
             sails.log.verbose(`Requests records retrieved: ${records.length}`);
             sails.log.silly(records);
+            
             var thereturn = [];
             if (typeof records === 'undefined' || records.length === 0)
             {

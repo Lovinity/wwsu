@@ -11,12 +11,15 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller meta/get called.');
+        
+        // Subscribe to socket if applicable
         if (this.req.isSocket)
         {
             sails.sockets.join(this.req, 'meta');
             sails.log.verbose('Request was a socket. Joining meta.');
         }
         
+        // Return current meta
         return exits.success(Meta['A']);
     }
 

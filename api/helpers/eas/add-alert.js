@@ -80,6 +80,8 @@ module.exports = {
                 if (temp.indexOf(inputs.county) === -1)
                     temp.push(inputs.county);
                 temp = temp.join(', ');
+                
+                // Prepare criteria to update
                 var criteria = {
                     source: inputs.source,
                     reference: inputs.reference,
@@ -94,6 +96,7 @@ module.exports = {
                     criteria.information = inputs.information;
 
                 sails.log.silly(`Criteria: ${criteria}`);
+                
                 // Detect any changes in the alert. If a change is detected, we will do a database update.
                 var updateIt = false;
                 for (var key in criteria)
@@ -113,8 +116,11 @@ module.exports = {
                             .fetch();
                 }
                 return exits.success();
-            } else { // Does not exist
+                
+            } else { // Does not exist; new alert
                 sails.log.verbose('Alert does not exist.');
+                
+                // Prepare criteria
                 var criteria = {
                     source: inputs.source,
                     reference: inputs.reference,

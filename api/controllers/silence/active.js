@@ -32,7 +32,7 @@ module.exports = {
                         .tolerate((err) => {
                         });
                 
-                // Skip the track
+                // Skip the track if there's a track playing in automation
                 if (typeof Meta.automation[1] !== 'undefined')
                 {
                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);

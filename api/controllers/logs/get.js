@@ -58,6 +58,7 @@ module.exports = {
             if (inputs.end !== null)
                 end = moment(inputs.end);
 
+            // Prepare query
             var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
             if (inputs.attendanceID !== null && inputs.attendanceID > 0)
                 query = {attendanceID: inputs.attendanceID};
@@ -76,6 +77,7 @@ module.exports = {
             sails.log.verbose(`Retrieved Logs records: ${records.length}`);
             sails.log.silly(records);
 
+            // Join logs socket if applicable (ignores all filtering rules)
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'logs');

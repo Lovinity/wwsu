@@ -15,7 +15,7 @@ module.exports = {
         type: {
             type: 'string',
             required: true,
-            description: 'The type of XP record (show, or remote).'
+            description: 'The type of XP record (xp, or remote).'
         },
         subtype: {
             type: 'string',
@@ -51,6 +51,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Add the record
             await Xp.create({dj: inputs.dj, type: inputs.type, subtype: inputs.subtype, description: inputs.description, amount: inputs.amount, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)});
             
             return exits.success();

@@ -13,6 +13,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper error.post called.');
         try {
+            // When in automation, but not playlist, queue an ID and restart the genre.
             if (Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'automation_playlist')
             {
                 sails.log.verbose(`Automation recovery triggered.`);
@@ -28,6 +29,7 @@ module.exports = {
                     await sails.helpers.genre.start('Default', true);
                 };
                 await sails.helpers.rest.cmd('EnableAutoDJ', 1);
+            // When in playlist or prerecord, queue an ID and restart the playlist/prerecord
             } else if (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord')
             {
                 sails.log.verbose(`Playlist recovery triggered.`);
@@ -38,6 +40,7 @@ module.exports = {
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.playlists.start(Meta['A'].playlist, true, Meta['A'].state === 'live_prerecord' ? 1 : 0, Meta['A'].topic, true);
+            // When in break, queue PSAs
             } else if (Meta['A'].state.includes("_break") || Meta['A'].state.includes("_returning") || Meta['A'].state.includes("_disconnected"))
             {
                 sails.log.verbose(`Break recovery triggered.`);

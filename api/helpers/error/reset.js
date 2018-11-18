@@ -24,6 +24,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Reset the error check count to 0.
             Status.errorCheck[inputs.name].count = 0;
 
             // All done.

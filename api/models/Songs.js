@@ -262,7 +262,8 @@ module.exports = {
         */
   },
   
-  pending: [] // Tracks that have been removed but need to air eventually, and will be re-queued at the next break.
+  pending: [], // Tracks that have been removed but need to air eventually, and will be re-queued at the next break.
+  pendingCmd: [] // Queued/pending rest commands
 
 };
 

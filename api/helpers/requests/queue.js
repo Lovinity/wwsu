@@ -85,34 +85,15 @@ module.exports = {
                     switch (Meta['A'].state)
                     {
                         case 'live_on':
-                            if (queuedSomething)
-                                await Meta.changeMeta({state: 'live_returning'});
-                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                            await sails.helpers.rest.cmd('EnableAssisted', 0);
-                            return resolve();
-                            break;
                         case 'remote_on':
-                            if (queuedSomething)
-                                await Meta.changeMeta({state: 'remote_returning'});
-                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                            await sails.helpers.rest.cmd('EnableAssisted', 0);
-                            return resolve();
-                            break;
                         case 'sports_on':
-                            if (queuedSomething)
-                                await Meta.changeMeta({state: 'sports_returning'});
-                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                            await sails.helpers.rest.cmd('EnableAssisted', 0);
-                            return resolve();
-                            break;
                         case 'sportsremote_on':
-                            if (queuedSomething)
-                                await Meta.changeMeta({state: 'sportsremote_returning'});
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
                             return resolve();
                             break;
                         default:
+                            // For all other states, queue a request liner before we queue the requests
                             if (queuedSomething && inputs.liner_first)
                                 await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, false);
                             return resolve();

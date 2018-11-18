@@ -22,8 +22,11 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Block if we are in the process of changing states
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+            
+            // Lock system from any other state changing requests until we are done.
             await Meta.changeMeta({changingState: `Changing to automation`});
 
             // What to return for DJ Controls show stats, if applicable
@@ -220,7 +223,7 @@ module.exports = {
                 // Enable Auto DJ
                 await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
-                // We are going to break
+            // We are going to break
             } else {
                 await Attendance.createRecord(`Genre: Default`);
 

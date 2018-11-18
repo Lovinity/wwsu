@@ -47,16 +47,25 @@ module.exports = {
             if (!Meta['A'].state.startsWith("automation_") && !Meta['A'].state.startsWith("remote_"))
                 return exits.error(new Error(`Cannot execute state/remote unless in automation or remote. Please go to automation first.`));
 
+            // Block this request if we are changing states right now
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
             
+            // Lock so that other state changing requests get blocked until we are done.
             await Meta.changeMeta({changingState: `Switching to remote`});
 
-            // Filter profanity
+            // Filter profanity and sanitize
             if (inputs.topic !== '')
+            {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
+                inputs.topic = await sails.helpers.sanitize(inputs.topic);
+                inputs.topic = await sails.helpers.truncateText(inputs.topic, 140);
+            }
             if (inputs.showname !== '')
+            {
                 inputs.showname = await sails.helpers.filterProfane(inputs.showname);
+                inputs.showname = await sails.helpers.sanitize(inputs.showname);
+            }
 
             // Send meta to prevent accidental interfering messages in Dj Controls
             await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null});
@@ -74,13 +83,17 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
+                
+                // Queue a show opener if there is one
                 if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
                 {
                     await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Openers"]], 'Bottom', 1);
                 } else {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
+                
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
+                
                 await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else

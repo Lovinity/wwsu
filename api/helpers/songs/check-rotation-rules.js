@@ -25,13 +25,17 @@ module.exports = {
             var record = await Songs.findOne({ID: inputs.ID});
             sails.log.silly(`Song: ${record}`);
 
-            // Get rotation rule settings as saved in the database by RadioDJ.
-            var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']});
-            sails.log.silly(`Rotation settings: ${thesettings}`);
-            var rotationRules = {};
-            thesettings.forEach(function (thesetting) {
-                rotationRules[thesetting.setting] = thesetting.value;
-            });
+            // Exit if no song was returned
+            if (!record)
+                return exits.success(false);
+
+            // Check if the track is enabled
+            if (record.enabled !== 1)
+                return exits.success(false);
+
+            // Check if the track has exceeded the number of allowed spin counts
+            if (record.limit_action > 0 && record.count_played >= record.play_limit)
+                return exits.success(false);
 
             // Check if we are past the end date of the track
             if (moment(record.end_date).isBefore() && moment(record.end_date).isAfter('2002-01-01 00:00:01'))
@@ -41,9 +45,13 @@ module.exports = {
             if (moment(record.start_date).isAfter())
                 return exits.success(false);
 
-            // Check if the track has exceeded the number of allowed spin counts
-            if (record.limit_action > 0 && record.count_played >= record.play_limit)
-                return exits.success(false);
+            // Get rotation rule settings as saved in the database by RadioDJ.
+            var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']});
+            sails.log.silly(`Rotation settings: ${thesettings}`);
+            var rotationRules = {};
+            thesettings.forEach(function (thesetting) {
+                rotationRules[thesetting.setting] = thesetting.value;
+            });
 
             // Check rotation rules
             if (moment(record.date_played).isAfter(moment().subtract(rotationRules.RepeatTrackInterval, 'minutes')))

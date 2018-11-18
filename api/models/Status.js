@@ -67,8 +67,8 @@ module.exports = {
      *     count: 0, // Used by the helper to count the number of times that error occurred.
      *     trigger: 15, // If count reaches this number, then fn() is executed
      *     active: false, // Set to false by default; used to make sure error checks do not run on top of each other.
-     *     condition: function() {}, // If this function returns true, then count is automatically reset to 0 in the count helper.
-     *     fn: function() {}, // This function is executed when count reaches trigger. The function should return a number to which the count should be changed to (such as 0).
+     *     condition: function() {}, // If this function returns true, then count is automatically reset to 0 in the count helper. Can be async.
+     *     fn: function() {}, // This function is executed when count reaches trigger. The function should return a number to which the count should be changed to (such as 0). Can be async.
      * }
      */
     errorCheck: {
@@ -347,11 +347,10 @@ module.exports = {
                         if (status.status === 5)
                             criteria.time = moment().toISOString(true);
 
-                        // Find or create the status record
-
                         // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
                         var criteriaB = _.cloneDeep(criteria);
 
+                        // Find or create the status record
                         var record = await Status.findOrCreate({name: status.name}, criteriaB)
                                 .tolerate((err) => {
                                     return resolve2();
@@ -385,6 +384,8 @@ module.exports = {
                             {
                                 loglevel = `urgent`;
                             }
+                            
+                            // Log changes in status
                             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
                                     .tolerate((err) => {
                                         // Don't throw errors, but log them
@@ -393,6 +394,7 @@ module.exports = {
                         }
                         if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
                         {
+                            // Log when bad statuses are now good.
                             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good.`})
                                     .tolerate((err) => {
                                         // Don't throw errors, but log them

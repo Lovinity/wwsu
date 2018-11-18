@@ -18,10 +18,13 @@ module.exports = {
         sails.log.debug('Controller state/break called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Block this request if we are already trying to change states
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+
+            // Lock so that other state changing requests get blocked until we are done
             await Meta.changeMeta({changingState: `Going into break`});
-            
+
             // Do not allow a halftime break if not in a sports broadcast
             if (!Meta['A'].state.startsWith("sports") && inputs.halftime)
                 inputs.halftime = false;
@@ -36,15 +39,20 @@ module.exports = {
             // halftime break? Play a station ID and then begin halftime music
             if (inputs.halftime)
             {
+                // Queue and play tracks
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 await sails.helpers.songs.queuePending();
-                Status.errorCheck.prevID = moment();
-                Status.errorCheck.prevBreak = moment();
-                await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 2);
+                
+                
+                Status.errorCheck.prevID = moment();
+                Status.errorCheck.prevBreak = moment();
+                await sails.helpers.error.count('stationID');
+                
+                // Change state to halftime mode
                 if (Meta['A'].state.startsWith("sportsremote"))
                 {
                     await Meta.changeMeta({state: 'sportsremote_halftime'});
@@ -55,11 +63,15 @@ module.exports = {
                 // Standard break
             } else {
                 Status.errorCheck.prevBreak = moment();
+                
+                // Queue and play tracks
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queuePending();
                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 2, true);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
+                
+                // Switch state to break
                 switch (Meta['A'].state)
                 {
                     case 'live_on':
@@ -76,7 +88,7 @@ module.exports = {
                         break;
                 }
             }
-            
+
             await Meta.changeMeta({changingState: null});
             return exits.success();
         } catch (e) {

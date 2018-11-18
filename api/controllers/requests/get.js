@@ -17,12 +17,16 @@ module.exports = {
         sails.log.debug('Controller requests/get called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Get requests
             var response = await sails.helpers.requests.get(inputs.offset);
+            
+            // If applicable, subscribe to the requests socket
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'requests');
                 sails.log.verbose('Request was a socket. Joining requests.');
             }
+            
             return exits.success(response);
         } catch (e) {
             return exits.error(e);

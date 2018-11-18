@@ -39,17 +39,18 @@ module.exports = {
             // If so, do stuff
             if (requestable.requestable)
             {
-            // Filter disallowed HTML
-            inputs.name = await sails.helpers.sanitize(inputs.name);
-            inputs.message = await sails.helpers.sanitize(inputs.message);
+                // Filter disallowed HTML
+                inputs.name = await sails.helpers.sanitize(inputs.name);
+                inputs.message = await sails.helpers.sanitize(inputs.message);
 
-            // Filter profanity
-            inputs.name = await sails.helpers.filterProfane(inputs.name);
-            inputs.message = await sails.helpers.filterProfane(inputs.message);
+                // Filter profanity
+                inputs.name = await sails.helpers.filterProfane(inputs.name);
+                inputs.message = await sails.helpers.filterProfane(inputs.message);
 
-            // Truncate
-            inputs.name = await sails.helpers.truncateText(inputs.name, 64);
-            inputs.message = await sails.helpers.truncateText(inputs.message, 1024);
+                // Truncate
+                inputs.name = await sails.helpers.truncateText(inputs.name, 64);
+                inputs.message = await sails.helpers.truncateText(inputs.message, 1024);
+
                 // Get the song data
                 var record2 = await Songs.findOne({ID: inputs.ID});
                 if (!record2)
@@ -59,10 +60,10 @@ module.exports = {
                 // Create the request
                 await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(true), played: 0}).fetch();
                 Requests.pending.push(inputs.ID);
-                
+
                 // Bump priority if configured
-                            if (sails.config.custom.requests.priorityBump !== 0)
-                await Songs.update({ID: inputs.ID}, {weight: record2.weight + sails.config.custom.requests.priorityBump});
+                if (sails.config.custom.requests.priorityBump !== 0)
+                    await Songs.update({ID: inputs.ID}, {weight: record2.weight + sails.config.custom.requests.priorityBump});
 
                 // Finish it
                 return exits.success({requested: true, HTML: `<div class="alert alert-success" role="alert">

@@ -18,6 +18,7 @@ module.exports = {
         sails.log.debug('Helper messages.removeMass called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Mark all messages from provided host as deleted
             await Messages.update({from: inputs.host}, {status: 'deleted'}).fetch();
             return exits.success();
         } catch (e) {

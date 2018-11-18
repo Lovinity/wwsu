@@ -24,6 +24,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Determine which announcements to return; do not subscribe to websockets for "all" type
             if (inputs.type !== "all" && (!inputs.ID || inputs.ID === null))
             {
                 var records = await Announcements.find({type: inputs.type});
@@ -41,7 +42,13 @@ module.exports = {
             sails.log.verbose(`${records.length} records retrieved.`);
             sails.log.silly(records);
 
-            return exits.success(records);
+            // Return records
+            if (!records || records.length < 1)
+            {
+                return exits.success([]);
+            } else {
+                return exits.success(records);
+            }
         } catch (e) {
             return exits.error(e);
         }

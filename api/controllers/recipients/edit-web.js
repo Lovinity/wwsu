@@ -20,6 +20,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Request must be a socket
             if (!this.req.isSocket)
                 return exits.error(new Error('This controller requires a websocket.'));
 
