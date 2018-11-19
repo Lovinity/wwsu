@@ -100,14 +100,15 @@ module.exports = {
                     await sails.helpers.asyncForEach(thesongs, function (thesong) {
                         return new Promise(async (resolve, reject) => {
                             try {
+
+                                if (typeof thesong === 'undefined')
+                                    return resolve(false);
+
                                 if (queuedtracksa.indexOf(thesong.ID) > -1)
                                 {
                                     sails.log.verbose(`Skipped ${thesong.ID}: already in queue.`);
                                     return resolve(false);
                                 }
-                                
-                                if (typeof thesong === 'undefined')
-                                    return resolve(false);
 
                                 // Check rotation rules first
                                 var canplay = await sails.helpers.songs.checkRotationRules(thesong.ID);
@@ -151,6 +152,9 @@ module.exports = {
                     await sails.helpers.asyncForEach(thesongs, function (thesong) {
                         return new Promise(async (resolve, reject) => {
                             try {
+                                if (typeof thesong === 'undefined')
+                                    return resolve(false);
+                                
                                 if (queuedtracksa.indexOf(thesong.ID) > -1)
                                 {
                                     sails.log.verbose(`Skipped ${thesong.ID}: already in queue.`);

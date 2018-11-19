@@ -70,7 +70,7 @@ Receive analytical statistics about WWSU from the last 7 days.
             "tracksLiked": 13, // Number of tracks that were liked from the website in the last 7 days
             "tracksRequested": 12, // Number of tracks requested from the website in the last 7 days
             "webMessagesExchanged": 93 // Number of messages exchanged between visitors and the DJ in the last 7 days
-}
+        }
 ## Announcements
 Announcements endpoints regard the internal announcements system at WWSU.
 ### /announcements/add
