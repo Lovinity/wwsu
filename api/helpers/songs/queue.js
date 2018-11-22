@@ -54,10 +54,10 @@ module.exports = {
 
             // Remove songs that are expired
             if (thesongs.length > 0)
-                thesongs = thesongs.filter(thesong => moment(thesong.start_date).isSameOrBefore(moment()) && (moment(thesong.end_date).isSameOrBefore(moment("2002-01-01 00:00:02")) || moment().isBefore(moment(thesong.end_date))) && (thesong.play_limit === 0 || thesong.count_played < thesong.play_limit))
+                thesongs = thesongs.filter(thesong => moment(thesong.start_date).isSameOrBefore(moment()) && (moment(thesong.end_date).isSameOrBefore(moment("2002-01-02 00:00:02")) || moment().isBefore(moment(thesong.end_date))) && (thesong.play_limit === 0 || thesong.count_played < thesong.play_limit))
 
             // If duration is provided, remove songs that fail the duration check
-            if (inputs.duration !== null && thesongs.length > 0)
+            if (inputs.duration && inputs.duration !== null && thesongs.length > 0)
                 thesongs = thesongs.filter(thesong => thesong.duration <= (inputs.duration + 5) && thesong.duration >= (inputs.duration - 5));
 
             if (thesongs.length > 0)
@@ -76,20 +76,18 @@ module.exports = {
                 // Queue up the chosen tracks if they pass rotation rules, and if rules is not set to false
                 if (inputs.rules)
                 {
-                    var maps = thesongs
-                            .filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1)
-                            .map(async thesong => {
-
-                                // NOTE: Array.filter does not support async, and sails.helpers does not execute without await, so this cannot be used in Array.filter
-                                if (queuedtracks < inputs.quantity && await sails.helpers.songs.checkRotationRules(thesong.ID))
-                                {
-                                    queuedtracks += 1;
-                                    sails.log.verbose(`Queued ${thesong.ID}`);
-                                    await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
-                                }
-                                return true;
-                            });
-                    await Promise.all(maps);
+                    thesongs = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
+                    var i = 0;
+                    while (queuedtracks < inputs.quantity && i < thesongs.length)
+                    {
+                        if (await sails.helpers.songs.checkRotationRules(thesongs[i].ID))
+                        {
+                            queuedtracks++;
+                            sails.log.verbose(`Queued ${thesongs[i].ID}`);
+                            await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesongs[i].ID);
+                        }
+                        i++;
+                    }
                 }
 
                 // Not enough tracks, or rules was set to false? Let's try queuing [more] tracks without rotation rules
@@ -103,19 +101,17 @@ module.exports = {
                     tracks.map(track => queuedtracksa.push(track.ID));
 
                     // Go through all the songs again without checking for rotation rules
-                    var maps = thesongs
-                            .filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1)
-                            .map(async thesong => {
-                                if (queuedtracks < inputs.quantity)
-                                {
-                                    queuedtracks += 1;
-                                    sails.log.verbose(`Queued ${thesong.ID}`);
-                                    await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
-                                }
-                                return true;
-                            });
-                    await Promise.all(maps);
+                    var thesongs = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
+                    var i = 0;
+                    while (queuedtracks < inputs.quantity && i < thesongs.length)
+                    {
+                        queuedtracks++;
+                        sails.log.verbose(`Queued ${thesongs[i].ID}`);
+                        await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesongs[i].ID);
+                        i++;
+                    }
                 }
+                
                 if (queuedtracks < inputs.quantity)
                 {
                     sails.log.verbose(`Did not have enough tracks to queue.`);
