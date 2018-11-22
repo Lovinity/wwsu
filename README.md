@@ -1,4 +1,4 @@
-# WWSU 4.2.0 ALPHA
+# WWSU 4.3.0
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -30,31 +30,32 @@ All API endpoints explained below will respond with something. In addition to th
  - 500 Internal Server Error
 ## Methods
 The WWSU app does not care which method you use for any of the requests. Generally, it is recommended to use GET when fetching information, and POST when submitting information.
-## User
-### /user/auth Authorization
+## Hosts and Authorization
 A lot of API endpoints require a valid authorization in the form of a header. The endpoints which require authorization will be noted in their respective section.
  - The key is "authorization", and the value is "Bearer (token)". 
- - Use the /user/auth endpoint to authenticate and get a token.
- - User accounts are issued by WWSU. They are not available on request.
+ - Use the /hosts/get endpoint to authenticate and get a token.
+### /hosts/get
+Retrieve information about a host. 
+ - If the host does not exist in the database, it will be created with default settings. However, it will not be authorized, and therefore a token will not be returned. An admin will need to authorize the host for it to begin using tokens to hit endpoints requiring authorization. 
+ - If the host exists and is authorized, an authorization token will be generated and returned.
 #### Request
 | key | criteria |
 |--|--|
-| email | string (required; the email of the authenticating user) |
-| password | string (required; the password of the authenticating user) |
+| host | string (required; name of the host to retrieve or create.) |
 #### Response 200
         {
-            "user": {
-                "email": "null@example.com",
-                "id": 0,
-                "createdAt": "2018-02-15T18:00:01.000Z",
-                "updatedAt": "2018-02-15T18:00:01.000Z"
-            },
-            "token": "authorization token here"
+            "createdAt": "2018-05-03T23:18:41.089Z",
+            "updatedAt": "2018-05-03T23:18:41.089Z",
+            "ID": 1,
+            "host": "abunchofstuff", // Host name of the host computer
+            "friendlyname": "OnAir Computer", // Friendly name to use for labels
+            "authorized": false, // If false, this host is not authorized to use any of the endpoints in the API requiring authorization
+            "admin": true, // If true, this client is an administrator and should have access to options in DJ Controls
+            "requests": true, // If true, this client should notify of track requests even when this host was not used to go live
+            "emergencies": false, // If true, this client should notify of reported technical issues
+            "webmessages": true, // If true, this client should notify of messages sent by public clients, even when this host was not used to go live
+            "token": null // If the host is authorized, a token will be provided here for use in the headers of endpoints requiring authorization. The token will expire after 1 hour. Otherwise, this will be null.
         }
-#### Response 401
-            {
-                "err": "Email and password required."
-            }
 ## Analytics
 Analytics endpoints deal with getting analytics about WWSU.
 ### /analytics/weekly-dj
@@ -311,25 +312,6 @@ Embeds are specially designed pages used for other websites to embed WWSU on the
 ### /embeds/guardian
 Retrieve a WWSU web player specially designed for Wright State's Guardian Newspaper website.
 #### Response 200 HTML
-## Hosts
-Hosts endpoints regard DJ Controls instances.
-### /hosts/get
-Retrieve information about a host. If the host does not exist in the database, it will be created with default data. **Requires authorization**.
-#### Request
-| key | criteria |
-|--|--|
-| host | string (required; name of the host to retrieve or create.) |
-#### Response 200
-        {
-            "createdAt": "2018-05-03T23:18:41.089Z",
-            "updatedAt": "2018-05-03T23:18:41.089Z",
-            "ID": 1,
-            "host": "hostname", // Name of the host
-            "friendlyname": "OnAir Computer", // Friendly name to use for labels
-            "requests": true, // If true, this client should notify of track requests even when this host was not used to go live
-            "emergencies": false, // If true, this client should notify of reported technical issues and should be considered an administrator
-            "webmessages": true // If true, this client should notify of messages sent by public clients, even when this host was not used to go live
-        }
 ## Listen
 These endpoints return web pages of various sections of the Listener's Corner. This is mainly used by the mobile app.
 ### /listen/calendar

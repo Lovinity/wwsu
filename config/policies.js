@@ -29,6 +29,7 @@ module.exports.policies = {
     'display/public': 'isBanned',
     'display/internal': 'isBanned',
     'eas/get': 'isBanned',
+    'hosts/get': 'isBanned',
     'logs/get': 'isBanned',
     'logs/get-subtypes': 'isBanned',
     'logs/view': 'isBanned',

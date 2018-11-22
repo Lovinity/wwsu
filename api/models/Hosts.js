@@ -20,12 +20,23 @@ module.exports = {
         },
 
         friendlyname: {
-            type: 'string'
+            type: 'string',
+            defaultsTo: 'Unknown Host'
+        },
+
+        authorized: {
+            type: 'boolean',
+            defaultsTo: false
+        },
+
+        admin: {
+            type: 'boolean',
+            defaultsTo: false
         },
 
         requests: {
             type: 'boolean',
-            defaultsTo: true
+            defaultsTo: false
         },
 
         emergencies: {
@@ -35,7 +46,7 @@ module.exports = {
 
         webmessages: {
             type: 'boolean',
-            defaultsTo: true
+            defaultsTo: false
         }
 
     }
