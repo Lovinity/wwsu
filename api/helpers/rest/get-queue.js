@@ -24,18 +24,14 @@ module.exports = {
                             }
                             if (resp.body.name === 'ArrayOfSongData')
                             {
-                                resp.body.children.forEach(function (trackA, index) {
+                                resp.body.children.map(trackA => {
                                     var theTrack = {};
-                                    trackA.children.forEach(function (track) {
-                                        theTrack[track.name] = track.value;
-                                    });
+                                    trackA.children.map(track => theTrack[track.name] = track.value);
                                     Meta.automation.push(theTrack);
                                 });
                             } else {
                                 var theTrack = {};
-                                resp.body.children.forEach(function (track) {
-                                    theTrack[track.name] = track.value;
-                                });
+                                resp.body.children.map(track => theTrack[track.name] = track.value);
                                 Meta.automation.push(theTrack);
                             }
                             return exits.success(Meta.automation);

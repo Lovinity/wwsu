@@ -22,7 +22,7 @@ module.exports = {
         try {
             var song = await Songs.findOne({ID: inputs.ID});
             sails.log.silly(`Song: ${song}`);
-            
+
             // Reject if no song was returned
             if (!song)
                 return exits.error(new Error("The song was not found."));
@@ -47,37 +47,29 @@ module.exports = {
                 var spins30 = 0;
                 var spinsYTD = 0;
                 var spins365 = 0;
-                sails.log.debug(`Calling asyncForEach in songs.getSpins on each RadioDJ history entry.`);
-                await sails.helpers.asyncForEach(history, function (record, index) {
-                    return new Promise(async (resolve2, reject2) => {
-                        if (moment(record.date_played).isAfter(lastplayed))
-                            lastplayed = moment(record.date_played);
-                        if (moment(record.date_played).isAfter(moment().subtract(1, 'weeks')))
-                            spins7 += 1;
-                        if (moment(record.date_played).isAfter(moment().subtract(1, 'months')))
-                            spins30 += 1;
-                        if (moment(record.date_played).isAfter(moment().subtract(1, 'years')))
-                            spins365 += 1;
-                        if (moment(record.date_played).isAfter(moment().startOf('year')))
-                            spinsYTD += 1;
-                        return resolve2(false);
-                    });
+                history.map(record => {
+                    if (moment(record.date_played).isAfter(lastplayed))
+                        lastplayed = moment(record.date_played);
+                    if (moment(record.date_played).isAfter(moment().subtract(1, 'weeks')))
+                        spins7 += 1;
+                    if (moment(record.date_played).isAfter(moment().subtract(1, 'months')))
+                        spins30 += 1;
+                    if (moment(record.date_played).isAfter(moment().subtract(1, 'years')))
+                        spins365 += 1;
+                    if (moment(record.date_played).isAfter(moment().startOf('year')))
+                        spinsYTD += 1;
                 });
-                sails.log.debug(`Calling asyncForEach in songs.getSpins on each logged song.`);
-                await sails.helpers.asyncForEach(history2, function (record, index) {
-                    return new Promise(async (resolve2, reject2) => {
-                        if (moment(record.createdAt).isAfter(lastplayed))
-                            lastplayed = moment(record.date_played);
-                        if (moment(record.createdAt).isAfter(moment().subtract(1, 'weeks')))
-                            spins7 += 1;
-                        if (moment(record.createdAt).isAfter(moment().subtract(1, 'months')))
-                            spins30 += 1;
-                        if (moment(record.createdAt).isAfter(moment().subtract(1, 'years')))
-                            spins365 += 1;
-                        if (moment(record.createdAt).isAfter(moment().startOf('year')))
-                            spinsYTD += 1;
-                        return resolve2(false);
-                    });
+                history2.map(record => {
+                    if (moment(record.createdAt).isAfter(lastplayed))
+                        lastplayed = moment(record.date_played);
+                    if (moment(record.createdAt).isAfter(moment().subtract(1, 'weeks')))
+                        spins7 += 1;
+                    if (moment(record.createdAt).isAfter(moment().subtract(1, 'months')))
+                        spins30 += 1;
+                    if (moment(record.createdAt).isAfter(moment().subtract(1, 'years')))
+                        spins365 += 1;
+                    if (moment(record.createdAt).isAfter(moment().startOf('year')))
+                        spinsYTD += 1;
                 });
 
                 return exits.success({7: spins7, 30: spins30, 'YTD': spinsYTD, 365: spins365});

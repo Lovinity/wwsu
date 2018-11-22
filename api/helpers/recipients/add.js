@@ -112,48 +112,25 @@ module.exports = {
             // If the recipient group is computers, update Status
             if (inputs.group === 'computers')
             {
-                var inConfig = false;
-                sails.log.debug(`Calling asyncForEach in recipients.add for finding djcontrols in config`);
-                await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            if (djcontrols.host === inputs.host)
-                            {
-                                inConfig = true;
-                                await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 5, data: 'Operational.'}]);
-                                return resolve(true);
-                            } else {
-                                return resolve(false);
-                            }
-                        } catch (e) {
-                            return reject(e);
-                        }
-                    });
-                });
+                var maps = sails.config.custom.djcontrols
+                        .filter(djcontrols => djcontrols.host === inputs.host)
+                        .map(async djcontrols => {
+                            await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 5, data: 'Operational.'}]);
+                            return true;
+                        });
+                await Promise.all(maps);
             }
 
             // If the recipient group is display, update Status if there are at least instances connections.
             if (inputs.group === 'display')
             {
-                var inConfig = false;
-                sails.log.debug(`Calling asyncForEach in recipients.add for finding displaysigns in config`);
-                await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            if (inputs.host === `display-${display.name}`)
-                            {
-                                inConfig = true;
-                                if (Recipients.sockets[recipient.ID].length >= display.instances)
-                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'Operational.'}]);
-                                return resolve(true);
-                            } else {
-                                return resolve(false);
-                            }
-                        } catch (e) {
-                            return reject(e);
-                        }
-                    });
-                });
+                var maps = sails.config.custom.displaysigns
+                        .filter(display => inputs.host === `display-${display.name}` && Recipients.sockets[recipient.ID].length >= display.instances)
+                        .map(async display => {
+                            await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'Operational.'}]);
+                            return true;
+                        });
+                await Promise.all(maps);
             }
 
             return exits.success(recipient.label);

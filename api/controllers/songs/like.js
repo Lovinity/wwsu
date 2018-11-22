@@ -28,7 +28,7 @@ module.exports = {
                 return exits.error(new Error(`The track ID provided does not exist.`));
 
             var query = {IP: from_IP, ID: inputs.trackID};
-            
+
             // If config specifies users can like tracks multiple times, add a date condition.
             if (sails.config.custom.songsliked.limit > 0)
                 query.createdAt = {'>=': moment().subtract(sails.config.custom.songsliked.limit, 'days').toISOString(true)};
@@ -43,17 +43,16 @@ module.exports = {
             var records = await History.find({createdAt: {'>=': moment().subtract(30, 'minutes').toISOString(true)}}).sort('createdAt DESC');
             if (records && records.length > 0)
             {
-                records.forEach(function (song) {
-                    if (song.trackID === inputs.trackID)
-                        canLike = true;
-                });
+                records
+                        .filter(song => song.trackID === inputs.trackID)
+                        .map(song => canLike = true);
             }
             if (!canLike)
                 return exits.error(new Error(`This track has not recently been played. It cannot be liked at this time.`));
 
             // At this point, the track can be liked, so like it
             await Songsliked.create({IP: from_IP, trackID: inputs.trackID});
-            
+
             // Update track weight if applicable / configured to change weight on a track like
             if (sails.config.custom.songsliked.priorityBump !== 0)
                 await Songs.update({ID: inputs.trackID}, {weight: track.weight + sails.config.custom.songsliked.priorityBump});

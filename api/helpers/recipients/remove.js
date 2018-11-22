@@ -75,41 +75,23 @@ module.exports = {
                     sails.log.verbose(`Recipient is no longer connected. Setting to offline.`);
                     await Recipients.update({host: recipient.host}, {host: recipient.host, status: 0, time: moment().toISOString(true)}).fetch();
 
-                    // If the recipient name is found in djcontrols config, reflect status
-                    sails.log.debug(`Calling asyncForEach in recipients.remove for finding djcontrols in config`);
-                    await sails.helpers.asyncForEach(sails.config.custom.djcontrols, function (djcontrols, index) {
-                        return new Promise(async (resolve, reject) => {
-                            try {
-                                if (djcontrols.host === recipient.host)
-                                {
-                                    await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'DJ Controls is offline'}]);
-                                    return resolve(true);
-                                }
-                                return resolve(false);
-                            } catch (e) {
-                                return reject(e);
-                            }
-                        });
-                    });
+                    var maps = sails.config.custom.djcontrols
+                            .filter(djcontrols => djcontrols.host === recipient.host)
+                            .map(async djcontrols => {
+                                await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'DJ Controls is offline'}]);
+                                return true;
+                            });
+                    await Promise.all(maps);
                 }
 
                 // If the recipient name is found in display sign config, reflect status if there are insufficient number of connections.
-                sails.log.debug(`Calling asyncForEach in recipients.remove for finding displaysigns in config`);
-                await sails.helpers.asyncForEach(sails.config.custom.displaysigns, function (display, index) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            if (recipient.host === `display-${display.name}`)
-                            {
-                                if (Recipients.sockets[recipient.ID].length < display.instances)
-                                    await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `${Recipients.sockets[recipient.ID].length} out of ${display.instances} displays are operational.`}]);
-                                return resolve(true);
-                            }
-                            return resolve(false);
-                        } catch (e) {
-                            return reject(e);
-                        }
-                    });
-                });
+                var maps = sails.config.custom.displaysigns
+                        .filter(display => recipient.host === `display-${display.name}` && Recipients.sockets[recipient.ID].length < display.instances)
+                        .map(async display => {
+                            await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `${Recipients.sockets[recipient.ID].length} out of ${display.instances} displays are operational.`}]);
+                            return true;
+                        });
+                await Promise.all(maps);
             } else {
                 sails.log.verbose(`Recipient not found in database. Assuming already removed.`);
             }

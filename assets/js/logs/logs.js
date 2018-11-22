@@ -55,7 +55,7 @@ function filterLogs(subtype = null) {
                             var newRow = tableData.insertRow(tableData.rows.length);
                             var cell = newRow.insertCell(0);
                             cell.innerHTML = `<a href="javascript:filterLogs(\`ISSUES\`)" title="Show the log" role="button" class="btn btn-warning">View logged problems/issues for this day</a>`;
-                            resHTML.forEach(function (logtype) {
+                            resHTML.map(logtype => {
                                 var newRow = tableData.insertRow(tableData.rows.length);
                                 var cell = newRow.insertCell(0);
                                 cell.innerHTML = `<a href="javascript:filterLogs(\`${logtype.logsubtype}\`)" title="Show the log" role="button" class="btn btn-primary">${logtype.logsubtype}</a>`;

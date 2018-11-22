@@ -49,9 +49,7 @@ module.exports = {
             var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']});
             sails.log.silly(`Rotation settings: ${thesettings}`);
             var rotationRules = {};
-            thesettings.forEach(function (thesetting) {
-                rotationRules[thesetting.setting] = thesetting.value;
-            });
+            thesettings.map(thesetting => rotationRules[thesetting.setting] = thesetting.value);
 
             // Check rotation rules
             if (moment(record.date_played).isAfter(moment().subtract(rotationRules.RepeatTrackInterval, 'minutes')))

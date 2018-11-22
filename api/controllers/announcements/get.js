@@ -28,15 +28,16 @@ module.exports = {
             if (inputs.type !== "all" && (!inputs.ID || inputs.ID === null))
             {
                 var records = await Announcements.find({type: inputs.type});
-                if (this.req.isSocket)
-                {
-                    sails.sockets.join(this.req, `announcements-${inputs.type}`);
-                    sails.log.verbose(`Request was a socket. Joined announcements-${inputs.type}.`);
-                }
             } else if (!inputs.ID || inputs.ID === null) {
                 var records = await Announcements.find();
             } else {
                 var records = await Announcements.findOne({ID: inputs.ID});
+            }
+
+            if (this.req.isSocket)
+            {
+                sails.sockets.join(this.req, `announcements-${inputs.type}`);
+                sails.log.verbose(`Request was a socket. Joined announcements-${inputs.type}.`);
             }
 
             sails.log.verbose(`${records.length} records retrieved.`);

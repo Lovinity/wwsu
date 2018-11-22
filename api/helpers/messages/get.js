@@ -38,17 +38,16 @@ module.exports = {
             var records = await Messages.find({status: 'active', or: [{createdAt: {'>': searchto}}, {to: 'emergency'}]});
             sails.log.verbose(`Messages records retrieved: ${records.length}`);
             sails.log.silly(records);
-            
+
             // Return empty array if no messages were returned
             if (typeof records === 'undefined' || records.length === 0)
             {
                 return exits.success([]);
             } else {
                 // Remove IP addresses from response!
-                records.forEach(function (record, index) {
-                    if (typeof records[index].from_IP !== 'undefined')
-                        delete records[index].from_IP;
-                });
+                records
+                        .filter((record, index) => typeof records[index].from_IP !== 'undefined')
+                        .map((record, index) => delete records[index].from_IP);
                 return exits.success(records);
             }
         } catch (e) {

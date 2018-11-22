@@ -41,14 +41,7 @@ module.exports = {
         try {
 
             // Get rid of all the null entries
-            sails.log.debug(`Calling asyncForEach in songs.remove for getting rid of null entries`);
-            await sails.helpers.asyncForEach(inputs.subcategories, function (subcategory, index) {
-                return new Promise(async (resolve, reject) => {
-                    if (subcategory === null)
-                        delete inputs.subcategories[index];
-                    return resolve(false);
-                });
-            });
+            inputs.subcategories = inputs.subcategories.filter(subcategory => subcategory !== null);
 
             // Get a snapshot of the current queue.
             var queue = await sails.helpers.rest.getQueue();
@@ -78,13 +71,8 @@ module.exports = {
                 // Re-queue the remaining tracks
                 if (queue.length > 0)
                 {
-                    sails.log.debug(`Calling asyncForEach in songs.remove for re-queuing tracks`);
-                    await sails.helpers.asyncForEach(queue, function (track, index) {
-                        return new Promise(async (resolve, reject) => {
-                            await sails.helpers.rest.cmd("LoadTrackToBottom", track.ID);
-                            return resolve(false);
-                        });
-                    });
+                    var maps = queue.map(async track => await sails.helpers.rest.cmd("LoadTrackToBottom", track.ID));
+                    await Promise.all(maps);
                 }
 
                 // if necessary, set a 5-second timeout to skip the current track playing

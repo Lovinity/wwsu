@@ -82,9 +82,7 @@ module.exports = {
                                 return reject2(new Error(`No playlist tracks were returned.`));
                             }
                             Playlists.active.tracks = [];
-                            playlistTracks.forEach(function (playlistTrack) {
-                                Playlists.active.tracks.push(playlistTrack.sID);
-                            });
+                            playlistTracks.map(playlistTrack => Playlists.active.tracks.push(playlistTrack.sID));
 
                             var slot = 10;
                             var prevLength = 0;

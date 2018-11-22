@@ -100,7 +100,7 @@ Edits an existing announcement. **Requires authorization**.
 #### Response 200 OK
 ### /announcements/get
 Get an array of announcements for the provided type.
- - This endpoint supports sockets, uses the "announcements" event, and returns data in the structure defined in the websockets section.
+ - This endpoint supports sockets, uses the "announcements" event, and returns data in the structure defined in the websockets section. Only data pertaining to the provided type is returned in sockets.
  - **NOTE**: Clients are expected to do their own processing of starts and expires time; system returns all applicable announcements regardless whether or not they have expired or become active yet.
 #### Request
 | key | criteria |
@@ -129,6 +129,35 @@ Removes an announcement. **Requires authorization**.
 |--|--|
 | ID | number (required; the ID of the announcement to remove.) |
 #### Response 200
+## Attendance
+Attendance endpoints regard records that keep track of scheduled events and when those events actually aired, if they aired.
+### /attendance/get
+Retrieve an array of show/program attendance logs for a specified date or specified DJ. **Requires Authorization**.
+ - This endpoint supports sockets, uses the "attendance" event, and returns data in the structure defined in the websockets section. A socket is only subscribed to if dj and event parameters are not provided.
+#### Request
+| key | criteria |
+|--|--|
+| date | string (optional; a moment.js parsable date that falls within the day to get log attendance records. Defaults to now.) |
+| dj | string (optional; retrieve attendance records for the specified DJ. If provided, date is ignored.) |
+| event | string (optional; return attendance records where this string is contained within the record's event field. If provided, date is ignored. If DJ is provided, will further filter by the DJ.) |
+#### Response 200
+        [
+            {
+                "createdAt": "2018-11-08T05:00:03.000Z",
+                "updatedAt": "2018-11-11T00:21:38.000Z",
+                "ID": 747, // attendanceID
+                "unique": "", // If the event coordinates with a Google Calendar event, the GC event ID will be provided here
+                "DJ": null, // If a DJ/Host is applicable, the DJ or Host will be provided here. Otherwise, this will be null.
+                "event": "Genre: Default", // The name of the event, along with its operation prefix
+                "showTime": 240, // Amount of onAir time this event had, in minutes. Can be null if it's still on or never aired.
+                "listenerMinutes": 241, // Number of online listener minutes during this event. Can be null if it's still on or never aired.
+                "scheduledStart": null, // ISO String of when this event was scheduled to start. Can be null if it was not scheduled.
+                "scheduledEnd": null, // ISO String of when this event was scheduled to end. Can be null if it was not scheduled.
+                "actualStart": "2018-11-08T05:00:03.000Z", // ISO String of when this event actually started. Can be null if it did not start.
+                "actualEnd": "2018-11-08T09:00:04.000Z" // ISO String of when this event actually ended. Can be null if it did not start or if it did not yet end.
+            },
+            ...
+        ]
 ## Calendar
 Calendar endpoints regard the Google Calendar events of WWSU Radio (such as show and genre schedules / programming).
 ### /calendar/get
@@ -355,30 +384,6 @@ Add a log into the system. **Requires authorization**
 | trackAlbum | string (optional; specify track album if a track was played.) |
 | trackLabel | string (optional; specify track label if a track was played.) |
 #### Response 200 OK
-### /logs/get-attendance
-Retrieve an array of show/program attendance logs for a specified date. **Requires Authorization**.
-#### Request
-| key | criteria |
-|--|--|
-| date | string (optional; a moment.js parsable date that falls within the day to get log attendance records. Defaults to now.) |
-#### Response 200
-        [
-            {
-                "createdAt": "2018-11-08T05:00:03.000Z",
-                "updatedAt": "2018-11-11T00:21:38.000Z",
-                "ID": 747, // attendanceID
-                "unique": "", // If the event coordinates with a Google Calendar event, the GC event ID will be provided here
-                "DJ": null, // If a DJ/Host is applicable, the DJ or Host will be provided here. Otherwise, this will be null.
-                "event": "Genre: Default", // The name of the event, along with its operation prefix
-                "showTime": 240, // Amount of onAir time this event had, in minutes. Can be null if it's still on or never aired.
-                "listenerMinutes": 241, // Number of online listener minutes during this event. Can be null if it's still on or never aired.
-                "scheduledStart": null, // ISO String of when this event was scheduled to start. Can be null if it was not scheduled.
-                "scheduledEnd": null, // ISO String of when this event was scheduled to end. Can be null if it was not scheduled.
-                "actualStart": "2018-11-08T05:00:03.000Z", // ISO String of when this event actually started. Can be null if it did not start.
-                "actualEnd": "2018-11-08T09:00:04.000Z" // ISO String of when this event actually ended. Can be null if it did not start or if it did not yet end.
-            },
-            ...
-        ]
 ### /logs/get-subtypes
 Retrieve a list of log subtypes for a specified date.
 #### Request
@@ -1011,49 +1016,27 @@ Get an array of DJs that are in the system. **Requires Authorization**.
             ...
         ]
 ### /xp/get
-Get the XP / remote credits earned by a DJ, as well as attendance logs. **Requires Authorization**.
+Get the XP / remote credits earned by a DJ. **Requires Authorization**.
+ - This endpoint supports sockets, uses the "xp" event, and returns data in the structure defined in the websockets section. A socket is only subscribed to if dj is not provided.
 #### Request
 | key | criteria |
 |--|--|
-| dj | string (required; the name of the DJ to get XP / remotes for.) |
+| dj | string (optional; the name of the DJ to get XP / remotes for. If not provided, the endpoint will simply return "OK" but will subscribe to the xp event if the request was a socket.) |
 #### Response 200
-        {
-            "XP": { // Data regarding the DJ's XP and remote credits
-                "totalXP": 2021, // Total number of XP the DJ has earned to date
-                "remote": 0, // Remote credits the DJ has earned
-                "rows": [ // Array of rows for each XP / remote credits earned
-                    {
-                        "ID": 1062,
-                        "dj": "K-Dean",
-                        "type": "xp", // whether this is xp or remote. Could also be "add-dj", which is a default row entered when a DJ is manually created.
-                        "subtype": "showtime", // Monikor categorizing the reason for this earning.
-                        "description": "Prerecord was on the air for 242 minutes.", // Description of what the XP/remote was earned for
-                        "amount": 121, // Amount of XP/remote earbed for this record
-                        "createdAt": "2018-11-17T06:03:38.000Z", // ISO stamp when this XP/remote was earned
-                        "updatedAt": "2018-11-17T06:03:38.000Z"
-                    },
-                    ...
-                ],
-                // Beyond this point, additional key: value pairs may exist, where key is the "subtype" of an XP/remote, and value is the total number of XP/remotes earned for that subtype.
+        [
+            {
+                "createdAt": "2018-05-29T18:13:01.763Z", // ISO date string of when the XP was earned
+                "updatedAt": "2018-05-29T18:13:01.763Z",
+                "ID": 7,
+                "dj": "George Carlin", // Name of the DJ that this record applied to
+                "type": "remote", // Either "xp" for XP, or "remote" for remote credits. Could also be "add-dj" which is a blank entry to register a new DJ in the system.
+                "subtype": "remote-sports", // A monikor to further categorize the reason for the earned XP or remotes.
+                "description": null, // A description provided for this record. Could be null.
+                "amount": 1 // Number of XP or remote credits earned in this record. Could be negative and could be a float.
             },
-            "attendance": [ // Array of attendance logs for this DJ
-                {
-                    "createdAt": "2018-11-17T02:01:27.000Z",
-                    "updatedAt": "2018-11-17T09:00:04.000Z",
-                    "ID": 910, // attendanceID
-                    "unique": "3rv7fo76g1vjp0fhe19mbbppk3_20181117T020000Z", // If this attendance log matches a Google Calendar event, the event ID will be filled here
-                    "DJ": "K-Dean",
-                    "event": "Prerecord: K-Dean - K-Dean Vybz", // The name of the event/show for this record, with the operation prefix
-                    "showTime": 418, // Number of minutes this show/event was on the air. Could be null if the show did not air / is still in progress.
-                    "listenerMinutes": 1019, // Number of online listener minutes for this event. Could be null if the show did not air / is still in progress.
-                    "scheduledStart": "2018-11-17T02:00:00.000Z", // ISO string of when this event was scheduled to start. Could be null if this event was not scheduled.
-                    "scheduledEnd": "2018-11-17T06:00:00.000Z", // ISO string of when this event was scheduled to end. Could be null if the event was not scheduled.
-                    "actualStart": "2018-11-17T02:01:27.000Z", // ISO string of when this event actually started. Could be null if the event did not start yet, or did not start at all.
-                    "actualEnd": "2018-11-17T09:00:03.000Z" // ISO string of when this event actually ended. Could be null if the event did not start, has not started yet, or is still in progress.
-                },
-                ...
-            ]
-        }
+            ...
+        ]
+#### Response 200 OK
 ### /xp/remove-dj
 Removes a DJ from the system. **Requires Authorization**.
  - **NOTE:** Removing a DJ removes all of their XP and remote credit records and disassociates them from all attendance logs. However, the attendance logs themselves will remain in the system.

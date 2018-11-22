@@ -1,3 +1,5 @@
+/* global Playlists_list, Songs */
+
 module.exports = {
 
 
@@ -46,9 +48,7 @@ module.exports = {
      
      var tracks = await Playlists_list.find({pID: [14,15,16,18,24,26,27]});
      var trackUpdate = [];
-     tracks.forEach(function(track) {
-        trackUpdate.push(track.sID); 
-     });
+     tracks.map(track => trackUpdate.push(track.sID));
      await Songs.update({ID: trackUpdate}, {id_subcat: 211});
     return exits.success();
 

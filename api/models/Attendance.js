@@ -61,6 +61,28 @@ module.exports = {
 
     },
 
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`attendance socket: ${data}`);
+        sails.sockets.broadcast('attendance', 'attendance', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.log.silly(`attendance socket: ${data}`);
+        sails.sockets.broadcast('attendance', 'attendance', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`attendance socket: ${data}`);
+        sails.sockets.broadcast('attendance', 'attendance', data);
+        return proceed();
+    },
+
     weeklyAnalytics: {
         topShows: [],
         topGenre: 'None',
@@ -130,16 +152,13 @@ module.exports = {
                     // Calculate listener minutes
                     var prevTime = moment(currentRecord.actualStart);
                     var listenerMinutes = 0;
-                    listenerRecords.forEach(function (listener) {
-                        if (moment(listener.createdAt).isBefore(moment(currentRecord.actualStart)))
-                            return null;
-                        if (moment(listener.createdAt).isAfter(moment(currentRecord.actualEnd)))
-                            return null;
-
-                        listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
-                        prevListeners = listener.listeners;
-                        prevTime = moment(listener.createdAt);
-                    });
+                    listenerRecords
+                            .filter(listener => moment(listener.createdAt).isSameOrAfter(moment(currentRecord.actualStart)) && moment(listener.createdAt).isSameOrBefore(moment(currentRecord.actualEnd)))
+                            .map(listener => {
+                                listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+                                prevListeners = listener.listeners;
+                                prevTime = moment(listener.createdAt);
+                            });
 
                     // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
                     listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;

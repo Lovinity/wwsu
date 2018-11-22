@@ -25,7 +25,7 @@ module.exports = {
             // Block if we are in the process of changing states
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
-            
+
             // Lock system from any other state changing requests until we are done.
             await Meta.changeMeta({changingState: `Changing to automation`});
 
@@ -112,7 +112,7 @@ module.exports = {
             {
                 var prevTime = moment(Meta['A'].showStamp);
                 var prevListeners = 0;
-                returnData.listeners.forEach(function (listener) {
+                returnData.listeners.map(listener => {
                     listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                     prevListeners = listener.listeners;
                     prevTime = moment(listener.createdAt);
@@ -223,7 +223,7 @@ module.exports = {
                 // Enable Auto DJ
                 await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
-            // We are going to break
+                // We are going to break
             } else {
                 await Attendance.createRecord(`Genre: Default`);
 

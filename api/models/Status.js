@@ -81,7 +81,7 @@ module.exports = {
 
         // moment stamp of when the most recent PSA break was queued.
         prevBreak: null,
-        
+
         // moment stamp of when the most recent standard liner was queued.
         prevLiner: null,
 
@@ -234,7 +234,7 @@ module.exports = {
             active: false,
             condition: function () {
                 var inQueue = false;
-                Meta.automation.forEach(function (track) {
+                Meta.automation.map(track => {
                     // WORK ON THIS
                 });
             },
@@ -257,13 +257,9 @@ module.exports = {
             active: false,
             condition: function () {
                 var inQueue = false;
-                Meta.automation.forEach(function (track) {
-                    if (sails.config.custom.subcats.IDs.indexOf(parseInt(track.IDSubcat)) > -1)
-                    {
-                        inQueue = true;
-                        return true;
-                    }
-                });
+                Meta.automation
+                        .filter(track => sails.config.custom.subcats.IDs.indexOf(parseInt(track.IDSubcat)) > -1)
+                        .map(track => inQueue = true);
                 return inQueue;
             },
             fn: function () {
@@ -340,89 +336,87 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             sails.log.debug(`Status.changeStatus called.`);
             try {
-                sails.log.debug(`Calling asyncForEach in Status.changeStatus for each status to be changed`);
-                await sails.helpers.asyncForEach(array, function (status, index) {
-                    return new Promise(async (resolve2, reject2) => {
-                        var criteria = {name: status.name, status: status.status, data: status.data || '', label: status.label || status.name};
-                        if (status.status === 5)
-                            criteria.time = moment().toISOString(true);
+                var maps = array.map(async status => {
+                    var criteria = {name: status.name, status: status.status, data: status.data || '', label: status.label || status.name};
+                    if (status.status === 5)
+                        criteria.time = moment().toISOString(true);
 
-                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                        var criteriaB = _.cloneDeep(criteria);
+                    // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+                    var criteriaB = _.cloneDeep(criteria);
 
-                        // Find or create the status record
-                        var record = await Status.findOrCreate({name: status.name}, criteriaB)
-                                .tolerate((err) => {
-                                    return resolve2();
-                                });
+                    // Find or create the status record
+                    var record = await Status.findOrCreate({name: status.name}, criteriaB)
+                            .tolerate((err) => {
+                                return true;
+                            });
 
-                        // Search to see if any changes are made to the status; we only want to update if there is a change.
-                        var updateIt = false;
-                        for (var key in criteria)
+                    // Search to see if any changes are made to the status; we only want to update if there is a change.
+                    var updateIt = false;
+                    for (var key in criteria)
+                    {
+                        if (criteria.hasOwnProperty(key))
                         {
-                            if (criteria.hasOwnProperty(key))
+                            if (criteria[key] !== record[key])
                             {
-                                if (criteria[key] !== record[key])
+                                // We don't want to fetch() on time-only updates; this will flood websockets
+                                if (!updateIt && key === 'time')
                                 {
-                                    // We don't want to fetch() on time-only updates; this will flood websockets
-                                    if (!updateIt && key === 'time')
-                                    {
-                                        updateIt = 2;
-                                    } else {
-                                        updateIt = 1;
-                                    }
+                                    updateIt = 2;
+                                } else {
+                                    updateIt = 1;
                                 }
                             }
                         }
-                        if (updateIt === 1 && typeof criteria.status !== 'undefined' && criteria.status <= 3 && (!record.status || (record.status !== criteria.status)))
+                    }
+                    if (updateIt === 1 && typeof criteria.status !== 'undefined' && criteria.status <= 3 && (!record.status || (record.status !== criteria.status)))
+                    {
+                        var loglevel = `warning`;
+                        if (criteria.status < 2)
                         {
-                            var loglevel = `warning`;
-                            if (criteria.status < 2)
-                            {
-                                loglevel = `danger`;
-                            } else if (criteria.status < 3)
-                            {
-                                loglevel = `urgent`;
-                            }
-                            
-                            // Log changes in status
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
-                                    .tolerate((err) => {
-                                        // Don't throw errors, but log them
-                                        sails.log.error(err);
-                                    });
-                        }
-                        if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
+                            loglevel = `danger`;
+                        } else if (criteria.status < 3)
                         {
-                            // Log when bad statuses are now good.
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good.`})
-                                    .tolerate((err) => {
-                                        // Don't throw errors, but log them
-                                        sails.log.error(err);
-                                    });
+                            loglevel = `urgent`;
                         }
-                        if (updateIt === 1)
-                        {
-                            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                            var criteriaB = _.cloneDeep(criteria);
-                            sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`);
-                            await Status.update({name: status.name}, criteriaB)
-                                    .tolerate((err) => {
-                                        return reject(err);
-                                    })
-                                    .fetch();
-                        } else if (updateIt === 2) {
-                            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                            var criteriaB = _.cloneDeep(criteria);
-                            sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`);
-                            await Status.update({name: status.name}, criteriaB)
-                                    .tolerate((err) => {
-                                        return reject(err);
-                                    });
-                        }
-                        return resolve2();
-                    });
+
+                        // Log changes in status
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
+                                .tolerate((err) => {
+                                    // Don't throw errors, but log them
+                                    sails.log.error(err);
+                                });
+                    }
+                    if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
+                    {
+                        // Log when bad statuses are now good.
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good.`})
+                                .tolerate((err) => {
+                                    // Don't throw errors, but log them
+                                    sails.log.error(err);
+                                });
+                    }
+                    if (updateIt === 1)
+                    {
+                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+                        var criteriaB = _.cloneDeep(criteria);
+                        sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`);
+                        await Status.update({name: status.name}, criteriaB)
+                                .tolerate((err) => {
+                                    throw err;
+                                })
+                                .fetch();
+                    } else if (updateIt === 2) {
+                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+                        var criteriaB = _.cloneDeep(criteria);
+                        sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`);
+                        await Status.update({name: status.name}, criteriaB)
+                                .tolerate((err) => {
+                                    throw err;
+                                });
+                    }
+                    return true;
                 });
+                await Promise.all(maps);
                 return resolve();
             } catch (e) {
                 return reject(e);

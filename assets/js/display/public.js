@@ -376,73 +376,71 @@ function processCalendar(data, replace = false)
         calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')] = [];
 
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-        Calendar().get().sort(compare).forEach(function (event)
-        {
-            try {
-                // Do not show genre nor playlist events
-                if (event.title.startsWith("Genre:") || event.title.startsWith("Playlist:"))
-                    return null;
+        Calendar().get().sort(compare)
+                .filter(event => !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:"))
+                .map(event =>
+                {
+                    try {
+                        // null start or end? Use a default to prevent errors.
+                        if (!moment(event.start).isValid())
+                            event.start = moment(Meta.time).startOf('day');
+                        if (!moment(event.end).isValid())
+                            event.end = moment(Meta.time).add(1, 'days').startOf('day');
 
-                // null start or end? Use a default to prevent errors.
-                if (!moment(event.start).isValid())
-                    event.start = moment(Meta.time).startOf('day');
-                if (!moment(event.end).isValid())
-                    event.end = moment(Meta.time).add(1, 'days').startOf('day');
+                        // Determine which day(s) of the week that this event belongs to, and add them in those days. Also, re-format startT and endT if necessary.
+                        for (var i = 0; i < 7; i++) {
+                            var looptime = moment(Meta.time).startOf('day').add(i, 'days');
+                            var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
+                            var start2;
+                            var end2;
+                            if (moment(event.start).isBefore(looptime))
+                            {
+                                start2 = moment(looptime);
+                            } else {
+                                start2 = moment(event.start);
+                            }
+                            if (moment(event.end).isAfter(looptime2))
+                            {
+                                end2 = moment(looptime2);
+                            } else {
+                                end2 = moment(event.end);
+                            }
+                            if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
+                            {
+                                event.startT = moment(event.start).format('hh:mm A');
+                                event.endT = moment(event.end).format('hh:mm A');
 
-                // Determine which day(s) of the week that this event belongs to, and add them in those days. Also, re-format startT and endT if necessary.
-                for (var i = 0; i < 7; i++) {
-                    var looptime = moment(Meta.time).startOf('day').add(i, 'days');
-                    var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
-                    var start2;
-                    var end2;
-                    if (moment(event.start).isBefore(looptime))
-                    {
-                        start2 = moment(looptime);
-                    } else {
-                        start2 = moment(event.start);
-                    }
-                    if (moment(event.end).isAfter(looptime2))
-                    {
-                        end2 = moment(looptime2);
-                    } else {
-                        end2 = moment(event.end);
-                    }
-                    if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
-                    {
-                        event.startT = moment(event.start).format('hh:mm A');
-                        event.endT = moment(event.end).format('hh:mm A');
+                                // Update strings if need be, if say, start time was before this day, or end time is after this day.
+                                if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
+                                {
+                                    event.endT = moment(event.start).format('MM/DD hh:mm A');
+                                }
+                                if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
+                                {
+                                    event.startT = moment(event.start).format('MM/DD hh:mm A');
+                                }
 
-                        // Update strings if need be, if say, start time was before this day, or end time is after this day.
-                        if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
-                        {
-                            event.endT = moment(event.start).format('MM/DD hh:mm A');
+                                // Push the final products into our formatted variable
+                                if (i === 0)
+                                {
+                                    calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].push(event);
+                                } else if (i > 0 && i < 4)
+                                {
+                                    calendar[1][i - 1][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
+                                } else if (i < 7)
+                                {
+                                    calendar[2][i - 4][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
+                                }
+                            }
                         }
-                        if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
-                        {
-                            event.startT = moment(event.start).format('MM/DD hh:mm A');
-                        }
-
-                        // Push the final products into our formatted variable
-                        if (i === 0)
-                        {
-                            calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].push(event);
-                        } else if (i > 0 && i < 4)
-                        {
-                            calendar[1][i - 1][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
-                        } else if (i < 7)
-                        {
-                            calendar[2][i - 4][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
-                        }
+                    } catch (e) {
+                        console.error(e);
+                        iziToast.show({
+                            title: 'An error occurred - Please check the logs',
+                            message: `Error occurred during calendar iteration in processCalendar.`
+                        });
                     }
-                }
-            } catch (e) {
-                console.error(e);
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: `Error occurred during calendar iteration in processCalendar.`
                 });
-            }
-        });
     } catch (e) {
         console.error(e);
         iziToast.show({
@@ -1432,7 +1430,7 @@ function doSlide(same = false)
                     {
                         if (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length > 0)
                         {
-                            calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].forEach(function (dodo, index) {
+                            calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].map((dodo, index) => {
                                 try {
                                     var color = hexRgb(dodo.color);
                                     var borderColor = '#000000';
@@ -1564,7 +1562,7 @@ function doSlide(same = false)
                     {
                         if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                            calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].map((dodo, index) => {
                                 try {
                                     var color = null;
                                     var temp2 = document.getElementById(`events-row-${index}`);
@@ -1637,7 +1635,7 @@ function doSlide(same = false)
                     {
                         if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                            calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].map((dodo, index) => {
                                 try {
                                     var color = null;
                                     var temp2 = document.getElementById(`events-row-${index}`);
@@ -1710,7 +1708,7 @@ function doSlide(same = false)
                     {
                         if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                            calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].map((dodo, index) => {
                                 try {
                                     var color = null;
                                     var temp2 = document.getElementById(`events-row-${index}`);
@@ -1803,7 +1801,7 @@ function doSlide(same = false)
                     {
                         if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                            calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].map((dodo, index) => {
                                 try {
                                     var color = null;
                                     var temp2 = document.getElementById(`events-row-${index}`);
@@ -1876,7 +1874,7 @@ function doSlide(same = false)
                     {
                         if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                            calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].map((dodo, index) => {
                                 try {
                                     var color = null;
                                     var temp2 = document.getElementById(`events-row-${index}`);
@@ -1949,7 +1947,7 @@ function doSlide(same = false)
                     {
                         if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].length > 0)
                         {
-                            calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].forEach(function (dodo, index) {
+                            calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].map((dodo, index) => {
                                 try {
                                     var color = null;
                                     var temp2 = document.getElementById(`events-row-${index}`);
@@ -2404,66 +2402,65 @@ function processAnnouncements() {
     }
 
     var anncCount = 0;
-    Announcements({type: 'display-public'}).get().sort(compare).forEach(function (announcement)
-    {
-        if (moment(Meta.time).isBefore(moment(announcement.starts)) || moment(Meta.time).isAfter(moment(announcement.expires)))
-            return null;
-
-        anncCount++;
-        slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
-                $('#slide').animateCss('slideOutUp', function () {
-                    content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
+    Announcements({type: 'display-public'}).get().sort(compare)
+            .filter(announcement => moment(Meta.time).isSameOrAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires)))
+            .map(announcement =>
+            {
+                anncCount++;
+                slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
+                        $('#slide').animateCss('slideOutUp', function () {
+                            content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
             <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
-                    var pageWidth, pageHeight;
+                            var pageWidth, pageHeight;
 
-                    var basePage = {
-                        width: 1600,
-                        height: 900,
-                        scale: 1,
-                        scaleX: 1,
-                        scaleY: 1
-                    };
+                            var basePage = {
+                                width: 1600,
+                                height: 900,
+                                scale: 1,
+                                scaleX: 1,
+                                scaleY: 1
+                            };
 
-                    $(function () {
-                        var $page = $('.scale-content');
+                            $(function () {
+                                var $page = $('.scale-content');
 
-                        getPageSize();
-                        scalePages($page, pageWidth, pageHeight);
+                                getPageSize();
+                                scalePages($page, pageWidth, pageHeight);
 
-                        window.requestAnimationFrame(function () {
-                            getPageSize();
-                            scalePages($page, pageWidth, pageHeight);
+                                window.requestAnimationFrame(function () {
+                                    getPageSize();
+                                    scalePages($page, pageWidth, pageHeight);
+                                });
+
+                                function getPageSize() {
+                                    pageHeight = $('#scale-wrapper').height();
+                                    pageWidth = $('#scale-wrapper').width();
+                                }
+
+                                function scalePages(page, maxWidth, maxHeight) {
+                                    page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
+                                    var scaleX = 1, scaleY = 1;
+                                    scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
+                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
+                                    basePage.scaleX = scaleX;
+                                    basePage.scaleY = scaleY;
+                                    basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
+
+                                    var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
+                                    var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
+
+                                    page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
+                                }
+                            });
+
+                            slidetimer = setTimeout(doSlide, 14000);
+
                         });
+                    }};
 
-                        function getPageSize() {
-                            pageHeight = $('#scale-wrapper').height();
-                            pageWidth = $('#scale-wrapper').width();
-                        }
-
-                        function scalePages(page, maxWidth, maxHeight) {
-                            page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
-                            var scaleX = 1, scaleY = 1;
-                            scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
-                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
-                            basePage.scaleX = scaleX;
-                            basePage.scaleY = scaleY;
-                            basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
-
-                            var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
-                            var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
-
-                            page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
-                        }
-                    });
-
-                    slidetimer = setTimeout(doSlide, 14000);
-
-                });
-            }};
-
-        tempslide++;
-    });
+                tempslide++;
+            });
 
     // If there are more than 2 announcement slides, disable the days 2-4 and days 5-7 calendar slides to reduce clutter.
     if (anncCount > 2)

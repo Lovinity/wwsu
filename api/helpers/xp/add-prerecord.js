@@ -50,7 +50,7 @@ module.exports = {
                     var prevTime = moment(Meta['A'].showStamp);
                     var prevListeners = 0;
                     var listenerMinutes = 0;
-                    listeners.forEach(function (listener) {
+                    listeners.map(listener => {
                         listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                         prevListeners = listener.listeners;
                         prevTime = moment(listener.createdAt);

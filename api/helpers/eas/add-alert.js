@@ -80,7 +80,7 @@ module.exports = {
                 if (temp.indexOf(inputs.county) === -1)
                     temp.push(inputs.county);
                 temp = temp.join(', ');
-                
+
                 // Prepare criteria to update
                 var criteria = {
                     source: inputs.source,
@@ -96,7 +96,7 @@ module.exports = {
                     criteria.information = inputs.information;
 
                 sails.log.silly(`Criteria: ${criteria}`);
-                
+
                 // Detect any changes in the alert. If a change is detected, we will do a database update.
                 var updateIt = false;
                 for (var key in criteria)
@@ -116,10 +116,10 @@ module.exports = {
                             .fetch();
                 }
                 return exits.success();
-                
+
             } else { // Does not exist; new alert
                 sails.log.verbose('Alert does not exist.');
-                
+
                 // Prepare criteria
                 var criteria = {
                     source: inputs.source,
@@ -145,35 +145,26 @@ module.exports = {
                                         sails.log.silly(resp.body);
 
                                         // Go through each child
-                                        sails.log.debug(`Calling asyncForEach in eas.addAlert for going through each child of CAPS data`);
-                                        await sails.helpers.asyncForEach(resp.body.children, function (entry, index) {
-                                            return new Promise(async (resolve2, reject2) => {
-                                                try {
+                                        var maps = resp.body.children
+                                                .filter(entry => typeof entry.name !== 'undefined' && entry.name === 'info')
+                                                .map(async entry => {
+                                                    try {
+                                                        var alert = {};
 
-                                                    // Skip all non-info properties
-                                                    if (typeof entry.name === 'undefined' || entry.name !== 'info')
-                                                        return resolve2(false);
+                                                        // Parse field information into the alert variable
+                                                        entry.children.map(entry2 => alert[entry2.name] = entry2.value);
 
-                                                    var alert = {};
+                                                        criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
+                                                        sails.log.silly(`Criteria: ${criteria}`);
+                                                        await Eas.create(criteria)
+                                                                .fetch();
+                                                        return true;
 
-                                                    // Parse field information into the alert variable
-                                                    entry.children.forEach(function (entry2)
-                                                    {
-                                                        alert[entry2.name] = entry2.value;
-                                                    });
-
-                                                    criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
-                                                    sails.log.silly(`Criteria: ${criteria}`);
-                                                    await Eas.create(criteria)
-                                                            .fetch();
-                                                    return exits.success();
-
-                                                } catch (e) {
-                                                    return reject2(e);
-                                                }
-                                                return resolve2(false);
-                                            });
-                                        });
+                                                    } catch (e) {
+                                                        throw e;
+                                                    }
+                                                });
+                                        await Promise.all(maps);
 
                                     } catch (e) {
                                         throw e;

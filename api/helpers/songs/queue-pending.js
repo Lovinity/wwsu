@@ -16,15 +16,13 @@ module.exports = {
         // Load in any duplicate non-music tracks that were removed prior, to ensure underwritings etc get proper play counts.
         if (Songs.pending.length > 0)
         {
-            sails.log.debug(`Calling asyncForEach in songs.queuePending for queuing pending tracks`);
-            await sails.helpers.asyncForEach(Songs.pending, function (track, index) {
-                return new Promise(async (resolve2, reject2) => {
-                    await sails.helpers.rest.cmd('LoadTrackToTop', track);
-                    //wait.for.time(1);
-                    delete Songs.pending[index];
-                    return resolve2(false);
-                });
+            var maps = Songs.pending.map(async (track, index) => {
+                await sails.helpers.rest.cmd('LoadTrackToTop', track);
+                //wait.for.time(1);
+                delete Songs.pending[index];
+                return true;
             });
+            await Promise.all(maps);
         }
         // All done.
         return exits.success();

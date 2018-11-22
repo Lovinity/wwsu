@@ -108,10 +108,9 @@ module.exports = {
                     sails.log.verbose(`queueRequest called: ${record.ID}`);
                     // Check to see if the requested track is already in the queue. If so, terminate.
                     var inQueue = false;
-                    queue.forEach(function (track) {
-                        if (record.songID === track.ID)
-                            inQueue = true;
-                    });
+                    queue
+                            .filter(track => record.songID === parseInt(track.ID))
+                            .map(track => inQueue = true);
                     if (inQueue)
                     {
                         sails.log.verbose(`Track already in queue. Abandoning queueRequest.`);
@@ -142,14 +141,9 @@ module.exports = {
                     {
                         // Check if the request is already in the queue
                         var inQueue = false;
-                        sails.log.debug(`Calling asyncForEach in requests.queue for seeing if request is in automation queue`);
-                        await sails.helpers.asyncForEach(Meta.automation, function (track, index) {
-                            return new Promise(async (resolve2, reject2) => {
-                                if (parseInt(track.ID) === record[0].songID)
-                                    inQueue = true;
-                                return resolve2(false);
-                            });
-                        });
+                        Meta.automation
+                                .filter(track => parseInt(track.ID) === record[0].songID)
+                                .map(track => inQueue = true);
                         // Skip it if so
                         if (inQueue)
                         {

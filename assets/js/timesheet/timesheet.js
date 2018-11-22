@@ -56,10 +56,10 @@ function editClock(clockID, save = false) {
     if (!save)
     {
         var opened = false;
-        timesheets.forEach(function (timesheet) {
-            if (timesheet.ID === clockID)
-            {
-                modalBody.innerHTML = `<form action="javascript:editClock(${clockID}, true)"><div class="form-group">
+        timesheets
+                .filter(timesheet => timesheet.ID === clockID)
+                .map(timesheet => {
+                    modalBody.innerHTML = `<form action="javascript:editClock(${clockID}, true)"><div class="form-group">
         <label for="uid">Username of admin:</label>
         <input type="text" class="form-control" id="uid" value="U">
         <label for="clock-in">Clock In:</label>
@@ -74,10 +74,9 @@ function editClock(clockID, save = false) {
                         </div>
         <button type="submit" class="btn btn-primary">Edit</button>
         </form>`;
-                opened = true;
-                return null;
-            }
-        });
+                    opened = true;
+                    return null;
+                });
         if (!opened)
             modalBody.innerHTML = 'There was an internal error loading that clock.';
         $('#clockModal').modal('handleUpdate');
@@ -129,7 +128,7 @@ function filterDate() {
 
                         // iterate through each timesheet record
                         var hours = {};
-                        timesheets.forEach(function (record, index) {
+                        timesheets.map((record, index) => {
                             var newRow = document.getElementById(`director-${record.name.replace(/\W/g, '')}`);
                             // If there is not a row for this director yet, create one
                             if (!newRow || newRow === null)

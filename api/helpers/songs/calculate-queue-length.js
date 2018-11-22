@@ -22,7 +22,7 @@ module.exports = {
             {
                 breakQueueLength = -1;
                 firstNoMeta = -1;
-                queue.forEach(function (track, index) {
+                queue.map((track, index) => {
                     if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1)
                     {
                         if (firstNoMeta > -1 && breakQueueLength < 0)
@@ -37,12 +37,9 @@ module.exports = {
             }
 
             // Determine the queue length
-            queue.forEach(function (track, index) {
-                if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
-                {
-                    queueLength += (track.Duration - track.Elapsed);
-                }
-            });
+            queue
+                    .filter((track, index) => index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
+                    .map(track => queueLength += (track.Duration - track.Elapsed));
 
             return exits.success(queueLength);
         } catch (e) {

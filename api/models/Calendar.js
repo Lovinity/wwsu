@@ -201,7 +201,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             sails.log.verbose(`Calendar.loadEvents called`);
             try {
-                
+
                 // First, calendarID for WWSU Events
                 var {google} = require('googleapis');
                 var toTrigger = null;
@@ -242,70 +242,66 @@ module.exports = {
                     sails.log.silly(playlistsR);
 
                     // Determine duration of the tracks in every playlist
-                    sails.log.debug(`Calling asyncForEach in Calendar for determining duration of playlists`);
-                    await sails.helpers.asyncForEach(playlistsR, function (playlist, index) {
-                        return new Promise(async (resolve2, reject2) => {
-                            try {
-                                var playlistSongs = [];
-                                var playlistDuplicates = 0;
-                                var duplicateTracks = [];
+                    var maps = playlistsR.map(async playlist => {
+                        try {
+                            var playlistSongs = [];
+                            var playlistDuplicates = 0;
+                            var duplicateTracks = [];
 
-                                // Get the playlist tracks
-                                var pTracks = await Playlists_list.find({pID: playlist.ID});
-                                sails.log.verbose(`Retrieved Playlists_list records: ${pTracks.length}`);
-                                sails.log.silly(pTracks);
+                            // Get the playlist tracks
+                            var pTracks = await Playlists_list.find({pID: playlist.ID});
+                            sails.log.verbose(`Retrieved Playlists_list records: ${pTracks.length}`);
+                            sails.log.silly(pTracks);
 
-                                var temp = [];
-                                
-                                // Check for duplicates
-                                pTracks.forEach(function (track) {
-                                    if (temp.indexOf(track.sID) > -1)
-                                        playlistDuplicates++;
-                                    temp.push(track.sID);
-                                });
+                            var temp = [];
 
-                                // Get the song records for each playlist track
-                                var songs = await Songs.find({ID: temp});
-                                sails.log.verbose(`Retrieved Songs records: ${songs.length}`);
-                                sails.log.silly(songs);
+                            // Check for duplicates
+                            pTracks.map(track => {
+                                if (temp.indexOf(track.sID) > -1)
+                                    playlistDuplicates++;
+                                temp.push(track.sID);
+                            });
 
-                                var duration = 0;
-                                
-                                // Determine duration, ignoring duplicates
-                                songs.forEach(function (song) {
-                                    if (playlistSongs.indexOf(`${song.artist} - ${song.title}`) > -1)
-                                    {
-                                        playlistDuplicates++;
-                                        duplicateTracks.push(`${song.artist} - ${song.title}`);
-                                    } else {
-                                        duration += song.duration;
-                                    }
-                                    playlistSongs.push(`${song.artist} - ${song.title}`);
-                                });
+                            // Get the song records for each playlist track
+                            var songs = await Songs.find({ID: temp});
+                            sails.log.verbose(`Retrieved Songs records: ${songs.length}`);
+                            sails.log.silly(songs);
 
-                                // Generate playlist object
-                                playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates, duplicateTracks: duplicateTracks.join("<br />")});
-                                return resolve2(false);
-                            } catch (e) {
-                                return reject2(e);
-                            }
-                        });
+                            var duration = 0;
+
+                            // Determine duration, ignoring duplicates
+                            songs.map(song => {
+                                if (playlistSongs.indexOf(`${song.artist} - ${song.title}`) > -1)
+                                {
+                                    playlistDuplicates++;
+                                    duplicateTracks.push(`${song.artist} - ${song.title}`);
+                                } else {
+                                    duration += song.duration;
+                                }
+                                playlistSongs.push(`${song.artist} - ${song.title}`);
+                            });
+
+                            // Generate playlist object
+                            playlists[playlist.name] = ({ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates, duplicateTracks: duplicateTracks.join("<br />")});
+                            return true;
+                        } catch (e) {
+                            throw e;
+                        }
                     });
+                    await Promise.all(maps);
 
                     // Load all manual RadioDJ events into memory
                     var djeventsR = await Events.find({type: 3});
                     sails.log.verbose(`Retrieved Events records: ${djeventsR.length}`);
                     sails.log.silly(djeventsR);
 
-                    djeventsR.forEach(function (event) {
-                        djevents[event.name] = event;
-                    });
+                    djeventsR.map(event => djevents[event.name] = event);
 
                     // Loop through each calendar event
                     for (var i = 0; i < events.length; i++) {
                         var event = events[i];
                         eventIds.push(event.id);
-                        
+
                         // Skip events without a start time or without an end time or without a summary
                         if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined')
                         {
@@ -594,21 +590,19 @@ module.exports = {
                     // Go through every event record which passed the end time, and log absences where necessary.
                     if (destroyed && destroyed.length > 0)
                     {
-                        sails.log.debug(`Calling asyncForEach in Calendar for looping through calendar records that expires.`);
-                        await sails.helpers.asyncForEach(destroyed, function (event, index) {
-                            return new Promise(async (resolve2, reject2) => {
-                                try {
-                                    var dj = event.title;
-                                    if (dj.includes(" - ") && dj.includes(": "))
-                                    {
-                                        dj = dj.split(" - ")[0];
-                                        dj = dj.substring(dj.indexOf(": ") + 2);
-                                    } else {
-                                        dj = null;
-                                    }
-                                    // Do not attendance-track events which did not get a Valid or Check mark on the verification system (for example, Invalid or Manual events)
-                                    if (event.verify === "Valid" || event.verify === "Check")
-                                    {
+                        var maps = destroyed
+                                // Do not log attendance for invalid or manual events
+                                .filter(event => event.verify === "Valid" || event.verify === "Check")
+                                .map(async event => {
+                                    try {
+                                        var dj = event.title;
+                                        if (dj.includes(" - ") && dj.includes(": "))
+                                        {
+                                            dj = dj.split(" - ")[0];
+                                            dj = dj.substring(dj.indexOf(": ") + 2);
+                                        } else {
+                                            dj = null;
+                                        }
                                         Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, DJ: dj, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
                                                 .exec(async(err, record, wasCreated) => {
                                                     // if wasCreated, then the event never aired; Log an absence.
@@ -656,17 +650,14 @@ module.exports = {
 
                                                         // We do not care about genres
                                                     }
-                                                    return resolve2(false);
+                                                    return true;
                                                 });
-                                    } else {
-                                        return resolve2(false);
+                                    } catch (e) {
+                                        sails.log.error(e);
+                                        return true;
                                     }
-                                } catch (e) {
-                                    sails.log.error(e);
-                                    return resolve2(false);
-                                }
-                            });
-                        });
+                                });
+                        await Promise.all(maps);
                     }
 
 
@@ -696,7 +687,7 @@ module.exports = {
                 events = events.data.items;
                 Directorhours.calendar = events;
                 sails.log.silly(events);
-                
+
                 // Should have at least one event.
                 if (events.length === 0) {
                     Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'No director hours are listed. Is this normal?', status: 3}]);
@@ -709,7 +700,7 @@ module.exports = {
                     for (var i = 0; i < events.length; i++) {
                         var event = events[i];
                         eventIds.push(event.id);
-                        
+
                         // Skip events without a start time or without an end time or without a summary
                         if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined')
                         {
@@ -774,44 +765,44 @@ module.exports = {
                     // Go through every event record which passed the end time, and log absences where necessary.
                     // TODO: DOES NOT WORK YET
                     /*
-                    if (destroyed && destroyed.length > 0)
-                    {
-                        sails.log.debug(`Calling asyncForEach in Calendar for looping through calendar records that expires for Director Hours.`);
-                        await sails.helpers.asyncForEach(destroyed, function (event, index) {
-                            return new Promise(async (resolve2, reject2) => {
-                                try {
-                                    var records = Timesheet.find({name: event.director, time_in: {'>=': moment().startOf('day').toISOString(true)}});
-                                    var absent = true;
-                                    if (records.length > 0)
-                                    {
-                                        records.forEach(function (therecord) {
-                                            if (moment(therecord.time_in).isSameOrAfter(moment(event.start)) && moment(therecord.time_in).isSameOrBefore(moment(event.end)))
-                                            {
-                                                absent = false;
-                                            }
-                                            if (moment(therecord.time_out).isSameOrBefore(moment(event.end)) && moment(therecord.time_out).isSameOrAfter(moment(event.start)))
-                                            {
-                                                absent = false;
-                                            }
-                                        });
-                                    }
-                                    if (absent)
-                                    {
-                                        await Logs.create({attendanceID: null, logtype: 'absent-director', loglevel: 'warning', logsubtype: event.director, event: `A director did not come in for scheduled office hours!<br />Director: ${event.director}<br />Scheduled time: ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
-                                                .tolerate((err) => {
-                                                    sails.log.error(err);
-                                                });
-                                    }
-
-                                    return resolve2(false);
-                                } catch (e) {
-                                    sails.log.error(e);
-                                    return resolve2(false);
-                                }
-                            });
-                        });
-                    }
-                    */
+                     if (destroyed && destroyed.length > 0)
+                     {
+                     sails.log.debug(`Calling asyncForEach in Calendar for looping through calendar records that expires for Director Hours.`);
+                     await sails.helpers.asyncForEach(destroyed, function (event, index) {
+                     return new Promise(async (resolve2, reject2) => {
+                     try {
+                     var records = Timesheet.find({name: event.director, time_in: {'>=': moment().startOf('day').toISOString(true)}});
+                     var absent = true;
+                     if (records.length > 0)
+                     {
+                     records.forEach(function (therecord) {
+                     if (moment(therecord.time_in).isSameOrAfter(moment(event.start)) && moment(therecord.time_in).isSameOrBefore(moment(event.end)))
+                     {
+                     absent = false;
+                     }
+                     if (moment(therecord.time_out).isSameOrBefore(moment(event.end)) && moment(therecord.time_out).isSameOrAfter(moment(event.start)))
+                     {
+                     absent = false;
+                     }
+                     });
+                     }
+                     if (absent)
+                     {
+                     await Logs.create({attendanceID: null, logtype: 'absent-director', loglevel: 'warning', logsubtype: event.director, event: `A director did not come in for scheduled office hours!<br />Director: ${event.director}<br />Scheduled time: ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}`, createdAt: moment().toISOString(true)})
+                     .tolerate((err) => {
+                     sails.log.error(err);
+                     });
+                     }
+                     
+                     return resolve2(false);
+                     } catch (e) {
+                     sails.log.error(e);
+                     return resolve2(false);
+                     }
+                     });
+                     });
+                     }
+                     */
 
                     if (!badEvent)
                         Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational', status: 5}]);

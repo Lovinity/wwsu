@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Xp.js
  *
@@ -36,6 +38,28 @@ module.exports = {
             defaultsTo: 0
         }
 
+    },
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`xp socket: ${data}`);
+        sails.sockets.broadcast('xp', 'xp', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.log.silly(`xp socket: ${data}`);
+        sails.sockets.broadcast('xp', 'xp', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`xp socket: ${data}`);
+        sails.sockets.broadcast('xp', 'xp', data);
+        return proceed();
     },
 
 };

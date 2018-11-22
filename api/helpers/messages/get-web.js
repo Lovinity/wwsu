@@ -19,7 +19,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var searchto = moment().subtract(1, 'hours').toDate(); // Do not return messages more than 1 hour old
-            
+
             // get records
             var records = await Messages.find(
                     {
@@ -33,17 +33,16 @@ module.exports = {
                     });
             sails.log.verbose(`Messages records retrieved: ${records.length}`);
             sails.log.silly(records);
-            
+
             // Return an empty array if no records were returned.
             if (typeof records === 'undefined' || records.length === 0)
             {
                 return exits.success([]);
             } else {
                 // Remove IP addresses from response!
-                records.forEach(function (record, index) {
-                    if (typeof records[index].from_IP !== 'undefined')
-                        delete records[index].from_IP;
-                });
+                records
+                        .filter((record, index) => typeof records[index].from_IP !== 'undefined')
+                        .map((record, index) => delete records[index].from_IP);
 
                 return exits.success(records);
             }

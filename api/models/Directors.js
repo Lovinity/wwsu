@@ -76,25 +76,26 @@ module.exports = {
                 sort: 'time_in DESC'});
             if (records.length > 0)
             {
-                records.forEach(async function (record) {
-                    if (typeof names[record.name] === 'undefined')
-                    {
-                        names[record.name] = true;
-                        // If there's an entry with a null time_out, then consider the director clocked in
-                        if (record.time_out === null)
-                        {
-                            await Directors.update({name: record.name}, {present: true, since: moment(record.time_in).toISOString(true)})
-                                    .tolerate((err) => {
-                                    })
-                                    .fetch();
-                        } else {
-                            await Directors.update({name: record.name}, {present: false, since: moment(record.time_out).toISOString(true)})
-                                    .tolerate((err) => {
-                                    })
-                                    .fetch();
-                        }
-                    }
-                });
+                // Update present and since entries in the Directors database
+                var maps = records
+                        .filter(record => typeof names[record.name] === 'undefined')
+                        .map(async record => {
+                            names[record.name] = true;
+                            // If there's an entry with a null time_out, then consider the director clocked in
+                            if (record.time_out === null)
+                            {
+                                await Directors.update({name: record.name}, {present: true, since: moment(record.time_in).toISOString(true)})
+                                        .tolerate((err) => {
+                                        })
+                                        .fetch();
+                            } else {
+                                await Directors.update({name: record.name}, {present: false, since: moment(record.time_out).toISOString(true)})
+                                        .tolerate((err) => {
+                                        })
+                                        .fetch();
+                            }
+                        });
+                await Promise.all(maps);
             }
             return resolve();
         });

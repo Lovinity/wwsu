@@ -20,11 +20,11 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper filterProfane called.');
         try {
-            sails.config.custom.profanity.forEach(function (word) {
+            sails.config.custom.profanity.map(word => {
                 var numbers = getIndicesOf(word, inputs.message, false);
                 if (numbers.length > 0)
                 {
-                    numbers.forEach(function (number) {
+                    numbers.map(number => {
                         for (var i = 0; i < word.length; i++)
                         {
                             if (i !== 0 && i !== (word.length - 1))

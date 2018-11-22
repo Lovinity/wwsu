@@ -30,9 +30,7 @@ module.exports = {
                 output += `Started func2... `;
                 var queue = await sails.helpers.rest.getQueue();
                 var stuff = [];
-                queue.forEach(function (test) {
-                    stuff.push(test.ID);
-                });
+                queue.map(test => stuff.push(test.ID));
                 output += `FINISHED func2... `;
                 return resolve();
             });

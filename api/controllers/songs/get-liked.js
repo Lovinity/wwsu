@@ -19,7 +19,7 @@ module.exports = {
             // Get the hosts's IP address first
             var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
             var query = {IP: from_IP};
-            
+
             // If config specifies users can like tracks multiple times, add a date condition to only return liked tracks within the configured days.
             if (sails.config.custom.songsliked.limit > 0)
                 query.createdAt = {'>=': moment().subtract(sails.config.custom.songsliked.limit, 'days').toISOString(true)};
@@ -27,11 +27,7 @@ module.exports = {
             // Retrieve track IDs liked by this IP
             var records = await Songsliked.find(query);
             if (records.length > 0)
-            {
-                records.forEach(function (record) {
-                    returnArray.push(record.trackID);
-                });
-            }
+                records.map(record => returnArray.push(record.trackID));
 
             return exits.success(returnArray);
         } catch (e) {

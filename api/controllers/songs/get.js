@@ -1,4 +1,4 @@
-/* global sails, Subcategory, Songs, Category, Logs, History */
+/* global sails, Subcategory, Songs, Category, Logs, History, Genre */
 
 module.exports = {
 
@@ -75,13 +75,7 @@ module.exports = {
                 sails.log.silly(subcats2);
 
                 // Make note of all the subcategories in the retrieved songs
-                sails.log.debug(`Calling asyncForEach in songs/get for grabbing subcatIDs`);
-                await sails.helpers.asyncForEach(songs, function (song, index) {
-                    return new Promise(async (resolve, reject) => {
-                        subcatIDs.push(song.id_subcat);
-                        resolve(false);
-                    });
-                });
+                songs.map(song => subcatIDs.push(song.id_subcat));
 
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 query = {id_subcat: subcatIDs};
@@ -115,36 +109,28 @@ module.exports = {
                 var cats2 = await Category.find();
                 sails.log.verbose(`Categories retrieved: ${cats2.length}`);
                 sails.log.silly(cats2);
-                sails.log.debug(`Calling asyncForEach in songs/get for mapping categories`);
-                await sails.helpers.asyncForEach(cats2, function (cat, index) {
-                    return new Promise(async (resolve, reject) => {
-                        cats[cat.ID] = cat.name;
-                        resolve(false);
-                    });
-                });
+                cats2.map(cat => cats[cat.ID] = cat.name);
 
                 // Add additional data to the song(s), such as request ability, category info, and spin counts.
-                sails.log.debug(`Calling asyncForEach in songs/get for adding additional song data`);
-                await sails.helpers.asyncForEach(songs, function (song, index) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            // Get those subcategories
-                            var subcats2 = await Subcategory.findOne({ID: song.id_subcat});
-                            sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
-                            sails.log.silly(subcats2);
+                var maps = songs.map(async (song, index) => {
+                    try {
+                        // Get those subcategories
+                        var subcats2 = await Subcategory.findOne({ID: song.id_subcat});
+                        sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
+                        sails.log.silly(subcats2);
 
-                            songs[index].category = `${cats[subcats2.parentid]} >> ${subcats2.name}` || 'Unknown';
-                            songs[index].request = await sails.helpers.requests.checkRequestable(song.ID, from_IP);
+                        songs[index].category = `${cats[subcats2.parentid]} >> ${subcats2.name}` || 'Unknown';
+                        songs[index].request = await sails.helpers.requests.checkRequestable(song.ID, from_IP);
 
-                            // Get spin counts from both RadioDJ and manually logged entries by DJs
-                            songs[index].spins = await sails.helpers.songs.getSpins(song.ID);
-                            resolve(false);
-                        } catch (e) {
-                            sails.log.error(e);
-                            resolve(false);
-                        }
-                    });
+                        // Get spin counts from both RadioDJ and manually logged entries by DJs
+                        songs[index].spins = await sails.helpers.songs.getSpins(song.ID);
+                        return true;
+                    } catch (e) {
+                        sails.log.error(e);
+                        return false;
+                    }
                 });
+                await Promise.all(maps);
             }
 
             // If songs is undefined at this point, that is an internal error!
@@ -156,31 +142,20 @@ module.exports = {
             var genre = await Genre.find();
             sails.log.verbose(`Genres retrieved: ${genre.length}`);
             sails.log.silly(genre);
-            sails.log.debug(`Calling asyncForEach in songs/get for mapping genres`);
-            await sails.helpers.asyncForEach(genre, function (genrea, index) {
-                return new Promise(async (resolve, reject) => {
-                    genres[genrea.ID] = genrea.name;
-                    resolve(false);
-                });
-            });
+            genre.map(genrea => genres[genrea.ID] = genrea.name);
 
             // Add genre data to the songs
-            sails.log.debug(`Calling asyncForEach in songs/get for mapping genres to songs.`);
-            await sails.helpers.asyncForEach(songs, function (song, index) {
-                return new Promise(async (resolve, reject) => {
-                    try {
-                        if (typeof genres[songs[index].id_genre] !== 'undefined')
-                        {
-                            songs[index].genre = genres[songs[index].id_genre];
-                        } else {
-                            songs[index].genre = 'Unknown';
-                        }
-                        resolve(false);
-                    } catch (e) {
-                        sails.log.error(e);
-                        resolve(false);
+            songs.map((song, index) => {
+                try {
+                    if (typeof genres[songs[index].id_genre] !== 'undefined')
+                    {
+                        songs[index].genre = genres[songs[index].id_genre];
+                    } else {
+                        songs[index].genre = 'Unknown';
                     }
-                });
+                } catch (e) {
+                    sails.log.error(e);
+                }
             });
 
             return exits.success(songs);

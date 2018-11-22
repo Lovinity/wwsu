@@ -403,12 +403,9 @@ function messagesSocket()
     io.socket.post('/messages/get-web', {}, function serverResponded(body, JWR) {
         //console.log(body);
         try {
-            body.forEach(function (message) {
-                if (messageIDs.indexOf(message.ID) === -1)
-                {
-                    addMessage(message, firstTime);
-                }
-            });
+            body
+                    .filter(message => messageIDs.indexOf(message.ID) === -1)
+                    .map(message => addMessage(message, firstTime));
             firstTime = false;
         } catch (e) {
             setTimeout(messagesSocket, 10000);
@@ -454,12 +451,9 @@ function announcementsSocket()
     io.socket.post('/announcements/get', {type: 'website'}, function serverResponded(body, JWR) {
         //console.log(body);
         try {
-            body.forEach(function (announcement) {
-                if (announcementIDs.indexOf(announcement.ID) === -1)
-                {
-                    addAnnouncement(announcement);
-                }
-            });
+            body
+                    .filter(announcement => announcementIDs.indexOf(announcement.ID) === -1)
+                    .map(announcement => addAnnouncement(announcement));
         } catch (e) {
             setTimeout(announcementsSocket, 10000);
         }
@@ -671,7 +665,7 @@ function doMeta(response)
             // reset recent tracks
             if (recentTracks)
                 recentTracks.innerHTML = ``;
-            response.history.forEach(function (track) {
+            response.history.map(track => {
                 console.dir(track);
                 if (recentTracks)
                     recentTracks.innerHTML += `<div class="row">
@@ -811,7 +805,7 @@ function loadTracks(skip = 0) {
             //response = JSON.parse(response);
             if (response.length > 0)
             {
-                response.forEach(function (track) {
+                response.map(track => {
                     songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 border border-secondary bg-${(track.enabled === 1) ? 'wwsu-red' : 'dark'}" style="cursor: pointer;"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
                     skipIt++;
                 });
@@ -841,7 +835,7 @@ function loadGenres() {
             try {
                 document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
                 var x = document.getElementById("filter-genre");
-                response.forEach(function (subcat) {
+                response.map(subcat => {
                     var c = document.createElement("option");
                     c.value = subcat.ID;
                     c.text = subcat.name;
@@ -883,7 +877,7 @@ function likeTrack(trackID) {
                 // reset recent tracks
                 if (recentTracks)
                     recentTracks.innerHTML = ``;
-                Meta.history.forEach(function (track) {
+                Meta.history.map(track => {
                     console.dir(track);
                     if (recentTracks)
                         recentTracks.innerHTML += `<div class="row">
@@ -1008,18 +1002,16 @@ function processCalendar(data, replace = false)
             };
 
             // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-            Calendar().get().sort(compare).forEach(function (event)
-            {
-                try {
-                    if (!event.title.startsWith("Show:") && !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && !event.title.startsWith("Prerecord:") && !event.title.startsWith("Remote:") && !event.title.startsWith("Sports:") && !event.title.startsWith("Podcast:"))
-                        return null;
-                    if (moment(event.start).subtract(1, 'days').isAfter(moment(Meta.time)) || moment(event.end).isBefore(moment(Meta.time)))
-                        return null;
-                    var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
-                    finalColor.red = Math.round(finalColor.red);
-                    finalColor.green = Math.round(finalColor.green);
-                    finalColor.blue = Math.round(finalColor.blue);
-                    caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
+            Calendar().get().sort(compare)
+                    .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).subtract(1, 'days').isSameOrBefore(moment(Meta.time)) && moment(event.end).isAfter(moment(Meta.time)))
+                    .map(event =>
+                    {
+                        try {
+                            var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
+                            finalColor.red = Math.round(finalColor.red);
+                            finalColor.green = Math.round(finalColor.green);
+                            finalColor.blue = Math.round(finalColor.blue);
+                            caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-4">
@@ -1030,16 +1022,16 @@ function processCalendar(data, replace = false)
                                             </div>
                                         </div>
                                     </div></div>`;
-                } catch (e) {
-                    console.error(e);
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred during calendar iteration in processCalendar.`
+                        } catch (e) {
+                            console.error(e);
+                            iziToast.show({
+                                title: 'An error occurred - Please check the logs',
+                                message: `Error occurred during calendar iteration in processCalendar.`
+                            });
+                        }
                     });
-                }
-            });
         }
-        
+
         if (document.querySelector('#calendar3h'))
         {
             var caldata = document.querySelector("#calendar3h");
@@ -1065,18 +1057,16 @@ function processCalendar(data, replace = false)
             };
 
             // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-            Calendar().get().sort(compare).forEach(function (event)
-            {
-                try {
-                    if (!event.title.startsWith("Show:") && !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && !event.title.startsWith("Prerecord:") && !event.title.startsWith("Remote:") && !event.title.startsWith("Sports:") && !event.title.startsWith("Podcast:"))
-                        return null;
-                    if (moment(event.start).subtract(3, 'hours').isAfter(moment(Meta.time)) || moment(event.end).isBefore(moment(Meta.time)))
-                        return null;
-                    var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
-                    finalColor.red = Math.round(finalColor.red);
-                    finalColor.green = Math.round(finalColor.green);
-                    finalColor.blue = Math.round(finalColor.blue);
-                    caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
+            Calendar().get().sort(compare)
+                    .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).subtract(3, 'hours').isSameOrBefore(moment(Meta.time)) && moment(event.end).isAfter(moment(Meta.time)))
+                    .map(event =>
+                    {
+                        try {
+                            var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
+                            finalColor.red = Math.round(finalColor.red);
+                            finalColor.green = Math.round(finalColor.green);
+                            finalColor.blue = Math.round(finalColor.blue);
+                            caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-4">
@@ -1088,14 +1078,14 @@ function processCalendar(data, replace = false)
                                             </div>
                                         </div>
                                     </div></div>`;
-                } catch (e) {
-                    console.error(e);
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred during calendar iteration in processCalendar.`
+                        } catch (e) {
+                            console.error(e);
+                            iziToast.show({
+                                title: 'An error occurred - Please check the logs',
+                                message: `Error occurred during calendar iteration in processCalendar.`
+                            });
+                        }
                     });
-                }
-            });
         }
     } catch (e) {
         console.error(e);

@@ -22,7 +22,7 @@ module.exports = {
             var records = await Requests.find({played: 0, ID: {'>': inputs.offset}});
             sails.log.verbose(`Requests records retrieved: ${records.length}`);
             sails.log.silly(records);
-            
+
             var thereturn = [];
             if (typeof records === 'undefined' || records.length === 0)
             {
@@ -31,20 +31,18 @@ module.exports = {
                 var thereturn = [];
 
                 // Get artist and title of each requested track
-                sails.log.debug(`Calling asyncForEach in requests.get for getting artist - title`);
-                await sails.helpers.asyncForEach(records, function (record) {
-                    return new Promise(async (resolve2, reject2) => {
-                        var temp = record;
-                        var record2 = await Songs.findOne({ID: record.songID});
-                        sails.log.silly(`Song: ${record2}`);
-                        if (record2)
-                        {
-                            temp.trackname = `${record2.artist} - ${record2.title}`;
-                            thereturn.push(temp);
-                        }
-                        return resolve2(false);
-                    });
+                var maps = records.map(async record => {
+                    var temp = record;
+                    var record2 = await Songs.findOne({ID: record.songID});
+                    sails.log.silly(`Song: ${record2}`);
+                    if (record2)
+                    {
+                        temp.trackname = `${record2.artist} - ${record2.title}`;
+                        thereturn.push(temp);
+                    }
+                    return true;
                 });
+                await Promise.all(maps);
                 return exits.success(thereturn);
             }
         } catch (e) {

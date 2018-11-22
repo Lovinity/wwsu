@@ -71,15 +71,10 @@ module.exports = {
             }
 
             var inQueue = false;
-            sails.log.debug(`Calling asyncForEach in requests.checkRequestable for each track in the automation queue`);
-            await sails.helpers.asyncForEach(Meta.automation, function (track, index) {
-                return new Promise(async (resolve2, reject2) => {
-                    if (parseInt(track.ID) === inputs.ID)
-                        inQueue = true;
-                    return resolve2(false);
-                });
-            });
-            
+            Meta.automation
+                    .filter(track => parseInt(track.ID) === inputs.ID)
+                    .map(track => inQueue = true);
+
             if (inQueue)
             {
                 sails.log.verbose(`Track cannot be requested: Track is in the automation system queue and is pending to air.`);
@@ -107,9 +102,7 @@ module.exports = {
             var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']});
             sails.log.silly(`Rotation rule records: ${thesettings}`);
             var rotationRules = {};
-            thesettings.forEach(function (thesetting) {
-                rotationRules[thesetting.setting] = thesetting.value;
-            });
+            thesettings.map(thesetting => rotationRules[thesetting.setting] = thesetting.value);
 
             // Check if we are past the end date of the track
             if (moment(record.end_date).isBefore() && moment(record.end_date).isAfter('2002-01-01 00:00:01'))
