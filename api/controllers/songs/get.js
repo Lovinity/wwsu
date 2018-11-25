@@ -75,7 +75,7 @@ module.exports = {
                 sails.log.silly(subcats2);
 
                 // Make note of all the subcategories in the retrieved songs
-                songs.map(song => subcatIDs.push(song.id_subcat));
+                subcats2.map(subcat => subcatIDs.push(subcat.ID));
 
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 query = {id_subcat: subcatIDs};

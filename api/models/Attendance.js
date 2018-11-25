@@ -160,7 +160,7 @@ module.exports = {
                             prevListeners = listener.listeners;
                             prevTime = moment(listener.createdAt);
                         });
-                        
+
                         // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
                         listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
 
