@@ -144,7 +144,7 @@ module.exports = {
                     var updateData = {showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true)};
 
                     // Fetch listenerRecords since beginning of Attendance, as well as the listener count prior to start of attendance record.
-                    var listenerRecords = await Listeners.find({'createdAt': {'>': currentRecord.actualStart}}).sort('ID ASC');
+                    var listenerRecords = await Listeners.find({createdAt: {'>=': currentRecord.actualStart}}).sort("createdAt ASC");
                     var prevListeners = await Listeners.find({'createdAt': {'<=': currentRecord.actualStart}}).sort('createdAt DESC').limit(1) || 0;
                     if (prevListeners[0])
                         prevListeners = prevListeners[0].listeners || 0;
@@ -152,19 +152,21 @@ module.exports = {
                     // Calculate listener minutes
                     var prevTime = moment(currentRecord.actualStart);
                     var listenerMinutes = 0;
-                    listenerRecords
-                            .filter(listener => moment(listener.createdAt).isSameOrAfter(moment(currentRecord.actualStart)) && moment(listener.createdAt).isSameOrBefore(moment(currentRecord.actualEnd)))
-                            .map(listener => {
-                                listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
-                                prevListeners = listener.listeners;
-                                prevTime = moment(listener.createdAt);
-                            });
 
-                    // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-                    listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+                    if (listenerRecords && listenerRecords.length > 0)
+                    {
+                        listenerRecords.map(listener => {
+                            listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+                            prevListeners = listener.listeners;
+                            prevTime = moment(listener.createdAt);
+                        });
+                        
+                        // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
+                        listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
 
-                    listenerMinutes = Math.round(listenerMinutes);
-                    updateData.listenerMinutes = listenerMinutes;
+                        listenerMinutes = Math.round(listenerMinutes);
+                        updateData.listenerMinutes = listenerMinutes;
+                    }
 
                     // Update the attendance record with the data
                     await Attendance.update({ID: currentID}, updateData);
