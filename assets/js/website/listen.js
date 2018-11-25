@@ -31,7 +31,6 @@ var calendar = [];
 var likedTracks = [];
 
 // Initialize the web player
-/*
 if (document.querySelector('#nativeflashradio'))
     $("#nativeflashradio").flashradio({
         userinterface: "small",
@@ -65,7 +64,6 @@ if (document.querySelector('#nativeflashradio'))
         streamurl: "https://server.wwsu1069.org",
         songinformationinterval: "600000"
     });
-    */
 
 if (document.querySelector('#themessage'))
     var quill = new Quill('#themessage', {
