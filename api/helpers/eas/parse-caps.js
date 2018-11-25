@@ -43,7 +43,7 @@ module.exports = {
                                     if (alert['cap:event'] in sails.config.custom.EAS.alerts) { // Is the alert in our array of alerts to alert for? Get its color if so.
                                         color = sails.config.custom.EAS.alerts[alert['cap:event']];
                                     } else { // If it is not in our array, then it is not an alert we should publish. Resolve to the next one.
-                                        return resolve2(false);
+                                        return false;
                                     }
                                     // Add the alert
                                     await sails.helpers.eas.addAlert(alert['id'], 'NWS', inputs.county, alert['cap:event'], alert['cap:severity'], moment(alert['cap:effective']).toISOString(true), moment(alert['cap:expires']).toISOString(true), color);
