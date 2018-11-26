@@ -21,7 +21,6 @@ try {
     wrapper.height = window.innerHeight;
     var flashInterval = null;
     var statusMarquee = ``;
-    var badStatusMarquee = ``;
 
 // Define other variables
     var nodeURL = 'https://server.wwsu1069.org';
@@ -371,37 +370,87 @@ function processStatus()
     try {
 
         var globalStatus = 4;
+        var doRow = false;
+        var secondRow = false;
+        statusMarquee = `<div class="row">
+                      <div class="col-2 text-primary-light">
+                  	<strong>System</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>Status</strong>
+                      </div>
+                      <div class="col-2 text-primary-light">
+                  	<strong>System</strong>
+                      </div>
+                      <div class="col text-primary-light">
+                  	<strong>Status</strong>
+                      </div>
+                    </div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
 
-        // Make a badge for each status subsystem and display its status by color / class. Also check for current overall status.
-        badStatusMarquee = ``;
-        statusMarquee = ``;
+
         Status().each(function (thestatus) {
             try {
+                if (doRow)
+                {
+                    if (!secondRow)
+                    {
+                        secondRow = true;
+                    } else {
+                        secondRow = false;
+                    }
+                    statusMarquee += `</div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
+                    doRow = false;
+                } else {
+                    doRow = true;
+                }
+
                 switch (thestatus.status)
                 {
                     case 1:
-                        badStatusMarquee += `<span class="m-1 btn btn-danger">${thestatus.label}</span> <strong>CRITICAL</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-                        statusMarquee += `<span class="m-1 btn btn-danger">${thestatus.label}</span> <strong>CRITICAL</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+                        statusMarquee += `<div class="col-2 text-primary-light">
+                  	<span class="m-1 btn btn-danger btn-sm">${thestatus.label}</span>
+                      </div>
+                      <div class="col text-white">
+                  	<strong>CRITICAL</strong>: ${thestatus.data}
+                      </div>`;
                         if (globalStatus > 1)
                             globalStatus = 1;
                         break;
                     case 2:
-                        badStatusMarquee += `<span class="m-1 btn btn-urgent">${thestatus.label}</span> <strong>URGENT</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-                        statusMarquee += `<span class="m-1 btn btn-urgent">${thestatus.label}</span> <strong>URGENT</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+                        statusMarquee += `<div class="col-2 text-primary-light">
+                  	<span class="m-1 btn btn-urgent btn-sm">${thestatus.label}</span>
+                      </div>
+                      <div class="col text-white">
+                  	<strong>Urgent</strong>: ${thestatus.data}
+                      </div>`;
                         if (globalStatus > 2)
                             globalStatus = 2;
                         break;
                     case 3:
-                        badStatusMarquee += `<span class="m-1 btn btn-warning">${thestatus.label}</span> <strong>WARNING</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-                        statusMarquee += `<span class="m-1 btn btn-warning">${thestatus.label}</span> <strong>WARNING</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+                        statusMarquee += `<div class="col-2 text-primary-light">
+                  	<span class="m-1 btn btn-warning btn-sm">${thestatus.label}</span>
+                      </div>
+                      <div class="col text-white">
+                  	<strong>Warning</strong>: ${thestatus.data}
+                      </div>`;
                         if (globalStatus > 3)
                             globalStatus = 3;
                         break;
                     case 4:
-                        statusMarquee += `<span class="m-1 btn btn-outline-success">${thestatus.label}</span> <strong>OFFLINE</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+                        statusMarquee += `<div class="col-2 text-primary-light">
+                  	<span class="m-1 btn btn-outline-success btn-sm">${thestatus.label}</span>
+                      </div>
+                      <div class="col text-white">
+                  	<strong>Offline</strong>: ${thestatus.data}
+                      </div>`;
                         break;
                     case 5:
-                        statusMarquee += `<span class="m-1 btn btn-success">${thestatus.label}</span> <strong>GOOD</strong>: ${thestatus.data}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+                        statusMarquee += `<div class="col-2 text-primary-light">
+                  	<span class="m-1 btn btn-success btn-sm">${thestatus.label}</span>
+                      </div>
+                      <div class="col text-white">
+                  	<strong>Good</strong>: ${thestatus.data}
+                      </div>`;
                         if (globalStatus > 3)
                             globalStatus = 5;
                         break;
@@ -416,51 +465,7 @@ function processStatus()
             }
         });
 
-        if (globalStatus > 3 && prevStatus <= 3)
-        {
-            var marqueeIt = function () {
-                statusLine.innerHTML = `<span class="text-success-light"><strong>WWSU SYSTEMS OPERATIONAL</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;` + statusMarquee;
-                $('#status-line')
-                        .bind('finished', function () {
-                            marqueeIt();
-                        })
-                        .marquee({
-                            //duration in milliseconds of the marquee
-                            speed: 180,
-                            //gap in pixels between the tickers
-                            gap: 50,
-                            //time in milliseconds before the marquee will start animating
-                            delayBeforeStart: 250,
-                            //'left' or 'right'
-                            direction: 'left',
-                            //true or false - should the marquee be duplicated to show an effect of continues flow
-                            duplicated: false
-                        });
-            }
-            marqueeIt();
-        } else if (prevStatus > 3 && globalStatus <= 3)
-        {
-            var marqueeIt = function () {
-                statusLine.innerHTML = `<span class="text-warning-light"><strong>WWSU SYSTEM NEEDS ATTENTION</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;` + badStatusMarquee;
-                $('#status-line')
-                        .bind('finished', function () {
-                            marqueeIt();
-                        })
-                        .marquee({
-                            //duration in milliseconds of the marquee
-                            speed: 180,
-                            //gap in pixels between the tickers
-                            gap: 50,
-                            //time in milliseconds before the marquee will start animating
-                            delayBeforeStart: 250,
-                            //'left' or 'right'
-                            direction: 'left',
-                            //true or false - should the marquee be duplicated to show an effect of continues flow
-                            duplicated: false
-                        });
-            }
-            marqueeIt();
-        }
+        statusMarquee += `</div>`;
 
         if (disconnected)
             globalStatus = 0;
@@ -486,6 +491,7 @@ function processStatus()
                 break;
             case 1:
                 color = 'rgba(244, 67, 54, 0.5)';
+                statusLine.innerHTML = 'CRITICAL ISSUES DETECTED WITH WWSU';
                 if (globalStatus !== prevStatus)
                     responsiveVoice.speak("Attention! Attention! The WWSU system is in a critically unstable state.");
                 // Flash screen for major outages every second
@@ -498,6 +504,7 @@ function processStatus()
                 break;
             case 2:
                 color = 'rgba(245, 124, 0, 0.5)';
+                statusLine.innerHTML = 'Significant issues detected with WWSU';
                 if (globalStatus !== prevStatus)
                     responsiveVoice.speak("Attention! The WWSU system needs attention.");
                 // Flash screen for partial outages every 5 seconds
@@ -510,12 +517,15 @@ function processStatus()
                 }, 5000);
                 break;
             case 3:
+                statusLine.innerHTML = 'Minor issues detected with WWSU';
                 color = 'rgba(251, 192, 45, 0.5)';
                 break;
             case 5:
+                statusLine.innerHTML = 'WWSU systems are operational';
                 color = 'rgba(76, 175, 80, 0.5)';
                 break;
             default:
+                statusLine.innerHTML = 'WWSU status is unknown';
                 color = 'rgba(158, 158, 158, 0.3)';
         }
 
@@ -532,6 +542,18 @@ function processStatus()
             status.style.color = 'rgba(255, 255, 255, 0.2)';
             statusLine.style.color = 'rgba(255, 255, 255, 0.2)';
         }
+
+        slides[6] = {
+            name: 'System', class: 'wwsu-red', do: true, function: function () {
+                $('#slide').animateCss('fadeOutUp', function () {
+                    content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1>
+                    <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status">${statusMarquee}</div></div>`;
+
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }
+        };
+
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
@@ -573,7 +595,7 @@ function processDirectors(data = {}, replace = false)
         directorpresent = false;
 
         // Slide 3 is a list of WWSU directors and whether or not they are currently clocked in
-        slides[2] = {name: 'Directors', class: 'info', do: true, function: function () {
+        slides[2] = {name: 'Directors', class: 'primary', do: true, function: function () {
                 $('#slide').animateCss('lightSpeedOut', function () {
                     content.innerHTML = `<div class="animated fadeInDown" ><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div></div>`;
