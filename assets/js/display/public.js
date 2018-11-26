@@ -1054,8 +1054,7 @@ function processNowPlaying(response)
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
                         <div class="container-fluid m-1" style="text-align: center;">${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}</div>
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
-                        </div>
-                        `;
+                        </div>`;
             if (Meta.state === 'automation_live' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
             {
                 djAlert.style.display = "inline";

@@ -665,7 +665,7 @@ module.exports = {
                     {
                         Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Invalid events in Google Calendar. Please see DJ Controls administration / Calendar Verification.', status: 3}]);
                     } else {
-                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational', status: 5}]);
+                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational, and all events are formatted correctly.', status: 5}]);
                     }
                 }
 
@@ -805,7 +805,7 @@ module.exports = {
                      */
 
                     if (!badEvent)
-                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational', status: 5}]);
+                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational, and all events are formatted correctly.', status: 5}]);
 
                     return resolve();
                 }

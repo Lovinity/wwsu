@@ -78,7 +78,7 @@ module.exports = {
                     var maps = sails.config.custom.djcontrols
                             .filter(djcontrols => djcontrols.host === recipient.host)
                             .map(async djcontrols => {
-                                await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'DJ Controls is offline'}]);
+                                await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'DJ Controls is offline.'}]);
                                 return true;
                             });
                     await Promise.all(maps);

@@ -115,7 +115,7 @@ module.exports = {
                 var maps = sails.config.custom.djcontrols
                         .filter(djcontrols => djcontrols.host === inputs.host)
                         .map(async djcontrols => {
-                            await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 5, data: 'Operational.'}]);
+                            await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: 5, data: 'DJ Controls is online.'}]);
                             return true;
                         });
                 await Promise.all(maps);
@@ -127,7 +127,7 @@ module.exports = {
                 var maps = sails.config.custom.displaysigns
                         .filter(display => inputs.host === `display-${display.name}` && Recipients.sockets[recipient.ID].length >= display.instances)
                         .map(async display => {
-                            await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'Operational.'}]);
+                            await Status.changeStatus([{name: `display-${display.name}`, label: `Display ${display.label}`, status: 5, data: 'DJ Controls is online.'}]);
                             return true;
                         });
                 await Promise.all(maps);
