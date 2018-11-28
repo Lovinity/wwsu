@@ -183,6 +183,9 @@ module.exports = {
                         // Do not update queueFinish nor trackFinish if time difference is less than 1 second of what we have in memory.
                         if (obj[key] !== null && (moment(Meta['A'][key]).diff(obj[key]) < 1000 && moment(Meta['A'][key]).diff(obj[key]) > -1000))
                             continue;
+                        
+                        // If we are updating trackFinish or queueFinish, also include current time in update so clients are properly synced.
+                        obj.time = moment().toISOString(true);
                     }
 
                     // Update meta in memory
