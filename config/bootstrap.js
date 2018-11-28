@@ -482,9 +482,6 @@ module.exports.bootstrap = async function (done) {
             try {
                 if (queue.length > 0)
                 {
-                    if (queue[0].Duration > 0)
-                        change.percent = (queue[0].Elapsed / queue[0].Duration);
-
                     // If we are preparing for live, so some stuff if queue is done
                     if (Meta['A'].state === 'automation_live' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
