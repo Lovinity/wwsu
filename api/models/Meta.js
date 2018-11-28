@@ -100,7 +100,7 @@ module.exports = {
     A: {
         state: '', // State of the WWSU system
         dj: '', // If someone is on the air, host name - show name, or name of sports for sports broadcasts
-        showStamp: null, // When a show starts, this is the timestamp which the show began
+        showStamp: null, // When a show starts, this is the ISO timestamp which the show began
         attendanceID: null, // The ID of the Attendance record the system is currently running under
         track: '', // Currently playing track either in automation or manually logged
         trackID: 0, // The ID of the track currently playing
@@ -109,7 +109,7 @@ module.exports = {
         trackTitle: null, // The title of the currently playing track
         trackAlbum: null, // The album name of the currently playing track
         trackLabel: null, // The label name of the currently playing track
-        trackStamp: null, // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
+        trackStamp: null, // ISO timestamp of when manual track meta was added
         history: [], // An array of objects {ID: trackID, track: 'Artist - Title', likable: true if it can be liked} of the last 3 tracks that played 
         requested: false, // Whether or not this track was requested
         requestedBy: '', // The user who requested this track, if requested
@@ -121,15 +121,15 @@ module.exports = {
         djcontrols: 'EngineeringPC', // Hostname of the computer in which has activated the most recent live/sports/remote broadcast via DJ Controls
         line1: 'We are unable to provide now playing info at this time.', // First line of meta for display signs
         line2: '', // Second line of meta for display signs
-        percent: 0, // Integer or float between 0 and 100 indicating how far in the current track in automation we are, for display signs
-        time: moment().toISOString(true), // ISO string of the current WWSU time
+        time: moment().toISOString(true), // ISO string of the current WWSU time. NOTE: time is only pushed in websockets every night at 11:50pm for re-sync. Clients should keep their own time ticker in sync with this value.
         listeners: 0, // Number of current online listeners
         listenerpeak: 0, // Number of peak online listeners
-        queueLength: 0, // Amount of audio queued in radioDJ in seconds (can be a float)
-        queueMusic: false, // If returning from break, or going live, and there are music tracks in the queue not counted towards queueLength, this will be true
+        queueFinish: null, // An ISO timestamp of when the queue is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.
+        trackFinish: null, // An ISO timestamp of when the current track is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.
+        queueMusic: false, // If returning from break, or going live, and there are music tracks in the queue not counted towards queueFinish, this will be true
         playing: false, // Whether or not something is currently playing in the active RadioDJ
         changingState: null, // If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. Will be state changing string otherwise.
-        breakneeded: false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
+        lastID: null, // An ISO timestamp of when the last top of hour ID break was taken.
         webchat: true, // Set to false to restrict the ability to send chat messages through the website
         playlist: null, // Name of the playlist we are currently airing
         playlist_position: -1, // Current position within the playlist
@@ -167,6 +167,22 @@ module.exports = {
                         // Enable webchat automatically when going into automation state
                         if (obj[key] === 'automation_on' || obj[key] === 'automation_genre' || obj[key] === 'automation_playlist' || obj[key] === 'automation_prerecord')
                             push2.webchat = true;
+                    }
+
+                    // Do stuff if changing queueFinish and trackFinish
+                    if (key === "queueFinish" || key === "trackFinish")
+                    {
+                        // Set to null if nothing is playing
+                        if ((typeof obj.playing !== 'undefined' && !obj.playing) || !Meta['A'].playing)
+                            obj[key] = null;
+                        
+                        // Do not update queueFinish nor trackFinish if null has not changed
+                        if (obj[key] === null && Meta['A'][key] === null)
+                            continue;
+                        
+                        // Do not update queueFinish nor trackFinish if time difference is less than 1 second of what we have in memory.
+                        if (obj[key] !== null && (moment(Meta['A'][key]).diff(obj[key]) < 1000 || moment(Meta['A'][key]).diff(obj[key]) > -1000))
+                            continue;
                     }
 
                     // Update meta in memory

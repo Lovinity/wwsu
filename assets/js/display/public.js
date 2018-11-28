@@ -48,6 +48,7 @@ try {
     var color3 = "#787878";
     var lastBurnIn = null;
     var easExtreme = false;
+    var nowPlayingTimer;
 
     wrapper.width = window.innerWidth;
     wrapper.height = window.innerHeight;
@@ -60,6 +61,8 @@ try {
     var afterSlide = function () {};
 
 // Create a seek progress bar in the Meta box
+// DEPRECATED: We no longer support Meta.percent in WWSU
+/*
     var bar = new ProgressBar.Line(nowplayingseek, {
         strokeWidth: 4,
         easing: 'easeInOut',
@@ -69,6 +72,7 @@ try {
         trailWidth: 1,
         svgStyle: {width: '100%', height: '100%'}
     });
+    */
 
     // Define default settings for iziToast (overlaying messages)
     iziToast.settings({
@@ -959,6 +963,24 @@ function processNowPlaying(response)
     if (response)
     {
         try {
+            // reset ticker timer on change to queue time
+            if (typeof response.queueFinish !== 'undefined')
+            {
+                clearInterval(nowPlayingTimer);
+                clearTimeout(nowPlayingTimer);
+                nowPlayingTimer = setTimeout(function () {
+                    nowPlayingTick();
+                    nowPlayingTimer = setInterval(nowPlayingTick, 1000);
+                }, moment(Meta.queueFinish).diff(moment(Meta.queueFinish).startOf('second')));
+            }
+            // Reset ticker when time is provided
+            else if (typeof response.time !== 'undefined')
+            {
+                clearInterval(nowPlayingTimer);
+                clearTimeout(nowPlayingTimer);
+                nowPlayingTimer = setInterval(nowPlayingTick, 1000);
+            }
+
             // First, process now playing information
             var color = 'rgba(158, 158, 158, 0.3)';
             var progress = 50;
@@ -985,7 +1007,7 @@ function processNowPlaying(response)
                 statebadge = `<span class="badge badge-success">SPORTS</span>`;
                 color = 'rgba(76, 175, 80, 0.5)';
             }
-            var queuelength = Math.round(Meta.queueLength);
+            var queuelength = Meta.queueFinish !== null ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), 'seconds')) : 0;
             if (queuelength < 0)
                 queuelength = 0;
             if (typeof response.line1 !== 'undefined')
@@ -1041,21 +1063,19 @@ function processNowPlaying(response)
                 nowplaying.style.color = 'rgba(255, 255, 255, 1)';
                 nowplayinglines.style.color = 'rgba(255, 255, 255, 1)';
                 nowplayingtime.style.color = 'rgba(255, 235, 59, 1)';
-                bar.animate(Meta.percent);  // Number from 0.0 to 1.0
             } else {
                 statebadge = '';
                 nowplaying.style.backgroundColor = '#000000';
                 nowplaying.style.color = 'rgba(255, 255, 255, 0.2)';
                 nowplayingtime.style.color = 'rgba(255, 235, 59, 0.2)';
                 nowplayinglines.style.color = 'rgba(255, 255, 255, 0.2)';
-                bar.animate(0);
             }
             nowplayingtime.innerHTML = `<div class="d-flex align-items-stretch">
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
                         <div class="container-fluid m-1" style="text-align: center;">${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}</div>
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
                         </div>`;
-            if (Meta.state === 'automation_live' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
+            if (Meta.state === 'automation_live' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1094,7 +1114,7 @@ function processNowPlaying(response)
                 }
 
                 // When a remote broadcast is about to start
-            } else if (Meta.state === 'automation_remote' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
+            } else if (Meta.state === 'automation_remote' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1133,7 +1153,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // Sports broadcast about to begin
-            } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
+            } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1171,7 +1191,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // DJ is returning from a break
-            } else if (Meta.state === 'live_returning' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
+            } else if (Meta.state === 'live_returning' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1210,7 +1230,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // Remote broadcast is returning from a break
-            } else if (Meta.state === 'remote_returning' && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
+            } else if (Meta.state === 'remote_returning' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1248,7 +1268,7 @@ function processNowPlaying(response)
                     }, 250);
                 }
                 // Returning to a sports broadcast
-            } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && (typeof response.state === 'undefined' || typeof response.queueLength !== 'undefined'))
+            } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = "inline";
                 var countdown = document.getElementById('countdown');
@@ -1298,6 +1318,12 @@ function processNowPlaying(response)
             });
         }
     }
+}
+
+function nowPlayingTick()
+{
+    Meta.time = moment(Meta.time).add(1, 'seconds');
+    processNowPlaying({});
 }
 
 

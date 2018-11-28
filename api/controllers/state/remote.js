@@ -1,4 +1,4 @@
-/* global sails, Meta, Logs, Status */
+/* global sails, Meta, Logs, Status, moment */
 
 module.exports = {
 
@@ -93,8 +93,7 @@ module.exports = {
                 }
                 
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                
-                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_remote', dj: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});

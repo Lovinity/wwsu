@@ -83,7 +83,7 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
-                
+
                 // Queue a show opener if applicable
                 if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
                 {
@@ -91,10 +91,9 @@ module.exports = {
                 } else {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
-                
-                await sails.helpers.rest.cmd('EnableAssisted', 0);
 
-                await Meta.changeMeta({queueLength: await sails.helpers.songs.calculateQueueLength(), state: 'automation_live', dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await sails.helpers.rest.cmd('EnableAssisted', 0);
+                await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_live', dj: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});

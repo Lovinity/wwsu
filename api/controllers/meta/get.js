@@ -19,8 +19,10 @@ module.exports = {
             sails.log.verbose('Request was a socket. Joining meta.');
         }
         
-        // Return current meta
-        return exits.success(Meta['A']);
+        // Return current meta, but update time to current time since it's not auto-updated automatically by changeMeta.
+        var returnData = Meta['A'];
+        returnData.time = moment().toISOString(true);
+        return exits.success(returnData);
     }
 
 

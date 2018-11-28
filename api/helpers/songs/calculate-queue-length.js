@@ -43,7 +43,8 @@ module.exports = {
 
             return exits.success(queueLength);
         } catch (e) {
-            return exits.error(e);
+            // Should not throw on error; return a 0 instead.
+            return exits.success(0);
         }
 
     }

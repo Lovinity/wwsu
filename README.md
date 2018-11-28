@@ -1,4 +1,4 @@
-# WWSU 4.3.1
+# WWSU 4.3.2
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -492,42 +492,42 @@ Get the current meta as an object.
  - This endpoint supports sockets under the "meta" event. However, the data sent is an object containing only the changed key: value pairs. This should be merged with the meta stored in memory by the client. There will never be new or deleted keys sent through sockets.
 #### Response 200
         {
-            "state": 'unknown', // State of the WWSU system. Refer to the states section in meta
-            "dj": '', // If someone is on the air, name of the host
-            "showStamp": null, // When a show starts, this is the ISO timestamp which the show began
-            "attendanceID": null, // The ID of the Attendance record the system is currently running under
-            "track": '', // Currently playing track either in automation or manually logged
-            "trackID": 0, // The ID of the track currently playing
-            "trackIDSubcat": 0, // The ID of the subcategory the currently playing track falls in
-            "trackArtist": null, // The artist of the currently playing track
-            "trackTitle": null, // The title of the currently playing track
-            "trackAlbum": null, // The album name of the currently playing track
-            "trackLabel": null, // The label name of the currently playing track
-            "trackStamp": null, // ISO String of when the current track began playing
-            "history": [], // An array of objects {ID: trackID, track: 'Artist - Title', likable: true if it can be liked} of the last 3 tracks that played 
-            "requested": false, // Whether or not this track was requested
-            "requestedBy": '', // The user who requested this track, if requested
-            "requestedMessage": '', // The provided message for this track request, if requested
-            "genre": '', // Name of the genre or rotation currently being played, if any
-            "topic": '', // If the DJ specified a show topic, this is the topic.
-            "stream": '', // Meta artist - title for the internet radio stream
-            "radiodj": '', // REST IP of the RadioDJ instance currently in control
-            "djcontrols": '', // Hostname of the computer in which has activated the most recent live/sports/remote broadcast via DJ Controls
-            "line1": '', // First line of meta for display signs and website
-            "line2": '', // Second line of meta for display signs and website
-            "percent": 0, // Integer or float between 0 and 100 indicating how far in the current track in automation we are, for display signs
-            "time": '', // ISO string of the current WWSU time
-            "listeners": 0, // Number of current online listeners
-            "listenerpeak": 0, // Number of peak online listeners
-            "queueLength": 0, // Amount of audio queued in radioDJ in seconds (can be a float)
-            "queueMusic": false, // If returning from break, or going live, and there are music tracks in the queue not counted towards queueLength, this will be true
-            "playing": false, // Whether or not something is currently playing in the active RadioDJ
-            "changingState": null, // If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. When not null, will be a string containing a very short explanation as to why state changing is locked out.
-            "breakneeded": false, // If the current DJ needs to take the FCC required top of the hour break, this will be true
-            "webchat": true, // Set to false to restrict the ability to send chat messages through the website. Clients should forbid the ability to send messages when this is true. /messages/send-web will reject attempts when this is true.
-            "playlist": null, // Name of the playlist we are currently airing if any
-            "playlist_position": -1, // Current position within the playlist
-            "playlist_played": null // ISO string of when the playlist was activated/queued.
+            state: '', // State of the WWSU system
+            dj: '', // If someone is on the air, host name - show name, or name of sports for sports broadcasts
+            showStamp: null, // When a show starts, this is the ISO timestamp which the show began
+            attendanceID: null, // The ID of the Attendance record the system is currently running under
+            track: '', // Currently playing track either in automation or manually logged
+            trackID: 0, // The ID of the track currently playing
+            trackIDSubcat: 0, // The ID of the subcategory the currently playing track falls in
+            trackArtist: null, // The artist of the currently playing track
+            trackTitle: null, // The title of the currently playing track
+            trackAlbum: null, // The album name of the currently playing track
+            trackLabel: null, // The label name of the currently playing track
+            trackStamp: null, // ISO timestamp of when manual track meta was added
+            history: [], // An array of objects {ID: trackID, track: 'Artist - Title', likable: true if it can be liked} of the last 3 tracks that played 
+            requested: false, // Whether or not this track was requested
+            requestedBy: '', // The user who requested this track, if requested
+            requestedMessage: '', // The provided message for this track request, if requested
+            genre: '', // Name of the genre or rotation currently being played, if any
+            topic: '', // If the DJ specified a show topic, this is the topic.
+            stream: '', // Meta for the internet radio stream
+            radiodj: '', // REST IP of the RadioDJ instance currently in control
+            djcontrols: 'EngineeringPC', // Hostname of the computer in which has activated the most recent live/sports/remote broadcast via DJ Controls
+            line1: 'We are unable to provide now playing info at this time.', // First line of meta for display signs
+            line2: '', // Second line of meta for display signs
+            time: moment().toISOString(true), // ISO string of the current WWSU time. NOTE: time is only pushed in websockets every night at 11:50pm for re-sync. Clients should keep their own time ticker in sync with this value.
+            listeners: 0, // Number of current online listeners
+            listenerpeak: 0, // Number of peak online listeners
+            queueFinish: null, // An ISO timestamp of when the queue is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.
+            trackFinish: null, // An ISO timestamp of when the current track is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.
+            queueMusic: false, // If returning from break, or going live, and there are music tracks in the queue not counted towards queueLength, this will be true
+            playing: false, // Whether or not something is currently playing in the active RadioDJ
+            changingState: null, // If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. Will be state changing string otherwise.
+            lastID: null, // An ISO timestamp of when the last top of hour ID break was taken.
+            webchat: true, // Set to false to restrict the ability to send chat messages through the website
+            playlist: null, // Name of the playlist we are currently airing
+            playlist_position: -1, // Current position within the playlist
+            playlist_played: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
         }
 ### states
 The value of the meta state key can be any of the following strings:

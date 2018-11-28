@@ -150,9 +150,8 @@ module.exports.bootstrap = async function (done) {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON checks triggered.`);
 
-            Meta.changeMeta({time: moment().toISOString(true)}); // Always casually send the current time through Meta as a separate socket
-
-            var change = {queueLength: 0, percent: 0}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
+            var queueLength = 0;
+            var change = {queueFinish: null, trackFinish: null}; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
             //
             // Skip all checks and use default meta template if sails.config.custom.lofi = true
             if (sails.config.custom.lofi)
@@ -228,12 +227,14 @@ module.exports.bootstrap = async function (done) {
                     if (parseInt(queue[0].ID) === 0)
                     {
                         change.playing = false;
+                        change.trackFinish = null;
                     } else {
                         change.playing = true;
                         change.trackArtist = queue[0].Artist || null;
                         change.trackTitle = queue[0].Title || null;
                         change.trackAlbum = queue[0].Album || null;
                         change.trackLabel = queue[0].Label || null;
+                        change.trackFinish = moment().add(parseFloat(queue[0].Duration) - parseFloat(queue[0].Elapsed), 'seconds').toISOString(true);
                     }
 
                     // When on queue to go live or return from break, search for the position of the last noMeta track
@@ -276,14 +277,14 @@ module.exports.bootstrap = async function (done) {
                                     await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
                                     theTracks = [];
                                     queue = await sails.helpers.rest.getQueue();
-                                    change.queueLength = 0;
+                                    queueLength = 0;
                                     return resolve2(true);
                                 } else {
                                     theTracks.push(title);
 
                                     if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
                                     {
-                                        change.queueLength += (track.Duration - track.Elapsed);
+                                        queueLength += (track.Duration - track.Elapsed);
                                     }
 
                                     return resolve2(false);
@@ -309,10 +310,10 @@ module.exports.bootstrap = async function (done) {
              * This results in false transitions in system state. Run a check to detect if the queuelength deviated by more than 2 seconds since last run.
              * If so, we assume this was an error, so do not treat it as accurate, and trigger a 5 second error resolution wait.
              */
-            if (change.queueLength > (Status.errorCheck.prevQueueLength - 3) || Status.errorCheck.trueZero > 0)
+            if (queueLength > (Status.errorCheck.prevQueueLength - 3) || Status.errorCheck.trueZero > 0)
             {
                 // If the detected queueLength gets bigger, assume the issue resolved itself and immediately mark the queuelength as accurate
-                if (change.queueLength > (Status.errorCheck.prevQueueLength))
+                if (queueLength > (Status.errorCheck.prevQueueLength))
                 {
                     Status.errorCheck.trueZero = 0;
                 } else if (Status.errorCheck.trueZero > 0)
@@ -324,27 +325,26 @@ module.exports.bootstrap = async function (done) {
                     } else {
                         //Statemeta.final.queueLength = (Statesystem.errors.prevqueuelength - 1);
                     }
-                    if (change.queueLength < 0)
-                        change.queueLength = 0;
+                    if (queueLength < 0)
+                        queueLength = 0;
                 } else { // No error wait time [remaining]? Use actual detected queue time.
                 }
             } else {
                 Status.errorCheck.trueZero = 5; // Wait up to 5 seconds before considering the queue accurate
                 // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
-                //Statemeta.final.queueLength = (Statesystem.errors.prevqueuelength - 1);
-                if (change.queueLength < 0)
-                    change.queueLength = 0;
+                if (queueLength < 0)
+                    queueLength = 0;
             }
 
             // For remotes, when playing a liner etc, we need to know when to re-queue the remote stream
-            if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0 && queue[0].TrackType !== 'InternetStream')
+            if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && queueLength <= 0 && Status.errorCheck.trueZero <= 0 && queue[0].TrackType !== 'InternetStream')
             {
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
             }
-            Status.errorCheck.prevQueueLength = change.queueLength;
+            Status.errorCheck.prevQueueLength = queueLength;
 
             // If we do not know active playlist, we need to populate the info
             if (Meta['A'].playlist !== null && Meta['A'].playlist !== '' && Playlists.active.tracks.length <= 0 && (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord'))
@@ -375,7 +375,7 @@ module.exports.bootstrap = async function (done) {
 
             // If we are in automation_genre, check to see if the queue is less than 20 seconds. If so, the genre rotation may be out of tracks to play.
             // In that case, flip to automation_on with Default rotation.
-            if (Meta['A'].state === 'automation_genre' && change.queueLength <= 20)
+            if (Meta['A'].state === 'automation_genre' && queueLength <= 20)
             {
                 await sails.helpers.error.count('genreEmpty');
             } else {
@@ -486,7 +486,7 @@ module.exports.bootstrap = async function (done) {
                         change.percent = (queue[0].Elapsed / queue[0].Duration);
 
                     // If we are preparing for live, so some stuff if queue is done
-                    if (Meta['A'].state === 'automation_live' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
+                    if (Meta['A'].state === 'automation_live' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'live_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
@@ -498,7 +498,7 @@ module.exports.bootstrap = async function (done) {
                                 });
                     }
                     // If we are preparing for sports, do some stuff if queue is done
-                    if (Meta['A'].state === 'automation_sports' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
+                    if (Meta['A'].state === 'automation_sports' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'sports_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
@@ -510,7 +510,7 @@ module.exports.bootstrap = async function (done) {
                                 });
                     }
                     // If we are preparing for remote, do some stuff if we are playing the stream track
-                    if (Meta['A'].state === 'automation_remote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
+                    if (Meta['A'].state === 'automation_remote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'remote_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
@@ -525,7 +525,7 @@ module.exports.bootstrap = async function (done) {
                                 });
                     }
                     // If we are preparing for sportsremote, do some stuff if we are playing the stream track
-                    if (Meta['A'].state === 'automation_sportsremote' && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
+                    if (Meta['A'].state === 'automation_sportsremote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'sportsremote_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
@@ -540,7 +540,7 @@ module.exports.bootstrap = async function (done) {
                                 });
                     }
                     // If returning from break, do stuff once queue is empty
-                    if (Meta['A'].state.includes('_returning') && change.queueLength <= 0 && Status.errorCheck.trueZero <= 0)
+                    if (Meta['A'].state.includes('_returning') && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         switch (Meta['A'].state)
                         {
@@ -698,6 +698,7 @@ module.exports.bootstrap = async function (done) {
                                     {
                                         Status.errorCheck.prevID = moment();
                                         await sails.helpers.error.count('stationID');
+                                        change.lastID = moment().toISOString(true);
                                     }
 
                                     // Add XP for prerecords
@@ -788,6 +789,14 @@ module.exports.bootstrap = async function (done) {
                     {
                         await sails.helpers.error.count('frozenRemote');
                     }
+                }
+
+                // Process queueFinish
+                if (change.playing)
+                {
+                    change.queueFinish = moment().add(queueLength, 'seconds').toISOString(true);
+                } else {
+                    change.queueFinish = null;
                 }
 
                 // Change applicable meta
@@ -1325,12 +1334,14 @@ module.exports.bootstrap = async function (done) {
         });
     });
 
-    // Every day at 11:59:50pm, clock out any directors still clocked in
+    // Every day at 11:59:50pm, clock out any directors still clocked in, and re-sync station time to all clients
     sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`);
     cron.schedule('50 59 23 * * *', () => {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON clockOutDirectors called`);
             try {
+                await Meta.changeMeta({time: moment().toISOString(true)});
+                
                 await Timesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false})
                         .tolerate((err) => {
                         });

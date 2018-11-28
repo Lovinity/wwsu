@@ -55,9 +55,9 @@ module.exports = {
                 // Change state to halftime mode
                 if (Meta['A'].state.startsWith("sportsremote"))
                 {
-                    await Meta.changeMeta({state: 'sportsremote_halftime'});
+                    await Meta.changeMeta({state: 'sportsremote_halftime', lastID: moment().toISOString(true)});
                 } else {
-                    await Meta.changeMeta({state: 'sports_halftime'});
+                    await Meta.changeMeta({state: 'sports_halftime', lastID: moment().toISOString(true)});
                 }
 
                 // Standard break
@@ -75,16 +75,16 @@ module.exports = {
                 switch (Meta['A'].state)
                 {
                     case 'live_on':
-                        await Meta.changeMeta({state: 'live_break'});
+                        await Meta.changeMeta({state: 'live_break', lastID: moment().toISOString(true)});
                         break;
                     case 'remote_on':
-                        await Meta.changeMeta({state: 'remote_break'});
+                        await Meta.changeMeta({state: 'remote_break', lastID: moment().toISOString(true)});
                         break;
                     case 'sports_on':
-                        await Meta.changeMeta({state: 'sports_break'});
+                        await Meta.changeMeta({state: 'sports_break', lastID: moment().toISOString(true)});
                         break;
                     case 'sportsremote_on':
-                        await Meta.changeMeta({state: 'sportsremote_break'});
+                        await Meta.changeMeta({state: 'sportsremote_break', lastID: moment().toISOString(true)});
                         break;
                 }
             }
