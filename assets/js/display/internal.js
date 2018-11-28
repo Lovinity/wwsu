@@ -1322,7 +1322,7 @@ function processAnnouncements() {
                                     page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
                                     var scaleX = 1, scaleY = 1;
                                     scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
-                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
+                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;
                                     basePage.scaleX = scaleX;
                                     basePage.scaleY = scaleY;
                                     basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
@@ -1385,7 +1385,7 @@ function processAnnouncements() {
                                     page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
                                     var scaleX = 1, scaleY = 1;
                                     scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
-                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
+                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;
                                     basePage.scaleX = scaleX;
                                     basePage.scaleY = scaleY;
                                     basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
