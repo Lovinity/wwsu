@@ -186,6 +186,8 @@ module.exports = {
                         
                         // If we are updating trackFinish or queueFinish, also include current time in update so clients are properly synced.
                         obj.time = moment().toISOString(true);
+                        Meta['A'].time = obj.time;
+                        push.time = obj.time;
                     }
 
                     // Update meta in memory
