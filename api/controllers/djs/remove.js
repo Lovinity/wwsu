@@ -31,10 +31,10 @@ module.exports = {
             await Listeners.update({dj: inputs.dj}, {dj: null}).fetch();
 
             // Destroy XP records
-            await Xp.destroy({dj: inputs.dj});
+            await Xp.destroy({dj: inputs.dj}).fetch();
 
             // Destroy DJ
-            await Djs.destroy({ID: inputs.dj});
+            await Djs.destroy({ID: inputs.dj}).fetch();
 
             return exits.success();
         } catch (e) {

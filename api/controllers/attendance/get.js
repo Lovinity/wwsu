@@ -33,6 +33,7 @@ module.exports = {
 
         try {
             var query = {};
+            
             // No DJ nor event? Filter by date.
             if ((inputs.dj === null || inputs.dj === '' || !inputs.dj) && (inputs.event === null || inputs.event === '' || !inputs.event))
             {

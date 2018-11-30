@@ -43,7 +43,7 @@ module.exports = {
 
                             listenerMinutes = Math.round(listenerMinutes);
 
-                            await Attendance.update({ID: currentRecord.ID}, {listenerMinutes: listenerMinutes});
+                            await Attendance.update({ID: currentRecord.ID}, {listenerMinutes: listenerMinutes}).fetch();
                         }
 
                         return true;

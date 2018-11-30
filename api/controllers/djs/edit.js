@@ -56,7 +56,7 @@ module.exports = {
                         await Listeners.update({dj: record.ID}, {dj: inputs.dj}).fetch();
                         
                         // Remove the original record
-                        await Djs.destroy({ID: record.ID});
+                        await Djs.destroy({ID: record.ID}).fetch();
                     });
                     await Promise.all(maps);
                 }
