@@ -74,7 +74,7 @@ module.exports = {
             var criteriaB = _.cloneDeep(criteria);
 
             // Edit it
-            await Xp.update({ID: inputs.ID}, criteriaB);
+            await Xp.update({ID: inputs.ID}, criteriaB).fetch();
 
             return exits.success();
         } catch (e) {

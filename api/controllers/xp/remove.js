@@ -25,7 +25,7 @@ module.exports = {
         try {
             
             // Remove this XP record
-            await Xp.destroy({ID: inputs.ID});
+            await Xp.destroy({ID: inputs.ID}).fetch();
             
             return exits.success();
         } catch (e) {

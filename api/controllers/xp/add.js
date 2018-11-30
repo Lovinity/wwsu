@@ -67,7 +67,7 @@ module.exports = {
             }
             
             // Add the records
-            await Xp.createEach(records);
+            await Xp.createEach(records).fetch();
 
             return exits.success();
         } catch (e) {
