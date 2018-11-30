@@ -78,8 +78,10 @@ module.exports = {
             {
                 // Update present and since entries in the Directors database
                 var maps = records
-                        .filter(record => typeof names[record.name] === 'undefined')
                         .map(async record => {
+                            if (typeof names[record.name] !== 'undefined')
+                                return false;
+                            
                             names[record.name] = true;
                             // If there's an entry with a null time_out, then consider the director clocked in
                             if (record.time_out === null)
@@ -94,6 +96,7 @@ module.exports = {
                                         })
                                         .fetch();
                             }
+                            return true;
                         });
                 await Promise.all(maps);
             }
