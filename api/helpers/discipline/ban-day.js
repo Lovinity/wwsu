@@ -23,7 +23,7 @@ module.exports = {
             await sails.helpers.messages.removeMass(inputs.host);
 
             // Add a dayban to the database
-            var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'dayban', message: `The website user was banned for 24 hours by ${Meta['A'].dj}`}).fetch();
+            var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'dayban', message: `The website user was banned for 24 hours by ${Meta['A'].show}`}).fetch();
 
             // Broadcast the ban to the client
             sails.sockets.broadcast(`discipline-${inputs.host}`, `discipline`, {"discipline": `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}`});

@@ -17,7 +17,7 @@ module.exports = {
         },
 
         dj: {
-            type: 'string'
+            type: 'number'
         },
 
         type: {

@@ -12,6 +12,10 @@ module.exports = {
             required: true,
             description: 'The ID of the record to modify.'
         },
+        dj: {
+            type: 'number',
+            description: 'The DJ ID this record belongs to. If provided, will overwrite the original value.'
+        },
         type: {
             type: 'string',
             allowNull: true,
@@ -53,6 +57,8 @@ module.exports = {
         try {
             // Determine what needs updating
             var criteria = {};
+            if (inputs.dj !== null && typeof inputs.dj !== 'undefined')
+                criteria.dj = inputs.dj;
             if (inputs.type !== null && typeof inputs.type !== 'undefined')
                 criteria.type = inputs.type;
             if (inputs.subtype !== null && typeof inputs.subtype !== 'undefined')

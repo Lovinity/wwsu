@@ -21,15 +21,15 @@ module.exports = {
                 return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`));
 
             // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Sports Liner requested.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: Meta['A'].show, event: 'Sports Liner requested.'})
                     .tolerate((err) => {
                         // Do not throw for errors, but log it
                         sails.log.error(err);
                     });
 
             // Queue it
-            if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Top', 1);
+            if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
+                await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Top', 1);
 
             // Play it
             await sails.helpers.rest.cmd('EnableAssisted', 0);

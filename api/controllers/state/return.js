@@ -24,7 +24,7 @@ module.exports = {
             await Meta.changeMeta({changingState: `Returning from break`});
 
             // log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'return', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Return from break requested.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'return', loglevel: 'info', logsubtype: Meta['A'].show, event: 'Return from break requested.'})
                     .tolerate((err) => {
                         // Don't throw errors, but log them
                         sails.log.error(err);
@@ -45,8 +45,8 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 
                 // Queue a sports liner
-                if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
-                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
+                if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
+                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
 
                 // Change state
                 if (Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected')
@@ -65,10 +65,10 @@ module.exports = {
                 if (num >= 50 || num < 10 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
                 {
                     // Liners for sports broadcasts, promos for others.
-                    if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                    if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                     {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
-                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
+                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
                     } else {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
@@ -77,12 +77,7 @@ module.exports = {
                     // Earn XP for doing the top of the hour ID break, if the show is live
                     if (Meta['A'].state.startsWith("live_"))
                     {
-                        var dj = Meta['A'].dj;
-                        if (dj.includes(" - "))
-                        {
-                            dj = dj.split(" - ")[0];
-                        }
-                        await Xp.create({dj: dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: "DJ played an on-time Top of the Hour ID break."})
+                        await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: "DJ played an on-time Top of the Hour ID break."})
                                 .tolerate((err) => {
                                     // Do not throw for error, but log it
                                     sails.log.error(err);
@@ -95,9 +90,9 @@ module.exports = {
                     await Meta.changeMeta({lastID: moment().toISOString(true)});
                 } else {
                     // Liners for sports broadcasts
-                    if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                    if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                     {
-                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Liners"]], 'Bottom', 1);
+                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
                     } else {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
                     }
@@ -110,9 +105,9 @@ module.exports = {
                     case 'live_break':
                         
                         // Queue a show return if there is one
-                        if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                        if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                         {
-                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Returns"]], 'Bottom', 1);
+                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Returns"]], 'Bottom', 1);
                         } else {
                             await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
                         }
@@ -125,9 +120,9 @@ module.exports = {
                     case 'remote_break':
                     case 'remote_break_disconnected':
                         // Queue a show return if there is one
-                        if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                        if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                         {
-                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Returns"]], 'Bottom', 1);
+                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Returns"]], 'Bottom', 1);
                         } else {
                             await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
                         }

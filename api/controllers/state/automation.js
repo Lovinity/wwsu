@@ -33,7 +33,7 @@ module.exports = {
             var returnData = {showTime: 0};
 
             // Log the request
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'Show ended.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'Show ended.'})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
@@ -45,13 +45,13 @@ module.exports = {
             // If coming out of a sports broadcast, queue a closer if exists.
             if (Meta['A'].state.startsWith("sports"))
             {
-                if (typeof sails.config.custom.sportscats[Meta['A'].dj] !== 'undefined')
+                if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                 {
-                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].dj]["Sports Closers"]], 'Bottom', 1);
+                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Closers"]], 'Bottom', 1);
                 }
             } else {
-                if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
-                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Closers"]], 'Bottom', 1);
+                if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
+                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Closers"]], 'Bottom', 1);
             }
 
             // Queue a station ID
@@ -75,12 +75,6 @@ module.exports = {
             await sails.helpers.rest.cmd('EnableAssisted', 0);
 
             // Calculate XP and other stats
-            var dj = Meta['A'].dj;
-            if (dj.includes(" - "))
-            {
-                dj = dj.split(" - ")[0];
-            }
-
             if (Meta['A'].state.startsWith("live_"))
                 returnData.subtotalXP = 0;
 
@@ -91,7 +85,7 @@ module.exports = {
             {
                 returnData.showXP = Math.round(returnData.showTime / sails.config.custom.XP.showMinutes);
                 returnData.subtotalXP += returnData.showXP;
-                await Xp.create({dj: dj, type: 'xp', subtype: 'showtime', amount: returnData.showXP, description: `DJ was on the air for ${returnData.showTime} minutes.`})
+                await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'showtime', amount: returnData.showXP, description: `DJ was on the air for ${returnData.showTime} minutes.`})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -102,7 +96,7 @@ module.exports = {
 
             // Calculate number of listener minutes for the show, and award XP based on configured values.
             var listenerMinutes = 0;
-            returnData.listeners = await Listeners.find({dj: dj, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort("createdAt ASC")
+            returnData.listeners = await Listeners.find({createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort("createdAt ASC")
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
@@ -130,7 +124,7 @@ module.exports = {
                 {
                     returnData.listenerXP = Math.round(listenerMinutes / sails.config.custom.XP.listenerMinutes);
                     returnData.subtotalXP += returnData.listenerXP;
-                    await Xp.create({dj: dj, type: 'xp', subtype: 'listeners', amount: returnData.listenerXP, description: `DJ had ${returnData.listenerMinutes} online listener minutes during their show.`})
+                    await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'listeners', amount: returnData.listenerXP, description: `DJ had ${returnData.listenerMinutes} online listener minutes during their show.`})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);
@@ -152,7 +146,7 @@ module.exports = {
                 {
                     returnData.messagesXP = Math.round(returnData.messagesWeb * sails.config.custom.XP.web);
                     returnData.subtotalXP += returnData.messagesXP;
-                    await Xp.create({dj: dj, type: 'xp', subtype: 'messages', amount: returnData.messagesXP, description: `DJ sent ${returnData.messagesWeb} messages to web visitors during their show.`})
+                    await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'messages', amount: returnData.messagesXP, description: `DJ sent ${returnData.messagesWeb} messages to web visitors during their show.`})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);
@@ -164,7 +158,7 @@ module.exports = {
 
 
             // Calculate XP earned this show from Top Adds
-            returnData.topAdds = await Xp.count({dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
+            returnData.topAdds = await Xp.count({dj: Meta['A'].dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
@@ -172,7 +166,7 @@ module.exports = {
 
             if (Meta['A'].state.startsWith("live_"))
             {
-                returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
+                returnData.topAddsXP = await Xp.sum('amount', {dj: Meta['A'].dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -183,7 +177,7 @@ module.exports = {
             // Calculate XP earned this show from doing the mandatory Legal IDs
             if (Meta['A'].state.startsWith("live_"))
             {
-                returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
+                returnData.IDsXP = await Xp.sum('amount', {dj: Meta['A'].dj, type: 'xp', subtype: 'id', createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -194,7 +188,7 @@ module.exports = {
             // Calculate a DJ's total XP earned ever
             if (Meta['A'].state.startsWith("live_"))
             {
-                returnData.totalXP = await Xp.sum('amount', {dj: dj, type: {'!=': 'remote'}})
+                returnData.totalXP = await Xp.sum('amount', {dj: Meta['A'].dj, type: {'!=': 'remote'}})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -202,7 +196,7 @@ module.exports = {
             }
 
             // Add to total XP for remote credits
-            returnData.totalXP += (sails.config.custom.XP.remoteCredit * await Xp.sum('amount', {dj: dj, type: 'remote'})
+            returnData.totalXP += (sails.config.custom.XP.remoteCredit * await Xp.sum('amount', {dj: Meta['A'].dj, type: 'remote'})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
@@ -211,7 +205,7 @@ module.exports = {
             // We are going to automation
             if (!inputs.transition)
             {
-                await Meta.changeMeta({genre: '', state: 'automation_on', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                await Meta.changeMeta({genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
                 await sails.helpers.error.reset('automationBreak');
 
                 // Add up to 3 track requests if any are pending
@@ -227,7 +221,7 @@ module.exports = {
             } else {
                 await Attendance.createRecord(`Genre: Default`);
 
-                await Meta.changeMeta({genre: '', state: 'automation_break', dj: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                await Meta.changeMeta({genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
             }
 
             await Meta.changeMeta({changingState: null});

@@ -286,7 +286,7 @@ module.exports = {
                             return resolve(295);
 
                         await Meta.changeMeta({changingState: `Switching to automation via automationBreak`});
-                        await Meta.changeMeta({state: 'automation_on', genre: '', dj: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                        await Meta.changeMeta({state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
 
                         // Add up to 3 track requests if any are pending
                         await sails.helpers.requests.queue(3, true, true);
@@ -380,7 +380,7 @@ module.exports = {
                         }
 
                         // Log changes in status
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].show, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`})
                                 .tolerate((err) => {
                                     // Don't throw errors, but log them
                                     sails.log.error(err);
@@ -389,7 +389,7 @@ module.exports = {
                     if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
                     {
                         // Log when bad statuses are now good.
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].dj, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good.`})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].show, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good.`})
                                 .tolerate((err) => {
                                     // Don't throw errors, but log them
                                     sails.log.error(err);

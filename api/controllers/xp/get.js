@@ -8,9 +8,9 @@ module.exports = {
 
     inputs: {
         dj: {
-            type: 'string',
+            type: 'number',
             allowNull: true,
-            description: 'The DJ which to view XP information.'
+            description: 'The DJ ID which to view XP information.'
         }
     },
 
@@ -24,7 +24,7 @@ module.exports = {
 
         try {
             // Get XP records
-            if (inputs.dj && inputs.dj !== null && inputs.dj !== '')
+            if (inputs.dj && inputs.dj !== null)
             {
                 var records = await Xp.find({dj: inputs.dj});
 

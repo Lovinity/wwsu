@@ -1,4 +1,4 @@
-# WWSU 4.3.2
+# WWSU 4.4.0
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -139,7 +139,7 @@ Retrieve an array of show/program attendance logs for a specified date or specif
 | key | criteria |
 |--|--|
 | date | string (optional; a moment.js parsable date that falls within the day to get log attendance records. Defaults to now.) |
-| dj | string (optional; retrieve attendance records for the specified DJ. If provided, date is ignored.) |
+| dj | number (optional; retrieve attendance records for the specified DJ ID. If provided, date is ignored.) |
 | event | string (optional; return attendance records where this string is contained within the record's event field. If provided, date is ignored. If DJ is provided, will further filter by the DJ.) |
 #### Response 200
         [
@@ -148,7 +148,7 @@ Retrieve an array of show/program attendance logs for a specified date or specif
                 "updatedAt": "2018-11-11T00:21:38.000Z",
                 "ID": 747, // attendanceID
                 "unique": "", // If the event coordinates with a Google Calendar event, the GC event ID will be provided here
-                "DJ": null, // If a DJ/Host is applicable, the DJ or Host will be provided here. Otherwise, this will be null.
+                "DJ": null, // If a DJ/Host is applicable, the DJ or Host ID will be provided here. Otherwise, this will be null.
                 "event": "Genre: Default", // The name of the event, along with its operation prefix
                 "showTime": 240, // Amount of onAir time this event had, in minutes. Can be null if it's still on or never aired.
                 "listenerMinutes": 241, // Number of online listener minutes during this event. Can be null if it's still on or never aired.
@@ -268,11 +268,53 @@ Get the internal display sign as HTML webpage; to be run in full screen on the d
 ### /display/refresh
 Send a refresh signal to all connected display signs via websockets. **Requires authorization**.
 #### Response 200 OK
+## DJs
+The DJs endpoint regards the DJs of WWSU Radio.
+### /djs/add
+Add a new DJ to the system. **Requires Authorization**.
+ - DJs who air a show who are not already in the system will be added automatically.
+#### Request
+| key | criteria |
+|--|--|
+| name | string (required; the name of the DJ to add) |
+| login | string (optional; the login this DJ will use for DJ related settings. If null / not provided, the DJ will not be able to manage their own DJ settings.) |
+#### Response 200 OK
+### /djs/edit
+Edits a DJ in the system. **Requires Authorization**.
+#### Request
+| key | criteria |
+|--|--|
+| dj | number (required; the DJ ID to edit) |
+| name | string (optional; the new name for this DJ) |
+| login | string (optional; the new login for this DJ) |
+#### Response 200 OK
+### /djs/get
+Get an array of DJs that are in the system. **Requires Authorization**.
+ - This endpoint supports sockets, uses the "djs" event, and returns data in the structure defined in the websockets section.
+#### Response 200
+        [
+            {
+                "createdAt": "2018-05-29T18:13:01.763Z",
+                "updatedAt": "2018-05-29T18:13:01.763Z",
+                "ID": 7,
+                "name": "George Carlin", // The name of the DJ
+                "login": "", // login ID / pin used for various DJ-level settings
+            },
+            ...
+        ]
+### /djs/remove
+Removes a DJ from the system. **Requires Authorization**.
+ - **NOTE:** Removing a DJ disassociates them from all XP/remote logs, system logs, and analytics. However, those records will still exist in the database.
+#### Request
+| key | criteria |
+|--|--|
+| dj | number (required; the ID of the DJ to remove) |
+#### Response 200 OK
 ## Eas
 Eas endpoints regard the internal WWSU emergency alert system. **These endpoints do not have anything to do with the SAGE Digital ENDEC**; this is internal only.
 ### /eas/get
 Get an array of currently active alerts. 
-This endpoint supports sockets, uses the "eas" event, and returns data in the structure defined in the websockets section.
+ - This endpoint supports sockets, uses the "eas" event, and returns data in the structure defined in the websockets section.
 #### Response 200
         [
             {
@@ -343,7 +385,7 @@ Retrieve an array of online listener counts between specified time periods. **Re
                 "createdAt": "2018-11-08T03:34:33.000Z", // When the listener record was logged. Use this for pinning the listener count to a time stamp.
                 "updatedAt": "2018-11-08T03:34:33.000Z",
                 "ID": 10809,
-                "dj": "", // If this listener record was logged during a show, this will include the name of the DJ / Host
+                "dj": null, // If this listener record was logged during a show, this will include the DJ ID.
                 "listeners": 1 // Number of connected online listeners at this logged time
             },
             ...
@@ -493,7 +535,8 @@ Get the current meta as an object.
 #### Response 200
         {
             state: '', // State of the WWSU system
-            dj: '', // If someone is on the air, host name - show name, or name of sports for sports broadcasts
+            dj: null, // The ID of the DJ currently on the air, or null if not applicable.
+            show: '', // If someone is on the air, host name - show name, or name of sports for sports broadcasts
             showStamp: null, // When a show starts, this is the ISO timestamp which the show began
             attendanceID: null, // The ID of the Attendance record the system is currently running under
             track: '', // Currently playing track either in automation or manually logged
@@ -946,35 +989,18 @@ Access the timesheet web interface.
 #### Request
 #### Response 200 (text/html)
 ## XP
-XP endpoints deal with the XP and remote credits earned by DJs. This is also used for DJ manipulation and retrieving DJs.
-### /xp/add-dj
-Add a new DJ to the system. **Requires Authorization**.
- - DJs who air a show who are not already in the system will be added automatically.
-#### Request
-| key | criteria |
-|--|--|
-| dj | string (required; the name of the DJ to add) |
-#### Response 200 OK
+XP endpoints deal with the XP and remote credits earned by DJs.
 ### /xp/add
 Add XP or remote credits to a DJ. **Requires Authorization**.
 #### Request
 | key | criteria |
 |--|--|
-| dj | string (required; the DJ earning the XP or remote credits) |
+| djs | array (required; an array of DJ IDs earning the XP/remote) |
 | type | string (required; the type. Use "remote" for remote credits, or "xp" for XP.) |
 | subtype | string (required; a monikor for what the XP or remote credits were earned for.) |
 | description | string (optional; A description explaining what this XP or remote credits were earned for.) |
 | amount | number (required; number of XP or remote credits earned.) |
 | date | string (optional; moment.js parsable string of when this XP or remote credits were earned. Defaults to now.) |
-#### Response 200 OK
-### /xp/edit-dj
-Edits a DJ in the system. **Requires Authorization**.
- - If the provided "new" matches the name of a DJ that already exists, then logs and XP of the "old" DJ will be merged with the DJ provided as "new". 
-#### Request
-| key | criteria |
-|--|--|
-| old | string (required; the name of the DJ to edit) |
-| new | string (required; the new name for this DJ) |
 #### Response 200 OK
 ### /xp/edit
 Edit an XP / remote credit entry. **Requires Authorization**.
@@ -982,35 +1008,27 @@ Edit an XP / remote credit entry. **Requires Authorization**.
 | key | criteria |
 |--|--|
 | ID | number (required; the ID of the record to edit) |
+| dj | number (optional; the DJ Id that this record belongs to) |
 | type | string (optional; the type. Use "remote" for remote credits, or "xp" for XP. If provided, the original value will be overwritten with this.) |
 | subtype | string (optional; a monikor for what the XP or remote credits were earned for. If provided, the original value will be overwritten with this.) |
 | description | string (optional; A description explaining what this XP or remote credits were earned for. If provided, the original value will be overwritten with this.) |
 | amount | number (optional; number of XP or remote credits earned. If provided, the original value will be overwritten with this.) |
 | date | string (optional; moment.js parsable string of when this XP or remote credits were earned. If provided, the original value will be overwritten with this.) |
 #### Response 200 OK
-### /xp/get-djs
-Get an array of DJs that are in the system. **Requires Authorization**.
-#### Response 200
-        [
-            {
-                "dj": "George Carlin" // The name of the DJ
-            },
-            ...
-        ]
 ### /xp/get
 Get the XP / remote credits earned by a DJ. **Requires Authorization**.
  - This endpoint supports sockets, uses the "xp" event, and returns data in the structure defined in the websockets section. A socket is only subscribed to if dj is not provided.
 #### Request
 | key | criteria |
 |--|--|
-| dj | string (optional; the name of the DJ to get XP / remotes for. If not provided, the endpoint will simply return "OK" but will subscribe to the xp event if the request was a socket.) |
+| dj | number (optional; the ID of the DJ to get XP / remotes for. If not provided, the endpoint will simply return "OK" but will subscribe to the xp event if the request was a socket.) |
 #### Response 200
         [
             {
                 "createdAt": "2018-05-29T18:13:01.763Z", // ISO date string of when the XP was earned
                 "updatedAt": "2018-05-29T18:13:01.763Z",
                 "ID": 7,
-                "dj": "George Carlin", // Name of the DJ that this record applied to
+                "dj": 5, // ID of the DJ that this record applied to
                 "type": "remote", // Either "xp" for XP, or "remote" for remote credits. Could also be "add-dj" which is a blank entry to register a new DJ in the system.
                 "subtype": "remote-sports", // A monikor to further categorize the reason for the earned XP or remotes.
                 "description": null, // A description provided for this record. Could be null.
@@ -1018,14 +1036,6 @@ Get the XP / remote credits earned by a DJ. **Requires Authorization**.
             },
             ...
         ]
-#### Response 200 OK
-### /xp/remove-dj
-Removes a DJ from the system. **Requires Authorization**.
- - **NOTE:** Removing a DJ removes all of their XP and remote credit records and disassociates them from all attendance logs. However, the attendance logs themselves will remain in the system.
-#### Request
-| key | criteria |
-|--|--|
-| dj | string (required; the name of the DJ to remove) |
 #### Response 200 OK
 ### /xp/remove
 Removes an XP record (removes XP / remote credits). **Requires Authorization**.

@@ -68,7 +68,7 @@ module.exports = {
             }
 
             // Send meta early so that DJ Controls does not think this person is interfering with another show
-            await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null});
+            await Meta.changeMeta({show: inputs.showname, topic: inputs.topic, trackStamp: null});
 
             // If we are not already in live mode, prepare to go live in RadioDJ
             if (!Meta['A'].state.startsWith("live_") || Meta['A'].state === 'live_prerecord')
@@ -85,18 +85,18 @@ module.exports = {
                 await sails.helpers.error.count('stationID');
 
                 // Queue a show opener if applicable
-                if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
+                if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                 {
-                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Openers"]], 'Bottom', 1);
+                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Openers"]], 'Bottom', 1);
                 } else {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
 
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_live', dj: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             } else {
                 // Otherwise, just update metadata but do not do anything else
-                await Meta.changeMeta({dj: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
             }
 
             await sails.helpers.error.reset('automationBreak');

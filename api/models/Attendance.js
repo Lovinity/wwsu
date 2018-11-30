@@ -21,7 +21,7 @@ module.exports = {
         },
 
         DJ: {
-            type: 'string',
+            type: 'number',
             allowNull: true
         },
 
@@ -104,16 +104,6 @@ module.exports = {
             try {
                 sails.log.debug(`Attendance.createRecord called.`);
 
-                // Strip DJ if it exists
-                var dj = event;
-                if (dj.includes(" - "))
-                {
-                    dj = dj.split(" - ")[0];
-                    dj = dj.substring(dj.indexOf(": ") + 2);
-                } else {
-                    dj = null;
-                }
-
                 // Store the current ID in a variable; we want to start a new record before processing the old one
                 var currentID = Meta['A'].attendanceID;
 
@@ -126,9 +116,9 @@ module.exports = {
 
                 if (record.length > 0)
                 {
-                    created = await Attendance.create({unique: record[0].unique, DJ: dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true)}).fetch();
+                    created = await Attendance.create({unique: record[0].unique, DJ: Meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true)}).fetch();
                 } else {
-                    created = await Attendance.create({DJ: dj, event: event, actualStart: moment().toISOString(true)}).fetch();
+                    created = await Attendance.create({DJ: Meta['A'].dj, event: event, actualStart: moment().toISOString(true)}).fetch();
                 }
 
                 // Switch to the new record in the system
@@ -140,39 +130,42 @@ module.exports = {
                     // Get Attendance record
                     var currentRecord = await Attendance.findOne({ID: currentID});
 
-                    // Pre-load update data
-                    var updateData = {showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true)};
-
-                    // Fetch listenerRecords since beginning of Attendance, as well as the listener count prior to start of attendance record.
-                    var listenerRecords = await Listeners.find({createdAt: {'>=': currentRecord.actualStart}}).sort("createdAt ASC");
-                    var prevListeners = await Listeners.find({'createdAt': {'<=': currentRecord.actualStart}}).sort('createdAt DESC').limit(1) || 0;
-                    if (prevListeners[0])
-                        prevListeners = prevListeners[0].listeners || 0;
-
-                    // Calculate listener minutes
-                    var prevTime = moment(currentRecord.actualStart);
-                    var listenerMinutes = 0;
-
-                    if (listenerRecords && listenerRecords.length > 0)
+                    if (currentRecord)
                     {
-                        listenerRecords.map(listener => {
-                            listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
-                            prevListeners = listener.listeners;
-                            prevTime = moment(listener.createdAt);
-                        });
+                        // Pre-load update data
+                        var updateData = {showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true)};
 
-                        // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-                        listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+                        // Fetch listenerRecords since beginning of Attendance, as well as the listener count prior to start of attendance record.
+                        var listenerRecords = await Listeners.find({createdAt: {'>=': currentRecord.actualStart}}).sort("createdAt ASC");
+                        var prevListeners = await Listeners.find({'createdAt': {'<=': currentRecord.actualStart}}).sort('createdAt DESC').limit(1) || 0;
+                        if (prevListeners[0])
+                            prevListeners = prevListeners[0].listeners || 0;
 
-                        listenerMinutes = Math.round(listenerMinutes);
-                        updateData.listenerMinutes = listenerMinutes;
+                        // Calculate listener minutes
+                        var prevTime = moment(currentRecord.actualStart);
+                        var listenerMinutes = 0;
+
+                        if (listenerRecords && listenerRecords.length > 0)
+                        {
+                            listenerRecords.map(listener => {
+                                listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+                                prevListeners = listener.listeners;
+                                prevTime = moment(listener.createdAt);
+                            });
+
+                            // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
+                            listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+
+                            listenerMinutes = Math.round(listenerMinutes);
+                            updateData.listenerMinutes = listenerMinutes;
+                        }
+
+                        // Update the attendance record with the data
+                        await Attendance.update({ID: currentID}, updateData);
+
+                        // Recalculate weekly analytics
+                        await sails.helpers.attendance.calculateStats();
                     }
-
-                    // Update the attendance record with the data
-                    await Attendance.update({ID: currentID}, updateData);
-
-                    // Recalculate weekly analytics
-                    await sails.helpers.attendance.calculateStats();
                 }
 
                 return resolve();

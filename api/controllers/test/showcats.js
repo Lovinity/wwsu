@@ -9,8 +9,8 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        if (typeof sails.config.custom.showcats[Meta['A'].dj] !== 'undefined')
-            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].dj]["Show Returns"]], 'Bottom', 1);
+        if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
+            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Returns"]], 'Bottom', 1);
         return exits.success(sails.config.custom.showcats);
 
     }

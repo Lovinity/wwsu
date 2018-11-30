@@ -14,17 +14,18 @@ module.exports = {
             type: 'number',
             autoIncrement: true
         },
-        
+
         dj: {
-            type: 'string'
+            type: 'number',
+            allowNull: true
         },
-        
+
         listeners: {
             type: 'number'
         }
 
     },
-    
+
     memory: {dj: null, listeners: null} // Used to track when listener count or DJ changes; only adds entries in the database when things change, so that it doesn't get flooded with rows.
 
 };

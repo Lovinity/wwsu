@@ -462,7 +462,7 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.requests.queue(3, true, true);
 
                         // Switch back to automation
-                        await Meta.changeMeta({changingState: null, state: 'automation_on', genre: '', dj: '', topic: '', playlist: null, playlist_position: 0});
+                        await Meta.changeMeta({changingState: null, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlist_position: 0});
 
                         // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
                         await Calendar.preLoadEvents();
@@ -487,8 +487,8 @@ module.exports.bootstrap = async function (done) {
                     {
                         await Meta.changeMeta({state: 'live_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        await Attendance.createRecord(`Show: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Attendance.createRecord(`Show: ${Meta['A'].show}`);
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -499,8 +499,8 @@ module.exports.bootstrap = async function (done) {
                     {
                         await Meta.changeMeta({state: 'sports_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -514,8 +514,8 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
-                        await Attendance.createRecord(`Remote: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -529,8 +529,8 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
-                        await Attendance.createRecord(`Sports: ${Meta['A'].dj}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].dj, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -594,7 +594,7 @@ module.exports.bootstrap = async function (done) {
                     } else {
                         if (Meta['A'].breakneeded && n >= 10)
                         {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].dj, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].dj}`})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].show}`})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -701,12 +701,7 @@ module.exports.bootstrap = async function (done) {
                                     // Add XP for prerecords
                                     if (Meta['A'].state === 'live_prerecorded')
                                     {
-                                        var dj = Meta['A'].dj;
-                                        if (dj.includes(" - "))
-                                        {
-                                            dj = dj.split(" - ")[0];
-                                        }
-                                        await Xp.create({dj: dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.`})
+                                        await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.`})
                                                 .tolerate((err) => {
                                                     // Do not throw for error, but log it
                                                     sails.log.error(err);
@@ -841,26 +836,14 @@ module.exports.bootstrap = async function (done) {
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5}]);
                                 publicStream = true;
 
-                                var dj = '';
-
-                                // Do not tie DJ with listener count unless DJ is actually on the air
-                                if (!Meta['A'].state.startsWith("automation_"))
-                                {
-                                    dj = Meta['A'].dj;
-                                    if (dj.includes(" - "))
-                                    {
-                                        dj = dj.split(" - ")[0];
-                                    }
-                                }
-
                                 // Log listeners if there are any changes
-                                if (dj !== Listeners.memory.dj || streams[0].uniquelisteners !== Listeners.memory.listeners)
+                                if (Meta['A'].dj !== Listeners.memory.dj || streams[0].uniquelisteners !== Listeners.memory.listeners)
                                 {
-                                    await Listeners.create({dj: dj, listeners: streams[0].uniquelisteners})
+                                    await Listeners.create({dj: Meta['A'].dj, listeners: streams[0].uniquelisteners})
                                             .tolerate((err) => {
                                             });
                                 }
-                                Listeners.memory = {dj: dj, listeners: streams[0].uniquelisteners};
+                                Listeners.memory = {dj: Meta['A'].dj, listeners: streams[0].uniquelisteners};
                             } else {
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Stream is offline. It should be online!', status: 2}]);
                             }

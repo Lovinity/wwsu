@@ -1,4 +1,4 @@
-/* global moment, sails, Attendance */
+/* global moment, sails, Attendance, Djs */
 
 module.exports = {
 
@@ -16,7 +16,7 @@ module.exports = {
             description: `moment() parsable string of a date to get logs.`
         },
         dj: {
-            type: 'string',
+            type: 'number',
             allowNull: true,
             description: `Retrieve attendance records for the specified DJ. If provided, date is ignored.`
         },
@@ -42,13 +42,16 @@ module.exports = {
                     sails.sockets.join(this.req, 'attendance');
                     sails.log.verbose('Request was a socket. Joining attendance.');
                 }
-                
+
                 var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(1, 'days');
                 query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
             } else {
+
                 if (inputs.dj && inputs.dj !== null && inputs.dj !== '')
-                    query.DJ = inputs.dj;
+                {
+                        query.DJ = inputs.dj;
+                }
 
                 if (inputs.event && inputs.event !== null && inputs.event !== '')
                     query.event = {'contains': inputs.event};

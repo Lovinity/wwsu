@@ -21,17 +21,11 @@ module.exports = {
             // Calculate XP if exiting prerecord
             if (Meta['A'].state === 'live_prerecord')
             {
-                var dj = Meta['A'].dj;
-                if (dj.includes(" - "))
-                {
-                    dj = dj.split(" - ")[0];
-                }
-
                 // Award XP based on time on the air
                 var showTime = moment().diff(moment(Meta['A'].showStamp), 'minutes');
                 var showXP = Math.round(showTime / sails.config.custom.XP.prerecordShowMinutes);
 
-                await Xp.create({dj: dj, type: 'xp', subtype: 'showtime', amount: showXP, description: `Prerecord was on the air for ${showTime} minutes.`})
+                await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'showtime', amount: showXP, description: `Prerecord was on the air for ${showTime} minutes.`})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -39,7 +33,7 @@ module.exports = {
 
                 // Calculate number of listener minutes for the show, and award XP based on configured values.
                 var listenerMinutes = 0;
-                var listeners = await Listeners.find({dj: dj, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort("createdAt ASC")
+                var listeners = await Listeners.find({dj: Meta['A'].dj, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort("createdAt ASC")
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -62,7 +56,7 @@ module.exports = {
                     listenerMinutes = Math.round(listenerMinutes);
                     var listenerXP = Math.round(listenerMinutes / sails.config.custom.XP.prerecordListenerMinutes);
 
-                    await Xp.create({dj: dj, type: 'xp', subtype: 'listeners', amount: listenerXP, description: `There were ${listenerMinutes} online listener minutes during the prerecord.`})
+                    await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'listeners', amount: listenerXP, description: `There were ${listenerMinutes} online listener minutes during the prerecord.`})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);

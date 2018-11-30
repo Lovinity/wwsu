@@ -22,7 +22,7 @@ module.exports = {
         try {
             
             // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: Meta['A'].dj, event: 'Top Add requested.'})
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: Meta['A'].show, event: 'Top Add requested.'})
                     .tolerate((err) => {
                         // Do not throw for an error, but log it.
                         sails.log.error(err);
@@ -38,12 +38,7 @@ module.exports = {
             // Earn XP for playing a Top Add, if the show is live
             if (Meta['A'].state.startsWith("live_"))
             {
-                var dj = Meta['A'].dj;
-                if (dj.includes(" - "))
-                {
-                    dj = dj.split(" - ")[0];
-                }
-                await Xp.create({dj: dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: "DJ played a Top Add."})
+                await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: "DJ played a Top Add."})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
