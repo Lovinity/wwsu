@@ -1089,7 +1089,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    var temp = Meta.dj.split(" - ");
+                    var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -1128,7 +1128,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    var temp = Meta.dj.split(" - ");
+                    var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -1175,8 +1175,8 @@ function processNowPlaying(response)
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
-                    countdowntext.innerHTML = `<span class="text-success">${Meta.dj}</span><br />about to broadcast in`;
-                    responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.dj}, is about to begin on WWSU radio.`);
+                    countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span><br />about to broadcast in`;
+                    responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.show}, is about to begin on WWSU radio.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1205,7 +1205,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    var temp = Meta.dj.split(" - ");
+                    var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flip" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em;" id="countdown-text"></h1>
                     <div class="m-3" style="color: #FFCDD2; font-size: 15em;" id="countdown-clock">?</div>
@@ -1290,8 +1290,8 @@ function processNowPlaying(response)
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
-                    countdowntext.innerHTML = `<span class="text-success">${Meta.dj}</span></br>returning in`;
-                    responsiveVoice.speak(`Raider up! The broadcast of ${Meta.dj} is about to resume.`);
+                    countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span></br>returning in`;
+                    responsiveVoice.speak(`Raider up! The broadcast of ${Meta.show} is about to resume.`);
                 }
                 if (queuelength >= 15)
                 {
@@ -1422,16 +1422,16 @@ function doSlide(same = false)
                     var innercontent = ``;
                     if (Meta.topic.length > 2)
                     {
-                        innercontent = `<h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+                        innercontent = `<h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
                             innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
                         } else {
                             innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
                         }
-                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic.replace(/[\r\n]+/g, ' ')}</div></div>`;
+                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic}</div></div>`;
                     } else {
-                        innercontent = `<h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.dj}</h2>`;
+                        innercontent = `<h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
                             innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
@@ -2048,7 +2048,7 @@ function doSlide(same = false)
                 $('#slide').animateCss('fadeOutUp', function () {
                     if (Meta.state.startsWith("live_"))
                     {
-                        var temp = Meta.dj.split(" - ");
+                        var temp = Meta.show.split(" - ");
                         content.innerHTML = `<div class="animated bounceIn">
                     <div style="text-align: center; width: 100%; font-size: 4em; color: #FFFFFF;">Interested in being <div class="text-warning jump-text">on the air</div>just like <span class="text-danger">${temp[0]}</span>?</div>
                             <div id="thebottom">

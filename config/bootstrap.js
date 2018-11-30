@@ -488,7 +488,7 @@ module.exports.bootstrap = async function (done) {
                         await Meta.changeMeta({state: 'live_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Show: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -500,7 +500,7 @@ module.exports.bootstrap = async function (done) {
                         await Meta.changeMeta({state: 'sports_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -515,7 +515,7 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -530,7 +530,7 @@ module.exports.bootstrap = async function (done) {
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                         await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].dj + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
