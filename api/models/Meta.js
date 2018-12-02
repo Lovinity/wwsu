@@ -266,9 +266,9 @@ module.exports = {
                                 push2.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.automation}`;
                                 push2.percent = 0;
                             } else {
-                                push2.line1 = await sails.helpers.filterProfane(`Now playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`);
-                                push2.line2 = push2.requested ? await sails.helpers.filterProfane(`Requested by: ${push2.requestedBy || "Anonymous"}`) : '';
-                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.line1 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.automation}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`);
+                                push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"}`) : '';
+                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
                             }
 
                             // Playlist automation
@@ -278,13 +278,13 @@ module.exports = {
                             if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(Meta['A'].trackIDSubcat || 0) > -1) || Meta['A'].trackArtist.includes("Unknown Artist") || Meta['A'].trackArtist === null || Meta['A'].trackArtist === '')
                             {
                                 push2.line1 = sails.config.custom.meta.alt.playlist;
-                                push2.line2 = `Playlist: ${Meta['A'].playlist}`;
+                                push2.line2 = `${sails.config.custom.meta.prefix.playlist}${Meta['A'].playlist}`;
                                 push2.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.playlist}`;
                                 push2.percent = 0;
                             } else {
-                                push2.line1 = await sails.helpers.filterProfane(`Now playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`);
-                                push2.line2 = push2.requested ? await sails.helpers.filterProfane(`Requested by: ${push2.requestedBy || "Anonymous"}`) : `Playlist: ${Meta['A'].playlist}`;
-                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.line1 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.automation}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`);
+                                push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"}`) : `${sails.config.custom.meta.prefix.playlist}${Meta['A'].playlist}`;
+                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
                             }
 
                             // Genre automation
@@ -294,13 +294,13 @@ module.exports = {
                             if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(Meta['A'].trackIDSubcat || 0) > -1) || Meta['A'].trackArtist.includes("Unknown Artist") || Meta['A'].trackArtist === null || Meta['A'].trackArtist === '')
                             {
                                 push2.line1 = sails.config.custom.meta.alt.genre;
-                                push2.line2 = `Genre: ${Meta['A'].genre}`;
+                                push2.line2 = `${sails.config.custom.meta.prefix.genre}${Meta['A'].genre}`;
                                 push2.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.genre}`;
                                 push2.percent = 0;
                             } else {
-                                push2.line1 = await sails.helpers.filterProfane(`Now playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`);
-                                push2.line2 = push2.requested ? await sails.helpers.filterProfane(`Requested by: ${push2.requestedBy || "Anonymous"}`) : `Genre: ${Meta['A'].genre}`;
-                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.line1 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.automation}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`);
+                                push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"}`) : `${sails.config.custom.meta.prefix.genre}${Meta['A'].genre}`;
+                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.genre}${push2.requestedBy || "Anonymous"})` : ``}`);
                             }
 
                             // Live shows
@@ -309,14 +309,14 @@ module.exports = {
                             // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
                             if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(Meta['A'].trackIDSubcat || 0) > -1) || Meta['A'].trackArtist.includes("Unknown Artist") || Meta['A'].trackArtist === null || Meta['A'].trackArtist === '')
                             {
-                                push2.line1 = `On the Air: ${Meta['A'].show}`;
+                                push2.line1 = `${sails.config.custom.meta.prefix.live}${Meta['A'].show}`;
                                 push2.line2 = sails.config.custom.meta.alt.live;
                                 push2.stream = `${Meta['A'].show} (${sails.config.custom.meta.alt.live})`;
                                 push2.percent = 0;
                             } else {
-                                push2.line1 = `On the Air: ${Meta['A'].show}`;
-                                push2.line2 = await sails.helpers.filterProfane(`Playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
-                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.line1 = `${sails.config.custom.meta.prefix.live}${Meta['A'].show}`;
+                                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
                             }
 
                             // Prerecorded shows
@@ -325,14 +325,14 @@ module.exports = {
                             // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
                             if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(Meta['A'].trackIDSubcat || 0) > -1) || Meta['A'].trackArtist.includes("Unknown Artist") || Meta['A'].trackArtist === null || Meta['A'].trackArtist === '')
                             {
-                                push2.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
+                                push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${Meta['A'].playlist}`;
                                 push2.line2 = sails.config.custom.meta.alt.prerecord;
                                 push2.stream = `${Meta['A'].playlist} (${sails.config.custom.meta.alt.prerecord})`;
                                 push2.percent = 0;
                             } else {
-                                push2.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
-                                push2.line2 = await sails.helpers.filterProfane(`Playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
-                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${Meta['A'].playlist}`;
+                                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
                             }
 
                             // Remote broadcasts
@@ -341,40 +341,40 @@ module.exports = {
                             // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
                             if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(Meta['A'].trackIDSubcat || 0) > -1) || Meta['A'].trackArtist.includes("Unknown Artist") || Meta['A'].trackArtist === null || Meta['A'].trackArtist === '')
                             {
-                                push2.line1 = `Broadcasting: ${Meta['A'].show}`;
+                                push2.line1 = `${sails.config.custom.meta.prefix.remote}${Meta['A'].show}`;
                                 push2.line2 = sails.config.custom.meta.alt.remote;
                                 push2.stream = `${Meta['A'].show} (${sails.config.custom.meta.alt.remote})`;
                                 push2.percent = 0;
                             } else {
-                                push2.line1 = `Broadcasting: ${Meta['A'].show}`;
-                                push2.line2 = await sails.helpers.filterProfane(`Playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
-                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(Requested by: ${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.line1 = `${sails.config.custom.meta.prefix.remote}${Meta['A'].show}`;
+                                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
+                                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || "Anonymous"})` : ``}`);
                             }
 
                             // Sports broadcasts
                         } else if (Meta['A'].state.startsWith("sports_") || Meta['A'].state.startsWith("sportsremote_"))
                         {
                             // We do not ever want to display what we are playing when broadcasting sports; always use alt meta
-                            push2.line1 = `Raider Sports: ${Meta['A'].show}`;
+                            push2.line1 = `${sails.config.custom.meta.prefix.sports}${Meta['A'].show}`;
                             push2.line2 = sails.config.custom.meta.alt.sports;
-                            push2.stream = `Raider Sports - ${Meta['A'].show} (${sails.config.custom.meta.alt.sports})`;
+                            push2.stream = `WWSU 106.9FM - ${Meta['A'].show} (${sails.config.custom.meta.alt.sports})`;
                             push2.percent = 0;
                         }
 
                         // Overwrite line 2 of the metadata if a broadcast is about to begin
                         if (Meta['A'].state === 'automation_live')
                         {
-                            push2.line2 = `About to go live: ${Meta['A'].show}`;
+                            push2.line2 = `${sails.config.custom.meta.prefix.pendLive}${Meta['A'].show}`;
                             // Prerecord about to begin
                         } else if (Meta['A'].state === 'automation_prerecord')
                         {
-                            push2.line2 = `Prerecord about to start: ${Meta['A'].show}`;
+                            push2.line2 = `${sails.config.custom.meta.prefix.pendPrerecord}${Meta['A'].show}`;
                         } else if (Meta['A'].state === 'automation_remote')
                         {
-                            push2.line2 = `About to begin broadcast: ${Meta['A'].show}`;
+                            push2.line2 = `${sails.config.custom.meta.prefix.pendRemote}${Meta['A'].show}`;
                         } else if (Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote')
                         {
-                            push2.line2 = `About to begin Raider Sports: ${Meta['A'].show}`;
+                            push2.line2 = `${sails.config.custom.meta.prefix.pendSports}${Meta['A'].show}`;
                         }
 
                         // Log the new track playing if the track was new
@@ -421,30 +421,30 @@ module.exports = {
                         // Live shows
                         if (Meta['A'].state.startsWith("live_") && Meta['A'].state !== 'live_prerecord')
                         {
-                            push2.line1 = `On the Air: ${Meta['A'].show}`;
-                            push2.line2 = manual ? await sails.helpers.filterProfane(`Playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : ``;
-                            push2.stream = manual ? await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : await sails.helpers.filterProfane(`${Meta['A'].dj} (LIVE)`);
+                            push2.line1 = `${sails.config.custom.meta.prefix.live}${Meta['A'].show}`;
+                            push2.line2 = manual ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : ``;
+                            push2.stream = manual ? await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : await sails.helpers.filterProfane(`${Meta['A'].show} (LIVE)`);
 
                             // Prerecorded shows (should never happen; this is an error!)
                         } else if (Meta['A'].state === 'live_prerecord')
                         {
-                            push2.line1 = `Prerecorded Show: ${Meta['A'].playlist}`;
+                            push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${Meta['A'].playlist}`;
                             push2.line2 = `Error! No audio playing.`;
                             push2.stream = await sails.helpers.filterProfane(`${Meta['A'].show} (PRERECORD)`);
 
                             // Remote Broadcasts
                         } else if (Meta['A'].state.startsWith("remote_"))
                         {
-                            push2.line1 = `Broadcasting: ${Meta['A'].show}`;
-                            push2.line2 = manual ? await sails.helpers.filterProfane(`Playing: ${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : ``;
-                            push2.stream = manual ? await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : await sails.helpers.filterProfane(`${Meta['A'].dj} (LIVE)`);
+                            push2.line1 = `${sails.config.custom.meta.prefix.remote}${Meta['A'].show}`;
+                            push2.line2 = manual ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : ``;
+                            push2.stream = manual ? await sails.helpers.filterProfane(`${Meta['A'].trackArtist || "Unknown Artist"} - ${Meta['A'].trackTitle || "Unknown Title"}`) : await sails.helpers.filterProfane(`${Meta['A'].show} (LIVE)`);
 
                             // Sports; we don't want to ever display what we are playing
                         } else if (Meta['A'].state.startsWith("sports_") || Meta['A'].state.startsWith("sportsremote_"))
                         {
-                            push2.line1 = `Raider Sports: ${Meta['A'].show}`;
+                            push2.line1 = `${sails.config.custom.meta.prefix.sports}${Meta['A'].show}`;
                             push2.line2 = ``;
-                            push2.stream = `Raider Sports - ${Meta['A'].show} (LIVE)`;
+                            push2.stream = `WWSU 106.9FM - ${Meta['A'].show} (LIVE)`;
 
                             // Regular automation (should never happen; this is an error!)
                         } else if (Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre')
@@ -456,13 +456,13 @@ module.exports = {
                         } else if (Meta['A'].state === 'automation_playlist')
                         {
                             push2.line1 = `Error! No audio playing.`;
-                            push2.line2 = `Playlist: ${Meta['A'].playlist}`;
+                            push2.line2 = `${sails.config.custom.meta.prefix.playlist}${Meta['A'].playlist}`;
 
                             // Genre automation (should never happen; this is an error!)
-                        } else if (Meta['A'].state === 'automation_playlist')
+                        } else if (Meta['A'].state === 'automation_genre')
                         {
                             push2.line1 = `Error! No audio playing.`;
-                            push2.line2 = `Genre: ${Meta['A'].genre}`;
+                            push2.line2 = `${sails.config.custom.meta.prefix.genre}${Meta['A'].genre}`;
                         }
                     }
                 }

@@ -215,6 +215,51 @@ module.exports.custom = {
 
             // Meta text to use when playing something in automation during a sports broadcast (live or remote)
             sports: `We'll get back to the sports broadcast shortly...`
+        },
+
+        // This is a collection of prefixes to add to metadata for various types of programming.
+        // NOTE: If you do not add a space at the end of the string, no space will be added automatically!
+        prefix: {
+
+            // During automation, genre, and playlist... this prefix will appear before the currently playing track on line 1 of metadata.
+            automation: `Playing: `,
+
+            // During genre, this will appear before the genre currently airing on line 2 of metadata.
+            genre: `Genre: `,
+
+            // During a playlist, this will appear before the playlist currently airing on line 2 of metadata
+            playlist: `Playlist: `,
+
+            // When playing a track request in automation, genre, or playlist... this will appear before the name of the person requesting the track on line 2 of metadata.
+            request: `Requested By: `,
+
+            // When a live show is about to begin, this will appear before the host - show on line 2 of metadata.
+            pendLive: `Coming Up: `,
+
+            // When a prerecorded show is about to begin, this will appear before the prerecord name on line 2 of metadata.
+            pendPrerecord: `Coming Up: `,
+
+            // When a remote broadcast is about to begin, this will appear before the host - show on line 2 of metadata.
+            pendRemote: `Coming Up: `,
+
+            // When a sports broadcast is about to begin, this will appear before the sport on line 2 of metadata.
+            pendSports: `Coming Up: Raider Sports - `,
+
+            // During a prerecorded show, this will appear before the name of the prerecord on line 1 of metadata.
+            prerecord: `On the Air: `,
+
+            // During a live show, this will appear before the host - show on line 1 of metadata.
+            live: `On the Air: `,
+
+            // During a remote broadcast, this will appear before the host - show on line 1 of metadata
+            remote: `Broadcasting: `,
+
+            // During a sports broadcast, this will appear before the sport being aired on line 1 of metadata
+            sports: `Raider Sports: `,
+            
+            // In a live, remote, sports, or prerecorded show... this will appear before the track name on line 2 of metadata when something is being played
+            playing: `Playing: `
+
         }
     },
 
