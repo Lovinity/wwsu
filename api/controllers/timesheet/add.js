@@ -48,7 +48,7 @@ module.exports = {
                     toapprove = true;
 
                 // Add the time_out entry
-                await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(true), approved: toapprove});
+                await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(true), approved: toapprove}).fetch();
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: false, since: thetime.toISOString(true)})
@@ -63,7 +63,7 @@ module.exports = {
                     toapprove = true;
 
                 // Clock-ins need a new entry
-                await Timesheet.create({name: record.name, time_in: thetime.toISOString(true), approved: toapprove});
+                await Timesheet.create({name: record.name, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
 
                 // Update the director presence
                 await Directors.update({login: inputs.login}, {present: true, since: thetime.toISOString(true)})
