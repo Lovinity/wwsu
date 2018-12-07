@@ -1,4 +1,4 @@
-# WWSU 4.4.0
+# WWSU 4.4.3
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -983,11 +983,10 @@ Add a timesheet entry into the system.
 #### Response 200 OK
 #### Response 404
 ### /timesheet/edit
-Edit a specific timesheet entry.
+Edit a specific timesheet entry. **Requires authorization**
 #### Request
 | key | criteria |
 |--|--|
-| admin | string (required; the OpenProject login of an administrator) |
 | ID | number (required; the ID of the timesheet entry to be edited) |
 | time_in | string (required; a moment.js valid timestamp indicating when the director clocked in) |
 | time_out | string (a moment.js valid timestamp indicating when the director clocked out. Use null if the director has not clocked out yet. Defaults to null.) |
