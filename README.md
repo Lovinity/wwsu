@@ -996,6 +996,7 @@ Edit a specific timesheet entry. **Requires authorization**
 #### Response 404
 ### /timesheet/get
 Return an array of timesheet entries for the week.
+ - This endpoint supports sockets, uses the "timesheet" event, and returns data in the structure defined in the websockets section. Socket is only subscribed to if parameter date is not provided in the request.
 #### Request
 | key | criteria |
 |--|--|
