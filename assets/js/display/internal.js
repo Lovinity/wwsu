@@ -1310,6 +1310,10 @@ function processAnnouncements() {
                                 window.requestAnimationFrame(function () {
                                     getPageSize();
                                     scalePages($page, pageWidth, pageHeight);
+                                    setTimeout(function () {
+                                        getPageSize();
+                                        scalePages($page, pageWidth, pageHeight);
+                                    }, 500);
                                 });
 
 
@@ -1319,7 +1323,7 @@ function processAnnouncements() {
                                 }
 
                                 function scalePages(page, maxWidth, maxHeight) {
-                                    page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
+                                    page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 80)}%`);
                                     var scaleX = 1, scaleY = 1;
                                     scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
                                     scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;
@@ -1373,6 +1377,10 @@ function processAnnouncements() {
                                 window.requestAnimationFrame(function () {
                                     getPageSize();
                                     scalePages($page, pageWidth, pageHeight);
+                                    setTimeout(function () {
+                                        getPageSize();
+                                        scalePages($page, pageWidth, pageHeight);
+                                    }, 500);
                                 });
 
 
@@ -1382,7 +1390,7 @@ function processAnnouncements() {
                                 }
 
                                 function scalePages(page, maxWidth, maxHeight) {
-                                    page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
+                                    page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 80)}%`);
                                     var scaleX = 1, scaleY = 1;
                                     scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
                                     scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;

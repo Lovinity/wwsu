@@ -62,17 +62,17 @@ try {
 
 // Create a seek progress bar in the Meta box
 // DEPRECATED: We no longer support Meta.percent in WWSU
-/*
-    var bar = new ProgressBar.Line(nowplayingseek, {
-        strokeWidth: 4,
-        easing: 'easeInOut',
-        duration: 1000,
-        color: '#FFFFFF',
-        trailColor: 'rgba(0, 0, 0, 0)',
-        trailWidth: 1,
-        svgStyle: {width: '100%', height: '100%'}
-    });
-    */
+    /*
+     var bar = new ProgressBar.Line(nowplayingseek, {
+     strokeWidth: 4,
+     easing: 'easeInOut',
+     duration: 1000,
+     color: '#FFFFFF',
+     trailColor: 'rgba(0, 0, 0, 0)',
+     trailWidth: 1,
+     svgStyle: {width: '100%', height: '100%'}
+     });
+     */
 
     // Define default settings for iziToast (overlaying messages)
     iziToast.settings({
@@ -2456,6 +2456,10 @@ function processAnnouncements() {
                                 window.requestAnimationFrame(function () {
                                     getPageSize();
                                     scalePages($page, pageWidth, pageHeight);
+                                    setTimeout(function () {
+                                        getPageSize();
+                                        scalePages($page, pageWidth, pageHeight);
+                                    }, 500);
                                 });
 
                                 function getPageSize() {
