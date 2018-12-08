@@ -31,7 +31,29 @@ module.exports = {
             type: 'boolean',
             defaultsTo: false
         }
-    }
+    },
+    
+        // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`timesheet socket: ${data}`);
+        sails.sockets.broadcast('timesheet', 'timesheet', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.log.silly(`timesheet socket: ${data}`);
+        sails.sockets.broadcast('timesheet', 'timesheet', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`timesheet socket: ${data}`);
+        sails.sockets.broadcast('timesheet', 'timesheet', data);
+        return proceed();
+    },
 
 };
 

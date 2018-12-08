@@ -14,23 +14,7 @@ $(document).ready(function () {
         var lastDate = moment(value, "MM/DD/YYYY").day(6).format("MM/DD/YYYY");
         $("#weekly-date-picker").val(firstDate);
     });
-
-    document.querySelector(`#timesheet-records`).addEventListener("click", function (e) {
-        try {
-            if (e.target) {
-                if (e.target.id.startsWith(`timesheet-t`))
-                {
-                    editClock(parseInt(e.target.id.replace(`timesheet-t-`, ``)));
-                }
-            }
-        } catch (err) {
-        }
-    });
 });
-
-function closeModal() {
-    $('#clockModal').modal('hide');
-}
 
 var theopts = {};
 var timesheets = [];
@@ -39,68 +23,6 @@ function escapeHTML(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
-}
-
-// Edit a timesheet entry, or view a single entry
-function editClock(clockID, save = false) {
-    console.log(`editClock called.`);
-    var modalBody = document.getElementById('clock-body');
-    if (!save)
-    {
-        $('#clockModal').modal('show');
-        modalBody.innerHTML = 'Loading clock...';
-    }
-    $('#trackModal').modal('handleUpdate');
-
-    // View an entry
-    if (!save)
-    {
-        var opened = false;
-        timesheets
-                .filter(timesheet => timesheet.ID === clockID)
-                .map(timesheet => {
-                    modalBody.innerHTML = `<form action="javascript:editClock(${clockID}, true)"><div class="form-group">
-        <label for="uid">Username of admin:</label>
-        <input type="text" class="form-control" id="uid" value="U">
-        <label for="clock-in">Clock In:</label>
-        <input type="text" class="form-control" id="clock-in" value="${moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss')}">
-        <label for="clock-out">Clock Out:</label>
-        <input type="text" class="form-control" id="clock-out" value="${moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss')}">
-                <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="clock-approved" ${(timesheet.approved) ? 'checked' : ''}>
-                            <label class="form-check-label" for="clock-approved">
-                                Approved Record
-                            </label>
-                        </div>
-        <button type="submit" class="btn btn-primary">Edit</button>
-        </form>`;
-                    opened = true;
-                    return null;
-                });
-        if (!opened)
-            modalBody.innerHTML = 'There was an internal error loading that clock.';
-        $('#clockModal').modal('handleUpdate');
-        // Editing an entry
-    } else {
-        var buid = document.getElementById('uid');
-        var bclockin = document.getElementById('clock-in');
-        var bclockout = document.getElementById('clock-out');
-        var bapproved = document.getElementById('clock-approved');
-        $.ajax({
-            type: "POST",
-            url: '/timesheet/edit',
-            data: {admin: buid.value, ID: clockID, time_in: bclockin.value, time_out: bclockout.value, approved: (bapproved.checked)}
-        })
-                .then(
-                        function success(resHTML) {
-                            $('#clockModal').modal('handleUpdate');
-                            filterDate();
-                        },
-                        function fail(data, status) {
-                            modalBody.innerHTML = 'Failed to edit clock. Make sure you typed in an admin username correctly case sensitive.';
-                        }
-                );
-}
 }
 
 function filterDate() {
@@ -151,7 +73,7 @@ function filterDate() {
                             // Prepare clock moments
                             var clockin = moment(record.time_in);
                             var clockout = moment(record.time_out);
-                            var clocknow = moment(thedate.value);
+                            var clocknow = moment();
                             var clocknext = moment(thedate.value).add(1, 'weeks');
                             var clockday = moment(clockin).format('e');
 

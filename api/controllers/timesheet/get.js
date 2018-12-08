@@ -22,6 +22,16 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            if (!inputs.date || inputs.date === null)
+            {
+                // Join timesheet socket if applicable
+                if (this.req.isSocket)
+                {
+                    sails.sockets.join(this.req, 'timesheet');
+                    sails.log.verbose('Request was a socket. Joining timesheet.');
+                }
+            }
+
             // Get a range of one week
             var start = inputs.date !== null ? moment(inputs.date).startOf('week') : moment().startOf('week');
             var end = moment(start).add(1, 'weeks');

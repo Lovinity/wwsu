@@ -1,4 +1,4 @@
-# WWSU 4.4.0
+# WWSU 4.4.3
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -189,6 +189,29 @@ Returns an HTML page verifying the events in the WWSU Calendar for the next week
 #### Response 200 HTML
 ## Directors
 The Directors endpoints regard the directors of WWSU Radio.
+### /directors/add
+Add a new director into the WWSU system. **Requires authorization**
+#### Request
+| key | criteria |
+|--|--|
+| name | string (required; the name of the director) |
+| login | string (required; the login used for the clock-in and clock-out system) |
+| admin | boolean (optional; whether or not this director is an administrator. Defaults to false.) |
+| assistant | boolean (optional; whether or not this director is an assistant director (false is a main director). Defaults to false.) |
+| position | string (required; The name of the position this director works for (eg. "General manager"). |
+#### Response 200 OK
+### /directors/edit
+Edits the details of an existing director. **Requires authorization**
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; the ID of the director to edit) |
+| name | string (optional; if provided, the name of the director will be changed to this.) |
+| login | string (optional; if provided, the login of the director will be changed to this.) |
+| admin | boolean (optional; if provided, the admin status of the director will be changed to this.) |
+| assistant | boolean (optional; if provided, the assistant status of the director will be changed to this.) |
+| position | string (optional; if provided, the position of the director will be changed to this.) |
+#### Response 200 OK
 ### /directors/get-hours
 Get an array of office hours for WWSU directors for the next week.
  - This endpoint supports sockets, uses the "directorhours" event, and returns data in the structure defined in the websockets section.
@@ -231,6 +254,13 @@ Get an array of directors. If a username is provided, will filter according to t
             ...
         ]
 #### Response 404
+### /directors/remove
+Removes a director from the system. **Requires authorization**
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; the ID of the director to remove.) |
+#### Response 200 OK
 ## Discipline
 The discipline endpoints regard moderation for public clients (website and app users).
 ### /discipline/ban-show
@@ -953,11 +983,10 @@ Add a timesheet entry into the system.
 #### Response 200 OK
 #### Response 404
 ### /timesheet/edit
-Edit a specific timesheet entry.
+Edit a specific timesheet entry. **Requires authorization**
 #### Request
 | key | criteria |
 |--|--|
-| admin | string (required; the OpenProject login of an administrator) |
 | ID | number (required; the ID of the timesheet entry to be edited) |
 | time_in | string (required; a moment.js valid timestamp indicating when the director clocked in) |
 | time_out | string (a moment.js valid timestamp indicating when the director clocked out. Use null if the director has not clocked out yet. Defaults to null.) |
@@ -967,6 +996,7 @@ Edit a specific timesheet entry.
 #### Response 404
 ### /timesheet/get
 Return an array of timesheet entries for the week.
+ - This endpoint supports sockets, uses the "timesheet" event, and returns data in the structure defined in the websockets section. Socket is only subscribed to if parameter date is not provided in the request.
 #### Request
 | key | criteria |
 |--|--|

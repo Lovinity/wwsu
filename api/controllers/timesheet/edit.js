@@ -7,12 +7,6 @@ module.exports = {
     description: 'Edit a timesheet entry.',
 
     inputs: {
-        admin: {
-            type: 'string',
-            required: true,
-            description: 'The login of an admin authorized to edit timesheets.'
-        },
-
         ID: {
             type: 'number',
             required: true,
@@ -61,16 +55,8 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            // Get the director as provided by admin
-            var record = await Directors.findOne({login: inputs.admin});
-            sails.log.silly(record);
-
-            // Director not found or is not an admin? Forbidden request.
-            if (typeof record === 'undefined' || record.length <= 0 || !record.admin)
-                return exits.forbidden();
-
             // Update the timesheet record
-            await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(true), time_out: moment(inputs.time_out).toISOString(true), approved: inputs.approved});
+            await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(true), time_out: moment(inputs.time_out).toISOString(true), approved: inputs.approved}).fetch();
 
             // Force a re-load of all directors to update any possible changes in presence
             await Directors.updateDirectors();

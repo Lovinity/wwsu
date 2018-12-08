@@ -50,7 +50,6 @@ module.exports.policies = {
     'status/get': 'isBanned',
     'tasks/get': 'isBanned',
     'timesheet/add': 'isBanned',
-    'timesheet/edit': 'isBanned',
     'timesheet/get': 'isBanned',
     'timesheet/view': 'isBanned',
     'listen': 'isBanned',
