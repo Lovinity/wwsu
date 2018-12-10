@@ -51,7 +51,7 @@ module.exports = {
 
                 if (inputs.dj && inputs.dj !== null && inputs.dj !== '')
                 {
-                        query.DJ = inputs.dj;
+                        query.dj = inputs.dj;
                 }
 
                 if (inputs.event && inputs.event !== null && inputs.event !== '')

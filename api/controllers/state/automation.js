@@ -219,9 +219,8 @@ module.exports = {
 
                 // We are going to break
             } else {
-                await Attendance.createRecord(`Genre: Default`);
-
                 await Meta.changeMeta({genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                await Attendance.createRecord(`Genre: Default`);
             }
 
             await Meta.changeMeta({changingState: null});

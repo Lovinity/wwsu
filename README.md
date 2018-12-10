@@ -1,4 +1,4 @@
-# WWSU 4.4.3
+# WWSU 4.4.4
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -148,7 +148,7 @@ Retrieve an array of show/program attendance logs for a specified date or specif
                 "updatedAt": "2018-11-11T00:21:38.000Z",
                 "ID": 747, // attendanceID
                 "unique": "", // If the event coordinates with a Google Calendar event, the GC event ID will be provided here
-                "DJ": null, // If a DJ/Host is applicable, the DJ or Host ID will be provided here. Otherwise, this will be null.
+                "dj": null, // If a DJ/Host is applicable, the DJ or Host ID will be provided here. Otherwise, this will be null.
                 "event": "Genre: Default", // The name of the event, along with its operation prefix
                 "showTime": 240, // Amount of onAir time this event had, in minutes. Can be null if it's still on or never aired.
                 "listenerMinutes": 241, // Number of online listener minutes during this event. Can be null if it's still on or never aired.
@@ -314,7 +314,7 @@ Edits a DJ in the system. **Requires Authorization**.
 #### Request
 | key | criteria |
 |--|--|
-| dj | number (required; the DJ ID to edit) |
+| ID | number (required; the DJ ID to edit) |
 | name | string (optional; the new name for this DJ) |
 | login | string (optional; the new login for this DJ) |
 #### Response 200 OK
@@ -338,7 +338,7 @@ Removes a DJ from the system. **Requires Authorization**.
 #### Request
 | key | criteria |
 |--|--|
-| dj | number (required; the ID of the DJ to remove) |
+| ID | number (required; the ID of the DJ to remove) |
 #### Response 200 OK
 ## Eas
 Eas endpoints regard the internal WWSU emergency alert system. **These endpoints do not have anything to do with the SAGE Digital ENDEC**; this is internal only.
@@ -438,21 +438,8 @@ Add a log into the system. **Requires authorization**
 | trackAlbum | string (optional; specify track album if a track was played.) |
 | trackLabel | string (optional; specify track label if a track was played.) |
 #### Response 200 OK
-### /logs/get-subtypes
-Retrieve a list of log subtypes for a specified date.
-#### Request
-| key | criteria |
-|--|--|
-| date | string (optional; a moment.js parsable date that falls within the day to get log subtypes. Defaults to now.) |
-#### Response 200
-        [
-            {
-                "logsubtype": "automation" // Name of the subtype
-            },
-            ...
-        ]
 ### /logs/get
-Get a list of logs for a specific subtype and a specific date. Returns logs for the 24-hour period of the provided date.
+Get a list of logs for a specific subtype and a specific date. Returns logs for the 24-hour period of the provided date. **Requires Authorization**
  - This endpoint supports sockets, uses the "logs" event, and returns data in the structure defined in the websockets section.
  - Websockets will ignore filtering rules and will instead return any/all new logs.
 #### Request
@@ -481,9 +468,6 @@ Get a list of logs for a specific subtype and a specific date. Returns logs for 
             },
             ...
         ]
-### /logs/view
-View a webpage to browse through the system logs.
-#### Response 200 (text/html)
 ## Messages
 Messages endpoints regard the internal WWSU messaging system.
 ### /messages/get-web

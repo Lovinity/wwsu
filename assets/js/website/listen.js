@@ -29,6 +29,7 @@ var nicknameTimer = null;
 var Calendar = TAFFY();
 var calendar = [];
 var likedTracks = [];
+var clockTimer;
 
 // Initialize the web player
 if (document.querySelector('#nativeflashradio'))
@@ -565,6 +566,13 @@ function doMeta(response)
         if (notificationsBox)
             shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;
 
+        if (typeof response.time !== 'undefined')
+        {
+            clearInterval(clockTimer);
+            clearTimeout(clockTimer);
+            clockTimer = setInterval(clockTick, 1000);
+        }
+
         // Update meta and color code it, if new meta was provided
         if (('line1' in response || 'line2' in response) && nowPlaying)
         {
@@ -681,6 +689,10 @@ function doMeta(response)
     } catch (e) {
         console.error(e);
     }
+}
+
+function clockTick() {
+    Meta.time = moment(Meta.time).add(1, 'seconds');
 }
 
 // Send a message through the system

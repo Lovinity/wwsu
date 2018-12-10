@@ -606,7 +606,7 @@ module.exports = {
                                         dj = await Djs.find({name: dj});
                                         if (!dj || typeof dj[0] === 'undefined')
                                             return false;
-                                        Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, DJ: dj, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
+                                        Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, sj: dj, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
                                                 .exec(async(err, record, wasCreated) => {
                                                     // if wasCreated, then the event never aired; Log an absence.
                                                     if (wasCreated)

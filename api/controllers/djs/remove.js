@@ -7,7 +7,7 @@ module.exports = {
     description: 'Remove a DJ from the system.',
 
     inputs: {
-        dj: {
+        ID: {
             type: 'number',
             required: true,
             description: 'The DJ ID to remove.'
@@ -25,16 +25,16 @@ module.exports = {
         try {
 
             // Update all attendance records to null DJ
-            await Attendance.update({DJ: inputs.dj}, {DJ: null}).fetch();
+            await Attendance.update({dj: inputs.ID}, {dj: null}).fetch();
 
             // Update all listeners records to null DJ
-            await Listeners.update({dj: inputs.dj}, {dj: null}).fetch();
+            await Listeners.update({dj: inputs.ID}, {dj: null}).fetch();
 
             // Destroy XP records
-            await Xp.destroy({dj: inputs.dj}).fetch();
+            await Xp.destroy({dj: inputs.ID}).fetch();
 
             // Destroy DJ
-            await Djs.destroy({ID: inputs.dj}).fetch();
+            await Djs.destroy({ID: inputs.ID}).fetch();
 
             return exits.success();
         } catch (e) {

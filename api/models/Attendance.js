@@ -20,7 +20,7 @@ module.exports = {
             type: 'string'
         },
 
-        DJ: {
+        dj: {
             type: 'number',
             allowNull: true
         },
@@ -116,9 +116,9 @@ module.exports = {
 
                 if (record.length > 0)
                 {
-                    created = await Attendance.create({unique: record[0].unique, DJ: Meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true)}).fetch();
+                    created = await Attendance.create({unique: record[0].unique, dj: Meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true)}).fetch();
                 } else {
-                    created = await Attendance.create({DJ: Meta['A'].dj, event: event, actualStart: moment().toISOString(true)}).fetch();
+                    created = await Attendance.create({dj: Meta['A'].dj, event: event, actualStart: moment().toISOString(true)}).fetch();
                 }
 
                 // Switch to the new record in the system

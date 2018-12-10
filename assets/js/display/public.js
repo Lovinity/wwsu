@@ -593,7 +593,7 @@ waitFor(function () {
                     messageSize: '1.5em',
                     balloon: true
                 });
-                responsiveVoice.speak(`Attention guests! There is a message from the DJ: ${data[key].message}`);
+                responsiveVoice.speak(`Attention guests! There is a new message. ${data[key].message}`);
             }
         }
     });
