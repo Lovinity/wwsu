@@ -603,9 +603,12 @@ module.exports = {
                                         } else {
                                             dj = null;
                                         }
-                                        dj = await Djs.find({name: dj}) || null;
+                                        if (dj !== null)
+                                            dj = await Djs.find({name: dj}) || null;
                                         Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, dj: dj, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
                                                 .exec(async(err, record, wasCreated) => {
+                                                    if (err)
+                                                        throw err;
                                                     // if wasCreated, then the event never aired; Log an absence.
                                                     if (wasCreated)
                                                     {
@@ -651,8 +654,8 @@ module.exports = {
 
                                                         // We do not care about genres
                                                     }
-                                                    return true;
                                                 });
+                                        return true;
                                     } catch (e) {
                                         sails.log.error(e);
                                         return true;
