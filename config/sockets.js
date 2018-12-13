@@ -46,7 +46,7 @@ module.exports.sockets = {
 
         // `true` allows the socket to connect.
         // (`false` would reject the connection)
-        console.dir(handshake);
+        //console.dir(handshake);
         return proceed(undefined, true);
         //
     },

@@ -18,7 +18,7 @@ module.exports = {
             var maps = records
                     .filter(record => record.actualStart !== null && record.actualEnd !== null)
                     .map(async currentRecord => {
-                        console.log(`Updating Attendance ID ${currentRecord.ID}`);
+                        sails.log.debug(`Updating Attendance ID ${currentRecord.ID}`);
                         // Fetch listenerRecords since beginning of Attendance, as well as the listener count prior to start of attendance record.
                         var listenerRecords = listenerRecordsA
                                 .filter(record2 => moment(record2.createdAt).isSameOrAfter(moment(currentRecord.actualStart)) && moment(record2.createdAt).isSameOrBefore(moment(currentRecord.actualEnd)))

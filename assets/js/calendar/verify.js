@@ -41,7 +41,7 @@ function verifyEvents() {
                                     return 1;
                                 return 0;
                             } catch (e) {
-                                console.error(e);
+                                sails.log.error(e);
                             }
                         };
 
