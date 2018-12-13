@@ -15,5 +15,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - display/public Too many end div tage in On the Air slide (https://github.com/Lovinity/wwsu/commit/488325427fe9159e5b1bdd6ed440267e1057579f)
  - Library updates (https://github.com/Lovinity/wwsu/commit/e0e42e45c77292a6730e413d3c8916726b2ce147)
  
-###Fixed
+### Fixed
  - Typo in Attendance absence records causing dj value to be null. (https://github.com/Lovinity/wwsu/issues/16) (https://github.com/Lovinity/wwsu/commit/14121d07757f32c2158696b76ed62eda159df0b4)
