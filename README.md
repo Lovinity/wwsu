@@ -1,4 +1,4 @@
-# WWSU 4.4.4
+# WWSU 4.4.5
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -34,6 +34,22 @@ The WWSU app does not care which method you use for any of the requests. General
 A lot of API endpoints require a valid authorization in the form of a header. The endpoints which require authorization will be noted in their respective section.
  - The key is "authorization", and the value is "Bearer (token)". 
  - Use the /hosts/get endpoint to authenticate and get a token.
+### /hosts/edit
+Edit a host. **Requires authorization**
+ - A request to edit a host will be blocked if the provided admin or authorized parameter is false, and there are 1 or less authorized admin hosts. This is to prevent accidental lockout from the system.
+ - Modifying the "host" (host name) is not implemented; this should never change as it is based off of the client / device and not something configured.
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; ID of the host record to edit.) |
+| friendlyname | string (optional; if provided, the friendly name of this host will be modified to what is provided.) |
+| authorized | boolean (optional; if provided, whether or not the host is authorized (receives a token for restricted endpoints) will be changed to this. If false, and 1 or less authorized admin hosts exist, the edit request will be denied to prevent accidental lockout.) |
+| admin | boolean (optional; if provided, whether or not the host is an admin (should have access to admin settings in DJ Controls) will be changed to this. If false, and 1 or less authorized admin hosts exist, the edit request will be denied to prevent accidental lockout.) |
+| requests | boolean (optional; if provided, whether or not this host should be notified of new track requests will be changed to this.) |
+| emergencies | boolean (optional; if provided, whether or not this host should be notified of system problems will be changed to this.) |
+| webmessages | boolean (optional; if provided, whether or not this host should be notified of messages sent from the web / mobile app will be changed to this.) |
+#### Response 200 OK
+#### Response 409 Conflict (This is thrown when the request was blocked to prevent accidental lockout)
 ### /hosts/get
 Retrieve information about a host. 
  - If the host does not exist in the database, it will be created with default settings. However, it will not be authorized, and therefore a token will not be returned. An admin will need to authorize the host for it to begin using tokens to hit endpoints requiring authorization. 
@@ -56,6 +72,15 @@ Retrieve information about a host.
             "webmessages": true, // If true, this client should notify of messages sent by public clients, even when this host was not used to go live
             "token": null // If the host is authorized, a token will be provided here for use in the headers of endpoints requiring authorization. The token will expire after 1 hour. Otherwise, this will be null.
         }
+### /hosts/remove
+Removes a host from the database.
+ - A request to remove a host will be blocked if the host to remove is the only authorized admin host in the system. This is to prevent accidental lockout from the system.
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; the ID of the host to remove.) |
+#### Response 200 OK
+#### Response 409 Conflict (This is thrown when the request was blocked to prevent accidental lockout)
 ## Analytics
 Analytics endpoints deal with getting analytics about WWSU.
 ### /analytics/weekly-dj
