@@ -1,7 +1,7 @@
 {
   "name": "wwsu-4",
   "private": true,
-  "version": "4.4.4",
+  "version": "4.4.5",
   "description": "Core backend for WWSU Radio operations",
   "keywords": [],
   "dependencies": {
@@ -27,7 +27,7 @@
     "sails-hook-orm": "^2.1.1",
     "sails-hook-sockets": "^1.5.5",
     "sails-mysql": "^1.0.1",
-    "sanitize-html": "^1.19.1",
+    "sanitize-html": "^1.19.3",
     "shorthash": "0.0.2",
     "unique-names-generator": "^1.0.14",
     "url-safe-string": "^1.1.0",
