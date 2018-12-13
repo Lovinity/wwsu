@@ -33,6 +33,7 @@ try {
     var stickySlides = false;
     var offlineTimer;
     var clockTimer;
+    var globalStatus = 4;
 
 // Define initial slides
     var slides = {1: {
@@ -381,8 +382,6 @@ function clockTick() {
 function processStatus()
 {
     try {
-
-        var globalStatus = 4;
         var doRow = false;
         var secondRow = false;
         statusMarquee = `<div class="row">
@@ -491,7 +490,7 @@ function processStatus()
         {
             case 0:
                 color = 'rgba(244, 67, 54, 0.5)';
-                statusLine.innerHTML = 'No connection to WWSU; please ensure the server is running';
+                statusLine.innerHTML = 'No connection to WWSU! The server might be offline and WWSU not functional';
                 if (globalStatus !== prevStatus)
                     offlineTimer = setTimeout(function () {
                         responsiveVoice.speak("Attention! The display sign has been disconnected from the server for one minute. This could indicate a network problem, the server crashed, or the server is rebooting.");
@@ -572,6 +571,13 @@ function processStatus()
                 });
             }
         };
+
+        // Update slide if this is the current active slide
+        if (slide === 6)
+        {
+            var innercontent = document.getElementById('system-status');
+            innercontent.innerHTML = statusMarquee;
+        }
 
     } catch (e) {
         iziToast.show({
@@ -1142,19 +1148,25 @@ function doSlide(same = false)
             slide += 1;
         console.log(`Slide ${slide}.`);
 
-        // Only do sticky slides when there are sticky slides
-        if (stickySlides && slide < 1000)
+        // Do system slide if there's an urgent or critical issue
+        if (globalStatus === 1 || globalStatus === 2)
+        {
+            slide = 6;
+            // Do sticky slides if there are any
+        } else if (stickySlides && slide < 1000)
+        {
             slide = 1000;
+        }
 
         // Do slides if we are not to be in power saving mode
-        if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote'))
+        if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote') || globalStatus === 1 || globalStatus === 2)
         {
             slidebadges.innerHTML = ``;
             // Determine highest slide number so we know when we are done
             var highestslide = 0;
             for (var key in slides) {
                 if (slides.hasOwnProperty(key)) {
-                    if (slides[key].do && (!stickySlides || key >= 1000))
+                    if (slides[key].do && (!stickySlides || key >= 1000) && (globalStatus > 2 || key === 6))
                     {
                         if (highestslide < parseInt(key))
                             highestslide = parseInt(key);
@@ -1176,8 +1188,13 @@ function doSlide(same = false)
                     {
                         processAnnouncements();
                         slide = 1;
-                        if (stickySlides)
+                        if (globalStatus === 1 || globalStatus === 2)
+                        {
+                            slide = 6;
+                        } else if (stickySlides)
+                        {
                             slide = 1000;
+                        }
                         restarted = true;
                     } else { // We have a problem if we reach this point! Trigger marquee screensaver as failsafe
                         slide = 0;
@@ -1201,7 +1218,7 @@ function doSlide(same = false)
                             });
                         }, 30000);
                     });
-                } else if (typeof slides[slide] !== 'undefined' && slides[slide].do && (!stickySlides || slide >= 1000))
+                } else if (typeof slides[slide] !== 'undefined' && slides[slide].do && (!stickySlides || slide >= 1000) && (globalStatus > 2 || slide === 6))
                 {
                     if (slide !== prevslide && !same)
                     {
