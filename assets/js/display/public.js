@@ -1429,7 +1429,7 @@ function doSlide(same = false)
                         } else {
                             innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
                         }
-                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic}</div></div>`;
+                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark text-white border border-primary p-1 m-1">${Meta.topic}</div>`;
                     } else {
                         innercontent = `<h2 style="text-align: center; font-size: 3em;" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
