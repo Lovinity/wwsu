@@ -292,7 +292,12 @@ module.exports = {
                         await sails.helpers.requests.queue(3, true, true);
 
                         // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-                        await Calendar.preLoadEvents(true);
+                        try {
+                            await Calendar.preLoadEvents(true);
+                        } catch (e2) {
+                            // Couldn't load calendar? Fall back to Default automation
+                            await sails.helpers.genre.start('Default', true);
+                        }
 
                         await Meta.changeMeta({changingState: null});
                         return resolve(0);
