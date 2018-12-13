@@ -62,11 +62,6 @@ module.exports = {
 
             if (thesongs.length > 0)
             {
-
-                // Randomise the list of songs
-                thesongs = await sails.helpers.shuffle(thesongs);
-                sails.log.silly(`Array shuffled. Resulting array: ${thesongs}`);
-
                 // Determine which tracks are already queued
                 var queuedtracks = 0;
                 var queuedtracksa = [];
@@ -76,17 +71,18 @@ module.exports = {
                 // Queue up the chosen tracks if they pass rotation rules, and if rules is not set to false
                 if (inputs.rules)
                 {
-                    thesongs = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
-                    var i = 0;
-                    while (queuedtracks < inputs.quantity && i < thesongs.length)
+                    var thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
+                    while (queuedtracks < inputs.quantity && thesongs2.length > 0)
                     {
-                        if (await sails.helpers.songs.checkRotationRules(thesongs[i].ID))
+                        var temp = await sails.helpers.pickRandom(thesongs2, true);
+                        thesongs2 = temp.newArray;
+                        var thesong = temp.item;
+                        if (await sails.helpers.songs.checkRotationRules(thesong.ID))
                         {
                             queuedtracks++;
-                            sails.log.verbose(`Queued ${thesongs[i].ID}`);
-                            await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesongs[i].ID);
+                            sails.log.verbose(`Queued ${thesong.ID}`);
+                            await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
                         }
-                        i++;
                     }
                 }
 
@@ -101,17 +97,18 @@ module.exports = {
                     tracks.map(track => queuedtracksa.push(track.ID));
 
                     // Go through all the songs again without checking for rotation rules
-                    var thesongs = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
-                    var i = 0;
-                    while (queuedtracks < inputs.quantity && i < thesongs.length)
+                    var thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
+                    while (queuedtracks < inputs.quantity && thesongs2.length > 0)
                     {
+                        var temp = await sails.helpers.pickRandom(thesongs2, true);
+                        thesongs2 = temp.newArray;
+                        var thesong = temp.item;
                         queuedtracks++;
-                        sails.log.verbose(`Queued ${thesongs[i].ID}`);
-                        await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesongs[i].ID);
-                        i++;
+                        sails.log.verbose(`Queued ${thesong.ID}`);
+                        await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
                     }
                 }
-                
+
                 if (queuedtracks < inputs.quantity)
                 {
                     sails.log.verbose(`Did not have enough tracks to queue.`);
