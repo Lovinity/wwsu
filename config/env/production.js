@@ -292,7 +292,7 @@ module.exports = {
   *                                                                         *
   ***************************************************************************/
   log: {
-    level: 'verbose'
+    level: 'warn'
   },
 
 
@@ -322,7 +322,7 @@ module.exports = {
     * (https://sailsjs.com/config/http)                                        *
     *                                                                          *
     ***************************************************************************/
-    // trustProxy: true,
+    //trustProxy: true,
 
   },
 
@@ -337,7 +337,7 @@ module.exports = {
   * this, just try deploying without setting it and see if it works.)       *
   *                                                                         *
   ***************************************************************************/
-  port: 1337,
+  port: 1977,
 
 
 
@@ -371,7 +371,7 @@ module.exports = {
   *                                                                         *
   ***************************************************************************/
   custom: {
-    baseUrl: 'https://example.com',
+    baseUrl: 'https://server.wwsu1069.org',
     internalEmailAddress: 'wwsu4@wright.edu',
 
     // mailgunDomain: 'mg.example.com',
