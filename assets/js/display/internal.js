@@ -384,6 +384,7 @@ function processStatus()
     try {
         var doRow = false;
         var secondRow = false;
+        globalStatus = 4;
         statusMarquee = `<div class="row">
                       <div class="col-2 text-primary-light">
                   	<strong>System</strong>
