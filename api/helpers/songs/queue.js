@@ -77,7 +77,7 @@ module.exports = {
                         var temp = await sails.helpers.pickRandom(thesongs2, true);
                         thesongs2 = temp.newArray;
                         var thesong = temp.item;
-                        if (await sails.helpers.songs.checkRotationRules(thesong.ID))
+                        if (typeof thesong.ID !== 'undefined' && await sails.helpers.songs.checkRotationRules(thesong.ID))
                         {
                             queuedtracks++;
                             sails.log.verbose(`Queued ${thesong.ID}`);
@@ -103,9 +103,12 @@ module.exports = {
                         var temp = await sails.helpers.pickRandom(thesongs2, true);
                         thesongs2 = temp.newArray;
                         var thesong = temp.item;
-                        queuedtracks++;
-                        sails.log.verbose(`Queued ${thesong.ID}`);
-                        await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
+                        if (typeof thesong.ID !== 'undefined')
+                        {
+                            queuedtracks++;
+                            sails.log.verbose(`Queued ${thesong.ID}`);
+                            await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
+                        }
                     }
                 }
 

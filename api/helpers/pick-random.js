@@ -35,7 +35,7 @@ module.exports = {
         
         // Remove the item from the array if necessary
         if (inputs.remove)
-            delete inputs.items[random];
+            inputs.items.splice(random, 1);
         
         return exits.success({item: item, newArray: inputs.items});
         
