@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  
 ### Fixed
  - Typo in Attendance absence records causing dj value to be null. [Issue 16](https://github.com/Lovinity/wwsu/issues/16) [Commit 14121d0](https://github.com/Lovinity/wwsu/commit/14121d07757f32c2158696b76ed62eda159df0b4)
+ - Fall back to Genre: Default when Google Calendar fails.
