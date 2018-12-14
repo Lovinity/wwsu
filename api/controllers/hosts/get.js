@@ -40,6 +40,10 @@ module.exports = {
                 {
                     sails.sockets.join(this.req, 'hosts');
                     sails.log.verbose('Request was a socket on an authorized admin. Joined hosts.');
+                    
+                    // Push the current hosts
+                    var records = await Hosts.find();
+                    record.otherHosts = records;
                 }
             } else {
                 record.token = null;

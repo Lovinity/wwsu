@@ -71,7 +71,8 @@ Retrieve information about a host.
             "requests": true, // If true, this client should notify of track requests even when this host was not used to go live
             "emergencies": false, // If true, this client should notify of reported technical issues
             "webmessages": true, // If true, this client should notify of messages sent by public clients, even when this host was not used to go live
-            "token": null // If the host is authorized, a token will be provided here for use in the headers of endpoints requiring authorization. The token will expire after 1 hour. Otherwise, this will be null.
+            "token": null, // If the host is authorized, a token will be provided here for use in the headers of endpoints requiring authorization. The token will expire after 1 hour. Otherwise, this will be null.
+            "otherHosts": [], // If this host is an authorized admin, an array of all the hosts in the database will be provided for administration purposes. Otherwise, this property will not exist.
         }
 ### /hosts/remove
 Removes a host from the database.
