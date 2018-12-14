@@ -23,7 +23,7 @@ module.exports = {
 
         try {
             // Find or create the hosts record
-            var record = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: inputs.host});
+            var record = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: await sails.helpers.recipients.generateNick()});
             sails.log.silly(record);
 
             if (record.authorized)
