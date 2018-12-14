@@ -46,7 +46,7 @@ module.exports = {
                 records = records.concat(records1);
             
             // If the earliest returned record still falls after the provided start time, add the latest record before the provided start time as a baseline.
-            if (moment(start).isBefore(moment(records1[0].createdAt)))
+            if (typeof records1[0] === 'undefined' || moment(start).isBefore(moment(records1[0].createdAt)))
             {
                 var records2 = await Listeners.find({createdAt: {'<': start.toISOString(true)}}).sort('createdAt DESC').limit(1);
                 if (records2)
