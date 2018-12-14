@@ -54,6 +54,7 @@ Edit a host. **Requires authorization**
 Retrieve information about a host. 
  - If the host does not exist in the database, it will be created with default settings. However, it will not be authorized, and therefore a token will not be returned. An admin will need to authorize the host for it to begin using tokens to hit endpoints requiring authorization. 
  - If the host exists and is authorized, an authorization token will be generated and returned.
+ - This endpoint supports sockets, uses the "hosts" event, and returns data in the structure defined in the websockets section. A request will only be subscribed if the provided host is an authorized admin.
 #### Request
 | key | criteria |
 |--|--|

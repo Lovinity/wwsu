@@ -34,6 +34,13 @@ module.exports = {
                         {
                             expiresIn: (60 * 60) // Token Expire time (1 hour)
                         });
+
+                // Subscribe to websockets if applicable
+                if (this.req.isSocket && record.admin)
+                {
+                    sails.sockets.join(this.req, 'hosts');
+                    sails.log.verbose('Request was a socket on an authorized admin. Joined hosts.');
+                }
             } else {
                 record.token = null;
             }

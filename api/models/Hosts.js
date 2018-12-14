@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Hosts.js
  *
@@ -49,6 +51,28 @@ module.exports = {
             defaultsTo: false
         }
 
+    },
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`hosts socket: ${data}`);
+        sails.sockets.broadcast('hosts', 'hosts', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.log.silly(`hosts socket: ${data}`);
+        sails.sockets.broadcast('hosts', 'hosts', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`hosts socket: ${data}`);
+        sails.sockets.broadcast('hosts', 'hosts', data);
+        return proceed();
     }
 
 };
