@@ -1,4 +1,4 @@
-/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events, Logs, Attendance, Directorhours, Timesheet */
+/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events, Logs, Attendance, Directorhours, Timesheet, Djs */
 
 /**
  * Calendar.js
@@ -604,8 +604,8 @@ module.exports = {
                                             dj = null;
                                         }
                                         if (dj !== null)
-                                            dj = await Djs.find({name: dj}) || null;
-                                        Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, dj: dj, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
+                                            dj = await Djs.findOne({name: dj});
+                                        Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, dj: dj.ID, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
                                                 .exec(async(err, record, wasCreated) => {
                                                     if (err)
                                                         throw err;

@@ -29,7 +29,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            await Djs.create({name: inputs.name, login: inputs.login || null}).fetch();
+            await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login || null}).fetch();
             return exits.success();
         } catch (e) {
             return exits.error(e);
