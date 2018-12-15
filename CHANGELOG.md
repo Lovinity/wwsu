@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Fixed
+
+## [4.5.0] - 2018-12-14
+### Added
  - hosts/edit and hosts/remove API endpoints [Issue 8](https://github.com/Lovinity/wwsu/issues/8)
  - sails.helpers.pickRandom. [Issue 11](https://github.com/Lovinity/wwsu/issues/11)
  
