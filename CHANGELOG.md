@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+ - state/change-radio-dj not switching to another RadioDJ instance like it should. [Issue 31](https://github.com/Lovinity/wwsu/issues/31)
+ - Calendar.js cannot read property ID of null when adding Attendance records with null DJ.
 
 ## [4.5.0] - 2018-12-14
 ### Added
