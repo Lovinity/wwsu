@@ -873,6 +873,16 @@ module.exports.bootstrap = async function (done) {
                                 Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error parsing data from internet stream server.', status: 4}]);
                             }
                         }
+                    })
+                    .catch(err => {
+                        Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server is offline.', status: 2}]);
+                        if (Meta['A'].state.includes("remote"))
+                        {
+                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server is offline.', status: 2}]);
+                        } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
+                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server is offline (OK, as we do not need remote stream right now)', status: 4}]);
+                        }
+                        sails.log.error(err);
                     });
             /*ICECAST 2.3
              // Get the JSON status from Icecast
@@ -968,12 +978,12 @@ module.exports.bootstrap = async function (done) {
              });
              */
         } catch (e) {
-            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
+            Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error checking internet stream server.', status: 2}]);
             if (Meta['A'].state.includes("remote"))
             {
-                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error.', status: 2}]);
+                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error checking internet stream server.', status: 2}]);
             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error (OK, as we do not need remote stream right now)', status: 4}]);
+                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error checking internet stream server (OK, as we do not need remote stream right now)', status: 4}]);
             }
             sails.log.error(e);
         }
@@ -1032,10 +1042,10 @@ module.exports.bootstrap = async function (done) {
                         }
                     })
                     .catch(function (err) {
-                        Status.changeStatus([{name: `website`, label: `Website`, data: 'Website did not return body data.', status: 2}]);
+                        Status.changeStatus([{name: `website`, label: `Website`, data: 'Website is offline.', status: 2}]);
                     });
         } catch (e) {
-            Status.changeStatus([{name: `website`, label: `Website`, data: 'Could not connect to website.', status: 2}]);
+            Status.changeStatus([{name: `website`, label: `Website`, data: 'Error checking website.', status: 2}]);
             sails.log.error(e);
         }
     });
@@ -1315,13 +1325,13 @@ module.exports.bootstrap = async function (done) {
     });
 
     // Every day at 11:59:50pm, clock out any directors still clocked in, and re-sync station time to all clients
-    sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`);
+    sails.log.verbose(`BOOTSTRAP: scheduling clockOutDirectors CRON.`);
     cron.schedule('50 59 23 * * *', () => {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON clockOutDirectors called`);
             try {
                 await Meta.changeMeta({time: moment().toISOString(true)});
-                
+
                 await Timesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
                         .tolerate((err) => {
                         });
