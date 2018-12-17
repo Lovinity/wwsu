@@ -5,14 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [Unreleased]
-### Added
 
+## [4.5.1] - 2018-12-17
 ### Changed
  - Status error messages (data) for internet stream, website, RadioDJ, and NWS CAPS are more helpful.
 
 ### Fixed
  - state/change-radio-dj not switching to another RadioDJ instance like it should. [Issue 31](https://github.com/Lovinity/wwsu/issues/31)
  - Calendar.js cannot read property ID of null when adding Attendance records with null DJ.
+ - display/public On the Air slide does not display when a topic was provided. [Issue 26](https://github.com/Lovinity/wwsu/issues/26)
+ - No connection to internet stream server does not trigger status error. [Issue 30](https://github.com/Lovinity/wwsu/issues/30)
 
 ## [4.5.0] - 2018-12-14
 ### Added
