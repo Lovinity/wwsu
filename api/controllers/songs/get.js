@@ -69,16 +69,8 @@ module.exports = {
             // No song ID specified?
             if (typeof inputs.ID === 'undefined' || inputs.ID === null)
             {
-                // Retrieve a list of subcategories that fall within a parent category defined in config as a music category.
-                var subcats2 = await Subcategory.find({ID: sails.config.custom.subcats.music});
-                sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
-                sails.log.silly(subcats2);
-
-                // Make note of all the subcategories in the retrieved songs
-                subcats2.map(subcat => subcatIDs.push(subcat.ID));
-
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
-                query = {id_subcat: subcatIDs};
+                query.id_subcat = sails.config.custom.subcats.music;
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
                     query.id_subcat = inputs.subcategory;
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)

@@ -847,7 +847,7 @@ function loadGenres() {
             try {
                 document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
                 var x = document.getElementById("filter-genre");
-                response.map(subcat => {
+                response.reverse().map(subcat => {
                     var c = document.createElement("option");
                     c.value = subcat.ID;
                     c.text = subcat.name;
