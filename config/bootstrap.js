@@ -1010,7 +1010,7 @@ module.exports.bootstrap = async function (done) {
                                         return resolve2(false);
                                     })
                                     .catch(function (err) {
-                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level}]);
+                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level}]);
                                         return resolve2(false);
                                     });
                         } catch (e) {
@@ -1060,6 +1060,7 @@ module.exports.bootstrap = async function (done) {
 
                 // Iterate through every configured county and get their weather alerts
                 var complete = 0;
+                var bad = [];
                 sails.log.debug(`Calling asyncForEach in cron EAS for checking every EAS source`);
                 await sails.helpers.asyncForEach(sails.config.custom.EAS.NWSX, function (county, index) {
                     return new Promise(async (resolve, reject) => {
@@ -1072,11 +1073,13 @@ module.exports.bootstrap = async function (done) {
                                         return resolve(false);
                                     })
                                     .catch(function (err) {
+                                        bad.push(county.name);
                                         // Do not reject on error; just go to the next county
                                         sails.log.error(err);
                                         return resolve(false);
                                     });
                         } catch (e) {
+                            bad.push(county.name);
                             // Do not reject on error; just go to the next county
                             sails.log.error(e);
                             return resolve(false);
@@ -1089,7 +1092,7 @@ module.exports.bootstrap = async function (done) {
                 {
                     Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: 'All NWS CAPS are online.', status: 5}]);
                 } else {
-                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: `${complete} out of ${sails.config.custom.EAS.NWSX.length} NWS CAPS are online.`, status: 3}]);
+                    Status.changeStatus([{name: 'EAS-internal', label: 'Internal EAS', data: `Could not fetch the following NWS CAPS counties: ${bad.join(", ")}`, status: 3}]);
                 }
 
                 // Finish up
