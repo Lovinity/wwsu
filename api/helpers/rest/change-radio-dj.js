@@ -17,8 +17,10 @@ module.exports = {
 
             // Determine which instance we should switch to
             sails.config.custom.radiodjs
-                    .filter(instance => instance.rest === Meta['A'].radiodj)
-                    .map((instance, index) => runninginstance = index);
+                    .map((instance, index) => {
+                        if (instance.rest === Meta['A'].radiodj)
+                            runninginstance = index;
+                    });
 
             sails.log.verbose(`INSTANCE ${runninginstance}`);
 
