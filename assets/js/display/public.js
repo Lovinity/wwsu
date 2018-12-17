@@ -1438,9 +1438,9 @@ function doSlide(same = false)
                         } else {
                             innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF;">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
                         }
-                        content.innerHTML = `<div class="animated fadeInDown">
-                        <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>${innercontent}</div>`;
                     }
+                    content.innerHTML = `<div class="animated fadeInDown">
+                        <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1>${innercontent}</div>`;
                     slidetimer = setTimeout(doSlide, 14000);
                 });
             }};
