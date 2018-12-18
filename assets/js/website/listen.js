@@ -11,6 +11,7 @@ var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i');
 // Load HTML elements
 var nowPlaying = document.getElementById('nowplaying');
 var notificationsBox = document.getElementById('messages');
+var notificationsStatus = document.getElementById('messages-status');
 var messageText = document.getElementById('themessage');
 var nickname = document.getElementById('nickname');
 var sendButton = document.getElementById('sendmessage');
@@ -605,8 +606,8 @@ function doMeta(response)
             blocked = true;
             messageText.disabled = true;
             sendButton.disabled = true;
-            if (notificationsBox)
-                notificationsBox.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red" id="msg-disabled">The web chat is currently disabled for this show.</div>`;
+            if (notificationsStatus)
+                notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-secondary"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>`;
             if (shouldScroll && document.querySelector('#messages')) {
                 $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
             }
@@ -623,8 +624,8 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    if (notificationsBox)
-                        notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">No one is on the air at this time. There may not be anyone in the studio to read your messages.</div>`;
+                    if (notificationsStatus)
+                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-primary"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>`;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                     }
@@ -636,8 +637,8 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    if (notificationsBox)
-                        notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">The current show airing is a prerecord. There may not be anyone in the studio to read your messages.</div>`;
+                    if (notificationsStatus)
+                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>`;
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -649,8 +650,8 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    if (notificationsBox)
-                        notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-wwsu-red text-warning" id="msg-state">There is a show airing now. Your messages should be received by the host.</div>`;
+                    if (notificationsStatus)
+                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>`;
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -707,7 +708,7 @@ function sendMessage(privateMsg) {
             if (response !== 'OK')
             {
                 if (notificationsBox)
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message: ${response}</div>`;
+                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. You may be sending messages too fast, or there was a network issue.</div>`;
                 if (document.querySelector('#messages'))
                     $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                 return null;

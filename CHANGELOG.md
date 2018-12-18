@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Added warnings about the changes in authorization system for version 5.0.0 in the readme.md file.
  - Discipline in Listener's Corner causes disconnection from socket.
+ - Notifications about messages on the listener's corner now appear above the chat instead of in the chat.
 
 ### Fixed
  - Minor bug in attendance records when creating an absence record but more than one record matches provided unique value.
+ - Discipline system not functioning properly. [Issue 3](https://github.com/Lovinity/wwsu/issues/3)
 
 ## [4.5.1] - 2018-12-17
 ### Changed

@@ -26,7 +26,7 @@ module.exports = {
             var reference = await Discipline.create({active: 1, IP: inputs.host, action: 'permaban', message: `The website user was banned indefinitely by ${Meta['A'].show}`}).fetch();
 
             // Broadcast the ban to the client
-            sails.sockets.broadcast(`discipline-${inputs.host}`, `discipline`, {"discipline": `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}`});
+            sails.sockets.broadcast(`discipline-${inputs.host.replace('website-', '')}`, `discipline`, {"discipline": `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}`});
             return exits.success();
         } catch (e) {
             return exits.error(e);
