@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+
+### Fixed
+
+### Added
+
+## [4.5.2] - 2018-12-18
+### Changed
  - Added warnings about the changes in authorization system for version 5.0.0 in the readme.md file.
  - Discipline in Listener's Corner causes disconnection from socket.
  - Notifications about messages on the listener's corner now appear above the chat instead of in the chat.
