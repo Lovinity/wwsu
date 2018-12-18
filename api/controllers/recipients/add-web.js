@@ -24,9 +24,11 @@ module.exports = {
             var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
             var host = sh.unique(from_IP + sails.tokenSecret);
 
+            sails.sockets.join(this.req, `discipline-${host}`); // If a ban is issued for this client later on, it is sent through this
+
             // Mark the client as online
             var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`);
-            
+
             // Return the nickname of this client as a label object
             return exits.success({label: label});
         } catch (e) {

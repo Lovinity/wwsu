@@ -358,8 +358,9 @@ waitFor(function () {
 
 // On meta changes, process meta
     io.socket.on('discipline', function (data) {
+        io.socket.disconnect();
         iziToast.show({
-            title: `Notice`,
+            title: `Disciplinary notice - Disconnected from WWSU`,
             message: data.discipline,
             color: 'red',
             zindex: 1000,

@@ -32,7 +32,6 @@ module.exports = {
                 // Subscribe the client to receiving web messages over websockets
                 sails.sockets.join(this.req, 'messages-website'); // Public website messages
                 sails.sockets.join(this.req, `messages-website-${opts.host}`); // Private website messages
-                sails.sockets.join(this.req, `discipline-${opts.host}`); // If a ban is issued for this client later on, it is sent through this
                 sails.log.verbose(`Request was a socket. Joining messages-website and messages-website-${opts.host}.`);
             } else {
                 opts.host = sh.unique(from_IP + sails.tokenSecret);
