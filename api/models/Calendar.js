@@ -608,7 +608,7 @@ module.exports = {
                                         Attendance.findOrCreate({unique: event.unique}, {unique: event.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: event.title, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true)})
                                                 .exec(async(err, record, wasCreated) => {
                                                     if (err)
-                                                        throw err;
+                                                        return false;
                                                     // if wasCreated, then the event never aired; Log an absence.
                                                     if (wasCreated)
                                                     {

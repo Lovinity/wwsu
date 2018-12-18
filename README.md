@@ -38,6 +38,7 @@ A lot of API endpoints require a valid authorization in the form of a header. Th
 Edit a host. **Requires authorization**
  - A request to edit a host will be blocked if the provided admin or authorized parameter is false, and there are 1 or less authorized admin hosts. This is to prevent accidental lockout from the system.
  - Modifying the "host" (host name) is not implemented; this should never change as it is based off of the client / device and not something configured.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -75,8 +76,9 @@ Retrieve information about a host.
             "otherHosts": [], // If this host is an authorized admin, an array of all the hosts in the database will be provided for administration purposes. Otherwise, this property will not exist.
         }
 ### /hosts/remove
-Removes a host from the database.
+Removes a host from the database. **Requires Authorization**
  - A request to remove a host will be blocked if the host to remove is the only authorized admin host in the system. This is to prevent accidental lockout from the system.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -103,6 +105,7 @@ Receive analytical statistics about WWSU from the last 7 days.
 Announcements endpoints regard the internal announcements system at WWSU.
 ### /announcements/add
 Adds an announcement into the system. **Requires authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -115,6 +118,7 @@ Adds an announcement into the system. **Requires authorization**.
 #### Response 200 OK
 ### /announcements/edit
 Edits an existing announcement. **Requires authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -152,6 +156,7 @@ Get an array of announcements for the provided type.
         ]
 ### /announcements/remove
 Removes an announcement. **Requires authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -218,6 +223,7 @@ Returns an HTML page verifying the events in the WWSU Calendar for the next week
 The Directors endpoints regard the directors of WWSU Radio.
 ### /directors/add
 Add a new director into the WWSU system. **Requires authorization**
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -229,6 +235,7 @@ Add a new director into the WWSU system. **Requires authorization**
 #### Response 200 OK
 ### /directors/edit
 Edits the details of an existing director. **Requires authorization**
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization of an administrator director instead of hosts/get authorization. This endpoint will also reject if trying to take away administrator privilege from the only administrator director in the system.
 #### Request
 | key | criteria |
 |--|--|
@@ -259,6 +266,7 @@ Get an array of office hours for WWSU directors for the next week.
 ### /directors/get
 Get an array of directors. If a username is provided, will filter according to the provided username. Otherwise, will return all directors.
  - This endpoint supports sockets, uses the "directors" event, and returns data in the structure defined in the websockets section.
+ - **WARNING:** As of version 5.0.0, this endpoint and its websockets will no longer return "login".
 #### Request
 | key | criteria |
 |--|--|
@@ -283,6 +291,7 @@ Get an array of directors. If a username is provided, will filter according to t
 #### Response 404
 ### /directors/remove
 Removes a director from the system. **Requires authorization**
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization of an administrator director instead of hosts/get authorization. This endpoint will also reject if trying to remove the only administrator director in the system.
 #### Request
 | key | criteria |
 |--|--|
@@ -329,6 +338,7 @@ Send a refresh signal to all connected display signs via websockets. **Requires 
 The DJs endpoint regards the DJs of WWSU Radio.
 ### /djs/add
 Add a new DJ to the system. **Requires Authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
  - DJs who air a show who are not already in the system will be added automatically.
 #### Request
 | key | criteria |
@@ -338,6 +348,7 @@ Add a new DJ to the system. **Requires Authorization**.
 #### Response 200 OK
 ### /djs/edit
 Edits a DJ in the system. **Requires Authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -348,6 +359,7 @@ Edits a DJ in the system. **Requires Authorization**.
 ### /djs/get
 Get an array of DJs that are in the system. **Requires Authorization**.
  - This endpoint supports sockets, uses the "djs" event, and returns data in the structure defined in the websockets section.
+ - **WARNING:** As of version 5.0.0, this endpoint and its websockets will no longer return "login". Instead, clients will need to djs/auth to authorize a DJ.
 #### Response 200
         [
             {
@@ -361,6 +373,7 @@ Get an array of DJs that are in the system. **Requires Authorization**.
         ]
 ### /djs/remove
 Removes a DJ from the system. **Requires Authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
  - **NOTE:** Removing a DJ disassociates them from all XP/remote logs, system logs, and analytics. However, those records will still exist in the database.
 #### Request
 | key | criteria |
@@ -392,6 +405,7 @@ Get an array of currently active alerts.
         ]
 ### /eas/send
 Issue a new alert through the internal emergency alert system, originating from source WWSU. **Requires authorization**
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -405,6 +419,7 @@ Issue a new alert through the internal emergency alert system, originating from 
 #### Response 200 OK
 ### /eas/test
 Send out a test through the internal emergency alert system. **Requires authorization**
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Response 200 OK
 ## Embeds
 Embeds are specially designed pages used for other websites to embed WWSU on their website.
@@ -430,7 +445,7 @@ These endpoints deal with online listener counts with WWSU.
 ### /listeners/get
 Retrieve an array of online listener counts between specified time periods. **Requires Authorization**.
  - **NOTE:** The server may return one record that falls before provided start time; this is so listener graphs and listener minute calculators can get an accurate baseline / representation.
- - **ANOTHER NOTE:** The server does not log listeners in a consistant interval; it only logs when a change in the online listener count was detected.
+ - **ANOTHER NOTE:** The server does not log listeners in a consistent interval; it only logs when a change in the online listener count was detected.
 #### Request
 | key | criteria |
 |--|--|
@@ -786,7 +801,8 @@ Retrieve an array of tracks that this host/IP has liked recently and cannot yet 
             ...
         ]
 ### /songs/get
-Get an array of tracks from the automation system. This was designed to be used with the track request system.
+Get an array of tracks from the automation system.
+ - If ID is not specified, this will only return songs that fall in the configured music categories.
  - For performance reasons, song.category, song.request, and song.spins will only be included if ID was specified in the request parameters.
 #### Request
 | key | criteria |
@@ -921,6 +937,7 @@ Go into break mode (play PSAs, or music if halftime is true, until state/return 
 #### Response 200 OK
 ### /state/change-radio-dj
 Tell the system to switch to a different RadioDJ instance in the array of configured RadioDJ instances.  **Requires authorization**
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Response 200 OK
 ### /state/live
 Request to go live. **Requires authorization**
@@ -986,6 +1003,7 @@ Timesheet endpoints regard the internal timesheet and clock in/out system for WW
 Add a timesheet entry into the system.
  - If the director is present, the add entry will be a clock-out entry. If the director is not present, the add entry will be a clock-in entry. 
  - Do not use this endpoint for editing; use the edit endpoint for editing entries.
+ - **WARNING:** As of version 5.0.0, this endpoint will require hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -995,6 +1013,7 @@ Add a timesheet entry into the system.
 #### Response 404
 ### /timesheet/edit
 Edit a specific timesheet entry. **Requires authorization**
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization of an administrator director instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -1045,6 +1064,7 @@ Add XP or remote credits to a DJ. **Requires Authorization**.
 #### Response 200 OK
 ### /xp/edit
 Edit an XP / remote credit entry. **Requires Authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|
@@ -1080,6 +1100,7 @@ Get the XP / remote credits earned by a DJ. **Requires Authorization**.
 #### Response 200 OK
 ### /xp/remove
 Removes an XP record (removes XP / remote credits). **Requires Authorization**.
+ - **WARNING:** As of version 5.0.0, this endpoint will require directors/auth authorization instead of hosts/get authorization.
 #### Request
 | key | criteria |
 |--|--|

@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [Unreleased]
+### Changed
+ - Added warnings about the changes in authorization system for version 5.0.0 in the readme.md file.
+
+### Fixed
+ - Minor bug in attendance records when creating an absence record but more than one record matches provided unique value.
 
 ## [4.5.1] - 2018-12-17
 ### Changed

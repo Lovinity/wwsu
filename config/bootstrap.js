@@ -830,7 +830,7 @@ module.exports.bootstrap = async function (done) {
                             var remoteStream = false;
 
                             // Check public stream
-                            if (streams[0] && streams[0].streamstatus !== 0)
+                            if (typeof streams[0] !== 'undefined' && streams[0].streamstatus !== 0)
                             {
                                 // Mark stream as good
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5}]);
