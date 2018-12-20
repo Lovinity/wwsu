@@ -1,4 +1,4 @@
-/* global sails, Xp, Attendance, _, Djs, Listeners, Promise */
+/* global sails, Xp, Attendance, _, Djs, Listeners, Promise, Meta */
 
 module.exports = {
 
@@ -57,6 +57,10 @@ module.exports = {
                         
                         // Remove the original record
                         await Djs.destroy({ID: record.ID}).fetch();
+                        
+                        // Edit meta if necessary
+                        if (Meta['A'].dj === record.ID)
+                            Meta.changeMeta({dj: inputs.ID});
                     });
                     await Promise.all(maps);
                 }

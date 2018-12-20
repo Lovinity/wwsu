@@ -36,6 +36,10 @@ module.exports = {
             // Destroy DJ
             await Djs.destroy({ID: inputs.ID}).fetch();
 
+            // Edit meta if necessary
+            if (Meta['A'].dj === inputs.ID)
+                Meta.changeMeta({dj: null});
+
             return exits.success();
         } catch (e) {
             return exits.error(e);
