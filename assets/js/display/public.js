@@ -49,6 +49,8 @@ try {
     var lastBurnIn = null;
     var easExtreme = false;
     var nowPlayingTimer;
+    var isStudio = window.location.search.indexOf('studio=true') !== -1;
+    var queueReminder = false;
 
     wrapper.width = window.innerWidth;
     wrapper.height = window.innerHeight;
@@ -593,7 +595,8 @@ waitFor(function () {
                     messageSize: '1.5em',
                     balloon: true
                 });
-                responsiveVoice.speak(`Attention guests! There is a new message. ${data[key].message}`);
+                if (!isStudio)
+                    responsiveVoice.speak(`Attention guests! There is a new message. ${data[key].message}`);
             }
         }
     });
@@ -821,7 +824,8 @@ function doEas()
                     <div class="m-1 text-warning-light" style="font-size: 2em;">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3" style="color: #FFFFFF; background: rgba(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}, 0.8); font-size: 2.5em;">${text}</div>
                     </div></div>`;
-                responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
+                if (!isStudio)
+                    responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
                 if (easExtreme)
                 {
                     easAlert.style.display = "inline";
@@ -894,7 +898,8 @@ function doEas()
                     if (voiceCount > 179)
                     {
                         voiceCount = 0;
-                        responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`);
+                        if (!isStudio)
+                            responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`);
                     }
                 }, 250);
             }, 1000);
@@ -1010,6 +1015,8 @@ function processNowPlaying(response)
             var queuelength = Meta.queueFinish !== null ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), 'seconds')) : 0;
             if (queuelength < 0)
                 queuelength = 0;
+            if (queuelength > 29)
+                queueReminder = false;
             if (typeof response.line1 !== 'undefined')
             {
                 $('#nowplaying-line1').animateCss('fadeOut', function () {
@@ -1098,19 +1105,26 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
-                    responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
+                    if (!isStudio)
+                        responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
                 }
                 if (queuelength >= 15)
                 {
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
                 } else {
+                    if (!queueReminder && isStudio)
+                        responsiveVoice.speak(`DJ is going live in less than 15 seconds`);
+                    queueReminder = true;
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
-                    $("#dj-alert").css("background-color", "#F44336");
-                    setTimeout(function () {
-                        $("#dj-alert").css("background-color", "#000000");
-                    }, 250);
+                    if (!isStudio)
+                    {
+                        $("#dj-alert").css("background-color", "#F44336");
+                        setTimeout(function () {
+                            $("#dj-alert").css("background-color", "#000000");
+                        }, 250);
+                    }
                 }
 
                 // When a remote broadcast is about to start
@@ -1138,19 +1152,26 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = "Remote Broadcast starting in";
-                    responsiveVoice.speak(`Attention guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
+                    if (!isStudio)
+                        responsiveVoice.speak(`Attention guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);
                 }
                 if (queuelength >= 15)
                 {
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
                 } else {
+                    if (!queueReminder && isStudio)
+                        responsiveVoice.speak(`Producer is going live in less than 15 seconds`);
+                    queueReminder = true;
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
-                    $("#dj-alert").css("background-color", "#9C27B0");
-                    setTimeout(function () {
-                        $("#dj-alert").css("background-color", "#000000");
-                    }, 250);
+                    if (!isStudio)
+                    {
+                        $("#dj-alert").css("background-color", "#9C27B0");
+                        setTimeout(function () {
+                            $("#dj-alert").css("background-color", "#000000");
+                        }, 250);
+                    }
                 }
                 // Sports broadcast about to begin
             } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && typeof response.state === 'undefined')
@@ -1176,19 +1197,26 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span><br />about to broadcast in`;
-                    responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.show}, is about to begin on WWSU radio.`);
+                    if (!isStudio)
+                        responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.show}, is about to begin on WWSU radio.`);
                 }
                 if (queuelength >= 15)
                 {
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
                 } else {
+                    if (!queueReminder && isStudio)
+                        responsiveVoice.speak(`Producer is going live in less than 15 seconds`);
+                    queueReminder = true;
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
-                    $("#dj-alert").css("background-color", "#4CAF50");
-                    setTimeout(function () {
-                        $("#dj-alert").css("background-color", "#000000");
-                    }, 250);
+                    if (!isStudio)
+                    {
+                        $("#dj-alert").css("background-color", "#4CAF50");
+                        setTimeout(function () {
+                            $("#dj-alert").css("background-color", "#000000");
+                        }, 250);
+                    }
                 }
                 // DJ is returning from a break
             } else if (Meta.state === 'live_returning' && queuelength < 60 && typeof response.state === 'undefined')
@@ -1215,19 +1243,26 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is returning live in`;
-                    responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);
+                    if (!isStudio)
+                        responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);
                 }
                 if (queuelength >= 15)
                 {
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
                 } else {
+                    if (!queueReminder && isStudio)
+                        responsiveVoice.speak(`DJ is returning live in less than 15 seconds`);
+                    queueReminder = true;
                     countdownclock.style.color = "#FFCDD2";
                     countdownclock.innerHTML = queuelength;
-                    $("#dj-alert").css("background-color", "#F44336");
-                    setTimeout(function () {
-                        $("#dj-alert").css("background-color", "#000000");
-                    }, 250);
+                    if (!isStudio)
+                    {
+                        $("#dj-alert").css("background-color", "#F44336");
+                        setTimeout(function () {
+                            $("#dj-alert").css("background-color", "#000000");
+                        }, 250);
+                    }
                 }
                 // Remote broadcast is returning from a break
             } else if (Meta.state === 'remote_returning' && queuelength < 60 && typeof response.state === 'undefined')
@@ -1253,19 +1288,26 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = "Returning to remote broadcast in";
-                    responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);
+                    if (!isStudio)
+                        responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);
                 }
                 if (queuelength >= 15)
                 {
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
                 } else {
+                    if (!queueReminder && isStudio)
+                        responsiveVoice.speak(`Producer is returning live in less than 15 seconds`);
+                    queueReminder = true;
                     countdownclock.style.color = "#E1BEE7";
                     countdownclock.innerHTML = queuelength;
-                    $("#dj-alert").css("background-color", "#9C27B0");
-                    setTimeout(function () {
-                        $("#dj-alert").css("background-color", "#000000");
-                    }, 250);
+                    if (!isStudio)
+                    {
+                        $("#dj-alert").css("background-color", "#9C27B0");
+                        setTimeout(function () {
+                            $("#dj-alert").css("background-color", "#000000");
+                        }, 250);
+                    }
                 }
                 // Returning to a sports broadcast
             } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && typeof response.state === 'undefined')
@@ -1291,19 +1333,26 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span></br>returning in`;
-                    responsiveVoice.speak(`Raider up! The broadcast of ${Meta.show} is about to resume.`);
+                    if (!isStudio)
+                        responsiveVoice.speak(`Raider up! The broadcast of ${Meta.show} is about to resume.`);
                 }
                 if (queuelength >= 15)
                 {
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
                 } else {
+                    if (!queueReminder && isStudio)
+                        responsiveVoice.speak(`Producer is returning live in less than 15 seconds`);
+                    queueReminder = true;
                     countdownclock.style.color = "#C8E6C9";
                     countdownclock.innerHTML = queuelength;
-                    $("#dj-alert").css("background-color", "#4CAF50");
-                    setTimeout(function () {
-                        $("#dj-alert").css("background-color", "#000000");
-                    }, 250);
+                    if (!isStudio)
+                    {
+                        $("#dj-alert").css("background-color", "#4CAF50");
+                        setTimeout(function () {
+                            $("#dj-alert").css("background-color", "#000000");
+                        }, 250);
+                    }
                 }
                 // Nothing special to show
             } else {
