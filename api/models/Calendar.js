@@ -226,7 +226,7 @@ module.exports = {
                 sails.log.silly(events);
                 // Alert if no events returned; this may be a problem. Also exit.
                 if (events.length === 0) {
-                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'No events detected for the next 7 days. Is this normal?', status: 3}]);
+                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no events for the next 7 days.', status: 3}]);
                     return resolve();
                 } else {
                     // Iterate through each returned event from Google Calendar
@@ -668,8 +668,6 @@ module.exports = {
                     if (badEvent)
                     {
                         Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Invalid events in Google Calendar. Please see DJ Controls administration / Calendar Verification.', status: 3}]);
-                    } else {
-                        Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Operational, and all events are formatted correctly.', status: 5}]);
                     }
                 }
 
@@ -694,7 +692,7 @@ module.exports = {
 
                 // Should have at least one event.
                 if (events.length === 0) {
-                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'No director hours are listed. Is this normal?', status: 3}]);
+                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no director hours for the next 7 days.', status: 3}]);
                     return resolve();
                 } else {
                     var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
