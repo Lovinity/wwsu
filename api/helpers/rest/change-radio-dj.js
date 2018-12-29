@@ -46,6 +46,8 @@ module.exports = {
                                 // Throw an error so that error.post does not get called, which is sometimes called after this helper finishes.
                                 throw new Error(`There are no healthy RadioDJ instances to switch to at this time.`);
                             }
+                            
+                            // Patrick Schmalstig cannot spell worth a shit
                             return true;
                         });
                 await Promise.all(maps);
