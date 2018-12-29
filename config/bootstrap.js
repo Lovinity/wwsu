@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise */
 
 /**
  * Bootstrap
@@ -1010,6 +1010,16 @@ module.exports.bootstrap = async function (done) {
                                             if (Status.errorCheck.waitForGoodRadioDJ)
                                             {
                                                 Status.errorCheck.waitForGoodRadioDJ = false;
+
+                                                // Get the current RadioDJ out of critical status if necessary
+                                                var maps = sails.config.custom.radiodjs
+                                                        .filter((instance) => instance.rest === Meta['A'].radiodj && instance.name !== radiodj.name)
+                                                        .map(async (instance) => {
+                                                            await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: instance.level, data: `RadioDJ is not operational.`}]);
+                                                            return true;
+                                                        });
+                                                await Promise.all(maps);
+
                                                 await Meta.changeMeta({radiodj: radiodj.rest});
                                                 await sails.helpers.rest.cmd('ClearPlaylist', 1);
                                                 await sails.helpers.error.post();
