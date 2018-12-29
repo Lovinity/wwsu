@@ -106,6 +106,10 @@ module.exports = {
             fn: function () {
                 return new Promise(async (resolve, reject) => {
                     try {
+                        // Do not continue if we are in the process of waiting for a status 5 RadioDJ
+                        if (Status.errorCheck.waitForGoodRadioDJ)
+                            return resolve(0);
+
                         await Meta.changeMeta({changingState: `Switching radioDJ instances due to queueFail`});
                         sails.sockets.broadcast('system-error', 'system-error', true);
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; active RadioDJ was failing to return queue data.`})
@@ -159,6 +163,10 @@ module.exports = {
                                     });
                             await sails.helpers.error.post();
                         } else {
+                            // Do not continue if we are in the process of waiting for a status 5 RadioDJ
+                            if (Status.errorCheck.waitForGoodRadioDJ)
+                                return resolve(0);
+
                             await Meta.changeMeta({changingState: `Switching automation instances due to frozen`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
                             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; queue was frozen.`})
@@ -219,6 +227,10 @@ module.exports = {
                             await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                         } else {
+                            // Do not continue if we are in the process of waiting for a status 5 RadioDJ
+                            if (Status.errorCheck.waitForGoodRadioDJ)
+                                return resolve(0);
+
                             await Meta.changeMeta({changingState: `Switching radioDJ instances due to frozenRemote`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
                             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; remote stream was not playing.`})
