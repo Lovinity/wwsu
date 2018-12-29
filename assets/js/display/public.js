@@ -417,11 +417,11 @@ function processCalendar(data, replace = false)
                                 event.endT = moment(event.end).format('hh:mm A');
 
                                 // Update strings if need be, if say, start time was before this day, or end time is after this day.
-                                if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
+                                if (moment(event.end).isAfter(moment(looptime2)))
                                 {
-                                    event.endT = moment(event.start).format('MM/DD hh:mm A');
+                                    event.endT = moment(event.end).format('MM/DD hh:mm A');
                                 }
-                                if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
+                                if (moment(event.start).isBefore(moment(looptime)))
                                 {
                                     event.startT = moment(event.start).format('MM/DD hh:mm A');
                                 }
