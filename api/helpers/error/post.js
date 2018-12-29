@@ -27,9 +27,10 @@ module.exports = {
                     await sails.helpers.genre.start(Meta['A'].genre, true);
                 } else {
                     await sails.helpers.genre.start('Default', true);
-                };
+                }
+                ;
                 await sails.helpers.rest.cmd('EnableAutoDJ', 1);
-            // When in playlist or prerecord, queue an ID and restart the playlist/prerecord
+                // When in playlist or prerecord, queue an ID and restart the playlist/prerecord
             } else if (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord')
             {
                 sails.log.verbose(`Playlist recovery triggered.`);
@@ -40,7 +41,7 @@ module.exports = {
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.playlists.start(Meta['A'].playlist, true, Meta['A'].state === 'live_prerecord' ? 1 : 0, Meta['A'].topic, true);
-            // When in break, queue PSAs
+                // When in break, queue PSAs
             } else if (Meta['A'].state.includes("_break") || Meta['A'].state.includes("_returning") || Meta['A'].state.includes("_disconnected"))
             {
                 sails.log.verbose(`Break recovery triggered.`);
@@ -50,6 +51,12 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, false);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                // Remote broadcasts; requeue remote track
+            } else if (Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on')
+            {
+                await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
+                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                await sails.helpers.rest.cmd('EnableAssisted', 0);
             }
 
             // All done.

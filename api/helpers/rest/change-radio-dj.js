@@ -1,4 +1,4 @@
-/* global sails, Meta */
+/* global sails, Meta, Promise, Status */
 
 module.exports = {
 
@@ -13,27 +13,43 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug(`Helper sails.helpers.rest.changeRadioDj called.`);
         try {
-            var runninginstance = 0;
 
-            // Determine which instance we should switch to
-            sails.config.custom.radiodjs
-                    .map((instance, index) => {
-                        if (instance.rest === Meta['A'].radiodj)
-                            runninginstance = index;
-                    });
+            // Determine which inactive RadioDJs are healthy (status 5).
+            var healthyRadioDJs = [];
+            var maps = sails.config.custom.radiodjs.map(async (instance, index) => {
+                if (instance.rest === Meta['A'].radiodj)
+                    return false;
+                var status = await Status.findOne({name: `radiodj-${instance.name}`});
+                if (status && status.status === 5)
+                    healthyRadioDJs.push()
+                return true;
+            });
+            await Promise.all(maps);
 
-            sails.log.verbose(`INSTANCE ${runninginstance}`);
-
-            runninginstance += 1;
-            if ((runninginstance >= sails.config.custom.radiodjs.length))
+            // If there is at least one healthy inactive RadioDJ, choose one randomly to switch to
+            if (healthyRadioDJs.length > 0)
             {
-                sails.log.verbose(`RESTARTING to 0.`);
-                runninginstance = 0;
-            }
+                var changeTo = await sails.helpers.pickRandom(healthyRadioDJs);
+                await Meta.changeMeta({radiodj: changeTo.rest});
 
-            // Change the instance
-            sails.log.debug('USING instance ' + runninginstance + ' which translates to ' + sails.config.custom.radiodjs[runninginstance].name);
-            await Meta.changeMeta({radiodj: sails.config.custom.radiodjs[runninginstance].rest});
+                // Otherwise, check to see if the active RadioDJ is still status 5
+            } else {
+                var maps = sails.config.custom.radiodjs
+                        .filter((instance) => instance.rest === Meta['A'].radiodj)
+                        .map(async (instance) => {
+                            var status = await Status.findOne({name: `radiodj-${instance.name}`});
+                            // If the current RadioDJ is also not status 5, we have a huge problem! Trigger critical status, and wait for a good RadioDJ to report
+                            if (!status || status.status !== 5)
+                            {
+                                Status.errorCheck.waitForGoodRadioDJ = true;
+                                await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 1, data: `None of the configured RadioDJ instances are reporting operational! Waiting for one to report operational to switch to.`}]);
+                                // Throw an error so that error.post does not get called, which is sometimes called after this helper finishes.
+                                throw new Error(`There are no healthy RadioDJ instances to switch to at this time.`);
+                            }
+                            return true;
+                        });
+                await Promise.all(maps);
+            }
 
             // All done.
             return exits.success();

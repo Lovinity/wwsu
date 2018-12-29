@@ -1,4 +1,4 @@
-/* global sails, Status, _, Logs, moment, Meta, inputs, Announcements, Calendar */
+/* global sails, Status, _, Logs, moment, Meta, inputs, Announcements, Calendar, Promise */
 
 /**
  * Status.js
@@ -95,6 +95,9 @@ module.exports = {
         prevDuration: 0,
         prevElapsed: 0,
 
+        // Used for telling the system we are waiting for a good RadioDJ to switch to
+        waitForGoodRadioDJ: false,
+
         // Triggered when CRON checks fails to getQueue. 
         queueFail: {
             count: 0,
@@ -113,10 +116,20 @@ module.exports = {
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
+                        var maps = sails.config.custom.radiodjs
+                                .filter((instance) => instance.rest === Meta['A'].radiodj)
+                                .map(async (instance) => {
+                                    var status = await Status.findOne({name: `radiodj-${instance.name}`});
+                                    if (status && status.status !== 1)
+                                        await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data.`}]);
+                                    return true;
+                                });
+                        await Promise.all(maps);
                         await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
                         await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0);
                         await sails.helpers.rest.cmd('StopPlayer', 1, 0);
                         await sails.helpers.rest.changeRadioDj();
+                        await sails.helpers.rest.cmd('ClearPlaylist', 1);
                         await sails.helpers.error.post();
                         await Meta.changeMeta({changingState: null});
                         return resolve(0);
@@ -156,6 +169,15 @@ module.exports = {
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
+                            var maps = sails.config.custom.radiodjs
+                                    .filter((instance) => instance.rest === Meta['A'].radiodj)
+                                    .map(async (instance) => {
+                                        var status = await Status.findOne({name: `radiodj-${instance.name}`});
+                                        if (status && status.status !== 1)
+                                            await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed.`}]);
+                                        return true;
+                                    });
+                            await Promise.all(maps);
                             sails.sockets.broadcast('system-error', 'system-error', true);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
@@ -208,14 +230,21 @@ module.exports = {
                                         sails.log.error(err);
                                     });
                             sails.sockets.broadcast('system-error', 'system-error', true);
+                            var maps = sails.config.custom.radiodjs
+                                    .filter((instance) => instance.rest === Meta['A'].radiodj)
+                                    .map(async (instance) => {
+                                        var status = await Status.findOne({name: `radiodj-${instance.name}`});
+                                        if (status && status.status !== 1)
+                                            await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered frozenRemote multiple times; it has probably crashed.`}]);
+                                        return true;
+                                    });
+                            await Promise.all(maps);
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
                             await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
                             await sails.helpers.rest.cmd('StopPlayer', 0, 0);
                             await sails.helpers.rest.changeRadioDj();
                             await sails.helpers.rest.cmd('ClearPlaylist', 1);
-                            await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                            await sails.helpers.rest.cmd('EnableAssisted', 0);
+                            await sails.helpers.error.post();
                             await Meta.changeMeta({changingState: null});
                         }
                         return resolve(0);

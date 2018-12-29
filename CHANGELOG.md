@@ -6,14 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
- - display/public studio parameter (when studio=true, voice will only announce a 15-second warning when DJ is going live). [Issue 34](https://github.com/Lovinity/wwsu/issues/34)
  - Queue PSA instead of random music in state/automation. [Issue 43](https://github.com/Lovinity/wwsu/issues/43)
+ - Check status of RadioDJs when changing radioDJ instance. [Issue 38](https://github.com/Lovinity/wwsu/issues/38)
 
 ### Fixed
  - Editing a live DJ could cause issues in Meta. [Issue 35](https://github.com/Lovinity/wwsu/issues/35)
  - Google Calendar director hours status check goes success then error when no director hours. [Issue 36](https://github.com/Lovinity/wwsu/issues/36)
 
 ### Added
+ - display/public studio parameter (when studio=true, voice will only announce a 15-second warning when DJ is going live). [Issue 34](https://github.com/Lovinity/wwsu/issues/34)
+ - In the RadioDJ cron checks, check for inactive RadioDJs playing something and send a stop command if they are playing. [Issue 39](https://github.com/Lovinity/wwsu/issues/39)
 
 ## [4.5.2] - 2018-12-18
 ### Changed

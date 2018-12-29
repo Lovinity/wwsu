@@ -998,12 +998,22 @@ module.exports.bootstrap = async function (done) {
                 sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`);
                 await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
                     return new Promise(async (resolve2, reject2) => {
+                        var status = await Status.findOne({name: `radiodj-${radiodj.name}`});
                         try {
                             needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, {headers: {'Content-Type': 'application/json'}})
                                     .then(async function (resp) {
                                         if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
                                         {
                                             Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is online.', status: 5}]);
+
+                                            // We were waiting for a good RadioDJ to switch to. Switch to it immediately.
+                                            if (Status.errorCheck.waitForGoodRadioDJ)
+                                            {
+                                                Status.errorCheck.waitForGoodRadioDJ = false;
+                                                await Meta.changeMeta({radiodj: radiodj.rest});
+                                                await sails.helpers.rest.cmd('ClearPlaylist', 1);
+                                                await sails.helpers.error.post();
+                                            }
 
                                             // If this RadioDJ is inactive, check to see if it is playing anything and send a stop command if so.
                                             if (Meta['A'].radiodj !== radiodj.rest)
@@ -1021,22 +1031,25 @@ module.exports.bootstrap = async function (done) {
                                                     resp.body.children.map(track => theTrack[track.name] = track.value);
                                                     automation.push(theTrack);
                                                 }
-                                                
+
                                                 // If this if condition passes, the RadioDJ is playing when it shouldn't be. Stop it!
                                                 if (typeof automation[0] !== 'undefined' && parseInt(automation[0].ID) !== 0)
                                                     await sails.helpers.rest.cmd('StopPlayer', 0, 0);
                                             }
                                         } else {
-                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level}]);
+                                            if (status && status.status !== 1)
+                                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level}]);
                                         }
                                         return resolve2(false);
                                     })
                                     .catch(function (err) {
-                                        Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level}]);
+                                        if (status && status.status !== 1)
+                                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level}]);
                                         return resolve2(false);
                                     });
                         } catch (e) {
-                            Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding.', status: radiodj.level}]);
+                            if (status && status.status !== 1)
+                                Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding.', status: radiodj.level}]);
                             return resolve2(false);
                         }
                     });
