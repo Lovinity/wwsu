@@ -21,7 +21,7 @@ module.exports = {
                     return false;
                 var status = await Status.findOne({name: `radiodj-${instance.name}`});
                 if (status && status.status === 5)
-                    healthyRadioDJs.push()
+                    healthyRadioDJs.push(instance);
                 return true;
             });
             await Promise.all(maps);
