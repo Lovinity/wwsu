@@ -1004,6 +1004,28 @@ module.exports.bootstrap = async function (done) {
                                         if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined')
                                         {
                                             Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is online.', status: 5}]);
+
+                                            // If this RadioDJ is inactive, check to see if it is playing anything and send a stop command if so.
+                                            if (Meta['A'].radiodj !== radiodj.rest)
+                                            {
+                                                var automation = [];
+                                                if (resp.body.name === 'ArrayOfSongData')
+                                                {
+                                                    resp.body.children.map(trackA => {
+                                                        var theTrack = {};
+                                                        trackA.children.map(track => theTrack[track.name] = track.value);
+                                                        automation.push(theTrack);
+                                                    });
+                                                } else {
+                                                    var theTrack = {};
+                                                    resp.body.children.map(track => theTrack[track.name] = track.value);
+                                                    automation.push(theTrack);
+                                                }
+                                                
+                                                // If this if condition passes, the RadioDJ is playing when it shouldn't be. Stop it!
+                                                if (typeof automation[0] !== 'undefined' && parseInt(automation[0].ID) !== 0)
+                                                    await sails.helpers.rest.cmd('StopPlayer', 0, 0);
+                                            }
                                         } else {
                                             Status.changeStatus([{name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level}]);
                                         }
