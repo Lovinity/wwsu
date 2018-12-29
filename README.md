@@ -1,4 +1,4 @@
-# WWSU 4.5.1
+# WWSU 4.5.3
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -327,6 +327,10 @@ Bans the specified user indefinitely. Also mass deletes all website messages sen
 These endpoints regard the display signs for WWSU. Although they are publicly accessible, they were not meant for general public use.
 ### /display/public
 Get the public display sign as HTML webpage; to be run in full screen on the display monitor.
+#### Request
+| key | criteria |
+|--|--|
+| studio | boolean (optional; set to true on the display sign used in the OnAir studio. This causes the text-to-speech voice to only announce when going on the air in 15 seconds for the guests, and disables red flashing on queue countdown as it's not necessary for the public studio sign.) |
 #### Response 200 (text/html)
 ### /display/internal
 Get the internal display sign as HTML webpage; to be run in full screen on the display monitor. This is for directors and members of the WWSU organization.

@@ -62,13 +62,8 @@ module.exports = {
             Status.errorCheck.prevID = moment();
             await sails.helpers.error.count('stationID');
 
-            // Queue a random music track in case Google Calendar takes a while
-            if (!inputs.transition)
-            {
-                await sails.helpers.songs.queue(sails.config.custom.subcats.music, 'Bottom', 1);
-            } else {
-                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1);
-            }
+            // Queue a random PSA in case Google Calendar takes a while
+            await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1);
 
             // Finish up
             await sails.helpers.songs.queuePending();
