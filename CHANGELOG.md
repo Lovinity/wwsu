@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [Unreleased]
+### Deprecated
+ - As of version 5.0.0, hosts/get will no longer return authorization tokens. Instead, a new group of auth/* endpoints will be used. README.md has more information.
+ - As of version 5.0.0, directors/get and djs/get will no longer return the "login" property.
+ - As of version 5.0.0, directors/get will no longer use "username" parameter. Instead, optional "name" parameter can be provided to return only the director whose name matches the provided name.
+ - As of version 5.0.0, Some endpoints as indicated in README.md will reject on HTTP requests and begin requiring the request to be made via websocket.
+ - As of version 5.0.0, "host" will be required in the header when requesting to establish a websocket connection, except for requests originating from server.wwsu1069.org. The host parameter should include a Hosts.host who is authorized (authorized=true). Otherwise, the websocket request will be rejected.
+ - As of version 5.0.0, calendar/verify will be removed.
+ - As of version 5.0.0, clients must call a new state/sports-remote endpoint for remote sports broadcasts; the "remote" parameter will be removed from state/sports. state/sports-remote will have the same request parameters as state/sports.
+ - As of version 5.0.0, a few unnecessary request parameters will be removed, and instead data from the provided auth token will be used. See README.md for more information.
+
 ### Changed
  - Queue PSA instead of random music in state/automation. [Issue 43](https://github.com/Lovinity/wwsu/issues/43)
  - Check status of RadioDJs when changing radioDJ instance. [Issue 38](https://github.com/Lovinity/wwsu/issues/38)
