@@ -420,9 +420,11 @@ function processCalendar(data, replace = false)
                                 if (moment(event.end).isAfter(moment(looptime2)))
                                 {
                                     event.endT = moment(event.end).format('MM/DD hh:mm A');
+                                    event.startT = moment(event.start).format('MM/DD hh:mm A');
                                 }
                                 if (moment(event.start).isBefore(moment(looptime)))
                                 {
+                                    event.endT = moment(event.end).format('MM/DD hh:mm A');
                                     event.startT = moment(event.start).format('MM/DD hh:mm A');
                                 }
 
