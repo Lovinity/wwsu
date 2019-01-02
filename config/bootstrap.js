@@ -1044,7 +1044,16 @@ module.exports.bootstrap = async function (done) {
 
                                                 // If this if condition passes, the RadioDJ is playing when it shouldn't be. Stop it!
                                                 if (typeof automation[0] !== 'undefined' && parseInt(automation[0].ID) !== 0)
-                                                    await sails.helpers.rest.cmd('StopPlayer', 0, 0);
+                                                {
+                                                    try {
+                                                        needle('get', radiodj.rest + '/opt?auth=' + sails.config.custom.rest.auth + '&command=StopPlayer&arg=1', {}, {open_timeout: 10000, response_timeout: 10000, read_timeout: 10000, headers: {'Content-Type': 'application/json'}})
+                                                                .catch(function (err) {
+                                                                    // Ignore errors
+                                                                });
+                                                    } catch (e3) {
+                                                        // Ignore errors
+                                                    }
+                                                }
                                             }
                                         } else {
                                             if (status && status.status !== 1)
