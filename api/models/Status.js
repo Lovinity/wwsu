@@ -154,7 +154,7 @@ module.exports = {
                 return new Promise(async (resolve, reject) => {
                     try {
                         // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
-                        if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
+                        if (!moment().isBefore(moment(Status.errorCheck.prevError).add(1, 'minutes')))
                         {
                             sails.log.verbose(`No recent error; attempting standard recovery.`);
                             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Queue recovery attempted; queue was frozen.`})
@@ -213,7 +213,7 @@ module.exports = {
                 return new Promise(async (resolve, reject) => {
                     try {
                         // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
-                        if (moment().isAfter(moment(Status.errorCheck.prevError).add(1, 'minutes')))
+                        if (!moment().isBefore(moment(Status.errorCheck.prevError).add(1, 'minutes')))
                         {
                             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'urgent', logsubtype: '', event: `Remote stream not playing; attempting to re-queue it.`})
                                     .tolerate((err) => {

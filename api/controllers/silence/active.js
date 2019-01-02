@@ -42,7 +42,7 @@ module.exports = {
             }
 
             // If we are in automation, and prevError is less than 3 minutes ago, assume an audio issue and switch RadioDJs
-            if (moment().isAfter(moment(Status.errorCheck.prevError).add(3, 'minutes')) && (Meta['A'].state.startsWith("automation_") || Meta['A'].state === 'live_prerecord'))
+            if (moment().isBefore(moment(Status.errorCheck.prevError).add(3, 'minutes')) && (Meta['A'].state.startsWith("automation_") || Meta['A'].state === 'live_prerecord'))
             {
                 await Meta.changeMeta({changingState: `Switching automation instances due to no audio`});
                 await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switching automation instances; silence detection executed multiple times.`})
