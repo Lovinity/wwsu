@@ -1165,7 +1165,7 @@ function doSlide(same = false)
         {
             slidebadges.innerHTML = ``;
             // Determine highest slide number so we know when we are done
-            var highestslide = 0;
+            var highestslide = 1;
             for (var key in slides) {
                 if (slides.hasOwnProperty(key)) {
                     if (slides[key].do && (!stickySlides || key >= 1000) && (globalStatus > 2 || key === 6))
@@ -1199,7 +1199,7 @@ function doSlide(same = false)
                         }
                         restarted = true;
                     } else { // We have a problem if we reach this point! Trigger marquee screensaver as failsafe
-                        slide = 0;
+                        slide = 1;
                     }
                 }
 
