@@ -1199,6 +1199,7 @@ function doSlide(same = false)
                         }
                         restarted = true;
                     } else { // We have a problem if we reach this point! Trigger marquee screensaver as failsafe
+                        done = true;
                         slide = 6;
                     }
                 }
