@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file as of versio
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
-## [Unreleased]
+## [4.5.4] - 2019-01-02
 ### Deprecated
  - As of version 5.0.0, hosts/get will no longer return authorization tokens. Instead, a new group of auth/* endpoints will be used. README.md has more information.
  - As of version 5.0.0, directors/get and djs/get will no longer return the "login" property.

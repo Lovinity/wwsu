@@ -49,7 +49,7 @@ module.exports = {
                         .tolerate((err) => {
                             sails.log.error(err);
                         });
-                await Announcements.findOrCreate({type: 'djcontrols', title: `Audio Error (system)`, announcement: "System recently had switched automation instances because the silence detectionm system triggered multiple times. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `Audio Error (system)`, announcement: "System recently had switched automation instances because the silence detectionm system triggered multiple times. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                await Announcements.findOrCreate({type: 'djcontrols', title: `Audio Error (system)`, announcement: "System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `Audio Error (system)`, announcement: "System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                         .tolerate((err) => {
                             sails.log.error(err);
                         });
