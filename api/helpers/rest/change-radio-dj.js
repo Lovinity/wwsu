@@ -29,8 +29,8 @@ module.exports = {
             // If there is at least one healthy inactive RadioDJ, choose one randomly to switch to
             if (healthyRadioDJs.length > 0)
             {
-                var changeTo = await sails.helpers.pickRandom(healthyRadioDJs).item;
-                await Meta.changeMeta({radiodj: changeTo.rest});
+                var changeTo = await sails.helpers.pickRandom(healthyRadioDJs);
+                await Meta.changeMeta({radiodj: changeTo.item.rest});
 
                 // Otherwise, check to see if the active RadioDJ is still status 5
             } else {
