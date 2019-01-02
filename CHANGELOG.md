@@ -22,10 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
  - Editing a live DJ could cause issues in Meta. [Issue 35](https://github.com/Lovinity/wwsu/issues/35)
  - Google Calendar director hours status check goes success then error when no director hours. [Issue 36](https://github.com/Lovinity/wwsu/issues/36)
+ - display/internal triggers marquee screensaver when lost connection when it should not.
 
 ### Added
  - display/public studio parameter (when studio=true, voice will only announce a 15-second warning when DJ is going live). [Issue 34](https://github.com/Lovinity/wwsu/issues/34)
  - In the RadioDJ cron checks, check for inactive RadioDJs playing something and send a stop command if they are playing. [Issue 39](https://github.com/Lovinity/wwsu/issues/39)
+ - Multiple silence/active calls within 3 minutes in automation state will trigger a RadioDJ change. [Issue 44](https://github.com/Lovinity/wwsu/issues/44)
 
 ## [4.5.2] - 2018-12-18
 ### Changed
