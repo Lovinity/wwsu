@@ -1,4 +1,4 @@
-/* global sails, Hosts */
+/* global sails, Hosts, Status */
 
 module.exports = {
 
@@ -35,7 +35,10 @@ module.exports = {
                 return exits.conflict("To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing this host.");
 
             // Destroy it
-            await Hosts.destroy({ID: inputs.ID}).fetch();
+            var hostRecord = await Hosts.destroyOne({ID: inputs.ID});
+            
+            // Destroy the status records for this host as well
+            await Status.destroy({name: `host-${hostRecord.host}`}).fetch();
 
             // All done.
             return exits.success();

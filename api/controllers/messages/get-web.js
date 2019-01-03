@@ -24,7 +24,7 @@ module.exports = {
             if (this.req.isSocket)
             {
                 // Generate a host name from the IP address and randomly generated secret
-                opts.host = sh.unique(from_IP + sails.tokenSecret);
+                opts.host = sh.unique(from_IP + sails.config.custom.hostSecret);
                 if (opts.nickname === null || opts.nickname === '')
                     opts.nickname = opts.host;
                 sails.log.silly(`Host: ${opts.host}`);
@@ -34,7 +34,7 @@ module.exports = {
                 sails.sockets.join(this.req, `messages-website-${opts.host}`); // Private website messages
                 sails.log.verbose(`Request was a socket. Joining messages-website and messages-website-${opts.host}.`);
             } else {
-                opts.host = sh.unique(from_IP + sails.tokenSecret);
+                opts.host = sh.unique(from_IP + sails.config.custom.hostSecret);
             }
             if (opts.nickname === null || opts.nickname === '')
                 opts.nickname = opts.host;

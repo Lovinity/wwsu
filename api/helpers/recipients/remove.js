@@ -1,4 +1,4 @@
-/* global sails, Recipients, _, moment, Status */
+/* global sails, Recipients, _, moment, Status, Hosts, djcontrols, Promise */
 
 module.exports = {
 
@@ -75,13 +75,21 @@ module.exports = {
                     sails.log.verbose(`Recipient is no longer connected. Setting to offline.`);
                     await Recipients.update({host: recipient.host}, {host: recipient.host, status: 0, time: moment().toISOString(true)}).fetch();
 
-                    var maps = sails.config.custom.djcontrols
-                            .filter(djcontrols => djcontrols.host === recipient.host)
-                            .map(async djcontrols => {
-                                await Status.changeStatus([{name: `djcontrols-${djcontrols.name}`, label: `DJ Controls ${djcontrols.label}`, status: djcontrols.level, data: 'DJ Controls is offline.'}]);
-                                return true;
-                            });
-                    await Promise.all(maps);
+                    var hostRecord = await Hosts.findOne({host: recipient.host});
+                    if (hostRecord)
+                    {
+                        var offStatus = 4;
+                        if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls)
+                        {
+                            if (hostRecord.silenceDetection || hostRecord.recordAudio)
+                            {
+                                offStatus = 2;
+                            } else {
+                                offStatus = 3;
+                            }
+                        }
+                        await Status.changeStatus([{name: recipient.host, label: `Host ${recipient.label}`, status: offStatus, data: 'Host is offline.'}]);
+                    }
                 }
 
                 // If the recipient name is found in display sign config, reflect status if there are insufficient number of connections.

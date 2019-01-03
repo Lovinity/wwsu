@@ -1,4 +1,4 @@
-/* global Hosts, sails */
+/* global Hosts, sails, Status, _ */
 
 module.exports = {
 
@@ -28,6 +28,26 @@ module.exports = {
             description: 'If provided, the admin setting for the host will be changed to this. If changing to false, and no other authorized admin exists, an error will be thrown to prevent accidental lockout.'
         },
 
+        makeCalls: {
+            type: 'boolean',
+            description: 'If provided, the makeCalls setting for the host will be changed to this.'
+        },
+
+        answerCalls: {
+            type: 'boolean',
+            description: 'If provided, the answerCalls setting for the host will be changed to this.'
+        },
+
+        silenceDetection: {
+            type: 'boolean',
+            description: 'If provided, the silenceDetection setting for the host will be changed to this. If changing to true, and another host already has this set at true, an error will be thrown to prevent silence detection conflicts.'
+        },
+
+        recordAudio: {
+            type: 'boolean',
+            description: 'If provided, the recordAudio setting for the host will be changed to this. If changing to true, and another host already has this set at true, an error will be thrown to prevent silence detection conflicts.'
+        },
+
         requests: {
             type: 'boolean',
             description: 'If provided, whether or not this host should receive track request notifications will be changed to this.'
@@ -43,7 +63,7 @@ module.exports = {
             description: 'If provided, whether or not this host should receive web/client message notifications will be changed to this.'
         }
     },
-    
+
     exits: {
         conflict: {
             statusCode: 409
@@ -61,6 +81,20 @@ module.exports = {
             if (lockout <= 1 && ((typeof inputs.admin !== 'undefined' && !inputs.admin) || (typeof inputs.authorized !== 'undefined' && !inputs.authorized)))
                 return exits.conflict("To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing authorized admin status from this host.");
 
+            // Now, if changing silenceDetection or recordAudio to true, ensure there aren't other hosts with it already true. If so, error to prevent conflict
+            if (typeof inputs.silenceDetection !== 'undefined' && inputs.silenceDetection !== null && inputs.silenceDetection)
+            {
+                var lockout = await Hosts.count({ID: {'!=': inputs.ID}, silenceDetection: true});
+                if (lockout >= 1)
+                    return exits.conflict("To prevent silence detection conflicts, this request was denied because another host already has silenceDetection. Please set the other host silenceDetection to false first.");
+            }
+            if (typeof inputs.recordAudio !== 'undefined' && inputs.recordAudio !== null && inputs.recordAudio)
+            {
+                var lockout = await Hosts.count({ID: {'!=': inputs.ID}, recordAudio: true});
+                if (lockout >= 1)
+                    return exits.conflict("To prevent audio recording conflicts, this request was denied because another host already has recordAudio. Please set the other host recordAudio to false first.");
+            }
+
             // Determine what needs updating
             var criteria = {};
             if (typeof inputs.friendlyname !== 'undefined' && inputs.friendlyname !== null)
@@ -69,6 +103,14 @@ module.exports = {
                 criteria.authorized = inputs.authorized;
             if (typeof inputs.admin !== 'undefined' && inputs.admin !== null)
                 criteria.admin = inputs.admin;
+            if (typeof inputs.makeCalls !== 'undefined' && inputs.makeCalls !== null)
+                criteria.makeCalls = inputs.makeCalls;
+            if (typeof inputs.answerCalls !== 'undefined' && inputs.answerCalls !== null)
+                criteria.answerCalls = inputs.answerCalls;
+            if (typeof inputs.silenceDetection !== 'undefined' && inputs.silenceDetection !== null)
+                criteria.silenceDetection = inputs.silenceDetection;
+            if (typeof inputs.recordAudio !== 'undefined' && inputs.recordAudio !== null)
+                criteria.recordAudio = inputs.recordAudio;
             if (typeof inputs.requests !== 'undefined' && inputs.requests !== null)
                 criteria.requests = inputs.requests;
             if (typeof inputs.emergencies !== 'undefined' && inputs.emergencies !== null)
@@ -80,7 +122,29 @@ module.exports = {
             var criteriaB = _.cloneDeep(criteria);
 
             // Edit it
-            await Hosts.update({ID: inputs.ID}, criteriaB).fetch();
+            var hostRecord = await Hosts.updateOne({ID: inputs.ID}, criteriaB);
+
+            // Edit the status of this host if necessary
+            var statusRecord = await Status.findOne({name: `host-${hostRecord.host}`});
+            if (statusRecord)
+            {
+                if (statusRecord.status !== 5)
+                {
+                    var status = 4;
+                    if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls)
+                    {
+                        if (hostRecord.silenceDetection || hostRecord.recordAudio)
+                        {
+                            status = 2;
+                        } else {
+                            status = 3;
+                        }
+                    }
+                    await Status.changeStatus([{name: `host-${hostRecord.host}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host is offline.`}]);
+                } else {
+                    await Status.changeStatus([{name: `host-${hostRecord.host}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: `Host is online.`}]);
+                }
+            }
 
             // All done.
             return exits.success();

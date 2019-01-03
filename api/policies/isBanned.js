@@ -12,7 +12,7 @@ module.exports = async function (req, res, next) {
     var searchto = moment().subtract(1, 'days').toDate();
     var sh = require("shorthash");
     var theip = req.isSocket ? (typeof req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? req.socket.handshake.headers['x-forwarded-for'] : req.socket.conn.remoteAddress) : req.ip;
-    var theid = sh.unique(theip + sails.tokenSecret);
+    var theid = sh.unique(theip + sails.config.custom.hostSecret);
     /*
      Discipline.findOne({where: {active: 1, or: [
      {action: 'permaban'},

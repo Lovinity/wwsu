@@ -7,13 +7,25 @@ module.exports = {
 
     friendlyName: 'hosts / get',
 
-    description: 'Retrieve data about a specified host. Also authorizes and returns a token if the host is an authorized host.',
+    description: 'Retrieve data about a specified host. Also provides an array of otherHosts, and subscribes to the hosts socket, if the host parameter is an admin host.',
 
     inputs: {
         host: {
             type: 'string',
             required: true,
-            description: 'The host name to search for or authorize. If the host does not exist, one will be created.'
+            description: 'The host name to search for or authorize.'
+        }
+    },
+
+    exits: {
+        success: {
+            statusCode: 200
+        },
+        notFound: {
+            statusCode: 404
+        },
+        error: {
+            statusCode: 500
         }
     },
 
@@ -22,31 +34,31 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            // Find or create the hosts record
-            var record = await Hosts.findOrCreate({host: inputs.host}, {host: inputs.host, friendlyname: await sails.helpers.recipients.generateNick()});
+            // Find the hosts record
+            var record = await Hosts.findOne({host: inputs.host});
             sails.log.silly(record);
 
-            if (record.authorized)
-            {
-                record.token = await jwt.sign(// Sign and generate an authorization token
-                        {id: record.ID},
-                        sails.tokenSecret, // Token Secret that we sign it with
-                        {
-                            expiresIn: (60 * 60) // Token Expire time (1 hour)
-                        });
+            if (!record)
+                return exits.notFound();
 
-                // Subscribe to websockets if applicable
-                if (this.req.isSocket && record.admin)
-                {
-                    sails.sockets.join(this.req, 'hosts');
-                    sails.log.verbose('Request was a socket on an authorized admin. Joined hosts.');
-                    
-                    // Push the current hosts
-                    var records = await Hosts.find();
-                    record.otherHosts = records;
-                }
-            } else {
-                record.token = null;
+            /*
+             record.token = await jwt.sign(// Sign and generate an authorization token
+             {id: record.ID},
+             sails.tokenSecret, // Token Secret that we sign it with
+             {
+             expiresIn: (60 * 60) // Token Expire time (1 hour)
+             });
+             */
+
+            // Subscribe to websockets if applicable
+            if (record.authorized && this.req.isSocket && record.admin)
+            {
+                sails.sockets.join(this.req, 'hosts');
+                sails.log.verbose('Request was a socket on an authorized admin. Joined hosts.');
+
+                // Push the current hosts
+                var records = await Hosts.find();
+                record.otherHosts = records;
             }
 
             return exits.success(record);
