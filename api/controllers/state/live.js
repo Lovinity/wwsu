@@ -30,12 +30,6 @@ module.exports = {
             defaultsTo: true,
             description: 'Should the web chat be enabled during this show? Defaults to true.'
         },
-
-        djcontrols: {
-            type: 'string',
-            required: true,
-            description: 'Name of the computer which is triggering this live request (the live request should be coming from DJ Controls).'
-        }
     },
 
     fn: async function (inputs, exits) {
@@ -93,10 +87,10 @@ module.exports = {
                 }
 
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
             } else {
                 // Otherwise, just update metadata but do not do anything else
-                await Meta.changeMeta({show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                await Meta.changeMeta({show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host});
             }
 
             await sails.helpers.error.reset('automationBreak');

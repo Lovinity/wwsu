@@ -40,6 +40,15 @@ module.exports.bootstrap = async function (done) {
                 sails.log.error(err);
             });
 
+    // Generate token secrets
+    sails.log.verbose(`BOOTSTRAP: generating token secrets`);
+    var cryptoRandomString = require('crypto-random-string');
+    sails.config.custom.secrets = {};
+    sails.config.custom.secrets.host = cryptoRandomString(256);
+    sails.config.custom.secrets.dj = cryptoRandomString(256);
+    sails.config.custom.secrets.director = cryptoRandomString(256);
+    sails.config.custom.secrets.adminDirector = cryptoRandomString(256);
+
     // Load blank Meta template
     sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);
     Meta.template = _.cloneDeep(Meta['A']);

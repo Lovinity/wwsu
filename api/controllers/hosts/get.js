@@ -1,8 +1,5 @@
 /* global sails, Hosts */
-var
-        jwt = require('jsonwebtoken'),
-        cryptoRandomString = require('crypto-random-string');
-sails.tokenSecret = cryptoRandomString(256);
+
 module.exports = {
 
     friendlyName: 'hosts / get',
@@ -40,15 +37,6 @@ module.exports = {
 
             if (!record)
                 return exits.notFound();
-
-            /*
-             record.token = await jwt.sign(// Sign and generate an authorization token
-             {id: record.ID},
-             sails.tokenSecret, // Token Secret that we sign it with
-             {
-             expiresIn: (60 * 60) // Token Expire time (1 hour)
-             });
-             */
 
             // Subscribe to websockets if applicable
             if (record.authorized && this.req.isSocket && record.admin)

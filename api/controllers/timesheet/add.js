@@ -7,12 +7,6 @@ module.exports = {
     description: 'Add a timesheet entry for a director.',
 
     inputs: {
-        login: {
-            type: 'string',
-            required: true,
-            description: 'Username of the director adding the timesheet entry.'
-        },
-
         timestamp: {
             type: 'string',
             required: true,
@@ -30,7 +24,7 @@ module.exports = {
         try {
 
             // Get the director
-            var record = await Directors.findOne({login: inputs.login});
+            var record = await Directors.findOne({name: this.req.payload.name});
             sails.log.silly(record);
 
             // No director? return not found.
@@ -51,7 +45,7 @@ module.exports = {
                 await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(true), approved: toapprove}).fetch();
 
                 // Update the director presence
-                await Directors.update({login: inputs.login}, {present: false, since: thetime.toISOString(true)})
+                await Directors.update({ID: record.ID}, {present: false, since: thetime.toISOString(true)})
                         .fetch();
 
             } else { // If the director is not present, this is a clock-in entry.
@@ -66,7 +60,7 @@ module.exports = {
                 await Timesheet.create({name: record.name, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
 
                 // Update the director presence
-                await Directors.update({login: inputs.login}, {present: true, since: thetime.toISOString(true)})
+                await Directors.update({ID: record.ID}, {present: true, since: thetime.toISOString(true)})
                         .fetch();
             }
             return exits.success();

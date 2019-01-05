@@ -2,8 +2,7 @@
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
-**WARNING!!! As of version 5.0.0, requests to connect to websocket that do not originate from server.wwsu1069.org will require a host parameter in the header**. The provided host must be a Hosts.host who is authorized (authorized=true). Otherwise, the websocket request will be rejected.
-Several of the API endpoints, as noted in their respective section of this documentation, can be called using a socket request. When the request is a socket, the client will be subscribed to receive changes. Unless otherwise specified, all websocket messages are sent as an event containing the same name as the top level endpoint, in all lowercase (For example, anything under Messages will be sent as a socket event named "messages"). The data sent to the event follows the following format, designed to be used in conjunction with nedb:
+Several of the API endpoints, as noted in their respective section of this documentation, can be called using a socket request. When the request is a socket, the client will be subscribed to receive changes. Unless otherwise specified in this readme, websocket messages are sent as an event containing the same name as the top level endpoint, in all lowercase (For example, anything under Messages will be sent as a socket event named "messages"). The data sent to the event follows the following format:
 ### Insert
     {
         "insert": {
@@ -20,24 +19,27 @@ Several of the API endpoints, as noted in their respective section of this docum
     {
         "remove": 1 // The ID number of the record to be removed
     }
-**Endpoints in this documentation which indicate they support sockets and do not specify a format are assumed to use the above standard.**
+### Websocket authentication
+All socket requests not originating from server.wwsu1069.org must provide a "host" parameter in the connection query. The value must be an authorized host (see Hosts).
+
 ## Responses
 All API endpoints explained below will respond with something. In addition to the responses documented in the respective sections, endpoints may also respond with any of the following:
 
+ - 200 OK
  - 400 An error object, containing code (string), problems (array of strings), and message (string).
- - 401 `{"err": "Invalid Token!"}`
+ - 401 `{"err": "A string describing why you were not authorized to perform the action"}`
  - 403 `{"discipline": "Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: (reference numbers here separated by comma)"}` 
- - 404 "Not Found"
+ - 404 Not Found
  - 500 Internal Server Error
 ## Methods
 The WWSU app does not care which method you use for any of the requests. Generally, it is recommended to use GET when fetching information, and POST when submitting information.
 ## Authorization
-A lot of API endpoints require a valid authorization in the form of a header. The endpoints which require authorization will be noted in their respective section.
+A lot of API endpoints require a valid authorization in the form of a header token. The endpoints which require authorization will be noted in their respective section.
  - The key is "authorization", and the value is "Bearer (token)". 
- - Use the /hosts/get endpoint to authenticate and get a token.
 
-**WARNING!!! Authorization will be changing in version 5.0.0**. There will be different authorizations depending on the API endpoint. We added warnings to appropriate endpoints to indicate what authorization they will begin using in version 5.0.0.
- - auth/host will replace hosts/get and authenticate endpoints just needing an authorized host. Must provide Hosts.host as "username" in request. No password required.
+### Endpoints
+Use one of the following endpoints to get an authorization token. Each endpoint section requiring authorization will tell you which endpoint you must use.
+ - auth/host This will be used for endpoints requiring low-level authentication. Must provide Hosts.host as "username" in request. The provided host must be authorized by the system. No password required.
  - auth/dj will be used for endpoints regarding DJ-specific functionality. Must provide Djs.name as "username", and Djs.login as "password", in request.
  - auth/director will be used for endpoints needing authentication of any director. Must provide Directors.name as "username", and Directors.login as "password", in request.
  - auth/admin-director will be used for endpoints needing authentication of a director with admin=true. Must provide Directors.name as "username", and Directors.login as "password", in request.
@@ -46,7 +48,7 @@ Analytics endpoints deal with getting analytics about WWSU.
 ### /analytics/weekly-dj
 Receive analytical statistics about WWSU from the last 7 days.
  - This endpoint supports sockets, and uses the "analytics-weekly-dj" event. The data passed in this event is in the same structure as the response format.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Response 200
         {
             "topShows": [], // Array of strings containing the DJ Name - Show name of the shows with the most online listeners. The shows in the earlier array positions have more listeners than the shows in the later array positions.
@@ -61,9 +63,9 @@ Receive analytical statistics about WWSU from the last 7 days.
 ## Announcements
 Announcements endpoints regard the internal announcements system at WWSU.
 ### /announcements/add
-Adds an announcement into the system. **Requires authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Adds an announcement into the system.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -75,9 +77,9 @@ Adds an announcement into the system. **Requires authorization**.
 | expires | string (optional; the ISO moment.js compatible time that the announcement expires. Defaults to the year 3000.) |
 #### Response 200 OK
 ### /announcements/edit
-Edits an existing announcement. **Requires authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Edits an existing announcement.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -93,7 +95,7 @@ Edits an existing announcement. **Requires authorization**.
 Get an array of announcements for the provided type.
  - This endpoint supports sockets, uses the "announcements" event, and returns data in the structure defined in the websockets section. Only data pertaining to the provided type is returned in sockets.
  - **NOTE**: Clients are expected to do their own processing of starts and expires time; system returns all applicable announcements regardless whether or not they have expired or become active yet.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -115,9 +117,9 @@ Get an array of announcements for the provided type.
             ...
         ]
 ### /announcements/remove
-Removes an announcement. **Requires authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Removes an announcement.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -126,10 +128,10 @@ Removes an announcement. **Requires authorization**.
 ## Attendance
 Attendance endpoints regard records that keep track of scheduled events and when those events actually aired, if they aired.
 ### /attendance/get
-Retrieve an array of show/program attendance logs for a specified date or specified DJ. **Requires Authorization**.
+Retrieve an array of show/program attendance logs for a specified date or specified DJ.
  - This endpoint supports sockets, uses the "attendance" event, and returns data in the structure defined in the websockets section. A socket is only subscribed to if dj and event parameters are not provided.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -179,35 +181,31 @@ Get an array of events for the next 7 days, in no particular order (client will 
             },
             ...
         ]
-### /calendar/verify
-Returns an HTML page verifying the events in the WWSU Calendar for the next week. Checks for event title syntax, proper formatting, existing playlists/rotations, playlist length, and more. Page also uses calendar/get for populating the verification.
- - **DEPRECATION WARNING:** This endpoint will be removed in version 5.0.0. Use the calendar verification tool in DJ Controls instead.
-#### Response 200 HTML
 ## Directors
 The Directors endpoints regard the directors of WWSU Radio.
 ### /directors/add
-Add a new director into the WWSU system. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/admin-director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Add a new director into the WWSU system.
+ - **Requires auth/admin-director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
 | name | string (required; the name of the director) |
-| login | string (required; the password used for the clock-in and clock-out system) |
+| login | string (required; the password used for this director) |
 | admin | boolean (optional; whether or not this director is an administrator. Defaults to false.) |
 | assistant | boolean (optional; whether or not this director is an assistant director (false is a main director). Defaults to false.) |
 | position | string (required; The name of the position this director works for (eg. "General manager"). |
 #### Response 200 OK
 ### /directors/edit
-Edits the details of an existing director. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/admin-director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Edits the details of an existing director.
+ - **Requires auth/admin-director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
 | ID | number (required; the ID of the director to edit) |
 | name | string (optional; if provided, the name of the director will be changed to this.) |
-| login | string (optional; if provided, the login of the director will be changed to this.) |
+| login | string (optional; if provided, the login/password of the director will be changed to this.) |
 | admin | boolean (optional; if provided, the admin status of the director will be changed to this.) |
 | assistant | boolean (optional; if provided, the assistant status of the director will be changed to this.) |
 | position | string (optional; if provided, the position of the director will be changed to this.) |
@@ -230,21 +228,18 @@ Get an array of office hours for WWSU directors for the next week.
             ...
         ]
 ### /directors/get
-Get an array of directors. If a username is provided, will filter according to the provided username. Otherwise, will return all directors.
+Get an array of directors.
  - This endpoint supports sockets, uses the "directors" event, and returns data in the structure defined in the websockets section.
- - **DEPRECATION WARNING:** As of version 5.0.0, this endpoint and its websockets will no longer return "login".
- - **DEPRECATION WARNING:** As of version 5.0.0, the username parameter will be removed. Instead, optional "name" can be provided to only return the director whose name matches the parameter.
 #### Request
 | key | criteria |
 |--|--|
-| username | string (optional; the OpenProject username of the director to return) |
+| name | string (optional; return only the director with this name.) |
 #### Response 200
         [
             {
                 "createdAt": "2018-05-15T22:31:34.381Z",
                 "updatedAt": "2018-05-15T22:31:34.381Z",
                 "ID": 1,
-                "login": "george-carlin", // Password for the director
                 "name": "George Carlin", // Full name of the director
                 "admin": true, // True if this is a super director / admin
                 "assistant": false, // True if this is a non-paid assistant director / intern
@@ -257,9 +252,9 @@ Get an array of directors. If a username is provided, will filter according to t
         ]
 #### Response 404
 ### /directors/remove
-Removes a director from the system. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/admin-director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Removes a director from the system.
+ - **Requires auth/admin-director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -268,33 +263,33 @@ Removes a director from the system. **Requires authorization**
 ## Discipline
 The discipline endpoints regard moderation for public clients (website and app users).
 ### /discipline/ban-show
-Bans the specified user until the currently live DJ/broadcast ends. Also mass deletes all website messages sent by the specified user. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Bans the specified user until the currently live DJ/broadcast ends. Also mass deletes all website messages sent by the specified user.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 |key|criteria|
 |--|--|
-| host | string (required; the Recipient host to be issued the discipline) |
+| host | string (required; the Recipient host or IP address to be issued the discipline) |
 #### Response 200 OK
 #### Response 500
 ### /discipline/ban-day
-Bans the specified user for 24 hours. Also mass deletes all website messages sent by the specified user. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Bans the specified user for 24 hours. Also mass deletes all website messages sent by the specified user.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 |key|criteria|
 |--|--|
-| host | string (required; the Recipient host to be issued the discipline) |
+| host | string (required; the Recipient host or IP address to be issued the discipline) |
 #### Response 200 OK
 #### Response 500
 ### /discipline/ban-indefinite
-Bans the specified user indefinitely. Also mass deletes all website messages sent by the specified user. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Bans the specified user indefinitely. Also mass deletes all website messages sent by the specified user.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 |key|criteria|
 |--|--|
-| host | string (required; the Recipient host to be issued the discipline) |
+| host | string (required; the Recipient host or IP address to be issued the discipline) |
 #### Response 200 OK
 #### Response 500
 ## Display
@@ -310,40 +305,39 @@ Get the public display sign as HTML webpage; to be run in full screen on the dis
 Get the internal display sign as HTML webpage; to be run in full screen on the display monitor. This is for directors and members of the WWSU organization.
 #### Response 200 (text/html)
 ### /display/refresh
-Send a refresh signal to all connected display signs via websockets. **Requires authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Send a refresh signal to all connected display signs via websockets.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200 OK
 ## DJs
 The DJs endpoint regards the DJs of WWSU Radio.
 ### /djs/add
-Add a new DJ to the system. **Requires Authorization**.
+Add a new DJ to the system.
  - **NOTE:** DJs who air a show who are not already in the system will be added automatically. However, they will not have a login.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
 | name | string (required; the name of the DJ to add) |
-| login | string (optional; the login this DJ will use for DJ related settings. If null / not provided, the DJ will not be able to manage their own DJ settings.) |
+| login | string (optional; the login/password this DJ will use for DJ related settings. If null / not provided, the DJ will not be able to manage their own DJ settings.) |
 #### Response 200 OK
 ### /djs/edit
-Edits a DJ in the system. **Requires Authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Edits a DJ in the system.
+ - **NOTE:** If you provide the name of a DJ that already exists as the name parameter, this DJ and their logs/XP/remotes will be merged into the other DJ.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
 | ID | number (required; the DJ ID to edit) |
 | name | string (optional; the new name for this DJ) |
-| login | string (optional; the new login for this DJ) |
+| login | string (optional; the new login/password for this DJ) |
 #### Response 200 OK
 ### /djs/get
-Get an array of DJs that are in the system. **Requires Authorization**.
+Get an array of DJs that are in the system.
  - This endpoint supports sockets, uses the "djs" event, and returns data in the structure defined in the websockets section.
- - **WARNING:** As of version 5.0.0, this endpoint and its websockets will no longer return "login".
- - **WARNING:** As of version 5.0.0, this endpoint will no longer require authorization.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Response 200
         [
             {
@@ -351,15 +345,14 @@ Get an array of DJs that are in the system. **Requires Authorization**.
                 "updatedAt": "2018-05-29T18:13:01.763Z",
                 "ID": 7,
                 "name": "George Carlin", // The name of the DJ
-                "login": "", // login ID / pin used for various DJ-level settings
             },
             ...
         ]
 ### /djs/remove
-Removes a DJ from the system. **Requires Authorization**.
+Removes a DJ from the system.
  - **NOTE:** Removing a DJ disassociates them from all XP/remote logs, system logs, and analytics. However, those records will still exist in the database.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -389,9 +382,9 @@ Get an array of currently active alerts.
             ...
         ]
 ### /eas/send
-Issue a new alert through the internal emergency alert system, originating from source WWSU. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Issue a new alert through the internal emergency alert system, originating from source WWSU.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -404,9 +397,9 @@ Issue a new alert through the internal emergency alert system, originating from 
 | information | string (required; additional information, and instructions, for the public.) |
 #### Response 200 OK
 ### /eas/test
-Send out a test through the internal emergency alert system. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Send out a test through the internal emergency alert system.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200 OK
 ## Embeds
 Embeds are specially designed pages used for other websites to embed WWSU on their website.
@@ -416,12 +409,13 @@ Retrieve a WWSU web player specially designed for Wright State's Guardian Newspa
 ## Hosts
 Hosts endpoints regard the clients authorized to use the WWSU server.
 ### /hosts/edit
-Edit a host. **Requires authorization**
+Edit a host.
  - A request to edit a host will be blocked if the provided admin or authorized parameter is false, and there are 1 or less authorized admin hosts. This is to prevent accidental lockout from the system.
  - A request to edit a host will be blocked if silenceDetection parameter is true, and a different host already has this true. This is to prevent silence detection conflicts.
  - A request to edit a host will be blocked if recordAudio parameter is true, and a different host already has this true. This is to prevent audio recording conflicts.
  - Modifying the "host" (host name) is not implemented; this should never change as it is based off of the client / device and not something configured.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization instead of hosts/get authorization.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -441,8 +435,8 @@ Edit a host. **Requires authorization**
 ### /hosts/get
 Retrieve information about a host. 
  - This endpoint supports sockets, uses the "hosts" event, and returns data in the structure defined in the websockets section. A request will only be subscribed if the provided host is an authorized admin.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -467,10 +461,10 @@ Retrieve information about a host.
         }
 #### Response 404 Not Found
 ### /hosts/remove
-Removes a host from the database. **Requires Authorization**
+Removes a host from the database.
  - A request to remove a host will be blocked if the host to remove is the only authorized admin host in the system. This is to prevent accidental lockout from the system.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -496,9 +490,9 @@ These endpoints deal with online listener counts with WWSU.
 ### /listeners/get
 Retrieve an array of online listener counts between specified time periods. **Requires Authorization**.
  - **NOTE:** The server may return one record that falls before provided start time; this is so listener graphs and listener minute calculators can get an accurate baseline / representation.
- - **ANOTHER NOTE:** The server does not log listeners in a consistent interval; it only logs when a change in the online listener count was detected.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **NOTE:** The server does not log listeners in a consistent interval; it only logs when a change in the online listener count was detected.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -518,10 +512,10 @@ Retrieve an array of online listener counts between specified time periods. **Re
 ## Logs
 Logs endpoints regard the internal logging system.
 ### /logs/add
-Add a log into the system. **Requires authorization**
+Add a log into the system.
  - **NOTE:** if provided logtype is "manual", and trackArtist and trackTitle were provided, now playing metadata will be updated with that info. If logtype is "manual", and trackArtist or trackTitle is not provided, now playing metadata will be cleared.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -539,8 +533,8 @@ Add a log into the system. **Requires authorization**
 Get a list of logs for a specific subtype and a specific date. Returns logs for the 24-hour period of the provided date. **Requires Authorization**
  - This endpoint supports sockets, uses the "logs" event, and returns data in the structure defined in the websockets section.
  - Websockets will ignore filtering rules and will instead return any/all new logs.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -575,7 +569,7 @@ Retrieve a list of messages sent within the last hour applicable to web and mobi
  - This endpoint supports sockets. When called by a socket, the client will be subscribed to multiple events:
  - - The "messages" event receives new/updated/deleted messages using the structure defined in the websockets section.
  - - The "discipline" event receives data when discipline has been issued to the client. The data received is `{"discipline": "A message regarding the discipline issued"}`. When discipline is issued, several endpoints will respond with a 403 until the discipline expires.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Response 200
         [
             {
@@ -592,16 +586,11 @@ Retrieve a list of messages sent within the last hour applicable to web and mobi
             ...
         ]
 ### /messages/get
-Retrieve an array of messages sent within the last hour. Used by internal WWSU applications. **Requires authorization**.
+Retrieve an array of messages sent within the last hour. Used by internal WWSU applications.
  - This endpoint supports sockets, uses the "messages" event, and returns data in the structure defined in the websockets section.
  - **NOTE:** new clients should call recipients/add in order to show up as online / accepting messages to other clients.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
- - **WARNING:** As of version 5.0.0, the "host" parameter will be removed; instead, the host from the provided auth/host token will be used.
-#### Request
-| key | criteria |
-|--|--|
-| host | string (required; typically the hostname of the computer; is defined in the Hosts model, or created automatically if not defined.) |
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200
         [
             {
@@ -618,9 +607,9 @@ Retrieve an array of messages sent within the last hour. Used by internal WWSU a
             ...
         ]
 ### /messages/remove
-Remove a message. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+Remove a message.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -628,7 +617,7 @@ Remove a message. **Requires authorization**
 #### Response 200 OK
 ### /messages/send-web
 Sends a message. This is used by public web and mobile clients.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -637,14 +626,12 @@ Sends a message. This is used by public web and mobile clients.
 | nickname | string (optional; A human friendly name for the client) |
 #### Response 200 OK
 ### /messages/send
-Sends a message. This is used by internal WWSU clients. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
- - **WARNING:** As of version 5.0.0, the "from" parameter will be removed; instead, the host from the provided auth/host token will be used.
+Sends a message. This is used by internal WWSU clients.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
-| from | string (required; host ID of the client sending the message) |
 | to | string (required; host ID of the client which is targeted by the message) |
 | to_friendly | string (required; The human friendly label of the client which is targeted by the message) |
 | message | string (required; the message to send) |
@@ -724,15 +711,10 @@ The value of the meta state key can be any of the following strings:
 ## Recipients
 These endpoints regard the recipients and clients that may send or receive messages.
 ### /recipients/add-computers
-DJ Controls clients should use this endpoint to register themselves as online. **Requires Authorization**.
+DJ Controls clients should use this endpoint to register themselves as online.
  - Clients should call this endpoint after every re-connection as well, since recipients are erased when the server restarts.
- - **Request to this endpoint must be a websocket**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, the "host" parameter will be removed; instead, the host from the provided auth/host token will be used.
-#### Request
-| key | criteria |
-|--|--|
-| host | string (required; the host name of the computer running DJ Controls) |
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200
         {
             "label": "Nickname" // The nickname of the client as we have it in records at this time.
@@ -741,7 +723,7 @@ DJ Controls clients should use this endpoint to register themselves as online. *
 WWSU Display Signs should use this endpoint to register themselves as online.
  - Clients should call this endpoint after every re-connection since recipients are erased when the server restarts.
  - This will also subscribe the socket to the "messages" event to receive messages to be displayed on the display sign, as well as the "display-refresh" event which the display sign should restart itself when called.
- - **Request to this endpoint must be a websocket**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -753,14 +735,14 @@ WWSU Display Signs should use this endpoint to register themselves as online.
 ### /recipients/add-web
 Public clients should use this endpoint prior to using any messages endpoints to register themselves as online.
  - Clients should call this endpoint after every re-connection as well, since recipients are erased when the server restarts.
- - **Request to this endpoint must be a websocket**.
+ - **Request must originate from a websocket**.
 #### Response 200
         {
             "label": "Nickname" // The nickname of the client as we have it in records at this time.
         }
 ### /recipients/edit-web
 Public clients wishing to change their nickname should call this endpoint.
- - **Request to this endpoint must be a websocket**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -769,9 +751,9 @@ Public clients wishing to change their nickname should call this endpoint.
 ### /recipients/get
 Retrieve an array of recipients that can receive and send messages.
  - This endpoint supports sockets, returns data in the structure defined in the websockets section, and uses the "recipients" event.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200
-
     [
         {
             "createdAt": "2018-05-15T22:31:34.381Z",
@@ -788,10 +770,10 @@ Retrieve an array of recipients that can receive and send messages.
 ## Requests
 Requests endpoints regard the WWSU track request system.
 ### /requests/get
-Get an array of requested tracks. **Requires authorization**
+Get an array of requested tracks.
  - This endpoint supports sockets, uses the "requests" event, and returns data in the structure defined in the websockets section. However, it is important to note that a delete is not sent out until the request begins playing; it is not sent out when a request is queued in automation. This is by design.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200
         [
             {
@@ -810,7 +792,7 @@ Get an array of requested tracks. **Requires authorization**
         ]
 ### /requests/place
 Place a track request in the system.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -828,8 +810,8 @@ Place a track request in the system.
 Immediately queue or play a request. **Requires Authorization**.
  - If in automation, will queue it to the top.
  - If live / sports / remote / sportsremote, will queue and immediately begin playing it.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -858,7 +840,7 @@ This endpoint should be hit when previously detected silence has been resolved.
 Songs endpoints regard the available songs/tracks in the automation system.
 ### /songs/get-genres
 Get an array of genres.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Response 200
         [
             {
@@ -869,7 +851,7 @@ Get an array of genres.
         ]
 ### /songs/get-liked
 Retrieve an array of tracks that this host/IP has liked recently and cannot yet like again at this time.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Response 200
         [
             18293,
@@ -880,7 +862,7 @@ Retrieve an array of tracks that this host/IP has liked recently and cannot yet 
 Get an array of tracks from the automation system.
  - If ID is not specified, this will only return songs that fall in the configured music categories.
  - For performance reasons, song.category, song.request, and song.spins will only be included if ID was specified in the request parameters.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -959,7 +941,7 @@ Get an array of tracks from the automation system.
         ]
 ### /songs/like
 Mark a track as liked. Depending on configuration, this might also bump the track's priority in rotation.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -968,19 +950,19 @@ Mark a track as liked. Depending on configuration, this might also bump the trac
 #### Response 500 various errors if a track cannot be liked at this time
 ### /songs/queue-add
 Queue a Top Add into RadioDJ. If in a show, will play the Add immediately. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200
 ### /songs/queue-liner
 Queue and play a Sports Liner. Will error if we are not in a sports broadcast. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200
 #### Response 500
 ### /songs/queue-psa
 Add a PSA into the RadioDJ queue. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -992,8 +974,8 @@ State endpoints are used to request to change states in WWSU's system (for examp
 Request to go into automation mode. **Requires authorization**
  - If coming from a sports broadcast, this will also play the closer, if there is one. 
  - Requests do not get a response until the entire process of going to automation is completed on the backend. This could take several seconds.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -1016,8 +998,8 @@ Request to go into automation mode. **Requires authorization**
 ### /state/break
 Go into break mode (play PSAs, or music if halftime is true, until state/return is called). **Requires authorization**
  - Requests do not get a response until the entire process of starting a break is complete.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -1025,37 +1007,33 @@ Go into break mode (play PSAs, or music if halftime is true, until state/return 
 #### Response 200 OK
 ### /state/change-radio-dj
 Tell the system to switch to a different RadioDJ instance in the array of configured RadioDJ instances.  **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200 OK
 ### /state/live
 Request to go live. **Requires authorization**
  - Requests do not get a response until the entire process of preparing for live is completed on the backend. This could take several seconds.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
- - **WARNING:** As of version 5.0.0, the "djcontrols" parameter will be removed; instead, the host from the provided auth/host token will be used.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
 | topic | string (optional; a short blurb describing this live broadcast.) |
 | showname | string (required; the name of this live broadcast. It must follow this format: "DJ name/handle - show name". Validation will fail if it does not.) |
 | webchat | boolean (optional; True allows the public to send messages to the DJ; false disallows this. Defaults to true.) |
-| djcontrols | string (required; the computer hostname requesting to go live (this should be executed from DJ Controls)) |
 #### Response 200 OK
 ### /state/remote
 Request to begin a remote broadcast. **Requires authorization**
  - **Before beginning**, ensure audio is being streamed to the separate remote stream.
  - Requests do not get a response until the entire process of preparing for a remote broadcast is completed on the backend. This could take several seconds.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
- - **WARNING:** As of version 5.0.0, the "djcontrols" parameter will be removed; instead, the host from the provided auth/host token will be used.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
 | topic | string (optional; a short blurb describing this broadcast.) |
 | showname | string (required; the name of this broadcast. It must follow this format: "Show host - show name". Validation will fail if it does not.) |
 | webchat | boolean (optional; True allows the public to send messages to the host's DJ Controls; false disallows this. Defaults to true.) |
-| djcontrols | string (required; the computer hostname requesting to go to remote (this should be executed from DJ Controls)) |
 #### Response 200 OK
 ### /state/return
 Return from a break, back into the broadcast. **Requires authorization**
@@ -1063,28 +1041,36 @@ Return from a break, back into the broadcast. **Requires authorization**
  - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
  - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
 #### Response 200 OK
-### /state/sports
-Request to begin a sports broadcast. **Requires authorization**
+### /state/sports-remote
+Request to begin a sports broadcast remotely.
  - Requests do not get a response until the entire process of preparing for a sports broadcast is completed on the backend. This could take several seconds.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
- - **WARNING:** As of version 5.0.0, the "djcontrols" parameter will be removed; instead, the host from the provided auth/host token will be used.
- - **WARNING:** As of version 5.0.0, the "remote" parameter will be removed; state/sports-remote will be made instead for remote sports broadcasts. It will have the same request parameters as state/sports (after the indicated parameters are removed).
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
 | topic | string (optional; a short blurb describing this broadcast.) |
 | sport | string (required; the sport being broadcast. This must be configured in the Node application.) |
-| remote | boolean (optional; if true, this will be a remote sports broadcast. Defaults to false.) |
 | webchat | boolean (optional; True allows the public to send messages to the host's DJ Controls; false disallows this. Defaults to true.) |
-| djcontrols | string (required; the computer hostname requesting to go to remote (this should be executed from DJ Controls)) |
+#### Response 200 OK
+### /state/sports
+Request to begin a sports broadcast.
+ - Requests do not get a response until the entire process of preparing for a sports broadcast is completed on the backend. This could take several seconds.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
+#### Request
+| key | criteria |
+|--|--|
+| topic | string (optional; a short blurb describing this broadcast.) |
+| sport | string (required; the sport being broadcast. This must be configured in the Node application.) |
+| webchat | boolean (optional; True allows the public to send messages to the host's DJ Controls; false disallows this. Defaults to true.) |
 #### Response 200 OK
 ## Status
 Status endpoints refer to the status of WWSU subsystems.
 ### /status/get
 Get an array of the status of WWSU subsystems.
  - This endpoint supports sockets, uses the "status" event, and returns data in the structure defined in the websockets section.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Response 200
         [
             {
@@ -1105,20 +1091,18 @@ Timesheet endpoints regard the internal timesheet and clock in/out system for WW
 Add a timesheet entry into the system.
  - If the director is present, the add entry will be a clock-out entry. If the director is not present, the add entry will be a clock-in entry. 
  - Do not use this endpoint for editing; use the edit endpoint for editing entries.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
- - **WARNING:** As of version 5.0.0, the "login" parameter will be removed; the timesheet record added will be for the authorized director.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
-| login | string (required; The OpenProject login of the director for this timesheet entry.) |
 | timestamp | string (required; a timestamp indicating the time this director clocked in/out. Must be valid by moment.js.) |
 #### Response 200 OK
 #### Response 404
 ### /timesheet/edit
 Edit a specific timesheet entry. **Requires authorization**
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/admin-director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/admin-director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -1132,7 +1116,7 @@ Edit a specific timesheet entry. **Requires authorization**
 ### /timesheet/get
 Return an array of timesheet entries for the week.
  - This endpoint supports sockets, uses the "timesheet" event, and returns data in the structure defined in the websockets section. Socket is only subscribed to if parameter date is not provided in the request.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -1158,8 +1142,8 @@ Access the timesheet web interface.
 XP endpoints deal with the XP and remote credits earned by DJs.
 ### /xp/add
 Add XP or remote credits to a DJ. **Requires Authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -1172,8 +1156,8 @@ Add XP or remote credits to a DJ. **Requires Authorization**.
 #### Response 200 OK
 ### /xp/edit
 Edit an XP / remote credit entry. **Requires Authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -1188,8 +1172,8 @@ Edit an XP / remote credit entry. **Requires Authorization**.
 ### /xp/get
 Get the XP / remote credits earned by a DJ. **Requires Authorization**.
  - This endpoint supports sockets, uses the "xp" event, and returns data in the structure defined in the websockets section. A socket is only subscribed to if dj is not provided.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|
@@ -1211,8 +1195,8 @@ Get the XP / remote credits earned by a DJ. **Requires Authorization**.
 #### Response 200 OK
 ### /xp/remove
 Removes an XP record (removes XP / remote credits). **Requires Authorization**.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
 #### Request
 | key | criteria |
 |--|--|

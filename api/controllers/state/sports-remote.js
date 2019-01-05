@@ -2,9 +2,9 @@
 
 module.exports = {
 
-    friendlyName: 'State / Sports',
+    friendlyName: 'State / Sports-remote',
 
-    description: 'Request to begin a sports broadcast.',
+    description: 'Request to begin a remote sports broadcast.',
 
     inputs: {
         topic: {
@@ -28,21 +28,21 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller state/sports called.');
+        sails.log.debug('Controller state/sports-remote called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
 
             // Do not continue if not in sports or automation mode; client should request automation before requesting sports
             if (!Meta['A'].state.startsWith("sports") && !Meta['A'].state.startsWith("automation_"))
-                return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`));
+                return exits.error(new Error(`Cannot execute state/sports-remote unless in automation or sports mode. Please go to automation first.`));
 
             // Block this request if we are already switching states
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
 
             // Lock so that any other state changing requests are blocked until we are done
-            await Meta.changeMeta({changingState: `Switching to sports`});
+            await Meta.changeMeta({changingState: `Switching to sports-remote`});
 
             // Filter profanity
             if (inputs.topic !== '')
@@ -76,7 +76,7 @@ module.exports = {
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                 // Change meta
-                Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_sports', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
+                Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_sportsremote', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 Meta.changeMeta({show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host});

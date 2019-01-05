@@ -7,6 +7,8 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Policies
  */
 
+var jwt = require('jsonwebtoken');
+
 module.exports = async function (req, res, next) {
     var token;
 
@@ -20,21 +22,25 @@ module.exports = async function (req, res, next) {
                 token = credentials;
             }
         } else {
-            return res.status(401).json({err: 'Format is Authorization: Bearer [token]'});
+            return res.status(401).json({err: 'Error with authorization. Format is Authorization: Bearer [token]'});
         }
     } else if (req.param('token')) {
         token = req.param('token');
         // We delete the token from param to not mess with blueprints
         delete req.query.token;
     } else {
-        return res.status(401).json({err: 'No Authorization header was found'});
+        return res.status(401).json({err: 'This endpoint requires auth/dj authorization.'});
     }
 
     try {
-        req.token = await sails.helpers.user.verify(token);
+        var authorized = jwt.verify(token, sails.config.custom.secrets.dj, {subject: 'dj'});
+        
+        // Set the authorization data to req.payload so controllers/actions can use it
+        req.payload = authorized;
+        
         return next();
     } catch (e) {
         sails.log.error(e);
-        return res.status(401).json({err: 'Invalid Token!'});
+        return res.status(401).json({err: 'This endpoint requires auth/dj authorization. The provided token is invalid or expired.'});
     }
 };

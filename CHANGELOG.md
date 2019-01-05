@@ -4,7 +4,29 @@ All notable changes to this project will be documented in this file as of versio
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
-[Unreleased]
+## [Unreleased]
+### Added
+ - Websocket policies; socket requests not originating from server.wwsu1069.org must provide a host query parameter, which is an authorized host (see Hosts). [Issue 24](https://github.com/Lovinity/wwsu/issues/24)
+ - Added makeCalls, answerCalls, silenceDetection, and recordAudio options to hosts. [Issue 42](https://github.com/Lovinity/wwsu/issues/42)
+ - state/sports-remote for remote sports broadcasts.
+
+### Changed
+ - The authorization procedure of many endpoints has changed. See the readme file carefully for instructions on authorization and which endpoints require which type of authorization. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
+ - Calling hosts/get with a host that does not exist no longer creates a new host in the database. This now happens via initial websocket connection requests.
+ - The secret used for website host IP IDs no longer changes on each reboot; this is now set via sails.config.custom.hostSecret.
+ - DJ Controls hosts are no longer monitored / configured in sails.config.custom. Instead, they are monitored in Status based off of the hosts in the database. [Issue 42](https://github.com/Lovinity/wwsu/issues/42)
+ - DJ "name" column and director "name" column now must be unique.
+ - Directors/get now takes optional name parameter; username (login) parameter was removed.
+ - Directors login column no longer accepts null; a value must be provided.
+
+### Removed
+ - hosts/get no longer returns authorization tokens. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
+ - Directors/get no longer returns the login property. The property is also no longer given in websockets.
+ - Removed "host" parameter from messages/get, recipients/add-computers... and "from" parameter from messages/send. Uses the host authorized from the provided auth/host token instead.
+ - Removed "djcontrols" parameter from state/live, state/remote, and state/sports. Will use the host authorized from the provided auth/host token instead.
+ - Removed "remote" parameter from state/sports; use new state/sports-remote instead.
+ - Removed "login" parameter from timesheet/add; uses the director authorized from the provided auth/director token instead.
+
 ### Fixed
  - Internal Server Error on djs/add. [Issue 46](https://github.com/Lovinity/wwsu/issues/46).
 
