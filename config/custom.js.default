@@ -27,8 +27,6 @@ module.exports.custom = {
 
     stream: '', // URL to the Shoutcast 2.6 internet stream server. For icecast 2.3, see config/bootstrap.js and replace the Shoutcast 2.6 code with the "// ICECAST 2.3" code.
 
-    hostSecret: 'changeme', // A random secret key used for generating hashes for public hosts / web mobile visitors. CHANGING THIS WILL INVALIDATE ACTIVE DISCIPLINE.
-
     GoogleAPI: {
         // ID of the Google Calendar used for show programming and events. Must have API access.
         calendarId: '',
@@ -368,6 +366,12 @@ module.exports.custom = {
     // Configure this array with all RadioDJs that Node should use for programming.
     // {name: 'alphaname' ("radiodj-" prepends this), label: 'Friendly name' ("RadioDJ " will prepend this), rest: 'restURL', level: 1 (1=critical, 2=significant, 3=minor)}
     radiodjs: [
+    ],
+
+    // Array of DJ controls which should trip status alarms if they are not connected / running (such as the OnAir Studio DJ Controls).
+    // {name: 'alphaname' ("djcontrols-" prepends this), label: 'Friendly name' ("DJ Controls " will prepend this), host: 'machine-id', level: 1 (1=critical, 2=significant, 3=minor)}
+    // All other DJ Controls will either give a status of 4 (offline no-issue) if they are reported offline, or will not show up in the recipients table.
+    djcontrols: [
     ],
 
     // Array of display signs which should trip status alarms (level 3: minor issue) if they are not connected.

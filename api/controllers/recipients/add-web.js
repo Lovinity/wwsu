@@ -22,7 +22,7 @@ module.exports = {
 
             // Get client IP address and form a host hash from it
             var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
-            var host = sh.unique(from_IP + sails.config.custom.hostSecret);
+            var host = sh.unique(from_IP + sails.tokenSecret);
 
             sails.sockets.join(this.req, `discipline-${host}`); // If a ban is issued for this client later on, it is sent through this
 

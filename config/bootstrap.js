@@ -49,29 +49,10 @@ module.exports.bootstrap = async function (done) {
     sails.config.custom.radiodjs.forEach(function (radiodj) {
         Status.template.push({name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: radiodj.level, data: 'This RadioDJ has not reported online since initialization.', time: null});
     });
-    sails.log.verbose(`BOOTSTRAP: Loading Client instances into template`);
-    var clients = await Hosts.find({authorized: true})
-            .tolerate((err) => {
-                // Don't throw errors, but log them
-                sails.log.error(err);
-            });
-    if (clients.length > 0)
-    {
-        clients.forEach(function (client) {
-            var offStatus = 4;
-            if (client.silenceDetection || client.recordAudio || client.answerCalls)
-            {
-                if (client.silenceDetection || client.recordAudio)
-                {
-                    offStatus = 2;
-                } else {
-                    offStatus = 3;
-                }
-            }
-            Status.template.push({name: `host-${client.host}`, label: `Host ${client.friendlyname}`, status: offStatus, data: 'This host has not reported online since initialization.', time: null});
-        });
-    }
-
+    sails.log.verbose(`BOOTSTRAP: Loading DJ Controls instances into template`);
+    sails.config.custom.djcontrols.forEach(function (djcontrol) {
+        Status.template.push({name: `djcontrols-${djcontrol.name}`, label: `DJ Controls ${djcontrol.label}`, status: djcontrol.level, data: 'This DJ Controls has not reported online since initialization.', time: null});
+    });
     sails.log.verbose(`BOOTSTRAP: Loading Display Sign instances into template`);
     sails.config.custom.displaysigns.forEach(function (display) {
         Status.template.push({name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: 'This display sign has not reported online since initialization.', time: null});
@@ -849,7 +830,7 @@ module.exports.bootstrap = async function (done) {
                             var remoteStream = false;
 
                             // Check public stream
-                            if (streams && typeof streams[0] !== 'undefined' && streams[0].streamstatus !== 0)
+                            if (typeof streams[0] !== 'undefined' && streams[0].streamstatus !== 0)
                             {
                                 // Mark stream as good
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5}]);

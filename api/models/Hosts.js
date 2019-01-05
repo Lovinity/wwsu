@@ -18,8 +18,7 @@ module.exports = {
 
         host: {
             type: 'string',
-            required: true,
-            unique: true
+            required: true
         },
 
         friendlyname: {
@@ -33,26 +32,6 @@ module.exports = {
         },
 
         admin: {
-            type: 'boolean',
-            defaultsTo: false
-        },
-
-        makeCalls: {
-            type: 'boolean',
-            defaultsTo: false
-        },
-        
-        answerCalls: {
-            type: 'boolean',
-            defaultsTo: false
-        },
-        
-        silenceDetection: {
-            type: 'boolean',
-            defaultsTo: false
-        },
-        
-        recordAudio: {
             type: 'boolean',
             defaultsTo: false
         },

@@ -1,4 +1,4 @@
-# WWSU 5.0.0 ALPHA
+# WWSU 4.5.4
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -31,7 +31,7 @@ All API endpoints explained below will respond with something. In addition to th
  - 500 Internal Server Error
 ## Methods
 The WWSU app does not care which method you use for any of the requests. Generally, it is recommended to use GET when fetching information, and POST when submitting information.
-## Authorization
+## Hosts and Authorization
 A lot of API endpoints require a valid authorization in the form of a header. The endpoints which require authorization will be noted in their respective section.
  - The key is "authorization", and the value is "Bearer (token)". 
  - Use the /hosts/get endpoint to authenticate and get a token.
@@ -41,6 +41,62 @@ A lot of API endpoints require a valid authorization in the form of a header. Th
  - auth/dj will be used for endpoints regarding DJ-specific functionality. Must provide Djs.name as "username", and Djs.login as "password", in request.
  - auth/director will be used for endpoints needing authentication of any director. Must provide Directors.name as "username", and Directors.login as "password", in request.
  - auth/admin-director will be used for endpoints needing authentication of a director with admin=true. Must provide Directors.name as "username", and Directors.login as "password", in request.
+### /hosts/edit
+Edit a host. **Requires authorization**
+ - A request to edit a host will be blocked if the provided admin or authorized parameter is false, and there are 1 or less authorized admin hosts. This is to prevent accidental lockout from the system.
+ - Modifying the "host" (host name) is not implemented; this should never change as it is based off of the client / device and not something configured.
+ - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization instead of hosts/get authorization.
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; ID of the host record to edit.) |
+| friendlyname | string (optional; if provided, the friendly name of this host will be modified to what is provided.) |
+| authorized | boolean (optional; if provided, whether or not the host is authorized (receives a token for restricted endpoints) will be changed to this. If false, and 1 or less authorized admin hosts exist, the edit request will be denied to prevent accidental lockout.) |
+| admin | boolean (optional; if provided, whether or not the host is an admin (should have access to admin settings in DJ Controls) will be changed to this. If false, and 1 or less authorized admin hosts exist, the edit request will be denied to prevent accidental lockout.) |
+| requests | boolean (optional; if provided, whether or not this host should be notified of new track requests will be changed to this.) |
+| emergencies | boolean (optional; if provided, whether or not this host should be notified of system problems will be changed to this.) |
+| webmessages | boolean (optional; if provided, whether or not this host should be notified of messages sent from the web / mobile app will be changed to this.) |
+#### Response 200 OK
+#### Response 409 Conflict (This is thrown when the request was blocked to prevent accidental lockout)
+### /hosts/get
+Retrieve information about a host. 
+ - If the host does not exist in the database, it will be created with default settings. However, it will not be authorized, and therefore a token will not be returned. An admin will need to authorize the host for it to begin using tokens to hit endpoints requiring authorization. 
+ - If the host exists and is authorized, an authorization token will be generated and returned.
+ - This endpoint supports sockets, uses the "hosts" event, and returns data in the structure defined in the websockets section. A request will only be subscribed if the provided host is an authorized admin.
+ - **DEPRECATION WARNING:** This endpoint will no longer return authorization tokens starting in version 5.0.0. Instead, call auth/host .
+ - **DEPRECATION WARNING:** As of version 5.0.0, calling this endpoint with a host that does not exist will not create a new host record anymore. Instead, not found will be returned.
+ - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
+ - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+#### Request
+| key | criteria |
+|--|--|
+| host | string (required; name of the host to retrieve or create.) |
+#### Response 200
+        {
+            "createdAt": "2018-05-03T23:18:41.089Z",
+            "updatedAt": "2018-05-03T23:18:41.089Z",
+            "ID": 1,
+            "host": "abunchofstuff", // Host name of the host computer
+            "friendlyname": "OnAir Computer", // Friendly name to use for labels
+            "authorized": false, // If false, this host is not authorized to use any of the endpoints in the API requiring authorization
+            "admin": true, // If true, this client is an administrator and should have access to options in DJ Controls
+            "requests": true, // If true, this client should notify of track requests even when this host was not used to go live
+            "emergencies": false, // If true, this client should notify of reported technical issues
+            "webmessages": true, // If true, this client should notify of messages sent by public clients, even when this host was not used to go live
+            "token": null, // If the host is authorized, a token will be provided here for use in the headers of endpoints requiring authorization. The token will expire after 1 hour. Otherwise, this will be null.
+            "otherHosts": [], // If this host is an authorized admin, an array of all the hosts in the database will be provided for administration purposes. Otherwise, this property will not exist.
+        }
+### /hosts/remove
+Removes a host from the database. **Requires Authorization**
+ - A request to remove a host will be blocked if the host to remove is the only authorized admin host in the system. This is to prevent accidental lockout from the system.
+ - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
+ - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
+#### Request
+| key | criteria |
+|--|--|
+| ID | number (required; the ID of the host to remove.) |
+#### Response 200 OK
+#### Response 409 Conflict (This is thrown when the request was blocked to prevent accidental lockout)
 ## Analytics
 Analytics endpoints deal with getting analytics about WWSU.
 ### /analytics/weekly-dj
@@ -413,70 +469,6 @@ Embeds are specially designed pages used for other websites to embed WWSU on the
 ### /embeds/guardian
 Retrieve a WWSU web player specially designed for Wright State's Guardian Newspaper website.
 #### Response 200 HTML
-## Hosts
-Hosts endpoints regard the clients authorized to use the WWSU server.
-### /hosts/edit
-Edit a host. **Requires authorization**
- - A request to edit a host will be blocked if the provided admin or authorized parameter is false, and there are 1 or less authorized admin hosts. This is to prevent accidental lockout from the system.
- - A request to edit a host will be blocked if silenceDetection parameter is true, and a different host already has this true. This is to prevent silence detection conflicts.
- - A request to edit a host will be blocked if recordAudio parameter is true, and a different host already has this true. This is to prevent audio recording conflicts.
- - Modifying the "host" (host name) is not implemented; this should never change as it is based off of the client / device and not something configured.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization instead of hosts/get authorization.
-#### Request
-| key | criteria |
-|--|--|
-| ID | number (required; ID of the host record to edit.) |
-| friendlyname | string (optional; if provided, the friendly name of this host will be modified to what is provided.) |
-| authorized | boolean (optional; if provided, whether or not the host is authorized (receives a token for restricted endpoints) will be changed to this. If false, and 1 or less authorized admin hosts exist, the edit request will be denied to prevent accidental lockout.) |
-| admin | boolean (optional; if provided, whether or not the host is an admin (should have access to admin settings in DJ Controls) will be changed to this. If false, and 1 or less authorized admin hosts exist, the edit request will be denied to prevent accidental lockout.) |
-| makeCalls | boolean (optional; if provided, whether or not the host should be allowed to make audio calls to other hosts (DJ Controls only) will be changed to this.) |
-| answerCalls | boolean (optional; if provided, whether or not this host should accept and answer incoming audio calls (DJ Controls only) will be changed to this.) |
-| silenceDetection | boolean (optional; if provided, whether or not this host should be in charge of silence detection will be changed to this. If trying to change to true, and another host already has this true, the request will be denied to prevent silence detection conflicts.) |
-| recordAudio | boolean (optional; if provided, whether or not this host should be in charge of recording OnAir programming will be changed to this. If trying to change to true, and another host already has this true, the request will be denied to prevent audio recording conflicts.) |
-| requests | boolean (optional; if provided, whether or not this host should be notified of new track requests will be changed to this.) |
-| emergencies | boolean (optional; if provided, whether or not this host should be notified of system problems will be changed to this.) |
-| webmessages | boolean (optional; if provided, whether or not this host should be notified of messages sent from the web / mobile app will be changed to this.) |
-#### Response 200 OK
-#### Response 409 Conflict (This is thrown when the request was blocked to prevent accidental lockout)
-### /hosts/get
-Retrieve information about a host. 
- - This endpoint supports sockets, uses the "hosts" event, and returns data in the structure defined in the websockets section. A request will only be subscribed if the provided host is an authorized admin.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/host authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
-#### Request
-| key | criteria |
-|--|--|
-| host | string (required; name of the host to retrieve or create.) |
-#### Response 200
-        {
-            "createdAt": "2018-05-03T23:18:41.089Z",
-            "updatedAt": "2018-05-03T23:18:41.089Z",
-            "ID": 1,
-            "host": "abunchofstuff", // Host fingerprint of the host computer
-            "friendlyname": "OnAir Computer", // Friendly name to use for labels
-            "authorized": false, // If false, this host is not authorized to use any of the endpoints in the API requiring authorization
-            "admin": true, // If true, this client is an administrator and should have access to options in DJ Controls
-            "makeCalls": true, // If true, this client should be allowed to make audio calls to other clients (Client manages audio calls themselves, not the server)
-            "answerCalls": true, // If true, this client should accept and answer incoming audio calls (Client manages audio calls themselves, not the server)
-            "silenceDetection": true, // If true, this client should be in charge of detecting and reporting silence (Client manages silence detection itself, not the server)
-            "recordAudio": true, // If true, this client should be in charge of recording OnAir programming (Client manages audio recording itself, not the server)
-            "requests": true, // If true, this client should notify of track requests even when this host was not used to go live (Client manages the actual notifications, not the server)
-            "emergencies": false, // If true, this client should notify of reported technical issues (Client manages the actual notifications, not the server)
-            "webmessages": true, // If true, this client should notify of messages sent by public clients, even when this host was not used to go live (Client manages the actual notifications, not the server)
-            "otherHosts": [], // If this host is an authorized admin, an array of all the hosts in the database will be provided for administration purposes. Otherwise, this property will not exist.
-        }
-#### Response 404 Not Found
-### /hosts/remove
-Removes a host from the database. **Requires Authorization**
- - A request to remove a host will be blocked if the host to remove is the only authorized admin host in the system. This is to prevent accidental lockout from the system.
- - **WARNING:** As of version 5.0.0, this endpoint will require auth/director authorization. See the warning in "Hosts and Authorization" for more information.
- - **WARNING:** As of version 5.0.0, this endpoint will reject on HTTP requests; you must use a websocket request.
-#### Request
-| key | criteria |
-|--|--|
-| ID | number (required; the ID of the host to remove.) |
-#### Response 200 OK
-#### Response 409 Conflict (This is thrown when the request was blocked to prevent accidental lockout)
 ## Listen
 These endpoints return web pages of various sections of the Listener's Corner. This is mainly used by the mobile app.
 ### /listen/calendar
