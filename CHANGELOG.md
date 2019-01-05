@@ -4,14 +4,9 @@ All notable changes to this project will be documented in this file as of versio
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
-## [unreleased]
-### Removed
-
-### Changed
-
+[Unreleased]
 ### Fixed
-
-### Added
+ - Internal Server Error on djs/add. [Issue 46](https://github.com/Lovinity/wwsu/issues/46).
 
 ## [4.5.4] - 2019-01-02
 ### Deprecated
