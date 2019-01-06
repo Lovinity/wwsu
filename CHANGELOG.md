@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Directors/get now takes optional name parameter; username (login) parameter was removed.
  - Directors login column no longer accepts null; a value must be provided.
  - Calls to directors/edit where parameter admin=false will be rejected if there are 1 or less admin directors in the system; this is to prevent accidental lockout.
+ - Directors login column and dj login column will store logins as bcrypt factor 13 instead of plaintext.
 
 ### Removed
  - hosts/get no longer returns authorization tokens. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Removed "djcontrols" parameter from state/live, state/remote, and state/sports. Will use the host authorized from the provided auth/host token instead.
  - Removed "remote" parameter from state/sports; use new state/sports-remote instead.
  - Removed "login" parameter from timesheet/add; uses the director authorized from the provided auth/director token instead.
+ - Removed user.verify helper; no longer needed as verification will happen inside the policies.
 
 ### Fixed
  - Internal Server Error on djs/add. [Issue 46](https://github.com/Lovinity/wwsu/issues/46).
