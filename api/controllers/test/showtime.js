@@ -1,4 +1,4 @@
-/* global Djs, Xp, Attendance, Listeners, moment */
+/* global Djs, Xp, Attendance, Listeners, moment, Promise */
 
 module.exports = {
 
@@ -18,11 +18,11 @@ module.exports = {
         records.map(record => DJs[record.ID] = {name: record.name, showtime: 0, listeners: 0});
 
         var curDJ = null;
+        var startTime = moment("2018-10-01 00:00:00");
         var prevTime = moment("2018-10-01 00:00:00");
         var prevListeners = 0;
         var records = await Listeners.find({createdAt: {"<=": "2018-10-01 00:00:00"}}).sort("createdAt ASC");
-        records
-                .filter(record => moment(record.createdAt).isAfter(moment("2018-08-26 00:00:00")))
+        var maps = records
                 .map(record => {
                     if (record.dj !== curDJ)
                     {
@@ -35,7 +35,9 @@ module.exports = {
                                 DJs[0].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
                                 DJs[0].listeners += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                             }
+                            Attendance.create({unique: null, dj: record.dj, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true)}).exec(function () {});
                         }
+                        startTime = moment(record.createdAt);
                     } else if (curDJ !== null) {
                         if (typeof DJs[record.dj] === 'undefined')
                             return;
@@ -49,17 +51,19 @@ module.exports = {
                     prevListeners = record.listeners;
                 });
 
-        var records = await Attendance.find();
-        records
-                .filter(record => record.showTime !== null && record.listenerMinutes !== null)
-                .map(record => {
-                    if (typeof DJs[record.DJ] === 'undefined')
-                        return;
-                    DJs[record.DJ].showtime += record.showTime;
-                    DJs[record.DJ].listeners += (record.listenerMinutes);
-                    DJs[0].showtime += record.showTime;
-                    DJs[0].listeners += (record.listenerMinutes);
-                });
+        /*
+         var records = await Attendance.find();
+         records
+         .filter(record => record.showTime !== null && record.listenerMinutes !== null)
+         .map(record => {
+         if (typeof DJs[record.DJ] === 'undefined')
+         return;
+         DJs[record.DJ].showtime += record.showTime;
+         DJs[record.DJ].listeners += (record.listenerMinutes);
+         DJs[0].showtime += record.showTime;
+         DJs[0].listeners += (record.listenerMinutes);
+         });
+         */
 
         // All done.
         return exits.success(DJs);
