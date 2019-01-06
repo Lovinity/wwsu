@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise, Uabdirectors, Uabtimesheet */
 
 /**
  * Bootstrap
@@ -159,6 +159,7 @@ module.exports.bootstrap = async function (done) {
     // Load directors.
     sails.log.verbose(`BOOTSTRAP: Refreshing directors.`);
     await Directors.updateDirectors();
+    await Uabdirectors.updateDirectors();
 
     // Load Google Calendar.
     sails.log.verbose(`BOOTSTRAP: Loading calendar events.`);
@@ -1422,8 +1423,12 @@ module.exports.bootstrap = async function (done) {
                 await Timesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
                         .tolerate((err) => {
                         });
+                await Uabtimesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
+                        .tolerate((err) => {
+                        });
                 // Force reload all directors based on timesheets
                 await Directors.updateDirectors();
+                await Uabdirectors.updateDirectors();
 
                 return resolve();
             } catch (e) {
