@@ -20,6 +20,8 @@ module.exports = {
         var curDJ = null;
         var startTime = moment("2018-10-01 00:00:00");
         var prevTime = moment("2018-10-01 00:00:00");
+        var tShowTime = 0;
+        var tListenerMinutes = 0;
         var prevListeners = 0;
         var records = await Listeners.find({createdAt: {"<=": "2018-10-01 00:00:00"}}).sort("createdAt ASC");
         var maps = records
@@ -30,17 +32,23 @@ module.exports = {
                         {
                             if (typeof DJs[curDJ] !== 'undefined')
                             {
+                                tShowTime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
+                                tListenerMinutes += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                                 DJs[curDJ].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
                                 DJs[curDJ].listeners += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                                 DJs[0].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
                                 DJs[0].listeners += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                             }
-                            Attendance.create({unique: null, dj: record.dj, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true)}).exec(function () {});
+                            Attendance.create({unique: null, dj: record.dj, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true), showTime: tShowTime, listenerMinutes: tListenerMinutes}).exec(function () {});
                         }
                         startTime = moment(record.createdAt);
+                        var tShowTime = 0;
+                        var tListenerMinutes = 0;
                     } else if (curDJ !== null) {
                         if (typeof DJs[record.dj] === 'undefined')
                             return;
+                        tShowTime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
+                        tListenerMinutes += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                         DJs[record.dj].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
                         DJs[record.dj].listeners += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                         DJs[0].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
