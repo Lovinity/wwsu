@@ -15,7 +15,9 @@ module.exports = {
         var DJs = {};
 
         var records = await Attendance.find({createdAt: {">=": "2019-01-06 02:00:00"}});
-        var maps = records.map(async (record) => {
+        var maps = records
+                .filter((record) => record.actualStart !== null && record.actualEnd !== null)
+                .map(async (record) => {
             await Logs.update({and: [{createdAt: {">=": moment(record.actualStart).toISOString(true)}}, {createdAt: {"<": moment(record.actualEnd).toISOString(true)}}]}, {attendanceID: record.ID});
         });
         await Promise.all(maps);
