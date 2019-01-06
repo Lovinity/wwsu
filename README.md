@@ -988,7 +988,6 @@ Request to go into automation mode. **Requires authorization**
             "showTime": 0, // Number of minutes that the show was on the air
             "subtotalXP": 0, // Total amount of XP the DJ earned for this show. NOTE: This property may not exist for non-live shows.
             "showXP": 0, // Amount of XP earned for showTime. NOTE: This property may not exist for non-live shows.
-            "listeners": [], // Array of online listener data during the show (uses same format as the response from listeners/get)
             "listenerMinutes": 0, // Number of online listener minutes during the show.
             "listenerXP": 0, // Amount of XP earned for online listener minutes. NOTE: This property may not exist for non-live shows.
             "messagesWeb": 0, // Number of messages the DJ sent to web/mobile users during the show.
@@ -997,6 +996,9 @@ Request to go into automation mode. **Requires authorization**
             "topAddsXP": 0, // Amount of XP earned for playing top adds. NOTE: This property may not exist for non-live shows.
             "IDsXP": 0, // Amount of XP earned for playing on-time top of the hour ID breaks. NOTE: This property may not exist for non-live shows.
             "totalXP": 0, // Total XP the DJ has earned overall to date. NOTE: This property may not exist for non-live shows.
+            "remoteCredits": 0, // Total remote credits the DJ has since sails.config.custom.startOfSemester. NOTE: This property may not exist for non-live shows.
+            "totalShowTime": 0, // Total overall OnAir show time in minutes the DJ has. NOTE: This property may not exist for non-live shows.
+            "totalListenerMinutes": 0, // Total overall listener minutes the DJ has. NOTE: This property may not exist for non-live shows.
         }
 ### /state/break
 Go into break mode (play PSAs, or music if halftime is true, until state/return is called). **Requires authorization**
