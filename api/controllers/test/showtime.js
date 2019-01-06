@@ -13,6 +13,13 @@ module.exports = {
     fn: async function (inputs, exits) {
 
         var DJs = {};
+        
+        var records = await Attendance.find({createdAt: {">=": "2019-01-06 02:00:00"}});
+        var maps = records.map(async (record) => {
+            await Logs.update({createdAt: {">=": moment(record.actualStart).toISOString(true), "<": moment(record.actualEnd).toISOString(true)}}, {attendanceID: record.ID});
+        });
+        
+        /*
         DJs[0] = {name: "EVERYONE", showtime: 0, listeners: 0};
         var records = await Djs.find();
         records.map(record => DJs[record.ID] = {name: record.name, showtime: 0, listeners: 0});
@@ -39,11 +46,6 @@ module.exports = {
                                 DJs[0].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
                                 DJs[0].listeners += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                             }
-                            Attendance.create({unique: "", dj: curDJ, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true), showTime: tShowTime, listenerMinutes: tListenerMinutes}).exec((err, result) => {
-                                if (err)
-                                    sails.log.error(err);
-                                
-                            });
                         }
                         startTime = moment(record.createdAt);
                         tShowTime = 0;
@@ -62,6 +64,7 @@ module.exports = {
                     prevTime = moment(record.createdAt);
                     prevListeners = record.listeners;
                 });
+                */
 
         /*
          var records = await Attendance.find();
