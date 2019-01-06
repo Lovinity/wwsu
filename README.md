@@ -43,6 +43,8 @@ Use one of the following endpoints to get an authorization token. Each endpoint 
  - auth/dj will be used for endpoints regarding DJ-specific functionality. Must provide Djs.name as "username", and Djs.login as "password", in request.
  - auth/director will be used for endpoints needing authentication of any director. Must provide Directors.name as "username", and Directors.login as "password", in request.
  - auth/admin-director will be used for endpoints needing authentication of a director with admin=true. Must provide Directors.name as "username", and Directors.login as "password", in request.
+ - auth/director-uab will be used for endpoints needing authentication of any USB director. Must provide Uabdirectors.name as "username", and Uabdirectors.login as "password", in request.
+ - auth/admin-director-uab will be used for endpoints needing authentication of a USB director with admin=true. Must provide Uabdirectors.name as "username", and Uabdirectors.login as "password", in request.
 ## Analytics
 Analytics endpoints deal with getting analytics about WWSU.
 ### /analytics/weekly-dj
@@ -198,6 +200,7 @@ Add a new director into the WWSU system.
 #### Response 200 OK
 ### /directors/edit
 Edits the details of an existing director.
+ - A request to edit a director will be rejected if provided admin parameter is false, and there are one or less admin directors in the system. This is to prevent accidental lockout.
  - **Requires auth/admin-director authorization**.
  - **Request must originate from a websocket**.
 #### Request

@@ -1,10 +1,10 @@
-/* global moment, sails, Xp, Djs, Directors, _ */
+/* global moment, sails, Xp, Djs, Directors, Uabdirectors, _ */
 const bcrypt = require('bcrypt');
 module.exports = {
 
-    friendlyName: 'directors / edit',
+    friendlyName: 'uab / directors / edit',
 
-    description: 'Edit one of the directors in the system.',
+    description: 'Edit one of the UAB directors in the system.',
 
     inputs: {
         ID: {
@@ -28,11 +28,6 @@ module.exports = {
             description: 'If provided, the admin status of the director will be changed to this.'
         },
 
-        assistant: {
-            type: 'boolean',
-            description: 'If provided, the assistant status of the director will be changed to this.'
-        },
-
         position: {
             type: 'string',
             description: 'If provided, the director position will be changed to this.'
@@ -44,12 +39,12 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller directors/edit called.');
+        sails.log.debug('Controller uab/directors/edit called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // First, determine if we need to lock out of editing admin
-            var lockout = await Directors.count({admin: true});
+            var lockout = await Uabdirectors.count({admin: true});
 
             // Block requests to change admin  to false if there are 1 or less admin directors.
             if (lockout <= 1 && ((typeof inputs.admin !== 'undefined' && !inputs.admin)))
@@ -66,9 +61,6 @@ module.exports = {
             if (typeof inputs.admin !== 'undefined' && inputs.admin !== null)
                 criteria.admin = inputs.admin;
 
-            if (typeof inputs.assistant !== 'undefined' && inputs.assistant !== null)
-                criteria.assistant = inputs.assistant;
-
             if (typeof inputs.position !== 'undefined' && inputs.position !== null)
                 criteria.position = inputs.position;
 
@@ -76,7 +68,7 @@ module.exports = {
             var criteriaB = _.cloneDeep(criteria);
 
             // Edit it
-            await Directors.update({ID: inputs.ID}, criteriaB).fetch();
+            await Uabdirectors.update({ID: inputs.ID}, criteriaB).fetch();
 
             return exits.success();
         } catch (e) {

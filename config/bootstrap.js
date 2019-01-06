@@ -48,6 +48,8 @@ module.exports.bootstrap = async function (done) {
     sails.config.custom.secrets.dj = cryptoRandomString(256);
     sails.config.custom.secrets.director = cryptoRandomString(256);
     sails.config.custom.secrets.adminDirector = cryptoRandomString(256);
+    sails.config.custom.secrets.directorUab = cryptoRandomString(256);
+    sails.config.custom.secrets.adminDirectorUab = cryptoRandomString(256);
 
     // Load blank Meta template
     sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);

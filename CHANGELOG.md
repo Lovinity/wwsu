@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Websocket policies; socket requests not originating from server.wwsu1069.org must provide a host query parameter, which is an authorized host (see Hosts). [Issue 24](https://github.com/Lovinity/wwsu/issues/24)
  - Added makeCalls, answerCalls, silenceDetection, and recordAudio options to hosts. [Issue 42](https://github.com/Lovinity/wwsu/issues/42)
  - state/sports-remote for remote sports broadcasts.
+ - uab/directors/add, uab/directors/edit, uab/directors/get, and uab/directors/remove endpoints. Also, Uabdirectors model. This is used for UAB timesheet system. [Issue 40](https://github.com/Lovinity/wwsu/issues/40)
+ - uab/timesheet/add, uab/timesheet/edit, uab/timesheet/get and uab/timesheet/view endpoints. Also, Uabtimesheet model. This is used for UAB timesheet system. [Issue 40](https://github.com/Lovinity/wwsu/issues/40)
 
 ### Changed
  - The authorization procedure of many endpoints has changed. See the readme file carefully for instructions on authorization and which endpoints require which type of authorization. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - DJ "name" column and director "name" column now must be unique.
  - Directors/get now takes optional name parameter; username (login) parameter was removed.
  - Directors login column no longer accepts null; a value must be provided.
+ - Calls to directors/edit where parameter admin=false will be rejected if there are 1 or less admin directors in the system; this is to prevent accidental lockout.
 
 ### Removed
  - hosts/get no longer returns authorization tokens. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)

@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Timesheet.js
  *
@@ -37,24 +39,27 @@ module.exports = {
         // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
-        sails.log.silly(`timesheet socket: ${data}`);
-        sails.sockets.broadcast('timesheet', 'timesheet', data);
+        sails.log.silly(`uabtimesheet socket: ${data}`);
+        sails.sockets.broadcast('uabtimesheet', 'uabtimesheet', data);
         return proceed();
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
-        sails.log.silly(`timesheet socket: ${data}`);
-        sails.sockets.broadcast('timesheet', 'timesheet', data);
+        sails.log.silly(`uabtimesheet socket: ${data}`);
+        sails.sockets.broadcast('uabtimesheet', 'uabtimesheet', data);
         return proceed();
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = {remove: destroyedRecord.ID};
-        sails.log.silly(`timesheet socket: ${data}`);
-        sails.sockets.broadcast('timesheet', 'timesheet', data);
+        sails.log.silly(`uabtimesheet socket: ${data}`);
+        sails.sockets.broadcast('uabtimesheet', 'uabtimesheet', data);
         return proceed();
     },
 
 };
+
+
+
 

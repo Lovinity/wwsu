@@ -2,9 +2,9 @@
 const bcrypt = require('bcrypt');
 module.exports = {
 
-    friendlyName: 'directors / add',
+    friendlyName: 'uab / directors / add',
 
-    description: 'Add a new director into the system.',
+    description: 'Add a new UAB director into the system.',
 
     inputs: {
         name: {
@@ -25,12 +25,6 @@ module.exports = {
             description: 'Is this director an administrator? Defaults to false.'
         },
 
-        assistant: {
-            type: 'boolean',
-            defaultsTo: false,
-            description: 'Is this director an assistant director opposed to a main director? Defaults to false.'
-        },
-
         position: {
             type: 'string',
             required: true,
@@ -43,11 +37,11 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller directors/add called.');
+        sails.log.debug('Controller uab/directors/add called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            await Directors.create({name: inputs.name, login: bcrypt.hashSync(inputs.login, 13), admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: moment().toISOString()}).fetch();
+            await Directors.create({name: inputs.name, login: bcrypt.hashSync(inputs.login, 13), admin: inputs.admin, position: inputs.position, present: false, since: moment().toISOString()}).fetch();
             return exits.success();
         } catch (e) {
             return exits.error(e);
