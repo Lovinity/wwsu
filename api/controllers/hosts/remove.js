@@ -1,4 +1,5 @@
 /* global sails, Hosts, Status */
+var sh = require("shorthash");
 
 module.exports = {
 
@@ -38,7 +39,7 @@ module.exports = {
             var hostRecord = await Hosts.destroyOne({ID: inputs.ID});
             
             // Destroy the status records for this host as well
-            await Status.destroy({name: `host-${hostRecord.host}`}).fetch();
+            await Status.destroy({name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`}).fetch();
 
             // All done.
             return exits.success();

@@ -1,4 +1,5 @@
 /* global sails, Recipients, _, moment, Status, Hosts, djcontrols, Promise */
+var sh = require("shorthash");
 
 module.exports = {
 
@@ -87,8 +88,8 @@ module.exports = {
                             } else {
                                 offStatus = 3;
                             }
+                            await Status.changeStatus([{name: `host-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: 'Host is offline.'}]);
                         }
-                        await Status.changeStatus([{name: recipient.host, label: `Host ${recipient.label}`, status: offStatus, data: 'Host is offline.'}]);
                     }
                 }
 

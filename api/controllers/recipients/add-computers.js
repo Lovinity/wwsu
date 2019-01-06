@@ -18,7 +18,7 @@ module.exports = {
                 return exits.error(new Error('This controller requires a websocket.'));
 
             // Add the recipient
-            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), this.req.payload.host, 'computers', inputs.host);
+            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), this.req.payload.host, 'computers', this.req.payload.host);
             
             // Return the host label object
             return exits.success({label: label});

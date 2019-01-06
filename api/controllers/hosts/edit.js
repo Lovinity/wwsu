@@ -1,4 +1,5 @@
 /* global Hosts, sails, Status, _ */
+var sh = require("shorthash");
 
 module.exports = {
 
@@ -125,24 +126,27 @@ module.exports = {
             var hostRecord = await Hosts.updateOne({ID: inputs.ID}, criteriaB);
 
             // Edit the status of this host if necessary
-            var statusRecord = await Status.findOne({name: `host-${hostRecord.host}`});
+            var statusRecord = await Status.findOne({name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`});
+
             if (statusRecord)
             {
-                if (statusRecord.status !== 5)
+                if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls)
                 {
-                    var status = 4;
-                    if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls)
+                    if (statusRecord.status !== 5)
                     {
+                        var status = 4;
                         if (hostRecord.silenceDetection || hostRecord.recordAudio)
                         {
                             status = 2;
-                        } else {
+                        } else if (hostRecord.answerCalls) {
                             status = 3;
                         }
+                        await Status.changeStatus([{name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host is offline.`}]);
+                    } else {
+                        await Status.changeStatus([{name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: `Host is online.`}]);
                     }
-                    await Status.changeStatus([{name: `host-${hostRecord.host}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host is offline.`}]);
                 } else {
-                    await Status.changeStatus([{name: `host-${hostRecord.host}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: `Host is online.`}]);
+                    await Status.destroy({name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`}).fetch();
                 }
             }
 

@@ -1,4 +1,5 @@
-/* global sails, Recipients, _, moment, Status, Hosts */
+/* global sails, Recipients, _, moment, Status, Hosts, Promise */
+var sh = require("shorthash");
 
 module.exports = {
 
@@ -112,7 +113,7 @@ module.exports = {
             // If the recipient group is computers, update Status
             if (inputs.group === 'computers')
             {
-                await Status.changeStatus([{name: `host-${inputs.host}`, label: `Host ${host && typeof host[0] !== 'undefined' ? inputs.label : 'Unknown'}`, status: 5, data: `Host is online.`}]);
+                await Status.changeStatus([{name: `host-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`, label: `Host ${host && typeof host[0] !== 'undefined' ? inputs.label : 'Unknown'}`, status: 5, data: `Host is online.`}]);
             }
 
             // If the recipient group is display, update Status if there are at least instances connections.

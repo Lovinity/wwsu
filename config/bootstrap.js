@@ -13,6 +13,7 @@
 
 module.exports.bootstrap = async function (done) {
     var cron = require('node-cron');
+    var sh = require("shorthash");
 
     // By convention, this is a good place to set up fake data during development.
     //
@@ -78,8 +79,8 @@ module.exports.bootstrap = async function (done) {
                 } else {
                     offStatus = 3;
                 }
+                Status.template.push({name: `host-${sh.unique(client.host + sails.config.custom.hostSecret)}`, label: `Host ${client.friendlyname}`, status: offStatus, data: 'This host has not reported online since initialization.', time: null});
             }
-            Status.template.push({name: `host-${client.host}`, label: `Host ${client.friendlyname}`, status: offStatus, data: 'This host has not reported online since initialization.', time: null});
         });
     }
 
