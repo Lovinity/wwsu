@@ -24,7 +24,7 @@ module.exports = {
         var tListenerMinutes = 0;
         var prevListeners = 0;
         var records = await Listeners.find({createdAt: {"<=": "2018-10-01 00:00:00"}}).sort("createdAt ASC");
-        var maps = records
+        records
                 .map(record => {
                     if (record.dj !== curDJ)
                     {
@@ -39,11 +39,15 @@ module.exports = {
                                 DJs[0].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
                                 DJs[0].listeners += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                             }
-                            Attendance.create({unique: "", dj: record.dj, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true), showTime: tShowTime, listenerMinutes: tListenerMinutes}).exec(function () {});
+                            Attendance.create({unique: "", dj: curDJ, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true), showTime: tShowTime, listenerMinutes: tListenerMinutes}).exec((err, result) => {
+                                if (err)
+                                    sails.log.error(err);
+                                
+                            });
                         }
                         startTime = moment(record.createdAt);
-                        var tShowTime = 0;
-                        var tListenerMinutes = 0;
+                        tShowTime = 0;
+                        tListenerMinutes = 0;
                     } else if (curDJ !== null) {
                         if (typeof DJs[record.dj] === 'undefined')
                             return;
