@@ -39,7 +39,7 @@ module.exports = {
                                 DJs[0].showtime += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60);
                                 DJs[0].listeners += (moment(record.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                             }
-                            Attendance.create({unique: null, dj: record.dj, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true), showTime: tShowTime, listenerMinutes: tListenerMinutes}).exec(function () {});
+                            Attendance.create({unique: "", dj: record.dj, event: `(Unknown Radio Show)`, scheduledStart: null, scheduledEnd: null, actualStart: moment(startTime).toISOString(true), actualEnd: moment(prevTime).toISOString(true), showTime: tShowTime, listenerMinutes: tListenerMinutes}).exec(function () {});
                         }
                         startTime = moment(record.createdAt);
                         var tShowTime = 0;
