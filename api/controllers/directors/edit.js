@@ -40,7 +40,9 @@ module.exports = {
     },
 
     exits: {
-
+        conflict: {
+            statusCode: 409
+        }
     },
 
     fn: async function (inputs, exits) {
