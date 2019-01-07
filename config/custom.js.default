@@ -39,6 +39,9 @@ module.exports.custom = {
         directorHoursId: ''
     },
 
+    // Insert a date and time in the string indicating when the current semester started; this will serve as the remote credit cutoff date
+    startOfSemester: moment("2019-01-14 00:00:00"),
+
     /*
      * TRACK CATEGORIES AND META
      */
