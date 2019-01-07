@@ -22,14 +22,14 @@ module.exports = async function (req, res, next) {
                 token = credentials;
             }
         } else {
-            return res.status(401).json({err: 'Error with authorization. Format is Authorization: Bearer [token]'});
+            return res.status(401).json({tokenErr: 'Error with authorization. Format is Authorization: Bearer [token]'});
         }
     } else if (req.param('token')) {
         token = req.param('token');
         // We delete the token from param to not mess with blueprints
         delete req.query.token;
     } else {
-        return res.status(401).json({err: 'This endpoint requires auth/director authorization.'});
+        return res.status(401).json({tokenErr: 'This endpoint requires auth/director authorization.'});
     }
 
     try {
@@ -41,7 +41,7 @@ module.exports = async function (req, res, next) {
         return next();
     } catch (e) {
         sails.log.error(e);
-        return res.status(401).json({err: 'This endpoint requires auth/director-uab authorization. The provided token is invalid or expired.'});
+        return res.status(401).json({tokenErr: 'This endpoint requires auth/director-uab authorization. The provided token is invalid or expired.'});
     }
 };
 
