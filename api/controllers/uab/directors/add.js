@@ -41,7 +41,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            await Directors.create({name: inputs.name, login: bcrypt.hashSync(inputs.login, 13), admin: inputs.admin, position: inputs.position, present: false, since: moment().toISOString()}).fetch();
+            await Uabdirectors.create({name: inputs.name, login: bcrypt.hashSync(inputs.login, 13), admin: inputs.admin, position: inputs.position, present: false, since: moment().toISOString()}).fetch();
             return exits.success();
         } catch (e) {
             return exits.error(e);
