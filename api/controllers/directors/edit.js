@@ -1,5 +1,5 @@
-/* global moment, sails, Xp, Djs */
-
+/* global moment, sails, Xp, Djs, Directors, _ */
+const bcrypt = require('bcrypt');
 module.exports = {
 
     friendlyName: 'directors / edit',
@@ -40,7 +40,9 @@ module.exports = {
     },
 
     exits: {
-
+        conflict: {
+            statusCode: 409
+        }
     },
 
     fn: async function (inputs, exits) {
@@ -48,14 +50,20 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // First, determine if we need to lock out of editing admin
+            var lockout = await Directors.count({admin: true});
+
+            // Block requests to change admin  to false if there are 1 or less admin directors.
+            if (lockout <= 1 && ((typeof inputs.admin !== 'undefined' && !inputs.admin)))
+                return exits.conflict("To prevent accidental lockout, this request was denied because there are 1 or less admin directors. Make another director an admin first before removing admin status from this director.");
 
             // Determine what needs updating
             var criteria = {};
             if (typeof inputs.name !== 'undefined' && inputs.name !== null)
                 criteria.name = inputs.name;
 
-            if (typeof inputs.login !== 'undefined' && inputs.login !== null)
-                criteria.login = inputs.login;
+            if (typeof inputs.login !== 'undefined' && inputs.login !== null && inputs.login !== '')
+                criteria.login = bcrypt.hashSync(inputs.login, 10);
 
             if (typeof inputs.admin !== 'undefined' && inputs.admin !== null)
                 criteria.admin = inputs.admin;

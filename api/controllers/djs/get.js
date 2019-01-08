@@ -1,4 +1,4 @@
-/* global sails, Xp */
+/* global sails, Xp, Djs */
 
 module.exports = {
 
@@ -20,6 +20,13 @@ module.exports = {
         try {
             // Grab events
             var records = await Djs.find();
+            
+            // Remove login information from the records
+            records = records.map(record => {
+                delete record.login;
+                return record;
+            });
+
             sails.log.verbose(`DJ records retrieved: ${records.length}`);
             sails.log.silly(records);
 
@@ -37,7 +44,7 @@ module.exports = {
             } else {
                 return exits.success(records);
             }
-            
+
         } catch (e) {
             return exits.error(e);
         }

@@ -1,5 +1,5 @@
 /* global sails, Xp, Attendance, _, Djs, Listeners, Promise, Meta */
-
+const bcrypt = require('bcrypt');
 module.exports = {
 
     friendlyName: 'djs / edit',
@@ -67,7 +67,7 @@ module.exports = {
             }
             
             if (inputs.login !== null && typeof inputs.login !== 'undefined')
-                criteria.login = inputs.login;
+                criteria.login = bcrypt.hashSync(inputs.login, 10);
 
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             var criteriaB = _.cloneDeep(criteria);

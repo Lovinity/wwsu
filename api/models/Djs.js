@@ -27,6 +27,7 @@ module.exports = {
   
       // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
+        delete newlyCreatedRecord.login;
         var data = {insert: newlyCreatedRecord};
         sails.log.silly(`djs socket: ${data}`);
         sails.sockets.broadcast('djs', 'djs', data);
@@ -34,6 +35,7 @@ module.exports = {
     },
 
     afterUpdate: function (updatedRecord, proceed) {
+        delete updatedRecord.login;
         var data = {update: updatedRecord};
         sails.log.silly(`djs socket: ${data}`);
         sails.sockets.broadcast('djs', 'djs', data);

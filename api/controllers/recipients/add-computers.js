@@ -7,11 +7,6 @@ module.exports = {
     description: 'Registers a DJ Controls recipient as online. This is to be used with internal recipients; web/mobile public recipients should use recipients / add-web.',
 
     inputs: {
-        host: {
-            type: 'string',
-            required: true,
-            description: 'Name of the host being registered.'
-        }
     },
 
     fn: async function (inputs, exits) {
@@ -23,7 +18,7 @@ module.exports = {
                 return exits.error(new Error('This controller requires a websocket.'));
 
             // Add the recipient
-            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.host, 'computers', inputs.host);
+            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), this.req.payload.host, 'computers', this.req.payload.host);
             
             // Return the host label object
             return exits.success({label: label});

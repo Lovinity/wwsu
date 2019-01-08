@@ -1,5 +1,5 @@
 /* global moment, sails, Xp, Djs */
-
+const bcrypt = require('bcrypt');
 module.exports = {
 
     friendlyName: 'djs / add',
@@ -29,7 +29,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login || null});
+            await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null});
             return exits.success();
         } catch (e) {
             return exits.error(e);

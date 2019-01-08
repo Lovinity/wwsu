@@ -16,12 +16,13 @@ module.exports = {
             autoIncrement: true
         },
 
-        login: {
+        name: {
             type: 'string',
-            required: true
+            required: true,
+            unique: true
         },
 
-        name: {
+        login: {
             type: 'string',
             required: true
         },
@@ -81,7 +82,7 @@ module.exports = {
                         .map(async record => {
                             if (typeof names[record.name] !== 'undefined')
                                 return false;
-                            
+
                             names[record.name] = true;
                             // If there's an entry with a null time_out, then consider the director clocked in
                             if (record.time_out === null)
@@ -106,6 +107,7 @@ module.exports = {
 
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
+        delete newlyCreatedRecord.login;
         var data = {insert: newlyCreatedRecord};
         sails.log.silly(`directors socket: ${data}`);
         sails.sockets.broadcast('directors', 'directors', data);
@@ -113,6 +115,7 @@ module.exports = {
     },
 
     afterUpdate: function (updatedRecord, proceed) {
+        delete updatedRecord.login;
         var data = {update: updatedRecord};
         sails.log.silly(`directors socket: ${data}`);
         sails.sockets.broadcast('directors', 'directors', data);

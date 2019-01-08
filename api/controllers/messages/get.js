@@ -7,11 +7,6 @@ module.exports = {
     description: 'A WWSU client, such as DJ Controls, will use this endpoint to read messages, including reported emergencies.',
 
     inputs: {
-        host: {
-            type: 'string',
-            required: true,
-            description: 'The host ID of the client connecting for messages.'
-        }
     },
 
     fn: async function (inputs, exits) {
@@ -23,7 +18,7 @@ module.exports = {
         
         try {
             // Get messages
-            var records = await sails.helpers.messages.get(inputs.host, from_IP, this.req.isSocket ? sails.sockets.getId(this.req) : null);
+            var records = await sails.helpers.messages.get(this.req.payload.host, from_IP, this.req.isSocket ? sails.sockets.getId(this.req) : null);
             
             // Subscribe to web socket if applicable
             if (this.req.isSocket)

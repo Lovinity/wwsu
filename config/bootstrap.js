@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise, Uabdirectors, Uabtimesheet */
 
 /**
  * Bootstrap
@@ -13,6 +13,7 @@
 
 module.exports.bootstrap = async function (done) {
     var cron = require('node-cron');
+    var sh = require("shorthash");
 
     // By convention, this is a good place to set up fake data during development.
     //
@@ -40,6 +41,17 @@ module.exports.bootstrap = async function (done) {
                 sails.log.error(err);
             });
 
+    // Generate token secrets
+    sails.log.verbose(`BOOTSTRAP: generating token secrets`);
+    var cryptoRandomString = require('crypto-random-string');
+    sails.config.custom.secrets = {};
+    sails.config.custom.secrets.host = cryptoRandomString(256);
+    sails.config.custom.secrets.dj = cryptoRandomString(256);
+    sails.config.custom.secrets.director = cryptoRandomString(256);
+    sails.config.custom.secrets.adminDirector = cryptoRandomString(256);
+    sails.config.custom.secrets.directorUab = cryptoRandomString(256);
+    sails.config.custom.secrets.adminDirectorUab = cryptoRandomString(256);
+
     // Load blank Meta template
     sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);
     Meta.template = _.cloneDeep(Meta['A']);
@@ -49,10 +61,29 @@ module.exports.bootstrap = async function (done) {
     sails.config.custom.radiodjs.forEach(function (radiodj) {
         Status.template.push({name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: radiodj.level, data: 'This RadioDJ has not reported online since initialization.', time: null});
     });
-    sails.log.verbose(`BOOTSTRAP: Loading DJ Controls instances into template`);
-    sails.config.custom.djcontrols.forEach(function (djcontrol) {
-        Status.template.push({name: `djcontrols-${djcontrol.name}`, label: `DJ Controls ${djcontrol.label}`, status: djcontrol.level, data: 'This DJ Controls has not reported online since initialization.', time: null});
-    });
+    sails.log.verbose(`BOOTSTRAP: Loading Client instances into template`);
+    var clients = await Hosts.find({authorized: true})
+            .tolerate((err) => {
+                // Don't throw errors, but log them
+                sails.log.error(err);
+            });
+    if (clients.length > 0)
+    {
+        clients.forEach(function (client) {
+            var offStatus = 4;
+            if (client.silenceDetection || client.recordAudio || client.answerCalls)
+            {
+                if (client.silenceDetection || client.recordAudio)
+                {
+                    offStatus = 2;
+                } else {
+                    offStatus = 3;
+                }
+                Status.template.push({name: `host-${sh.unique(client.host + sails.config.custom.hostSecret)}`, label: `Host ${client.friendlyname}`, status: offStatus, data: 'This host has not reported online since initialization.', time: null});
+            }
+        });
+    }
+
     sails.log.verbose(`BOOTSTRAP: Loading Display Sign instances into template`);
     sails.config.custom.displaysigns.forEach(function (display) {
         Status.template.push({name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: 'This display sign has not reported online since initialization.', time: null});
@@ -129,6 +160,7 @@ module.exports.bootstrap = async function (done) {
     // Load directors.
     sails.log.verbose(`BOOTSTRAP: Refreshing directors.`);
     await Directors.updateDirectors();
+    await Uabdirectors.updateDirectors();
 
     // Load Google Calendar.
     sails.log.verbose(`BOOTSTRAP: Loading calendar events.`);
@@ -830,7 +862,7 @@ module.exports.bootstrap = async function (done) {
                             var remoteStream = false;
 
                             // Check public stream
-                            if (typeof streams[0] !== 'undefined' && streams[0].streamstatus !== 0)
+                            if (typeof streams !== 'undefined' && typeof streams[0] !== 'undefined' && typeof streams[0].streamstatus !== 'undefined' && streams[0].streamstatus !== 0)
                             {
                                 // Mark stream as good
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5}]);
@@ -849,7 +881,7 @@ module.exports.bootstrap = async function (done) {
                             }
 
                             // Check remote stream
-                            if (streams[1] && streams[1].streamstatus !== 0)
+                            if (typeof streams !== 'undefined' && typeof streams[1] !== 'undefined' && typeof streams[1].streamstatus !== 'undefined' && streams[1].streamstatus !== 0)
                             {
                                 // Mark stream as good
                                 Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Stream is online.', status: 5}]);
@@ -1392,8 +1424,12 @@ module.exports.bootstrap = async function (done) {
                 await Timesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
                         .tolerate((err) => {
                         });
+                await Uabtimesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
+                        .tolerate((err) => {
+                        });
                 // Force reload all directors based on timesheets
                 await Directors.updateDirectors();
+                await Uabdirectors.updateDirectors();
 
                 return resolve();
             } catch (e) {

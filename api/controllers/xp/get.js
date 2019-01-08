@@ -28,7 +28,7 @@ module.exports = {
             {
                 var records = await Xp.find({dj: inputs.dj});
 
-                return exits.success(records);
+                return exits.success({startOfSemester: moment(sails.config.custom.startOfSemester).toISOString(true), data: records});
             } else {
                 
                 // Join xp socket if applicable

@@ -28,12 +28,12 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller logs/get-attendance called.');
+        sails.log.debug('Controller attendance/get called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             var query = {};
-            
+
             // No DJ nor event? Filter by date.
             if ((inputs.dj === null || inputs.dj === '' || !inputs.dj) && (inputs.event === null || inputs.event === '' || !inputs.event))
             {
@@ -46,12 +46,12 @@ module.exports = {
 
                 var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(1, 'days');
-                query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
+                query = {or: [{scheduledStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}, {actualStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}]};
             } else {
 
                 if (inputs.dj && inputs.dj !== null && inputs.dj !== '')
                 {
-                        query.dj = inputs.dj;
+                    query.dj = inputs.dj;
                 }
 
                 if (inputs.event && inputs.event !== null && inputs.event !== '')
@@ -59,7 +59,27 @@ module.exports = {
             }
 
             // Get records
-            var records = await Attendance.find(query).sort("createdAt ASC");
+            var records = await Attendance.find(query);
+
+            if (records)
+            {
+                // We want to sort by actualStart if not null, else scheduledStart if not null, else ID. We can't do that in ORM, so use a compare function instead.
+                var compare = function (a, b) {
+                    var theDateA = a.actualStart !== null ? a.actualStart : a.scheduledStart;
+                    var theDateB = b.actualStart !== null ? b.actualStart : b.scheduledStart;
+                    if (moment(theDateA).valueOf() < moment(theDateB).valueOf())
+                        return -1;
+                    if (moment(theDateA).valueOf() > moment(theDateB).valueOf())
+                        return 1;
+                    if (a.ID > b.ID)
+                        return 1;
+                    if (b.ID > a.ID)
+                        return -1;
+                    return 0;
+                };
+
+                records.sort(compare);
+            }
 
             sails.log.verbose(`Special records returned: ${records.length}`);
             sails.log.silly(records);

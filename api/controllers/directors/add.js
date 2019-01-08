@@ -1,5 +1,5 @@
-/* global moment, sails, Xp, Djs */
-
+/* global moment, sails, Xp, Djs, Directors */
+const bcrypt = require('bcrypt');
 module.exports = {
 
     friendlyName: 'directors / add',
@@ -47,7 +47,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            await Directors.create({name: inputs.name, login: inputs.login, admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: moment().toISOString()}).fetch();
+            await Directors.create({name: inputs.name, login: bcrypt.hashSync(inputs.login, 10), admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: moment().toISOString()}).fetch();
             return exits.success();
         } catch (e) {
             return exits.error(e);

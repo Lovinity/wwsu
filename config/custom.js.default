@@ -37,6 +37,9 @@ module.exports.custom = {
         directorHoursId: ''
     },
 
+    // Insert a date and time in the string indicating when the current semester started; this will serve as the remote credit cutoff date
+    startOfSemester: moment("2019-01-14 00:00:00"),
+
     /*
      * TRACK CATEGORIES AND META
      */
@@ -886,6 +889,8 @@ module.exports.custom = {
     // Populated by bootstrap via sports and getting subcategory IDs
     sportscats: {},
     // Populated by bootstrap via Show Openers, Show Returns, and Show Closers
-    showcats: {}
+    showcats: {},
+    // Populated by bootstrap; contains randomly generated secrets to use for this process for token authentication
+    secrets: {},
 
 };

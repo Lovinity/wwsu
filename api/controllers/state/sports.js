@@ -20,22 +20,10 @@ module.exports = {
             description: 'Name of the sport that is being broadcasted.'
         },
 
-        remote: {
-            type: 'boolean',
-            defaultsTo: false,
-            description: 'True if this is a remote sports broadcast.'
-        },
-
         webchat: {
             type: 'boolean',
             defaultsTo: true,
             description: 'Should the web chat be enabled during this broadcast? Defaults to true.'
-        },
-
-        djcontrols: {
-            type: 'string',
-            required: true,
-            description: 'Name of the computer which is triggering this sports request (the sports request should be coming from DJ Controls).'
         }
     },
 
@@ -78,25 +66,20 @@ module.exports = {
                 await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false, true);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
-                
+
                 // Queue a Sports opener if there is one
                 if (typeof sails.config.custom.sportscats[inputs.sport] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[inputs.sport]["Sports Openers"]], 'Bottom', 1);
-                
+
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                 // Change meta
-                if (inputs.remote)
-                {
-                    Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_sportsremote', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-                } else {
-                    Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_sports', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: inputs.djcontrols});
-                }
+                Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_sports', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
             } else {
                 // Otherwise, just update metadata but do not do anything else
-                Meta.changeMeta({show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: inputs.djcontrols});
+                Meta.changeMeta({show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host});
             }
 
             await sails.helpers.error.reset('automationBreak');

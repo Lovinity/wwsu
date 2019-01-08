@@ -7,8 +7,8 @@ module.exports = {
     description: 'Retrieve directors from memory.',
 
     inputs: {
-        username: {
-            description: 'Director to search for; this is an OpenProject username.',
+        name: {
+            description: 'Director to search for.',
             type: 'string',
             allowNull: true
         }
@@ -34,7 +34,7 @@ module.exports = {
             // If a username was specified, find only that director. Otherwise, get all directors.
             var query = {};
             if (inputs.username !== null)
-                query = {login: inputs.username};
+                query = {name: inputs.name};
 
             // Subscribe to websockets if applicable
             if (this.req.isSocket)
@@ -45,10 +45,16 @@ module.exports = {
 
             // Get records
             var records = await Directors.find(query);
+            
+            // Remove the login parameter
+            records = records.map(record => {
+                delete record.login;
+                return record;
+            });
 
             sails.log.verbose(`Director records retrieved: ${records.length}`);
             sails.log.silly(records);
-            
+
             // Return records
             if (!records || records.length < 1)
             {
