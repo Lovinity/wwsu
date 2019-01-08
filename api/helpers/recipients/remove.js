@@ -88,7 +88,7 @@ module.exports = {
                             } else {
                                 offStatus = 3;
                             }
-                            await Status.changeStatus([{name: `host-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: 'Host is offline.'}]);
+                            await Status.changeStatus([{name: `host-${sh.unique(recipient.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: 'Host is offline.'}]);
                         }
                     }
                 }
