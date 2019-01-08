@@ -50,7 +50,7 @@ module.exports = {
                 return exits.noToken({err: "The provided director either does not exist or is not authorized."});
 
             // Generate the token valid for 5 minutes
-            var token = jwt.sign({name: director.name, exp: Math.floor(Date.now() / 1000) + (60 * 5)}, sails.config.custom.secrets.director, {subject: 'director'});
+            var token = jwt.sign({name: director.name, exp: Math.floor(Date.now() / 1000) + (60 * 10)}, sails.config.custom.secrets.director, {subject: 'director'});
 
             // Return the token as an object
             return exits.success({token: token});

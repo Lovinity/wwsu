@@ -58,7 +58,7 @@ module.exports = {
                 criteria.name = inputs.name;
 
             if (typeof inputs.login !== 'undefined' && inputs.login !== null && inputs.login !== '')
-                criteria.login = bcrypt.hashSync(inputs.login, 13);
+                criteria.login = bcrypt.hashSync(inputs.login, 10);
 
             if (typeof inputs.admin !== 'undefined' && inputs.admin !== null)
                 criteria.admin = inputs.admin;

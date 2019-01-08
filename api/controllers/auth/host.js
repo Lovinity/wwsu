@@ -38,7 +38,7 @@ module.exports = {
                 return exits.noToken({err: "The provided host either does not exist or is not authorized."});
             
             // Generate the token valid for 15 minutes
-            var token = jwt.sign({host: host.host, exp: Math.floor(Date.now() / 1000) + (60 * 15)}, sails.config.custom.secrets.host, {subject: 'host'});
+            var token = jwt.sign({host: host.host, exp: Math.floor(Date.now() / 1000) + (60 * 10)}, sails.config.custom.secrets.host, {subject: 'host'});
             
             // Return the token as an object
             return exits.success({token: token});
