@@ -21,6 +21,7 @@ module.exports.policies = {
     'auth/*': ['isBanned', 'isSocket'],
     'analytics/weekly-dj': ['isBanned', 'isSocket'],
     'announcements/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+    'announcements/add-problem': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'announcements/get': ['isBanned', 'isSocket'],
     'calendar/*': 'isBanned',
     'directors/*': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
@@ -34,6 +35,7 @@ module.exports.policies = {
     'eas/get': 'isBanned',
     'embeds/guardian': 'isBanned',
     'hosts/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+    'hosts/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'listen': 'isBanned',
     'listen/*': 'isBanned',
     'messages/get-web': ['isBanned', 'isSocket'],
@@ -55,6 +57,12 @@ module.exports.policies = {
     'timesheet/edit': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
     'timesheet/get': ['isBanned', 'isSocket'],
     'timesheet/view': 'isBanned',
+    'uab/directors/*': ['isBanned', 'isSocket', 'isAuthorizedAdminDirectorUab'],
+    'uab/directors/get': 'isBanned',
+    'uab/timesheet/add': ['isBanned', 'isSocket', 'isAuthorizedDirectorUab'],
+    'uab/timesheet/edit': ['isBanned', 'isSocket', 'isAuthorizedAdminDirectorUab'],
+    'uab/timesheet/get': ['isBanned', 'isSocket'],
+    'uab/timesheet/view': 'isBanned',
     'xp/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
     'xp/get': ['isBanned', 'isSocket', 'isAuthorizedHost']
 };

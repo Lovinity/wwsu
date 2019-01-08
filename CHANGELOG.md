@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - uab/timesheet/add, uab/timesheet/edit, uab/timesheet/get and uab/timesheet/view endpoints. Also, Uabtimesheet model. This is used for UAB timesheet system. [Issue 40](https://github.com/Lovinity/wwsu/issues/40)
  - sails.config.custom.startOfSemester, which should be configured every semester so that remote credit calculations are by semester.
  - For ending live shows, state/automation now also returns properties remoteCredits (number of credits the DJ has this semester), totalShowTime (total overall airtime in minutes), and totalListenerMinutes (total listener minutes during all shows).
+ - announcements/add-problem . This endpoint should be used instead of announcements/add when reporting technical issues with WWSU.
 
 ### Changed
  - The authorization procedure of many endpoints has changed. See the readme file carefully for instructions on authorization and which endpoints require which type of authorization. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Calls to directors/edit where parameter admin=false will be rejected if there are 1 or less admin directors in the system; this is to prevent accidental lockout.
  - Directors login column and dj login column will store logins as bcrypt factor 13 instead of plaintext.
  - Attendance/get response array will now be sorted by actualStart ASC if not null, else scheduledStart ASC if not null, else ID ASC. createdAt was inefficient for some records.
+ - xp/get now returns as an object {startOfSemester: "ISO date string", data: []}. See README.md for more information.
 
 ### Removed
  - hosts/get no longer returns authorization tokens. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)

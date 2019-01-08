@@ -1,4 +1,4 @@
-# WWSU 5.0.0 ALPHA
+# WWSU 5.0.0 BETA.1
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -64,6 +64,15 @@ Receive analytical statistics about WWSU from the last 7 days.
         }
 ## Announcements
 Announcements endpoints regard the internal announcements system at WWSU.
+### /announcements/add-problem
+Report a problem to WWSU, which adds a djcontrols announcement.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
+#### Request
+| key | criteria |
+|--|--|
+| information | string (required; information pertaining to the issue) |
+#### Response 200 OK
 ### /announcements/add
 Adds an announcement into the system.
  - **Requires auth/director authorization**.
@@ -1184,19 +1193,22 @@ Get the XP / remote credits earned by a DJ. **Requires Authorization**.
 |--|--|
 | dj | number (optional; the ID of the DJ to get XP / remotes for. If not provided, the endpoint will simply return "OK" but will subscribe to the xp event if the request was a socket.) |
 #### Response 200
-        [
-            {
-                "createdAt": "2018-05-29T18:13:01.763Z", // ISO date string of when the XP was earned
-                "updatedAt": "2018-05-29T18:13:01.763Z",
-                "ID": 7,
-                "dj": 5, // ID of the DJ that this record applied to
-                "type": "remote", // Either "xp" for XP, or "remote" for remote credits. Could also be "add-dj" which is a blank entry to register a new DJ in the system.
-                "subtype": "remote-sports", // A monikor to further categorize the reason for the earned XP or remotes.
-                "description": null, // A description provided for this record. Could be null.
-                "amount": 1 // Number of XP or remote credits earned in this record. Could be negative and could be a float.
-            },
-            ...
-        ]
+        {
+            "startOfSemester": "2018-05-29T18:13:01.763Z", // ISO date string of the configured start of current semester. Clients are advised not to count remote credits where createdAt is before this date.
+            data: [
+                {
+                    "createdAt": "2018-05-29T18:13:01.763Z", // ISO date string of when the XP was earned
+                    "updatedAt": "2018-05-29T18:13:01.763Z",
+                    "ID": 7,
+                    "dj": 5, // ID of the DJ that this record applied to
+                    "type": "remote", // Either "xp" for XP, or "remote" for remote credits. Could also be "add-dj" which is a blank entry to register a new DJ in the system.
+                    "subtype": "remote-sports", // A monikor to further categorize the reason for the earned XP or remotes.
+                    "description": null, // A description provided for this record. Could be null.
+                    "amount": 1 // Number of XP or remote credits earned in this record. Could be negative and could be a float.
+                },
+                ...
+            ]
+        }
 #### Response 200 OK
 ### /xp/remove
 Removes an XP record (removes XP / remote credits). **Requires Authorization**.
