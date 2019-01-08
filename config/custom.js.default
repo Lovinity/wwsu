@@ -371,12 +371,6 @@ module.exports.custom = {
     radiodjs: [
     ],
 
-    // Array of DJ controls which should trip status alarms if they are not connected / running (such as the OnAir Studio DJ Controls).
-    // {name: 'alphaname' ("djcontrols-" prepends this), label: 'Friendly name' ("DJ Controls " will prepend this), host: 'machine-id', level: 1 (1=critical, 2=significant, 3=minor)}
-    // All other DJ Controls will either give a status of 4 (offline no-issue) if they are reported offline, or will not show up in the recipients table.
-    djcontrols: [
-    ],
-
     // Array of display signs which should trip status alarms (level 3: minor issue) if they are not connected.
     // {name: 'alphaname' ("display-" prepends this), label: 'Friendly name' ("Display " will prepend this), level: 1 (1=critical, 2=significant, 3=minor), instances: 1 (number of display signs to expect to be connected)}
     // All other display signs will either give a status of 4 (online no-issue) if they are reported offline, or will not show up in the recipients table.
