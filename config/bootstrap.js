@@ -57,6 +57,10 @@ module.exports.bootstrap = async function (done) {
     Meta.template = _.cloneDeep(Meta['A']);
 
     // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
+    sails.log.verbose(`BOOTSTRAP: Loading RadioDJ instances into template`);
+    sails.config.custom.radiodjs.forEach(function (radiodj) {
+        Status.template.push({name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: radiodj.level, data: 'This RadioDJ has not reported online since initialization.', time: null});
+    });
     sails.log.verbose(`BOOTSTRAP: Loading Client instances into template`);
     var clients = await Hosts.find({authorized: true})
             .tolerate((err) => {

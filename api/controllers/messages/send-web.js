@@ -38,7 +38,7 @@ module.exports = {
         
         // Prepare data
         var opts = {message: inputs.message, from_IP: from_IP, nickname: inputs.nickname || null, private: inputs.private};
-        opts.host = sh.unique(from_IP + sails.tokenSecret);
+        opts.host = sh.unique(from_IP + sails.config.custom.hostSecret);
         
         try {
             // Send the message
