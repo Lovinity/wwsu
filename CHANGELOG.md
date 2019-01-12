@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Directors login column and dj login column will store logins as bcrypt factor 13 instead of plaintext.
  - Attendance/get response array will now be sorted by actualStart ASC if not null, else scheduledStart ASC if not null, else ID ASC. createdAt was inefficient for some records.
  - xp/get now returns as an object {startOfSemester: "ISO date string", data: []}. See README.md for more information.
+ - Timesheet editing via timesheet/view re-implemented with admin director authentication. [Issue 1](https://github.com/Lovinity/wwsu/issues/1)
 
 ### Removed
  - hosts/get no longer returns authorization tokens. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
