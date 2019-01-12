@@ -1,4 +1,4 @@
-# WWSU 5.0.0 BETA.2
+# WWSU 5.0.0 BETA.3
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
@@ -81,7 +81,7 @@ Adds an announcement into the system.
 | key | criteria |
 |--|--|
 | type | string (required; the type of announcement, which often dictates what should display the announcement) |
-| level | string (required; Severity level. Must be in: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"]) |
+| level | string (required; Severity level. Must be in: ["danger", "warning", "info", "trivial"]) |
 | title | string (required; the short and concise title/header for this announcement) |
 | announcement | string (required; The announcement text. HTML is allowed, but subject to server-side filtering.) |
 | starts | string (optional; the ISO moment.js compatible time that the announcement starts. Defaults to now.) |
@@ -96,7 +96,7 @@ Edits an existing announcement.
 |--|--|
 | ID | number (required; the ID of the announcement to edit) |
 | type | string (optional, but edits original value if provided; the type of announcement, which often dictates what should display the announcement) |
-| level | string (optional, but edits original value when provided; Severity level. Must be in: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"]) |
+| level | string (optional, but edits original value when provided; Severity level. Must be in: ["danger", "warning", "info", "trivial"]) |
 | title | string (optional, but edits the original title for the announcement) |
 | announcement | string (optional, but edits original value if provided; The announcement text) |
 | starts | string (optional, but edits original value if provided; the ISO moment.js compatible time that the announcement starts.) |
@@ -119,7 +119,7 @@ Get an array of announcements for the provided type.
                 "updatedAt": "2018-05-15T22:31:34.381Z",
                 "ID": 1,
                 "type": "display-public", // This announcement is applicable to the provided type. Examples: display-public, display-internal, djcontrols, website.
-                "level": "info", // Severity level. Must be in: ["danger", "urgent", "warning", "info", "success", "primary", "secondary"].
+                "level": "info", // Severity level. Will be one of: ["danger", "warning", "info", "trivial"].
                 "title": "Men's Basketball", // The title/header of the announcement
                 "announcement": "Do not forget to do your air checks. They are due August 3.", // The announcement text or HTML
                 "starts": "2018-05-15T22:31:34.381Z", // ISO string of when the announcement begins.

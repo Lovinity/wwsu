@@ -101,7 +101,7 @@ module.exports = {
         // Triggered when CRON checks fails to getQueue. 
         queueFail: {
             count: 0,
-            trigger: 15,
+            trigger: 30,
             active: false,
             fn: function () {
                 return new Promise(async (resolve, reject) => {
@@ -148,7 +148,7 @@ module.exports = {
         // Triggered when RadioDJ appears to be frozen
         frozen: {
             count: 0,
-            trigger: 15,
+            trigger: 30,
             active: false,
             fn: function () {
                 return new Promise(async (resolve, reject) => {

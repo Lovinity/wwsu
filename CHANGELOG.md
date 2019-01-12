@@ -27,7 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Directors login column and dj login column will store logins as bcrypt factor 13 instead of plaintext.
  - Attendance/get response array will now be sorted by actualStart ASC if not null, else scheduledStart ASC if not null, else ID ASC. createdAt was inefficient for some records.
  - xp/get now returns as an object {startOfSemester: "ISO date string", data: []}. See README.md for more information.
- - Timesheet editing via timesheet/view re-implemented with admin director authentication. [Issue 1](https://github.com/Lovinity/wwsu/issues/1)
+ - (>=BETA.2) Timesheet editing via timesheet/view re-implemented with admin director authentication. [Issue 1](https://github.com/Lovinity/wwsu/issues/1)
+ - (>=BETA.2) announcements/add and announcements/edit takes danger, warning, info, or trivial for the level parameter. The announcements model does the same. [Issue 48](https://github.com/Lovinity/wwsu/issues/48)
+ - (>=BETA.3) errorCheck trigger time for frozen and queueFail increased from 15 to 30 seconds due to conflict with playlist queuing. [Issue 51](https://github.com/Lovinity/wwsu/issues/51)
 
 ### Removed
  - hosts/get no longer returns authorization tokens. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
@@ -41,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Internal Server Error on djs/add. [Issue 46](https://github.com/Lovinity/wwsu/issues/46).
+ - (>=BETA.3) Listener minutes calculations in Attendance not accurate. [Issue 47](https://github.com/Lovinity/wwsu/issues/47)
 
 ## [4.5.4] - 2019-01-02
 ### Deprecated

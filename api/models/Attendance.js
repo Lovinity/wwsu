@@ -152,13 +152,13 @@ module.exports = {
                                 prevListeners = listener.listeners;
                                 prevTime = moment(listener.createdAt);
                             });
-
-                            // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-                            listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
-
-                            listenerMinutes = Math.round(listenerMinutes);
-                            updateData.listenerMinutes = listenerMinutes;
                         }
+
+                        // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
+                        listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners;
+
+                        listenerMinutes = Math.round(listenerMinutes);
+                        updateData.listenerMinutes = listenerMinutes;
 
                         // Update the attendance record with the data
                         await Attendance.update({ID: currentID}, updateData).fetch();
