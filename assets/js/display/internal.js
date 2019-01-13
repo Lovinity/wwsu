@@ -1,4 +1,4 @@
-/* global io, moment, Infinity, iziToast, responsiveVoice */
+/* global io, moment, Infinity, iziToast, responsiveVoice, jdenticon */
 
 try {
 
@@ -655,7 +655,7 @@ function processDirectors(data = {}, replace = false)
                              `;
                              */
                             innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
+    <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
   <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
                         } catch (e) {
@@ -700,7 +700,7 @@ function processDirectors(data = {}, replace = false)
                      */
                     if (innercontent)
                         innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;"><img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle"></div>
+    <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="../images/avatars/${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
   <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
                 } catch (e) {
