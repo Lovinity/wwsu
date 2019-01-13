@@ -37,9 +37,9 @@ module.exports = {
             defaultsTo: false
         },
 
-        avatar: {// HTML path relative to assets/images/avatars/
+        avatar: {// img src data for an avatar
             type: 'string',
-            defaultsTo: 'default.png'
+            defaultsTo: ''
         },
 
         position: {
