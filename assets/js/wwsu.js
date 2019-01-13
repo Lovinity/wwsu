@@ -71,10 +71,10 @@ class WWSUdb {
     }
     }
 
-    replaceData(WWSUreq, path)
+    replaceData(WWSUreq, path, data = {})
     {
         try {
-            WWSUreq.request({method: 'POST', url: path, data: {}}, (body) => {
+            WWSUreq.request({method: 'POST', url: path, data: data}, (body) => {
                 this.query(body, true);
             });
         } catch (e) {
