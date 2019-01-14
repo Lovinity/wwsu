@@ -1,6 +1,7 @@
 /* global sails */
 
 const sanitizeHtml = require('sanitize-html');
+const he = require('he');
 
 module.exports = {
 
@@ -28,7 +29,7 @@ module.exports = {
           var clean = sanitizeHtml(inputs.text, sails.config.custom.sanitize);
           
           // Don't leave &amp;s etc
-          clean = decodeURI(clean);
+          clean = he.decode(clean);
           
           return exits.success(clean);
       } catch (e) {
