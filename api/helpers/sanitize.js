@@ -26,6 +26,10 @@ module.exports = {
       
       try {
           var clean = sanitizeHtml(inputs.text, sails.config.custom.sanitize);
+          
+          // Don't leave &amp;s etc
+          clean = decodeURI(clean);
+          
           return exits.success(clean);
       } catch (e) {
           return exits.error(e);

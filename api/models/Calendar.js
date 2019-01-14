@@ -1,4 +1,4 @@
-/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events, Logs, Attendance, Directorhours, Timesheet, Djs */
+/* global Calendar, sails, Playlists, Meta, Genre, moment, _, Status, Playlists_list, Songs, Events, Logs, Attendance, Directorhours, Timesheet, Djs, Promise */
 
 /**
  * Calendar.js
