@@ -226,7 +226,7 @@ class WWSUreq {
     }
 
     _promptLogin(opts, cb) {
-        var selection = [];
+        var selection = [`<option value="">--SELECT A USER--</option>`];
         if (opts.db !== null)
         {
             opts.db.each((user) => {

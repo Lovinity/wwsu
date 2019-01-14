@@ -41,13 +41,13 @@ module.exports = {
             // Verify the Director exists first
             var director = await Uabdirectors.findOne({name: inputs.username, admin: true});
             if (!director)
-                return exits.noToken({err: "The provided director either does not exist or is not authorized."});
+                return exits.noToken({errToken: "The provided director either does not exist or is not authorized."});
             
             // Now check the password
             var match = await bcrypt.compare(inputs.password, director.login);
             
             if (!match)
-                return exits.noToken({err: "The provided director either does not exist or is not authorized."});
+                return exits.noToken({errToken: "The provided director either does not exist or is not authorized."});
 
             // Generate the token valid for 5 minutes
             var token = jwt.sign({name: director.name, exp: Math.floor(Date.now() / 1000) + (60 * 10)}, sails.config.custom.secrets.adminDirectorUab, {subject: 'adminDirectorUab'});
