@@ -512,6 +512,10 @@ module.exports = {
                 // Do not push empty (no) changes through websockets
                 if (_.isEmpty(push))
                     return resolve();
+                
+                // Do not push Meta.djcontrols
+                if (typeof push.djcontrols !== 'undefined')
+                    delete push.djcontrols;
 
                 sails.log.silly(`meta socket: ${push}`);
                 sails.sockets.broadcast('meta', 'meta', push);

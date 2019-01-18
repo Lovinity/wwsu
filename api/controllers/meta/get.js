@@ -21,6 +21,7 @@ module.exports = {
         
         // Return current meta, but update time to current time since it's not auto-updated automatically by changeMeta.
         var returnData = Meta['A'];
+        returnData.djcontrols = "";
         returnData.time = moment().toISOString(true);
         return exits.success(returnData);
     }

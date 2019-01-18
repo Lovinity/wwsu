@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [Unreleased]
+## Deprecated
+ - Meta.djcontrols will soon be removed from meta/get (but will still exist internally). For now, it will just return an empty string all the time. Clients are advised to use their own internal checking.
+
 ### Added
  - Websocket policies; socket requests not originating from server.wwsu1069.org must provide a host query parameter, which is an authorized host (see Hosts). [Issue 24](https://github.com/Lovinity/wwsu/issues/24)
  - Added makeCalls, answerCalls, silenceDetection, and recordAudio options to hosts. [Issue 42](https://github.com/Lovinity/wwsu/issues/42)
@@ -44,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
  - Internal Server Error on djs/add. [Issue 46](https://github.com/Lovinity/wwsu/issues/46).
  - (>=BETA.3) Listener minutes calculations in Attendance not accurate. [Issue 47](https://github.com/Lovinity/wwsu/issues/47)
+ - (>=BETA.4) sanitize helper was changing & to &amp;.
 
 ## [4.5.4] - 2019-01-02
 ### Deprecated
