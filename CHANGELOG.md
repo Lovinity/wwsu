@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Internal Server Error on djs/add. [Issue 46](https://github.com/Lovinity/wwsu/issues/46).
  - (>=BETA.3) Listener minutes calculations in Attendance not accurate. [Issue 47](https://github.com/Lovinity/wwsu/issues/47)
  - (>=BETA.4) sanitize helper was changing & to &amp;.
+ - (>=BETA.5) EAS processes "This alert has expired"; these should be skipped.
 
 ## [4.5.4] - 2019-01-02
 ### Deprecated

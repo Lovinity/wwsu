@@ -154,6 +154,10 @@ module.exports = {
                                                         // Parse field information into the alert variable
                                                         entry.children.map(entry2 => alert[entry2.name] = entry2.value);
 
+                                                        // Sometimes, EAS will return "This alert has expired". If so, do not process this alert for now.
+                                                        if (alert.description.includes("This alert has expired"))
+                                                            return false;
+
                                                         criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
                                                         sails.log.silly(`Criteria: ${criteria}`);
                                                         await Eas.create(criteria)
