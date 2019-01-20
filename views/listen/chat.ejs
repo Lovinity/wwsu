@@ -1,10 +1,10 @@
 <div class="row">
     <div class="col">
-        <div class="p-1 m-3 card text-white bg-dark">
+        <div class="p-1 m-3 card text-dark bg-light-3">
             <div class="card-header text-center" style="font-size: 1.5em;">Chat with the WWSU DJ</div>
             <div class="card-body">
                 <div id="messages-status"></div>
-                <div class="container-fluid" id="messages" style="height: 360px; overflow-y: auto; background-color: #787878; color: #FFFFFF;">
+                <div class="container-fluid bg-light-2 text-dark" id="messages" style="height: 360px; overflow-y: auto;">
                 </div>
                 <div class="form-group">
                     <label for="nickname">Nickname (Change if you want the DJ to know who you are)</label>
@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="btn btn-wwsu-red m-1" id="sendmessage" onclick="sendMessage(false);">
+                    <button type="button" class="btn btn-primary m-1" id="sendmessage" onclick="sendMessage(false);">
                         Send to Chat
                     </button>
                     <button type="button" class="btn btn-secondary m-1" id="sendmessagep" onclick="sendMessage(true);">
@@ -25,12 +25,7 @@
                         Clear Messages
                     </button>
                 </div>
-                <div class="alert alert-info" role="alert">
-                    Each IP address is limited to sending 3 messages per minute.
-                </div>
-                <div class="alert alert-warning" role="alert">
-                    <strong>Your IP address is logged when you send messages.</strong> Abuse of the chat system may result in a temporary or permanent ban from the listener's corner.
-                </div>
+                <div class="p-3 bs-callout bs-callout-warning text-light shadow-2"><strong>Your IP address is logged when you send messages.</strong> Abuse of the chat system could result in being banned from the listener's corner.</div>
             </div>
         </div>
     </div>

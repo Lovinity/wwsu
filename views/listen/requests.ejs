@@ -1,41 +1,29 @@
 <div class="row">
     <div class="col">
-        <div class="p-1 m-3 card text-white bg-dark">
+        <div class="p-1 m-3 card text-dark bg-light-3">
             <div class="card-header text-center" style="font-size: 1.5em;">Request a Track on WWSU</div>
             <div class="card-body">
-                <div class="alert alert-info" role="alert">
-                    Each IP is limited to making <%= requestLimit %> requests per day (reset at midnight).
-                </div>
-                <div class="container-fluid" id="trackrequests" style="background-color: #969696; color: #000000;">
-                    <div class="input-group">
-                        <input type="text" placeholder="Search artist or title..." size="25" value="" id="searchterm" class="form-control">
+                <div class="m-1 bs-callout bs-callout-info text-light shadow-2">Each IP is limited to making <%= requestLimit %> requests per day (reset at midnight).</div>
+                <div class="container-fluid text-dark bg-light-2" id="trackrequests">
                         <div class="form-group">
-                            <select class="form-control" id="filter-genre">
-                                <option value="0">Filter by genre</option>
-                            </select>
+                            <input type="text" placeholder="Search artist or title..." size="25" value="" id="searchterm" class="form-control">
+                                <select class="form-control" id="filter-genre">
+                                   <option value="0">Filter by genre</option>
+                                </select>
+                            </div>
+                            <input type="submit" id="filter-submit" class="btn btn-primary" type="button" value="Search">
                         </div>
-                        <span class="input-group-btn">
-                            <input type="submit" id="filter-submit" class="btn btn-default" type="button" value="Search"></span><br />
-                    </div>
-                    <div id="song-data" style="color: #ffffff; text-align: center;"></div>
+                    <div id="song-data" style="text-align: center;"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="trackModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel2">Track Information</h5>
-                <a type="button" class="close" data-dismiss="trackModal" href="javascript:closeModal()" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </a>
-            </div>
-            <div class="modal-body" id="track-info-body">
-                <table class="table table-hover text-dark" border="1" cellpadding="1" cellspacing="1" style="width: 100%;">
+        <div class="modal" id="trackModal" tabindex="-1" role="dialog">
+            <div class="modal-content text-dark bg-light-3">
+                <div class="modal-body" id="track-info-body">
+<table class="table table-hover text-dark" border="1" cellpadding="1" cellspacing="1" style="width: 100%;">
                     <thead>
                         <tr>
                             <th scope="col"><strong>Name</strong></th>
@@ -82,9 +70,8 @@
                 </table>
                 <div id="track-info-request">
                 </div>
-            </div>
-            <div class="modal-footer">
+                </div>
+                <div class="modal-footer bg-light-1">
+                </div>
             </div>
         </div>
-    </div>
-</div>

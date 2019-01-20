@@ -1,4 +1,4 @@
-/* global io, moment, iziToast, Infinity */
+/* global io, moment, iziToast, Infinity, jdenticon */
 
 // Define hexrgb constants
 var hexChars = 'a-f\\d';
@@ -78,6 +78,25 @@ if (document.querySelector('#themessage'))
         },
         theme: 'snow'
     });
+
+if (document.querySelector(`#trackModal`))
+{
+    $("#trackModal").iziModal({
+        title: 'Track Information',
+        headerColor: '#88A0B9',
+        width: 640,
+        focusInput: true,
+        arrowKeys: false,
+        navigateCaption: false,
+        navigateArrows: false, // Boolean, 'closeToModal', 'closeScreenEdge'
+        overlayClose: false,
+        overlayColor: 'rgba(0, 0, 0, 0.75)',
+        timeout: false,
+        timeoutProgressbar: true,
+        pauseOnHover: true,
+        timeoutProgressbarColor: 'rgba(255,255,255,0.5)',
+    });
+}
 
 function quillGetHTML(inputDelta) {
     var tempCont = document.createElement("div");
@@ -197,12 +216,17 @@ if (document.querySelector('#song-data'))
     document.querySelector(`#song-data`).addEventListener("click", function (e) {
         try {
             if (e.target) {
-                if (e.target.id.startsWith(`track-l-`))
+                if (e.target.id === `track-load` || e.target.id === `track-l-load`)
                 {
-                    loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)));
-                } else if (e.target.id.startsWith(`track-`))
-                {
-                    loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
+                    loadTracks(skipIt);
+                } else {
+                    if (e.target.id.startsWith(`track-l-`))
+                    {
+                        loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)));
+                    } else if (e.target.id.startsWith(`track-`))
+                    {
+                        loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)));
+                    }
                 }
             }
         } catch (err) {
@@ -261,7 +285,7 @@ function escapeHTML(str) {
 
 function closeModal() {
     if (document.querySelector('#trackModal'))
-        $('#trackModal').modal('hide');
+        $('#trackModal').iziModal('close');
 }
 
 // Wait for connection by io, then create event handlers and do the sockets
@@ -289,7 +313,7 @@ waitFor(function () {
     io.socket.on('disconnect', function () {
         try {
             if (nowPlaying)
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">Re-connecting...</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">Connecting...</div>`;
             iziToast.show({
                 title: 'Lost connection to WWSU',
                 message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
@@ -483,7 +507,20 @@ function addMessage(data, firsttime = false)
     if (data.to.startsWith("website-"))
     {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (Only you see this message)</span></div>`;
+            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-primary bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+  <div class="row text-dark">
+    <div class="col-2">
+      ${jdenticon.toSvg(data.from, 64)}
+    </div>
+    <div class="col-8">
+      <small>${data.from_friendly} -> YOU (private; only you see this message)</small>
+      <div id="msg-t-${data.ID}">${data.message}</div>
+    </div>
+    <div class="col-2">
+      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+    </div>
+  </div>
+</div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -503,7 +540,20 @@ function addMessage(data, firsttime = false)
     } else if (data.to === 'website')
     {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-wwsu-red"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
+            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-primary bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+  <div class="row text-dark">
+    <div class="col-2">
+      ${jdenticon.toSvg(data.from, 64)}
+    </div>
+    <div class="col-8">
+      <small>${data.from_friendly} -> All web/mobile visitors</small>
+      <div id="msg-t-${data.ID}">${data.message}</div>
+    </div>
+    <div class="col-2">
+      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+    </div>
+  </div>
+</div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -522,7 +572,20 @@ function addMessage(data, firsttime = false)
         // Private message sent from visitor
     } else if (data.to === 'DJ-private') {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly} (only the DJ sees this message)</span></div>`;
+            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+  <div class="row text-dark">
+    <div class="col-2">
+      ${jdenticon.toSvg(data.from, 64)}
+    </div>
+    <div class="col-8">
+      <small>${data.from_friendly} -> DJ (private; only the DJ sees this message)</small>
+      <div id="msg-t-${data.ID}">${data.message}</div>
+    </div>
+    <div class="col-2">
+      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+    </div>
+  </div>
+</div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -540,7 +603,20 @@ function addMessage(data, firsttime = false)
         // All other messages
     } else {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div id="msg-${data.ID}" class="p-3 mb-2 bg-dark"><span style="font-size: 1em;">${data.message}</span><br /><span class="text-light" style="font-size: 0.67em;">${moment(data.createdAt).format('LT')} by ${data.from_friendly}</span></div>`;
+            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+  <div class="row text-dark">
+    <div class="col-2">
+      ${jdenticon.toSvg(data.from, 64)}
+    </div>
+    <div class="col-8">
+      <small>${data.from_friendly} -> DJ / public</small>
+      <div id="msg-t-${data.ID}">${data.message}</div>
+    </div>
+    <div class="col-2">
+      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+    </div>
+  </div>
+</div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -579,13 +655,13 @@ function doMeta(response)
         if (('line1' in response || 'line2' in response) && nowPlaying)
         {
             if (Meta.state.includes("live_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
             if (Meta.state.includes("sports_") || Meta.state.includes("sportsremote_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>`;
             if (Meta.state.includes("remote_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
             if (Meta.state.includes("automation_") || Meta.state === 'unknown')
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 bg-wwsu-red">${Meta.line1}<br />${Meta.line2}</div>`;
+                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>`;
             iziToast.show({
                 title: Meta.line1,
                 message: Meta.line2,
@@ -607,7 +683,7 @@ function doMeta(response)
             messageText.disabled = true;
             sendButton.disabled = true;
             if (notificationsStatus)
-                notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-secondary"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>`;
+                notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>`;
             if (shouldScroll && document.querySelector('#messages')) {
                 $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
             }
@@ -625,7 +701,7 @@ function doMeta(response)
                     if (temp)
                         temp.remove();
                     if (notificationsStatus)
-                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-primary"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>`;
+                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-default shadow-4 text-light"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>`;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                     }
@@ -638,7 +714,7 @@ function doMeta(response)
                     if (temp)
                         temp.remove();
                     if (notificationsStatus)
-                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>`;
+                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>`;
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -651,7 +727,7 @@ function doMeta(response)
                     if (temp)
                         temp.remove();
                     if (notificationsStatus)
-                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>`;
+                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>`;
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -683,7 +759,7 @@ function doMeta(response)
                 ${track.track}
                 </div>
                 <div class="col-4">
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                 </div>
                 </div>`;
             });
@@ -736,10 +812,11 @@ function loadTrackInfo(trackID) {
     io.socket.post('/songs/get', {ID: trackID}, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
+            console.log(`got ${trackID}`)
             // WORK ON THIS: HTML table of song information
             if (document.querySelector('#trackModal'))
             {
-                $('#trackModal').modal('show');
+                $('#trackModal').iziModal('open');
                 $('#track-info-ID').html(response[0].ID);
                 $('#track-info-status').html(response[0].enabled === 1 ? 'Enabled' : 'Disabled');
                 document.getElementById('track-info-status').className = `table-${response[0].enabled === 1 ? 'success' : 'dark'}`;
@@ -760,7 +837,6 @@ function loadTrackInfo(trackID) {
                 $('#track-info-spinsytd').html(`since January 1: ${response[0].spins["YTD"]}`);
                 $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins["365"]}`);
                 $('#track-info-request').html(response[0].request.HTML);
-                $('#trackModal').modal('handleUpdate');
             }
         } catch (e) {
             console.dir(response[0]);
@@ -787,7 +863,7 @@ function requestTrack(trackID) {
                 timeout: 15000
             });
             if (document.querySelector('#trackModal'))
-                $('#trackModal').modal('hide');
+                $('#trackModal').iziModal('close');
         } catch (e) {
             iziToast.show({
                 title: 'Request system failed',
@@ -805,6 +881,9 @@ function requestTrack(trackID) {
 
 // Used to load a list of tracks for the track request system
 function loadTracks(skip = 0) {
+    var temp = document.getElementById(`track-load`);
+    if (temp)
+        temp.parentNode.removeChild(temp);
     var songData = document.getElementById('song-data');
     var search = document.getElementById('searchterm');
     var query = {search: escapeHTML(search.value), skip: skip};
@@ -820,9 +899,11 @@ function loadTracks(skip = 0) {
             if (response.length > 0)
             {
                 response.map(track => {
-                    songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 border border-secondary bg-${(track.enabled === 1) ? 'wwsu-red' : 'dark'}" style="cursor: pointer;"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
+                    songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 shadow-2 bg-${(track.enabled === 1) ? 'primary' : 'secondary'} text-white" style="cursor: pointer;"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
                     skipIt++;
                 });
+
+                songData.innerHTML += `<div id="track-load" class="p-1 m-1 shadow-2 bg-success text-white" style="cursor: pointer;"><span id="track-l-load">Load more tracks</span></div>`;
             } else {
                 skipIt = -1;
                 songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`;
@@ -899,19 +980,19 @@ function likeTrack(trackID) {
                 ${track.track}
                 </div>
                 <div class="col-4">
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-wwsu-red m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-secondary m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                 </div>
                 </div>`;
                 });
                 iziToast.show({
-                    title: 'Track liking success',
-                    message: 'You successfully liked that track.',
+                    title: 'Track liked!',
+                    message: 'You successfully liked that track. When you like a track, it plays more often on WWSU!',
                     color: 'green',
                     zindex: 100,
                     layout: 1,
                     closeOnClick: true,
                     position: 'bottomCenter',
-                    timeout: 5000
+                    timeout: 15000
                 });
             }
         } catch (e) {
@@ -928,12 +1009,6 @@ function likeTrack(trackID) {
         }
     });
 }
-
-window.onscroll = function (ev) {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight && skipIt > -1) {
-        loadTracks(skipIt);
-    }
-};
 
 function addAnnouncement(announcement)
 {
@@ -1025,7 +1100,7 @@ function processCalendar(data, replace = false)
                             finalColor.red = Math.round(finalColor.red);
                             finalColor.green = Math.round(finalColor.green);
                             finalColor.blue = Math.round(finalColor.blue);
-                            caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
+                            caldata.innerHTML += `<div class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-4">
@@ -1080,15 +1155,15 @@ function processCalendar(data, replace = false)
                             finalColor.red = Math.round(finalColor.red);
                             finalColor.green = Math.round(finalColor.green);
                             finalColor.blue = Math.round(finalColor.blue);
-                            caldata.innerHTML += `<div class="bs-callout bs-callout-default" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgba(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}, 0.2);">
+                            caldata.innerHTML += `<div class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
                                     <div class="container">
                                         <div class="row">
                                             <div class="col-4">
                                                 ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
                                             </div>
                                             <div class="col-8">
-                                                <p class="text-warning-light">${event.title}</p>
-                                                <p class="text-info-light">${event.description}</p>
+                                                <p class="text-warning">${event.title}</p>
+                                                <p class="text-info">${event.description}</p>
                                             </div>
                                         </div>
                                     </div></div>`;

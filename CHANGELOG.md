@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - (>=BETA.2) Timesheet editing via timesheet/view re-implemented with admin director authentication. [Issue 1](https://github.com/Lovinity/wwsu/issues/1)
  - (>=BETA.2) announcements/add and announcements/edit takes danger, warning, info, or trivial for the level parameter. The announcements model does the same. [Issue 48](https://github.com/Lovinity/wwsu/issues/48)
  - (>=BETA.3) errorCheck trigger time for frozen and queueFail increased from 15 to 30 seconds due to conflict with playlist queuing. [Issue 51](https://github.com/Lovinity/wwsu/issues/51)
+ - (>=BETA.6) listener's corner uses Material design.
+ - (>=BETA.6) Due to HTML complications, listener's corner shows chat, schedule, and request system all without the menu.
+ - (>=BETA.6) Due to JQuery complications, listener's corner uses iziModal instead of Material Design / Bootstrap modals.
 
 ### Removed
  - hosts/get no longer returns authorization tokens. [Issue 9](https://github.com/Lovinity/wwsu/issues/9)
