@@ -2143,6 +2143,71 @@ function doSlide(same = false)
                     slidetimer = setTimeout(doSlide, 14000);
                 });
             }};
+        // AAUP Strike Counter
+        slides[1777] = {name: 'AAUP-WSU Strike Counter', class: 'danger', do: false, function() {
+                try {
+                    content.innerHTML = `
+            <h1 style="text-align: center; font-size: 3em; color: #FF7878">AAUP-WSU Strike Counter</h1>
+            <h2 style="text-align: center; font-size: 8em; color: #FFFFFF" id="aaup-strike">${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("d [days], h:mm:ss")}</h2>`;
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred in Eas iteration in doSlide.`
+                    });
+                }
+                slidetimer = setTimeout(doSlide, 1000);
+            }};
+
+        slides[101] = {name: 'Be a DJ', class: 'purple', do: true, function() {
+                $('#slide').animateCss('fadeOutUp', function () {
+                    if (Meta.state.startsWith("live_"))
+                    {
+                        var temp = Meta.show.split(" - ");
+                        content.innerHTML = `<div class="animated bounceIn">
+                    <div style="text-align: center; width: 100%; font-size: 4em; color: #FFFFFF;">Interested in being <div class="text-warning jump-text">on the air</div>just like <span class="text-danger">${temp[0]}</span>?</div>
+                            <div id="thebottom">
+                            <div style="text-align: center; font-size: 3em; color: #FFFFFF">Send an email to <span class="text-primary">production@wwsu1069.org</span>!</div>
+                            <div style="text-align: center; font-size: 1.5em; color: #FFFFFF">Class/training is free, is online, and generally only takes a few weeks.</div>
+                            <div style="text-align: center; font-size: 1.5em; color: #FFFFFF">You must be enrolled in at least 6 credit hours (3 for graduates) at Wright State.</div>
+            </div>
+            </div>
+            </div>`;
+                    } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_"))
+                    {
+                        content.innerHTML = `<div class="animated bounceIn">
+                    <div style="text-align: center; width: 100%; font-size: 4em; color: #FFFFFF;">Want to be a <div class="text-success jump-text">sports broadcaster?</div></div>
+                            <div id="thebottom">
+                            <div style="text-align: center; font-size: 3em; color: #FFFFFF">Send an email to <span class="text-primary">sports@wwsu1069.org</span>!</div>
+                            <div style="text-align: center; font-size: 1.5em; color: #FFFFFF">Class/training is free and generally only takes a couple weeks.</div>
+            </div>
+            </div>
+            </div>`;
+                    } else
+                    {
+                        content.innerHTML = `<div class="animated bounceIn">
+                    <div style="text-align: center; width: 100%; font-size: 4em; color: #FFFFFF;">Interested in becoming a<div class="text-warning jump-text">DJ / radio personality?</div></div>
+                            <div id="thebottom">
+                            <div style="text-align: center; font-size: 3em; color: #FFFFFF">Send an email to <span class="text-primary">production@wwsu1069.org</span>!</div>
+                            <div style="text-align: center; font-size: 1.5em; color: #FFFFFF">Class/training is free, is online, and generally only takes a few weeks.</div>
+                            <div style="text-align: center; font-size: 1.5em; color: #FFFFFF">You must be enrolled in at least 6 credit hours (3 for graduates) at Wright State.</div>
+            </div>
+            </div>
+            </div>`;
+                    }
+                    setTimeout(function () {
+                        $('.jump-text').animateCss('tada');
+                    }, 1500);
+                    setTimeout(function () {
+                        $('.jump-text').animateCss('tada');
+                    }, 3500);
+                    setTimeout(function () {
+                        $('.jump-text').animateCss('tada');
+                    }, 5500);
+                    slidetimer = setTimeout(doSlide, 14000);
+                });
+            }};
+
         // This slide is for active Eas alerts
         slides[102] = {name: 'Weather Alerts', class: 'danger', do: false, function() {
                 $('#slide').animateCss('fadeOutUp', function () {
@@ -2200,6 +2265,17 @@ function doSlide(same = false)
                     slidetimer = setTimeout(doSlide, 14000);
                 });
             }};
+
+        if (isStudio)
+        {
+            slides[1777].do = true;
+            slide = 1777;
+            slides[slide].function();
+            var temp = document.getElementById(`slidebadge-${slide}`);
+            if (temp !== null)
+                temp.className = `m-1 btn btn-${slides[slide].class} btn-sm`;
+            return true;
+        }
 
         // If not in power saving mode...
         if ((moment(Meta.time).isAfter(moment({hour: 8, minute: 0})) && (moment(Meta.time).isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote')
