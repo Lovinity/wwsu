@@ -2149,7 +2149,7 @@ function doSlide(same = false)
                     content.innerHTML = `
             <h1 style="text-align: center; font-size: 3em; color: #FF7878">AAUP-WSU Strike Counter</h1>
             <h2 style="text-align: center; font-size: 10em; color: #ffFF78" id="aaup-strike">${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("d [days], h:mm:ss")}</h2>
-            <h2 style="text-align: center; font-size: 5em; color: #FFFFFF" class="m-3" id="aaup-strike2">Has the strike impacted you?</h2><h2 style="text-align: center; font-size: 4em; color: #FFFFFF" id="aaup-strike2">WWSU wants your testimonials!</h2><h2 style="text-align: center; font-size: 3em; color: #FFFFFF" id="aaup-strike2">Come in to make a quick recording.</h2>`;
+            ${directorpresent ? `<h2 style="text-align: center; font-size: 5em; color: #FFFFFF" class="m-3" id="aaup-strike2">Has the strike impacted you?</h2><h2 style="text-align: center; font-size: 5em; color: #FFFF78" id="aaup-strike2">Come in to make a quick recording.</h2>` : ``}`;
                 } catch (e) {
                     console.error(e);
                     iziToast.show({
