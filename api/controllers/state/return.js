@@ -19,7 +19,7 @@ module.exports = {
             // Block this request if we are already changing states
             if (Meta['A'].changingState !== null)
                 return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
-            
+
             // Lock so that other state changing requests get blocked until we are done
             await Meta.changeMeta({changingState: `Returning from break`});
 
@@ -34,16 +34,16 @@ module.exports = {
 
             // Remove clearBreak tracks to speed up the return
             await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false, true);
-            
+
 
             // Perform the break
-            
+
             // If returning from a halftime break...
             if (Meta['A'].state.includes('halftime'))
             {
                 // Queue a legal ID
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
-                
+
                 // Queue a sports liner
                 if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
@@ -55,12 +55,12 @@ module.exports = {
                 } else {
                     await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'sports_returning'});
                 }
-                
-                
+
+
             } else {
                 var d = new Date();
                 var num = d.getMinutes();
-                
+
                 // Queue station IDs if after :50 and before :10, or if it's been an hour or more since the last station ID.
                 if (num >= 50 || num < 10 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
                 {
@@ -71,6 +71,9 @@ module.exports = {
                         await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
                     } else {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Bottom', 1);
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeIntro, 'Bottom', 1);
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeTestimonials, 'Bottom', 1);
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeOuttro, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                     }
 
@@ -94,6 +97,9 @@ module.exports = {
                     {
                         await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
                     } else {
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeIntro, 'Bottom', 1);
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeTestimonials, 'Bottom', 1);
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeOuttro, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
                     }
                     Status.errorCheck.prevBreak = moment();
@@ -103,7 +109,7 @@ module.exports = {
                 switch (Meta['A'].state)
                 {
                     case 'live_break':
-                        
+
                         // Queue a show return if there is one
                         if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                         {
@@ -111,7 +117,7 @@ module.exports = {
                         } else {
                             await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
                         }
-                        
+
                         await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning'});
                         break;
                     case 'sports_break':
@@ -126,7 +132,7 @@ module.exports = {
                         } else {
                             await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
                         }
-                        
+
                         await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'remote_returning'});
                         break;
                     case 'sportsremote_break':
