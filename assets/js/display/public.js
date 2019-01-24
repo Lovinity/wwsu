@@ -790,6 +790,7 @@ function announcementsSocket()
 function doEas()
 {
     try {
+        return null;
         console.log(`DO EAS called`);
         // Display the new alert if conditions permit
         if ((newEas.length > 0 && !easActive))
@@ -2147,9 +2148,10 @@ function doSlide(same = false)
         slides[1777] = {name: 'AAUP-WSU Strike Counter', class: 'danger', do: false, function() {
                 try {
                     content.innerHTML = `
-            <h1 style="text-align: center; font-size: 3em; color: #FF7878">AAUP-WSU Strike Counter</h1>
-            <h2 style="text-align: center; font-size: 10em; color: #ffFF78" id="aaup-strike">${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("d [days], h:mm:ss")}</h2>
-            ${directorpresent ? `<h2 style="text-align: center; font-size: 5em; color: #FFFFFF" class="m-3" id="aaup-strike2">Has the strike impacted you?</h2><h2 style="text-align: center; font-size: 5em; color: #FFFF78" id="aaup-strike2">Come in to make a quick recording.</h2>` : ``}`;
+            <h1 style="text-align: center; font-size: 3em; color: #FF7878">AAUP-WSU Strike</h1>
+            <div style="text-align: center; font-size: 6em; color: #ff7878" id="aaup-day" class="border border-danger">Day ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 00:00:00"))).format("d")}</div>
+            <div style="text-align: center; font-size: 3em; color: #ffff78" id="aaup-total">Since 8am 1/22: ${moment.duration(moment(Meta.time).add(1, 'days').diff(moment("2019-01-22 08:00:00"))).format("h [hours], m [minutes], s [seconds]")}</div>
+            ${directorpresent ? `<div style="text-align: center; font-size: 4em; color: #FFFFFF" class="m-3" id="aaup-strike2">Has the strike impacted you?</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Come in to make a quick recording.</div>` : ``}`;
                 } catch (e) {
                     console.error(e);
                     iziToast.show({
