@@ -2150,7 +2150,7 @@ function doSlide(same = false)
                     content.innerHTML = `
             <h1 style="text-align: center; font-size: 3em; color: #FF7878">AAUP-WSU Strike</h1>
             <div style="text-align: center; font-size: 6em; color: #ff7878" id="aaup-day" class="border border-danger">Day ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 00:00:00"))).format("d")}</div>
-            <div style="text-align: center; font-size: 3em; color: #ffff78" id="aaup-total">Since 8am 1/22: ${moment.duration(moment(Meta.time).add(1, 'days').diff(moment("2019-01-22 08:00:00"))).format("h [hours], m [minutes], s [seconds]")}</div>
+            <div style="text-align: center; font-size: 3em; color: #ffff78" id="aaup-total">Since 8am 1/22: ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("h [hours], m [minutes], s [seconds]")}</div>
             ${directorpresent ? `<div style="text-align: center; font-size: 4em; color: #FFFFFF" class="m-3" id="aaup-strike2">Has the strike impacted you?</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Come in to make a quick recording.</div>` : ``}`;
                 } catch (e) {
                     console.error(e);
