@@ -38,6 +38,7 @@ module.exports.policies = {
     'hosts/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'listen': 'isBanned',
     'listen/*': 'isBanned',
+    'strike': 'isBanned',
     'messages/get-web': ['isBanned', 'isSocket'],
     'messages/send-web': ['isBanned', 'isSocket'],
     'meta/get': 'isBanned',
