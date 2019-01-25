@@ -2145,6 +2145,7 @@ function doSlide(same = false)
                 });
             }};
         // AAUP Strike Counter
+        // NO LONGER MAINTAINED; don't make any more changes
         slides[1777] = {name: 'AAUP-WSU Strike Counter', class: 'danger', do: false, function() {
                 try {
                     content.innerHTML = `
