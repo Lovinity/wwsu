@@ -1,4 +1,4 @@
-# WWSU 5.0.0 BETA.6
+# WWSU 5.0.0
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 ## Websockets
