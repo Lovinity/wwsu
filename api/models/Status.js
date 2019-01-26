@@ -441,8 +441,8 @@ module.exports = {
                 return new Promise(async (resolve, reject) => {
                     try {
                         await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
-                        await sails.helpers.songs.remove(false, sails.config.custom.subcats.noClearShow, false, false);
-                        if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
+                        await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
+                        if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
                             await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
                     } catch (e) {
                         return reject(e);

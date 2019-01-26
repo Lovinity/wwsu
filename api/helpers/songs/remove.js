@@ -41,7 +41,11 @@ module.exports = {
         try {
 
             // Get rid of all the null entries
-            inputs.subcategories = inputs.subcategories.filter(subcategory => subcategory !== null);
+            try {
+                inputs.subcategories = inputs.subcategories.filter(subcategory => subcategory && subcategory !== null);
+            } catch (e2) {
+                inputs.subcategories = [];
+            }
 
             // Get a snapshot of the current queue.
             var queue = await sails.helpers.rest.getQueue();

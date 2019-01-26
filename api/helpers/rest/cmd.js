@@ -62,6 +62,7 @@ module.exports = {
                 // Add to queue, triggered by checks CRON, if queue is true
             } else {
                 Songs.pendingCmd.push({command: inputs.command, arg: inputs.arg, timeout: inputs.timeout, resolve: exits.success});
+                sails.log.verbose(`Put a REST cmd into queue: ${JSON.stringify({command: inputs.command, arg: inputs.arg, timeout: inputs.timeout, resolve: exits.success})}`);
                 // Do not resolve yet... when cron triggers this pendingCmd entry, it will then call the resolve function with either true or false as its parameter.
             }
         } catch (e) {

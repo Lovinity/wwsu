@@ -238,6 +238,7 @@ module.exports.bootstrap = async function (done) {
                 {
                     var task = Songs.pendingCmd.shift();
                     try {
+                        sails.log.verbose(`Executing REST cmd queue item ${JSON.stringify(task)}`);
                         var result = await sails.helpers.rest.cmd(task.command, task.arg, task.timeout);
                         task.resolve(result);
                     } catch (e2) {
