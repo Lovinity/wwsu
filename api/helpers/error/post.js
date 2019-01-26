@@ -7,13 +7,28 @@ module.exports = {
     description: 'Used after switching RadioDJ instances; resets the queue on the new RadioDJ instance if necessary.',
 
     inputs: {
-
+        oldQueue: {
+            type: 'ref',
+            description: 'Array of Meta.automation before radioDJs were switched. This will be re-queued in the new RadioDJ.',
+            required: false
+        }
     },
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper error.post called.');
         try {
-            // When in automation, but not playlist, queue an ID and restart the genre.
+            var reQueue = [];
+            if (inputs.oldQueue && inputs.oldQueue.length > 1)
+            {
+                try {
+                    inputs.oldQueue
+                            .filter((queueItem, index) => index > 0)
+                            .map(queueItem => reQueue.push(queueItem.ID));
+                } catch (e2) {
+                    // Do nothing on error
+                }
+            }
+            // When in automation, but not playlist, queue an ID and re-queue oldQueue
             if (Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'automation_playlist')
             {
                 sails.log.verbose(`Automation recovery triggered.`);
@@ -22,6 +37,8 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                 await sails.helpers.rest.cmd('EnableAssisted', 0)
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'bottom', 1));
+                await Promise.all(maps);
                 if (Meta['A'].state === 'automation_genre')
                 {
                     await sails.helpers.genre.start(Meta['A'].genre, true);
@@ -40,7 +57,8 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                await sails.helpers.playlists.start(Meta['A'].playlist, true, Meta['A'].state === 'live_prerecord' ? 1 : 0, Meta['A'].topic, true);
+                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'bottom', 1));
+                await Promise.all(maps);
                 // When in break, queue PSAs
             } else if (Meta['A'].state.includes("_break") || Meta['A'].state.includes("_returning") || Meta['A'].state.includes("_disconnected"))
             {
@@ -48,9 +66,11 @@ module.exports = {
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.rest.cmd('ClearPlaylist', 1);
-                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 2, false);
+                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, false);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'bottom', 1));
+                await Promise.all(maps);
                 // Remote broadcasts; requeue remote track
             } else if (Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on')
             {

@@ -1103,10 +1103,10 @@ module.exports.bootstrap = async function (done) {
                                                             return true;
                                                         });
                                                 await Promise.all(maps);
-
+                                                var queue = Meta.automation;
                                                 await Meta.changeMeta({radiodj: radiodj.rest});
                                                 await sails.helpers.rest.cmd('ClearPlaylist', 1);
-                                                await sails.helpers.error.post();
+                                                await sails.helpers.error.post(queue);
                                             }
 
                                             // If this RadioDJ is inactive, check to see if it is playing anything and send a stop command if so.

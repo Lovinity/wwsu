@@ -530,11 +530,11 @@ module.exports = {
                                 {
                                     if (event.summary.startsWith("Playlist: ") && (toTrigger === null || toTrigger.priority >= 2))
                                     {
-                                        toTrigger = {priority: 2, event: event.summary.replace('Playlist: ', ''), resume: false, type: 0, description: ''};
+                                        toTrigger = {priority: 2, event: event.summary.replace('Playlist: ', ''), type: 0, description: ''};
                                     }
                                     if (event.summary.startsWith("Prerecord: ") && (toTrigger === null || toTrigger.priority >= 1))
                                     {
-                                        toTrigger = {priority: 1, event: event.summary.replace('Prerecord: ', ''), resume: false, type: 1, description: criteria.description};
+                                        toTrigger = {priority: 1, event: event.summary.replace('Prerecord: ', ''), type: 1, description: criteria.description};
                                     }
                                 }
                                 // Do not re-trigger an already active genre, unless we are restarting it
@@ -559,7 +559,7 @@ module.exports = {
                     // Trigger playlist or genre, if there is one to trigger
                     if (toTrigger !== null && toTrigger.priority < 3)
                     {
-                        await sails.helpers.playlists.start(toTrigger.event, toTrigger.resume, toTrigger.type, toTrigger.description, ignoreChangingState);
+                        await sails.helpers.playlists.start(toTrigger.event, false, toTrigger.type, toTrigger.description, ignoreChangingState);
                     } else if (toTrigger !== null && toTrigger.priority === 3)
                     {
                         await sails.helpers.genre.start(toTrigger.event, ignoreChangingState);

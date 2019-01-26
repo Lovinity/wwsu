@@ -21,9 +21,10 @@ module.exports = {
             await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
             await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0);
             await sails.helpers.rest.cmd('StopPlayer', 0, 0);
+            var queue = Meta.automation;
             await sails.helpers.rest.changeRadioDj();
             await sails.helpers.rest.cmd('ClearPlaylist', 1);
-            await sails.helpers.error.post();
+            await sails.helpers.error.post(queue);
             
             await Meta.changeMeta({changingState: null});
             return exits.success();

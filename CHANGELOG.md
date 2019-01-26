@@ -11,10 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - lastSeen column in Djs model that updates to current datetime when a DJ does a show. [Issue 55](https://github.com/Lovinity/wwsu/issues/55)
  - errorChecks and config.custom.queueCorrection for checking queue lengths, and removing / skipping tracks if the queue is too long to get shows on sooner. [Issue 53](https://github.com/Lovinity/wwsu/issues/53)
+ - optional oldQueue parameter in sails.helpers.error.post. If provided as array of RadioDJ Meta.automation queue, this will be re-queued in the new RadioDJ. [Issue 50](https://github.com/Lovinity/wwsu/issues/50)
 
 ## [5.0.0] - 2019-01-25
 ### Deprecated
  - Meta.djcontrols will soon be removed from meta/get (but will still exist internally). This property will be removed in 6.0.0. For now, it will just return an empty string all the time. Clients are advised to use their own internal checking.
+ - sails.helpers.playlists.start resume parameter has been deprecated and will be ignored. The parameter will be removed in version 6.0.0.
 
 ### Added
  - Websocket policies; socket requests not originating from server.wwsu1069.org must provide a host query parameter, which is an authorized host (see Hosts). [Issue 24](https://github.com/Lovinity/wwsu/issues/24)
