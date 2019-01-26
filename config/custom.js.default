@@ -361,8 +361,26 @@ module.exports.custom = {
     // NOTE: This clock is reset when a break is played so as to avoid playing a liner too close to a break.
     linerTime: 10,
     
-    // When going to a live show, or starting a prerecord, if the currently playing track has more than this many minutes, immediately skip it so the show/prerecord starts sooner.
-    liveSkip: 5,
+   // This object of options regards checking for queues, and triggering errorChecks if a queue is deemed too long in order to fix that and get live shows / broadcasts on the air 
+   // sooner.
+   // NOTE: these checks only run once; if, say, the queue condition satisfies, and later doesn't, errorCheck will not trigger. This is by design since hosts can add PSAs / more time.
+    queueCorrection: {
+        
+        // If trying to begin a live show, and the total queue time is greater than this in seconds, skip currently playing track and try clearing necessary tracks from the queue again.
+        live: (60 * 5),
+        
+        // If the amount of time between now and the first prerecord playlist track is greater than this many seconds, try clearing/skipping some tracks to get the prerecord on the air sooner.
+        prerecord: (60 * 5),
+        
+        // If trying to begin a sports broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get sports on sooner.
+        sports: 60,
+        
+        // When first returning from a break in a sports broadcast, if the queue is greater than this in seconds, clear out some tracks.
+        sportsReturn: 30,
+        
+        // If trying to begin a remote broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get remote on sooner.
+        remote: (60 * 5)
+    },
 
     /*
      * STATUS CHECKS

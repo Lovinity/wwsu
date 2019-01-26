@@ -72,7 +72,7 @@ module.exports = {
 
                 // Operation: Remove all music tracks, queue a station ID, and disable auto DJ.
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0);
-                await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false, (Meta.automation[0] && (parseInt(Meta.automation[0].Duration) - parseInt(Meta.automation[0].Elapsed) > (sails.config.custom.liveSkip * 60))));
+                await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
@@ -85,6 +85,9 @@ module.exports = {
                 } else {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
+                
+                // start liveQueue check
+                await sails.helpers.error.count('liveQueue');
 
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});

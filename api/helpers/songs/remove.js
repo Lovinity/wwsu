@@ -30,7 +30,7 @@ module.exports = {
         includeCurrentTrack: {
             type: 'boolean',
             defaultsTo: false,
-            description: 'If true, then if the currently playing track fails criteria, PlayPlaylistTrack will be sent to skip to the next track in automation in 5 seconds (to allow any queuing of new tracks first).'
+            description: 'DEPRECATED'
         }
     },
 
@@ -62,8 +62,6 @@ module.exports = {
                         {
                             sails.log.verbose(`REMOVING`);
                             queue.splice(i, 1);
-                            if (i === 0 && inputs.includeCurrentTrack)
-                                skipCurrent = true;
                         }
                     }
                 }
@@ -74,15 +72,6 @@ module.exports = {
                     var maps = queue.map(async track => await sails.helpers.rest.cmd("LoadTrackToBottom", track.ID));
                     await Promise.all(maps);
                 }
-
-                // if necessary, set a 5-second timeout to skip the current track playing
-                if (skipCurrent && (parseInt(queue[0].Duration) - parseInt(queue[0].Elapsed)) > 10)
-                    setTimeout(function () {
-                        return new Promise(async (resolve2) => {
-                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 1);
-                            return resolve2();
-                        });
-                    }, 5000);
 
                 // Remove tracks one at a time instead of re-queuing a new playlist
             } else {
@@ -95,20 +84,9 @@ module.exports = {
                         {
                             sails.log.verbose(`REMOVING`);
                             await sails.helpers.rest.cmd('RemovePlaylistTrack', i - 1);
-                            if (i === 0 && inputs.includeCurrentTrack)
-                                skipCurrent = true;
                         }
                     }
                 }
-
-                // if necessary, set a 5-second timeout to skip the current track playing
-                if (skipCurrent && (parseInt(queue[0].Duration) - parseInt(queue[0].Elapsed)) > 10)
-                    setTimeout(function () {
-                        return new Promise(async (resolve2) => {
-                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 1);
-                            return resolve2();
-                        });
-                    }, 5000);
             }
 
             return exits.success();

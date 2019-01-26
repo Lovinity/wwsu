@@ -427,6 +427,7 @@ module.exports.bootstrap = async function (done) {
             // Playlist maintenance
             var thePosition = -1;
             var playlistTrackPlaying = false;
+            var timeToFirstTrack = 0;
             if ((Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_prerecord' || Meta['A'].state === 'live_prerecord'))
             {
                 // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
@@ -450,7 +451,11 @@ module.exports.bootstrap = async function (done) {
                                                 });
                                     }
                                     if (index === 0)
+                                    {
                                         playlistTrackPlaying = true;
+                                    } else {
+                                        timeToFirstTrack += (parseInt(autoTrack.Duration) - parseInt(autoTrack.Elapsed));
+                                    }
                                     if (thePosition === -1 || i < thePosition)
                                     {
                                         thePosition = i;
@@ -508,6 +513,53 @@ module.exports.bootstrap = async function (done) {
                     }
                 } catch (e) {
                     sails.log.error(e);
+                }
+            }
+
+            // Perform queue length checks depending on current state
+            if (Meta['A'].state === 'automation_live')
+            {
+                if (queueLength >= sails.config.custom.queueCorrection.live)
+                {
+                    await sails.helpers.error.count('liveQueue', true);
+                } else {
+                    await sails.helpers.error.reset('liveQueue');
+                }
+            }
+            if (Meta['A'].state === 'automation_prerecord')
+            {
+                if (timeToFirstTrack >= sails.config.custom.queueCorrection.prerecord && !Playlists.queuing && Meta['A'].changingState === null)
+                {
+                    await sails.helpers.error.count('prerecordQueue', true);
+                } else {
+                    await sails.helpers.error.reset('prerecordQueue');
+                }
+            }
+            if (Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote')
+            {
+                if (queueLength >= sails.config.custom.queueCorrection.sports)
+                {
+                    await sails.helpers.error.count('sportsQueue', true);
+                } else {
+                    await sails.helpers.error.reset('sportsQueue');
+                }
+            }
+            if (Meta['A'].state === 'sports_returning' || Meta['A'].state === 'sportsremote_returning')
+            {
+                if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
+                {
+                    await sails.helpers.error.count('sportsReturnQueue', true);
+                } else {
+                    await sails.helpers.error.reset('sportsReturnQueue');
+                }
+            }
+            if (Meta['A'].state === 'automation_remote')
+            {
+                if (queueLength >= sails.config.custom.queueCorrection.remote)
+                {
+                    await sails.helpers.error.count('remoteQueue', true);
+                } else {
+                    await sails.helpers.error.reset('remoteQueue');
                 }
             }
 
