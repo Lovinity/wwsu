@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - lastSeen column in Djs model that updates to current datetime when a DJ does a show. [Issue 55](https://github.com/Lovinity/wwsu/issues/55)
  - errorChecks and config.custom.queueCorrection for checking queue lengths, and removing / skipping tracks if the queue is too long to get shows on sooner. [Issue 53](https://github.com/Lovinity/wwsu/issues/53)
  - optional oldQueue parameter in sails.helpers.error.post. If provided as array of RadioDJ Meta.automation queue, this will be re-queued in the new RadioDJ. [Issue 50](https://github.com/Lovinity/wwsu/issues/50)
+ - optional queue parameter in sails.helpers.songs.queue. If true, songs will not be queued immediately but instead put in a queue that queues 1 track per second.
+ - optional queue parameter in sails.helpers.songs.queuePending. If true, songs will not be queued immediately but instead put in a queue that queues 1 track per second.
+ - task.rules in sails.config.custom.breaks for the queue task. If true, tracks will be checked against playlist rotation rules.
 
 ## [5.0.0] - 2019-01-25
 ### Deprecated

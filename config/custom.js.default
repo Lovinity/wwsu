@@ -287,8 +287,8 @@ module.exports.custom = {
      * // This queues up to (quantity) number of requested tracks, and adds a request liner (categories.requestLiners) at the beginning (if any requests were queued).
      * {task: "queueRequests", quantity: 1}
      * 
-     * // Queues (quantity) number of tracks from (category) as configured in the categories section.
-     * {task: "queue", category: "categoryName (from the categories configuration)", quantity: 1}
+     * // Queues (quantity) number of tracks from (category) as configured in the categories section. If rules is true, tracks will be checked against playlist rotation rules.
+     * {task: "queue", category: "categoryName (from the categories configuration)", quantity: 1, rules: true}
      * 
      * // If any underwritings etc were removed from the queue due to duplicates, they get stored in memory. This re-queues them. It is advised to have this in every break.
      * {task: "queueDuplicates"}

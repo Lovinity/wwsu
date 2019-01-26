@@ -820,11 +820,11 @@ module.exports.bootstrap = async function (done) {
                                                             break;
                                                             // Queue tracks from a configured categories.category
                                                         case "queue":
-                                                            await sails.helpers.songs.queue(sails.config.custom.subcats[task.category], 'Top', task.quantity || 1);
+                                                            await sails.helpers.songs.queue(sails.config.custom.subcats[task.category], 'Top', task.quantity || 1, task.rules || true, null, true);
                                                             break;
                                                             // Re-queue any underwritings etc that were removed due to duplicate track checking
                                                         case "queueDuplicates":
-                                                            await sails.helpers.songs.queuePending();
+                                                            await sails.helpers.songs.queuePending(true);
                                                             break;
                                                     }
                                                     return resolve2(false);
