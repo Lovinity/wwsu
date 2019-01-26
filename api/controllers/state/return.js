@@ -47,15 +47,25 @@ module.exports = {
                 // Queue a sports liner
                 if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
-                
-                await sails.helpers.error.count('sportsReturnQueue');
+
+                var queueLength = await sails.helpers.songs.calculateQueueLength();
+
+                if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
+                {
+                    await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
+                    //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
+                    if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
+                }
+
+                //await sails.helpers.error.count('sportsReturnQueue');
 
                 // Change state
                 if (Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected')
                 {
-                    await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'sportsremote_returning'});
+                    await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning'});
                 } else {
-                    await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'sports_returning'});
+                    await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning'});
                 }
 
 
@@ -123,8 +133,18 @@ module.exports = {
                         await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning'});
                         break;
                     case 'sports_break':
-                        await sails.helpers.error.count('sportsReturnQueue');
-                        await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'sports_returning'});
+                        var queueLength = await sails.helpers.songs.calculateQueueLength();
+
+                        if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
+                        {
+                            await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
+                            //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
+                            if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
+                                await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
+                        }
+
+                        //await sails.helpers.error.count('sportsReturnQueue');
+                        await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning'});
                         break;
                     case 'remote_break':
                     case 'remote_break_disconnected':
@@ -139,8 +159,18 @@ module.exports = {
                         break;
                     case 'sportsremote_break':
                     case 'sportsremote_break_disconnected':
-                        await sails.helpers.error.count('sportsReturnQueue');
-                        await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'sportsremote_returning'});
+                        var queueLength = await sails.helpers.songs.calculateQueueLength();
+
+                        if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
+                        {
+                            await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
+                            //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
+                            if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
+                                await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
+                        }
+
+                        //await sails.helpers.error.count('sportsReturnQueue');
+                        await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning'});
                         break;
                 }
             }
