@@ -51,7 +51,7 @@ module.exports = {
         try {
 
             // Get rid of all the null entries
-            inputs.subcategories = inputs.subcategories.filter(subcategory => subcategory && subcategory !== null);
+            inputs.subcategories = inputs.subcategories.length > 0 ? inputs.subcategories.filter(subcategory => subcategory && subcategory !== null) : [];
 
             // Find all applicable songs that are in the subcategory and load them in memory (have to do randomisation by Node, not by database)
             var thesongs = await Songs.find({id_subcat: inputs.subcategories, enabled: 1});
