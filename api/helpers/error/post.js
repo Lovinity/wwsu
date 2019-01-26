@@ -37,7 +37,7 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                 await sails.helpers.rest.cmd('EnableAssisted', 0)
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'bottom', 1));
+                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'Bottom', 1));
                 await Promise.all(maps);
                 if (Meta['A'].state === 'automation_genre')
                 {
@@ -57,7 +57,7 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'bottom', 1));
+                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'Bottom', 1));
                 await Promise.all(maps);
                 // When in break, queue PSAs
             } else if (Meta['A'].state.includes("_break") || Meta['A'].state.includes("_returning") || Meta['A'].state.includes("_disconnected"))
@@ -69,7 +69,7 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, false);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'bottom', 1));
+                var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'Bottom', 1));
                 await Promise.all(maps);
                 // Remote broadcasts; requeue remote track
             } else if (Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on')
