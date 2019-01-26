@@ -29,7 +29,7 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null});
+            await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: moment("2002-01-01 00:00:00").toISOString(true)});
             return exits.success();
         } catch (e) {
             return exits.error(e);

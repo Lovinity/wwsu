@@ -6,8 +6,8 @@
  */
 
 module.exports = {
- datastore: 'nodebase',
-  attributes: {
+    datastore: 'nodebase',
+    attributes: {
         ID: {
             type: 'number',
             autoIncrement: true
@@ -18,14 +18,20 @@ module.exports = {
             required: true,
             unique: true
         },
-        
+
         login: {
             type: 'string',
             allowNull: true
+        },
+
+        lastSeen: {
+            type: 'ref',
+            columnType: 'datetime'
         }
-  },
-  
-      // Websockets standards
+        
+    },
+
+    // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         delete newlyCreatedRecord.login;
         var data = {insert: newlyCreatedRecord};

@@ -184,7 +184,12 @@ module.exports = {
                             if (obj[key] !== null && obj[key].includes(" - "))
                             {
                                 var tmp = obj[key].split(" - ")[0];
-                                var dj = await Djs.findOrCreate({name: tmp}, {name: tmp});
+                                var dj = await Djs.findOrCreate({name: tmp}, {name: tmp, lastSeen: moment().toISOString(true)});
+                                
+                                // Update lastSeen record for the DJ
+                                if (dj && dj !== null)
+                                    await Djs.update({ID: dj.ID}, {lastSeen: moment().toISOString(true)}).fetch();
+                                
                                 Meta['A'].dj = dj.ID;
                             } else {
                                 Meta['A'].dj = null;
@@ -512,7 +517,7 @@ module.exports = {
                 // Do not push empty (no) changes through websockets
                 if (_.isEmpty(push))
                     return resolve();
-                
+
                 // Do not push Meta.djcontrols
                 if (typeof push.djcontrols !== 'undefined')
                     delete push.djcontrols;
