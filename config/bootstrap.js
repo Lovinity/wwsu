@@ -766,7 +766,7 @@ module.exports.bootstrap = async function (done) {
                                     // Go through each task
                                     if (breakOpts.length > 0)
                                     {
-                                        var maps = breakOpts.map(async task => await sails.helpers.breaks.execute(task.task, task.event, task.category, task.quantity, task.rules));
+                                        var maps = breakOpts.map(async task => await sails.helpers.break.execute(task.task, task.event, task.category, task.quantity, task.rules));
                                         await Promise.all(maps);
                                     }
                                     // If not doing a break, check to see if it's time to do a liner
