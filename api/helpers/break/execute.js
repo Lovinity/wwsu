@@ -65,6 +65,8 @@ module.exports = {
                     await sails.helpers.songs.queuePending(true);
                     break;
             }
+            
+            return exits.success();
         } catch (e) {
             return exits.error(e);
         }

@@ -752,18 +752,14 @@ module.exports.bootstrap = async function (done) {
                                     // Go through each task
                                     if (breakOpts.length > 0)
                                     {
-                                        var maps = breakOpts.map(async task => new Promise(async (resolve, reject) => {
-                                                await sails.helpers.break.execute(task.task, task.event, task.category, task.quantity, task.rules);
-                                                resolve();
-                                            }));
+                                        var asyncLoop = async function (array, callback) {
+                                            for (let index = 0; index < array.length; index++) {
+                                                await callback(array[index], index, array);
+                                            }
+                                        };
 
-                                        await maps.reduce((promiseChain, currentTask) => {
-                                            return promiseChain.then(chainResults =>
-                                                currentTask.then(currentResult =>
-                                                    [...chainResults, currentResult]
-                                                )
-                                            );
-                                        }, Promise.resolve([])).then(arrayOfResults => {
+                                        await asyncLoop(breakOpts, async (task) => {
+                                            await sails.helpers.break.execute(task.task, task.event, task.category, task.quantity, task.rules);
                                         });
                                     }
                                     // If not doing a break, check to see if it's time to do a liner
