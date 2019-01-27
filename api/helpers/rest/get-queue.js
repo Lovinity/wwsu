@@ -49,7 +49,7 @@ module.exports = {
                                     delete Songs.queueCheck[index];
                                 } else if (moment().diff(moment(check.time), 'seconds') >= 10)
                                 {
-                                    check.error();
+                                    check.error(new Error(`Did not find track ${check.ID} in the queue after 10 seconds.`));
                                     delete Songs.queueCheck[index];
                                 }
                             });

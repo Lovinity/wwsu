@@ -241,7 +241,7 @@ module.exports.bootstrap = async function (done) {
                     var theTracks = [];
                     change.trackID = parseInt(queue[0].ID);
                     change.trackIDSubcat = parseInt(queue[0].IDSubcat) || 0;
-                    
+
                     // Determine if something is currently playing via whether or not track 0 has ID of 0.
                     if (parseInt(queue[0].ID) === 0)
                     {
@@ -752,8 +752,19 @@ module.exports.bootstrap = async function (done) {
                                     // Go through each task
                                     if (breakOpts.length > 0)
                                     {
-                                        var maps = breakOpts.map(async task => await sails.helpers.break.execute(task.task, task.event, task.category, task.quantity, task.rules));
-                                        await Promise.all(maps);
+                                        var maps = breakOpts.map(async task => new Promise(async (resolve, reject) => {
+                                                await sails.helpers.break.execute(task.task, task.event, task.category, task.quantity, task.rules);
+                                                resolve();
+                                            }));
+
+                                        await maps.reduce((promiseChain, currentTask) => {
+                                            return promiseChain.then(chainResults =>
+                                                currentTask.then(currentResult =>
+                                                    [...chainResults, currentResult]
+                                                )
+                                            );
+                                        }, Promise.resolve([])).then(arrayOfResults => {
+                                        });
                                     }
                                     // If not doing a break, check to see if it's time to do a liner
                                 } else {
