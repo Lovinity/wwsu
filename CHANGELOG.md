@@ -7,15 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Deprecated
  - sails.helpers.songs.remove includeCurrentTrack parameter never worked correctly and will instead be used by something else. This parameter will now be ignored. It will be removed in 6.0.0.
+ - Songs.pendingCmd; it will be removed in 6.0.0.
+ - Parameter "queue" in sails.helpers.rest.cmd; it will be removed in 6.0.0.
 
 ### Added
  - lastSeen column in Djs model that updates to current datetime when a DJ does a show. [Issue 55](https://github.com/Lovinity/wwsu/issues/55)
- - errorChecks and config.custom.queueCorrection for checking queue lengths, and removing / skipping tracks if the queue is too long to get shows on sooner. [Issue 53](https://github.com/Lovinity/wwsu/issues/53)
+ - config.custom.queueCorrection and checks in the state/* endpoints for checking queue lengths, and removing / skipping tracks if the queue is too long to get shows on sooner. [Issue 53](https://github.com/Lovinity/wwsu/issues/53)
  - optional oldQueue parameter in sails.helpers.error.post. If provided as array of RadioDJ Meta.automation queue, this will be re-queued in the new RadioDJ. [Issue 50](https://github.com/Lovinity/wwsu/issues/50)
- - optional queue parameter in sails.helpers.songs.queue. If true, songs will not be queued immediately but instead put in a queue that queues 1 track per second.
- - optional queue parameter in sails.helpers.songs.queuePending. If true, songs will not be queued immediately but instead put in a queue that queues 1 track per second.
+ - optional queue parameter in sails.helpers.songs.queue. If true, the helper Promise will not be resolved until it has been confirmed that the track was queued in RadioDJ (or an error is thrown after 10 seconds).
+ - optional queue parameter in sails.helpers.songs.queuePending. If true, the helper Promise will not be resolved until it has been confirmed that the tracks were queued in RadioDJ (or an error is thrown after 10 seconds).
  - task.rules in sails.config.custom.breaks for the queue task. If true, tracks will be checked against playlist rotation rules.
  - sails.helpers.breaks.execute for executing configured break objects. [Issue 54](https://github.com/Lovinity/wwsu/issues/54)
+ - Songs.queueCheck to monitor for tracks we want to ensure were queued before resolving.
+ - sails.helpers.rest.checkQueue with parameter ID (track ID). When called, the helper will return with a Promise that does not resolve until sails.helpers.rest.getQueue confirms the track was queued.
 
 ## [5.0.0] - 2019-01-25
 ### Deprecated

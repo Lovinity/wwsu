@@ -263,7 +263,8 @@ module.exports = {
   },
   
   pending: [], // Tracks that have been removed but need to air eventually, and will be re-queued at the next break.
-  pendingCmd: [] // Queued/pending rest commands
+  pendingCmd: [], // DEPRECATED
+  queueCheck: [] // Array of objects containing tracks we're waiting to confirm were queued in RadioDJ (checked by sails.helpers.rest.getQueue).
 
 };
 

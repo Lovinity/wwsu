@@ -41,7 +41,7 @@ module.exports = {
         queue: {
             type: 'boolean',
             defaultsTo: false,
-            description: 'If true, instead of executing right away, song tracks will be added to a queue where one song is queued every execution of the check CRON. In addition, this helper call will not resolve until all songs are queued.'
+            description: 'If true, this helper will not resolve until sails.helpers.rest.getQueue has confirmed this track was indeed queued.'
         }
     },
 
@@ -92,6 +92,8 @@ module.exports = {
                             queuedtracks++;
                             sails.log.verbose(`Queued ${thesong.ID}`);
                             await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID, inputs.queue);
+                            if (inputs.queue)
+                                await sails.helpers.rest.checkQueue(thesong.ID);
                         }
                     }
                 }
@@ -118,6 +120,8 @@ module.exports = {
                             queuedtracks++;
                             sails.log.verbose(`Queued ${thesong.ID}`);
                             await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID, inputs.queue);
+                            if (inputs.queue)
+                                await sails.helpers.rest.checkQueue(thesong.ID);
                         }
                     }
                 }

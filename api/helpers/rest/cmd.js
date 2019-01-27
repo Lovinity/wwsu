@@ -25,7 +25,7 @@ module.exports = {
         queue: {
             type: 'boolean',
             defaultsTo: false,
-            description: 'If true, instead of executing right away, this cmd request will be added to a queue where one cmd is executed every execution of the check CRON. In addition, this helper call will not resolve until the cmd is executed in the queue.'
+            description: 'DEPRECATED'
         }
     },
 
@@ -45,26 +45,18 @@ module.exports = {
         }
 
         try {
-            if (!inputs.queue)
-            {
-                // Query REST
-                needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout, headers: {'Content-Type': 'application/json'}})
-                        .then(async function (resp) {
-                            try {
-                                return exits.success(true);
-                            } catch (e) {
-                                return exits.success(false);
-                            }
-                        })
-                        .catch(async function (err) {
+            // Query REST
+            needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout, headers: {'Content-Type': 'application/json'}})
+                    .then(async function (resp) {
+                        try {
+                            return exits.success(true);
+                        } catch (e) {
                             return exits.success(false);
-                        });
-                // Add to queue, triggered by checks CRON, if queue is true
-            } else {
-                Songs.pendingCmd.push({command: inputs.command, arg: inputs.arg, timeout: inputs.timeout, resolve: exits.success});
-                sails.log.verbose(`Put a REST cmd into queue: ${JSON.stringify({command: inputs.command, arg: inputs.arg, timeout: inputs.timeout, resolve: exits.success})}`);
-                // Do not resolve yet... when cron triggers this pendingCmd entry, it will then call the resolve function with either true or false as its parameter.
-            }
+                        }
+                    })
+                    .catch(async function (err) {
+                        return exits.success(false);
+                    });
         } catch (e) {
             return exits.success(false);
         }

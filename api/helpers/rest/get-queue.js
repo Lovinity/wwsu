@@ -1,4 +1,4 @@
-/* global sails, Meta, _, needle, Status */
+/* global sails, Meta, _, needle, Status, Songs, moment */
 
 module.exports = {
 
@@ -38,6 +38,22 @@ module.exports = {
                                 resp.body.children.map(track => theTrack[track.name] = track.value);
                                 Meta.automation.push(theTrack);
                             }
+                            
+                            // Run through Songs.queueCheck
+                            var inQueue = [];
+                            Meta.automation.map(track => inQueue.push(parseInt(track.ID)));
+                            Songs.queueCheck.map((check, index) => {
+                                if (inQueue.indexOf(check.ID) !== -1)
+                                {
+                                    check.success();
+                                    delete Songs.queueCheck[index];
+                                } else if (moment().diff(moment(check.time), 'seconds') >= 10)
+                                {
+                                    check.error();
+                                    delete Songs.queueCheck[index];
+                                }
+                            });
+                            
                             return exits.success(Meta.automation);
                         } catch (e) {
                             throw e;

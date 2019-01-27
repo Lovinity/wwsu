@@ -233,19 +233,6 @@ module.exports.bootstrap = async function (done) {
             }
 
             try {
-                // Execute one queued REST task if there are any in the queue
-                if (Songs.pendingCmd.length > 0)
-                {
-                    var task = Songs.pendingCmd.shift();
-                    try {
-                        sails.log.verbose(`Executing REST cmd queue item ${JSON.stringify(task)}`);
-                        var result = await sails.helpers.rest.cmd(task.command, task.arg, task.timeout);
-                        task.resolve(result);
-                    } catch (e2) {
-                        task.resolve(false);
-                    }
-                }
-
                 // Try to get the current RadioDJ queue.
                 var queue = await sails.helpers.rest.getQueue();
 
@@ -254,8 +241,7 @@ module.exports.bootstrap = async function (done) {
                     var theTracks = [];
                     change.trackID = parseInt(queue[0].ID);
                     change.trackIDSubcat = parseInt(queue[0].IDSubcat) || 0;
-
-
+                    
                     // Determine if something is currently playing via whether or not track 0 has ID of 0.
                     if (parseInt(queue[0].ID) === 0)
                     {

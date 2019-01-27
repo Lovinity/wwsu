@@ -95,7 +95,7 @@ module.exports = {
                         default:
                             // For all other states, queue a request liner before we queue the requests
                             if (queuedSomething && inputs.liner_first)
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, false, null);
+                                await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, false, null, Meta['A'].playing);
                             return resolve();
                             break;
                     }
@@ -118,7 +118,9 @@ module.exports = {
                     }
 
                     // Prepare the request
-                        await sails.helpers.rest.cmd('LoadTrackToTop', record.songID, 10000);
+                    await sails.helpers.rest.cmd('LoadTrackToTop', record.songID, 10000);
+                    if (Meta['A'].playing)
+                        await sails.helpers.rest.checkQueue(record.songID);
                     //wait.for.time(1);
                     if (!_.includes(Requests.pending, record.songID))
                     {
