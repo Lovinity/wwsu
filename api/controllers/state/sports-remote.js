@@ -75,8 +75,20 @@ module.exports = {
                 await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
+                var queueLength = await sails.helpers.songs.calculateQueueLength();
+
+                if (queueLength >= sails.config.custom.queueCorrection.sports)
+                {
+                    await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
+                    //await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
+                    if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
+
+                    queueLength = await sails.helpers.songs.calculateQueueLength();
+                }
+
                 // Change meta
-                Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_sportsremote', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
+                Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_sportsremote', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 Meta.changeMeta({show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host});

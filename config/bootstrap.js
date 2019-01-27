@@ -517,50 +517,13 @@ module.exports.bootstrap = async function (done) {
                 }
             }
 
-            // Perform queue length checks depending on current state
-            if (Meta['A'].state === 'automation_live')
-            {
-                if (queueLength >= sails.config.custom.queueCorrection.live)
-                {
-                    await sails.helpers.error.count('liveQueue', true);
-                } else {
-                    await sails.helpers.error.reset('liveQueue');
-                }
-            }
+            // Check queue of prerecords
             if (Meta['A'].state === 'automation_prerecord')
             {
                 if (timeToFirstTrack >= sails.config.custom.queueCorrection.prerecord && !Playlists.queuing && Meta['A'].changingState === null)
                 {
-                    await sails.helpers.error.count('prerecordQueue', true);
-                } else {
-                    await sails.helpers.error.reset('prerecordQueue');
-                }
-            }
-            if (Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote')
-            {
-                if (queueLength >= sails.config.custom.queueCorrection.sports)
-                {
-                    await sails.helpers.error.count('sportsQueue', true);
-                } else {
-                    await sails.helpers.error.reset('sportsQueue');
-                }
-            }
-            if (Meta['A'].state === 'sports_returning' || Meta['A'].state === 'sportsremote_returning')
-            {
-                if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
-                {
-                    await sails.helpers.error.count('sportsReturnQueue', true);
-                } else {
-                    await sails.helpers.error.reset('sportsReturnQueue');
-                }
-            }
-            if (Meta['A'].state === 'automation_remote')
-            {
-                if (queueLength >= sails.config.custom.queueCorrection.remote)
-                {
-                    await sails.helpers.error.count('remoteQueue', true);
-                } else {
-                    await sails.helpers.error.reset('remoteQueue');
+                    if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
                 }
             }
 
@@ -803,38 +766,8 @@ module.exports.bootstrap = async function (done) {
                                     // Go through each task
                                     if (breakOpts.length > 0)
                                     {
-                                        sails.log.debug(`Calling asyncForEach in cron checks for tasks in a break to be queued`);
-                                        await sails.helpers.asyncForEach(breakOpts, function (task, index) {
-                                            return new Promise(async (resolve2, reject2) => {
-                                                try {
-                                                    switch (task.task)
-                                                    {
-                                                        // Log an entry
-                                                        case "log":
-                                                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: 'automation', event: task.event})
-                                                                    .tolerate((err) => {
-                                                                    });
-                                                            break;
-                                                            // Add requested tracks
-                                                        case "queueRequests":
-                                                            await sails.helpers.requests.queue(task.quantity || 1, true, true);
-                                                            break;
-                                                            // Queue tracks from a configured categories.category
-                                                        case "queue":
-                                                            await sails.helpers.songs.queue(sails.config.custom.subcats[task.category], 'Top', task.quantity || 1, task.rules || true, null, true);
-                                                            break;
-                                                            // Re-queue any underwritings etc that were removed due to duplicate track checking
-                                                        case "queueDuplicates":
-                                                            await sails.helpers.songs.queuePending(true);
-                                                            break;
-                                                    }
-                                                    return resolve2(false);
-                                                } catch (e) {
-                                                    sails.log.error(e);
-                                                    return resolve2(false);
-                                                }
-                                            });
-                                        });
+                                        var maps = breakOpts.map(async task => await sails.helpers.breaks.execute(task.task, task.event, task.category, task.quantity, task.rules));
+                                        await Promise.all(maps);
                                     }
                                     // If not doing a break, check to see if it's time to do a liner
                                 } else {

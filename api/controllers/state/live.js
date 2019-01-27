@@ -86,11 +86,20 @@ module.exports = {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
                 
-                // start liveQueue check
-                await sails.helpers.error.count('liveQueue');
+                var queueLength = await sails.helpers.songs.calculateQueueLength();
+                
+                if (queueLength >= sails.config.custom.queueCorrection.live)
+                {
+                    await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
+                    //await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
+                    if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
+                    
+                    queueLength = await sails.helpers.songs.calculateQueueLength();
+                }
 
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
+                await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host});
             } else {
                 // Otherwise, just update metadata but do not do anything else
                 await Meta.changeMeta({show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host});

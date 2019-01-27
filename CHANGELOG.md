@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - optional queue parameter in sails.helpers.songs.queue. If true, songs will not be queued immediately but instead put in a queue that queues 1 track per second.
  - optional queue parameter in sails.helpers.songs.queuePending. If true, songs will not be queued immediately but instead put in a queue that queues 1 track per second.
  - task.rules in sails.config.custom.breaks for the queue task. If true, tracks will be checked against playlist rotation rules.
+ - sails.helpers.breaks.execute for executing configured break objects. [Issue 54](https://github.com/Lovinity/wwsu/issues/54)
 
 ## [5.0.0] - 2019-01-25
 ### Deprecated

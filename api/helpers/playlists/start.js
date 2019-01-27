@@ -156,7 +156,6 @@ module.exports = {
                     await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), show: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
                     await loadPlaylist();
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
-                    await sails.helpers.error.count('prerecordQueue');
                 }
                 if (!inputs.ignoreChangingState)
                     await Meta.changeMeta({changingState: null});
