@@ -42,9 +42,12 @@ module.exports = {
                             // Run through Songs.queueCheck
                             var inQueue = [];
                             Meta.automation.map(track => inQueue.push(parseInt(track.ID)));
+                            sails.log.verbose(JSON.stringify(inQueue));
                             Songs.queueCheck.map((check, index) => {
+                                sails.log.verbose(`queueCheck ${check.ID}`);
                                 if (inQueue.indexOf(check.ID) !== -1)
                                 {
+                                    sails.log.verbose(`IN QUEUE. Resolving success.`);
                                     check.success();
                                     delete Songs.queueCheck[index];
                                 } else if (moment().diff(moment(check.time), 'seconds') >= 10)

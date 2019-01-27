@@ -58,11 +58,11 @@ module.exports = {
                     break;
                     // Queue tracks from a configured categories.category
                 case "queue":
-                    await sails.helpers.songs.queue(sails.config.custom.subcats[inputs.category], 'Top', inputs.quantity, inputs.rules, null);
+                    await sails.helpers.songs.queue(sails.config.custom.subcats[inputs.category], 'Top', inputs.quantity, inputs.rules, null, true);
                     break;
                     // Re-queue any underwritings etc that were removed due to duplicate track checking
                 case "queueDuplicates":
-                    await sails.helpers.songs.queuePending();
+                    await sails.helpers.songs.queuePending(true);
                     break;
             }
         } catch (e) {
