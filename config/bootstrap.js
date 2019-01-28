@@ -745,10 +745,12 @@ module.exports.bootstrap = async function (done) {
                                     // Remove liners in the queue. Do not do the playlist re-queue method as there may be a big prerecord or playlist in the queue.
                                     await sails.helpers.songs.remove(false, sails.config.custom.subcats.liners, true, true);
 
-                                    // Get the configured break tasks
-                                    var breakOpts = sails.config.custom.breaks[key];
+                                    // Get the configured break tasks, but clone it. We're going to reverse the order, so we don't want to reverse the original object.
+                                    var breakOpts = _.cloneDeep(sails.config.custom.breaks[key]);
+                                    
                                     // Reverse the order of execution so queued things are in the same order as configured.
                                     breakOpts.reverse();
+                                    
                                     // Go through each task
                                     if (breakOpts.length > 0)
                                     {
