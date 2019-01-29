@@ -2146,6 +2146,8 @@ function doSlide(same = false)
             }};
         // AAUP Strike Counter
         // NO LONGER MAINTAINED; don't make any more changes
+        if (moment().format("YYYY-MM-DD") !== "2019-01-29" && moment().format("YYYY-MM-DD") !== "2019-01-30")
+        {
         slides[1777] = {name: 'AAUP-WSU Strike Counter', class: 'danger', do: false, function() {
                 try {
                     content.innerHTML = `
@@ -2162,6 +2164,23 @@ function doSlide(same = false)
                 }
                 slidetimer = setTimeout(doSlide, 1000);
             }};
+    } else {
+        slides[1777] = {name: 'wsu closed 1-30', class: 'danger', do: false, function() {
+                try {
+                    content.innerHTML = `
+            <h1 style="text-align: center; font-size: 3em; color: #FF7878">Campus Alert</h1>
+            <div style="text-align: center; font-size: 6em; color: #ff7878" id="aaup-day" class="border border-danger">WSU Closed January 30</div>
+            <div style="text-align: center; font-size: 4em; color: #FFFFFF" class="m-3" id="aaup-strike2">Wright State is closed January 30 due to cold.</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Go to wright.edu for more information.</div>`;
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred in Eas iteration in doSlide.`
+                    });
+                }
+                slidetimer = setTimeout(doSlide, 1000);
+            }};
+    }
 
         slides[101] = {name: 'Be a DJ', class: 'purple', do: true, function() {
                 $('#slide').animateCss('fadeOutUp', function () {
