@@ -2146,7 +2146,7 @@ function doSlide(same = false)
             }};
         // AAUP Strike Counter
         // NO LONGER MAINTAINED; don't make any more changes
-        if (moment().format("YYYY-MM-DD") !== "2019-01-29" && moment().format("YYYY-MM-DD") !== "2019-01-30")
+        if (moment().format("YYYY-MM-DD") !== "2019-01-29" && moment().format("YYYY-MM-DD") !== "2019-01-30" && moment().format("YYYY-MM-DD") !== "2019-01-31")
         {
         slides[1777] = {name: 'AAUP-WSU Strike Counter', class: 'danger', do: false, function() {
                 try {
@@ -2169,8 +2169,8 @@ function doSlide(same = false)
                 try {
                     content.innerHTML = `
             <h1 style="text-align: center; font-size: 3em; color: #FF7878">Campus Alert</h1>
-            <div style="text-align: center; font-size: 6em; color: #ff7878" id="aaup-day" class="border border-danger">WSU Closed January 30</div>
-            <div style="text-align: center; font-size: 4em; color: #FFFFFF" class="m-3" id="aaup-strike2">Wright State is closed January 30 due to cold.</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Go to wright.edu for more information.</div>`;
+            <div style="text-align: center; font-size: 6em; color: #ff7878" id="aaup-day" class="border border-danger">WSU Closed January 30 and 31</div>
+            <div style="text-align: center; font-size: 4em; color: #FFFFFF" class="m-3" id="aaup-strike2">Wright State is closed January 30 and 31 due to cold.</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Go to wright.edu for more information.</div>`;
                 } catch (e) {
                     console.error(e);
                     iziToast.show({
