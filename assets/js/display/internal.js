@@ -2,12 +2,715 @@
 
 try {
 
+    /* 
+     * CLASSES / FACTORIES
+     */
+
+// Slides factory function for containing all of the slides for this display sign
+    var Slides = (() => {
+
+        // Storage of slides in the system
+        var slides = [];
+
+        // slides index of the currently active slide
+        var currentSlide = -1;
+
+        // Used to count down how much time is left on the slide currently being displayed.
+        var timeLeft = 0;
+
+        // Return the Slide class of the currently active slide
+        const activeSlide = (() => slides[currentSlide] || {});
+
+        // Return the Slide class of the provided slide name
+        const slide = ((slideName) => {
+            return slides.filter((_slide) => _slide.name === slideName)[0];
+        });
+
+        const allSlides = (() => slides);
+
+        // function to update the order of the slides array by weight, and update the badges at the bottom of the screen for the slides
+        const updateBadges = (() => {
+
+            // First, sort the current slides array depending on each slide's weight... highest to lowest.
+            var compare = function (a, b) {
+                try {
+                    if (a.weight > b.weight)
+                        return -1;
+                    if (a.weight < b.weight)
+                        return 1;
+                    return 0;
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred in the compare function of Slides.updateBadges`
+                    });
+                }
+            };
+
+            slides = slides.sort(compare);
+
+            // Update the badges at the bottom of the screen for each slide
+            var temp = document.getElementById(`slide-badges`);
+            if (temp)
+            {
+                temp.innerHTML = ``;
+                var stickyOnly = slides.filter((_slides) => _slides.isSticky).length > 0;
+                var _slides = [];
+                if (stickyOnly)
+                {
+                    _slides = slides.filter((_slides) => _slides.active && _slides.isSticky);
+                    if (!activeSlide().active || !activeSlide().isSticky)
+                        timeLeft = 0;
+                } else {
+                    _slides = slides.filter((_slides) => _slides.active);
+                    if (!activeSlide().active)
+                        timeLeft = 0;
+                }
+
+                _slides.map((_slide) => {
+                    temp.innerHTML += `<span class="m-1 chip shadow-4"><i class="chip-icon bg-${_slide.color}">${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name ? timeLeft : ``}</i>${_slide.label}</span>`;
+                });
+            }
+        });
+
+        // Add a Slide class into the system
+        const newSlide = ((slideClass) => {
+            slides.push(slideClass);
+            updateBadges();
+        });
+
+        // Remove a slide from the system by slide name
+        const removeSlide = ((slideName) => {
+            slides.map((_slide, index) => {
+                if (_slide.name === slideName)
+                {
+                    _slide.remove();
+                    delete slides[index];
+                    if (index === currentSlide)
+                    {
+                        timeLeft = 0;
+                    }
+                }
+            });
+            updateBadges();
+        });
+
+        // Transition to a slide
+        const showSlide = ((slideName) => {
+            timeLeft = null;
+            if (slideName !== activeSlide().name)
+            {
+                // Executed when we are ready to show the slide
+                var afterFunction = () => {
+
+                    // Find out what index the slide we're about to display is
+                    var iteration = 0;
+                    var done = false;
+                    while (!done)
+                    {
+                        if (slides[iteration].name === slideName)
+                        {
+                            done = true;
+                            currentSlide = iteration;
+                        }
+                        iteration++;
+
+                        // Should never happen, but failsafe to prevent freezes
+                        if (iteration > slides.length)
+                            done = true;
+                    }
+
+                    // Show the slide
+                    var temp = document.getElementById(`slide-${activeSlide().name}`);
+                    if (temp)
+                        temp.style.display = "inline-block";
+                    $(`#slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, function () {});
+
+                    timeLeft = activeSlide().displayTime;
+                    updateBadges();
+
+                    // Fit content if necessary
+                    var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
+                    if (activeSlide().fitContent && temp && temp2)
+                    {
+
+                        temp.classList.add("scale-wrapper");
+                        temp2.classList.add("scale-content");
+                        var pageWidth, pageHeight;
+
+                        var basePage = {
+                            width: 1600,
+                            height: 900,
+                            scale: 1,
+                            scaleX: 1,
+                            scaleY: 1
+                        };
+
+                        $(function () {
+                            var $page = $(`slide-${activeSlide().name}`);
+
+                            getPageSize();
+                            scalePages($page, pageWidth, pageHeight);
+
+                            window.requestAnimationFrame(function () {
+                                getPageSize();
+                                scalePages($page, pageWidth, pageHeight);
+                                setTimeout(function () {
+                                    getPageSize();
+                                    scalePages($page, pageWidth, pageHeight);
+                                }, 500);
+                            });
+
+
+                            function getPageSize() {
+                                pageHeight = $('#scale-wrapper').height();
+                                pageWidth = $('#scale-wrapper').width();
+                            }
+
+                            function scalePages(page, maxWidth, maxHeight) {
+                                page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 80)}%`);
+                                var scaleX = 1, scaleY = 1;
+                                scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
+                                scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;
+                                basePage.scaleX = scaleX;
+                                basePage.scaleY = scaleY;
+                                basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
+
+                                var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
+                                var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
+
+                                page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
+                            }
+                        });
+                    }
+                };
+
+                // Process transitioning out of the current slide
+                if (currentSlide > -1)
+                {
+                    $(`#slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, function () {
+                        var temp = document.getElementById(`slide-${activeSlide().name}`);
+                        if (temp)
+                            temp.style.display = "none";
+
+                        afterFunction();
+                    });
+                } else {
+                    afterFunction();
+                }
+            } else {
+                timeLeft = activeSlide().displayTime;
+                updateBadges();
+            }
+        });
+
+        // Timer for controlling transitions between slides
+        var timer = setInterval(() => {
+            if (timeLeft !== null)
+            {
+                timeLeft--;
+
+                if (timeLeft <= 0)
+                {
+                    timeLeft = 0;
+
+                    // Determine which slides qualify to be displayed
+                    var stickyOnly = slides.filter((_slides) => _slides.isSticky).length > 0;
+                    var activeIndexes = [];
+                    if (stickyOnly)
+                    {
+                        activeIndexes = slides.map((_slides, index) => _slides.active && _slides.isSticky);
+                    } else {
+                        activeIndexes = slides.map((_slides, index) => _slides.active);
+                    }
+
+                    // Determine based on the above which slide we should show next
+                    var qualified = activeIndexes.filter((value, index) => index > currentSlide && value);
+                    if (qualified.length <= 0)
+                    {
+                        qualified = activeIndexes.filter((value, index) => value);
+                        if (qualified.length > 0)
+                        {
+                            var done = false;
+                            var iteration = 0;
+                            while (!done)
+                            {
+                                if (activeIndexes[iteration]) {
+                                    done = true;
+                                    showSlide(slides[iteration].name);
+                                }
+                                iteration++;
+
+                                // Should never happen, but failsafe to prevent freezes
+                                if (iteration > slides.length)
+                                    done = true;
+                            }
+                        }
+                    } else {
+                        var done = false;
+                        var iteration = currentSlide;
+                        while (!done)
+                        {
+                            if (activeIndexes[iteration]) {
+                                done = true;
+                                showSlide(slides[iteration].name);
+                            }
+                            iteration++;
+
+                            // Should never happen, but failsafe to prevent freezes
+                            if (iteration > slides.length)
+                                done = true;
+                        }
+                    }
+                }
+                
+                updateBadges();
+            }
+        }, 1000);
+
+        // Return the stuff
+        return {updateBadges, activeSlide, slide, allSlides, newSlide, removeSlide, showSlide};
+    })();
+
+// Slide class for managing a single slide
+    class Slide {
+        constructor(data = {}) {
+            this._name = data.name || "";
+            this._label = data.label || "";
+            this._weight = data.weight || 0;
+            this._isSticky = data.isSticky || false;
+            this._color = data.color || "secondary";
+            this._active = data.active || true;
+            this._starts = data.starts || null;
+            this._expires = data.expires || null;
+            this._html = `<div id="slide-${this._name}" style="display: none;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`;
+            this._transitionIn = data.transitionIn || "fadeIn";
+            this._transitionOut = data.transitionOut || "fadeOut";
+            this._displayTime = data.displayTime || 14;
+            this._fitContent = data.fitContent || false;
+
+            var temp = document.getElementById(`slides`);
+            if (temp)
+                temp.innerHTML += this._html;
+        }
+
+        get name() {
+            return this._name;
+        }
+
+        get label() {
+            return this._label;
+        }
+
+        set label(value) {
+            this._label = value;
+            Slides.updateBadges();
+        }
+
+        get weight() {
+            return this._weight;
+        }
+
+        set weight(value) {
+            this._weight = value;
+            Slides.updateBadges();
+        }
+
+        get isSticky() {
+            return this._isSticky;
+        }
+
+        set isSticky(value) {
+            this._isSticky = value;
+            Slides.updateBadges();
+        }
+
+        get color() {
+            return this._color;
+        }
+
+        set color(value) {
+            this._color = value;
+        }
+
+        get active() {
+            if (!this._active)
+                return false;
+
+            if (this._starts !== null && moment(Meta.time).isBefore(moment(this._starts)))
+                return false;
+
+            if (this._expires !== null && moment(Meta.time).isAfter(moment(this._expires)))
+                return false;
+
+            return true;
+        }
+
+        set active(value) {
+            this._active = value;
+            Slides.updateBadges();
+        }
+
+        set starts(value) {
+            this._starts = value;
+            Slides.updateBadges();
+        }
+
+        set expires(value) {
+            this._expires = value;
+            Slides.updateBadges();
+        }
+
+        get html() {
+            return this._html;
+        }
+
+        set html(value) {
+            if (Slides.activeSlide().name === this._name)
+            {
+                this._html = `<div id="slide-${this._name}" style="display: inline-block;"><div id="content-slide-${this._name}">${value}</div></div>`;
+            } else {
+                this._html = `<div id="slide-${this._name}" style="display: none;"><div id="content-slide-${this._name}">${value}</div></div>`;
+            }
+            var temp = document.getElementById(`slide-${this._name}`);
+            if (temp)
+                temp.innerHTML = value;
+        }
+
+        get transitionIn() {
+            return this._transitionIn;
+        }
+
+        get transitionOut() {
+            return this._transitionOut;
+        }
+
+        get displayTime() {
+            return this._displayTime;
+        }
+
+        set displayTime(value) {
+            this._displayTime = value;
+        }
+
+        get fitContent() {
+            return this._fitContent;
+        }
+
+        remove() {
+            var temp = document.getElementById(`slide-${this._name}`);
+            if (temp)
+                temp.parentNode.removeChild(temp);
+        }
+    }
+
+    // Define default slide templates
+    // Directors
+    Slides.newSlide(new Slide({
+        name: `directors`,
+        label: `Directors`,
+        weight: 1000000,
+        isSticky: false,
+        color: `primary`,
+        active: true,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 14,
+        fitContent: false,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div>`
+    }));
+
+    /*
+     slides[2] = {name: 'Directors', class: 'primary', do: true, function: function () {
+     $('#slide').animateCss('lightSpeedOut', function () {
+     content.innerHTML = `<div class="animated fadeInDown" ><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1>
+     <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div></div>`;
+     var innercontent = document.getElementById('directors');
+     Directors().each(function (dodo) {
+     try {
+     var color = 'rgba(211, 47, 47, 0.8)';
+     var text1 = 'OUT';
+     var theClass = 'danger';
+     var text2 = '';
+     if (dodo.since !== null && moment(dodo.since).isValid())
+     text2 = moment(dodo.since).from(moment(Meta.time), true);
+     if (dodo.present)
+     {
+     var color = 'rgba(56, 142, 60, 0.8)';
+     var text1 = 'IN';
+     var theClass = 'success';
+     }
+     innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+     <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
+     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+     <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
+     } catch (e) {
+     console.error(e);
+     iziToast.show({
+     title: 'An error occurred - Please check the logs',
+     message: `Error occurred in Directors iteration in doSlide.`
+     });
+     }
+     });
+     slidetimer = setTimeout(doSlide, 14000);
+     });
+     }};
+     */
+
+    // Director hours
+    Slides.newSlide(new Slide({
+        name: `hours-directors`,
+        label: `Hours`,
+        weight: 999999,
+        isSticky: false,
+        color: `info`,
+        active: true,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 14,
+        fitContent: false,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div>`
+    }));
+
+    /*
+     slides[3] = {name: 'Hours', class: 'info', do: true, function: function () {
+     $('#slide').animateCss('lightSpeedOut', function () {
+     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1>
+     <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
+     var innercontent = document.getElementById('office-hours');
+     
+     var stuff = `<div class="row">
+     <div class="col-3 text-primary-light">
+     <strong>Director</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>Today</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     </div>`;
+     var doShade = false;
+     for (var director in calendar)
+     {
+     if (calendar.hasOwnProperty(director))
+     {
+     stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+     <div class="col-3 text-warning">
+     ${director}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][0]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][1]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][2]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][3]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][4]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][5]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][6]}
+     </div>
+     </div>`;
+     if (doShade)
+     {
+     doShade = false;
+     } else {
+     doShade = true;
+     }
+     }
+     }
+     
+     innercontent.innerHTML += stuff;
+     
+     slidetimer = setTimeout(doSlide, 14000);
+     });
+     }};
+     */
+
+    // Assistant Director hours
+    Slides.newSlide(new Slide({
+        name: `hours-assistants`,
+        label: `Hours`,
+        weight: 999998,
+        isSticky: false,
+        color: `info`,
+        active: true,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 14,
+        fitContent: false,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div>`
+    }));
+
+    /*
+     slides[4] = {name: 'Hours', class: 'info', do: true, function: function () {
+     $('#slide').animateCss('lightSpeedOut', function () {
+     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1>
+     <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
+     var innercontent = document.getElementById('office-hours');
+     
+     var stuff = `<div class="row">
+     <div class="col-3 text-primary-light">
+     <strong>Asst. Director</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>Today</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     </div>`;
+     var doShade = false;
+     for (var director in asstcalendar)
+     {
+     if (asstcalendar.hasOwnProperty(director))
+     {
+     stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+     <div class="col-3 text-warning">
+     ${director}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][0]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][1]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][2]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][3]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][4]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][5]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][6]}
+     </div>
+     </div>`;
+     if (doShade)
+     {
+     doShade = false;
+     } else {
+     doShade = true;
+     }
+     }
+     }
+     
+     innercontent.innerHTML += stuff;
+     
+     slidetimer = setTimeout(doSlide, 14000);
+     });
+     }};
+     */
+
+    // Weekly Stats
+    Slides.newSlide(new Slide({
+        name: `weekly-stats`,
+        label: `Weekly Stats`,
+        weight: 900000,
+        isSticky: false,
+        color: `success`,
+        active: true,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 14,
+        fitContent: false,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
+    }));
+    /*
+     slides[5] = {name: 'Weekly Stats', class: 'success', do: true, function: function () {
+     $('#slide').animateCss('lightSpeedOut', function () {
+     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1>
+     <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics">
+     <p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
+     <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>
+     <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>
+     </div></div>`;
+     
+     slidetimer = setTimeout(doSlide, 14000);
+     });
+     }};
+     */
+
+    // System Status
+    Slides.newSlide(new Slide({
+        name: `system`,
+        label: `System`,
+        weight: -1000000,
+        isSticky: false,
+        color: `danger`,
+        active: true,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 14,
+        fitContent: false,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status"></div>`
+    }));
+    /*
+     slides[6] = {
+     name: 'System', class: 'wwsu-red', do: true, function: function () {
+     $('#slide').animateCss('fadeOutUp', function () {
+     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1>
+     <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status">${statusMarquee}</div></div>`;
+     
+     slidetimer = setTimeout(doSlide, 14000);
+     });
+     }
+     };
+     */
+
 // Define data variables
-    var Directors = TAFFY();
-    var Directorhours = TAFFY();
-    var Announcements = TAFFY();
+    var Directors = new WWSUdb(TAFFY());
+    var Directorhours = new WWSUdb(TAFFY());
+    var Announcements = new WWSUdb(TAFFY());
     var Meta = {time: moment().toISOString()};
-    var Status = TAFFY();
+    var Status = new WWSUdb(TAFFY());
 
 // Define HTML elements
     var noConnection = document.getElementById("no-connection");
@@ -34,25 +737,7 @@ try {
     var offlineTimer;
     var clockTimer;
     var globalStatus = 4;
-
-// Define initial slides
-    var slides = {1: {
-            name: 'WWSU', class: 'wwsu-red', do: true, function: function () {
-                $('#slide').animateCss('fadeOutUp', function () {
-                    content.innerHTML = `<div class="animated bounceIn">
-                    <div style="text-align: center; width: 100%;"><img src="../../images/display/logo.png" style="max-height: 300px; width: auto;"></div>
-                            <div id="thebottom">
-                            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Website: <span class="text-primary">wwsu1069.org</span></h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Line: <span class="text-warning">937-775-5554</span></h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: <span class="text-warning">937-775-5555</span></h1>
-            </div>
-            </div>
-            </div>
-            `;
-                    slidetimer = setTimeout(doSlide, 14000);
-                });
-            }
-        }};
+    var hostReq;
 
     var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
 
@@ -202,17 +887,147 @@ function waitFor(check, callback, count = 0)
 }
 }
 
+// Wait for the socket to be connected before defining event handlers
 waitFor(function () {
     return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected());
 }, function () {
-    // When a director is passed as an event, process it.
-    io.socket.on('directors', function (data) {
-        processDirectors(data);
+
+    // Define a host requester
+    hostReq = new WWSUreq(io.socket, `display-internal`, 'host', '/auth/host', 'Host');
+
+    // Assign socket events to data classes
+    Directors.assignSocketEvent('directors', io.socket);
+    Directorhours.assignSocketEvent('directorhours', io.socket);
+    Announcements.assignSocketEvent('announcements', io.socket);
+    Status.assignSocketEvent('status', io.socket);
+
+    // Do stuff when status changes are made
+    Status.setOnUpdate((data, db) => processStatus(db));
+    Status.setOnInsert((data, db) => processStatus(db));
+    Status.setOnRemove((data, db) => processStatus(db));
+    Status.setOnReplace((db) => processStatus(db));
+
+    // Do stuff when announcements changes are made
+    Announcements.setOnUpdate((data, db) => {
+        Slides.removeSlide(`attn-${data.ID}`);
+        if (data.type.startsWith(`display-internal`))
+        {
+            Slides.newSlide(new Slide({
+                name: `attn-${data.ID}`,
+                label: data.title,
+                weight: 0,
+                isSticky: data.type === `display-internal-sticky`,
+                color: data.level,
+                active: true,
+                starts: moment(data.starts),
+                expires: moment(data.expires),
+                transitionIn: `fadeIn`,
+                transitionOut: `fadeOut`,
+                displayTime: 14,
+                fitContent: true,
+                html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
+            }));
+        }
+    });
+    Announcements.setOnInsert((data, db) => {
+        if (data.type.startsWith(`display-internal`))
+        {
+            Slides.newSlide(new Slide({
+                name: `attn-${data.ID}`,
+                label: data.title,
+                weight: 0,
+                isSticky: data.type === `display-internal-sticky`,
+                color: data.level,
+                active: true,
+                starts: moment(data.starts),
+                expires: moment(data.expires),
+                transitionIn: `fadeIn`,
+                transitionOut: `fadeOut`,
+                displayTime: 14,
+                fitContent: true,
+                html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
+            }));
+        }
+    });
+    Announcements.setOnRemove((data, db) => Slides.removeSlide(`attn-${data}`));
+    Announcements.setOnReplace((db) => {
+
+        // Remove all announcement slides
+        Slides.allSlides()
+                .filter((slide) => slide.name.startsWith(`attn-`))
+                .map((slide) => Slides.removeSlide(slide.name));
+
+        // Add slides for each announcement
+        db.each((data) => {
+            console.dir(data);
+            if (data.type.startsWith(`display-internal`))
+            {
+                Slides.newSlide(new Slide({
+                    name: `attn-${data.ID}`,
+                    label: data.title,
+                    weight: 0,
+                    isSticky: data.type === `display-internal-sticky`,
+                    color: data.level,
+                    active: true,
+                    starts: moment(data.starts),
+                    expires: moment(data.expires),
+                    transitionIn: `fadeIn`,
+                    transitionOut: `fadeOut`,
+                    displayTime: 14,
+                    fitContent: true,
+                    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
+                }));
+            }
+        })
     });
 
-    // When a director is passed as an event, process it.
-    io.socket.on('directorhours', function (data) {
-        processDirectorHours(data);
+    // Assign additional event handlers
+    io.socket.on('display-refresh', function (data) {
+        // Reload the display sign when this event is called
+        window.location.reload(true);
+    });
+
+    // Update meta information when meta is provided
+    io.socket.on('meta', function (data) {
+        try {
+            for (var key in data)
+            {
+                if (data.hasOwnProperty(key))
+                {
+                    Meta[key] = data[key];
+
+                    // Do a status update if a state change was returned; this could impact power saving mode
+                    if (key === 'state')
+                        processStatus(Status.db());
+
+                    if (key === 'time')
+                    {
+                        clearInterval(clockTimer);
+                        clearTimeout(clockTimer);
+                        clockTimer = setInterval(clockTick, 1000);
+                    }
+                }
+            }
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred on meta event.'
+            });
+            console.error(e);
+        }
+    });
+
+    // Update weekly analytics
+    io.socket.on('analytics-weekly-dj', function (data) {
+        try {
+            processWeeklyStats(data);
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred on analytics-weekly-dj event.'
+            });
+            console.error(e);
+        }
     });
 
 // When a socket connection is established
@@ -230,7 +1045,6 @@ waitFor(function () {
             disconnected = false;
             clearTimeout(restart);
             clearTimeout(slidetimer);
-            doSlide(true);
         }
     });
 
@@ -246,7 +1060,6 @@ waitFor(function () {
         disconnected = false;
         clearTimeout(restart);
         clearTimeout(slidetimer);
-        doSlide(true);
     }
 
 // When a socket connection is lost
@@ -267,108 +1080,7 @@ waitFor(function () {
         {
             //noConnection.style.display = "inline";
             disconnected = true;
-            processStatus();
-        }
-    });
-
-// Display sign reload event
-    io.socket.on('display-refresh', function (data) {
-        window.location.reload(true);
-    });
-
-// Update meta information when meta is provided
-    io.socket.on('meta', function (data) {
-        try {
-            for (var key in data)
-            {
-                if (data.hasOwnProperty(key))
-                {
-                    Meta[key] = data[key];
-
-                    // Do a status update if a state change was returned; this could impact power saving mode
-                    if (key === 'state')
-                        processStatus();
-
-                    if (key === 'time')
-                    {
-                        clearInterval(clockTimer);
-                        clearTimeout(clockTimer);
-                        clockTimer = setInterval(clockTick, 1000);
-                    }
-                }
-            }
-        } catch (e) {
-            iziToast.show({
-                title: 'An error occurred - Please check the logs',
-                message: 'Error occurred on meta event.'
-            });
-            console.error(e);
-        }
-    });
-
-// Update statuses when status events are passed
-    io.socket.on('status', function (data) {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key))
-            {
-                switch (key)
-                {
-                    case 'insert':
-                        Status.insert(data[key]);
-                        break;
-                    case 'update':
-                        Status({ID: data[key].ID}).update(data[key]);
-                        break;
-                    case 'remove':
-                        Status({ID: data[key]}).remove();
-                        break;
-                }
-            }
-        }
-        processStatus();
-    });
-
-    // When an announcement comes through
-    io.socket.on('announcements', function (data) {
-        try {
-            for (var key in data)
-            {
-                if (data.hasOwnProperty(key))
-                {
-                    switch (key)
-                    {
-                        case 'insert':
-                            Announcements.insert(data[key]);
-                            break;
-                        case 'update':
-                            Announcements({ID: data[key].ID}).update(data[key]);
-                            break;
-                        case 'remove':
-                            Announcements({ID: data[key]}).remove();
-                            break;
-                    }
-                }
-            }
-        } catch (e) {
-            iziToast.show({
-                title: 'An error occurred - Please check the logs',
-                message: 'Error occurred on announcements event.'
-            });
-            console.error(e);
-        }
-    });
-
-    // When an announcement comes through
-    io.socket.on('analytics-weekly-dj', function (data) {
-        try {
-            processWeeklyStats(data);
-        } catch (e) {
-            iziToast.show({
-                title: 'An error occurred - Please check the logs',
-                message: 'Error occurred on analytics-weekly-dj event.'
-            });
-            console.error(e);
+            processStatus(Status.db());
         }
     });
 });
@@ -379,7 +1091,7 @@ function clockTick() {
 
 // Define data-specific functions
 // Run through operations of each WWSU status
-function processStatus()
+function processStatus(db)
 {
     try {
         var doRow = false;
@@ -401,7 +1113,7 @@ function processStatus()
                     </div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
 
 
-        Status().each(function (thestatus) {
+        db.each(function (thestatus) {
             try {
                 if (doRow)
                 {
@@ -503,6 +1215,9 @@ function processStatus()
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }, 1000);
+
+                Slides.slide(`system`).isSticky = true;
+
                 break;
             case 1:
                 color = 'rgba(244, 67, 54, 0.5)';
@@ -517,6 +1232,9 @@ function processStatus()
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }, 1000);
+
+                Slides.slide(`system`).isSticky = true;
+
                 break;
             case 2:
                 color = 'rgba(245, 124, 0, 0.5)';
@@ -532,20 +1250,29 @@ function processStatus()
                         $("html, body").css("background-color", "#000000");
                     }, 250);
                 }, 5000);
+
+                Slides.slide(`system`).isSticky = true;
+
                 break;
             case 3:
                 statusLine.innerHTML = 'WWSU is experiencing minor issues';
                 clearTimeout(offlineTimer);
                 color = 'rgba(251, 192, 45, 0.5)';
+
+                Slides.slide(`system`).isSticky = false;
                 break;
             case 5:
                 statusLine.innerHTML = 'WWSU is operational';
                 clearTimeout(offlineTimer);
                 color = 'rgba(76, 175, 80, 0.5)';
+
+                Slides.slide(`system`).isSticky = false;
                 break;
             default:
                 statusLine.innerHTML = 'WWSU status is unknown';
                 color = 'rgba(158, 158, 158, 0.3)';
+
+                Slides.slide(`system`).isSticky = false;
         }
 
         prevStatus = globalStatus;
@@ -562,24 +1289,10 @@ function processStatus()
             statusLine.style.color = 'rgba(255, 255, 255, 0.2)';
         }
 
-        slides[6] = {
-            name: 'System', class: 'wwsu-red', do: true, function: function () {
-                $('#slide').animateCss('fadeOutUp', function () {
-                    content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1>
-                    <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status">${statusMarquee}</div></div>`;
-
-                    slidetimer = setTimeout(doSlide, 14000);
-                });
-            }
-        };
-
-        // Update slide if this is the current active slide
-        if (slide === 6)
-        {
-            var innercontent = document.getElementById('system-status');
-            if (innercontent)
-                innercontent.innerHTML = statusMarquee;
-        }
+        // Update status html
+        var innercontent = document.getElementById('system-status');
+        if (innercontent)
+            innercontent.innerHTML = statusMarquee;
 
     } catch (e) {
         iziToast.show({
@@ -591,166 +1304,70 @@ function processStatus()
 }
 
 // Mark if a director is present or not
-function processDirectors(data = {}, replace = false)
+function processDirectors(db)
 {
     try {
-        if (replace)
-        {
-            Directors = TAFFY();
-            Directors.insert(data);
-        } else {
-            for (var key in data)
-            {
-                if (data.hasOwnProperty(key))
-                {
-                    switch (key)
-                    {
-                        case 'insert':
-                            Directors.insert(data[key]);
-                            break;
-                        case 'update':
-                            Directors({ID: data[key].ID}).update(data[key]);
-                            break;
-                        case 'remove':
-                            Directors({ID: data[key]}).remove();
-                            break;
-                    }
-                }
-            }
-        }
-
         directorpresent = false;
 
-        Directors().each(function (dodo) {
+        db.each(function (dodo) {
             if (dodo.present)
                 directorpresent = true;
         });
 
-        // Slide 3 is a list of WWSU directors and whether or not they are currently clocked in
-        slides[2] = {name: 'Directors', class: 'primary', do: true, function: function () {
-                $('#slide').animateCss('lightSpeedOut', function () {
-                    content.innerHTML = `<div class="animated fadeInDown" ><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1>
-            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div></div>`;
-                    var innercontent = document.getElementById('directors');
-                    Directors().each(function (dodo) {
-                        try {
-                            var color = 'rgba(211, 47, 47, 0.8)';
-                            var text1 = 'OUT';
-                            var theClass = 'danger';
-                            var text2 = '';
-                            if (dodo.since !== null && moment(dodo.since).isValid())
-                                text2 = moment(dodo.since).from(moment(Meta.time), true);
-                            if (dodo.present)
-                            {
-                                var color = 'rgba(56, 142, 60, 0.8)';
-                                var text1 = 'IN';
-                                var theClass = 'success';
-                            }
-                            /*
-                             innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
-                             <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
-                             <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
-                             <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
-                             </div>
-                             `;
-                             */
-                            innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
-    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
-                        } catch (e) {
-                            console.error(e);
-                            iziToast.show({
-                                title: 'An error occurred - Please check the logs',
-                                message: `Error occurred in Directors iteration in doSlide.`
-                            });
-                        }
-                    });
-                    slidetimer = setTimeout(doSlide, 14000);
-                });
-            }};
-        slides[1].do = false;
-
-        if (slide === 2)
-        {
-            var innercontent = document.getElementById('directors');
-            if (innercontent)
-                innercontent.innerHTML = '';
-            Directors().each(function (dodo) {
-                try {
-                    var color = 'rgba(211, 47, 47, 0.8)';
-                    var text1 = 'OUT';
-                    var theClass = 'danger';
-                    var text2 = '';
-                    if (dodo.since !== null && moment(dodo.since).isValid())
-                        text2 = moment(dodo.since).from(moment(Meta.time), true);
-                    if (dodo.present)
-                    {
-                        var color = 'rgba(56, 142, 60, 0.8)';
-                        var text1 = 'IN';
-                        var theClass = 'success';
-                    }
-                    /*
-                     innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
-                     <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
-                     <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
-                     <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
-                     </div>
-                     `;
-                     */
-                    if (innercontent)
-                        innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-    <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
-    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
-                } catch (e) {
-                    console.error(e);
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred in Directors iteration in doSlide.`
-                    });
+        // Update directors html
+        var innercontent = document.getElementById('directors');
+        if (innercontent)
+            innercontent.innerHTML = '';
+        db.each(function (dodo) {
+            try {
+                var color = 'rgba(211, 47, 47, 0.8)';
+                var text1 = 'OUT';
+                var theClass = 'danger';
+                var text2 = '';
+                if (dodo.since !== null && moment(dodo.since).isValid())
+                    text2 = moment(dodo.since).from(moment(Meta.time), true);
+                if (dodo.present)
+                {
+                    var color = 'rgba(56, 142, 60, 0.8)';
+                    var text1 = 'IN';
+                    var theClass = 'success';
                 }
-            });
-        }
+                /*
+                 innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
+                 <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
+                 <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
+                 <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
+                 </div>
+                 `;
+                 */
+                if (innercontent)
+                    innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+    <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
+    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
+            } catch (e) {
+                console.error(e);
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: `Error occurred in Directors iteration in doSlide.`
+                });
+            }
+        });
 
-        processDirectorHours();
+        processDirectorHours(Directorhours.db());
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
             message: 'Error occurred during the call of Directors[0].'
         });
         console.error(e);
-}
+    }
 }
 
 // Mark if a director is present or not
-function processDirectorHours(data = {}, replace = false)
+function processDirectorHours(db)
 {
     try {
-        if (replace)
-        {
-            Directorhours = TAFFY();
-            Directorhours.insert(data);
-        } else {
-            for (var key in data)
-            {
-                if (data.hasOwnProperty(key))
-                {
-                    switch (key)
-                    {
-                        case 'insert':
-                            Directorhours.insert(data[key]);
-                            break;
-                        case 'update':
-                            Directorhours({ID: data[key].ID}).update(data[key]);
-                            break;
-                        case 'remove':
-                            Directorhours({ID: data[key]}).remove();
-                            break;
-                    }
-                }
-            }
-        }
 
         // A list of Office Hours for the directors
 
@@ -778,9 +1395,9 @@ function processDirectorHours(data = {}, replace = false)
         // Prepare the formatted calendar variable for our formatted events
         var calendar = {};
         var asstcalendar = {};
-        Directorhours().get().sort(compare).map(event =>
+        db.get().sort(compare).map(event =>
         {
-            var temp = Directors({name: event.director}).first();
+            var temp = Directors.db({name: event.director}).first();
             if (typeof temp.assistant !== 'undefined')
             {
                 var assistant = temp.assistant;
@@ -859,176 +1476,162 @@ function processDirectorHours(data = {}, replace = false)
                         asstcalendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success-light">IN ${event.startT}</div><div class="m-1 text-danger-light">OUT ${event.endT}</div></div>`;
                 }
             }
+
+            // Director hours slide
+            var innercontent = document.getElementById('office-hours-directors');
+
+            var stuff = `<div class="row">
+     <div class="col-3 text-primary-light">
+     <strong>Director</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>Today</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     </div>`;
+            var doShade = false;
+            for (var director in calendar)
+            {
+                if (calendar.hasOwnProperty(director))
+                {
+                    stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+     <div class="col-3 text-warning">
+     ${director}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][0]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][1]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][2]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][3]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][4]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][5]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${calendar[director][6]}
+     </div>
+     </div>`;
+                    if (doShade)
+                    {
+                        doShade = false;
+                    } else {
+                        doShade = true;
+                    }
+                }
+            }
+
+            innercontent.innerHTML += stuff;
+
+            // Assistant hours slide
+            var innercontent = document.getElementById('office-hours-assistants');
+
+            var stuff = `<div class="row">
+     <div class="col-3 text-primary-light">
+     <strong>Director</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>Today</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     <div class="col text-primary-light">
+     <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
+     </div>
+     </div>`;
+            var doShade = false;
+            for (var director in asstcalendar)
+            {
+                if (asstcalendar.hasOwnProperty(director))
+                {
+                    stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+     <div class="col-3 text-warning">
+     ${director}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][0]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][1]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][2]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][3]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][4]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][5]}
+     </div>
+     <div class="col" style="font-size: 0.75em;">
+     ${asstcalendar[director][6]}
+     </div>
+     </div>`;
+                    if (doShade)
+                    {
+                        doShade = false;
+                    } else {
+                        doShade = true;
+                    }
+                }
+            }
+
+            innercontent.innerHTML += stuff;
         });
-
-        slides[3] = {name: 'Hours', class: 'info', do: true, function: function () {
-                $('#slide').animateCss('lightSpeedOut', function () {
-                    content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1>
-            <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
-                    var innercontent = document.getElementById('office-hours');
-
-                    var stuff = `<div class="row">
-                      <div class="col-3 text-primary-light">
-                  	<strong>Director</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>Today</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                    </div>`;
-                    var doShade = false;
-                    for (var director in calendar)
-                    {
-                        if (calendar.hasOwnProperty(director))
-                        {
-                            stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
-                      <div class="col-3 text-warning">
-                  	${director}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${calendar[director][0]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${calendar[director][1]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${calendar[director][2]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${calendar[director][3]}
-                      </div>
-                       <div class="col" style="font-size: 0.75em;">
-                            ${calendar[director][4]}
-                      </div>
-                       <div class="col" style="font-size: 0.75em;">
-                            ${calendar[director][5]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${calendar[director][6]}
-                      </div>
-                    </div>`;
-                            if (doShade)
-                            {
-                                doShade = false;
-                            } else {
-                                doShade = true;
-                            }
-                        }
-                    }
-
-                    innercontent.innerHTML += stuff;
-
-                    slidetimer = setTimeout(doSlide, 14000);
-                });
-            }};
-
-        slides[4] = {name: 'Hours', class: 'info', do: true, function: function () {
-                $('#slide').animateCss('lightSpeedOut', function () {
-                    content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1>
-            <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
-                    var innercontent = document.getElementById('office-hours');
-
-                    var stuff = `<div class="row">
-                      <div class="col-3 text-primary-light">
-                  	<strong>Asst. Director</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>Today</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                      <div class="col text-primary-light">
-                  	<strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
-                      </div>
-                    </div>`;
-                    var doShade = false;
-                    for (var director in asstcalendar)
-                    {
-                        if (asstcalendar.hasOwnProperty(director))
-                        {
-                            stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
-                      <div class="col-3 text-warning">
-                  	${director}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${asstcalendar[director][0]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${asstcalendar[director][1]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${asstcalendar[director][2]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${asstcalendar[director][3]}
-                      </div>
-                       <div class="col" style="font-size: 0.75em;">
-                            ${asstcalendar[director][4]}
-                      </div>
-                       <div class="col" style="font-size: 0.75em;">
-                            ${asstcalendar[director][5]}
-                      </div>
-                      <div class="col" style="font-size: 0.75em;">
-                            ${asstcalendar[director][6]}
-                      </div>
-                    </div>`;
-                            if (doShade)
-                            {
-                                doShade = false;
-                            } else {
-                                doShade = true;
-                            }
-                        }
-                    }
-
-                    innercontent.innerHTML += stuff;
-
-                    slidetimer = setTimeout(doSlide, 14000);
-                });
-            }};
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',
             message: 'Error occurred during the call of office hours slide.'
         });
         console.error(e);
-}
+    }
 }
 
 function onlineSocket()
 {
     console.log('attempting online socket');
-    io.socket.post('/recipients/add-display', {host: 'display-internal'}, function serverResponded(body, JWR) {
+    hostReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-internal'}}, function (body) {
         try {
         } catch (e) {
             console.log('FAILED ONLINE CONNECTION');
@@ -1041,31 +1644,21 @@ function onlineSocket()
 function directorSocket()
 {
     console.log('attempting director socket');
-    io.socket.post('/directors/get', {}, function serverResponded(body, JWR) {
-        try {
-            processDirectors(body, true);
-            io.socket.post('/directors/get-hours', {}, function serverResponded(body, JWR) {
-                try {
-                    processDirectorHours(body, true);
-                } catch (e) {
-                    console.error(e);
-                    console.log('FAILED DIRECTOR CONNECTION');
-                    setTimeout(directorSocket, 10000);
-                }
-            });
-        } catch (e) {
-            console.error(e);
-            console.log('FAILED DIRECTORS CONNECTION');
-            setTimeout(directorSocket, 10000);
-        }
-    });
+    try {
+        Directors.replaceData(hostReq, '/directors/get');
+        Directorhours.replaceData(hostReq, '/directors/get-hours');
+    } catch (e) {
+        console.error(e);
+        console.log('FAILED DIRECTORS CONNECTION');
+        setTimeout(directorSocket, 10000);
+    }
 }
 
 // Called to update all meta information with that of a body request
 function metaSocket()
 {
     console.log('attempting meta socket');
-    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
+    hostReq.request({method: 'POST', url: '/meta/get', data: {}}, function (body) {
         try {
             temp = body;
             for (var key in temp)
@@ -1078,10 +1671,10 @@ function metaSocket()
                         clearInterval(clockTimer);
                         clearTimeout(clockTimer);
                         clockTimer = setInterval(clockTick, 1000);
+                        processStatus(Status.db());
                     }
                 }
             }
-            processStatus();
         } catch (e) {
             console.error(e);
             console.log('FAILED META CONNECTION');
@@ -1094,24 +1687,20 @@ function metaSocket()
 function statusSocket()
 {
     console.log('attempting status socket');
-    io.socket.post('/status/get', function serverResponded(body, JWR) {
-        try {
-            Status = TAFFY();
-            Status.insert(body);
-            processStatus();
-        } catch (e) {
-            console.error(e);
-            console.log('FAILED STATUS CONNECTION');
-            setTimeout(statusSocket, 10000);
-        }
-    });
+    try {
+        Status.replaceData(hostReq, '/status/get');
+    } catch (e) {
+        console.error(e);
+        console.log('FAILED STATUS CONNECTION');
+        setTimeout(statusSocket, 10000);
+    }
 }
 
 // Replace all Status data with that of body request
 function weeklyDJSocket()
 {
     console.log('attempting weeklyDJ socket');
-    io.socket.post('/analytics/weekly-dj', function serverResponded(body, JWR) {
+    hostReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, function (body) {
         try {
             processWeeklyStats(body);
         } catch (e) {
@@ -1125,12 +1714,14 @@ function weeklyDJSocket()
 function announcementsSocket()
 {
     try {
-        Announcements = TAFFY();
-        io.socket.post('/announcements/get', {type: 'display-internal'}, function serverResponded(body, JWR) {
-            Announcements.insert(body);
-        });
-        io.socket.post('/announcements/get', {type: 'display-internal-sticky'}, function serverResponded(body, JWR) {
-            Announcements.insert(body);
+        var data = [];
+        hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal'}}, function (body) {
+            data.concat(body);
+            hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal-sticky'}}, function (body) {
+                data.concat(body);
+
+                Announcements.query(data, true);
+            });
         });
     } catch (e) {
         console.error(e);
@@ -1139,344 +1730,11 @@ function announcementsSocket()
     }
 }
 
-// Process slides
-function doSlide(same = false)
-{
-    try {
-        var prevslide = slide;
-        clearTimeout(slidetimer);
-        slidetimer = true;
-        if (!same)
-            slide += 1;
-        console.log(`Slide ${slide}.`);
-
-        // Do system slide if there's an urgent or critical issue
-        if (globalStatus === 1 || globalStatus === 2)
-        {
-            slide = 6;
-            // Do sticky slides if there are any
-        } else if (stickySlides && slide < 1000)
-        {
-            slide = 1000;
-        }
-
-        // Do slides if we are not to be in power saving mode
-        if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote') || globalStatus === 1 || globalStatus === 2)
-        {
-            slidebadges.innerHTML = ``;
-            // Determine highest slide number so we know when we are done
-            var highestslide = 0;
-            for (var key in slides) {
-                if (slides.hasOwnProperty(key)) {
-                    if (slides[key].do && (!stickySlides || key >= 1000) && (globalStatus > 2 || key === 6))
-                    {
-                        if (highestslide < parseInt(key))
-                            highestslide = parseInt(key);
-                        slidebadges.innerHTML += `<span class="m-1 btn btn-outline-${slides[key].class} btn-sm" id="slidebadge-${key}">${slides[key].name}</span>`;
-                    }
-                }
-            }
-
-            var done = false;
-            var restarted = false;
-
-            // Iterate through each number until we find a slide with a matching number, or we exceed highestslide
-            while (!done)
-            {
-                // Restart if we passed the highest slide number; do 30 second marquee screensaver first if it has been 15 minutes.
-                if (slide > highestslide)
-                {
-                    if (!restarted)
-                    {
-                        processAnnouncements();
-                        slide = 1;
-                        if (globalStatus === 1 || globalStatus === 2)
-                        {
-                            slide = 6;
-                        } else if (stickySlides)
-                        {
-                            slide = 1000;
-                        }
-                        restarted = true;
-                    } else { // We have a problem if we reach this point! Trigger marquee screensaver as failsafe
-                        done = true;
-                        slide = 6;
-                    }
-                }
-
-                // Do marquee screensaver
-                if (slide === 0)
-                {
-                    done = true;
-                    /*
-                     wrapper.style.display = "inline";
-                     $('#wrapper').fadeIn(500, 'linear', function () {
-                     lines.reset();
-                     lines.start();
-                     slidetimer = setTimeout(function () {
-                     lines.stop();
-                     $('#wrapper').fadeOut(500, 'linear', function () {
-                     lines.clear();
-                     wrapper.style.display = "none";
-                     doSlide();
-                     });
-                     }, 30000);
-                     });
-                     */
-                    slidetimer = setTimeout(function () {
-                        doSlide();
-                    }, 14000);
-                } else if (typeof slides[slide] !== 'undefined' && slides[slide].do && (!stickySlides || slide >= 1000) && (globalStatus > 2 || slide === 6))
-                {
-                    if (slide !== prevslide && !same)
-                    {
-                        done = true;
-                        if (restarted)
-                            generateBG();
-                        console.log(`Doing slide ${slide}`);
-                        try {
-                            slides[slide].function();
-                        } catch (e) {
-                            console.log(e);
-                            iziToast.show({
-                                title: 'An error occurred - Please check the logs',
-                                message: 'Slide ' + slide + ' has an error in its function call. This slide was skipped.'
-                            });
-                            doSlide();
-                            return null;
-                        }
-                    } else {
-                        done = true;
-                        slidetimer = setTimeout(doSlide, 14000);
-                    }
-                    var temp = document.getElementById(`slidebadge-${slide}`);
-                    if (temp !== null)
-                        temp.className = `m-1 btn btn-${slides[slide].class} btn-sm`;
-                } else {
-                    slide += 1;
-                }
-            }
-
-            background.style.display = "inline";
-
-
-            // Power saving slide
-        } else {
-            slidetimer = setTimeout(doSlide, 14000);
-            slidebadges.innerHTML = ``;
-            background.style.display = "none";
-            var afterFunction = function () {
-                try {
-                    console.log(`Doing inactive slide - WWSU`);
-                    content.innerHTML = `<div style="opacity: 0.2;" id="dim-slide">
-                    <div style="text-align: center; width: 100%;"><img src="../../images/display/logo.png" style="max-height: 300px; width: auto;"></div>
-                            <div id="thebottom">
-                            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Website: wwsu1069.org</h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Line: 937-775-5554</h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: 937-775-5555</h1>
-            </div>
-            </div>`;
-                    slide = 1;
-                } catch (e) {
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred in the afterFunction of doSlide.`
-                    });
-                    console.error(e);
-                }
-            };
-            if (document.getElementById('dim-slide') === null)
-            {
-                $('#slide').animateCss('fadeOutUp', afterFunction);
-            } else {
-                afterFunction();
-            }
-        }
-    } catch (e) {
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred on doSlide.'
-        });
-        console.error(e);
-}
-}
-
-function processAnnouncements() {
-    // Define a comparison function that will order announcements by createdAt
-    var compare = function (a, b) {
-        try {
-            if (moment(a.createdAt).valueOf() < moment(b.createdAt).valueOf())
-                return 1;
-            if (moment(a.createdAt).valueOf() > moment(b.createdAt).valueOf())
-                return -1;
-            if (a.ID < b.ID)
-                return -1;
-            if (a.ID > b.ID)
-                return 1;
-            return 0;
-        } catch (e) {
-            console.error(e);
-            iziToast.show({
-                title: 'An error occurred - Please check the logs',
-                message: `Error occurred in the compare function of processAnnouncements call.`
-            });
-        }
-    };
-
-    // Process non-sticky announcements first
-    var tempslide = 100;
-
-    // Remove all slides with announcements so as to refresh them
-    for (var i = 100; i < 2000; i++)
-    {
-        if (typeof slides[i] !== 'undefined')
-            delete slides[i];
-    }
-
-    Announcements({type: 'display-internal'}).get().sort(compare)
-            .filter(announcement => moment(Meta.time).isSameOrAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires)))
-            .map(announcement =>
-            {
-                slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
-                        $('#slide').animateCss('slideOutUp', function () {
-                            content.innerHTML = `<div class="animated fadeIn" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
-
-                            var pageWidth, pageHeight;
-
-                            var basePage = {
-                                width: 1600,
-                                height: 900,
-                                scale: 1,
-                                scaleX: 1,
-                                scaleY: 1
-                            };
-
-                            $(function () {
-                                var $page = $('.scale-content');
-
-                                getPageSize();
-                                scalePages($page, pageWidth, pageHeight);
-
-                                window.requestAnimationFrame(function () {
-                                    getPageSize();
-                                    scalePages($page, pageWidth, pageHeight);
-                                    setTimeout(function () {
-                                        getPageSize();
-                                        scalePages($page, pageWidth, pageHeight);
-                                    }, 500);
-                                });
-
-
-                                function getPageSize() {
-                                    pageHeight = $('#scale-wrapper').height();
-                                    pageWidth = $('#scale-wrapper').width();
-                                }
-
-                                function scalePages(page, maxWidth, maxHeight) {
-                                    page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 80)}%`);
-                                    var scaleX = 1, scaleY = 1;
-                                    scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
-                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;
-                                    basePage.scaleX = scaleX;
-                                    basePage.scaleY = scaleY;
-                                    basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
-
-                                    var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
-                                    var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
-
-                                    page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
-                                }
-                            });
-
-                            slidetimer = setTimeout(doSlide, 14000);
-
-                        });
-                    }};
-
-                tempslide++;
-            });
-    tempslide = 1000;
-    stickySlides = false;
-    Announcements({type: 'display-internal-sticky'}).get().sort(compare)
-            .filter(announcement => moment(Meta.time).isSameOrAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires)))
-            .map(announcement =>
-            {
-                stickySlides = true;
-
-                slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
-                        $('#slide').animateCss('slideOutUp', function () {
-                            content.innerHTML = `<div class="animated fadeIn scaleable-wrapper" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
-
-                            var pageWidth, pageHeight;
-
-                            var basePage = {
-                                width: 1600,
-                                height: 900,
-                                scale: 1,
-                                scaleX: 1,
-                                scaleY: 1
-                            };
-
-                            $(function () {
-                                var $page = $('.scale-content');
-
-                                getPageSize();
-                                scalePages($page, pageWidth, pageHeight);
-
-                                window.requestAnimationFrame(function () {
-                                    getPageSize();
-                                    scalePages($page, pageWidth, pageHeight);
-                                    setTimeout(function () {
-                                        getPageSize();
-                                        scalePages($page, pageWidth, pageHeight);
-                                    }, 500);
-                                });
-
-
-                                function getPageSize() {
-                                    pageHeight = $('#scale-wrapper').height();
-                                    pageWidth = $('#scale-wrapper').width();
-                                }
-
-                                function scalePages(page, maxWidth, maxHeight) {
-                                    page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 80)}%`);
-                                    var scaleX = 1, scaleY = 1;
-                                    scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
-                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;
-                                    basePage.scaleX = scaleX;
-                                    basePage.scaleY = scaleY;
-                                    basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
-
-                                    var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
-                                    var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
-
-                                    page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
-                                }
-                            });
-
-                            slidetimer = setTimeout(doSlide, 14000);
-
-                        });
-                    }};
-
-                tempslide++;
-            });
-}
-
 function processWeeklyStats(data) {
-    slides[5] = {name: 'Weekly Stats', class: 'success', do: true, function: function () {
-            $('#slide').animateCss('lightSpeedOut', function () {
-                content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1>
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics">
-                <p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
-                <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
-                <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>
-                <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>
-            </div></div>`;
-
-                slidetimer = setTimeout(doSlide, 14000);
-            });
-        }};
+    var temp = document.getElementById(`analytics`);
+    if (temp)
+        temp.innerHTML = `<p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
+     <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>
+     <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>`;
 }
