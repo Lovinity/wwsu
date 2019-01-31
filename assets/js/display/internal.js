@@ -224,6 +224,8 @@ try {
                     } else {
                         activeIndexes = slides.map((_slides, index) => _slides.active);
                     }
+                    
+                    console.dir(activeIndexes);
 
                     // Determine based on the above which slide we should show next
                     var qualified = activeIndexes.filter((value, index) => index > currentSlide && value);
@@ -239,6 +241,7 @@ try {
                                 if (activeIndexes[iteration]) {
                                     done = true;
                                     showSlide(slides[iteration].name);
+                                    console.log(`Show slide ${slides[iteration].name}`);
                                 }
                                 iteration++;
 
@@ -255,6 +258,7 @@ try {
                             if (activeIndexes[iteration]) {
                                 done = true;
                                 showSlide(slides[iteration].name);
+                                console.log(`Show slide ${slides[iteration].name}`);
                             }
                             iteration++;
 
@@ -906,6 +910,16 @@ waitFor(function () {
     Status.setOnInsert((data, db) => processStatus(db));
     Status.setOnRemove((data, db) => processStatus(db));
     Status.setOnReplace((db) => processStatus(db));
+    
+    Directors.setOnUpdate((data, db) => processDirectors(db));
+    Directors.setOnInsert((data, db) => processDirectors(db));
+    Directors.setOnRemove((data, db) => processDirectors(db));
+    Directors.setOnReplace((db) => processDirectors(db));
+    
+    Directorhours.setOnUpdate((data, db) => processDirectorHours(db));
+    Directorhours.setOnInsert((data, db) => processDirectorHours(db));
+    Directorhours.setOnRemove((data, db) => processDirectorHours(db));
+    Directorhours.setOnReplace((db) => processDirectorHours(db));
 
     // Do stuff when announcements changes are made
     Announcements.setOnUpdate((data, db) => {
@@ -1216,7 +1230,7 @@ function processStatus(db)
                     }, 250);
                 }, 1000);
 
-                Slides.slide(`system`).isSticky = true;
+                //Slides.slide(`system`).isSticky = true;
 
                 break;
             case 1:
@@ -1233,7 +1247,7 @@ function processStatus(db)
                     }, 250);
                 }, 1000);
 
-                Slides.slide(`system`).isSticky = true;
+                //Slides.slide(`system`).isSticky = true;
 
                 break;
             case 2:
@@ -1251,7 +1265,7 @@ function processStatus(db)
                     }, 250);
                 }, 5000);
 
-                Slides.slide(`system`).isSticky = true;
+                //Slides.slide(`system`).isSticky = true;
 
                 break;
             case 3:
@@ -1259,20 +1273,20 @@ function processStatus(db)
                 clearTimeout(offlineTimer);
                 color = 'rgba(251, 192, 45, 0.5)';
 
-                Slides.slide(`system`).isSticky = false;
+                //Slides.slide(`system`).isSticky = false;
                 break;
             case 5:
                 statusLine.innerHTML = 'WWSU is operational';
                 clearTimeout(offlineTimer);
                 color = 'rgba(76, 175, 80, 0.5)';
 
-                Slides.slide(`system`).isSticky = false;
+                //Slides.slide(`system`).isSticky = false;
                 break;
             default:
                 statusLine.innerHTML = 'WWSU status is unknown';
                 color = 'rgba(158, 158, 158, 0.3)';
 
-                Slides.slide(`system`).isSticky = false;
+                //Slides.slide(`system`).isSticky = false;
         }
 
         prevStatus = globalStatus;
@@ -1332,14 +1346,6 @@ function processDirectors(db)
                     var text1 = 'IN';
                     var theClass = 'success';
                 }
-                /*
-                 innercontent.innerHTML += `<div style="width: 49%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white">
-                 <div class="m-1" style="width: 64px;"><img src="${dodo.avatar}" width="64" class="rounded-circle"></div>
-                 <div class="container-fluid m-1" style="text-align: center;"><span style="font-size: 1.5em;">${dodo.name}</span><br /><span style="font-size: 1em;">${dodo.position}</span></div>
-                 <div class="m-1" style="width: 128px;"><span style="font-size: 1.5em;">${text1}</span><br /><span style="font-size: 1em;">${text2}</span></div>
-                 </div>
-                 `;
-                 */
                 if (innercontent)
                     innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
     <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
