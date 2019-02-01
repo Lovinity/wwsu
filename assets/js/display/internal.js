@@ -667,9 +667,9 @@ function waitFor(check, callback, count = 0)
 }
 
 // Wait for the socket to be connected before defining event handlers
-waitFor(function () {
+waitFor(() => {
     return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected());
-}, function () {
+}, () => {
 
     // Define a host requester
     hostReq = new WWSUreq(io.socket, `display-internal`, 'host', '/auth/host', 'Host');
