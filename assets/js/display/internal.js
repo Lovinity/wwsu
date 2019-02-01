@@ -1030,7 +1030,7 @@ function announcementsSocket()
 
 function processWeeklyStats(data) {
     var temp = document.getElementById(`analytics`);
-    if (temp)
+    if (temp !== null)
         temp.innerHTML = `<p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
      <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
      <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>

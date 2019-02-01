@@ -16,7 +16,7 @@ class Slide {
         this._fitContent = data.fitContent || false;
 
         var temp = document.getElementById(`slides`);
-        if (temp)
+        if (temp !== null)
             temp.innerHTML += this._html;
     }
 
@@ -99,7 +99,7 @@ class Slide {
             this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`;
         }
         var temp = document.getElementById(`slide-${this._name}`);
-        if (temp)
+        if (temp !== null)
             temp.innerHTML = value;
     }
 
@@ -125,7 +125,7 @@ class Slide {
 
     remove() {
         var temp = document.getElementById(`slide-${this._name}`);
-        if (temp)
+        if (temp !== null)
             temp.parentNode.removeChild(temp);
     }
 }
@@ -176,7 +176,7 @@ var Slides = (() => {
 
         // Update the badges at the bottom of the screen for each slide
         var temp = document.getElementById(`slide-badges`);
-        if (temp)
+        if (temp !== null)
         {
             temp.innerHTML = ``;
             var stickyOnly = slides.filter((_slides) => _slides.isSticky).length > 0;
@@ -260,7 +260,7 @@ var Slides = (() => {
                 // Show the slide
                 console.log(`showing slide`);
                 var temp = document.getElementById(`slide-${activeSlide().name}`);
-                if (temp)
+                if (temp !== null)
                     temp.style.display = "inline";
                 $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
                 });
@@ -271,7 +271,7 @@ var Slides = (() => {
 
                 // Fit content if necessary
                 var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
-                if (activeSlide().fitContent && temp && temp2)
+                if (activeSlide().fitContent && temp !== null && temp2 !== null)
                 {
                     console.log(`fitting content`);
                     temp.classList.add("scale-wrapper");
@@ -330,15 +330,13 @@ var Slides = (() => {
             if (currentSlide > -1)
             {
                 console.log(`transition out`);
-                var temp = document.getElementById(`content-slide-${activeSlide().name}`);
-                if (temp)
+                var temp = document.getElementById(`slide-${activeSlide().name}`);
+                if (temp !== null)
                 {
                     console.log(`slide exists; process animation`);
                     $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
                         console.log(`animation complete`);
-                        var temp = document.getElementById(`slide-${activeSlide().name}`);
-                        if (temp)
-                            temp.style.display = "none";
+                        temp.style.display = "none";
                         afterFunction();
                     });
                 } else {
@@ -376,7 +374,7 @@ var Slides = (() => {
         var gradient = "linear-gradient(" + angle + "deg, " + newColor1 + ", " + newColor2 + ")";
 
         var temp = document.getElementById("bg-canvas");
-        if (temp)
+        if (temp !== null)
             temp.style.background = gradient;
 
     }
