@@ -1,5 +1,5 @@
 // Slide class for managing a single slide
-const Slide = class {
+class Slide {
     constructor(data = {}) {
         this._name = data.name || "";
         this._label = data.label || "";
@@ -331,6 +331,31 @@ var Slides = (() => {
             updateBadges();
         }
     });
+
+    const generateBG = () => {
+
+        var hexValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e"];
+
+        function populate(a) {
+            for (var i = 0; i < 6; i++) {
+                var x = Math.round(Math.random() * 14);
+                var y = hexValues[x];
+                a += y;
+            }
+            return a;
+        }
+
+        var newColor1 = populate('#');
+        var newColor2 = populate('#');
+        var angle = Math.round(Math.random() * 360);
+
+        var gradient = "linear-gradient(" + angle + "deg, " + newColor1 + ", " + newColor2 + ")";
+
+        var temp = document.getElementById("bg-canvas");
+        if (temp)
+            temp.style.background = gradient;
+
+    }
 
     // Timer for controlling transitions between slides
     var timer = setInterval(() => {
