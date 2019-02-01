@@ -306,21 +306,26 @@ var Slides = (() => {
                         function getPageSize() {
                             pageHeight = $(`#slide-${activeSlide().name}`).height();
                             pageWidth = $(`#slide-${activeSlide().name}`).width();
+                            console.log(`Page size... height: ${pageHeight}, width: ${pageWidth}`);
                         }
 
                         function scalePages(page, maxWidth, maxHeight) {
                             page.attr("width", `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
+                            console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
                             var scaleX = 1, scaleY = 1;
                             scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95;
                             scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.80;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
                             basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
+                            console.log(`Scale: ${basePage.scale}, X: ${basePage.scaleX}, Y: ${basePage.scaleY}`);
 
                             var newLeftPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).width() * basePage.scale) - maxWidth) / 2));
                             var newTopPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).height() * basePage.scale) - maxHeight) / 2));
+                            
+                            console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`);
 
-                            page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
+                            page.attr('style', 'display: inline; -webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
                         }
                     });
                 }
