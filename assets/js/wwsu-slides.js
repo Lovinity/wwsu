@@ -216,6 +216,7 @@ var Slides = (() => {
                 delete slides[index];
                 if (index === currentSlide)
                 {
+                    currentSlide = -1;
                     timeLeft = 0;
                 }
             }
@@ -325,7 +326,7 @@ var Slides = (() => {
                             
                             console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`);
 
-                            page.attr('style', 'display: inline; -webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
+                            $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
                         }
                     });
                 }
