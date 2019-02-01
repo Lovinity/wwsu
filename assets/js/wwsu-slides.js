@@ -245,14 +245,19 @@ var Slides = (() => {
 
                     // Should never happen, but failsafe to prevent freezes
                     if (iteration > slides.length)
+                    {
                         done = true;
+                        timeLeft = 0;
+                        currentSlide = -1;
+                        return null;
+                    }
                 }
 
                 // Show the slide
                 var temp = document.getElementById(`slide-${activeSlide().name}`);
                 if (temp)
                     temp.style.display = "inline";
-                $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, function () {});
+                $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {});
 
                 timeLeft = activeSlide().displayTime;
                 updateBadges();
@@ -274,16 +279,16 @@ var Slides = (() => {
                         scaleY: 1
                     };
 
-                    $(function () {
-                        var $page = $(`slide-${activeSlide().name}`);
+                    $(() => {
+                        var $page = $(`#slide-${activeSlide().name}`);
 
                         getPageSize();
                         scalePages($page, pageWidth, pageHeight);
 
-                        window.requestAnimationFrame(function () {
+                        window.requestAnimationFrame(() => {
                             getPageSize();
                             scalePages($page, pageWidth, pageHeight);
-                            setTimeout(function () {
+                            setTimeout(() => {
                                 getPageSize();
                                 scalePages($page, pageWidth, pageHeight);
                             }, 500);
@@ -291,21 +296,21 @@ var Slides = (() => {
 
 
                         function getPageSize() {
-                            pageHeight = $('#scale-wrapper').height();
-                            pageWidth = $('#scale-wrapper').width();
+                            pageHeight = $(`#slide-${activeSlide().name}`).height();
+                            pageWidth = $(`#slide-${activeSlide().name}`).width();
                         }
 
                         function scalePages(page, maxWidth, maxHeight) {
-                            page.attr("width", `${(($('#scaled-content').height() / maxHeight) * 80)}%`);
+                            page.attr("width", `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
                             var scaleX = 1, scaleY = 1;
-                            scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
-                            scaleY = (maxHeight / $('#scaled-content').height()) * 0.80;
+                            scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95;
+                            scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.80;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
                             basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
 
-                            var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
-                            var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
+                            var newLeftPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).width() * basePage.scale) - maxWidth) / 2));
+                            var newTopPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).height() * basePage.scale) - maxHeight) / 2));
 
                             page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
                         }
@@ -316,7 +321,7 @@ var Slides = (() => {
             // Process transitioning out of the current slide
             if (currentSlide > -1)
             {
-                $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, function () {
+                $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
                     var temp = document.getElementById(`slide-${activeSlide().name}`);
                     if (temp)
                         temp.style.display = "none";
@@ -397,8 +402,15 @@ var Slides = (() => {
 
                             // Should never happen, but failsafe to prevent freezes
                             if (iteration > slides.length)
+                            {
                                 done = true;
+                                currentSlide = -1;
+                                timeLeft = 0;
+                            }
                         }
+                    } else {
+                        currentSlide = -1;
+                        timeLeft = 0;
                     }
                 } else {
                     var done = false;
@@ -413,7 +425,11 @@ var Slides = (() => {
 
                         // Should never happen, but failsafe to prevent freezes
                         if (iteration > slides.length)
+                        {
                             done = true;
+                            currentSlide = -1;
+                            timeLeft = 0;
+                        }
                     }
                 }
             }
