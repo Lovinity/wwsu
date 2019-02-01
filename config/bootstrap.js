@@ -509,7 +509,7 @@ module.exports.bootstrap = async function (done) {
                 if (timeToFirstTrack >= sails.config.custom.queueCorrection.prerecord && !Playlists.queuing && Meta['A'].changingState === null)
                 {
                     if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
-                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 1); // Skip currently playing track if it is not a noClearShow track
+                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
                 }
             }
 
