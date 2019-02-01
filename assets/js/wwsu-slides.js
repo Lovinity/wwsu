@@ -371,6 +371,7 @@ var Slides = (() => {
             if (timeLeft <= 0)
             {
                 timeLeft = 0;
+                console.log(`No time`);
 
                 // Determine which slides qualify to be displayed
                 var stickyOnly = slides.filter((_slides) => _slides.isSticky).length > 0;
@@ -386,46 +387,55 @@ var Slides = (() => {
                 var qualified = activeIndexes.filter((value, index) => index > currentSlide && value);
                 if (qualified.length <= 0)
                 {
+                    console.log(`No more slides`);
                     generateBG();
                     qualified = activeIndexes.filter((value, index) => value);
                     if (qualified.length > 0)
                     {
+                        console.log(`At least 1 qualified slide`);
                         var done = false;
                         var iteration = 0;
                         while (!done)
                         {
                             if (activeIndexes[iteration]) {
+                                console.log(`Qualified ${iteration}`);
                                 done = true;
                                 showSlide(slides[iteration].name);
                             }
                             iteration++;
 
                             // Should never happen, but failsafe to prevent freezes
-                            if (iteration > slides.length)
+                            if (!done && iteration > slides.length)
                             {
+                                console.log(`Reached iteration limit`);
                                 done = true;
                                 currentSlide = -1;
                                 timeLeft = 0;
                             }
                         }
                     } else {
+                        console.log(`No qualified slides`);
                         currentSlide = -1;
                         timeLeft = 0;
                     }
                 } else {
+                    console.log(`Qualified slides after current`);
                     var done = false;
                     var iteration = currentSlide + 1;
                     while (!done)
                     {
                         if (activeIndexes[iteration]) {
+                            console.log(`Qualified ${iteration}`);
                             done = true;
                             showSlide(slides[iteration].name);
                         }
+                        
                         iteration++;
 
                         // Should never happen, but failsafe to prevent freezes
-                        if (iteration > slides.length)
+                        if (!done && iteration > slides.length)
                         {
+                            console.log(`Reached iteration limit`);
                             done = true;
                             currentSlide = -1;
                             timeLeft = 0;
