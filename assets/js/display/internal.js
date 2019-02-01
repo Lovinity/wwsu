@@ -656,7 +656,7 @@ function waitFor(check, callback, count = 0)
         if (count < 10000)
         {
             count++;
-            window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(() => {
                 waitFor(check, callback, count);
             });
         } else {
@@ -740,7 +740,7 @@ waitFor(() => {
     });
     Announcements.setOnRemove((data, db) => Slides.removeSlide(`attn-${data}`));
     Announcements.setOnReplace((db) => {
-
+        console.dir(db);
         // Remove all announcement slides
         Slides.allSlides()
                 .filter((slide) => slide.name.startsWith(`attn-`))
@@ -1106,7 +1106,7 @@ function processDirectors(db)
         var innercontent = document.getElementById('directors');
         if (innercontent)
             innercontent.innerHTML = '';
-        
+
         Slides.slide(`directors`).displayTime = 5;
         db.each(function (dodo) {
             try {
