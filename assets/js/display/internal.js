@@ -125,7 +125,7 @@ try {
                     var temp = document.getElementById(`slide-${activeSlide().name}`);
                     if (temp)
                         temp.style.display = "inline";
-                    $(`#slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, function () {});
+                    $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, function () {});
 
                     timeLeft = activeSlide().displayTime;
                     updateBadges();
@@ -189,7 +189,7 @@ try {
                 // Process transitioning out of the current slide
                 if (currentSlide > -1)
                 {
-                    $(`#slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, function () {
+                    $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, function () {
                         var temp = document.getElementById(`slide-${activeSlide().name}`);
                         if (temp)
                             temp.style.display = "none";
@@ -712,7 +712,7 @@ waitFor(() => {
                 expires: moment(data.expires),
                 transitionIn: `fadeIn`,
                 transitionOut: `fadeOut`,
-                displayTime: 14,
+                displayTime: data.displayTime || 15,
                 fitContent: true,
                 html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
             }));
@@ -732,7 +732,7 @@ waitFor(() => {
                 expires: moment(data.expires),
                 transitionIn: `fadeIn`,
                 transitionOut: `fadeOut`,
-                displayTime: 14,
+                displayTime: data.displayTime || 15,
                 fitContent: true,
                 html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
             }));
@@ -761,7 +761,7 @@ waitFor(() => {
                     expires: moment(data.expires),
                     transitionIn: `fadeIn`,
                     transitionOut: `fadeOut`,
-                    displayTime: 14,
+                    displayTime: data.displayTime || 15,
                     fitContent: true,
                     html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
                 }));
