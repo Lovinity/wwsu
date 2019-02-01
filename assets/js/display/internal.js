@@ -1014,9 +1014,9 @@ function announcementsSocket()
     try {
         var data = [];
         hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal'}}, function (body) {
-            data.concat(body);
+            data = data.concat(body);
             hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal-sticky'}}, function (body) {
-                data.concat(body);
+                data = data.concat(body);
 
                 Announcements.query(data, true);
             });
