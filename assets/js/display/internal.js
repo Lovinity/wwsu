@@ -417,7 +417,7 @@ try {
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
-        displayTime: 14,
+        displayTime: 5,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div>`
     }));
@@ -432,7 +432,7 @@ try {
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
-        displayTime: 14,
+        displayTime: 5,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div>`
     }));
@@ -447,7 +447,7 @@ try {
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
-        displayTime: 14,
+        displayTime: 5,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div>`
     }));
@@ -462,7 +462,7 @@ try {
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
-        displayTime: 14,
+        displayTime: 15,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
     }));
@@ -477,7 +477,7 @@ try {
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
-        displayTime: 14,
+        displayTime: 15,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status"></div>`
     }));
@@ -1004,7 +1004,7 @@ function processStatus(db)
                     }, 250);
                 }, 1000);
 
-                //Slides.slide(`system`).isSticky = true;
+                Slides.slide(`system`).isSticky = true;
 
                 break;
             case 1:
@@ -1021,7 +1021,7 @@ function processStatus(db)
                     }, 250);
                 }, 1000);
 
-                //Slides.slide(`system`).isSticky = true;
+                Slides.slide(`system`).isSticky = true;
 
                 break;
             case 2:
@@ -1039,7 +1039,7 @@ function processStatus(db)
                     }, 250);
                 }, 5000);
 
-                //Slides.slide(`system`).isSticky = true;
+                Slides.slide(`system`).isSticky = true;
 
                 break;
             case 3:
@@ -1047,20 +1047,20 @@ function processStatus(db)
                 clearTimeout(offlineTimer);
                 color = 'rgba(251, 192, 45, 0.5)';
 
-                //Slides.slide(`system`).isSticky = false;
+                Slides.slide(`system`).isSticky = false;
                 break;
             case 5:
                 statusLine.innerHTML = 'WWSU is operational';
                 clearTimeout(offlineTimer);
                 color = 'rgba(76, 175, 80, 0.5)';
 
-                //Slides.slide(`system`).isSticky = false;
+                Slides.slide(`system`).isSticky = false;
                 break;
             default:
                 statusLine.innerHTML = 'WWSU status is unknown';
                 color = 'rgba(158, 158, 158, 0.3)';
 
-                //Slides.slide(`system`).isSticky = false;
+                Slides.slide(`system`).isSticky = false;
         }
 
         prevStatus = globalStatus;
@@ -1106,8 +1106,11 @@ function processDirectors(db)
         var innercontent = document.getElementById('directors');
         if (innercontent)
             innercontent.innerHTML = '';
+        
+        Slides.slide(`directors`).displayTime = 5;
         db.each(function (dodo) {
             try {
+                Slides.slide(`directors`).displayTime += 1;
                 var color = 'rgba(211, 47, 47, 0.8)';
                 var text1 = 'OUT';
                 var theClass = 'danger';
@@ -1284,10 +1287,12 @@ function processDirectorHours(db)
      </div>
      </div>`;
             var doShade = false;
+            Slides.slide(`hours-directors`).displayTime = 5;
             for (var director in calendar)
             {
                 if (calendar.hasOwnProperty(director))
                 {
+                    Slides.slide(`hours-directors`).displayTime += 2;
                     stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
      <div class="col-3 text-warning">
      ${director}
@@ -1355,10 +1360,12 @@ function processDirectorHours(db)
      </div>
      </div>`;
             var doShade = false;
+            Slides.slide(`hours-assistants`).displayTime = 5;
             for (var director in asstcalendar)
             {
                 if (asstcalendar.hasOwnProperty(director))
                 {
+                    Slides.slide(`hours-assistants`).displayTime += 2;
                     stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
      <div class="col-3 text-warning">
      ${director}
