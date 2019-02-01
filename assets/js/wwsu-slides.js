@@ -228,8 +228,10 @@ var Slides = (() => {
         timeLeft = null;
         if (slideName !== activeSlide().name)
         {
+            console.log(`Different slide.`);
             // Executed when we are ready to show the slide
             var afterFunction = () => {
+                console.log(`afterFunction executed`);
 
                 // Find out what index the slide we're about to display is
                 var iteration = 0;
@@ -240,12 +242,14 @@ var Slides = (() => {
                     {
                         done = true;
                         currentSlide = iteration;
+                        console.log(`currentSlide set to ${iteration}`);
                     }
                     iteration++;
 
                     // Should never happen, but failsafe to prevent freezes
                     if (iteration > slides.length)
                     {
+                        console.log(`Exceeded iteration count`);
                         done = true;
                         timeLeft = 0;
                         currentSlide = -1;
@@ -254,11 +258,14 @@ var Slides = (() => {
                 }
 
                 // Show the slide
+                console.log(`showing slide`);
                 var temp = document.getElementById(`slide-${activeSlide().name}`);
                 if (temp)
                     temp.style.display = "inline";
-                $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {});
+                $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
+                });
 
+                console.log(`setting time`);
                 timeLeft = activeSlide().displayTime;
                 updateBadges();
 
@@ -266,7 +273,7 @@ var Slides = (() => {
                 var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
                 if (activeSlide().fitContent && temp && temp2)
                 {
-
+                    console.log(`fitting content`);
                     temp.classList.add("scale-wrapper");
                     temp2.classList.add("scale-content");
                     var pageWidth, pageHeight;
@@ -280,6 +287,7 @@ var Slides = (() => {
                     };
 
                     $(() => {
+                        console.log(`fitting content self function`);
                         var $page = $(`#slide-${activeSlide().name}`);
 
                         getPageSize();
@@ -321,17 +329,28 @@ var Slides = (() => {
             // Process transitioning out of the current slide
             if (currentSlide > -1)
             {
-                $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
-                    var temp = document.getElementById(`slide-${activeSlide().name}`);
-                    if (temp)
-                        temp.style.display = "none";
-
+                console.log(`transition out`);
+                var temp = document.getElementById(`content-slide-${activeSlide().name}`);
+                if (temp)
+                {
+                    console.log(`slide exists; process animation`);
+                    $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
+                        console.log(`animation complete`);
+                        var temp = document.getElementById(`slide-${activeSlide().name}`);
+                        if (temp)
+                            temp.style.display = "none";
+                        afterFunction();
+                    });
+                } else {
+                    console.log(`slide does not exist; do not animate`);
                     afterFunction();
-                });
+                }
             } else {
+                console.log(`currentSlide is negative`);
                 afterFunction();
             }
         } else {
+            console.log(`Same slide; resetting clock`);
             timeLeft = activeSlide().displayTime;
             updateBadges();
         }
@@ -429,7 +448,7 @@ var Slides = (() => {
                             done = true;
                             showSlide(slides[iteration].name);
                         }
-                        
+
                         iteration++;
 
                         // Should never happen, but failsafe to prevent freezes
