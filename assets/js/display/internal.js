@@ -275,7 +275,7 @@ try {
     })();
 
 // Slide class for managing a single slide
-    class Slide {
+    const Slide = class {
         constructor(data = {}) {
             this._name = data.name || "";
             this._label = data.label || "";
@@ -507,7 +507,6 @@ try {
     var directorpresent = false;
     var disconnected = true;
     var slidetimer = false;
-    var slide = 1;
     var lastBurnIn = null;
     var prevStatus = 5;
     var stickySlides = false;
@@ -699,74 +698,19 @@ waitFor(() => {
     // Do stuff when announcements changes are made
     Announcements.setOnUpdate((data, db) => {
         Slides.removeSlide(`attn-${data.ID}`);
-        if (data.type.startsWith(`display-internal`))
-        {
-            Slides.newSlide(new Slide({
-                name: `attn-${data.ID}`,
-                label: data.title,
-                weight: 0,
-                isSticky: data.type === `display-internal-sticky`,
-                color: data.level,
-                active: true,
-                starts: moment(data.starts),
-                expires: moment(data.expires),
-                transitionIn: `fadeIn`,
-                transitionOut: `fadeOut`,
-                displayTime: data.displayTime || 15,
-                fitContent: true,
-                html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
-            }));
-        }
+        createAnnouncement(data);
     });
-    Announcements.setOnInsert((data, db) => {
-        if (data.type.startsWith(`display-internal`))
-        {
-            Slides.newSlide(new Slide({
-                name: `attn-${data.ID}`,
-                label: data.title,
-                weight: 0,
-                isSticky: data.type === `display-internal-sticky`,
-                color: data.level,
-                active: true,
-                starts: moment(data.starts),
-                expires: moment(data.expires),
-                transitionIn: `fadeIn`,
-                transitionOut: `fadeOut`,
-                displayTime: data.displayTime || 15,
-                fitContent: true,
-                html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
-            }));
-        }
-    });
+    Announcements.setOnInsert((data, db) => createAnnouncement(data));
     Announcements.setOnRemove((data, db) => Slides.removeSlide(`attn-${data}`));
     Announcements.setOnReplace((db) => {
-        console.dir(db);
+        console.dir(db.get());
         // Remove all announcement slides
         Slides.allSlides()
                 .filter((slide) => slide.name.startsWith(`attn-`))
                 .map((slide) => Slides.removeSlide(slide.name));
 
         // Add slides for each announcement
-        db.each((data) => {
-            if (data.type.startsWith(`display-internal`))
-            {
-                Slides.newSlide(new Slide({
-                    name: `attn-${data.ID}`,
-                    label: data.title,
-                    weight: 0,
-                    isSticky: data.type === `display-internal-sticky`,
-                    color: data.level,
-                    active: true,
-                    starts: moment(data.starts),
-                    expires: moment(data.expires),
-                    transitionIn: `fadeIn`,
-                    transitionOut: `fadeOut`,
-                    displayTime: data.displayTime || 15,
-                    fitContent: true,
-                    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
-                }));
-            }
-        })
+        db.each((data) => createAnnouncement(data));
     });
 
     // Assign additional event handlers
@@ -1521,4 +1465,25 @@ function processWeeklyStats(data) {
      <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
      <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>
      <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>`;
+}
+
+function createAnnouncement(data) {
+    if (data.type.startsWith(`display-internal`))
+    {
+        Slides.newSlide(new Slide({
+            name: `attn-${data.ID}`,
+            label: data.title,
+            weight: 0,
+            isSticky: data.type === `display-internal-sticky`,
+            color: data.level,
+            active: true,
+            starts: moment(data.starts),
+            expires: moment(data.expires),
+            transitionIn: `fadeIn`,
+            transitionOut: `fadeOut`,
+            displayTime: data.displayTime || 15,
+            fitContent: true,
+            html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
+        }));
+    }
 }
