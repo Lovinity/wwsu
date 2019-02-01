@@ -69,7 +69,7 @@ try {
                 }
 
                 _slides.map((_slide) => {
-                    temp.innerHTML += `<span class="m-1 chip shadow-4"><i class="chip-icon bg-${_slide.color}">${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name ? timeLeft : ``}</i>${_slide.label}</span>`;
+                    temp.innerHTML += `<span class="m-1 chip shadow-4 ${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name ? `bg-light-1` : `bg-dark-4`}"><i class="chip-icon bg-${_slide.color}">${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name && timeLeft !== null ? timeLeft : ``}</i>${_slide.label}</span>`;
                 });
             }
         });
@@ -124,7 +124,7 @@ try {
                     // Show the slide
                     var temp = document.getElementById(`slide-${activeSlide().name}`);
                     if (temp)
-                        temp.style.display = "inline-block";
+                        temp.style.display = "inline";
                     $(`#slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, function () {});
 
                     timeLeft = activeSlide().displayTime;
@@ -224,13 +224,12 @@ try {
                     } else {
                         activeIndexes = slides.map((_slides, index) => _slides.active);
                     }
-                    
-                    console.dir(activeIndexes);
 
                     // Determine based on the above which slide we should show next
                     var qualified = activeIndexes.filter((value, index) => index > currentSlide && value);
                     if (qualified.length <= 0)
                     {
+                        generateBG();
                         qualified = activeIndexes.filter((value, index) => value);
                         if (qualified.length > 0)
                         {
@@ -241,7 +240,6 @@ try {
                                 if (activeIndexes[iteration]) {
                                     done = true;
                                     showSlide(slides[iteration].name);
-                                    console.log(`Show slide ${slides[iteration].name}`);
                                 }
                                 iteration++;
 
@@ -252,13 +250,12 @@ try {
                         }
                     } else {
                         var done = false;
-                        var iteration = currentSlide;
+                        var iteration = currentSlide + 1;
                         while (!done)
                         {
                             if (activeIndexes[iteration]) {
                                 done = true;
                                 showSlide(slides[iteration].name);
-                                console.log(`Show slide ${slides[iteration].name}`);
                             }
                             iteration++;
 
@@ -268,7 +265,7 @@ try {
                         }
                     }
                 }
-                
+
                 updateBadges();
             }
         }, 1000);
@@ -288,7 +285,7 @@ try {
             this._active = data.active || true;
             this._starts = data.starts || null;
             this._expires = data.expires || null;
-            this._html = `<div id="slide-${this._name}" style="display: none;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`;
+            this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`;
             this._transitionIn = data.transitionIn || "fadeIn";
             this._transitionOut = data.transitionOut || "fadeOut";
             this._displayTime = data.displayTime || 14;
@@ -373,9 +370,9 @@ try {
         set html(value) {
             if (Slides.activeSlide().name === this._name)
             {
-                this._html = `<div id="slide-${this._name}" style="display: inline-block;"><div id="content-slide-${this._name}">${value}</div></div>`;
+                this._html = `<div id="slide-${this._name}" style="display: inline; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`;
             } else {
-                this._html = `<div id="slide-${this._name}" style="display: none;"><div id="content-slide-${this._name}">${value}</div></div>`;
+                this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`;
             }
             var temp = document.getElementById(`slide-${this._name}`);
             if (temp)
@@ -425,43 +422,6 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div>`
     }));
 
-    /*
-     slides[2] = {name: 'Directors', class: 'primary', do: true, function: function () {
-     $('#slide').animateCss('lightSpeedOut', function () {
-     content.innerHTML = `<div class="animated fadeInDown" ><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1>
-     <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div></div>`;
-     var innercontent = document.getElementById('directors');
-     Directors().each(function (dodo) {
-     try {
-     var color = 'rgba(211, 47, 47, 0.8)';
-     var text1 = 'OUT';
-     var theClass = 'danger';
-     var text2 = '';
-     if (dodo.since !== null && moment(dodo.since).isValid())
-     text2 = moment(dodo.since).from(moment(Meta.time), true);
-     if (dodo.present)
-     {
-     var color = 'rgba(56, 142, 60, 0.8)';
-     var text1 = 'IN';
-     var theClass = 'success';
-     }
-     innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
-     <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
-     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
-     <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
-     } catch (e) {
-     console.error(e);
-     iziToast.show({
-     title: 'An error occurred - Please check the logs',
-     message: `Error occurred in Directors iteration in doSlide.`
-     });
-     }
-     });
-     slidetimer = setTimeout(doSlide, 14000);
-     });
-     }};
-     */
-
     // Director hours
     Slides.newSlide(new Slide({
         name: `hours-directors`,
@@ -476,86 +436,6 @@ try {
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div>`
     }));
-
-    /*
-     slides[3] = {name: 'Hours', class: 'info', do: true, function: function () {
-     $('#slide').animateCss('lightSpeedOut', function () {
-     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1>
-     <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
-     var innercontent = document.getElementById('office-hours');
-     
-     var stuff = `<div class="row">
-     <div class="col-3 text-primary-light">
-     <strong>Director</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>Today</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     </div>`;
-     var doShade = false;
-     for (var director in calendar)
-     {
-     if (calendar.hasOwnProperty(director))
-     {
-     stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
-     <div class="col-3 text-warning">
-     ${director}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][0]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][1]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][2]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][3]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][4]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][5]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][6]}
-     </div>
-     </div>`;
-     if (doShade)
-     {
-     doShade = false;
-     } else {
-     doShade = true;
-     }
-     }
-     }
-     
-     innercontent.innerHTML += stuff;
-     
-     slidetimer = setTimeout(doSlide, 14000);
-     });
-     }};
-     */
 
     // Assistant Director hours
     Slides.newSlide(new Slide({
@@ -572,86 +452,6 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div>`
     }));
 
-    /*
-     slides[4] = {name: 'Hours', class: 'info', do: true, function: function () {
-     $('#slide').animateCss('lightSpeedOut', function () {
-     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1>
-     <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours"></div></div>`;
-     var innercontent = document.getElementById('office-hours');
-     
-     var stuff = `<div class="row">
-     <div class="col-3 text-primary-light">
-     <strong>Asst. Director</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>Today</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     <div class="col text-primary-light">
-     <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
-     </div>
-     </div>`;
-     var doShade = false;
-     for (var director in asstcalendar)
-     {
-     if (asstcalendar.hasOwnProperty(director))
-     {
-     stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
-     <div class="col-3 text-warning">
-     ${director}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][0]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][1]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][2]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][3]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][4]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][5]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][6]}
-     </div>
-     </div>`;
-     if (doShade)
-     {
-     doShade = false;
-     } else {
-     doShade = true;
-     }
-     }
-     }
-     
-     innercontent.innerHTML += stuff;
-     
-     slidetimer = setTimeout(doSlide, 14000);
-     });
-     }};
-     */
-
     // Weekly Stats
     Slides.newSlide(new Slide({
         name: `weekly-stats`,
@@ -666,21 +466,6 @@ try {
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
     }));
-    /*
-     slides[5] = {name: 'Weekly Stats', class: 'success', do: true, function: function () {
-     $('#slide').animateCss('lightSpeedOut', function () {
-     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1>
-     <div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics">
-     <p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
-     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
-     <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>
-     <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>
-     </div></div>`;
-     
-     slidetimer = setTimeout(doSlide, 14000);
-     });
-     }};
-     */
 
     // System Status
     Slides.newSlide(new Slide({
@@ -696,18 +481,6 @@ try {
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status"></div>`
     }));
-    /*
-     slides[6] = {
-     name: 'System', class: 'wwsu-red', do: true, function: function () {
-     $('#slide').animateCss('fadeOutUp', function () {
-     content.innerHTML = `<div class="animated fadeInDown"><h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1>
-     <div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status">${statusMarquee}</div></div>`;
-     
-     slidetimer = setTimeout(doSlide, 14000);
-     });
-     }
-     };
-     */
 
 // Define data variables
     var Directors = new WWSUdb(TAFFY());
@@ -805,6 +578,8 @@ try {
         background.style.background = gradient;
 
     }
+
+    generateBG();
 
 } catch (e) {
     iziToast.show({
@@ -910,12 +685,12 @@ waitFor(function () {
     Status.setOnInsert((data, db) => processStatus(db));
     Status.setOnRemove((data, db) => processStatus(db));
     Status.setOnReplace((db) => processStatus(db));
-    
+
     Directors.setOnUpdate((data, db) => processDirectors(db));
     Directors.setOnInsert((data, db) => processDirectors(db));
     Directors.setOnRemove((data, db) => processDirectors(db));
     Directors.setOnReplace((db) => processDirectors(db));
-    
+
     Directorhours.setOnUpdate((data, db) => processDirectorHours(db));
     Directorhours.setOnInsert((data, db) => processDirectorHours(db));
     Directorhours.setOnRemove((data, db) => processDirectorHours(db));
@@ -973,7 +748,6 @@ waitFor(function () {
 
         // Add slides for each announcement
         db.each((data) => {
-            console.dir(data);
             if (data.type.startsWith(`display-internal`))
             {
                 Slides.newSlide(new Slide({
@@ -1112,16 +886,16 @@ function processStatus(db)
         var secondRow = false;
         globalStatus = 4;
         statusMarquee = `<div class="row">
-                      <div class="col-2 text-primary-light">
+                      <div class="col-2 text-warning">
                   	<strong>System</strong>
                       </div>
-                      <div class="col text-primary-light">
+                      <div class="col text-white">
                   	<strong>Status</strong>
                       </div>
-                      <div class="col-2 text-primary-light">
+                      <div class="col-2 text-warning">
                   	<strong>System</strong>
                       </div>
-                      <div class="col text-primary-light">
+                      <div class="col text-white">
                   	<strong>Status</strong>
                       </div>
                     </div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
@@ -1146,7 +920,7 @@ function processStatus(db)
                 switch (thestatus.status)
                 {
                     case 1:
-                        statusMarquee += `<div class="col-2 text-primary-light">
+                        statusMarquee += `<div class="col-2">
                   	<span class="m-1 btn btn-danger btn-sm">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
@@ -1156,7 +930,7 @@ function processStatus(db)
                             globalStatus = 1;
                         break;
                     case 2:
-                        statusMarquee += `<div class="col-2 text-primary-light">
+                        statusMarquee += `<div class="col-2">
                   	<span class="m-1 btn btn-urgent btn-sm">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
@@ -1166,7 +940,7 @@ function processStatus(db)
                             globalStatus = 2;
                         break;
                     case 3:
-                        statusMarquee += `<div class="col-2 text-primary-light">
+                        statusMarquee += `<div class="col-2">
                   	<span class="m-1 btn btn-warning btn-sm">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
@@ -1176,7 +950,7 @@ function processStatus(db)
                             globalStatus = 3;
                         break;
                     case 4:
-                        statusMarquee += `<div class="col-2 text-primary-light">
+                        statusMarquee += `<div class="col-2">
                   	<span class="m-1 btn btn-outline-success btn-sm">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
@@ -1184,7 +958,7 @@ function processStatus(db)
                       </div>`;
                         break;
                     case 5:
-                        statusMarquee += `<div class="col-2 text-primary-light">
+                        statusMarquee += `<div class="col-2">
                   	<span class="m-1 btn btn-success btn-sm">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
@@ -1347,7 +1121,7 @@ function processDirectors(db)
                     var theClass = 'success';
                 }
                 if (innercontent)
-                    innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded">
+                    innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded shadow-8">
     <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
   <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
@@ -1374,7 +1148,6 @@ function processDirectors(db)
 function processDirectorHours(db)
 {
     try {
-
         // A list of Office Hours for the directors
 
         // Define a comparison function that will order calendar events by start time when we run the iteration
@@ -1407,10 +1180,8 @@ function processDirectorHours(db)
             if (typeof temp.assistant !== 'undefined')
             {
                 var assistant = temp.assistant;
-                console.log(event.director + " " + assistant);
             } else {
                 var assistant = true;
-                console.log(event.director + " is an unknown assistant.");
             }
             // Format calendar for the director
             if (!assistant && typeof calendar[event.director] === 'undefined')
@@ -1477,38 +1248,38 @@ function processDirectorHours(db)
 
                     // Push the final products into our formatted variable
                     if (!assistant)
-                        calendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success-light">IN ${event.startT}</div><div class="m-1 text-danger-light">OUT ${event.endT}</div></div>`;
+                        calendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success">IN ${event.startT}</div><div class="m-1 text-danger">OUT ${event.endT}</div></div>`;
                     if (assistant)
-                        asstcalendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success-light">IN ${event.startT}</div><div class="m-1 text-danger-light">OUT ${event.endT}</div></div>`;
+                        asstcalendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success">IN ${event.startT}</div><div class="m-1 text-danger">OUT ${event.endT}</div></div>`;
                 }
             }
 
             // Director hours slide
             var innercontent = document.getElementById('office-hours-directors');
 
-            var stuff = `<div class="row">
-     <div class="col-3 text-primary-light">
+            var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+     <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>Today</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
      </div>
      </div>`;
@@ -1517,7 +1288,7 @@ function processDirectorHours(db)
             {
                 if (calendar.hasOwnProperty(director))
                 {
-                    stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+                    stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
      <div class="col-3 text-warning">
      ${director}
      </div>
@@ -1552,34 +1323,34 @@ function processDirectorHours(db)
                 }
             }
 
-            innercontent.innerHTML += stuff;
+            innercontent.innerHTML = stuff;
 
             // Assistant hours slide
             var innercontent = document.getElementById('office-hours-assistants');
 
-            var stuff = `<div class="row">
-     <div class="col-3 text-primary-light">
+            var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+     <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>Today</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(1, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(2, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(3, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(4, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(5, 'days').format('ddd MM/DD')}</strong>
      </div>
-     <div class="col text-primary-light">
+     <div class="col text-info">
      <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
      </div>
      </div>`;
@@ -1588,7 +1359,7 @@ function processDirectorHours(db)
             {
                 if (asstcalendar.hasOwnProperty(director))
                 {
-                    stuff += `<div class="row" style="${doShade ? `background: rgba(255, 255, 255, 0.1);` : ``}">
+                    stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
      <div class="col-3 text-warning">
      ${director}
      </div>
@@ -1623,7 +1394,7 @@ function processDirectorHours(db)
                 }
             }
 
-            innercontent.innerHTML += stuff;
+            innercontent.innerHTML = stuff;
         });
     } catch (e) {
         iziToast.show({
