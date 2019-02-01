@@ -10,10 +10,13 @@ class Slide {
         this._starts = data.starts || null;
         this._expires = data.expires || null;
         this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`;
+        this._innerHtml = data.html || ``;
+        this._reset = data.reset || false;
         this._transitionIn = data.transitionIn || "fadeIn";
         this._transitionOut = data.transitionOut || "fadeOut";
         this._displayTime = data.displayTime || 14;
         this._fitContent = data.fitContent || false;
+        this._fn = data.fn || (() => {});
 
         var temp = document.getElementById(`slides`);
         if (temp !== null)
@@ -59,6 +62,10 @@ class Slide {
         this._color = value;
     }
 
+    get reset() {
+        return this._reset;
+    }
+
     get active() {
         if (!this._active)
             return false;
@@ -91,7 +98,12 @@ class Slide {
         return this._html;
     }
 
+    get innerHtml() {
+        return this._innerHtml;
+    }
+
     set html(value) {
+        this._innerHtml = value;
         if (Slides.activeSlide().name === this._name)
         {
             this._html = `<div id="slide-${this._name}" style="display: inline; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`;
@@ -121,6 +133,10 @@ class Slide {
 
     get fitContent() {
         return this._fitContent;
+    }
+
+    fn() {
+        return this._fn(this);
     }
 
     remove() {
@@ -265,13 +281,19 @@ var Slides = (() => {
                         temp.style.display = "none";
                 });
 
-                // Show the slide
+                // Show the slide. Update inner html to configured value in case fn changed it.
                 console.log(`showing slide`);
                 var temp = document.getElementById(`slide-${activeSlide().name}`);
                 if (temp !== null)
+                {
+                    if (activeSlide().reset)
+                        temp.innerHTML = activeSlide().innerHtml;
                     temp.style.display = "inline";
+                }
                 $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
                 });
+
+                activeSlide().fn();
 
                 console.log(`setting time`);
                 timeLeft = activeSlide().displayTime;
@@ -358,7 +380,7 @@ var Slides = (() => {
                             temp.className = "";
                         }
                         afterFunction();
-                    }, 10000);
+                    }, 5000);
 
                     $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
                         console.log(`animation complete`);
@@ -376,6 +398,19 @@ var Slides = (() => {
             }
         } else {
             console.log(`Same slide; resetting clock`);
+
+            // Show the slide. Update inner html to configured value in case fn changed it.
+            console.log(`showing slide`);
+            var temp = document.getElementById(`slide-${activeSlide().name}`);
+            if (temp !== null)
+            {
+                if (activeSlide().reset)
+                    temp.innerHTML = activeSlide().innerHtml;
+                temp.style.display = "inline";
+            }
+
+            activeSlide().fn();
+
             timeLeft = activeSlide().displayTime;
             updateBadges();
         }

@@ -1,4 +1,4 @@
-/* global io, moment, Infinity, iziToast, responsiveVoice, jdenticon */
+/* global io, moment, Infinity, iziToast, responsiveVoice, jdenticon, Slides */
 
 try {
     // Define default slide templates
@@ -435,7 +435,7 @@ function processStatus(db)
                 {
                     case 1:
                         statusMarquee += `<div class="col-2">
-                  	<span class="m-1 btn btn-danger btn-sm">${thestatus.label}</span>
+                  	<span class="m-1 badge badge-danger">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
                   	<strong>CRITICAL</strong>: ${thestatus.data}
@@ -445,7 +445,7 @@ function processStatus(db)
                         break;
                     case 2:
                         statusMarquee += `<div class="col-2">
-                  	<span class="m-1 btn btn-urgent btn-sm">${thestatus.label}</span>
+                  	<span class="m-1 badge badge-urgent">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
                   	<strong>Urgent</strong>: ${thestatus.data}
@@ -455,7 +455,7 @@ function processStatus(db)
                         break;
                     case 3:
                         statusMarquee += `<div class="col-2">
-                  	<span class="m-1 btn btn-warning btn-sm">${thestatus.label}</span>
+                  	<span class="m-1 badge badge-warning">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
                   	<strong>Warning</strong>: ${thestatus.data}
@@ -465,7 +465,7 @@ function processStatus(db)
                         break;
                     case 4:
                         statusMarquee += `<div class="col-2">
-                  	<span class="m-1 btn btn-outline-success btn-sm">${thestatus.label}</span>
+                  	<span class="m-1 badge badge-secondary">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
                   	<strong>Offline</strong>: ${thestatus.data}
@@ -473,7 +473,7 @@ function processStatus(db)
                         break;
                     case 5:
                         statusMarquee += `<div class="col-2">
-                  	<span class="m-1 btn btn-success btn-sm">${thestatus.label}</span>
+                  	<span class="m-1 badge badge-success">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
                   	<strong>Good</strong>: ${thestatus.data}
@@ -1031,10 +1031,10 @@ function announcementsSocket()
 function processWeeklyStats(data) {
     var temp = document.getElementById(`analytics`);
     if (temp !== null)
-        temp.innerHTML = `<p><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
-     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
-     <p><span style="color: rgb(204, 232, 232);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232);">Top Playlist: ${data.topPlaylist}</span></p>
-     <p><span style="color: rgb(204, 232, 204);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204);">Track requests placed: ${data.tracksRequested}</span></p>`;
+        temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
+     <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
+     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;
 }
 
 function createAnnouncement(data) {
@@ -1053,7 +1053,7 @@ function createAnnouncement(data) {
             transitionOut: `fadeOut`,
             displayTime: data.displayTime || 15,
             fitContent: true,
-            html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden;" id="content-attn-${data.ID}">${data.announcement}</div>`
+            html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`
         });
     }
 }
