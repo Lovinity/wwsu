@@ -534,6 +534,7 @@ function processCalendar(db)
 
         // Process events today slide
         var innercontent = document.getElementById('events-today');
+        innercontent.innerHTML = ``;
         if (typeof calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] !== 'undefined')
         {
             if (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length > 0)
@@ -1923,7 +1924,7 @@ function processNowPlaying(response)
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 chip-icon bg-primary text-white shadow-8" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3); width: 50%, height: 50%;" id="countdown-clock">?</div>
+                    <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
                     </div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
@@ -1967,8 +1968,7 @@ function processNowPlaying(response)
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 chip-icon bg-purple text-white shadow-8" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3); width: 50%, height: 50%;" id="countdown-clock">?</div>
-                    </div></div>`;
+<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                    </div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2009,8 +2009,7 @@ function processNowPlaying(response)
                     });
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 chip-icon bg-success text-white shadow-8" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3); width: 50%, height: 50%;" id="countdown-clock">?</div>
-                    </div></div>`;
+<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2052,8 +2051,7 @@ function processNowPlaying(response)
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 chip-icon bg-primary text-white shadow-8" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3); width: 50%, height: 50%;" id="countdown-clock">?</div>
-                    </div></div>`;
+<div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2095,8 +2093,7 @@ function processNowPlaying(response)
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 chip-icon bg-purple text-white shadow-8" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3); width: 50%, height: 50%;" id="countdown-clock">?</div>
-                    </div></div>`;
+<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2137,8 +2134,7 @@ function processNowPlaying(response)
                     });
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 chip-icon bg-success text-white shadow-8" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3); width: 50%, height: 50%;" id="countdown-clock">?</div>
-                    </div></div>`;
+<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
