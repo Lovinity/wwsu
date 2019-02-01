@@ -179,7 +179,7 @@ var Slides = (() => {
         if (temp !== null)
         {
             temp.innerHTML = ``;
-            var stickyOnly = slides.filter((_slides) => _slides.isSticky).length > 0;
+            var stickyOnly = slides.filter((_slides) => _slides.isSticky && _slides.active).length > 0;
             var _slides = [];
             if (stickyOnly)
             {
@@ -411,7 +411,7 @@ var Slides = (() => {
                 console.log(`No time`);
 
                 // Determine which slides qualify to be displayed
-                var stickyOnly = slides.filter((_slides) => _slides.isSticky).length > 0;
+                var stickyOnly = slides.filter((_slides) => _slides.isSticky && _slides.active).length > 0;
                 var activeIndexes = [];
                 if (stickyOnly)
                 {
