@@ -344,6 +344,12 @@ var Slides = (() => {
                     // Sometimes, animation callback will not fire. Add a 10-second failsafe just in case.
                     var failsafe = setTimeout(() => {
                         console.log(`animation failsafe triggered`);
+                        var temp = document.getElementById(`slide-${activeSlide().name}`);
+                        if (temp !== null)
+                        {
+                            temp.style.display = "none";
+                            temp.className = "";
+                        }
                         afterFunction();
                     }, 10000);
                     
