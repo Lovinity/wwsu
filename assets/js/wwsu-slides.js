@@ -334,9 +334,17 @@ var Slides = (() => {
                 if (temp !== null)
                 {
                     console.log(`slide exists; process animation`);
+                    
+                    // Sometimes, animation callback will not fire. Add a 10-second failsafe just in case.
+                    var failsafe = setTimeout(() => {
+                        console.log(`animation failsafe triggered`);
+                        afterFunction();
+                    }, 10000);
+                    
                     $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
                         console.log(`animation complete`);
                         temp.style.display = "none";
+                        clearTimeout(failsafe);
                         afterFunction();
                     });
                 } else {
