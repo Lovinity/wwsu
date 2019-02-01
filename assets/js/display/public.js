@@ -225,9 +225,9 @@ try {
         setInterval(() => {
             Slides.slide(`aaup`).html = `
             <h1 style="text-align: center; font-size: 3em; color: #FF7878">AAUP-WSU Strike</h1>
-            <div style="text-align: center; font-size: 6em; color: #ff7878" id="aaup-day" class="border border-danger">Day ${(parseInt(moment(Meta.time).diff(moment("2019-01-22 00:00:00"), 'days')) + 1)}</div>
-            <div style="text-align: center; font-size: 3em; color: #ffff78" id="aaup-total">Total: ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("hh:mm:ss")}</div>
-            ${directorpresent ? `<div style="text-align: center; font-size: 4em; color: #FFFFFF" class="m-3" id="aaup-strike2">Has the strike impacted you?</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Come in to make a quick recording.</div>` : ``}`;
+            <div style="text-align: center; font-size: 6em; 4px 8px 6px rgba(0,0,0,0.3);" id="aaup-day" class="rounded bg-danger text-white shadow-8">Day ${(parseInt(moment(Meta.time).diff(moment("2019-01-22 00:00:00"), 'days')) + 1)}</div>
+            <div style="text-align: center; font-size: 3em; color: #ffff78; 2px 4px 3px rgba(0,0,0,0.3);" id="aaup-total">Total: ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("hh:mm:ss")}</div>
+            ${directorpresent ? `<div style="text-align: center; font-size: 4em; color: #FFFFFF; 2px 4px 3px rgba(0,0,0,0.3);" class="m-3" id="aaup-strike2">Has the strike impacted you?</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Come in to make a quick recording.</div>` : ``}`;
         }, 1000);
 
     }
