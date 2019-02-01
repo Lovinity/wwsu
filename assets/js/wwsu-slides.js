@@ -258,6 +258,13 @@ var Slides = (() => {
                     }
                 }
 
+                // Failsafe: iterate through all slides and set display to none to prevent stray slides from remaining visible
+                slides.map((_slide) => {
+                    var temp = document.getElementById(`slide-${_slide.name}`);
+                    if (temp !== null)
+                        temp.style.display = "none";
+                });
+
                 // Show the slide
                 console.log(`showing slide`);
                 var temp = document.getElementById(`slide-${activeSlide().name}`);
