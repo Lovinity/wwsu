@@ -212,13 +212,13 @@ var Slides = (() => {
         slides.map((_slide, index) => {
             if (_slide.name === slideName)
             {
-                _slide.remove();
-                delete slides[index];
                 if (index === currentSlide)
                 {
                     currentSlide = -1;
                     timeLeft = 0;
                 }
+                _slide.remove();
+                delete slides[index];
             }
         });
         updateBadges();
@@ -323,7 +323,7 @@ var Slides = (() => {
 
                             var newLeftPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).width() * basePage.scale) - maxWidth) / 2));
                             var newTopPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).height() * basePage.scale) - maxHeight) / 2));
-                            
+
                             console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`);
 
                             $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
@@ -340,7 +340,7 @@ var Slides = (() => {
                 if (temp !== null)
                 {
                     console.log(`slide exists; process animation`);
-                    
+
                     // Sometimes, animation callback will not fire. Add a 10-second failsafe just in case.
                     var failsafe = setTimeout(() => {
                         console.log(`animation failsafe triggered`);
@@ -352,7 +352,7 @@ var Slides = (() => {
                         }
                         afterFunction();
                     }, 10000);
-                    
+
                     $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
                         console.log(`animation complete`);
                         temp.style.display = "none";
