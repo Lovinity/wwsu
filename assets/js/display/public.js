@@ -1517,7 +1517,6 @@ function announcementsSocket()
 function doEas()
 {
     try {
-        return null;
         console.log(`DO EAS called`);
         // Display the new alert if conditions permit
         if ((newEas.length > 0 && !easActive))
