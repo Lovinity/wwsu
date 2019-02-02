@@ -13,6 +13,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Helper eas.preParse called.');
         Eas.activeCAPS = [];
+        Eas.pendingAlerts = {};
         return exits.success();
     }
 

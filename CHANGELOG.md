@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file as of versio
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
+## [unreleased]
+### Added
+ - wwsu-slides.js for managing display sign slides
+
+### Changed
+ - Display Internal now uses material design and wwsu-slides.js
+ - Display Public now uses material design and wwsu-slides.js
+
+## Fixed
+ - Attempted to fix a bug where new NWS alerts were being pushed to websockets containing only the first county issued. Now, it should wait until all counties are processed.
+
 ## [5.0.1] - 2019-01-27
 ### Deprecated
  - sails.helpers.songs.remove includeCurrentTrack parameter never worked correctly and will instead be used by something else. This parameter will now be ignored. It will be removed in 6.0.0.

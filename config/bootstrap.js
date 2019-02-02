@@ -747,10 +747,10 @@ module.exports.bootstrap = async function (done) {
 
                                     // Get the configured break tasks, but clone it. We're going to reverse the order, so we don't want to reverse the original object.
                                     var breakOpts = _.cloneDeep(sails.config.custom.breaks[key]);
-                                    
+
                                     // Reverse the order of execution so queued things are in the same order as configured.
                                     breakOpts.reverse();
-                                    
+
                                     // Go through each task
                                     if (breakOpts.length > 0)
                                     {
@@ -1128,30 +1128,24 @@ module.exports.bootstrap = async function (done) {
                 // Iterate through every configured county and get their weather alerts
                 var complete = 0;
                 var bad = [];
-                sails.log.debug(`Calling asyncForEach in cron EAS for checking every EAS source`);
-                await sails.helpers.asyncForEach(sails.config.custom.EAS.NWSX, function (county, index) {
-                    return new Promise(async (resolve, reject) => {
-                        try {
-                            sails.log.verbose(`Trying ${county.name}-${county.code}`);
-                            needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`, {}, {headers: {'Content-Type': 'application/json'}})
-                                    .then(async function (resp) {
-                                        await sails.helpers.eas.parseCaps(county.name, resp.body);
-                                        complete++;
-                                        return resolve(false);
-                                    })
-                                    .catch(function (err) {
-                                        bad.push(county.name);
-                                        // Do not reject on error; just go to the next county
-                                        sails.log.error(err);
-                                        return resolve(false);
-                                    });
-                        } catch (e) {
-                            bad.push(county.name);
-                            // Do not reject on error; just go to the next county
-                            sails.log.error(e);
-                            return resolve(false);
-                        }
-                    });
+                sails.log.debug(`Calling asyncLoop in cron EAS for checking every EAS source`);
+                
+                var asyncLoop = async function (array, callback) {
+                    for (let index = 0; index < array.length; index++) {
+                        await callback(array[index], index, array);
+                    }
+                };
+                
+                await asyncLoop(sails.config.custom.EAS.NWSX, async (county, index) => {
+                    try {
+                        var resp = await needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`, {}, {headers: {'Content-Type': 'application/json'}});
+                        await sails.helpers.eas.parseCaps(county.name, resp.body);
+                        complete++;
+                    } catch (err) {
+                        bad.push(county.name);
+                        // Do not reject on error; just go to the next county
+                        sails.log.error(err);
+                    }
                 });
 
                 // If all counties succeeded, mark EAS-internal as operational

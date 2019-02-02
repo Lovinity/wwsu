@@ -1,4 +1,4 @@
-/* global Eas, sails, moment, needle */
+/* global Eas, sails, moment, needle, Promise */
 
 module.exports = {
 
@@ -67,6 +67,31 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
 
+            // Define a function for processing information into the Eas.pendingAlerts variable.
+            var processPending = (criteria) => {
+                if (typeof Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined`)
+                {
+                    Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] = criteria;
+                } else {
+                    for (var key in criteria)
+                    {
+                        if (criteria.hasOwnProperty(key))
+                        {
+                            if (key !== `counties`)
+                            {
+                                Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = criteria[key];
+                            } else {
+                                var temp = Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key].split(', ');
+                                if (temp.indexOf(inputs.county) === -1)
+                                    temp.push(inputs.county);
+                                temp = temp.join(', ');
+                                Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = temp;
+                            }
+                        }
+                    }
+                }
+            }
+
             // Get the alert if it already exists in the database
             var record = await Eas.findOne({source: inputs.source, reference: inputs.reference})
                     .tolerate((err) => {
@@ -112,8 +137,8 @@ module.exports = {
                 sails.log.silly(`Needs updating?: ${updateIt}`);
                 if (updateIt)
                 {
-                    await Eas.update({ID: record.ID}, criteria)
-                            .fetch();
+                    criteria._new = false;
+                    processPending(criteria);
                 }
                 return exits.success();
 
@@ -134,56 +159,50 @@ module.exports = {
                 };
 
                 // If this alert came from NWS, we need to GET a separate URL for alert information before we create the record.
-                if (inputs.source === 'NWS')
+                if (inputs.source === 'NWS' && (typeof Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null))
                 {
                     sails.log.verbose('Alert is from NWS source. Retrieving alert information.');
                     try {
-                        needle('get', inputs.reference)
-                                .then(async function (resp) {
-                                    try {
+                        var resp = await needle('get', inputs.reference);
+                        try {
+                            sails.log.silly(resp.body);
 
-                                        sails.log.silly(resp.body);
+                            // Go through each child
+                            var maps = resp.body.children
+                                    .filter(entry => typeof entry.name !== 'undefined' && entry.name === 'info')
+                                    .map(async entry => {
+                                        try {
+                                            var alert = {};
 
-                                        // Go through each child
-                                        var maps = resp.body.children
-                                                .filter(entry => typeof entry.name !== 'undefined' && entry.name === 'info')
-                                                .map(async entry => {
-                                                    try {
-                                                        var alert = {};
+                                            // Parse field information into the alert variable
+                                            entry.children.map(entry2 => alert[entry2.name] = entry2.value);
 
-                                                        // Parse field information into the alert variable
-                                                        entry.children.map(entry2 => alert[entry2.name] = entry2.value);
+                                            // Sometimes, EAS will return "This alert has expired". If so, leave information blank.
+                                            if (!alert.description.includes("This alert has expired"))
+                                                criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
+                                            sails.log.silly(`Criteria: ${criteria}`);
+                                            criteria._new = true;
+                                            processPending(criteria);
+                                            return true;
 
-                                                        // Sometimes, EAS will return "This alert has expired". If so, do not process this alert for now.
-                                                        if (alert.description.includes("This alert has expired"))
-                                                            return false;
+                                        } catch (e) {
+                                            throw e;
+                                        }
+                                    });
+                            await Promise.all(maps);
 
-                                                        criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
-                                                        sails.log.silly(`Criteria: ${criteria}`);
-                                                        await Eas.create(criteria)
-                                                                .fetch();
-                                                        return true;
+                            return exits.success();
 
-                                                    } catch (e) {
-                                                        throw e;
-                                                    }
-                                                });
-                                        await Promise.all(maps);
-
-                                    } catch (e) {
-                                        throw e;
-                                    }
-                                })
-                                .catch(function (err) {
-                                    throw err;
-                                });
+                        } catch (e) {
+                            throw e;
+                        }
                     } catch (e) {
                         throw e;
                     }
                 } else {
                     sails.log.silly(`Criteria: ${criteria}`);
-                    var record = await Eas.create(criteria)
-                            .fetch();
+                    criteria._new = true;
+                    processPending(criteria);
                     return exits.success();
                 }
             }
