@@ -283,7 +283,7 @@ var Slides = (() => {
 
                 // Show the slide. Update inner html to configured value in case fn changed it.
                 console.log(`showing slide`);
-                var temp = document.getElementById(`slide-${activeSlide().name}`);
+                var temp = document.getElementById(`content-slide-${activeSlide().name}`);
                 if (temp !== null)
                 {
                     if (activeSlide().reset)
@@ -401,7 +401,7 @@ var Slides = (() => {
 
             // Show the slide. Update inner html to configured value in case fn changed it.
             console.log(`showing slide`);
-            var temp = document.getElementById(`slide-${activeSlide().name}`);
+            var temp = document.getElementById(`content-slide-${activeSlide().name}`);
             if (temp !== null)
             {
                 if (activeSlide().reset)

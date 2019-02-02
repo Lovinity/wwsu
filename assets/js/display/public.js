@@ -75,7 +75,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 14,
         fitContent: false,
-        html: `<div style="text-align: center; width: 100%;"><img src="../images/display/logo.png" style="max-height: 300px; width: auto;"></div>
+        html: `<div style="text-align: center; width: 100%;"><img src="../images/display/logo_true.png" style="max-height: 300px; width: auto;"></div>
                             <div id="slide-wwsu-bottom">
                             <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Website: <span class="text-primary">wwsu1069.org</span></h1>
 <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Line: <span class="text-warning">937-775-5554</span></h1>
@@ -94,7 +94,7 @@ try {
             <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/facebook.png"></div>
             <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/twitter.png"></div>
             <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/instagram.png"></div>`;
-                        $('#thebottom').animateCss('fadeIn');
+                        $('#slide-wwsu-bottom').animateCss('fadeIn');
                     }
                 });
             }, 7000);
