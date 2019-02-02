@@ -32,6 +32,13 @@ module.exports = {
         announcement: {
             type: 'string'
         },
+        
+        displayTime: {
+            type: 'number',
+            defaultsTo: 15,
+            min: 5,
+            max: 60
+        },
 
         starts: {
             type: 'ref',

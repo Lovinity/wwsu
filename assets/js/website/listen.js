@@ -1031,7 +1031,7 @@ function addAnnouncement(announcement)
             closeOnClick: true,
             close: true,
             position: 'bottomCenter',
-            timeout: false
+            timeout: announcement.displayTime || 15
         });
     }
 }

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
  - wwsu-slides.js for managing display sign slides
+ - displayTime to announcements and relevant endpoints; used to specify the amount of time in seconds the announcement should display on display signs and on the web. Defaults to 15. Must be between 5 and 60.
 
 ### Changed
  - Display Internal now uses material design and wwsu-slides.js
@@ -14,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
  - Attempted to fix a bug where new NWS alerts were being pushed to websockets containing only the first county issued. Now, it should wait until all counties are processed.
+ - Uncaught length bug in truncateText helper.
 
 ## [5.0.1] - 2019-01-27
 ### Deprecated

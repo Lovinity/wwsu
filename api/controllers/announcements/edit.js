@@ -35,6 +35,12 @@ module.exports = {
             description: 'The announcement text.'
         },
 
+        displayTime: {
+            type: 'number',
+            min: 5,
+            max: 60
+        },
+
         starts: {
             type: 'string',
             custom: function (value) {
@@ -75,6 +81,9 @@ module.exports = {
 
             if (inputs.announcement !== null && typeof inputs.announcement !== 'undefined')
                 criteria.announcement = inputs.announcement;
+
+            if (inputs.displayTime !== null && typeof inputs.displayTime !== 'undefined')
+                criteria.displayTime = inputs.displayTime;
 
             if (inputs.starts !== null && typeof inputs.starts !== 'undefined')
                 criteria.starts = moment(inputs.starts).toISOString(true);

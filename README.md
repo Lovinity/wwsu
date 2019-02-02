@@ -84,6 +84,7 @@ Adds an announcement into the system.
 | level | string (required; Severity level. Must be in: ["danger", "warning", "info", "trivial"]) |
 | title | string (required; the short and concise title/header for this announcement) |
 | announcement | string (required; The announcement text. HTML is allowed, but subject to server-side filtering.) |
+| displayTime | number (optional; the number of seconds this announcement should display for on applicable devices, such as display signs and the web. Must be between 5 and 60. Defaults to 15.) |
 | starts | string (optional; the ISO moment.js compatible time that the announcement starts. Defaults to now.) |
 | expires | string (optional; the ISO moment.js compatible time that the announcement expires. Defaults to the year 3000.) |
 #### Response 200 OK
@@ -99,6 +100,7 @@ Edits an existing announcement.
 | level | string (optional, but edits original value when provided; Severity level. Must be in: ["danger", "warning", "info", "trivial"]) |
 | title | string (optional, but edits the original title for the announcement) |
 | announcement | string (optional, but edits original value if provided; The announcement text) |
+| displayTime | number (optional, but edits original value if provided; the number of seconds this announcement should display for on applicable devices, such as display signs and the web. Must be between 5 and 60 if specified.) |
 | starts | string (optional, but edits original value if provided; the ISO moment.js compatible time that the announcement starts.) |
 | expires | string (optional, but edits original value if provided; the ISO moment.js compatible time that the announcement expires.) |
 #### Response 200 OK
@@ -122,6 +124,7 @@ Get an array of announcements for the provided type.
                 "level": "info", // Severity level. Will be one of: ["danger", "warning", "info", "trivial"].
                 "title": "Men's Basketball", // The title/header of the announcement
                 "announcement": "Do not forget to do your air checks. They are due August 3.", // The announcement text or HTML
+                "displayTime": 15, // The number of seconds this announcement should display on applicable devices
                 "starts": "2018-05-15T22:31:34.381Z", // ISO string of when the announcement begins.
                 "expires": "2018-08-3T22:31:34.381Z" // ISO string of when the announcement expires.
             },

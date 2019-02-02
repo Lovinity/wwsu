@@ -31,6 +31,13 @@ module.exports = {
             required: true,
             description: 'The announcement text.'
         },
+        
+        displayTime: {
+            type: 'number',
+            defaultsTo: 15,
+            min: 5,
+            max: 60
+        },
 
         starts: {
             type: 'string',
@@ -59,7 +66,7 @@ module.exports = {
         try {
 
             // Add the announcement to the database
-            await Announcements.create({type: inputs.type, level: inputs.level, title: inputs.title, announcement: inputs.announcement, starts: inputs.starts !== null && typeof inputs.starts !== 'undefined' ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), expires: inputs.expires !== null && typeof inputs.expires !== 'undefined' ? moment(inputs.expires).toISOString(true) : moment({year : 3000}).toISOString(true)}).fetch();
+            await Announcements.create({type: inputs.type, level: inputs.level, title: inputs.title, announcement: inputs.announcement, displayTime: inputs.displayTime, starts: inputs.starts !== null && typeof inputs.starts !== 'undefined' ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), expires: inputs.expires !== null && typeof inputs.expires !== 'undefined' ? moment(inputs.expires).toISOString(true) : moment({year : 3000}).toISOString(true)}).fetch();
 
             return exits.success();
         } catch (e) {
