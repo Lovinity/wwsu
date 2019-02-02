@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file as of versio
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
-## [unreleased]
+## [5.0.2] - 2019-02-02
 ### Added
  - wwsu-slides.js for managing display sign slides
  - displayTime to announcements and relevant endpoints; used to specify the amount of time in seconds the announcement should display on display signs and on the web. Defaults to 15. Must be between 5 and 60.
