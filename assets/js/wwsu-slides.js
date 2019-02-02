@@ -16,7 +16,8 @@ class Slide {
         this._transitionOut = data.transitionOut || "fadeOut";
         this._displayTime = data.displayTime || 14;
         this._fitContent = data.fitContent || false;
-        this._fn = data.fn || (() => {});
+        this._fn = data.fn || (() => {
+        });
 
         var temp = document.getElementById(`slides`);
         if (temp !== null)
@@ -288,8 +289,10 @@ var Slides = (() => {
                 {
                     if (activeSlide().reset)
                         temp.innerHTML = activeSlide().innerHtml;
-                    temp.style.display = "inline";
                 }
+                var temp = document.getElementById(`slide-${activeSlide().name}`);
+                if (temp !== null)
+                    temp.style.display = "inline";
                 $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
                 });
 
@@ -406,8 +409,10 @@ var Slides = (() => {
             {
                 if (activeSlide().reset)
                     temp.innerHTML = activeSlide().innerHtml;
-                temp.style.display = "inline";
             }
+            var temp = document.getElementById(`slide-${activeSlide().name}`);
+            if (temp !== null)
+                temp.style.display = "inline";
 
             activeSlide().fn();
 
