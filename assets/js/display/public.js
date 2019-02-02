@@ -1182,6 +1182,7 @@ function processEas(db)
 
         prevEas = [];
         var innercontent = document.getElementById('eas-alerts');
+        innercontent.innerHTML = ``;
 
         var makeActive = false;
         var displayTime = 7;
