@@ -110,7 +110,7 @@ class Slide {
         } else {
             this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`;
         }
-        var temp = document.getElementById(`slide-${this._name}`);
+        var temp = document.getElementById(`content-slide-${this._name}`);
         if (temp !== null)
             temp.innerHTML = value;
     }
