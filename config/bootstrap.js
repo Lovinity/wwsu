@@ -619,21 +619,16 @@ module.exports.bootstrap = async function (done) {
                     if (Meta['A'].state === 'automation_break')
                         await sails.helpers.error.count('automationBreak');
 
-                    // Check if a break is needed (delay to :03 after... no need to remind unless the DJ forgot, which is assumed at :03 after)
+                    // Check if a DJ neglected the required top of the hour break (passes :05 after)
                     var d = new Date();
                     var n = d.getMinutes();
-                    if (!Meta['A'].state.includes("automation_") && !Meta['A'].state.includes("_break") && !Meta['A'].state.includes("_returning") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown' && n > 2 && n < 10 && (Status.errorCheck.prevID === null || moment(Status.errorCheck.prevID).isBefore(moment().subtract(20, 'minutes'))))
+                    if (moment().diff(Meta['A'].lastID, 'minutes') >= 60 && n >= 5 && !Meta['A'].state.includes("automation_") && !Meta['A'].state.includes("_break") && !Meta['A'].state.includes("_returning") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown')
                     {
-                        change.breakneeded = true;
-                    } else {
-                        if (Meta['A'].breakneeded && n >= 10)
-                        {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].show}`})
-                                    .tolerate((err) => {
-                                        sails.log.error(err);
-                                    });
-                        }
-                        change.breakneeded = false;
+                        await Meta.changeMeta({lastID: moment().toISOString(true)});
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].show}`})
+                                .tolerate((err) => {
+                                    sails.log.error(err);
+                                });
                     }
 
 
@@ -1129,13 +1124,13 @@ module.exports.bootstrap = async function (done) {
                 var complete = 0;
                 var bad = [];
                 sails.log.debug(`Calling asyncLoop in cron EAS for checking every EAS source`);
-                
+
                 var asyncLoop = async function (array, callback) {
                     for (let index = 0; index < array.length; index++) {
                         await callback(array[index], index, array);
                     }
                 };
-                
+
                 await asyncLoop(sails.config.custom.EAS.NWSX, async (county, index) => {
                     try {
                         var resp = await needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`, {}, {headers: {'Content-Type': 'application/json'}});
