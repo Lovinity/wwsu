@@ -1,4 +1,4 @@
-/* global sails, Meta, Logs, Status */
+/* global sails, Meta, Logs, Status, Xp, moment */
 
 module.exports = {
 
@@ -46,12 +46,12 @@ module.exports = {
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 2);
-                
-                
+
+
                 Status.errorCheck.prevID = moment();
                 Status.errorCheck.prevBreak = moment();
                 await sails.helpers.error.count('stationID');
-                
+
                 // Change state to halftime mode
                 if (Meta['A'].state.startsWith("sportsremote"))
                 {
@@ -63,28 +63,48 @@ module.exports = {
                 // Standard break
             } else {
                 Status.errorCheck.prevBreak = moment();
-                
+
                 // Queue and play tracks
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
+                var d = new Date();
+                var num = d.getMinutes();
+                // Queue station ID if between :55 and :05, or if it's been more than 50 minutes since the last ID break.
+                if (num >= 55 || num < 5 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 50 * 1000))
+                {
+                    await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                    Status.errorCheck.prevID = moment();
+                    await sails.helpers.error.count('stationID');
+                    await Meta.changeMeta({lastID: moment().toISOString(true)});
+
+                    // Earn XP for doing the top of the hour ID break, if the show is live
+                    if (Meta['A'].state.startsWith("live_") && (num >= 55 || num < 5))
+                    {
+                        await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: "DJ played an on-time Top of the Hour ID break."})
+                                .tolerate((err) => {
+                                    // Do not throw for error, but log it
+                                    sails.log.error(err);
+                                });
+                    }
+                }
                 await sails.helpers.songs.queuePending();
                 await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 2, true);
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                
+
                 // Switch state to break
                 switch (Meta['A'].state)
                 {
                     case 'live_on':
-                        await Meta.changeMeta({state: 'live_break', lastID: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'live_break'});
                         break;
                     case 'remote_on':
-                        await Meta.changeMeta({state: 'remote_break', lastID: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'remote_break'});
                         break;
                     case 'sports_on':
-                        await Meta.changeMeta({state: 'sports_break', lastID: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'sports_break'});
                         break;
                     case 'sportsremote_on':
-                        await Meta.changeMeta({state: 'sportsremote_break', lastID: moment().toISOString(true)});
+                        await Meta.changeMeta({state: 'sportsremote_break'});
                         break;
                 }
             }

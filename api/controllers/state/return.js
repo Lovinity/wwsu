@@ -43,6 +43,9 @@ module.exports = {
             {
                 // Queue a legal ID
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                Status.errorCheck.prevID = moment();
+                Status.errorCheck.prevBreak = moment();
+                await sails.helpers.error.count('stationID');
 
                 // Queue a sports liner
                 if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
@@ -65,9 +68,9 @@ module.exports = {
                 // Change state
                 if (Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected')
                 {
-                    await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning'});
+                    await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning', lastID: moment().toISOString(true)});
                 } else {
-                    await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning'});
+                    await Meta.changeMeta({queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning', lastID: moment().toISOString(true)});
                 }
 
 
@@ -75,36 +78,21 @@ module.exports = {
                 var d = new Date();
                 var num = d.getMinutes();
 
-                // Queue station IDs if after :50 and before :10, or if it's been an hour or more since the last station ID.
-                if (num >= 50 || num < 10 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 60 * 1000))
+                // Queue stuff if after :55 and before :05, or if it's been 50 or more minutes since the last station ID.
+                if (num >= 55 || num < 5 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 50 * 1000))
                 {
                     // Liners for sports broadcasts, promos for others.
                     if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                     {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                         await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
                     } else {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.strikeIntro, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.strikeTestimonials, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.strikeOuttro, 'Bottom', 1);
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                        await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
                     }
 
-                    // Earn XP for doing the top of the hour ID break, if the show is live
-                    if (Meta['A'].state.startsWith("live_"))
-                    {
-                        await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: "DJ played an on-time Top of the Hour ID break."})
-                                .tolerate((err) => {
-                                    // Do not throw for error, but log it
-                                    sails.log.error(err);
-                                });
-                    }
-
-                    Status.errorCheck.prevID = moment();
-                    Status.errorCheck.prevBreak = moment();
-                    await sails.helpers.error.count('stationID');
-                    await Meta.changeMeta({lastID: moment().toISOString(true)});
                 } else {
                     // Liners for sports broadcasts
                     if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
@@ -116,8 +104,9 @@ module.exports = {
                         await sails.helpers.songs.queue(sails.config.custom.subcats.strikeOuttro, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
                     }
-                    Status.errorCheck.prevBreak = moment();
                 }
+                
+                Status.errorCheck.prevBreak = moment();
 
                 // Do stuff depending on the state
                 switch (Meta['A'].state)
