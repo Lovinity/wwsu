@@ -1810,6 +1810,7 @@ function processNowPlaying(response)
             {
                 var line1Timer = setTimeout(() => {
                     nowplayingline1.innerHTML = Meta.line1;
+                    nowplayingLine1.className = ``;
                     if (Meta.line1.length >= 80)
                     {
                         $('#nowplaying-line1')
@@ -1825,8 +1826,6 @@ function processNowPlaying(response)
                                     //true or false - should the marquee be duplicated to show an effect of continues flow
                                     duplicated: true
                                 });
-                    } else {
-                        $('#nowplaying-line1').animateCss('fadeIn');
                     }
                 }, 5000);
                 $('#nowplaying-line1').animateCss('fadeOut', function () {
@@ -1856,6 +1855,7 @@ function processNowPlaying(response)
             {
                 var line2Timer = setTimeout(() => {
                     nowplayingline2.innerHTML = Meta.line2;
+                    nowplayingLine2.className = ``;
                     if (Meta.line2.length >= 80)
                     {
                         $('#nowplaying-line2')
@@ -1871,8 +1871,6 @@ function processNowPlaying(response)
                                     //true or false - should the marquee be duplicated to show an effect of continues flow
                                     duplicated: true
                                 });
-                    } else {
-                        $('#nowplaying-line2').animateCss('fadeIn');
                     }
                 }, 5000);
                 $('#nowplaying-line2').animateCss('fadeOut', function () {
