@@ -53,7 +53,7 @@ module.exports = {
             var token = jwt.sign({name: director.name, exp: Math.floor(Date.now() / 1000) + (60 * 10)}, sails.config.custom.secrets.director, {subject: 'director'});
 
             // Return the token as an object
-            return exits.success({token: token});
+            return exits.success({token: token, expires: (60000 * 10)});
         } catch (e) {
             return exits.error(e);
         }

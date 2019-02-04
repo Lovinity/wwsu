@@ -45,6 +45,18 @@ Use one of the following endpoints to get an authorization token. Each endpoint 
  - auth/admin-director will be used for endpoints needing authentication of a director with admin=true. Must provide Directors.name as "username", and Directors.login as "password", in request.
  - auth/director-uab will be used for endpoints needing authentication of any USB director. Must provide Uabdirectors.name as "username", and Uabdirectors.login as "password", in request.
  - auth/admin-director-uab will be used for endpoints needing authentication of a USB director with admin=true. Must provide Uabdirectors.name as "username", and Uabdirectors.login as "password", in request.
+
+### Response 200
+        {
+            "token": "gobbledygook", // The authorization token granted for use
+            "expires": 600000 // Number of milliseconds the token is valid for
+        }
+
+### Response 401
+        {
+            "errToken": "Reason why we could not authenticate"
+        }
+
 ## Analytics
 Analytics endpoints deal with getting analytics about WWSU.
 ### /analytics/weekly-dj
