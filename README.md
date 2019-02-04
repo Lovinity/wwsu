@@ -782,6 +782,16 @@ Retrieve an array of recipients that can receive and send messages.
         },
         ...
     ]
+### /recipients/register-peer
+Registers a PeerJS ID with a recipient for use in DJ Controls audio calling.
+ - Clients should call this endpoint whenever a PeerJS connection is established or disconnected.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
+#### Request
+| key | criteria |
+|--|--|
+| peer | string (required; the ID of the PeerJS connection for this recipient. Use null if the peer was disconnected.) |
+#### Response 200 OK
 ## Requests
 Requests endpoints regard the WWSU track request system.
 ### /requests/get

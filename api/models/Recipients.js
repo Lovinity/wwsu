@@ -35,6 +35,11 @@ module.exports = {
             min: 0,
             max: 5
         },
+        
+        peer: {
+            type: 'string',
+            allowNull: true
+        },
 
         time: {
             type: 'ref',
