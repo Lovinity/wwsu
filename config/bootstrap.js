@@ -622,8 +622,7 @@ module.exports.bootstrap = async function (done) {
                     // Check if a DJ neglected the required top of the hour break (passes :05 after)
                     var d = new Date();
                     var n = d.getMinutes();
-                    if (moment().diff(Meta['A'].lastID, 'minutes') >= 60 && n >= 5 && !Meta['A'].state.includes("automation_") && !Meta['A'].state.includes("_break") && !Meta['A'].state.includes("_returning") && Meta['A'].state !== 'live_prerecord' && Meta['A'].state !== 'unknown')
-                    {
+                    if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(Meta['A'].lastID))) {
                         await Meta.changeMeta({lastID: moment().toISOString(true)});
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].show}`})
                                 .tolerate((err) => {
