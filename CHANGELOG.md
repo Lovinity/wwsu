@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [Unreleased]
+### Added
+ - /auth/* endpoints, upon successful authorization, will also return expires property in addition to token property. Expires is how long the token is valid for, in milliseconds.
+
 ### Fixed
  - sails.helpers.recipients.add bug adding all computer recipients to Status instead of only the ones we want to track.
 
