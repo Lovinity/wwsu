@@ -723,7 +723,7 @@ module.exports.bootstrap = async function (done) {
                                     {
                                         Status.errorCheck.prevID = moment();
                                         await sails.helpers.error.count('stationID');
-                                        change.lastID = moment().toISOString(true);
+                                        await Meta.changeMeta({lastID: moment().toISOString(true)});
                                     }
 
                                     // Add XP for prerecords
