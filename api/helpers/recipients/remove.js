@@ -74,7 +74,7 @@ module.exports = {
                 if (Recipients.sockets[recipient.ID].length <= 0)
                 {
                     sails.log.verbose(`Recipient is no longer connected. Setting to offline.`);
-                    await Recipients.update({host: recipient.host}, {host: recipient.host, status: 0, time: moment().toISOString(true)}).fetch();
+                    await Recipients.update({host: recipient.host}, {host: recipient.host, status: 0, peer: null, time: moment().toISOString(true)}).fetch();
 
                     var hostRecord = await Hosts.findOne({host: recipient.host});
                     if (hostRecord)
