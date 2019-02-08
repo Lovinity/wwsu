@@ -196,14 +196,22 @@ class WWSUreq {
             });
         }
 
-        // Token expected to be expired? If so, prompt for login / authorization before making the request
+        // Token expected to be expired?
         if (this.expired())
         {
-            if (this.authPath !== '/auth/host')
+            // If /auth/host, we don't need to prompt for login; authenticate by host
+            if (this.authPath === '/auth/host')
             {
-                this._promptLogin(opts, (username, password) => step2(username, password));
-            } else {
                 step2(this.host, null);
+                // If auth path is null, this request doesn't need authentication; proceed with the request immediately
+            } else if (this.authPath === null)
+            {
+                this._tryRequest(opts, (body2) => {
+                    cb(body2);
+                });
+                // Otherwise, prompt for a login
+            } else {
+                this._promptLogin(opts, (username, password) => step2(username, password));
             }
 
             // Otherwise, try the request, and for safe measures, prompt for login if we end up getting an auth error

@@ -109,6 +109,7 @@ try {
     var clockTimer;
     var globalStatus = 4;
     var hostReq;
+    var noReq;
 
     var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
 
@@ -242,6 +243,7 @@ waitFor(() => {
 
     // Define a host requester
     hostReq = new WWSUreq(io.socket, `display-internal`, 'host', '/auth/host', 'Host');
+    noReq = new WWSUreq(io.socket, `display-internal`);
 
     // Assign socket events to data classes
     Directors.assignSocketEvent('directors', io.socket);
@@ -943,8 +945,8 @@ function directorSocket()
 {
     console.log('attempting director socket');
     try {
-        Directors.replaceData(hostReq, '/directors/get');
-        Directorhours.replaceData(hostReq, '/directors/get-hours');
+        Directors.replaceData(noReq, '/directors/get');
+        Directorhours.replaceData(noReq, '/directors/get-hours');
     } catch (e) {
         console.error(e);
         console.log('FAILED DIRECTORS CONNECTION');
@@ -956,7 +958,7 @@ function directorSocket()
 function metaSocket()
 {
     console.log('attempting meta socket');
-    hostReq.request({method: 'POST', url: '/meta/get', data: {}}, function (body) {
+    noReq.request({method: 'POST', url: '/meta/get', data: {}}, function (body) {
         try {
             temp = body;
             for (var key in temp)
@@ -986,7 +988,7 @@ function statusSocket()
 {
     console.log('attempting status socket');
     try {
-        Status.replaceData(hostReq, '/status/get');
+        Status.replaceData(noReq, '/status/get');
     } catch (e) {
         console.error(e);
         console.log('FAILED STATUS CONNECTION');
@@ -998,7 +1000,7 @@ function statusSocket()
 function weeklyDJSocket()
 {
     console.log('attempting weeklyDJ socket');
-    hostReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, function (body) {
+    noReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, function (body) {
         try {
             processWeeklyStats(body);
         } catch (e) {
@@ -1013,9 +1015,9 @@ function announcementsSocket()
 {
     try {
         var data = [];
-        hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal'}}, function (body) {
+        noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal'}}, function (body) {
             data = data.concat(body);
-            hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal-sticky'}}, function (body) {
+            noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal-sticky'}}, function (body) {
                 data = data.concat(body);
 
                 Announcements.query(data, true);

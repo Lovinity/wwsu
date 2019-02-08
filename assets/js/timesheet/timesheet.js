@@ -206,12 +206,13 @@ var socket = io.sails.connect();
 
 // Create request objects
 var hostReq = new WWSUreq(socket, null, 'host', '/auth/host', 'Host');
+var noReq = new WWSUreq(socket, null);
 var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director', 'Administrator Director');
 
 // Register event handlers
 socket.on('connect', function () {
-    directorsdb.replaceData(hostReq, '/directors/get');
-    timesheetsdb.replaceData(hostReq, '/timesheet/get');
+    directorsdb.replaceData(noReq, '/directors/get');
+    timesheetsdb.replaceData(noReq, '/timesheet/get');
 });
 
 directorsdb.assignSocketEvent('directors', socket);
@@ -298,7 +299,7 @@ function filterDate() {
     }
 
     // Get timesheet records
-    hostReq.request({method: 'POST', url: '/timesheet/get', data: {date: moment(thedate.value).toISOString(true)}}, (resHTML) => {
+    noReq.request({method: 'POST', url: '/timesheet/get', data: {date: moment(thedate.value).toISOString(true)}}, (resHTML) => {
         try {
             // Reset our timesheets array
             if (resHTML.length <= 0)

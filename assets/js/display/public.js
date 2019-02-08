@@ -41,6 +41,7 @@ try {
 
     // Define request object; this will be populated on socket connection
     var hostReq;
+    var noReq;
 
     // Define additional variables
     var flashInterval = null;
@@ -1281,6 +1282,7 @@ waitFor(() => {
 
     // Define hostReq object
     hostReq = new WWSUreq(io.socket, `display-public`, 'host', '/auth/host', 'Host');
+    noReq = new WWSUreq(io.socket, `display-public`);
 
     // When new Meta is received, update it in our memory and then run the process function.
     io.socket.on('meta', function (data) {
@@ -1444,7 +1446,7 @@ function easSocket()
 {
     console.log('attempting eas socket');
     try {
-        Eas.replaceData(hostReq, '/eas/get');
+        Eas.replaceData(noReq, '/eas/get');
     } catch (e) {
         console.log('FAILED CONNECTION');
         setTimeout(easSocket, 10000);
@@ -1454,7 +1456,7 @@ function easSocket()
 function MetaSocket()
 {
     console.log('attempting Meta socket');
-    hostReq.request({method: 'POST', url: '/meta/get', data: {}}, function (body) {
+    noReq.request({method: 'POST', url: '/meta/get', data: {}}, function (body) {
         try {
             temp = body;
             for (var key in temp)
@@ -1476,7 +1478,7 @@ function eventSocket()
 {
     console.log('attempting event socket');
     try {
-        Calendar.replaceData(hostReq, '/calendar/get');
+        Calendar.replaceData(noReq, '/calendar/get');
     } catch (e) {
         console.log(e);
         console.log('FAILED CONNECTION');
@@ -1488,7 +1490,7 @@ function directorSocket()
 {
     console.log('attempting director socket');
     try {
-        Directors.replaceData(hostReq, '/directors/get');
+        Directors.replaceData(noReq, '/directors/get');
     } catch (e) {
         console.log('FAILED CONNECTION');
         setTimeout(directorSocket, 10000);
@@ -1499,9 +1501,9 @@ function announcementsSocket()
 {
     try {
         var data = [];
-        hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-public'}}, function (body) {
+        noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-public'}}, function (body) {
             data = data.concat(body);
-            hostReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-public-sticky'}}, function (body) {
+            noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-public-sticky'}}, function (body) {
                 data = data.concat(body);
 
                 Announcements.query(data, true);
