@@ -1551,7 +1551,7 @@ function doEas()
                 easAlert.style.display = "inline";
                 easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
-                    <div class="m-3" style="color: ${color4}; font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${alert}</div>
+                    <div id="eas-alert-text" class="m-3" style="color: ${color4}; font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${alert}</div>
                     <div class="m-1 text-info" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
                     <div class="m-1 text-warning" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}); font-size: 2.5em;">${text}</div>
@@ -1594,10 +1594,14 @@ function doEas()
                         });
                 clearInterval(flashInterval);
                 flashInterval = setInterval(function () {
-                    $("#eas-alert").css("background-color", color3);
-                    setTimeout(function () {
-                        $("#eas-alert").css("background-color", "#320000");
-                    }, 250);
+                    var temp = document.querySelector(`#eas-alert-text`);
+                    if (temp !== null)
+                        temp.className = "m-3 animated pulse fast";
+                    setTimeout(() => {
+                        var temp = document.querySelector(`#eas-alert-text`);
+                        if (temp !== null)
+                            temp.className = "m-3";
+                    }, 900);
                     if (easActive && document.getElementById('slide-interrupt-eas') === null)
                     {
                         easActive = false;
