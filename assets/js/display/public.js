@@ -205,7 +205,7 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: #FFFFFF">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
     });
 
-    if (isStudio)
+    if (isStudio && moment().isBefore(moment("2019-02-12 00:00:00")))
     {
         // AAUP Strike
         Slides.newSlide({
@@ -213,7 +213,7 @@ try {
             label: `AAUP Strike`,
             weight: -999999,
             isSticky: true,
-            color: `danger`,
+            color: `success`,
             active: true,
             transitionIn: `fadeIn`,
             transitionOut: `fadeOut`,
@@ -226,9 +226,9 @@ try {
         setInterval(() => {
             Slides.slide(`aaup`).html = `
             <h1 style="text-align: center; font-size: 3em; color: #FF7878">AAUP-WSU Strike</h1>
-            <div style="text-align: center; font-size: 6em; text-shadow: 4px 8px 6px rgba(0,0,0,0.3);" id="aaup-day" class="rounded bg-danger text-white shadow-8">Day ${(parseInt(moment(Meta.time).diff(moment("2019-01-22 00:00:00"), 'days')) + 1)}</div>
-            <div style="text-align: center; font-size: 3em; color: #ffff78; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="aaup-total">Total: ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("hh:mm:ss")}</div>
-            ${directorpresent ? `<div style="text-align: center; font-size: 4em; color: #FFFFFF; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="m-3" id="aaup-strike2">Has the strike impacted you?</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="aaup-strike2">Come in to make a quick recording.</div>` : ``}`;
+            <div style="text-align: center; font-size: 6em; text-shadow: 4px 8px 6px rgba(0,0,0,0.3);" id="aaup-day" class="rounded bg-success text-white shadow-8">THE STRIKE IS OVER!!!</div>
+            <div style="text-align: center; font-size: 3em; color: #ffff78; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="aaup-total">Total time: 471 hours (20 days)</div>
+            <div style="text-align: center; font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="m-3 text-success" id="aaup-strike2">Welcome back professors!</div>`;
         }, 1000);
 
     }
