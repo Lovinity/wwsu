@@ -96,9 +96,6 @@ module.exports = {
                     {
                         await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
                     } else {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeIntro, 'Bottom', 1);
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeTestimonials, 'Bottom', 1);
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.strikeOuttro, 'Bottom', 1);
                         await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
                     }
                 }
