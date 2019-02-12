@@ -71,7 +71,14 @@ module.exports = {
             var criteria = {};
 
             if (inputs.type !== null && typeof inputs.type !== 'undefined')
+            {
                 criteria.type = inputs.type;
+                
+                // If the type changed, issue a remove websocket event to the previous type.
+                var record = await Announcements.findOne({ID: inputs.ID});
+                if (record && record.type !== inputs.type)
+                    sails.sockets.broadcast(`announcements-${record.type}`, 'announcements', {remove: inputs.ID});
+            }
 
             if (inputs.level !== null && typeof inputs.level !== 'undefined')
                 criteria.level = inputs.level;

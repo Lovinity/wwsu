@@ -58,7 +58,7 @@ module.exports = {
                         .map(async (instance) => {
                             var status = await Status.findOne({name: `radiodj-${instance.name}`});
                             if (status && status.status !== 1)
-                                await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed.`}]);
+                                await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.`}]);
                             return true;
                         });
                 await Promise.all(maps);

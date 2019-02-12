@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
  - sails.helpers.recipients.add bug adding all computer recipients to Status instead of only the ones we want to track.
  - Host request in wwsu.js fails for non-authentication requests. [Issue 62](https://github.com/Lovinity/wwsu/issues/62)
+ - Changing announcement type caused display slides to not be removed when they should have been. Now, when announcement type is changed, a websocket remove is sent to the previous type.
 
 ## [5.0.2] - 2019-02-02
 ### Added

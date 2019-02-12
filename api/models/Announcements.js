@@ -62,7 +62,7 @@ module.exports = {
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = {update: updatedRecord};
-        sails.log.silly(`calendar socket: ${data}`);
+        sails.log.silly(`announcements socket: ${data}`);
         sails.sockets.broadcast(`announcements-${updatedRecord.type}`, 'announcements', data);
         sails.sockets.broadcast(`announcements-all`, 'announcements', data);
         return proceed();

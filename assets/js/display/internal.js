@@ -108,7 +108,6 @@ try {
     var offlineTimer;
     var clockTimer;
     var globalStatus = 4;
-    var hostReq;
     var noReq;
 
     var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
@@ -242,7 +241,6 @@ waitFor(() => {
 }, () => {
 
     // Define a host requester
-    hostReq = new WWSUreq(io.socket, `display-internal`, 'host', '/auth/host', 'Host');
     noReq = new WWSUreq(io.socket, `display-internal`);
 
     // Assign socket events to data classes
@@ -931,7 +929,7 @@ function processDirectorHours(db)
 function onlineSocket()
 {
     console.log('attempting online socket');
-    hostReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-internal'}}, function (body) {
+    noReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-internal'}}, function (body) {
         try {
         } catch (e) {
             console.log('FAILED ONLINE CONNECTION');
