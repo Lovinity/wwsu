@@ -284,14 +284,7 @@ var Slides = (() => {
                     }
                 }
 
-                // Failsafe: iterate through all slides and set display to none to prevent stray slides from remaining visible
-                slides.map((_slide) => {
-                    var temp = document.getElementById(`slide-${_slide.name}`);
-                    if (temp !== null)
-                        temp.style.display = "none";
-                });
-
-                // Show the slide. Update inner html to configured value in case fn changed it.
+                // Update inner html to configured value in case fn changed it.
                 console.log(`showing slide`);
                 var temp = document.getElementById(`content-slide-${activeSlide().name}`);
                 if (temp !== null)
@@ -299,9 +292,24 @@ var Slides = (() => {
                     if (activeSlide().reset)
                         temp.innerHTML = activeSlide().innerHtml;
                 }
+
+                // Failsafe: iterate through all slides and set display to none to prevent stray slides from remaining visible
+                slides.map((_slide) => {
+                    var temp = document.getElementById(`slide-${_slide.name}`);
+                    if (temp !== null)
+                        temp.style.display = "none";
+                });
+
+                // Display active slide
                 var temp = document.getElementById(`slide-${activeSlide().name}`);
                 if (temp !== null)
                     temp.style.display = "inline";
+
+                // Reset animation classes
+                var temp = document.getElementById(`content-slide-${activeSlide().name}`);
+                if (temp !== null)
+                    temp.className = "";
+
                 $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
                 });
 
@@ -387,15 +395,18 @@ var Slides = (() => {
                         console.log(`animation failsafe triggered`);
                         var temp = document.getElementById(`slide-${activeSlide().name}`);
                         if (temp !== null)
-                        {
                             temp.style.display = "none";
+                        var temp = document.getElementById(`content-slide-${activeSlide().name}`);
+                        if (temp !== null)
                             temp.className = "";
-                        }
                         afterFunction();
                     }, 5000);
 
                     $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
                         console.log(`animation complete`);
+                        var temp = document.getElementById(`content-slide-${activeSlide().name}`);
+                        if (temp !== null)
+                            temp.className = "";
                         temp.style.display = "none";
                         clearTimeout(failsafe);
                         afterFunction();
