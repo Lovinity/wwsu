@@ -162,6 +162,15 @@ var Slides = (() => {
     // Return the Slide class of the currently active slide
     const activeSlide = (() => slides[currentSlide] || {});
 
+    // Return the number of currently active slides
+    const countActive = (() => {
+        try {
+            return slides.filter((_slides) => _slides.active).count;
+        } catch (eee) {
+            return 0;
+        }
+    });
+
     // Return the Slide class of the provided slide name
     const slide = ((slideName) => {
         return slides.filter((_slide) => _slide.name === slideName)[0];
@@ -533,6 +542,6 @@ var Slides = (() => {
     }, 1000);
 
     // Return the stuff
-    return {updateBadges, activeSlide, slide, allSlides, newSlide, removeSlide, showSlide};
+    return {updateBadges, activeSlide, countActive, slide, allSlides, newSlide, removeSlide, showSlide};
 })();
 

@@ -579,17 +579,9 @@ function processStatus(db)
 
         prevStatus = globalStatus;
 
-        // Have dim elements if we are to be in power saving mode
-        if (typeof Meta.state === 'undefined' || ((moment().isAfter(moment({hour: 8, minute: 0})) && (moment().isBefore(moment({hour: 22, minute: 0})))) || !Meta.state.startsWith("automation_") || directorpresent || Meta.state === 'automation_live' || Meta.state === 'automation_sports' || Meta.state === 'automation_remote' || Meta.state === 'automation_sportsremote'))
-        {
-            status.style.backgroundColor = color;
-            status.style.color = 'rgba(255, 255, 255, 1)';
-            statusLine.style.color = 'rgba(255, 255, 255, 1)';
-        } else {
-            status.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-            status.style.color = 'rgba(255, 255, 255, 0.2)';
-            statusLine.style.color = 'rgba(255, 255, 255, 0.2)';
-        }
+        status.style.backgroundColor = color;
+        status.style.color = 'rgba(255, 255, 255, 1)';
+        statusLine.style.color = 'rgba(255, 255, 255, 1)';
 
         // Update status html
         var innercontent = document.getElementById('system-status');

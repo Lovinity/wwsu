@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
  - /auth/* endpoints, upon successful authorization, will also return expires property in addition to token property. Expires is how long the token is valid for, in milliseconds.
+ - Slides.countActive() in wwsu-slides.js for counting the number of active slides currently.
+
+### Changed
+ - /display/public when there is a total of 8 or more active slides, Events 2-4 and Events 5-7 slides will be deactivated to conserve on information.
 
 ### Fixed
  - sails.helpers.recipients.add bug adding all computer recipients to Status instead of only the ones we want to track.

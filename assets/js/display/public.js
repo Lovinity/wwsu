@@ -1218,6 +1218,7 @@ function processEas(db)
 
         Slides.slide(`eas-alerts`).active = makeActive;
         Slides.slide(`eas-alerts`).displayTime = displayTime;
+        checkSlideCounts();
 
         // Do EAS events
         doEas();
@@ -1386,9 +1387,16 @@ waitFor(() => {
     Announcements.setOnUpdate((data, db) => {
         Slides.removeSlide(`attn-${data.ID}`);
         createAnnouncement(data);
+        checkSlideCounts();
     });
-    Announcements.setOnInsert((data, db) => createAnnouncement(data));
-    Announcements.setOnRemove((data, db) => Slides.removeSlide(`attn-${data}`));
+    Announcements.setOnInsert((data, db) => {
+        createAnnouncement(data);
+        checkSlideCounts();
+    });
+    Announcements.setOnRemove((data, db) => {
+        Slides.removeSlide(`attn-${data}`);
+        checkSlideCounts();
+    });
     Announcements.setOnReplace((db) => {
         console.dir(db.get());
         // Remove all announcement slides
@@ -1398,6 +1406,7 @@ waitFor(() => {
 
         // Add slides for each announcement
         db.each((data) => createAnnouncement(data));
+        checkSlideCounts();
     });
 });
 
@@ -1749,6 +1758,7 @@ function processNowPlaying(response)
                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_") || Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_"))
                 {
                     Slides.slide(`on-air`).active = true;
+                    checkSlideCounts();
                     var innercontent = ``;
                     if (Meta.topic.length > 2)
                     {
@@ -1776,6 +1786,7 @@ function processNowPlaying(response)
                         temp.innerHTML = innercontent;
                 } else {
                     Slides.slide(`on-air`).active = false;
+                    checkSlideCounts();
                 }
             }
             var queuelength = Meta.queueFinish !== null ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), 'seconds')) : 0;
@@ -2339,5 +2350,16 @@ function createAnnouncement(data) {
             fitContent: true,
             html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">${data.title}</h1><div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`
         });
+    }
+}
+
+function checkSlideCounts() {
+    if (Slides.countActive() >= 8)
+    {
+        Slides.slide(`events-2-4`).active = false;
+        Slides.slide(`events-5-7`).active = false;
+    } else {
+        Slides.slide(`events-2-4`).active = true;
+        Slides.slide(`events-5-7`).active = true;
     }
 }
