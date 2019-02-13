@@ -165,7 +165,8 @@ var Slides = (() => {
     // Return the number of currently active slides
     const countActive = (() => {
         try {
-            return slides.filter((_slides) => _slides.active).count;
+            var temp = slides.filter((_slides) => _slides.active);
+            return temp.length || 0;
         } catch (eee) {
             return 0;
         }
