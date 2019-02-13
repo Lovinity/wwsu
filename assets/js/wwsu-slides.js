@@ -408,7 +408,9 @@ var Slides = (() => {
                         var temp = document.getElementById(`content-slide-${activeSlide().name}`);
                         if (temp !== null)
                             temp.className = "";
-                        temp.style.display = "none";
+                        var temp = document.getElementById(`slide-${activeSlide().name}`);
+                        if (temp !== null)
+                            temp.style.display = "none";
                         clearTimeout(failsafe);
                         afterFunction();
                     });
