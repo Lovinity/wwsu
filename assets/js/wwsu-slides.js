@@ -287,11 +287,11 @@ var Slides = (() => {
 
                 // Update inner html to configured value in case fn changed it.
                 console.log(`showing slide`);
-                var temp = document.getElementById(`content-slide-${activeSlide().name}`);
-                if (temp !== null)
+                var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
+                if (temp2 !== null)
                 {
                     if (activeSlide().reset)
-                        temp.innerHTML = activeSlide().innerHtml;
+                        temp2.innerHTML = activeSlide().innerHtml;
                 }
 
                 // Failsafe: iterate through all slides and set display to none to prevent stray slides from remaining visible
@@ -307,9 +307,8 @@ var Slides = (() => {
                     temp.style.display = "inline";
 
                 // Reset animation classes
-                var temp = document.getElementById(`content-slide-${activeSlide().name}`);
-                if (temp !== null)
-                    temp.className = "";
+                if (temp2 !== null)
+                    temp2.className = "";
 
                 $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
                 });
@@ -321,6 +320,7 @@ var Slides = (() => {
                 updateBadges();
 
                 // Fit content if necessary
+                var temp = document.getElementById(`slide-${activeSlide().name}`);
                 var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
                 if (activeSlide().fitContent && temp !== null && temp2 !== null)
                 {
@@ -397,17 +397,17 @@ var Slides = (() => {
                         var temp = document.getElementById(`slide-${activeSlide().name}`);
                         if (temp !== null)
                             temp.style.display = "none";
-                        var temp = document.getElementById(`content-slide-${activeSlide().name}`);
-                        if (temp !== null)
-                            temp.className = "";
+                        var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
+                        if (temp2 !== null)
+                            temp2.className = "";
                         afterFunction();
                     }, 5000);
 
                     $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
                         console.log(`animation complete`);
-                        var temp = document.getElementById(`content-slide-${activeSlide().name}`);
-                        if (temp !== null)
-                            temp.className = "";
+                        var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
+                        if (temp2 !== null)
+                            temp2.className = "";
                         var temp = document.getElementById(`slide-${activeSlide().name}`);
                         if (temp !== null)
                             temp.style.display = "none";
@@ -427,11 +427,11 @@ var Slides = (() => {
 
             // Show the slide. Update inner html to configured value in case fn changed it.
             console.log(`showing slide`);
-            var temp = document.getElementById(`content-slide-${activeSlide().name}`);
-            if (temp !== null)
+            var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
+            if (temp2 !== null)
             {
                 if (activeSlide().reset)
-                    temp.innerHTML = activeSlide().innerHtml;
+                    temp2.innerHTML = activeSlide().innerHtml;
             }
             var temp = document.getElementById(`slide-${activeSlide().name}`);
             if (temp !== null)

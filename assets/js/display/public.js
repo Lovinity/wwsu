@@ -2354,7 +2354,12 @@ function createAnnouncement(data) {
 }
 
 function checkSlideCounts() {
-    if (Slides.countActive() >= 8)
+    var slideCount = 8;
+    if (!Slides.slide(`events-2-4`).active)
+        slideCount--;
+    if (!Slides.slide(`events-5-7`).active)
+        slideCount--;
+    if (Slides.countActive() >= slideCount)
     {
         Slides.slide(`events-2-4`).active = false;
         Slides.slide(`events-5-7`).active = false;
