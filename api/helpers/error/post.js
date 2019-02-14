@@ -71,12 +71,6 @@ module.exports = {
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 var maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'Bottom', 1));
                 await Promise.all(maps);
-                // Remote broadcasts; requeue remote track
-            } else if (Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on')
-            {
-                await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                await sails.helpers.rest.cmd('EnableAssisted', 0);
             }
 
             // All done.
