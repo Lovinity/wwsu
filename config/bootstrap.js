@@ -855,40 +855,13 @@ module.exports.bootstrap = async function (done) {
                                 Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Stream is offline. It should be online!', status: 2}]);
                             }
 
-                            // Check remote stream
-                            if (typeof streams !== 'undefined' && typeof streams[1] !== 'undefined' && typeof streams[1].streamstatus !== 'undefined' && streams[1].streamstatus !== 0)
-                            {
-                                // Mark stream as good
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Stream is online.', status: 5}]);
-                                remoteStream = true;
-                            } else {
-                                if (Meta['A'].state.includes("remote"))
-                                {
-                                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Stream is offline. It should be online!', status: 2}]);
-                                } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                                    Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Stream is offline (This is OK right now).', status: 4}]);
-                                }
-                            }
-
                         } catch (e) {
                             sails.log.error(e);
                             Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error parsing data from internet stream server.', status: 2}]);
-                            if (Meta['A'].state.includes("remote"))
-                            {
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error parsing data from internet stream server.', status: 2}]);
-                            } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error parsing data from internet stream server.', status: 4}]);
-                            }
                         }
                     })
                     .catch(err => {
                         Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server is offline.', status: 2}]);
-                        if (Meta['A'].state.includes("remote"))
-                        {
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server is offline.', status: 2}]);
-                        } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                            Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server is offline (OK, as we do not need remote stream right now)', status: 4}]);
-                        }
                         sails.log.error(err);
                     });
             /*ICECAST 2.3
@@ -986,12 +959,6 @@ module.exports.bootstrap = async function (done) {
              */
         } catch (e) {
             Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Error checking internet stream server.', status: 2}]);
-            if (Meta['A'].state.includes("remote"))
-            {
-                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error checking internet stream server.', status: 2}]);
-            } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-                Status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Error checking internet stream server (OK, as we do not need remote stream right now)', status: 4}]);
-            }
             sails.log.error(e);
         }
     });
