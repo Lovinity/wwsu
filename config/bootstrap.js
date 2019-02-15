@@ -355,14 +355,6 @@ module.exports.bootstrap = async function (done) {
                     queueLength = 0;
             }
 
-            // For remotes, when playing a liner etc, we need to know when to re-queue the remote stream
-            if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && queueLength <= 0 && Status.errorCheck.trueZero <= 0 && queue[0].TrackType !== 'InternetStream')
-            {
-                await sails.helpers.rest.cmd('EnableAssisted', 1);
-                await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                await sails.helpers.rest.cmd('EnableAssisted', 0);
-            }
             Status.errorCheck.prevQueueLength = queueLength;
 
             // If we do not know active playlist, we need to populate the info
@@ -540,14 +532,10 @@ module.exports.bootstrap = async function (done) {
                                     sails.log.error(err);
                                 });
                     }
-                    // If we are preparing for remote, do some stuff if we are playing the stream track
+                    // If we are preparing for remote, do some stuff
                     if (Meta['A'].state === 'automation_remote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'remote_on', showStamp: moment().toISOString(true)});
-                        await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                        await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
@@ -559,10 +547,6 @@ module.exports.bootstrap = async function (done) {
                     if (Meta['A'].state === 'automation_sportsremote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'sportsremote_on', showStamp: moment().toISOString(true)});
-                        await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                        await sails.helpers.rest.cmd('EnableAssisted', 0);
                         await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
                                 .tolerate((err) => {
@@ -582,11 +566,6 @@ module.exports.bootstrap = async function (done) {
                                 break;
                             case 'remote_returning':
                                 await Meta.changeMeta({state: 'remote_on'});
-                                await sails.helpers.rest.cmd('EnableAssisted', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                                if (!change.queueMusic)
-                                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                                await sails.helpers.rest.cmd('EnableAssisted', 0);
                                 break;
                             case 'sports_returning':
                                 await Meta.changeMeta({state: 'sports_on'});
@@ -595,11 +574,6 @@ module.exports.bootstrap = async function (done) {
                                 break;
                             case 'sportsremote_returning':
                                 await Meta.changeMeta({state: 'sportsremote_on'});
-                                await sails.helpers.rest.cmd('EnableAssisted', 1);
-                                await sails.helpers.songs.queue(sails.config.custom.subcats.remote, 'Bottom', 1);
-                                if (!change.queueMusic)
-                                    await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                                await sails.helpers.rest.cmd('EnableAssisted', 0);
                                 break;
                         }
                     }
@@ -635,14 +609,10 @@ module.exports.bootstrap = async function (done) {
                     if (queue.length > 0 && queue[0].Duration === Status.errorCheck.prevDuration && queue[0].Elapsed === Status.errorCheck.prevElapsed && (Meta['A'].state.startsWith("automation_") || Meta['A'].state.endsWith("_break") || Meta['A'].state.endsWith("_disconnected") || Meta['A'].state === 'live_prerecord'))
                     {
                         await sails.helpers.error.count('frozen');
-                    } else if ((Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on') && ((queue[0].TrackType !== 'InternetStream' && queue.length < 2) || queue[0].Elapsed === Status.errorCheck.prevElapsed))
-                    {
-                        await sails.helpers.error.count('frozenRemote');
                     } else {
                         Status.errorCheck.prevDuration = queue[0].Duration;
                         Status.errorCheck.prevElapsed = queue[0].Elapsed;
                         await sails.helpers.error.reset('frozen');
-                        await sails.helpers.error.reset('frozenRemote');
                     }
 
                     // Manage breaks intelligently using track queue length. This gets complicated, so comments explain the process.
@@ -784,9 +754,6 @@ module.exports.bootstrap = async function (done) {
                     if (Meta['A'].state.startsWith("automation_") || Meta['A'].state.endsWith("_break") || Meta['A'].state.endsWith("_disconnected") || Meta['A'].state === 'live_prerecord')
                     {
                         await sails.helpers.error.count('frozen');
-                    } else if (Meta['A'].state === 'remote_on' || Meta['A'].state === 'sportsremote_on')
-                    {
-                        await sails.helpers.error.count('frozenRemote');
                     }
                 }
 

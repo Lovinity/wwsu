@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Host request in wwsu.js fails for non-authentication requests. [Issue 62](https://github.com/Lovinity/wwsu/issues/62)
  - Changing announcement type caused display slides to not be removed when they should have been. Now, when announcement type is changed, a websocket remove is sent to the previous type.
 
+### Removed
+ - Removed the frozenRemote status errorCheck as we are favoring webRTC audio calls for remote broadcasts instead of shoutcast.
+ - Removed all instances of queuing a remote broadcast track for remote_on and sportsremote_on since we are using webRTC via DJ Controls now.
+
 ## [5.0.2] - 2019-02-02
 ### Added
  - wwsu-slides.js for managing display sign slides
