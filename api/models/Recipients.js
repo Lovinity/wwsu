@@ -59,7 +59,6 @@ module.exports = {
     ],
 
     sockets: {}, // For recipients connecting via sockets, we will pair the sockets with the Recipients.ID in the format: sockets[Recipients.ID] = [array, of, socket, IDs]
-    pendingCalls: [], // For pending call requests
 
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {

@@ -11,12 +11,8 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            Recipients.pendingCalls
-                    .filter((obj) => obj.host === this.req.payload.host)
-                    .map((obj, index) => {
-                        delete Recipients.pendingCalls[index];
-                        obj.cb(`OK`);
-                    });
+                        // Send a request to the appropriate DJ Control to connect and then call call/connected when connected.
+            sails.sockets.broadcast(`call`, `call-connected`, {player: this.req.payload.host});
             return exits.success();
         } catch (e) {
             return exits.error(e);

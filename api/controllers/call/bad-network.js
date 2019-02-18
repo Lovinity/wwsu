@@ -11,7 +11,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            sails.sockets.broadcast(`call`, `bad-network`, {});
+            sails.sockets.broadcast(`call`, `call-bad-network`, {});
         } catch (e) {
             return exits.error(e);
         }

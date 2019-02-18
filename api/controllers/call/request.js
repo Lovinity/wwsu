@@ -16,25 +16,10 @@ module.exports = {
     fn: async function (inputs, exits) {
         try {
             
-            // Add a pending call record to keep track
-            Recipients.pendingCalls.push[{host: inputs.host, cb: exits.success}];
-            
             // Send a request to the appropriate DJ Control to connect and then call call/connected when connected.
-            sails.sockets.broadcast(`calls-${inputs.host}`, `call-connect`, {});
-
-            // Fail after 10 seconds
-            setTimeout(() => {
-                Recipients.pendingCalls
-                        .filter((obj) => obj.host === inputs.host)
-                        .map((obj, index) => {
-                            delete Recipients.pendingCalls[index];
-                            obj.cb(`CALL FAIL`);
-                        });
-            }, 10000);
+            sails.sockets.broadcast(`calls-${inputs.host}`, `call-connect`, {streamer: this.req.payload.host, request: inputs.host});
             
-            // Prevent this script from concluding until the pending calls record is deleted
-            while (Recipients.pendingCalls.filter((obj) => obj.host === inputs.host).length > 0) {
-            }
+            return exits.success();
             
         } catch (e) {
             return exits.error(e);
