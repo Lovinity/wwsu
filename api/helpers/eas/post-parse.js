@@ -48,6 +48,8 @@ module.exports = {
 
             var maps = records.map(async record => {
                 // Remove NWS alerts no longer listed in the CAPS; we assume those alerts were expired.
+                // Temporarily disabled until a bug can be fixed.
+                /*
                 if (record.source === 'NWS' && Eas.activeCAPS.indexOf(record.reference) === -1)
                 {
                     sails.log.verbose(`Record ${record.ID} is to be deleted. It no longer exists in NWS CAPS.`);
@@ -57,6 +59,7 @@ module.exports = {
                             });
                     return true;
                 }
+                */
 
                 // Remove expired alerts
                 if (moment().isAfter(moment(record.expires)))
