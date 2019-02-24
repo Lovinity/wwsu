@@ -146,6 +146,7 @@ try {
         fitContent: false,
         html: `<div class="table-responsive" id="events-2-4"></div>`,
     });
+    Slides.slide(`events-2-4`).active = false;
 
     // Events 5-7
     // Deprecated for now
@@ -162,6 +163,7 @@ try {
         fitContent: false,
         html: `<div class="table-responsive" id="events-5-7"></div>`,
     });
+    Slides.slide(`events-5-7`).active = false;
 
     // Be a DJ
     // WWSU
