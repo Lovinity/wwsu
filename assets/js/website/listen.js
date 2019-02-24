@@ -507,20 +507,18 @@ function addMessage(data, firsttime = false)
     if (data.to.startsWith("website-"))
     {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-primary bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
-  <div class="row text-dark">
-    <div class="col-2">
+            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+    <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
-    <div class="col-8">
+    <div class="flex-grow-1 p-2">
       <small>${data.from_friendly} -> YOU (private; only you see this message)</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
-    <div class="col-2">
+    <div class="w-64 p-2">
       <small>${moment(data.createdAt).format("hh:mm A")}</small>
     </div>
-  </div>
-</div>`;
+  </div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -540,20 +538,18 @@ function addMessage(data, firsttime = false)
     } else if (data.to === 'website')
     {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-primary bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
-  <div class="row text-dark">
-    <div class="col-2">
+            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-primary bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+    <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
-    <div class="col-8">
-      <small>${data.from_friendly} -> All web/mobile visitors</small>
+    <div class="flex-grow-1 p-2">
+      <small>${data.from_friendly} -> Public web/mobile visitors</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
-    <div class="col-2">
+    <div class="w-64 p-2">
       <small>${moment(data.createdAt).format("hh:mm A")}</small>
     </div>
-  </div>
-</div>`;
+  </div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -572,20 +568,18 @@ function addMessage(data, firsttime = false)
         // Private message sent from visitor
     } else if (data.to === 'DJ-private') {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
-  <div class="row text-dark">
-    <div class="col-2">
+            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+    <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
-    <div class="col-8">
-      <small>${data.from_friendly} -> DJ (private; only the DJ sees this message)</small>
+    <div class="flex-grow-1 p-2">
+      <small>${data.from_friendly} -> DJ (private; other visitors cannot see this message)</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
-    <div class="col-2">
+    <div class="w-64 p-2">
       <small>${moment(data.createdAt).format("hh:mm A")}</small>
     </div>
-  </div>
-</div>`;
+  </div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -603,20 +597,18 @@ function addMessage(data, firsttime = false)
         // All other messages
     } else {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 container shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
-  <div class="row text-dark">
-    <div class="col-2">
+            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+    <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
-    <div class="col-8">
+    <div class="flex-grow-1 p-2">
       <small>${data.from_friendly} -> DJ / public</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
-    <div class="col-2">
+    <div class="w-64 p-2">
       <small>${moment(data.createdAt).format("hh:mm A")}</small>
     </div>
-  </div>
-</div>`;
+  </div>`;
         if (!firsttime)
         {
             iziToast.show({
@@ -754,14 +746,14 @@ function doMeta(response)
             response.history.map(track => {
                 console.dir(track);
                 if (recentTracks)
-                    recentTracks.innerHTML += `<div class="row">
-                <div class="col-8">
+                    recentTracks.innerHTML += `<tr>
+                <td>
                 ${track.track}
-                </div>
-                <div class="col-4">
+                </td>
+                <td>
                 ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
-                </div>
-                </div>`;
+                </td>
+                </tr>`;
             });
         }
     } catch (e) {
@@ -1101,16 +1093,15 @@ function processCalendar(data, replace = false)
                             finalColor.green = Math.round(finalColor.green);
                             finalColor.blue = Math.round(finalColor.blue);
                             caldata.innerHTML += `<div class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-4">
+                    <div class="d-flex flex-wrap">
+                                            <div class="p-2 w-192">
                                                 ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
                                             </div>
-                                            <div class="col-8">
-                                                ${event.title}
+                                            <div class="p-2 flex-grow-1">
+                                                <span class="text-warning">${event.title}</span>
                                             </div>
                                         </div>
-                                    </div></div>`;
+                                        </div>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
@@ -1156,17 +1147,16 @@ function processCalendar(data, replace = false)
                             finalColor.green = Math.round(finalColor.green);
                             finalColor.blue = Math.round(finalColor.blue);
                             caldata.innerHTML += `<div class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="col-4">
+                    <div class="d-flex flex-wrap">
+                                            <div class="p-2 w-192">
                                                 ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
                                             </div>
-                                            <div class="col-8">
-                                                <p class="text-warning">${event.title}</p>
-                                                <p class="text-info">${event.description}</p>
+                                            <div class="p-2 flex-grow-1">
+                                                <span class="text-warning">${event.title}</span>
                                             </div>
                                         </div>
-                                    </div></div>`;
+                                        <p class="text-info p-2">${event.description}</p>
+                                        </div>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
