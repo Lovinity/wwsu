@@ -128,17 +128,18 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 15,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: #FFFFFF">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
     });
 
     // Events 2-4
+    // Deprecated for now
     Slides.newSlide({
         name: `events-2-4`,
         label: `Days 2-4`,
         weight: 899998,
         isSticky: false,
         color: `success`,
-        active: true,
+        active: false,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 15,
@@ -147,13 +148,14 @@ try {
     });
 
     // Events 5-7
+    // Deprecated for now
     Slides.newSlide({
         name: `events-5-7`,
         label: `Days 5-7`,
         weight: 899998,
         isSticky: false,
         color: `success`,
-        active: true,
+        active: false,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 15,
@@ -2354,6 +2356,7 @@ function createAnnouncement(data) {
 }
 
 function checkSlideCounts() {
+    /*
     var slideCount = 8;
     if (!Slides.slide(`events-2-4`).active)
         slideCount--;
@@ -2367,4 +2370,5 @@ function checkSlideCounts() {
         Slides.slide(`events-2-4`).active = true;
         Slides.slide(`events-5-7`).active = true;
     }
+    */
 }
