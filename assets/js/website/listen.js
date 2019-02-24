@@ -106,66 +106,13 @@ if (document.querySelector(`#dialog`))
         arrowKeys: false,
         navigateCaption: false,
         navigateArrows: false, // Boolean, 'closeToModal', 'closeScreenEdge'
-        overlayClose: false,
+        overlay: false,
         overlayColor: 'rgba(0, 0, 0, 0.75)',
         timeout: false,
         timeoutProgressbar: true,
         pauseOnHover: true,
-        timeoutProgressbarColor: 'rgba(255,255,255,0.5)'
-    });
-}
-
-if (document.querySelector(`#calendar`))
-{
-    document.querySelector(`#calendar`).addEventListener("click", function (e) {
-        try {
-            console.log(e.target.id);
-            if (e.target) {
-                console.log(e.target.id);
-                if (e.target.id.startsWith(`calendar-item-`))
-                {
-                    var item = Calendar({ID: parseInt(e.target.id.replace(`calendar-item-`, ``))}).first();
-                    var temp = document.querySelector(`#dialogTitle`);
-                    if (temp !== null)
-                        temp.innerHTML = item.title;
-                    var temp = document.querySelector(`#dialogDesc`);
-                    if (temp !== null)
-                        temp.innerHTML = `<p><string>Starts: ${moment(event.start).format("LLL")}</strong></p>
-                        <p><strong>Ends: ${moment(event.end).format("LLL")}</strong></p>
-                        <p>${item.description}</p>`;
-                    $("#dialog").iziModal('open');
-                }
-            }
-        } catch (e) {
-
-        }
-    });
-}
-
-if (document.querySelector(`#calendar3h`))
-{
-    document.querySelector(`#calendar3h`).addEventListener("click", function (e) {
-        try {
-            console.log(e.target.id);
-            if (e.target) {
-                console.log(e.target.id);
-                if (e.target.id.startsWith(`calendar-item-`))
-                {
-                    var item = Calendar({ID: parseInt(e.target.id.replace(`calendar-item-`, ``))}).first();
-                    var temp = document.querySelector(`#dialogTitle`);
-                    if (temp !== null)
-                        temp.innerHTML = item.title;
-                    var temp = document.querySelector(`#dialogDesc`);
-                    if (temp !== null)
-                        temp.innerHTML = `<p><string>Starts: ${moment(event.start).format("LLL")}</strong></p>
-                        <p><strong>Ends: ${moment(event.end).format("LLL")}</strong></p>
-                        <p>${item.description}</p>`;
-                    $("#dialog").iziModal('open');
-                }
-            }
-        } catch (e) {
-
-        }
+        timeoutProgressbarColor: 'rgba(255,255,255,0.5)',
+        zindex: 50,
     });
 }
 
@@ -1137,16 +1084,92 @@ function processCalendar(data, replace = false)
                             finalColor.red = Math.round(finalColor.red);
                             finalColor.green = Math.round(finalColor.green);
                             finalColor.blue = Math.round(finalColor.blue);
-                            caldata.innerHTML += `<div id="calendar-item-${event.ID}" class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
-                    <div class="d-flex flex-wrap">
-                                            <div class="p-2 w-192">
-                                                ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
-                                            </div>
-                                            <div class="p-2 flex-grow-1">
-                                                <span class="text-warning">${event.title}</span>
-                                            </div>
-                                        </div>
-                                        </div>`;
+                            if (event.title.startsWith("Show: "))
+                            {
+                                var stripped = event.title.replace("Show: ", "");
+                                var eventType = "SHOW";
+                                var eventClass = "primary";
+                                var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "Unknown DJ";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Prerecord: "))
+                            {
+                                var stripped = event.title.replace("Prerecord: ", "");
+                                var eventType = "PRERECORD";
+                                var eventClass = "danger";
+                                var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "Unknown DJ";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Remote: "))
+                            {
+                                var stripped = event.title.replace("Remote: ", "");
+                                var eventType = "REMOTE";
+                                var eventClass = "purple";
+                                var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "Unknown Host";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Sports: "))
+                            {
+                                var stripped = event.title.replace("Sports: ", "");
+                                var eventType = "SPORTS";
+                                var eventClass = "success";
+                                var line1 = "Raider Sports";
+                                var line2 = stripped;
+                                var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
+                            } else if (event.title.startsWith("Playlist: ")) {
+                                var stripped = event.title.replace("Playlist: ", "");
+                                var eventType = "Playlist";
+                                var eventClass = "info";
+                                var image = `<i class="fas fa-list" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Genre: "))
+                            {
+                                var stripped = event.title.replace("Genre: ", "");
+                                var eventType = "Genre";
+                                var eventClass = "info";
+                                var line1 = "";
+                                var line2 = stripped;
+                                var image = `<i class="fas fa-music" style="font-size: 96px;"></i>`;
+                            } else {
+                                var eventType = "Event";
+                                var eventClass = "secondary";
+                                var line1 = "";
+                                var line2 = event.title;
+                                var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
+                            }
+                            caldata.innerHTML += `<button id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="btn btn-${eventClass} m-2 text-white rounded shadow-8">
+             <div class="p-1 text-center" style="width: 100%;">${image}
+             <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
+             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></button>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
@@ -1188,20 +1211,95 @@ function processCalendar(data, replace = false)
                     {
                         try {
                             var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
-                            finalColor.red = Math.round(finalColor.red);
-                            finalColor.green = Math.round(finalColor.green);
-                            finalColor.blue = Math.round(finalColor.blue);
-                            caldata.innerHTML += `<div id="calendar-item-${event.ID}" class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
-                    <div class="d-flex flex-wrap">
-                                            <div class="p-2 w-192">
-                                                ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
-                                            </div>
-                                            <div class="p-2 flex-grow-1">
-                                                <span class="text-warning">${event.title}</span>
-                                            </div>
-                                        </div>
-                                        <p class="text-info p-2">${event.description}</p>
-                                        </div>`;
+                            finalColor.red = Math.round(finalColor.red / 2);
+                            finalColor.green = Math.round(finalColor.green / 2);
+                            finalColor.blue = Math.round(finalColor.blue / 2);
+                            if (event.title.startsWith("Show: "))
+                            {
+                                var stripped = event.title.replace("Show: ", "");
+                                var eventType = "SHOW";
+                                var eventClass = "primary";
+                                var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "Unknown DJ";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Prerecord: "))
+                            {
+                                var stripped = event.title.replace("Prerecord: ", "");
+                                var eventType = "PRERECORD";
+                                var eventClass = "danger";
+                                var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "Unknown DJ";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Remote: "))
+                            {
+                                var stripped = event.title.replace("Remote: ", "");
+                                var eventType = "REMOTE";
+                                var eventClass = "purple";
+                                var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "Unknown Host";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Sports: "))
+                            {
+                                var stripped = event.title.replace("Sports: ", "");
+                                var eventType = "SPORTS";
+                                var eventClass = "success";
+                                var line1 = "Raider Sports";
+                                var line2 = stripped;
+                                var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
+                            } else if (event.title.startsWith("Playlist: ")) {
+                                var stripped = event.title.replace("Playlist: ", "");
+                                var eventType = "Playlist";
+                                var eventClass = "info";
+                                var image = `<i class="fas fa-list" style="font-size: 96px;"></i>`;
+                                var temp = stripped.split(" - ");
+                                if (temp.length === 2)
+                                {
+                                    var line1 = temp[0];
+                                    var line2 = temp[1];
+                                } else {
+                                    var line1 = "";
+                                    var line2 = temp;
+                                }
+                            } else if (event.title.startsWith("Genre: "))
+                            {
+                                var stripped = event.title.replace("Genre: ", "");
+                                var eventType = "Genre";
+                                var eventClass = "info";
+                                var line1 = "";
+                                var line2 = stripped;
+                                var image = `<i class="fas fa-music" style="font-size: 96px;"></i>`;
+                            } else {
+                                var eventType = "Event";
+                                var eventClass = "secondary";
+                                var line1 = "";
+                                var line2 = event.title;
+                                var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
+                            }
+                            caldata.innerHTML += `<button id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="btn btn-${eventClass} m-2 text-white rounded shadow-8">
+             <div class="p-1 text-center" style="width: 100%;">${image}
+             <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
+             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></button>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
@@ -1307,3 +1405,21 @@ function rgbHex(red, green, blue, alpha) {
     }
 }
 ;
+
+function displayEventInfo(showID) {
+    var item = Calendar({ID: parseInt(showID)}).first();
+    iziToast.show({
+        title: item.title,
+        message: `<p><strong>Starts: ${moment(item.start).format("LLL")}</strong></p>
+                        <p><strong>Ends: ${moment(item.end).format("LLL")}</strong></p>
+                        <p>${item.description}</p>`,
+        color: 'white',
+        zindex: 100,
+        maxWidth: 640,
+        layout: 2,
+        closeOnClick: true,
+        position: 'center',
+        timeout: false,
+        overlay: true
+    });
+}
