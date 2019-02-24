@@ -58,7 +58,7 @@ module.exports = {
                     return true;
                 }
                 
-                // Remove expired alerts and NWS records that have not been updated (by the above) in 5 or more minutes.
+                // Remove expired alerts. Also, NWS alerts not reported by CAPS in 5 or more minutes (via updatedAt checking) should also be considered expired or canceled.
                 if ((record.source === 'NWS' && moment().isAfter(moment(record.updatedAt).add(5, 'minutes'))) || moment().isAfter(moment(record.expires)))
                 {
                     sails.log.verbose(`Record ${record.ID} is to be deleted. It has expired.`);

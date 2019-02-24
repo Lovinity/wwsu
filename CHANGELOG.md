@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - /display/public when there is a total of 8 or more active slides, Events 2-4 and Events 5-7 slides will be deactivated to conserve on information.
+ - EAS alerts originating from NWS that are no longer being reported by CAPS (such as canceled) will not be removed from the system for 5 more minutes because of a potential bug if removed immediately.
 
 ### Fixed
  - sails.helpers.recipients.add bug adding all computer recipients to Status instead of only the ones we want to track.

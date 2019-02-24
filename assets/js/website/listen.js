@@ -98,6 +98,77 @@ if (document.querySelector(`#trackModal`))
     });
 }
 
+if (document.querySelector(`#dialog`))
+{
+    $("#dialog").iziModal({
+        width: 640,
+        focusInput: true,
+        arrowKeys: false,
+        navigateCaption: false,
+        navigateArrows: false, // Boolean, 'closeToModal', 'closeScreenEdge'
+        overlayClose: false,
+        overlayColor: 'rgba(0, 0, 0, 0.75)',
+        timeout: false,
+        timeoutProgressbar: true,
+        pauseOnHover: true,
+        timeoutProgressbarColor: 'rgba(255,255,255,0.5)'
+    });
+}
+
+if (document.querySelector(`#calendar`))
+{
+    document.querySelector(`#calendar`).addEventListener("click", function (e) {
+        try {
+            console.log(e.target.id);
+            if (e.target) {
+                console.log(e.target.id);
+                if (e.target.id.startsWith(`calendar-item-`))
+                {
+                    var item = Calendar({ID: parseInt(e.target.id.replace(`calendar-item-`, ``))}).first();
+                    var temp = document.querySelector(`#dialogTitle`);
+                    if (temp !== null)
+                        temp.innerHTML = item.title;
+                    var temp = document.querySelector(`#dialogDesc`);
+                    if (temp !== null)
+                        temp.innerHTML = `<p><string>Starts: ${moment(event.start).format("LLL")}</strong></p>
+                        <p><strong>Ends: ${moment(event.end).format("LLL")}</strong></p>
+                        <p>${item.description}</p>`;
+                    $("#dialog").iziModal('open');
+                }
+            }
+        } catch (e) {
+
+        }
+    });
+}
+
+if (document.querySelector(`#calendar3h`))
+{
+    document.querySelector(`#calendar3h`).addEventListener("click", function (e) {
+        try {
+            console.log(e.target.id);
+            if (e.target) {
+                console.log(e.target.id);
+                if (e.target.id.startsWith(`calendar-item-`))
+                {
+                    var item = Calendar({ID: parseInt(e.target.id.replace(`calendar-item-`, ``))}).first();
+                    var temp = document.querySelector(`#dialogTitle`);
+                    if (temp !== null)
+                        temp.innerHTML = item.title;
+                    var temp = document.querySelector(`#dialogDesc`);
+                    if (temp !== null)
+                        temp.innerHTML = `<p><string>Starts: ${moment(event.start).format("LLL")}</strong></p>
+                        <p><strong>Ends: ${moment(event.end).format("LLL")}</strong></p>
+                        <p>${item.description}</p>`;
+                    $("#dialog").iziModal('open');
+                }
+            }
+        } catch (e) {
+
+        }
+    });
+}
+
 function quillGetHTML(inputDelta) {
     var tempCont = document.createElement("div");
     (new Quill(tempCont)).setContents(inputDelta);
@@ -186,32 +257,6 @@ function setFocusToFirstItemInModal(obj) {
     // set the focus to the first keyboard focusable item
     o.filter(focusableElementsString).filter(':visible').first().focus();
 }
-$(document).ready(function () {
-    if (document.querySelector('#dialog'))
-    {
-        $('#dialog').on('shown.bs.modal', function () {
-            $('#dialog').trigger('focus');
-            jQuery('body').on('focusin', '#mainPage', function () {
-                setFocusToFirstItemInModal(jQuery('#dialog'));
-            });
-            focusedElementBeforeModal = jQuery(':focus');
-            setFocusToFirstItemInModal($('#dialog'));
-        })
-
-        $('#dialog').on('hidden.bs.modal', function (e) {
-            jQuery('body').off('focusin', '#mainPage');
-            focusedElementBeforeModal.focus();
-        })
-
-        jQuery('#dialog').keydown(function (event) {
-            trapTabKey($(this), event);
-        })
-
-        jQuery('#dialog').keydown(function (event) {
-            trapEscapeKey($(this), event);
-        })
-    }
-});
 if (document.querySelector('#song-data'))
     document.querySelector(`#song-data`).addEventListener("click", function (e) {
         try {
@@ -1092,7 +1137,7 @@ function processCalendar(data, replace = false)
                             finalColor.red = Math.round(finalColor.red);
                             finalColor.green = Math.round(finalColor.green);
                             finalColor.blue = Math.round(finalColor.blue);
-                            caldata.innerHTML += `<div class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
+                            caldata.innerHTML += `<div id="calendar-item-${event.ID}" class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
                     <div class="d-flex flex-wrap">
                                             <div class="p-2 w-192">
                                                 ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
@@ -1146,7 +1191,7 @@ function processCalendar(data, replace = false)
                             finalColor.red = Math.round(finalColor.red);
                             finalColor.green = Math.round(finalColor.green);
                             finalColor.blue = Math.round(finalColor.blue);
-                            caldata.innerHTML += `<div class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
+                            caldata.innerHTML += `<div id="calendar-item-${event.ID}" class="bs-callout bs-callout-default shadow-2 text-light" style="width: 100%; border-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue}); background: rgb(${parseInt(finalColor.red / 2)}, ${parseInt(finalColor.green / 2)}, ${parseInt(finalColor.blue / 2)});">
                     <div class="d-flex flex-wrap">
                                             <div class="p-2 w-192">
                                                 ${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}
