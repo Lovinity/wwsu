@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - /auth/* endpoints, upon successful authorization, will also return expires property in addition to token property. Expires is how long the token is valid for, in milliseconds.
  - Slides.countActive() in wwsu-slides.js for counting the number of active slides currently.
+ - /recipients/register-peer for DJ Controls connecting to Peerjs to report their peerjs ID to the system.
 
 ### Changed
  - /display/public events 2-4 and 5-7 slides deactivated for now to conserve on information.
