@@ -45,8 +45,6 @@ module.exports.policies = {
     'recipients/add-web': ['isBanned', 'isSocket'],
     'recipients/edit-web': ['isBanned', 'isSocket'],
     'requests/place': ['isBanned', 'isSocket'],
-    'silence/active': 'isBanned',
-    'silence/inactive': 'isBanned',
     'songs/get': ['isBanned', 'isSocket'],
     'songs/get-genres': ['isBanned', 'isSocket'],
     'songs/get-liked': ['isBanned', 'isSocket'],

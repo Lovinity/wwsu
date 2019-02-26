@@ -7,14 +7,6 @@ module.exports = {
     description: 'Silence detection program should hit this endpoint when silence was detected.',
 
     inputs: {
-        key: {
-            type: 'string',
-            required: true,
-            custom: function (value) {
-                return value === sails.config.custom.silence.key;
-            },
-            description: 'Secret key that the silence detection program must pass as a parameter.'
-        }
     },
 
     fn: async function (inputs, exits) {

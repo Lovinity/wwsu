@@ -1,5 +1,7 @@
-# WWSU 5.0.2
+# WWSU 5.1.0 ALPHA 1
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
+
+**5.1.0 is in alpha stage; not everything planned for 5.1.0 has been implemented yet. Bugs are expected.**
 
 ## Websockets
 Several of the API endpoints, as noted in their respective section of this documentation, can be called using a socket request. When the request is a socket, the client will be subscribed to receive changes. Unless otherwise specified in this readme, websocket messages are sent as an event containing the same name as the top level endpoint, in all lowercase (For example, anything under Messages will be sent as a socket event named "messages"). The data sent to the event follows the following format:
@@ -861,17 +863,13 @@ Silence endpoints should be hit by the silence detection application in order to
 This endpoint should be hit when silence was detected.
  - It should be hit once every minute until silence is resolved.
  - Will trigger silence alarms, and skip/disable the current track in automation, if one is playing.
-#### Request
-| key | criteria |
-|--|--|
-| key | string (required; the key/password as configured in the WWSU application, since silence detection program does not support /user/auth authorization.) |
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200 OK
 ### /silence/inactive
 This endpoint should be hit when previously detected silence has been resolved.
-#### Request
-| key | criteria |
-|--|--|
-| key | string (required; the key/password as configured in the WWSU application, since silence detection program does not support /user/auth authorization.) |
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
 #### Response 200 OK
 ## Songs
 Songs endpoints regard the available songs/tracks in the automation system.
