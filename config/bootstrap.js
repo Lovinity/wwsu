@@ -581,22 +581,33 @@ module.exports.bootstrap = async function (done) {
                     // If we are in break, queue something if the queue is under 2 items to keep the break going, and if we are not changing states
                     if (Meta['A'].changingState === null)
                     {
-                        if ((Meta['A'].state === 'sports_halftime' || Meta['A'].state === 'sportsremote_halftime' || Meta['A'].state === 'sportsremote_halftime_disconnected') && queue.length < 2)
+                        switch (Meta['A'].state)
                         {
-                            await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 1);
-                        }
-                        if (Meta['A'].state.includes('_break') && queue.length < 2)
-                        {
-                            await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1, true);
+                            case 'live_break':
+                                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.during);
+                                break;
+                            case 'remote_break':
+                                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.during);
+                                break;
+                            case 'sports_break':
+                            case 'sportsremote_break':
+                                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.during);
+                                break;
+                            case 'sports_halftime':
+                            case 'sportsremote_halftime':
+                                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.duringHalftime);
+                                break;
                         }
                     }
+                    
+                    // Counter to ensure automation break is not running for too long
                     if (Meta['A'].state === 'automation_break')
                         await sails.helpers.error.count('automationBreak');
 
                     // Check if a DJ neglected the required top of the hour break (passes :05 after)
                     var d = new Date();
                     var n = d.getMinutes();
-                    if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(Meta['A'].lastID))) {
+                    if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(Meta['A'].lastID)) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== `live_prerecord`) {
                         await Meta.changeMeta({lastID: moment().toISOString(true)});
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].show}`})
                                 .tolerate((err) => {
@@ -709,25 +720,9 @@ module.exports.bootstrap = async function (done) {
                                     // Remove liners in the queue. Do not do the playlist re-queue method as there may be a big prerecord or playlist in the queue.
                                     await sails.helpers.songs.remove(false, sails.config.custom.subcats.liners, true, true);
 
-                                    // Get the configured break tasks, but clone it. We're going to reverse the order, so we don't want to reverse the original object.
-                                    var breakOpts = _.cloneDeep(sails.config.custom.breaks[key]);
+                                    // Execute the break array
+                                    await sails.helpers.break.executeArray(sails.config.custom.breaks[key]);
 
-                                    // Reverse the order of execution so queued things are in the same order as configured.
-                                    breakOpts.reverse();
-
-                                    // Go through each task
-                                    if (breakOpts.length > 0)
-                                    {
-                                        var asyncLoop = async function (array, callback) {
-                                            for (let index = 0; index < array.length; index++) {
-                                                await callback(array[index], index, array);
-                                            }
-                                        };
-
-                                        await asyncLoop(breakOpts, async (task) => {
-                                            await sails.helpers.break.execute(task.task, task.event, task.category, task.quantity, task.rules);
-                                        });
-                                    }
                                     // If not doing a break, check to see if it's time to do a liner
                                 } else {
                                     // Don't do a liner if it was too soon.

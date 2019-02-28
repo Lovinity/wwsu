@@ -58,6 +58,12 @@ module.exports.custom = {
      */
     categories: {
 
+        /*
+         * REQUIRED CATEGORIES
+         * The category objects below this line must not be removed / renamed; they are required by the server. Doing so will break the server!
+         * You may, however, edit what is inside each of the category objects below to specify which RadioDJ categories/subcategories apply.
+         */
+
         // All the category / subcategory pairs containing automation system music.
         // This is also used by the request system; all tracks in this config can be requested... other tracks cannot.
         music: {
@@ -106,11 +112,6 @@ module.exports.custom = {
         // DEFINITION: An audio clip (usually 30-60 seconds) promoting a radio show or broadcast, played as defined in break configuration.
         promos: {
             "Promos": ["Radio Show Promos"]
-        },
-
-        // "Internet Stream" track(s), used for remote and sports remote broadcasts. Should really only have one track in total.
-        remote: {
-            "Radio Streams": ["WWSU Remote"]
         },
 
         // Music used for sports haltime and other extended sports breaks
@@ -173,6 +174,12 @@ module.exports.custom = {
             "Sports Liners": [],
             "Commercials": []
         },
+
+        /*
+         * OPTIONAL CATEGORIES
+         * The category objects below this line are optional. You may add, rename, or remove them as you wish.
+         * However, if you remove or rename any, make sure you no longer reference them anywhere else in this config file!
+         */
 
     },
 
@@ -349,6 +356,98 @@ module.exports.custom = {
             {task: "log", event: "Queued :00 top of the hour ID break."},
             {task: "queue", category: "IDs", quantity: 1}
         ]
+    },
+
+    /* 
+     * This object is for configuring the breaks during broadcasts. In each array, you will put objects specifying what should be executed / queued.
+     * The objects follow the same format as in the "breaks" configuration, as follows:
+     * 
+     * // This adds an info log entry under automation.
+     * {task: "log", event: "What to log"}
+     * 
+     * // This queues up to (quantity) number of requested tracks, and adds a request liner (categories.requestLiners) at the beginning (if any requests were queued).
+     * // It is NOT recommended to queue / play requests during broadcast breaks; let the DJ control those through DJ Controls.
+     * {task: "queueRequests", quantity: 1}
+     * 
+     * // Queues (quantity) number of tracks from (category) as configured in the categories section. If rules is true, tracks will be checked against playlist rotation rules.
+     * {task: "queue", category: "categoryName (from the categories configuration)", quantity: 1, rules: true}
+     * 
+     * // If any underwritings etc were removed from the queue due to duplicates, they get stored in memory. This re-queues them. It is advised to have this in every break.
+     * {task: "queueDuplicates"}
+     * 
+     * NOTE: everything is executed in REVERSE (items from the end of the array happen before the items in the beginning). But this works out because that way,
+     * queued tracks end up in the order you specified. For example, if you put PSAs before an ID in the array, the PSAs will be above the IDs in RadioDJ, and will play first.
+     * 
+     */
+    specialBreaks: {
+
+        // Breaks during live shows
+        // Do not include show openers, returns, nor closers, nor station IDs, in this configuration; those are queued automatically.
+        live: {
+
+            // These are queued/executed once, right when the break is started.
+            before: [
+                {task: "queueDuplicates"}
+            ],
+
+            // These are executed/queued repeatedly every time RadioDJ's queue gets empty until the DJ returns from their break.
+            during: [
+                {task: "queue", category: "PSAs", quantity: 1},
+            ],
+
+            // These are queued/executed when the DJ returns from their break.
+            after: [
+                {task: "queue", category: "sweepers", quantity: 1},
+            ],
+
+        },
+
+        // Breaks during remote broadcasts
+        // Do not include show openers, returns, nor closers, nor station IDs, in this configuration; those are queued automatically.
+        remote: {
+
+            // These are queued/executed once, right when the break is started.
+            before: [
+                {task: "queueDuplicates"}
+            ],
+
+            // These are executed/queued repeatedly every time RadioDJ's queue gets empty until the DJ returns from their break.
+            during: [
+                {task: "queue", category: "PSAs", quantity: 1},
+            ],
+
+            // These are queued/executed when the DJ returns from their break.
+            after: [
+                {task: "queue", category: "sweepers", quantity: 1},
+            ],
+
+        },
+
+        // Breaks during sports broadcasts (both live and remote)
+        // Do not include sports openers, closers, nor returns, nor station IDs, in this configuration; those are queued automatically.
+        sports: {
+
+            // These are queued/executed once, right when the break is started.
+            before: [
+                {task: "queueDuplicates"}
+            ],
+
+            // During standard breaks, these are executed/queued repeatedly every time RadioDJ's queue gets empty until the producer returns from their break.
+            during: [
+                {task: "queue", category: "PSAs", quantity: 1},
+            ],
+            
+            // During extended breaks / halftime, these are executed/queued repeatedly every time RadioDJ's queue gets empty until the producer returns from their break.
+            duringHalftime: [
+                {task: "queue", category: "halftime", quantity: 1},
+            ],
+
+            // These are queued/executed when the producer returns from their break.
+            after: [
+                {task: "queue", category: "sweepers", quantity: 1},
+            ],
+
+        }
     },
 
     // When considering when to queue breaks, if a break was queued less than this many minutes ago, hold off on queuing any other breaks until this many minutes have passed since.

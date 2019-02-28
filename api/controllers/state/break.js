@@ -42,11 +42,10 @@ module.exports = {
                 // Queue and play tracks
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
-                await sails.helpers.songs.queuePending();
                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
-                await sails.helpers.songs.queue(sails.config.custom.subcats.halftime, 'Bottom', 2);
-
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.before);
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.duringHalftime);
 
                 Status.errorCheck.prevID = moment();
                 Status.errorCheck.prevBreak = moment();
@@ -86,27 +85,34 @@ module.exports = {
                                 });
                     }
                 }
-                await sails.helpers.songs.queuePending();
-                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 2, true);
-                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                await sails.helpers.rest.cmd('EnableAssisted', 0);
 
-                // Switch state to break
+                // Execute appropriate breaks, and switch state to break
                 switch (Meta['A'].state)
                 {
                     case 'live_on':
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.before);
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.during);
                         await Meta.changeMeta({state: 'live_break'});
                         break;
                     case 'remote_on':
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.before);
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.during);
                         await Meta.changeMeta({state: 'remote_break'});
                         break;
                     case 'sports_on':
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.before);
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.during);
                         await Meta.changeMeta({state: 'sports_break'});
                         break;
                     case 'sportsremote_on':
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.before);
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.during);
                         await Meta.changeMeta({state: 'sportsremote_break'});
                         break;
                 }
+
+                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                await sails.helpers.rest.cmd('EnableAssisted', 0);
             }
 
             await Meta.changeMeta({changingState: null});

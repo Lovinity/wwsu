@@ -47,6 +47,8 @@ module.exports = {
                 Status.errorCheck.prevBreak = moment();
                 await sails.helpers.error.count('stationID');
 
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after);
+
                 // Queue a sports liner
                 if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
@@ -59,7 +61,7 @@ module.exports = {
                     //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
                     if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
-                    
+
                     queueLength = await sails.helpers.songs.calculateQueueLength();
                 }
 
@@ -78,34 +80,14 @@ module.exports = {
                 var d = new Date();
                 var num = d.getMinutes();
 
-                // Queue stuff if after :55 and before :05, or if it's been 50 or more minutes since the last station ID.
-                if (num >= 55 || num < 5 || Status.errorCheck.prevID === null || moment().diff(moment(Status.errorCheck.prevID)) > (60 * 50 * 1000))
-                {
-                    // Liners for sports broadcasts, promos for others.
-                    if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
-                    {
-                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
-                    } else {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.promos, 'Bottom', 1);
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
-                    }
-
-                } else {
-                    // Liners for sports broadcasts
-                    if (Meta['A'].state.startsWith("sports") && typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
-                    {
-                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
-                    } else {
-                        await sails.helpers.songs.queue(sails.config.custom.subcats.sweepers, 'Bottom', 1);
-                    }
-                }
-                
                 Status.errorCheck.prevBreak = moment();
 
                 // Do stuff depending on the state
                 switch (Meta['A'].state)
                 {
                     case 'live_break':
+                        // Queue after break
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.after);
 
                         // Queue a show return if there is one
                         if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
@@ -118,6 +100,9 @@ module.exports = {
                         await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning'});
                         break;
                     case 'sports_break':
+                        // Queue after break
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after);
+                        
                         var queueLength = await sails.helpers.songs.calculateQueueLength();
 
                         if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
@@ -126,7 +111,7 @@ module.exports = {
                             //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
                             if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
                                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
-                            
+
                             queueLength = await sails.helpers.songs.calculateQueueLength();
                         }
 
@@ -135,6 +120,8 @@ module.exports = {
                         break;
                     case 'remote_break':
                     case 'remote_break_disconnected':
+                        // Queue after break
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.after);
                         // Queue a show return if there is one
                         if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                         {
@@ -146,6 +133,8 @@ module.exports = {
                         break;
                     case 'sportsremote_break':
                     case 'sportsremote_break_disconnected':
+                        // Queue after break
+                        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after);
                         var queueLength = await sails.helpers.songs.calculateQueueLength();
 
                         if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
@@ -154,7 +143,7 @@ module.exports = {
                             //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
                             if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
                                 await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
-                            
+
                             queueLength = await sails.helpers.songs.calculateQueueLength();
                         }
 

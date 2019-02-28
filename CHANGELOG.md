@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - /auth/* endpoints, upon successful authorization, will also return expires property in addition to token property. Expires is how long the token is valid for, in milliseconds.
  - Slides.countActive() in wwsu-slides.js for counting the number of active slides currently.
  - /recipients/register-peer for DJ Controls connecting to Peerjs to report their peerjs ID to the system.
+ - Helper break.executeArray for executing an array of break objects through break.execute. [Issue 54](https://github.com/Lovinity/wwsu/issues/54)
 
 ### Changed
  - /silence/active and /silence/inactive now must be called with a valid socket and an authorized host.
  - /silence/active and /silence/inactive no longer take any input parameters; key was removed.
  - /display/public events 2-4 and 5-7 slides deactivated for now to conserve on information.
  - EAS alerts originating from NWS that are no longer being reported by CAPS (such as canceled) will not be removed from the system for 5 more minutes because of a potential bug if removed immediately.
+ - Breaks during live shows, remotes, and sports broadcasts now configured in sails.config.custom.specialBreaks. [Issue 54](https://github.com/Lovinity/wwsu/issues/54)
 
 ### Fixed
  - sails.helpers.recipients.add bug adding all computer recipients to Status instead of only the ones we want to track.
