@@ -29,7 +29,7 @@ module.exports = async function (req, res, next) {
             record = record[0];
             var references = record.ID;
             var json = {};
-            if (record.active === 1)
+            if (record.active)
             {
                 if (record.action === 'permaban')
                 {

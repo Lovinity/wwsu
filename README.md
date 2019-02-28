@@ -1,4 +1,4 @@
-# WWSU 5.1.0 ALPHA 14
+# WWSU 5.1.0 ALPHA 15
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 **5.1.0 is in alpha stage; not everything planned for 5.1.0 has been implemented yet. Bugs are expected.**
@@ -319,6 +319,46 @@ Bans the specified user indefinitely. Also mass deletes all website messages sen
 |key|criteria|
 |--|--|
 | host | string (required; the Recipient host or IP address to be issued the discipline) |
+#### Response 200 OK
+#### Response 500
+### /discipline/edit
+Edit a discipline entry.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
+#### Request
+|key|criteria|
+|--|--|
+| ID | number (required; the ID of the discipline entry to edit.) |
+| active | Boolean (optional; if provided, will change the active status of the discipline to what is specified.) |
+| IP | string (optional; if provided, will change the IP address / unique host ID of the discipline record to what is provided.) |
+| action | string (optional; if provided, will change the type of ban to this. Must be dayban, permaban, or showban.) |
+| message | string (optional; change the reason for the ban to this.) |
+#### Response 200 OK
+### /discipline/get
+Get discipline entries that are in the system.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
+ - This endpoint supports sockets, uses the "discipline" event, and returns data in the structure defined in the websockets section.
+#### Response 200
+        [
+            {
+                "createdAt": "2018-05-29T18:13:01.763Z", // Date/time the discipline was created. dayban utilizes this.
+                "updatedAt": "2018-05-29T18:13:01.763Z", // Date/time the record was last updated
+                "ID": 1, // The ID of the discipline record
+                "active": false, // Boolean indicating if this discipline is currently being applied
+                "IP": "nfjf93n", // Either the IP address or the unique host ID of the offending device being disciplined
+                "action": "dayban", // Either dayban (ban until 25 hours after createdAt), permaban (ban until record is removed or inactive), or showban (ban until the current broadcast ends, to which the discipline will then be marked inactive)
+                "message": "Telling George Carlin to go f*** himself" // Reason for the discipline
+            }
+            ...
+        ]
+### /discipline/remove
+Completely remove a discipline record from the system.
+ - **Requires auth/director authorization**.
+ - **Request must originate from a websocket**.
+|key|criteria|
+|--|--|
+| ID | number (required; the ID of the discipline entry to remove.) |
 #### Response 200 OK
 #### Response 500
 ## Display

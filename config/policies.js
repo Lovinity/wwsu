@@ -27,6 +27,8 @@ module.exports.policies = {
     'directors/*': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
     'directors/get': 'isBanned',
     'directors/get-hours': 'isBanned',
+    'discipline/edit': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+    'discipline/remove': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
     'display/public': 'isBanned',
     'display/internal': 'isBanned',
     'djs/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],

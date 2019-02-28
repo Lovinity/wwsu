@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Slides.countActive() in wwsu-slides.js for counting the number of active slides currently.
  - /recipients/register-peer for DJ Controls connecting to Peerjs to report their peerjs ID to the system.
  - Helper break.executeArray for executing an array of break objects through break.execute. [Issue 54](https://github.com/Lovinity/wwsu/issues/54)
+ - /discipline/get, /discipline/edit, and /discipline/remove for modifying discipline records in the system. [Issue 29](https://github.com/Lovinity/wwsu/issues/29)
 
 ### Changed
  - /silence/active and /silence/inactive now must be called with a valid socket and an authorized host.

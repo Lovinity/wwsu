@@ -1,3 +1,5 @@
+/* global sails */
+
 /**
  * Discipline.js
  *
@@ -15,9 +17,8 @@ module.exports = {
         },
 
         active: {
-            type: 'number',
-            min: 0,
-            max: 1
+            type: 'boolean',
+            defaultsTo: true,
         },
 
         IP: {
@@ -31,6 +32,28 @@ module.exports = {
         message: {
             type: 'string'
         }
+    },
+
+    // Websockets standards
+    afterCreate: function (newlyCreatedRecord, proceed) {
+        var data = {insert: newlyCreatedRecord};
+        sails.log.silly(`discipline socket: ${data}`);
+        sails.sockets.broadcast('discipline', 'discipline', data);
+        return proceed();
+    },
+
+    afterUpdate: function (updatedRecord, proceed) {
+        var data = {update: updatedRecord};
+        sails.log.silly(`discipline socket: ${data}`);
+        sails.sockets.broadcast('discipline', 'discipline', data);
+        return proceed();
+    },
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = {remove: destroyedRecord.ID};
+        sails.log.silly(`discipline socket: ${data}`);
+        sails.sockets.broadcast('discipline', 'discipline', data);
+        return proceed();
     }
 };
 
