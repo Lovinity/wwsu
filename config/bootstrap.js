@@ -579,7 +579,7 @@ module.exports.bootstrap = async function (done) {
                     }
 
                     // If we are in break, queue something if the queue is under 2 items to keep the break going, and if we are not changing states
-                    if (Meta['A'].changingState === null)
+                    if (Meta['A'].changingState === null && queue.length < 2)
                     {
                         switch (Meta['A'].state)
                         {
