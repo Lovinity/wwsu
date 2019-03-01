@@ -381,6 +381,14 @@ module.exports.custom = {
      */
     specialBreaks: {
 
+        // Automation / during is executed when a DJ "Switches show" and goes to automation_break. It is repeatedly executed whenever the queue empties until either the
+        // break times out, or another show begins.
+        automation: {
+            during: [
+                {task: "queue", category: "PSAs", quantity: 1},
+            ],
+        },
+
         // Breaks during live shows
         // Do not include show openers, returns, nor closers, nor station IDs, in this configuration; those are queued automatically.
         live: {

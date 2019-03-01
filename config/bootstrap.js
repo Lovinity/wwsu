@@ -583,6 +583,9 @@ module.exports.bootstrap = async function (done) {
                     {
                         switch (Meta['A'].state)
                         {
+                            case 'automation_break':
+                                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.automation.during);
+                                break;
                             case 'live_break':
                                 await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.during);
                                 break;
@@ -599,7 +602,7 @@ module.exports.bootstrap = async function (done) {
                                 break;
                         }
                     }
-                    
+
                     // Counter to ensure automation break is not running for too long
                     if (Meta['A'].state === 'automation_break')
                         await sails.helpers.error.count('automationBreak');
