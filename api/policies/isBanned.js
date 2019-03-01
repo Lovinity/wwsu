@@ -34,22 +34,22 @@ module.exports = async function (req, res, next) {
                 if (record.action === 'permaban')
                 {
                     json.discipline = `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${references}`;
-                    return res.send(200, JSON.stringify(json));
+                    return res.status(200).send(JSON.stringify(json));
                 } else if (record.action === 'dayban')
                 {
                     json.discipline = `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${references}`;
-                    return res.send(200, JSON.stringify(json));
+                    return res.status(200).send(JSON.stringify(json));
                 } else if (record.action === 'showban')
                 {
                     json.discipline = `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${references}`;
-                    return res.send(200, JSON.stringify(json));
+                    return res.status(200).send(JSON.stringify(json));
                 }
             }
         }
         return next();
     } catch (e) {
         sails.log.error(e);
-        return res.send(500, 'There was an error checking security protocols. Please try again in a few minutes. If this problem continues, email engineer@wwsu1069.org.');
+        return res.status(500).send('There was an error checking security protocols. Please try again in a few minutes. If this problem continues, email engineer@wwsu1069.org.');
     }
 };
 
