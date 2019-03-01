@@ -49,12 +49,14 @@ module.exports.custom = {
     /*
      * Configuration for the location of various tracks in RadioDJ. Each configuration follows this format:
      * name: {
-     *          "main category": ["array", "of", "sub categories", "inside", "main category"],
-     *          "another main category": [] (Empty array signifies use all subcategories in the main category)
+     *          "main category name in RadioDJ": ["array", "of", "sub categories", "inside", "main category" "from RadioDJ"],
+     *          "another main category in RadioDJ": [] (Empty array signifies use all subcategories in the main category)
      *          ...
      *       }
      * 
      * NOTE: Any configured categories or subcategories not found will be ignored.
+     * NOTE2: Whenever something else in this configuration files mentions "category", it refers to the categories configured here.
+     *        For example, if an "IDs" category is configured here, you might specify "IDs" as the category of station IDs to queue somewhere else in this config file.
      */
     categories: {
 

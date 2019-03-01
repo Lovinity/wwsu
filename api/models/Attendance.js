@@ -1,4 +1,4 @@
-/* global Calendar, sails, moment, Attendance, Meta, Listeners */
+/* global Calendar, sails, moment, Attendance, Meta, Listeners, Logs */
 
 /**
  * Attendance.js
@@ -119,6 +119,15 @@ module.exports = {
                     created = await Attendance.create({unique: record[0].unique, dj: Meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true)}).fetch();
                 } else {
                     created = await Attendance.create({dj: Meta['A'].dj, event: event, actualStart: moment().toISOString(true)}).fetch();
+                    
+                    // Broadcasts without a calendar ID are unauthorized. Log them!
+                    if (event.startsWith("Show: ") || event.startsWith("Remote: ") || event.startsWith("Sports: "))
+                    {
+                        await Logs.create({attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: record.event.replace("Show: ", "").replace("Remote: ", "").replace("Sports: ", ""), event: `An unauthorized / unscheduled broadcast started!<br />Broadcast: ${event}`, createdAt: moment().toISOString(true)})
+                                .tolerate((err) => {
+                                    sails.log.error(err);
+                                });
+                    }
                 }
 
                 // Switch to the new record in the system
