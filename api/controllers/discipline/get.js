@@ -2,41 +2,35 @@
 
 module.exports = {
 
+    friendlyName: 'Discipline / Get',
 
-  friendlyName: 'Discipline / Get',
+    description: 'Get an array of discipline in the system.',
 
+    inputs: {
 
-  description: 'Get an array of discipline in the system.',
+    },
 
+    exits: {
 
-  inputs: {
+    },
 
-  },
+    fn: async function (inputs, exits) {
+        sails.log.debug("controller discipline/get called.");
 
-
-  exits: {
-
-  },
-
-
-  fn: async function (inputs, exits) {
-      sails.log.debug("controller discipline/get called.");
-      
-      try {
-          var records = await Discipline.find();
-          return exits.success(records);
-          
+        try {
+            var records = await Discipline.find();
             // Subscribe to sockets if applicable
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'discipline');
                 sails.log.verbose('Request was a socket. Joining discipline.');
             }
-            
-      } catch (e) {
-          return exits.error(e);
-      }
-  }
+
+            return exits.success(records);
+        } catch (e) {
+            return exits.error(e);
+        }
+    }
 
 
 };
