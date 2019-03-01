@@ -1,5 +1,7 @@
 /* global sails */
 
+// DEPRECATED
+
 module.exports = {
 
     friendlyName: 'Discipline / banDay',
@@ -18,7 +20,7 @@ module.exports = {
         sails.log.debug('Controller discipline/ban-day called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            await sails.helpers.discipline.banDay(inputs.host);
+            await sails.helpers.discipline.banDay(inputs.host, `Unspecified reason`, true);
             return exits.success();
         } catch (e) {
             return exits.error(e);

@@ -1,4 +1,4 @@
-# WWSU 5.1.0 ALPHA 15
+# WWSU 5.1.0 ALPHA 16
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 **5.1.0 is in alpha stage; not everything planned for 5.1.0 has been implemented yet. Bugs are expected.**
@@ -291,8 +291,21 @@ Removes a director from the system.
 #### Response 200 OK
 ## Discipline
 The discipline endpoints regard moderation for public clients (website and app users).
+### /discipline/add
+Add a discipline entry.
+ - **Requires auth/host authorization**.
+ - **Request must originate from a websocket**.
+#### Request
+|key|criteria|
+|--|--|
+| active | Boolean (optional; whether or not the discipline should apply when issued. Defaults to true.) |
+| IP | string (required; the IP address or unique host ID of the device to apply discipline to.) |
+| action | string (required; the type of discipline to issue. Must be dayban (24-hour ban), permaban (banned until the record is removed or marked inactive), or showban (will be marked inactive when the current/next show ends).) |
+| message | string (optional; the reason for issuing the discipline.) |
+#### Response 200 OK
 ### /discipline/ban-show
 Bans the specified user until the currently live DJ/broadcast ends. Also mass deletes all website messages sent by the specified user.
+ - **This endpoint is deprecated and will be removed in version 6.0.0**. Use /discipline/add instead.
  - **Requires auth/host authorization**.
  - **Request must originate from a websocket**.
 #### Request
@@ -303,6 +316,7 @@ Bans the specified user until the currently live DJ/broadcast ends. Also mass de
 #### Response 500
 ### /discipline/ban-day
 Bans the specified user for 24 hours. Also mass deletes all website messages sent by the specified user.
+ - **This endpoint is deprecated and will be removed in version 6.0.0**. Use /discipline/add instead.
  - **Requires auth/host authorization**.
  - **Request must originate from a websocket**.
 #### Request
@@ -313,6 +327,7 @@ Bans the specified user for 24 hours. Also mass deletes all website messages sen
 #### Response 500
 ### /discipline/ban-indefinite
 Bans the specified user indefinitely. Also mass deletes all website messages sent by the specified user.
+ - **This endpoint is deprecated and will be removed in version 6.0.0**. Use /discipline/add instead.
  - **Requires auth/host authorization**.
  - **Request must originate from a websocket**.
 #### Request

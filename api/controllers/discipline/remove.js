@@ -1,3 +1,5 @@
+/* global sails, Discipline */
+
 module.exports = {
 
 

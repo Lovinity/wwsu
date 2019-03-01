@@ -5,12 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [Unreleased]
+
+### Deprecated
+ - /discipline/ban-day, /discipline/ban-indefinite, and /discipline/ban-show. Use /discipline/add instead. These endpoints will be removed in version 6.0.0.
+ - sails.helpers.discipline.banDay, sails.helpers.discipline.banIndefinite, and sails.helpers.discipline.banShow. Use sails.helpers.discipline.add instead. These helpers will be removed in version 6.0.0.
+
 ### Added
  - /auth/* endpoints, upon successful authorization, will also return expires property in addition to token property. Expires is how long the token is valid for, in milliseconds.
  - Slides.countActive() in wwsu-slides.js for counting the number of active slides currently.
  - /recipients/register-peer for DJ Controls connecting to Peerjs to report their peerjs ID to the system.
  - Helper break.executeArray for executing an array of break objects through break.execute. [Issue 54](https://github.com/Lovinity/wwsu/issues/54)
- - /discipline/get, /discipline/edit, and /discipline/remove for modifying discipline records in the system. [Issue 29](https://github.com/Lovinity/wwsu/issues/29)
+ - /discipline/get, /discipline/edit, /discipline/add, and /discipline/remove for modifying discipline records in the system. [Issue 29](https://github.com/Lovinity/wwsu/issues/29)
+ - sails.helpers.discipline.add to replace the three other discipline helpers.
 
 ### Changed
  - /silence/active and /silence/inactive now must be called with a valid socket and an authorized host.

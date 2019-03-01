@@ -1,5 +1,7 @@
 /* global sails */
 
+// DEPRECATED
+
 module.exports = {
 
     friendlyName: 'Discipline / banIndefinite',
@@ -22,7 +24,7 @@ module.exports = {
         sails.log.debug('Controller discipline/ban-indefinite called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            await sails.helpers.discipline.banIndefinite(inputs.host);
+            await sails.helpers.discipline.banIndefinite(inputs.host, `Unspecified reason`, true);
             return exits.success();
         } catch (e) {
             return exits.error(e);
