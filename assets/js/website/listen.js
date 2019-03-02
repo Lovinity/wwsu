@@ -1166,10 +1166,10 @@ function processCalendar(data, replace = false)
                                 var line2 = event.title;
                                 var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
                             }
-                            caldata.innerHTML += `<button id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="btn btn-${eventClass} m-2 text-white rounded shadow-8">
+                            caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="m-2 text-white rounded shadow-8">
              <div class="p-1 text-center" style="width: 100%;">${image}
              <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
-             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></button>`;
+             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({
@@ -1296,10 +1296,10 @@ function processCalendar(data, replace = false)
                                 var line2 = event.title;
                                 var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
                             }
-                            caldata.innerHTML += `<button id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="btn btn-${eventClass} m-2 text-white rounded shadow-8">
+                            caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="m-2 text-white rounded shadow-8">
              <div class="p-1 text-center" style="width: 100%;">${image}
              <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
-             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></button>`;
+             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
                         } catch (e) {
                             console.error(e);
                             iziToast.show({

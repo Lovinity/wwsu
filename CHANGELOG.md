@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Helper break.executeArray for executing an array of break objects through break.execute. [Issue 54](https://github.com/Lovinity/wwsu/issues/54)
  - /discipline/get, /discipline/edit, /discipline/add, and /discipline/remove for modifying discipline records in the system. [Issue 29](https://github.com/Lovinity/wwsu/issues/29)
  - sails.helpers.discipline.add to replace the three other discipline helpers.
+ - Unauthorized Shows, Remotes, and Sports broadcasts that start will be logged under the "unauthorized" logtype.
 
 ### Changed
  - /silence/active and /silence/inactive now must be called with a valid socket and an authorized host.
