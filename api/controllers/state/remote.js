@@ -53,7 +53,7 @@ module.exports = {
             {
                 inputs.topic = await sails.helpers.filterProfane(inputs.topic);
                 inputs.topic = await sails.helpers.sanitize(inputs.topic);
-                inputs.topic = await sails.helpers.truncateText(inputs.topic, 140);
+                inputs.topic = await sails.helpers.truncateText(inputs.topic, 256);
             }
             if (inputs.showname !== '')
             {

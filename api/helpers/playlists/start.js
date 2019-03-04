@@ -153,7 +153,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
                     await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
-                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), show: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 140)});
+                    await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), show: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 256)});
                     await loadPlaylist();
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                 }

@@ -355,8 +355,8 @@ var Slides = (() => {
 
 
                         function getPageSize() {
-                            pageHeight = $(`#slide-${activeSlide().name}`).height();
-                            pageWidth = $(`#slide-${activeSlide().name}`).width();
+                            pageHeight = window.innerHeight;
+                            pageWidth = window.innerWidth;
                             console.log(`Page size... height: ${pageHeight}, width: ${pageWidth}`);
                         }
 
