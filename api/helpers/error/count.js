@@ -58,7 +58,7 @@ module.exports = {
                     try {
                         sails.log.warn(`Status.errorCheck.${inputs.name} triggered!`);
                         Status.errorCheck[inputs.name].active = true;
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'errorcheck', loglevel: 'warning', logsubtype: '', event: `Status.errorCheck.${inputs.name} triggered!`})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'errorcheck', loglevel: 'warning', logsubtype: '', event: `Status.errorCheck.${inputs.name} triggered!`}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });

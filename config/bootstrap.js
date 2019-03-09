@@ -35,7 +35,7 @@ module.exports.bootstrap = async function (done) {
     // (otherwise your server will never lift, since it's waiting on the bootstrap)
 
     // Log that the server was rebooted
-    await Logs.create({attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', event: 'The Node server was rebooted.'})
+    await Logs.create({attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', event: 'The Node server was rebooted.'}).fetch()
             .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err);
@@ -423,7 +423,7 @@ module.exports.bootstrap = async function (done) {
                                         // State switching should be pushed in sockets 
                                         await Meta.changeMeta({state: 'live_prerecord', showStamp: moment().toISOString(true)});
                                         await Attendance.createRecord(`Prerecord: ${Meta['A'].playlist}`);
-                                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord started airing.` + "\n" + "Prerecord: " + Meta['A'].playlist})
+                                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord started airing.` + "\n" + "Prerecord: " + Meta['A'].playlist}).fetch()
                                                 .tolerate((err) => {
                                                     // Do not throw for errors, but log it.
                                                     sails.log.error(err);
@@ -458,14 +458,14 @@ module.exports.bootstrap = async function (done) {
                         switch (Meta['A'].state)
                         {
                             case "automation_playlist":
-                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A playlist finished airing.`})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A playlist finished airing.`}).fetch()
                                         .tolerate((err) => {
                                             // Do not throw for errors, but log it.
                                             sails.log.error(err);
                                         });
                                 break;
                             case "live_prerecord":
-                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord finished airing.`})
+                                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord finished airing.`}).fetch()
                                         .tolerate((err) => {
                                             // Do not throw for errors, but log it.
                                             sails.log.error(err);
@@ -514,7 +514,7 @@ module.exports.bootstrap = async function (done) {
                         await Meta.changeMeta({state: 'live_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Show: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -526,7 +526,7 @@ module.exports.bootstrap = async function (done) {
                         await Meta.changeMeta({state: 'sports_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
                         await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -537,7 +537,7 @@ module.exports.bootstrap = async function (done) {
                     {
                         await Meta.changeMeta({state: 'remote_on', showStamp: moment().toISOString(true)});
                         await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -548,7 +548,7 @@ module.exports.bootstrap = async function (done) {
                     {
                         await Meta.changeMeta({state: 'sportsremote_on', showStamp: moment().toISOString(true)});
                         await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
@@ -612,7 +612,7 @@ module.exports.bootstrap = async function (done) {
                     var n = d.getMinutes();
                     if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(Meta['A'].lastID)) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== `live_prerecord`) {
                         await Meta.changeMeta({lastID: moment().toISOString(true)});
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].show}`})
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `Required top of the hour break was not taken!<br />Show: ${Meta['A'].show}`}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });

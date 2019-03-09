@@ -142,7 +142,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                     await Attendance.createRecord(`Playlist: ${theplaylist.name}`);
                     await Meta.changeMeta({state: 'automation_playlist', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true)});
-                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + theplaylist.name, event: 'Playlist started.<br />Playlist: ' + inputs.name})
+                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + theplaylist.name, event: 'Playlist started.<br />Playlist: ' + inputs.name}).fetch()
                             .tolerate((err) => {
                                 sails.log.error(err);
                             });

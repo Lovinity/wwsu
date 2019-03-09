@@ -385,7 +385,7 @@ module.exports = {
                         // Log the new track playing if the track was new
                         if (typeof push.trackID !== 'undefined')
                         {
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: `Track played in automation.${push2.requested ? `<br />Requested by: ${push2.requestedBy || `Unknown User`}` : ``}`, trackArtist: Meta['A'].trackArtist || null, trackTitle: Meta['A'].trackTitle || null, trackAlbum: Meta['A'].trackAlbum || null, trackLabel: Meta['A'].trackLabel || null})
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: `Track played in automation.${push2.requested ? `<br />Requested by: ${push2.requestedBy || `Unknown User`}` : ``}`, trackArtist: Meta['A'].trackArtist || null, trackTitle: Meta['A'].trackTitle || null, trackAlbum: Meta['A'].trackAlbum || null, trackLabel: Meta['A'].trackLabel || null}).fetch()
                                     .tolerate((err) => {
                                     });
 

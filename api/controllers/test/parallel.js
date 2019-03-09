@@ -16,7 +16,7 @@ module.exports = {
         var func1 = function () {
             return new Promise(async (resolve, reject) => {
                 output += `Started func1... `;
-                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'test', loglevel: 'primary', logsubtype: '', event: 'This is a test log called from parallel.js'})
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'test', loglevel: 'primary', logsubtype: '', event: 'This is a test log called from parallel.js'}).fetch()
                         .tolerate((err) => {
                             sails.log.error(err);
                         });
