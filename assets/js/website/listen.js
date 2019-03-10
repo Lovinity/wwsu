@@ -35,6 +35,7 @@ var clockTimer;
 // Initialize the web player
 if (document.querySelector('#nativeflashradio'))
     $("#nativeflashradio").flashradio({
+        token: "dGZzd2ZzL3h4dHYyMTc6L3BzaAE=",
         userinterface: "small",
         backgroundcolor: "#263238",
         themecolor: "#d31e38",
