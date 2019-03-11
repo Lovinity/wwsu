@@ -1885,7 +1885,7 @@ function processNowPlaying(response)
             // scoreboard
             if (Meta.state.startsWith("sports"))
             {
-                scoreboard.style.display = "inline";
+                scoreboard.style.display = undefined;
                 nowplaying.style.display = "none";
 
                 if (moment(Meta.time).hours() < 18)
@@ -1895,7 +1895,7 @@ function processNowPlaying(response)
                     scoreboard.style.backgroundImage = "url(../../images/sports/mcm_mensemifinals.png)";
                 }
             } else {
-                nowplaying.style.display = "inline";
+                nowplaying.style.display = undefined;
                 scoreboard.style.display = "none";
             }
 
