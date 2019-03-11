@@ -10,16 +10,26 @@
                         <h2 style="text-align: center; font-size: 3em; color: #F44336">Display sign lost connection. Trying to re-connect...</h2>
             </div>
         </div>
-            <div class="footer p-3" style="color: #FFFFFF; text-align: center; height: 225px;">
+            <div class="footer p-3" style="color: #FFFFFF; text-align: center; height: 210px;">
                 <div class="foot">
                         <div class="p-1 m-1" style="height: 50px; text-align: center; font-size: 1.5em; z-index: 2;" id="slide-badges"></div>
-                        <div id="nowplaying-seek" style="height: 150px; opacity: 0.1;"></div>
                         <div style="height: 150px; background-color: #787878; text-align: center;" id="nowplaying" class="shadow-4">
                         <div class="m-1 shadow-2" style="color: #FFEB3B; font-size: 2em; height: 56px; background-color: rgba(0, 0, 0, 0.5); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="nowplaying-time"></div>
                         <div class="m-1" style="color: #FFFFFF; font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="nowplaying-lines"><div id="nowplaying-line1"></div><div id="nowplaying-line2"></div></div>
                         </div>
                 </div>
             </div>
+
+    <div class="bgoverlay" id="scoreboard" style="background-color: rgba(0, 0, 0, 0); background-image: url(../../images/sports/mcm_womensemifinals.png); background-repeat: no-repeat; background-position: center center; background-attachment: fixed; display: none; opacity: 1;">
+        <div id="score-wsu" style="width: 7vw; text-align: center; position: absolute; top: 84.5vh; left: 0.5vw; font-size: 8vh; color: #ffffff; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">0</div>
+        <div id="score-opp" style="width: 7vw; text-align: center; position: absolute; top: 84.5vh; left: 92.5vw; font-size: 8vh; color: #ffffff; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">0</div>
+
+        <div id="num-wsu" style="width: 7vw; text-align: center; position: absolute; top: 96vh; left: 0.5vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
+        <div id="num-opp" style="width: 7vw; text-align: center; position: absolute; top: 96vh; left: 92.5vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
+
+        <div id="text-wsu" style="width: 33vw; text-align: center; position: absolute; top: 96vh; left: 9.3vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
+        <div id="text-opp" style="width: 33vw; text-align: center; position: absolute; top: 96vh; left: 56vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
+    </div>
     <script>if (window.module)
                 module = window.module;</script>
 <script src="../../js/display/public.js?t=<%= timestamp %>" defer></script>
