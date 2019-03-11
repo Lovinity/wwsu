@@ -1885,17 +1885,17 @@ function processNowPlaying(response)
             // scoreboard
             if (Meta.state.startsWith("sports"))
             {
-                scoreboard.style.display = undefined;
+                scoreboard.style.display = "inline";
                 nowplaying.style.display = "none";
 
-                if (moment(Meta.time).hours() < 18)
+                if (Meta.show === "Women's Basketball")
                 {
                     scoreboard.style.backgroundImage = "url(../../images/sports/mcm_womensemifinals.png)";
-                } else {
+                } else if (Meta.show === "Men's Basketball") {
                     scoreboard.style.backgroundImage = "url(../../images/sports/mcm_mensemifinals.png)";
                 }
             } else {
-                nowplaying.style.display = undefined;
+                nowplaying.style.display = "block";
                 scoreboard.style.display = "none";
             }
 
@@ -1991,7 +1991,7 @@ function processNowPlaying(response)
             {
                 var line1Timer = setTimeout(() => {
                     nowplayingline1.innerHTML = Meta.line1;
-                    nowplayingLine1.className = ``;
+                    nowplayingline1.className = ``;
                     if (Meta.line1.length >= 80)
                     {
                         $('#nowplaying-line1')
@@ -2036,7 +2036,7 @@ function processNowPlaying(response)
             {
                 var line2Timer = setTimeout(() => {
                     nowplayingline2.innerHTML = Meta.line2;
-                    nowplayingLine2.className = ``;
+                    nowplayingline2.className = ``;
                     if (Meta.line2.length >= 80)
                     {
                         $('#nowplaying-line2')
