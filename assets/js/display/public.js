@@ -1448,7 +1448,7 @@ waitFor(() => {
     Directors.setOnReplace((db) => processDirectors(db));
 
     // scoreboard
-    sportsdb.assignSocketEvent('sports', socket);
+    sportsdb.assignSocketEvent('sports', io.socket);
     sportsdb.setOnInsert((data, db) => {
         changeData(data);
     });
