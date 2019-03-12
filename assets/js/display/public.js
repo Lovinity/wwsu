@@ -1890,9 +1890,9 @@ function processNowPlaying(response)
 
                 if (Meta.show === "Women's Basketball")
                 {
-                    scoreboard.style.backgroundImage = "url(../../images/sports/mcm_womensemifinals.png)";
+                    scoreboard.style.backgroundImage = "url(../../images/sports/mcm_womenfinals.png)";
                 } else if (Meta.show === "Men's Basketball") {
-                    scoreboard.style.backgroundImage = "url(../../images/sports/mcm_mensemifinals.png)";
+                    scoreboard.style.backgroundImage = "url(../../images/sports/mcm_menfinals.png)";
                 }
             } else {
                 nowplaying.style.display = "block";
