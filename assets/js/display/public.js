@@ -1803,7 +1803,7 @@ function doEas()
             <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
             var innercontent = document.getElementById('alerts');
-            Eas({severity: "Extreme"}).each(function (dodo) {
+            Eas.db({severity: "Extreme"}).each(function (dodo) {
                 try {
                     var color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color) ? hexRgb(dodo.color) : hexRgb('#787878');
                     var borderclass = 'black';
