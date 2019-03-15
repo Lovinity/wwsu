@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file as of versio
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
-## [Unreleased]
+## [unreleased]
 
+## [5.1.0] - 2019-03-15
 ### Deprecated
  - /discipline/ban-day, /discipline/ban-indefinite, and /discipline/ban-show. Use /discipline/add instead. These endpoints will be removed in version 6.0.0.
  - sails.helpers.discipline.banDay, sails.helpers.discipline.banIndefinite, and sails.helpers.discipline.banShow. Use sails.helpers.discipline.add instead. These helpers will be removed in version 6.0.0.
