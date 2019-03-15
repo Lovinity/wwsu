@@ -1679,8 +1679,8 @@ function doEas()
         // Display the new alert if conditions permit
         if ((newEas.length > 0 && !easActive))
         {
-            // Make sure alert is valid
-            if (typeof newEas[0] !== 'undefined')
+            // Make sure alert is valid. Also, only scroll severe and extreme alerts when there is an extreme alert in effect; ignore moderate and minor alerts.
+            if (typeof newEas[0] !== 'undefined' && (!easExtreme || (easExtreme && (newEas[0]['severity'] === "Extreme" || newEas[0]['severity'] === "Severe"))))
             {
                 easActive = true;
 
