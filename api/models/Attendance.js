@@ -123,7 +123,7 @@ module.exports = {
                     // Broadcasts without a calendar ID are unauthorized. Log them!
                     if (event.startsWith("Show: ") || event.startsWith("Remote: ") || event.startsWith("Sports: "))
                     {
-                        await Logs.create({attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: record.event.replace("Show: ", "").replace("Remote: ", "").replace("Sports: ", ""), event: `An unauthorized / unscheduled broadcast started!<br />Broadcast: ${event}`, createdAt: moment().toISOString(true)}).fetch()
+                        await Logs.create({attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: event.replace("Show: ", "").replace("Remote: ", "").replace("Sports: ", ""), event: `An unauthorized / unscheduled broadcast started!<br />Broadcast: ${event}`, createdAt: moment().toISOString(true)}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
