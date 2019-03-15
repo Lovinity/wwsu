@@ -295,6 +295,9 @@ module.exports = {
                     sails.log.verbose(`Retrieved Events records: ${djeventsR.length}`);
                     sails.log.silly(djeventsR);
 
+                    // Load the current attendance record into memory
+                    var attendanceRecord = await Attendance.findOne({ID: Meta['A'].attendanceID});
+
                     djeventsR.map(event => djevents[event.name] = event);
 
                     // Loop through each calendar event
@@ -548,6 +551,15 @@ module.exports = {
                                 // Mark when we are supposed to be in genre rotation
                                 if (event.summary.startsWith("Genre: "))
                                     genreActive = true;
+
+                                // Check if the event started over 10 minutes prior to start time, and if so, update the attendance record accordingly.
+                                if (Meta['A'].attendanceID !== null)
+                                {
+                                    if (attendanceRecord.event === event.summary && (attendanceRecord.unique === null || attendanceRecord.unique === ``))
+                                    {
+                                        await Attendance.update({ID: Meta['A'].attendanceID}, {unique: event.id, scheduledStart: moment(criteria.start).toISOString(true), scheduledEnd: moment(criteria.end).toISOString(true)}).fetch();
+                                    }
+                                }
                             } catch (e) {
                                 sails.log.error(e);
                             }
