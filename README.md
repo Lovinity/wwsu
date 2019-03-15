@@ -1,7 +1,7 @@
 # WWSU 5.1.0 ALPHA 17
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
-**The master branch should be considered UNSTABLE; please use one of the releases from our GitHub instead**
+**The master branch should NOT be used for your own deployment; please use a release instead**
 
 ## Websockets
 Several of the API endpoints, as noted in their respective section of this documentation, can be called using a socket request. When the request is a socket, the client will be subscribed to receive changes. Unless otherwise specified in this readme, websocket messages are sent as an event containing the same name as the top level endpoint, in all lowercase (For example, anything under Messages will be sent as a socket event named "messages"). The data sent to the event follows the following format:
