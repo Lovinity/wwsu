@@ -96,31 +96,8 @@ module.exports = {
                     return exits.conflict("To prevent audio recording conflicts, this request was denied because another host already has recordAudio. Please set the other host recordAudio to false first.");
             }
 
-            // Determine what needs updating
-            var criteria = {};
-            if (typeof inputs.friendlyname !== 'undefined' && inputs.friendlyname !== null)
-                criteria.friendlyname = inputs.friendlyname;
-            if (typeof inputs.authorized !== 'undefined' && inputs.authorized !== null)
-                criteria.authorized = inputs.authorized;
-            if (typeof inputs.admin !== 'undefined' && inputs.admin !== null)
-                criteria.admin = inputs.admin;
-            if (typeof inputs.makeCalls !== 'undefined' && inputs.makeCalls !== null)
-                criteria.makeCalls = inputs.makeCalls;
-            if (typeof inputs.answerCalls !== 'undefined' && inputs.answerCalls !== null)
-                criteria.answerCalls = inputs.answerCalls;
-            if (typeof inputs.silenceDetection !== 'undefined' && inputs.silenceDetection !== null)
-                criteria.silenceDetection = inputs.silenceDetection;
-            if (typeof inputs.recordAudio !== 'undefined' && inputs.recordAudio !== null)
-                criteria.recordAudio = inputs.recordAudio;
-            if (typeof inputs.requests !== 'undefined' && inputs.requests !== null)
-                criteria.requests = inputs.requests;
-            if (typeof inputs.emergencies !== 'undefined' && inputs.emergencies !== null)
-                criteria.emergencies = inputs.emergencies;
-            if (typeof inputs.webmessages !== 'undefined' && inputs.webmessages !== null)
-                criteria.webmessages = inputs.webmessages;
-
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-            var criteriaB = _.cloneDeep(criteria);
+            var criteriaB = _.cloneDeep(inputs);
 
             // Edit it
             var hostRecord = await Hosts.updateOne({ID: inputs.ID}, criteriaB);
