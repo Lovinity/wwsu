@@ -12,35 +12,25 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller messages/get-web called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Get the client IP address
-            var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
-
-            var opts = {};
-            opts = {ip: from_IP, host: null, nickname: null};
+            var from_IP = sails.helpers.getIP(this.req);
+            var host = sh.unique(from_IP + sails.config.custom.hostSecret);
 
             if (this.req.isSocket)
             {
                 // Generate a host name from the IP address and randomly generated secret
-                opts.host = sh.unique(from_IP + sails.config.custom.hostSecret);
-                if (opts.nickname === null || opts.nickname === '')
-                    opts.nickname = opts.host;
-                sails.log.silly(`Host: ${opts.host}`);
+                sails.log.silly(`Host: ${host}`);
 
                 // Subscribe the client to receiving web messages over websockets
                 sails.sockets.join(this.req, 'messages-website'); // Public website messages
-                sails.sockets.join(this.req, `messages-website-${opts.host}`); // Private website messages
-                sails.log.verbose(`Request was a socket. Joining messages-website and messages-website-${opts.host}.`);
-            } else {
-                opts.host = sh.unique(from_IP + sails.config.custom.hostSecret);
+                sails.sockets.join(this.req, `messages-website-${host}`); // Private website messages
+                sails.log.verbose(`Request was a socket. Joining messages-website and messages-website-${host}.`);
             }
-            if (opts.nickname === null || opts.nickname === '')
-                opts.nickname = opts.host;
 
             // Get messages for this client and return them
-            var records = await sails.helpers.messages.getWeb(opts.host);
+            var records = await sails.helpers.messages.getWeb(host);
             
             return exits.success(records);
         } catch (e) {
