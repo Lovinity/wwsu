@@ -24,12 +24,10 @@ module.exports = {
                         .tolerate((err) => {
                         });
 
-                // Skip the track if there's a track playing in automation
+                // Skip the track if there's a track playing in automation and there's another track queued
                 if (typeof Meta.automation[1] !== 'undefined')
                 {
                     await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-                } else {
-                    sails.helpers.rest.cmd('StopPlayer', 0);
                 }
             }
 
