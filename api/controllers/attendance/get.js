@@ -29,7 +29,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller attendance/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             var query = {};
@@ -47,6 +46,7 @@ module.exports = {
                 var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(1, 'days');
                 query = {or: [{scheduledStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}, {actualStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}]};
+                
             } else {
 
                 if (inputs.dj && inputs.dj !== null && inputs.dj !== '')

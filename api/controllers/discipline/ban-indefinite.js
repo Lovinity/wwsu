@@ -22,7 +22,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller discipline/ban-indefinite called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             await sails.helpers.discipline.banIndefinite(inputs.host, `Unspecified reason`, true);
             return exits.success();

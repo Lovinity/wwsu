@@ -15,7 +15,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller announcements/remove called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Destroy the announcement

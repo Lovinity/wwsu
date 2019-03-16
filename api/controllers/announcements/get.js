@@ -21,7 +21,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller announcements/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Determine which announcements to return; do not subscribe to websockets for "all" type
@@ -41,7 +40,6 @@ module.exports = {
             }
 
             sails.log.verbose(`${records.length} records retrieved.`);
-            sails.log.silly(records);
 
             // Return records
             if (!records || records.length < 1)

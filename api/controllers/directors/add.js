@@ -44,7 +44,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller directors/add called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             await Directors.create({name: inputs.name, login: bcrypt.hashSync(inputs.login, 10), admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: moment().toISOString()}).fetch();

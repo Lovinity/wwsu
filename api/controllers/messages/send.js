@@ -29,7 +29,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller messages/send called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+
         try {
             // Send the message
             await sails.helpers.messages.send(this.req.payload.host, inputs.to, inputs.to_friendly, inputs.message);

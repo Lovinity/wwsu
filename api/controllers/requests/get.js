@@ -15,7 +15,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller requests/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+
         try {
             // Get requests
             var response = await sails.helpers.requests.get(inputs.offset);

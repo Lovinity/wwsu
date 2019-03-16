@@ -31,7 +31,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller messages/send-web called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         
         // Get the client's IP address
         var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;

@@ -4,7 +4,7 @@ module.exports = {
 
     friendlyName: 'Silence / Inactive',
 
-    description: 'Silence detection program should hit this endpoint when previously detected silence has been resolved.',
+    description: 'DJ Controls should call this endpoint after a silence issue has been resolved, and silence is no longer detected.',
 
     inputs: {
     },

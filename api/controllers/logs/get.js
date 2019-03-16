@@ -47,9 +47,9 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller logs/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            
             // Get date range
             var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
             var end = moment(start).add(1, 'days');
@@ -63,6 +63,7 @@ module.exports = {
             if (inputs.attendanceID !== null && inputs.attendanceID > 0)
                 query = {attendanceID: inputs.attendanceID};
             
+            // Get issue logs if ISSUES was provided as the subtype
             if (inputs.subtype === "ISSUES")
             {
                 query.loglevel = ['warning', 'urgent', 'danger'];

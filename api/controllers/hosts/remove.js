@@ -23,7 +23,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller hosts/remove called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // First, determine if we need to lock out of editing authorized and admin

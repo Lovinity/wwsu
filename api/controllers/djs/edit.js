@@ -4,7 +4,7 @@ module.exports = {
 
     friendlyName: 'djs / edit',
 
-    description: 'Change the name or login of a DJ.',
+    description: 'Change the name or login of a DJ. If a DJ with the same name already exists, the two DJs will be merged.',
 
     inputs: {
         ID: {
@@ -30,7 +30,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller djs/edit called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
 
@@ -66,6 +65,7 @@ module.exports = {
                 }
             }
             
+            // Encrypt login
             if (inputs.login !== null && typeof inputs.login !== 'undefined')
                 criteria.login = bcrypt.hashSync(inputs.login, 10);
 

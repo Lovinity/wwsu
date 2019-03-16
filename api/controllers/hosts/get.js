@@ -28,7 +28,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller hosts/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Find the hosts record
@@ -44,7 +43,7 @@ module.exports = {
                 sails.sockets.join(this.req, 'hosts');
                 sails.log.verbose('Request was a socket on an authorized admin. Joined hosts.');
 
-                // Push the current hosts
+                // Push the current hosts through the output
                 var records = await Hosts.find();
                 record.otherHosts = records;
             }

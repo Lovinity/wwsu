@@ -73,7 +73,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller hosts/edit called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+
         try {
             // First, determine if we need to lock out of editing authorized and admin
             var lockout = await Hosts.count({authorized: true, admin: true});
@@ -82,7 +82,7 @@ module.exports = {
             if (lockout <= 1 && ((typeof inputs.admin !== 'undefined' && !inputs.admin) || (typeof inputs.authorized !== 'undefined' && !inputs.authorized)))
                 return exits.conflict("To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing authorized admin status from this host.");
 
-            // Now, if changing silenceDetection or recordAudio to true, ensure there aren't other hosts with it already true. If so, error to prevent conflict
+            // Now, if changing silenceDetection or recordAudio to true, ensure there aren't other hosts with it already true. If so, error to prevent conflict.
             if (typeof inputs.silenceDetection !== 'undefined' && inputs.silenceDetection !== null && inputs.silenceDetection)
             {
                 var lockout = await Hosts.count({ID: {'!=': inputs.ID}, silenceDetection: true});

@@ -18,7 +18,8 @@ module.exports = {
         sails.log.debug('Controller djs/get called.');
 
         try {
-            // Grab events
+            
+            // Grab DJs
             var records = await Djs.find();
             
             // Remove login information from the records
@@ -28,7 +29,6 @@ module.exports = {
             });
 
             sails.log.verbose(`DJ records retrieved: ${records.length}`);
-            sails.log.silly(records);
 
             // Subscribe to sockets if applicable
             if (this.req.isSocket)

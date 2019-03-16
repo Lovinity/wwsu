@@ -2,9 +2,6 @@
 
 //TODO: rename to queue-top-add
 
-const UrlSafeString = require('url-safe-string'),
-        tagGenerator = new UrlSafeString();
-
 module.exports = {
 
     friendlyName: 'songs / queue-add',
@@ -17,7 +14,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller songs/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             

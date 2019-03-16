@@ -1,4 +1,4 @@
-/* global sails, Subcategory, songs, Category */
+/* global sails, Subcategory, songs, Category, Genre */
 
 module.exports = {
 
@@ -18,7 +18,6 @@ module.exports = {
             // Retrieve a list of genres.
             var genres = await Genre.find({}).sort('name ASC');
             sails.log.verbose(`Genre retrieved: ${genres.length}`);
-            sails.log.silly(genres);
 
 
             // Push the genres out

@@ -16,7 +16,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller recipients/register-peer called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Must be a websocket request
             if (!this.req.isSocket)

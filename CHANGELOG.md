@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [unreleased]
+### Changed
+ - Many of the methods used in api controllers and in models have been migrated to sails helpers.
+ - Removed a lot of the logging that could potentially output sensitive data to the console.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

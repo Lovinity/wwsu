@@ -11,7 +11,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller recipients/add-computers called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Must be a websocket request
             if (!this.req.isSocket)
@@ -19,10 +18,6 @@ module.exports = {
 
             // Add the recipient
             var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), this.req.payload.host, 'computers', this.req.payload.host);
-            
-            // Join the audio call socket for this host
-            sails.sockets.join(this.req, `call`);
-            sails.sockets.join(this.req, `calls-${this.req.payload.host}`);
             
             // Return the host label object
             return exits.success({label: label});

@@ -4,7 +4,7 @@ module.exports = {
 
     friendlyName: 'djs / add',
 
-    description: 'Add a new DJ into the system.',
+    description: 'Add a new DJ into the system. Call is ignored if a DJ with the same name already exists.',
 
     inputs: {
         name: {
@@ -26,7 +26,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller djs/add called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: moment("2002-01-01 00:00:00").toISOString(true)});

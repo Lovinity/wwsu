@@ -4,14 +4,14 @@ module.exports = {
 
     friendlyName: 'silence / active',
 
-    description: 'Silence detection program should hit this endpoint when silence was detected.',
+    description: 'DJ Controls should call this endpoint every minute whenever silence is detected.',
 
     inputs: {
     },
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller silence/active called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+
         try {
             // Activate status issue
             Status.changeStatus([{name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio detected.`}]);
@@ -37,6 +37,8 @@ module.exports = {
             if (moment().isBefore(moment(Status.errorCheck.prevError).add(3, 'minutes')) && (Meta['A'].state.startsWith("automation_") || Meta['A'].state === 'live_prerecord'))
             {
                 await Meta.changeMeta({changingState: `Switching automation instances due to no audio`});
+                
+                // Log the problem
                 await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switching automation instances; silence detection executed multiple times.`}).fetch()
                         .tolerate((err) => {
                             sails.log.error(err);
@@ -45,6 +47,8 @@ module.exports = {
                         .tolerate((err) => {
                             sails.log.error(err);
                         });
+
+                // Find a RadioDJ to switch to
                 var maps = sails.config.custom.radiodjs
                         .filter((instance) => instance.rest === Meta['A'].radiodj)
                         .map(async (instance) => {
@@ -54,7 +58,10 @@ module.exports = {
                             return true;
                         });
                 await Promise.all(maps);
+                
                 sails.sockets.broadcast('system-error', 'system-error', true);
+                
+                // Prepare the radioDJ
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 1, 0);
                 await sails.helpers.rest.cmd('StopPlayer', 0, 0);

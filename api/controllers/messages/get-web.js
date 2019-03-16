@@ -39,7 +39,7 @@ module.exports = {
             if (opts.nickname === null || opts.nickname === '')
                 opts.nickname = opts.host;
 
-            // Get messages for this client
+            // Get messages for this client and return them
             var records = await sails.helpers.messages.getWeb(opts.host);
             
             return exits.success(records);

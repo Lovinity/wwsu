@@ -12,6 +12,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller eas/get called.');
+        
         try {
             // Get records
             var records = await Eas.find();

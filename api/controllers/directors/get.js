@@ -28,7 +28,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller directors/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // If a username was specified, find only that director. Otherwise, get all directors.
@@ -53,7 +52,6 @@ module.exports = {
             });
 
             sails.log.verbose(`Director records retrieved: ${records.length}`);
-            sails.log.silly(records);
 
             // Return records
             if (!records || records.length < 1)

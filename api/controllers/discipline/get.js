@@ -19,6 +19,7 @@ module.exports = {
 
         try {
             var records = await Discipline.find();
+            
             // Subscribe to sockets if applicable
             if (this.req.isSocket)
             {

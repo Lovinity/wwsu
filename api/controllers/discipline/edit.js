@@ -37,6 +37,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug("Controller discipline/edit called.");
+        
         try {
             var criteria = {};
             if (typeof inputs.active !== `undefined`)

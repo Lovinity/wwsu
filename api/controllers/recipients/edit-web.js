@@ -3,7 +3,7 @@ var sh = require("shorthash");
 
 module.exports = {
 
-    friendlyName: 'Recipients / Edit web',
+    friendlyName: 'Recipients / Edit-web',
 
     description: 'Changes a label for a public recipient.',
 
@@ -16,8 +16,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller recipients/add-web called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+        sails.log.debug('Controller recipients/edit-web called.');
 
         try {
             // Request must be a socket

@@ -19,7 +19,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller state/automation called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Block if we are in the process of changing states

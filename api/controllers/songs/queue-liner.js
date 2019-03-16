@@ -12,7 +12,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller songs/queue-liner called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
 

@@ -11,7 +11,6 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        
         sails.log.debug('Controller analytics/weekly-dj called.');
         
         // If socket, subscribe to receive changes to analytics

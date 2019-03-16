@@ -1,4 +1,4 @@
-/* global sails, Meta */
+/* global sails, Meta, moment */
 
 module.exports = {
 

@@ -1,4 +1,4 @@
-/* global Djs, sails, Xp, Attendance, Listeners */
+/* global Djs, sails, Xp, Attendance, Listeners, Meta */
 
 module.exports = {
 
@@ -20,7 +20,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller djs/remove called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
 

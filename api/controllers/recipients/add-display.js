@@ -15,8 +15,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller recipients/add called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+        sails.log.debug('Controller recipients/add-display called.');
         try {
             // Request must be a socket
             if (!this.req.isSocket)
