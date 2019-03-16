@@ -63,46 +63,22 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller announcements/edit called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
 
-            // Determine what needs updating
-            var criteria = {};
+            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+            var criteriaB = _.cloneDeep(inputs);
+
+            // Update the announcement
+            await Announcements.update({ID: inputs.ID}, criteriaB).fetch();
 
             if (inputs.type !== null && typeof inputs.type !== 'undefined')
             {
-                criteria.type = inputs.type;
-                
                 // If the type changed, issue a remove websocket event to the previous type.
                 var record = await Announcements.findOne({ID: inputs.ID});
                 if (record && record.type !== inputs.type)
                     sails.sockets.broadcast(`announcements-${record.type}`, 'announcements', {remove: inputs.ID});
             }
-
-            if (inputs.level !== null && typeof inputs.level !== 'undefined')
-                criteria.level = inputs.level;
-
-            if (inputs.title !== null && typeof inputs.title !== 'undefined')
-                criteria.title = inputs.title;
-
-            if (inputs.announcement !== null && typeof inputs.announcement !== 'undefined')
-                criteria.announcement = inputs.announcement;
-
-            if (inputs.displayTime !== null && typeof inputs.displayTime !== 'undefined')
-                criteria.displayTime = inputs.displayTime;
-
-            if (inputs.starts !== null && typeof inputs.starts !== 'undefined')
-                criteria.starts = moment(inputs.starts).toISOString(true);
-
-            if (inputs.expires !== null && typeof inputs.expires !== 'undefined')
-                criteria.expires = moment(inputs.expires).toISOString(true);
-
-            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-            var criteriaB = _.cloneDeep(criteria);
-
-            // Update the announcement
-            await Announcements.update({ID: inputs.ID}, criteriaB).fetch();
 
             return exits.success();
         } catch (e) {
