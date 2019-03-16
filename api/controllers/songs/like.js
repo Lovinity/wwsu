@@ -19,7 +19,7 @@ module.exports = {
 
         try {
             // Get the hosts's IP address first
-            var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
+            var from_IP = sails.helpers.getIP(this.req);
 
             // First, get the track record from the database (and reject if it does not exist)
             var track = await Songs.findOne({ID: inputs.trackID});

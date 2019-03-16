@@ -57,7 +57,7 @@ module.exports = {
         try {
 
             // Get the client IP address
-            var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
+            var from_IP = sails.helpers.getIP(this.req);
 
             var subcatIDs = [];
             var cats = {};
