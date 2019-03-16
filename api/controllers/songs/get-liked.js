@@ -17,7 +17,7 @@ module.exports = {
             var returnArray = [];
 
             // Get the hosts's IP address first
-            var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
+            var from_IP = sails.helpers.getIP(this.req);
             var query = {IP: from_IP};
 
             // If config specifies users can like tracks multiple times, add a date condition to only return liked tracks within the configured days.
