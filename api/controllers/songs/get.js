@@ -81,7 +81,6 @@ module.exports = {
 
                 songs = await Songs.find(query).sort([{artist: 'ASC'}, {title: 'ASC'}]).skip(inputs.skip).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
-                sails.log.silly(songs);
 
             } else {
                 sails.log.verbose(`Querying single track ID: ${inputs.ID}`);
@@ -90,8 +89,7 @@ module.exports = {
                 query = {ID: inputs.ID};
                 songs = await Songs.find(query).sort([{artist: 'ASC'}, {title: 'ASC'}]).skip(inputs.skip).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
-                sails.log.silly(songs);
-
+                
                 // No record retrieved? Assume we could not find the song.
                 if (!songs || typeof songs === 'undefined' || songs.length <= 0)
                     return exits.notFound();
