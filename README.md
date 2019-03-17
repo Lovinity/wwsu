@@ -1178,6 +1178,45 @@ Get an array of the status of WWSU subsystems.
             },
             ...
         ]
+## Subscribers
+The subscribers endpoints deal with mobile app subscriptions to receive push notifications via OneSignal.
+### /subscribers/add
+Subscribe to receive push notifications for something.
+ - **Request must originate from a websocket**.
+| key | criteria |
+|--|--|
+| device | string (required; the OneSignal UUID to subscribe for push notifications.) |
+| type | string (required; the type of subscription. Must be one of the following: ["calendar-once", "calendar-all"]) |
+| subtype | string (required; the specific item to subscribe to. For calendar-once, this is the Google Calendar event ID. For calendar-all, this is the event title (If an event prefix is not specified, we will subscribe to all prefixes (eg. "Show: ", "Remote: ", "Prerecord: ", etc.)) |
+#### Response 200 OK
+### /subscribers/get-web
+Get an array of subscriptions for the provided device ID.
+ - **Request must originate from a websocket**.
+| key | criteria |
+|--|--|
+| device | string (required; the OneSignal UUID to return subscriptions for.) |
+#### Response 200
+        [
+            {
+                "createdAt": "2018-05-15T22:31:34.381Z",
+                "updatedAt": "2018-05-15T22:31:34.381Z",
+                "ID": 1,
+                "host": "website-randomness", // The unique ID of the host (generated from IP address) matching this subscription. Used to check against active discipline.
+                "device": "41e66bae-48f8-11e9-8646-d663bd873d93", // The OneSignal UUID
+                "type": "calendar-all", // The type of subscription.
+                "subtype": "Sports: Men's Basketball" // The subtype, such as the event name (with the prefix if subscribed to a specific prefix (eg. "Sports: "), or without a prefix if subscribed to all prefixes), or the Google calendar unique ID of the event subscribed to.
+            },
+            ...
+        ]
+### /subscribers/remove
+Remove push notification subscriptions.
+ - **Request must originate from a websocket**.
+| key | criteria |
+|--|--|
+| device | string (required; the OneSignal UUID.) |
+| type | string (required; the type of subscription to remove from. Must be one of the following: ["calendar-once", "calendar-all"]) |
+| subtype | string (required; the specific item to remove the subscription from.) |
+#### Response 200 OK
 ## Timesheet
 Timesheet endpoints regard the internal timesheet and clock in/out system for WWSU directors.
 ### /timesheet/add
