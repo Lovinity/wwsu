@@ -196,7 +196,7 @@ Get an array of events for the next 7 days, in no particular order (client will 
                 "updatedAt": "2018-05-15T22:31:34.381Z",
                 "ID": 1,
                 "unique": "578vfod7icjde4ikdbmtii9ren_20180516T080000Z", // Unique event ID as provided by Google Calendar
-                "active": true, // Used internally
+                "active": true, // Becomes false when the event passed the end time, or when the event was marked as canceled.
                 "title": "Genre: New Rock", // Title of the event
                 "description": "", // Description of the event, if provided (HTML is stripped from the Google Calendar API field)
                 "color": "#5484ed", // Hexadecimal color representing this event
@@ -844,6 +844,7 @@ Retrieve an array of recipients that can receive and send messages.
             "updatedAt": "2018-05-15T22:31:34.381Z",
             "ID": 1,
             "host": "emergency", // An alphnumeric ID of the recipient
+            "device": "9101465e-48f4-11e9-8646-d663bd873d93", // If this recipient is a mobile device using the WWSU app, device will contain their OneSignal player UUID. Otherwise, this will be null.
             "group": "system", // Each recipient can be grouped together by the group
             "label": "Technical Issues", // A human friendly label for the recipient
             "status": 1, // 1 = not used, 2 = yellow (online), used by the computers and display groups, 3 = unused, 4 = unused, 5 = green (online), used by public clients, 0 = gray (offline / none)

@@ -20,6 +20,11 @@ module.exports = {
         host: {
             type: 'string'
         },
+        
+        device: {
+            type: 'string',
+            allowNull: true
+        },
 
         group: {
             type: 'string',
