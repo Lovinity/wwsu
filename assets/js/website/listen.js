@@ -31,6 +31,7 @@ var Calendar = TAFFY();
 var calendar = [];
 var likedTracks = [];
 var clockTimer;
+var device = getUrlParameter(`device`);
 
 // Initialize the web player
 if (document.querySelector('#nativeflashradio'))
@@ -1424,3 +1425,10 @@ function displayEventInfo(showID) {
         overlay: true
     });
 }
+
+function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(window.location.search);
+    return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
