@@ -43,7 +43,7 @@ module.exports = {
                     sails.log.verbose('Request was a socket. Joining attendance.');
                 }
 
-                var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
+                var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(1, 'days');
                 query = {or: [{scheduledStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}, {actualStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}]};
                 
