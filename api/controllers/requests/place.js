@@ -23,6 +23,12 @@ module.exports = {
             type: 'string',
             defaultsTo: '',
             description: 'Message provided regarding the request.'
+        },
+
+        device: {
+            type: 'string',
+            allowNull: true,
+            description: "If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays."
         }
     },
 
@@ -38,8 +44,8 @@ module.exports = {
             var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
 
             // Place the request
-            var response = await sails.helpers.requests.place(inputs.ID, from_IP, inputs.name, inputs.message);
-            
+            var response = await sails.helpers.requests.place(inputs.ID, from_IP, inputs.name, inputs.message, inputs.device);
+
             // Return the HTML message given by the helper
             return exits.success(response.HTML);
         } catch (e) {

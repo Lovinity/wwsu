@@ -75,7 +75,7 @@ module.exports = {
 
                 // Add a push notification subscription if a device was provided
                 var returndata = {requested: true, message: `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.`};
-                if (inputs.device !== null)
+                if (inputs.device && inputs.device !== null)
                 {
                     await Subscribers.findOrCreate({device: inputs.device, type: `request`, subtype: request.ID}, {host: `website-${host}`, device: inputs.device, type: `request`, subtype: request.ID});
                     returndata.message = `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.<br />
