@@ -1,4 +1,4 @@
-/* global Meta, sails, _, moment, Calendar, Logs, Requests, Djs */
+/* global Meta, sails, _, moment, Calendar, Logs, Requests, Djs, Subscribers */
 
 /**
  * Meta.js
@@ -185,11 +185,11 @@ module.exports = {
                             {
                                 var tmp = obj[key].split(" - ")[0];
                                 var dj = await Djs.findOrCreate({name: tmp}, {name: tmp, lastSeen: moment().toISOString(true)});
-                                
+
                                 // Update lastSeen record for the DJ
                                 if (dj && dj !== null)
                                     await Djs.update({ID: dj.ID}, {lastSeen: moment().toISOString(true)}).fetch();
-                                
+
                                 Meta['A'].dj = dj.ID;
                             } else {
                                 Meta['A'].dj = null;
@@ -233,7 +233,7 @@ module.exports = {
                         // Always reset trackstamp when something plays in automation
                         push2.trackStamp = null;
 
-                        // If the currently playing track was a request, mark as played and update meta
+                        // If the currently playing track was a request, mark as played, update meta, and send a push notification
                         if (typeof push.trackID !== 'undefined')
                         {
                             if (_.includes(Requests.pending, Meta['A'].trackID))
@@ -469,6 +469,16 @@ module.exports = {
                             push2.line1 = `Error! No audio playing.`;
                             push2.line2 = `${sails.config.custom.meta.prefix.genre}${Meta['A'].genre}`;
                         }
+                    }
+
+                    // Now, push notifications if this is a track request
+                    if (push2.requested && typeof requested[0] !== `undefined`)
+                    {
+                        var subscriptions = await Subscribers.destroy({type: `request`, subtype: requested[0].ID}).fetch();
+                        var devices = [];
+                        subscriptions.map((subscription) => devices.push(subscription.device));
+                        if (devices.length > 0)
+                            await sails.helpers.onesignal.send(devices, `request`, `WWSU - Your Request is Playing!`, `The track you requested is now playing on WWSU: ` + await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle}`), (60 * 15));
                     }
                 }
 

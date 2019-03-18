@@ -52,7 +52,7 @@ module.exports = {
                 android_group: categories[inputs.category],
                 android_group_message: `$[notif_count] new ${inputs.category}s`,
                 thread_id: categories[inputs.category],
-                summary_arg: `${categories[inputs.category]}s`,
+                summary_arg: `${inputs.category}s`,
                 ttl: inputs.ttl,
                 }, {headers: {'Content-Type': 'application/json'}})
                     .then(async function (resp) {

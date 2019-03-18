@@ -1,4 +1,4 @@
-/* global sails */
+/* global sails, Recipients */
 
 /**
  * Messages.js
@@ -62,7 +62,7 @@ module.exports = {
             sails.sockets.broadcast('messages-website', 'messages', data);
         }
 
-        // If message was a private website message, send to the respective client's socket
+        // If message was a private website message, send to the respective client's socket. Send a push notification if applicable.
         if (newlyCreatedRecord.from.startsWith("website-") && newlyCreatedRecord.to === 'DJ-private')
         {
             sails.log.silly(`messages socket for messages-${newlyCreatedRecord.from}: ${data}`);
@@ -72,6 +72,11 @@ module.exports = {
         {
             sails.log.silly(`messages socket for messages-${newlyCreatedRecord.to}: ${data}`);
             sails.sockets.broadcast(`messages-${newlyCreatedRecord.to}`, 'messages', data);
+            (async () => {
+                var recipient = await Recipients.findOne({host: newlyCreatedRecord.to, device: {'!=': null}});
+                if (recipient)
+                    await sails.helpers.onesignal.send([recipient.device], `message`, `WWSU New Message From DJ`, await sails.helpers.truncateText(newlyCreatedRecord.message, 128), (60 * 60));
+            })();
         }
 
         return proceed();
@@ -82,10 +87,10 @@ module.exports = {
         if (typeof updatedRecord.from_IP !== 'undefined')
             delete updatedRecord.from_IP;
         var data = {update: updatedRecord};
-        
+
         if (updatedRecord.status === 'deleted')
             data = {remove: updatedRecord.ID};
-        
+
         sails.log.silly(`messages socket: ${data}`);
         sails.sockets.broadcast('messages', 'messages', data);
 
