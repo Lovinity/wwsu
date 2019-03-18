@@ -34,7 +34,7 @@ module.exports = {
             var query = {};
 
             // No DJ nor event? Filter by date.
-            if (inputs.dj && inputs.dj.length > 0 && inputs.event && inputs.event.length > 0)
+            if ((!inputs.dj || inputs.dj.length === 0) && (!inputs.event || inputs.event.length === 0))
             {
                 // Subscribe to sockets if applicable
                 if (this.req.isSocket)
