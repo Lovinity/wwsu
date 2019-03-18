@@ -862,6 +862,8 @@ function loadTrackInfo(trackID) {
             // WORK ON THIS: HTML table of song information
             if (document.querySelector('#trackModal'))
             {
+                if (device === null && !isMobile)
+                    OneSignal.showNativePrompt();
                 $('#trackModal').iziModal('open');
                 $('#track-info-ID').html(response[0].ID);
                 $('#track-info-status').html(response[0].enabled === 1 ? 'Enabled' : 'Disabled');
