@@ -502,6 +502,28 @@ function onlineSocket()
             setTimeout(onlineSocket, 10000);
         }
     });
+
+    var temp = document.querySelector(`#track-info-subscribe`);
+    if (temp !== null)
+    {
+        if (device === null && !isMobile)
+        {
+            temp.style.display = "inline";
+        } else {
+            temp.style.display = "none";
+        }
+    }
+
+    var temp = document.querySelector(`#chat-subscribe`);
+    if (temp !== null)
+    {
+        if (device === null && !isMobile)
+        {
+            temp.style.display = "inline";
+        } else {
+            temp.style.display = "none";
+        }
+    }
 }
 
 function messagesSocket()
@@ -872,8 +894,6 @@ function sendMessage(privateMsg) {
                 return null;
             }
             quill.setText('');
-            if (privateMsg && device === null)
-                OneSignal.showNativePrompt();
         } catch (e) {
             if (notificationsBox)
                 notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;
@@ -900,8 +920,6 @@ function loadTrackInfo(trackID) {
             // WORK ON THIS: HTML table of song information
             if (document.querySelector('#trackModal'))
             {
-                if (device === null && !isMobile)
-                    OneSignal.showNativePrompt();
                 $('#trackModal').iziModal('open');
                 $('#track-info-ID').html(response[0].ID);
                 $('#track-info-status').html(response[0].enabled === 1 ? 'Enabled' : 'Disabled');
