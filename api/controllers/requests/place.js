@@ -47,7 +47,7 @@ module.exports = {
             var response = await sails.helpers.requests.place(inputs.ID, from_IP, inputs.name, inputs.message, inputs.device);
 
             // Return the HTML message given by the helper
-            return exits.success(response.HTML);
+            return exits.success(response);
         } catch (e) {
             return exits.error(e);
         }

@@ -83,7 +83,7 @@ module.exports = {
             sails.log.silly(`Recipients record: ${recipient}`);
 
             // Search to see if any changes are made to the recipient; we only want to update if there is a change.
-            var criteria = {host: inputs.host, group: inputs.group, status: status, device: inputs.device,};
+            var criteria = {host: inputs.host, group: inputs.group, status: status, device: inputs.device};
             var updateIt = false;
             for (var key in criteria)
             {
@@ -103,7 +103,7 @@ module.exports = {
             if (updateIt)
             {
                 sails.log.verbose(`Updating recipient as it has changed.`);
-                await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, status: status, time: moment().toISOString(true)}).fetch();
+                await Recipients.update({host: inputs.host}, {host: inputs.host, group: inputs.group, device: inputs.device, status: status, time: moment().toISOString(true)}).fetch();
             }
 
             // Put the socket ID in memory
