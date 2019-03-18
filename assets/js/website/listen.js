@@ -409,42 +409,80 @@ function doSockets(firsttime = false)
         loadGenres();
         // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
     } else {
-        waitFor(function () {
-            return (typeof window.OneSignal !== `undefined`);
-        }, function () {
-            OneSignal = window.OneSignal || [];
-            OneSignal.push(function () {
-                OneSignal.init({
-                    appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
-                    autoResubscribe: true,
-                });
+        OneSignal = window.OneSignal || [];
+        OneSignal.push(function () {
+            OneSignal.init({
+                appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
+                autoResubscribe: true,
             });
 
-            OneSignal.getUserId().then(function (userId) {
-                device = userId;
-                onlineSocket();
-                messagesSocket();
-                metaSocket();
-                announcementsSocket();
-                loadGenres();
+            OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
+                if (isEnabled)
+                {
+                    OneSignal.getUserId().then(function (userId) {
+                        device = userId;
+                        onlineSocket();
+                        messagesSocket();
+                        metaSocket();
+                        announcementsSocket();
+                        loadGenres();
+                    });
+                } else {
+                    device = null;
+                    onlineSocket();
+                    messagesSocket();
+                    metaSocket();
+                    announcementsSocket();
+                    loadGenres();
+                }
+            });
+
+            OneSignal.on('notificationPermissionChange', function (permissionChange) {
+                var currentPermission = permissionChange.to;
+                if (currentPermission === "granted" && device === null) {
+                    OneSignal.getUserId().then(function (userId) {
+                        device = userId;
+                        onlineSocket();
+                        if (device && device !== null)
+                        {
+                            io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+                                try {
+                                    Subscriptions = TAFFY();
+                                    Subscriptions.insert(body);
+                                } catch (e) {
+                                    setTimeout(metaSocket, 10000);
+                                }
+                            });
+                        }
+                    });
+                } else if (currentPermission === "denied" && device !== null) {
+                    device = null;
+                    onlineSocket();
+                }
             });
 
             // On changes to web notification subscriptions; update subscriptions and device.
             OneSignal.on('subscriptionChange', function (isSubscribed) {
-                OneSignal.getUserId().then(function (userId) {
-                    device = userId;
-                    if (device && device !== null)
-                    {
-                        io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
-                            try {
-                                Subscriptions = TAFFY();
-                                Subscriptions.insert(body);
-                            } catch (e) {
-                                setTimeout(metaSocket, 10000);
-                            }
-                        });
-                    }
-                });
+                if (isSubscribed && device === null) {
+                    OneSignal.getUserId().then(function (userId) {
+                        device = userId;
+                        onlineSocket();
+                        if (device && device !== null)
+                        {
+                            io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+                                try {
+                                    Subscriptions = TAFFY();
+                                    Subscriptions.insert(body);
+                                } catch (e) {
+                                    setTimeout(metaSocket, 10000);
+                                }
+                            });
+                        }
+                    });
+                } else if (!isSubscribed && device !== null) {
+                    device = null;
+                    onlineSocket();
+                }
             });
         });
 }
@@ -464,6 +502,28 @@ function onlineSocket()
             setTimeout(onlineSocket, 10000);
         }
     });
+
+    var temp = document.querySelector(`#track-info-subscribe`);
+    if (temp !== null)
+    {
+        if (device === null && !isMobile)
+        {
+            temp.style.display = "inline";
+        } else {
+            temp.style.display = "none";
+        }
+    }
+
+    var temp = document.querySelector(`#chat-subscribe`);
+    if (temp !== null)
+    {
+        if (device === null && !isMobile)
+        {
+            temp.style.display = "inline";
+        } else {
+            temp.style.display = "none";
+        }
+    }
 }
 
 function messagesSocket()
@@ -834,8 +894,6 @@ function sendMessage(privateMsg) {
                 return null;
             }
             quill.setText('');
-            if (privateMsg && device === null)
-                OneSignal.showNativePrompt();
         } catch (e) {
             if (notificationsBox)
                 notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;
@@ -1167,141 +1225,13 @@ function processCalendar(data, replace = false)
 
             // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
             Calendar().get().sort(compare)
-                    .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).subtract(1, 'days').isSameOrBefore(moment(Meta.time)) && moment(event.end).isAfter(moment(Meta.time)))
+                    .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).startOf('day').isSameOrBefore(moment(Meta.time)))
                     .map(event =>
                     {
                         try {
                             var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
-                            finalColor.red = Math.round(finalColor.red / 2);
-                            finalColor.green = Math.round(finalColor.green / 2);
-                            finalColor.blue = Math.round(finalColor.blue / 2);
-                            if (event.title.startsWith("Show: "))
-                            {
-                                var stripped = event.title.replace("Show: ", "");
-                                var eventType = "SHOW";
-                                var eventClass = "primary";
-                                var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "Unknown DJ";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Prerecord: "))
-                            {
-                                var stripped = event.title.replace("Prerecord: ", "");
-                                var eventType = "PRERECORD";
-                                var eventClass = "danger";
-                                var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "Unknown DJ";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Remote: "))
-                            {
-                                var stripped = event.title.replace("Remote: ", "");
-                                var eventType = "REMOTE";
-                                var eventClass = "purple";
-                                var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "Unknown Host";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Sports: "))
-                            {
-                                var stripped = event.title.replace("Sports: ", "");
-                                var eventType = "SPORTS";
-                                var eventClass = "success";
-                                var line1 = "Raider Sports";
-                                var line2 = stripped;
-                                var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
-                            } else if (event.title.startsWith("Playlist: ")) {
-                                var stripped = event.title.replace("Playlist: ", "");
-                                var eventType = "Playlist";
-                                var eventClass = "info";
-                                var image = `<i class="fas fa-list" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Genre: "))
-                            {
-                                var stripped = event.title.replace("Genre: ", "");
-                                var eventType = "Genre";
-                                var eventClass = "info";
-                                var line1 = "";
-                                var line2 = stripped;
-                                var image = `<i class="fas fa-music" style="font-size: 96px;"></i>`;
-                            } else {
-                                var eventType = "Event";
-                                var eventClass = "secondary";
-                                var line1 = "";
-                                var line2 = event.title;
-                                var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
-                            }
-                            caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="m-2 text-white rounded shadow-8">
-             <div class="p-1 text-center" style="width: 100%;">${image}
-             <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
-             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
-                        } catch (e) {
-                            console.error(e);
-                            iziToast.show({
-                                title: 'An error occurred - Please check the logs',
-                                message: `Error occurred during calendar iteration in processCalendar.`
-                            });
-                        }
-                    });
-        }
-
-        if (document.querySelector('#calendar3h'))
-        {
-            var caldata = document.querySelector("#calendar3h");
-            caldata.innerHTML = ``;
-
-            // Prepare the formatted calendar variable for our formatted events
-            calendar = [];
-
-            // Define a comparison function that will order calendar events by start time when we run the iteration
-            var compare = function (a, b) {
-                try {
-                    if (moment(a.start).valueOf() < moment(b.start).valueOf())
-                        return -1;
-                    if (moment(a.start).valueOf() > moment(b.start).valueOf())
-                        return 1;
-                    if (a.ID < b.ID)
-                        return -1;
-                    if (a.ID > b.ID)
-                        return 1;
-                    return 0;
-                } catch (e) {
-                }
-            };
-
-            // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-            Calendar().get().sort(compare)
-                    .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).subtract(3, 'hours').isSameOrBefore(moment(Meta.time)) && moment(event.end).isAfter(moment(Meta.time)))
-                    .map(event =>
-                    {
-                        try {
-                            var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
+                            if (!event.active)
+                                finalColor = ("#161616");
                             finalColor.red = Math.round(finalColor.red / 2);
                             finalColor.green = Math.round(finalColor.green / 2);
                             finalColor.blue = Math.round(finalColor.blue / 2);

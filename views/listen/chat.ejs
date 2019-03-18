@@ -16,15 +16,18 @@
                 </div>
                 <div class="form-group">
                     <button type="button" class="btn btn-primary m-1" id="sendmessage" onclick="sendMessage(false);">
-                        Send to Chat
+                        Send Publicly
                     </button>
                     <button type="button" class="btn btn-secondary m-1" id="sendmessagep" onclick="sendMessage(true);">
-                        DM the DJ
+                        DM the DJ <i class="fas fa-bell"></i>
                     </button>
                     <button type="button" class="btn btn-secondary m-1" id="clearchat" onclick="clearChat();">
                         Clear Messages
                     </button>
                 </div>
+<div class="p-3 bs-callout bs-callout-info shadow-4 text-light" id="chat-subscribe" style="display: none;">
+Click "subscribe" if you want push notifications when the DJ sends you a direct message. <button type="button" class="btn btn-info" onclick="OneSignal.showNativePrompt();">Subscribe</button>
+</div>
                 <div class="p-3 bs-callout bs-callout-warning text-light shadow-2"><strong>Your IP address is logged when you send messages.</strong> Abuse of the chat system could result in being banned from the listener's corner.</div>
             </div>
         </div>

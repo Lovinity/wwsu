@@ -34,7 +34,7 @@ module.exports = {
             var query = {};
 
             // No DJ nor event? Filter by date.
-            if (inputs.dj.length > 0 && inputs.event.length > 0)
+            if ((!inputs.dj || inputs.dj === null) && (!inputs.event || inputs.event === null))
             {
                 // Subscribe to sockets if applicable
                 if (this.req.isSocket)
@@ -43,18 +43,18 @@ module.exports = {
                     sails.log.verbose('Request was a socket. Joining attendance.');
                 }
 
-                var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
+                var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(1, 'days');
                 query = {or: [{scheduledStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}, {actualStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}]};
                 
             } else {
 
-                if (inputs.dj && inputs.dj !== null && inputs.dj !== '')
+                if (inputs.dj && inputs.dj !== null)
                 {
                     query.dj = inputs.dj;
                 }
 
-                if (inputs.event && inputs.event !== null && inputs.event !== '')
+                if (inputs.event && inputs.event !== null)
                     query.event = {'contains': inputs.event};
             }
 
