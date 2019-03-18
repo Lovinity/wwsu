@@ -26,7 +26,7 @@ module.exports = {
         },
 
         googleUnique: {
-            type: `number`,
+            type: `string`,
             allowNull: true,
             description: `The Google Calendar ID of the event that just started, or null if there is no event.`
         },
