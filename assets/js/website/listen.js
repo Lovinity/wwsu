@@ -442,6 +442,7 @@ function doSockets(firsttime = false)
                 if (currentPermission === "granted" && device === null) {
                     OneSignal.getUserId().then(function (userId) {
                         device = userId;
+                        onlineSocket();
                         if (device && device !== null)
                         {
                             io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
@@ -456,6 +457,7 @@ function doSockets(firsttime = false)
                     });
                 } else if (currentPermission === "denied" && device !== null) {
                     device = null;
+                    onlineSocket();
                 }
             });
 
@@ -464,6 +466,7 @@ function doSockets(firsttime = false)
                 if (isSubscribed && device === null) {
                     OneSignal.getUserId().then(function (userId) {
                         device = userId;
+                        onlineSocket();
                         if (device && device !== null)
                         {
                             io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
@@ -478,6 +481,7 @@ function doSockets(firsttime = false)
                     });
                 } else if (!isSubscribed && device !== null) {
                     device = null;
+                    onlineSocket();
                 }
             });
         });
