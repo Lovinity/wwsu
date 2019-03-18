@@ -33,7 +33,7 @@ var calendar = [];
 var likedTracks = [];
 var clockTimer;
 var device = getUrlParameter(`device`);
-var isMobile = device === null;
+var isMobile = device !== null;
 var OneSignal;
 
 // Initialize the web player
@@ -1506,7 +1506,7 @@ function displayEventInfo(showID) {
                         <p>${item.description}</p>`;
 
     // If a device ID was provided from the WWSU mobile app
-    if (device)
+    if (device !== null)
     {
         // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
 
