@@ -1,3 +1,5 @@
+/* global sails */
+
 module.exports = {
 
     friendlyName: 'sails.helpers.onesignal.send',
@@ -56,11 +58,13 @@ module.exports = {
                 ttl: inputs.ttl,
                 }, {headers: {'Content-Type': 'application/json'}})
                     .then(async function (resp) {
+                        sails.log.error(resp.body);
                         return exits.success(true);
                     });
 
         } catch (e) {
             // Do not error when notifications fail, but return false instead.
+            sails.log.error(e);
             return exits.success(false);
         }
     }
