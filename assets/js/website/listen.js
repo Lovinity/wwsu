@@ -409,42 +409,38 @@ function doSockets(firsttime = false)
         loadGenres();
         // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
     } else {
-        waitFor(function () {
-            return (typeof window.OneSignal !== `undefined`);
-        }, function () {
-            OneSignal = window.OneSignal || [];
-            OneSignal.push(function () {
-                OneSignal.init({
-                    appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
-                    autoResubscribe: true,
-                });
+        OneSignal = window.OneSignal || [];
+        OneSignal.push(function () {
+            OneSignal.init({
+                appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
+                autoResubscribe: true,
             });
+        });
 
+        OneSignal.getUserId().then(function (userId) {
+            device = userId;
+            onlineSocket();
+            messagesSocket();
+            metaSocket();
+            announcementsSocket();
+            loadGenres();
+        });
+
+        // On changes to web notification subscriptions; update subscriptions and device.
+        OneSignal.on('subscriptionChange', function (isSubscribed) {
             OneSignal.getUserId().then(function (userId) {
                 device = userId;
-                onlineSocket();
-                messagesSocket();
-                metaSocket();
-                announcementsSocket();
-                loadGenres();
-            });
-
-            // On changes to web notification subscriptions; update subscriptions and device.
-            OneSignal.on('subscriptionChange', function (isSubscribed) {
-                OneSignal.getUserId().then(function (userId) {
-                    device = userId;
-                    if (device && device !== null)
-                    {
-                        io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
-                            try {
-                                Subscriptions = TAFFY();
-                                Subscriptions.insert(body);
-                            } catch (e) {
-                                setTimeout(metaSocket, 10000);
-                            }
-                        });
-                    }
-                });
+                if (device && device !== null)
+                {
+                    io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+                        try {
+                            Subscriptions = TAFFY();
+                            Subscriptions.insert(body);
+                        } catch (e) {
+                            setTimeout(metaSocket, 10000);
+                        }
+                    });
+                }
             });
         });
 }
