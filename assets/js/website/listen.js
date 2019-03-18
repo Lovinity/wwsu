@@ -400,7 +400,7 @@ waitFor(function () {
 function doSockets(firsttime = false)
 {
     // Mobile devices and web devices where device parameter was passed, start sockets immediately.
-    if (isMobile || !isMobile && device !== null)
+    if (isMobile || !firsttime || (!isMobile && device !== null))
     {
         onlineSocket();
         messagesSocket();
@@ -413,7 +413,6 @@ function doSockets(firsttime = false)
             return (typeof window.OneSignal !== `undefined`);
         }, function () {
             OneSignal = window.OneSignal || [];
-
             OneSignal.push(function () {
                 OneSignal.init({
                     appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
