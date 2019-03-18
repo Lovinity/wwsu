@@ -44,7 +44,7 @@ module.exports = {
               "announcement": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
               "request": "0aa0e762-ca89-4eef-89a2-82009a58cb1a"
             };
-            needle('get', `https://onesignal.com/api/v1/notifications`, {
+            needle('post', `https://onesignal.com/api/v1/notifications`, {
                 app_id: `150c0123-e224-4e5b-a8b2-fc202d78e2f1`,
                 include_player_ids: inputs.devices,
                 headings: {"en": inputs.title},
