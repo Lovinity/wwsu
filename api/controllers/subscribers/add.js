@@ -33,7 +33,7 @@ module.exports = {
 
         try {
             // Get the client IP address
-            var from_IP = sails.helpers.getIP(this.req);
+            var from_IP = await sails.helpers.getIp(this.req);
             var host = sh.unique(from_IP + sails.config.custom.hostSecret);
             
             // Use find or create so that duplicate subscriptions do not happen (ignore host when checking for duplicates).

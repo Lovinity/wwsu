@@ -894,6 +894,7 @@ Place a track request in the system.
 | ID | number (required; the ID number of the song to queue) |
 | name | string (optional; name of the person making the request) |
 | message | string (optional; a message to be left regarding the request) |
+| device | string (optional; if the request is being placed from the mobile app, this is the OneSignal player ID of the requester; they will receive a push notification when the request plays.) |
 #### Response 200
         {
             "requested": true, // True if the track request was accepted, false if it was rejected (such as it is already in the queue, or it fails rotation rules)
@@ -1186,8 +1187,8 @@ Subscribe to receive push notifications for something.
 | key | criteria |
 |--|--|
 | device | string (required; the OneSignal UUID to subscribe for push notifications.) |
-| type | string (required; the type of subscription. Must be one of the following: ["calendar-once", "calendar-all"]) |
-| subtype | string (required; the specific item to subscribe to. For calendar-once, this is the Google Calendar event ID. For calendar-all, this is the event title (If an event prefix is not specified, we will subscribe to all prefixes (eg. "Show: ", "Remote: ", "Prerecord: ", etc.)) |
+| type | string (required; the type of subscription. Must be one of the following: ["calendar-once", "calendar-all", "request"]) |
+| subtype | string (required; the specific item to subscribe to. For calendar-once, this is the Google Calendar event ID. For calendar-all, this is the event title (If an event prefix is not specified, we will subscribe to all prefixes (eg. "Show: ", "Remote: ", "Prerecord: ", etc.). For request, this is the ID of the track requested.) |
 #### Response 200 OK
 ### /subscribers/get-web
 Get an array of subscriptions for the provided device ID.
@@ -1204,7 +1205,7 @@ Get an array of subscriptions for the provided device ID.
                 "host": "website-randomness", // The unique ID of the host (generated from IP address) matching this subscription. Used to check against active discipline.
                 "device": "41e66bae-48f8-11e9-8646-d663bd873d93", // The OneSignal UUID
                 "type": "calendar-all", // The type of subscription.
-                "subtype": "Sports: Men's Basketball" // The subtype, such as the event name (with the prefix if subscribed to a specific prefix (eg. "Sports: "), or without a prefix if subscribed to all prefixes), or the Google calendar unique ID of the event subscribed to.
+                "subtype": "Sports: Men's Basketball" // The subtype, such as the event name (with the prefix if subscribed to a specific prefix (eg. "Sports: "), or without a prefix if subscribed to all prefixes), or the Google calendar unique ID of the event subscribed to, or the ID of the request for track requests.
             },
             ...
         ]

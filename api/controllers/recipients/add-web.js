@@ -8,7 +8,11 @@ module.exports = {
     description: 'Registers a public recipient in the recipients database.',
 
     inputs: {
-
+        device: {
+            type: 'string',
+            allowNull: true,
+            description: `If this recipient comes from the WWSU mobile app, provide their OneSignal ID here.`
+        }
     },
 
     fn: async function (inputs, exits) {
@@ -26,7 +30,7 @@ module.exports = {
             sails.sockets.join(this.req, `discipline-${host}`); // If a ban is issued for this client later on, it is sent through this
 
             // Mark the client as online
-            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`);
+            var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`, inputs.device);
 
             // Return the nickname of this client as a label object
             return exits.success({label: label});

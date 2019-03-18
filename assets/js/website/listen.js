@@ -28,6 +28,7 @@ var blocked = false;
 var firstTime = true;
 var nicknameTimer = null;
 var Calendar = TAFFY();
+var Subscriptions = TAFFY();
 var calendar = [];
 var likedTracks = [];
 var clockTimer;
@@ -405,7 +406,7 @@ function doSockets(firsttime = false)
 
 function onlineSocket()
 {
-    io.socket.post('/recipients/add-web', {}, function serverResponded(body, JWR) {
+    io.socket.post('/recipients/add-web', {device: device}, function serverResponded(body, JWR) {
         try {
             if (nickname)
             {
@@ -450,13 +451,32 @@ function metaSocket()
                         }
                     }
                     doMeta(body);
-                    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
-                        try {
-                            processCalendar(body, true);
-                        } catch (e) {
-                            setTimeout(metaSocket, 10000);
-                        }
-                    });
+                    if (device && device !== null)
+                    {
+                        io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+                            try {
+                                Subscriptions = TAFFY();
+                                Subscriptions.insert(body);
+                                io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+                                    try {
+                                        processCalendar(body, true);
+                                    } catch (e) {
+                                        setTimeout(metaSocket, 10000);
+                                    }
+                                });
+                            } catch (e) {
+                                setTimeout(metaSocket, 10000);
+                            }
+                        });
+                    } else {
+                        io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+                            try {
+                                processCalendar(body, true);
+                            } catch (e) {
+                                setTimeout(metaSocket, 10000);
+                            }
+                        });
+                    }
                 } catch (e) {
                     setTimeout(metaSocket, 10000);
                 }
@@ -822,7 +842,20 @@ function loadTrackInfo(trackID) {
                 $('#track-info-spins30').html(`last 30 days: ${response[0].spins["30"]}`);
                 $('#track-info-spinsytd').html(`since January 1: ${response[0].spins["YTD"]}`);
                 $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins["365"]}`);
-                $('#track-info-request').html(response[0].request.HTML);
+
+                if (response[0].request.requestable)
+                {
+                    $('#track-info-request').html(`<div class="form-group">
+                                    <label for="request-name"><strong>Request this track</strong></label>
+                                    <input type="text" class="form-control" id="track-request-name" placeholder="Your name (optional)">
+                                    <textarea class="form-control" id="track-request-message" rows="2" placeholder="Message for the DJ (optional)"></textarea>
+                                    </div>                    
+                                    <button type="submit" id="track-request-submit" class="btn btn-primary">Place Request</button>`);
+                } else {
+                    $('#track-info-request').html(`<div class="bs-callout bs-callout-${response[0].request.listDiv} shadow-4 text-white">
+                        ${response[0].request.message}
+                    </div>`);
+                }
             }
         } catch (e) {
             console.dir(response[0]);
@@ -836,18 +869,34 @@ function requestTrack(trackID) {
     var requestName = document.getElementById('track-request-name');
     var requestMessage = document.getElementById('track-request-message');
     var data = {ID: trackID, name: requestName.value, message: requestMessage.value};
+    if (device !== null)
+        data.device = device;
     io.socket.post('/requests/place', data, function serverResponded(response, JWR) {
         try {
-            iziToast.show({
-                title: 'Request system success',
-                message: 'Your request was placed. In automation, requests are played during breaks. During shows, it is up to DJ discretion.',
-                color: 'green',
-                zindex: 100,
-                layout: 1,
-                closeOnClick: true,
-                position: 'bottomCenter',
-                timeout: 15000
-            });
+            if (response.requested)
+            {
+                iziToast.show({
+                    title: 'Request system success',
+                    message: `Your request was placed. In automation, requests are played during breaks. During shows, it is up to DJ discretion.${device !== null ? `<br /><strong>You will receive a push notification when your request begins playing.</strong>` : ``}`,
+                    color: 'green',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'bottomCenter',
+                    timeout: 15000
+                });
+            } else {
+                iziToast.show({
+                    title: 'Request system failed',
+                    message: `Failed to request this track. ${response.message}`,
+                    color: 'red',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'bottomCenter',
+                    timeout: 5000
+                });
+            }
             if (document.querySelector('#trackModal'))
                 $('#trackModal').iziModal('close');
         } catch (e) {
@@ -1410,17 +1459,82 @@ function rgbHex(red, green, blue, alpha) {
 
 function displayEventInfo(showID) {
     var item = Calendar({ID: parseInt(showID)}).first();
+    var buttons = [];
+    var subtypefilter = [];
+    var message = `<p><strong>Starts: ${moment(item.start).format("LLL")}</strong></p>
+                        <p><strong>Ends: ${moment(item.end).format("LLL")}</strong></p>
+                        <p>${item.description}</p>`;
+
+    // If a device ID was provided from the WWSU mobile app
+    if (device)
+    {
+        // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
+
+        subtypefilter.push(item.title);
+        // For show, prerecord, and remote events... filter for all 3 types, and also for the non-prefix version.
+        if ((item.title.startsWith("Show:") || item.title.startsWith("Prerecord:") || item.title.startsWith("Remote:")))
+        {
+            var temp = item.title.replace("Show: ", '').replace("Prerecord: ", "").replace("Remote: ", "");
+            subtypefilter.push(`Show: ${temp}`);
+            subtypefilter.push(`Prerecord: ${temp}`);
+            subtypefilter.push(`Remote: ${temp}`);
+            subtypefilter.push(temp);
+        }
+
+        // Check the number of subscriptions
+        var subscribed = Subscriptions([{type: `calendar-once`, subtype: item.unique}, {type: `calendar-all`, subtype: subtypefilter}]).get().length;
+
+        if (subscribed === 0)
+        {
+            message += `<p>To receive a push notification when this event goes on the air for this specific date/time, click "Subscribe One-Time".</p>
+<p>To receive a push notification every time this event goes on the air, click "Subscribe All Times".</p>
+<p>You can always come back to this screen to unsubscribe from push notifications.</p>`;
+            buttons = [
+                ['<button><b>Subscribe One-Time</b></button>', function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOut'}, toast, 'button');
+                        subscribe(`calendar-once`, item.unique);
+                    }, true],
+                ['<button><b>Subscribe All Times</b></button>', function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOut'}, toast, 'button');
+
+                        // For shows, remotes, and prerecords... subscribe to events regardless of prefix
+                        if ((item.title.startsWith("Show:") || item.title.startsWith("Prerecord:") || item.title.startsWith("Remote:")))
+                        {
+                            var temp = item.title.replace("Show: ", '').replace("Prerecord: ", "").replace("Remote: ", "");
+                            subscribe(`calendar-all`, temp);
+                        } else {
+                            subscribe(`calendar-all`, item.title);
+                        }
+
+                    }]
+            ];
+        } else {
+            message += `<p>You are currently subscribed to receive push notifications for this event. To unsubscribe from ALL push notifications for this event now and in the future, click "unsubscribe".</p>`;
+            buttons = [
+                ['<button><b>Unsubscribe</b></button>', function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOut'}, toast, 'button');
+                        // For shows, remotes, and prerecords... unsubscribe from events regardless of prefix
+                        if ((item.title.startsWith("Show:") || item.title.startsWith("Prerecord:") || item.title.startsWith("Remote:")))
+                        {
+                            var temp = item.title.replace("Show: ", '').replace("Prerecord: ", "").replace("Remote: ", "");
+                            unsubscribe(item.unique, temp);
+                        } else {
+                            unsubscribe(item.unique, item.title);
+                        }
+                    }, true]
+            ];
+        }
+    }
     iziToast.show({
         title: item.title,
-        message: `<p><strong>Starts: ${moment(item.start).format("LLL")}</strong></p>
-                        <p><strong>Ends: ${moment(item.end).format("LLL")}</strong></p>
-                        <p>${item.description}</p>`,
+        message: message,
         color: 'white',
         zindex: 100,
         maxWidth: 640,
         layout: 2,
         closeOnClick: true,
         position: 'center',
+        buttons: buttons,
         timeout: false,
         overlay: true
     });
@@ -1431,4 +1545,121 @@ function getUrlParameter(name) {
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
     var results = regex.exec(window.location.search);
     return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
-};
+}
+;
+
+function subscribe(type, subtype) {
+    io.socket.post('/subscribers/add', {device: device, type: type, subtype: subtype}, function serverResponded(response, JWR) {
+        try {
+            if (response !== 'OK')
+            {
+                iziToast.show({
+                    title: 'Subscription failed',
+                    message: 'Unable to subscribe you to this event at this time. Please try again later.',
+                    color: 'red',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'center',
+                    timeout: 10000
+                });
+            } else {
+                iziToast.show({
+                    title: 'Subscribed!',
+                    message: 'You successfully subscribed to that event. You will receive a push notification when it goes live.',
+                    color: 'green',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'center',
+                    timeout: 10000
+                });
+                Subscriptions.insert({type: type, subtype: subtype});
+            }
+        } catch (e) {
+            iziToast.show({
+                title: 'Subscription failed',
+                message: 'Unable to subscribe you to this event at this time. Please try again later.',
+                color: 'red',
+                zindex: 100,
+                layout: 1,
+                closeOnClick: true,
+                position: 'center',
+                timeout: 10000
+            });
+        }
+    });
+}
+
+function unsubscribe(ID, event) {
+    io.socket.post('/subscribers/remove', {device: device, type: `calendar-once`, subtype: ID}, function serverResponded(response, JWR) {
+        try {
+            if (response !== 'OK')
+            {
+                iziToast.show({
+                    title: 'Failed to unsubscribe',
+                    message: 'Unable to un-subscribe you to this event at this time. Please try again later.',
+                    color: 'red',
+                    zindex: 100,
+                    layout: 1,
+                    closeOnClick: true,
+                    position: 'center',
+                    timeout: 10000
+                });
+            } else {
+                io.socket.post('/subscribers/remove', {device: device, type: `calendar-all`, subtype: event}, function serverResponded(response, JWR) {
+                    try {
+                        if (response !== 'OK')
+                        {
+                            iziToast.show({
+                                title: 'Failed to unsubscribe',
+                                message: 'Unable to un-subscribe you to this event at this time. Please try again later.',
+                                color: 'red',
+                                zindex: 100,
+                                layout: 1,
+                                closeOnClick: true,
+                                position: 'center',
+                                timeout: 10000
+                            });
+                        } else {
+                            iziToast.show({
+                                title: 'Un-subscribed!',
+                                message: 'You successfully un-subscribed from that event. You will no longer receive push notifications for it.',
+                                color: 'green',
+                                zindex: 100,
+                                layout: 1,
+                                closeOnClick: true,
+                                position: 'center',
+                                timeout: 10000
+                            });
+                            Subscriptions({type: `calendar-once`, subtype: ID}).remove();
+                            Subscriptions({type: `calendar-all`, subtype: event}).remove();
+                        }
+                    } catch (e) {
+                        iziToast.show({
+                            title: 'Failed to unsubscribe',
+                            message: 'Unable to un-subscribe you to this event at this time. Please try again later.',
+                            color: 'red',
+                            zindex: 100,
+                            layout: 1,
+                            closeOnClick: true,
+                            position: 'center',
+                            timeout: 10000
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            iziToast.show({
+                title: 'Failed to unsubscribe',
+                message: 'Unable to un-subscribe you to this event at this time. Please try again later.',
+                color: 'red',
+                zindex: 100,
+                layout: 1,
+                closeOnClick: true,
+                position: 'center',
+                timeout: 10000
+            });
+        }
+    });
+}

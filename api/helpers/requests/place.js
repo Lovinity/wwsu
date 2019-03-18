@@ -1,4 +1,5 @@
-/* global sails, Songs, Requests, moment */
+/* global sails, Songs, Requests, moment, Subscribers */
+var sh = require("shorthash");
 
 module.exports = {
 
@@ -26,6 +27,11 @@ module.exports = {
             type: 'string',
             defaultsTo: '',
             description: 'A message to be included with the request.'
+        },
+        device: {
+            type: 'string',
+            allowNull: true,
+            description: "If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays."
         }
     },
 
@@ -39,6 +45,8 @@ module.exports = {
             // If so, do stuff
             if (requestable.requestable)
             {
+                var host = sh.unique(inputs.IP + sails.config.custom.hostSecret);
+
                 // Filter disallowed HTML
                 inputs.name = await sails.helpers.sanitize(inputs.name);
                 inputs.message = await sails.helpers.sanitize(inputs.message);
@@ -58,20 +66,27 @@ module.exports = {
                 sails.log.silly(`Song: ${record2}`);
 
                 // Create the request
-                await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(true), played: 0}).fetch();
+                var request = await Requests.create({songID: inputs.ID, username: inputs.name, userIP: inputs.IP, message: inputs.message, requested: moment().toISOString(true), played: 0}).fetch();
                 Requests.pending.push(inputs.ID);
 
                 // Bump priority if configured
                 if (sails.config.custom.requests.priorityBump !== 0)
                     await Songs.update({ID: inputs.ID}, {weight: record2.weight + sails.config.custom.requests.priorityBump});
 
+                // Add a push notification subscription if a device was provided
+                var returndata = {requested: true, message: `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.`};
+                if (inputs.device !== null)
+                {
+                    await Subscribers.findOrCreate({device: inputs.device, type: `request`, subtype: request.ID}, {host: `website-${host}`, device: inputs.device, type: `request`, subtype: request.ID});
+                    returndata.message = `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.<br />
+                                            <strong>You will receive a push notification when your request begins playing.</strong>`;
+                }
+
                 // Finish it
-                return exits.success({requested: true, HTML: `<div class="alert alert-success" role="alert">
-                                            Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.
-                                            </div>`});
+                return exits.success(returndata);
                 // If it cannot be requested, respond with the errors of why it cannot be requested.
             } else {
-                return exits.success({requested: false, HTML: requestable.HTML});
+                return exits.success({requested: false, message: requestable.message});
             }
         } catch (e) {
             return exits.error(e);

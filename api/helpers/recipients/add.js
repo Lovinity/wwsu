@@ -32,6 +32,12 @@ module.exports = {
             type: 'string',
             required: true,
             description: 'A human friendly name of the recipient'
+        },
+
+        device: {
+            type: 'string',
+            allowNull: true,
+            description: `If this recipient comes from the WWSU mobile app, provide their OneSignal ID here.`
         }
 
     },
@@ -72,7 +78,7 @@ module.exports = {
             }
 
             // Get or create the recipient entry
-            var recipient = await Recipients.findOrCreate({host: inputs.host}, {host: inputs.host, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString(true)});
+            var recipient = await Recipients.findOrCreate({host: inputs.host}, {host: inputs.host, device: inputs.device, group: inputs.group, label: inputs.label, status: status, time: moment().toISOString(true)});
 
             sails.log.silly(`Recipients record: ${recipient}`);
 

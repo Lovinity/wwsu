@@ -19,7 +19,7 @@ module.exports = {
 
         try {
             // Get the hosts's IP address first
-            var from_IP = sails.helpers.getIP(this.req);
+            var from_IP = await sails.helpers.getIp(this.req);
 
             // First, get the track record from the database (and reject if it does not exist)
             var track = await Songs.findOne({ID: inputs.trackID});

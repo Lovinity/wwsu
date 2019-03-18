@@ -34,9 +34,7 @@ module.exports = {
             if (requests.length >= sails.config.custom.requests.dailyLimit)
             {
                 sails.log.verbose(`Track cannot be requested: Reached daily request limit.`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                You have reached your daily request limit (${sails.config.custom.requests.dailyLimit}). Please check back tomorrow.
-                                </div>`, listDiv: 'danger', type: 'requestRules'});
+                return exits.success({requestable: false, message: `You have reached your daily request limit (${sails.config.custom.requests.dailyLimit}). Please check back tomorrow.`, listDiv: 'warning', type: 'requestRules'});
             }
 
             // Next, confirm the track ID actually exists
@@ -45,18 +43,14 @@ module.exports = {
             if (typeof record === 'undefined')
             {
                 sails.log.verbose(`Track cannot be requested: song ID not found.`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-danger" role="alert">
-                                Internal Error: Unable to find the requested track ID.
-                                </div>`, listDiv: 'danger', type: 'internal'});
+                return exits.success({requestable: false, message: `Internal Error: Unable to find the requested track ID.`, listDiv: 'danger', type: 'internal'});
             }
 
             // Is the track disabled?
             if (record.enabled !== 1)
             {
                 sails.log.verbose(`Track cannot be requested: Track is not enabled.`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                            You cannot request a disabled track.
-                                            </div>`, listDiv: 'secondary', type: 'disabled'});
+                return exits.success({requestable: false, message: `You cannot request a disabled track.`, listDiv: 'warning', type: 'disabled'});
             }
 
             // Next, check if the provided track has already been requested and is pending to air
@@ -65,9 +59,7 @@ module.exports = {
             if (requests2.length > 0)
             {
                 sails.log.verbose(`Track cannot be requested: it has already been requested and is pending to air.`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                This track is already in the request queue and pending to air.
-                                </div>`, listDiv: 'warning', type: 'inQueue'});
+                return exits.success({requestable: false, message: `This track is already in the request queue and pending to air.`, listDiv: 'warning', type: 'inQueue'});
             }
 
             var inQueue = false;
@@ -78,9 +70,7 @@ module.exports = {
             if (inQueue)
             {
                 sails.log.verbose(`Track cannot be requested: Track is in the automation system queue and is pending to air.`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                This track is already in the request queue and pending to air.
-                                </div>`, listDiv: 'warning', type: 'inQueue'});
+                return exits.success({requestable: false, message: `This track is already in the request queue and pending to air.`, listDiv: 'warning', type: 'inQueue'});
             }
 
 
@@ -93,9 +83,7 @@ module.exports = {
             if (sails.config.custom.subcats.music.indexOf(subcat.ID) === -1)
             {
                 sails.log.verbose(`Track cannot be requested: Track is not a music track.`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                            You cannot request a non-music track.
-                                            </div>`, listDiv: 'info', type: 'nonMusic'});
+                return exits.success({requestable: false, message: `You cannot request a non-music track.`, listDiv: 'warning', type: 'nonMusic'});
             }
 
             // The rest of the checks are based off of track rotation rule settings saved in the database via RadioDJ
@@ -108,27 +96,21 @@ module.exports = {
             if (moment(record.end_date).isBefore() && moment(record.end_date).isAfter('2002-01-01 00:00:01'))
             {
                 sails.log.verbose(`Track cannot be requested: Track is expired (date).`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                            You cannot request an expired track.
-                                            </div>`, listDiv: 'dark', type: 'expired'});
+                return exits.success({requestable: false, message: `You cannot request an expired track.`, listDiv: 'warning', type: 'expired'});
             }
 
             // Check if we have not yet reached the start date of the track
             if (moment(record.start_date).isAfter())
             {
                 sails.log.verbose(`Track cannot be requested: Track has not yet started via start date.`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                            You cannot request a track that has not yet started airing.
-                                            </div>`, listDiv: 'dark', type: 'expired'});
+                return exits.success({requestable: false, message: `You cannot request a track that has not yet reached its start date.`, listDiv: 'warning', type: 'expired'});
             }
 
             // Check if the track has exceeded the number of allowed spin counts
             if (record.limit_action > 0 && record.count_played >= record.play_limit)
             {
                 sails.log.verbose(`Track cannot be requested: Track is expired (spin counts).`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">
-                                            You cannot request an expired track.
-                                            </div>`, listDiv: 'dark', type: 'expired'});
+                return exits.success({requestable: false, message: `You cannot request an expired track.`, listDiv: 'dark', type: 'expired'});
             }
 
             // Check rotation rules
@@ -153,17 +135,12 @@ module.exports = {
             if (!passesRules)
             {
                 sails.log.verbose(`Track cannot be requested: Fails rotation rules: ${rulesFailed}`);
-                return exits.success({requestable: false, HTML: `<div class="alert alert-warning" role="alert">This track fails one or more playlist rotation rules and cannot be requested at this time:${rulesFailed}</div>`, listDiv: 'warning', type: 'rotationRules'});
+                return exits.success({requestable: false, message: `This track fails one or more playlist rotation rules and cannot be requested at this time:${rulesFailed}`, listDiv: 'warning', type: 'rotationRules'});
 
                 // By this point, all rules passed and the track can be requested. Include the request form.
             } else {
                 sails.log.verbose(`Track can be requested.`);
-                return exits.success({requestable: true, HTML: `<div class="form-group">
-                                    <label for="request-name"><strong>Request this track</strong></label>
-                                    <input type="text" class="form-control" id="track-request-name" placeholder="Your name (optional)">
-                                    <textarea class="form-control" id="track-request-message" rows="2" placeholder="Message for the DJ (optional)"></textarea>
-                                    </div>                    
-                                    <button type="submit" id="track-request-submit" class="btn btn-primary">Place Request</button>`, listDiv: 'success', type: 'requestable'});
+                return exits.success({requestable: true, message: `This track can be requested`, listDiv: 'success', type: 'requestable'});
             }
 
         } catch (e) {
