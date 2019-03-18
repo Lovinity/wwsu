@@ -1231,7 +1231,7 @@ function processCalendar(data, replace = false)
                         try {
                             var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
                             if (!event.active)
-                                finalColor = ("#161616");
+                                finalColor = hexRgb("#161616");
                             finalColor.red = Math.round(finalColor.red / 2);
                             finalColor.green = Math.round(finalColor.green / 2);
                             finalColor.blue = Math.round(finalColor.blue / 2);
