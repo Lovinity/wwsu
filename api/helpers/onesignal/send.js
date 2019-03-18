@@ -56,7 +56,7 @@ module.exports = {
                 thread_id: categories[inputs.category],
                 summary_arg: `${inputs.category}s`,
                 ttl: inputs.ttl,
-                }, {headers: {'Content-Type': 'application/json'}})
+                }, {headers: {'Content-Type': 'application/json', 'Authorization': `Basic ${sails.config.custom.onesignal.rest}`}})
                     .then(async function (resp) {
                         sails.log.error(resp.body);
                         return exits.success(true);
