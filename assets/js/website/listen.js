@@ -33,22 +33,8 @@ var calendar = [];
 var likedTracks = [];
 var clockTimer;
 var device = getUrlParameter(`device`);
+var isMobile = device === null;
 var OneSignal;
-
-// Web notifications when device is null
-if (device === null)
-{
-    waitFor(function () {
-        return (typeof window.OneSignal !== `undefined`);
-    }, function () {
-        OneSignal = window.OneSignal || [];
-        OneSignal.push(function () {
-            OneSignal.init({
-                appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
-            });
-        });
-    });
-}
 
 // Initialize the web player
 if (document.querySelector('#nativeflashradio'))
@@ -413,11 +399,56 @@ waitFor(function () {
 
 function doSockets(firsttime = false)
 {
-    onlineSocket();
-    messagesSocket();
-    metaSocket();
-    announcementsSocket();
-    loadGenres();
+    // Mobile devices and web devices where device parameter was passed, start sockets immediately.
+    if (isMobile || !isMobile && device !== null)
+    {
+        onlineSocket();
+        messagesSocket();
+        metaSocket();
+        announcementsSocket();
+        loadGenres();
+        // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
+    } else {
+        waitFor(function () {
+            return (typeof window.OneSignal !== `undefined`);
+        }, function () {
+            OneSignal = window.OneSignal || [];
+
+            OneSignal.push(function () {
+                OneSignal.init({
+                    appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
+                    autoResubscribe: true,
+                });
+            });
+
+            OneSignal.getUserId().then(function (userId) {
+                device = userId;
+                onlineSocket();
+                messagesSocket();
+                metaSocket();
+                announcementsSocket();
+                loadGenres();
+            });
+
+            // On changes to web notification subscriptions; update subscriptions and device.
+            OneSignal.on('subscriptionChange', function (isSubscribed) {
+                OneSignal.getUserId().then(function (userId) {
+                    device = userId;
+                    if (device && device !== null)
+                    {
+                        io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+                            try {
+                                Subscriptions = TAFFY();
+                                Subscriptions.insert(body);
+                            } catch (e) {
+                                setTimeout(metaSocket, 10000);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+}
 }
 
 function onlineSocket()
@@ -473,26 +504,18 @@ function metaSocket()
                             try {
                                 Subscriptions = TAFFY();
                                 Subscriptions.insert(body);
-                                io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
-                                    try {
-                                        processCalendar(body, true);
-                                    } catch (e) {
-                                        setTimeout(metaSocket, 10000);
-                                    }
-                                });
-                            } catch (e) {
-                                setTimeout(metaSocket, 10000);
-                            }
-                        });
-                    } else {
-                        io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
-                            try {
-                                processCalendar(body, true);
                             } catch (e) {
                                 setTimeout(metaSocket, 10000);
                             }
                         });
                     }
+                    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+                        try {
+                            processCalendar(body, true);
+                        } catch (e) {
+                            setTimeout(metaSocket, 10000);
+                        }
+                    });
                 } catch (e) {
                     setTimeout(metaSocket, 10000);
                 }
@@ -812,6 +835,8 @@ function sendMessage(privateMsg) {
                 return null;
             }
             quill.setText('');
+            if (privateMsg && device === null)
+                OneSignal.showNativePrompt();
         } catch (e) {
             if (notificationsBox)
                 notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;
@@ -893,7 +918,7 @@ function requestTrack(trackID) {
             {
                 iziToast.show({
                     title: 'Request system success',
-                    message: `Your request was placed. In automation, requests are played during breaks. During shows, it is up to DJ discretion.${device !== null ? `<br /><strong>You will receive a push notification when your request begins playing.</strong>` : ``}`,
+                    message: `Your request was placed. In automation, requests are played during breaks. During shows, it is up to DJ discretion.${device !== null ? `<br /><strong>You will receive a ${isMobile ? `push` : ``} notification when your request begins playing.</strong>` : ``}`,
                     color: 'green',
                     zindex: 100,
                     layout: 1,
@@ -1502,9 +1527,9 @@ function displayEventInfo(showID) {
 
         if (subscribed === 0)
         {
-            message += `<p>To receive a push notification when this event goes on the air for this specific date/time, click "Subscribe One-Time".</p>
-<p>To receive a push notification every time this event goes on the air, click "Subscribe All Times".</p>
-<p>You can always come back to this screen to unsubscribe from push notifications.</p>`;
+            message += `<hr><p>To receive a ${isMobile ? `push` : ``} notification when this event goes on the air for this specific date/time, click "Subscribe One-Time".</p>
+<p>To receive a ${isMobile ? `push` : ``} notification every time this event goes on the air, click "Subscribe All Times".</p>
+<p>You can always come back to this screen to unsubscribe from ${isMobile ? `push` : ``} notifications.</p>`;
             buttons = [
                 ['<button><b>Subscribe One-Time</b></button>', function (instance, toast) {
                         instance.hide({transitionOut: 'fadeOut'}, toast, 'button');
@@ -1525,7 +1550,7 @@ function displayEventInfo(showID) {
                     }]
             ];
         } else {
-            message += `<p>You are currently subscribed to receive push notifications for this event. To unsubscribe from ALL push notifications for this event now and in the future, click "unsubscribe".</p>`;
+            message += `<hr><p>You are currently subscribed to receive ${isMobile ? `push` : ``} notifications for this event. To unsubscribe from ALL ${isMobile ? `push` : ``} notifications for this event now and in the future, click "unsubscribe".</p>`;
             buttons = [
                 ['<button><b>Unsubscribe</b></button>', function (instance, toast) {
                         instance.hide({transitionOut: 'fadeOut'}, toast, 'button');
@@ -1540,6 +1565,14 @@ function displayEventInfo(showID) {
                     }, true]
             ];
         }
+    } else if (!isMobile) {
+        message += `<hr><p>If you want to receive notifications for when events go on the air, you first need to grant permission in your web browser for us to show notifications. Click "Show Prompt". After allowing notifications, re-load this event.</p>`;
+        buttons = [
+            ['<button><b>Show Prompt</b></button>', function (instance, toast) {
+                    instance.hide({transitionOut: 'fadeOut'}, toast, 'button');
+                    OneSignal.showNativePrompt();
+                }, true]
+        ];
     }
     iziToast.show({
         title: item.title,
