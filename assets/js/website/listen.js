@@ -33,6 +33,22 @@ var calendar = [];
 var likedTracks = [];
 var clockTimer;
 var device = getUrlParameter(`device`);
+var OneSignal;
+
+// Web notifications when device is null
+if (device === null)
+{
+    waitFor(function () {
+        return (typeof window.OneSignal !== `undefined`);
+    }, function () {
+        OneSignal = window.OneSignal || [];
+        OneSignal.push(function () {
+            OneSignal.init({
+                appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
+            });
+        });
+    });
+}
 
 // Initialize the web player
 if (document.querySelector('#nativeflashradio'))
