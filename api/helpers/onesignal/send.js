@@ -58,7 +58,6 @@ module.exports = {
                 ttl: inputs.ttl,
                 }, {headers: {'Content-Type': 'application/json', 'Authorization': `Basic ${sails.config.custom.onesignal.rest}`}})
                     .then(async function (resp) {
-                        sails.log.error(resp.body);
                         return exits.success(true);
                     });
 

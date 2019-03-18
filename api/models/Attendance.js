@@ -103,6 +103,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
             try {
                 sails.log.debug(`Attendance.createRecord called.`);
+                var returnData = {newID: null, unique: null};
 
                 // Store the current ID in a variable; we want to start a new record before processing the old one
                 var currentID = Meta['A'].attendanceID;
@@ -116,6 +117,7 @@ module.exports = {
 
                 if (record.length > 0)
                 {
+                    returnData.unique = record[0].unique;
                     created = await Attendance.create({unique: record[0].unique, dj: Meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true)}).fetch();
                 } else {
                     created = await Attendance.create({dj: Meta['A'].dj, event: event, actualStart: moment().toISOString(true)}).fetch();
@@ -129,6 +131,8 @@ module.exports = {
                                 });
                     }
                 }
+                
+                returnData.newID = created.ID;
 
                 // Switch to the new record in the system
                 await Meta.changeMeta({attendanceID: created.ID});
@@ -177,7 +181,7 @@ module.exports = {
                     }
                 }
 
-                return resolve();
+                return resolve(returnData);
             } catch (e) {
                 return reject(e);
             }

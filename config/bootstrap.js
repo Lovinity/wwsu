@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise, Uabdirectors, Uabtimesheet */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise, Uabdirectors, Uabtimesheet, Subscribers */
 
 /**
  * Bootstrap
@@ -422,12 +422,13 @@ module.exports.bootstrap = async function (done) {
                                     {
                                         // State switching should be pushed in sockets 
                                         await Meta.changeMeta({state: 'live_prerecord', showStamp: moment().toISOString(true)});
-                                        await Attendance.createRecord(`Prerecord: ${Meta['A'].playlist}`);
+                                        var attendance = await Attendance.createRecord(`Prerecord: ${Meta['A'].playlist}`);
                                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `A prerecord started airing.` + "\n" + "Prerecord: " + Meta['A'].playlist}).fetch()
                                                 .tolerate((err) => {
                                                     // Do not throw for errors, but log it.
                                                     sails.log.error(err);
                                                 });
+                                        await sails.helpers.onesignal.sendEvent(`Prerecord: `, Meta['A'].playlist, `Prerecorded Show`, attendance.unique);
                                     }
                                     if (index === 0)
                                     {
@@ -513,46 +514,50 @@ module.exports.bootstrap = async function (done) {
                     {
                         await Meta.changeMeta({state: 'live_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        await Attendance.createRecord(`Show: ${Meta['A'].show}`);
+                        var attendance = await Attendance.createRecord(`Show: ${Meta['A'].show}`);
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'DJ is now live.<br />DJ - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
                                 });
+                        await sails.helpers.onesignal.sendEvent(`Show: `, Meta['A'].show, `Live Show`, attendance.unique);
                     }
                     // If we are preparing for sports, do some stuff if queue is done
                     if (Meta['A'].state === 'automation_sports' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'sports_on', showStamp: moment().toISOString(true)});
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
+                        var attendance = await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
                                 });
+                        await sails.helpers.onesignal.sendEvent(`Sports: `, Meta['A'].show, `Sports Broadcast`, attendance.unique);
                     }
                     // If we are preparing for remote, do some stuff
                     if (Meta['A'].state === 'automation_remote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'remote_on', showStamp: moment().toISOString(true)});
-                        await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
+                        var attendance = await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote broadcast is now on the air.<br />Host - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
                                 });
+                        await sails.helpers.onesignal.sendEvent(`Remote: `, Meta['A'].show, `Remote Broadcast`, attendance.unique);
                     }
                     // If we are preparing for sportsremote, do some stuff if we are playing the stream track
                     if (Meta['A'].state === 'automation_sportsremote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0)
                     {
                         await Meta.changeMeta({state: 'sportsremote_on', showStamp: moment().toISOString(true)});
-                        await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
+                        var attendance = await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: 'A remote sports broadcast has started.<br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic}).fetch()
                                 .tolerate((err) => {
                                     // Do not throw for errors, but log it.
                                     sails.log.error(err);
                                 });
+                        await sails.helpers.onesignal.sendEvent(`Sports: `, Meta['A'].show, `Sports Broadcast`, attendance.unique);
                     }
                     // If returning from break, do stuff once queue is empty
                     if (Meta['A'].state.includes('_returning') && queueLength <= 0 && Status.errorCheck.trueZero <= 0)

@@ -32,7 +32,7 @@ module.exports = {
                     // Lock future state changes until we are done if ignoreChangingState is false.
                     if (!inputs.ignoreChangingState)
                         await Meta.changeMeta({changingState: `Switching to genre`});
-                    
+
                     // Find the manual RadioDJ event for Node to trigger
                     var event = await Events.find({type: 3, name: inputs.event, enabled: 'True'});
                     sails.log.verbose(`Events returned ${event.length} matched events, but we're only going to use the first one.`);
@@ -58,12 +58,13 @@ module.exports = {
                     // If we are going back to default rotation, we don't want to activate genre mode; leave in automation_on mode
                     if (inputs.event !== 'Default')
                     {
-                        await Attendance.createRecord(`Genre: ${inputs.event}`);
+                        var attendance = await Attendance.createRecord(`Genre: ${inputs.event}`);
                         await Meta.changeMeta({state: 'automation_genre', genre: inputs.event});
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: 'Genre started.<br />Genre: ' + inputs.event}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
+                        await sails.helpers.onesignal.sendEvent(`Genre: `, inputs.event, `Genre`, attendance.unique);
                     } else {
                         await Attendance.createRecord(`Genre: Default`);
                         await Meta.changeMeta({state: 'automation_on', genre: 'Default'});
