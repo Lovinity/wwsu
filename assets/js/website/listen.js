@@ -415,31 +415,69 @@ function doSockets(firsttime = false)
                 appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
                 autoResubscribe: true,
             });
-        });
 
-        OneSignal.getUserId().then(function (userId) {
-            device = userId;
-            onlineSocket();
-            messagesSocket();
-            metaSocket();
-            announcementsSocket();
-            loadGenres();
-        });
-
-        // On changes to web notification subscriptions; update subscriptions and device.
-        OneSignal.on('subscriptionChange', function (isSubscribed) {
-            OneSignal.getUserId().then(function (userId) {
-                device = userId;
-                if (device && device !== null)
+            OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
+                if (isEnabled)
                 {
-                    io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
-                        try {
-                            Subscriptions = TAFFY();
-                            Subscriptions.insert(body);
-                        } catch (e) {
-                            setTimeout(metaSocket, 10000);
+                    OneSignal.getUserId().then(function (userId) {
+                        device = userId;
+                        onlineSocket();
+                        messagesSocket();
+                        metaSocket();
+                        announcementsSocket();
+                        loadGenres();
+                    });
+                } else {
+                    device = null;
+                    onlineSocket();
+                    messagesSocket();
+                    metaSocket();
+                    announcementsSocket();
+                    loadGenres();
+                }
+            });
+
+            OneSignal.on('notificationPermissionChange', function (permissionChange) {
+                var currentPermission = permissionChange.to;
+                if (currentPermission === "granted" && device === null) {
+                    OneSignal.getUserId().then(function (userId) {
+                        device = userId;
+                        if (device && device !== null)
+                        {
+                            io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+                                try {
+                                    Subscriptions = TAFFY();
+                                    Subscriptions.insert(body);
+                                } catch (e) {
+                                    setTimeout(metaSocket, 10000);
+                                }
+                            });
                         }
                     });
+                } else if (currentPermission === "denied" && device !== null) {
+                    device = null;
+                }
+            });
+
+            // On changes to web notification subscriptions; update subscriptions and device.
+            OneSignal.on('subscriptionChange', function (isSubscribed) {
+                if (isSubscribed && device === null) {
+                    OneSignal.getUserId().then(function (userId) {
+                        device = userId;
+                        if (device && device !== null)
+                        {
+                            io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+                                try {
+                                    Subscriptions = TAFFY();
+                                    Subscriptions.insert(body);
+                                } catch (e) {
+                                    setTimeout(metaSocket, 10000);
+                                }
+                            });
+                        }
+                    });
+                } else if (!isSubscribed && device !== null) {
+                    device = null;
                 }
             });
         });
