@@ -524,6 +524,26 @@ function onlineSocket()
             temp.style.display = "none";
         }
     }
+
+    var temp = document.querySelector(`#show-subscribe-button`);
+    if (temp !== null)
+    {
+        if (device === null && !isMobile)
+        {
+            temp.innerHTML = "Show Prompt";
+            temp.onclick = () => OneSignal.showNativePrompt();
+        } else {
+            temp.innerHTML = "Subscribe";
+            temp.onclick = () => {
+                if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
+                {
+                    subscribe(`calendar-all`, Meta.show);
+                } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                    subscribe(`calendar-all`, `Sports: ${Meta.show}`);
+                }
+            };
+        }
+    }
 }
 
 function messagesSocket()
@@ -791,7 +811,6 @@ function doMeta(response)
             if (shouldScroll && document.querySelector('#messages')) {
                 $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
             }
-            return null;
         }
 
         // If a state change was returned, process it by informing the client whether or not there is probably a DJ at the studio to read messages
@@ -811,6 +830,9 @@ function doMeta(response)
                     }
                     automationpost = 'automation';
                 }
+                var temp = document.querySelector(`#show-subscribe`);
+                if (temp !== null)
+                    temp.style.display = "none";
             } else if (response.state === 'live_prerecord') {
                 if (automationpost !== response.live)
                 {
@@ -822,6 +844,35 @@ function doMeta(response)
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
+                    }
+                }
+                var temp = document.querySelector(`#show-subscribe`);
+                var temp2 = document.querySelector(`#show-subscribe-button`);
+                var temp3 = document.querySelector(`#show-subscribe-name`);
+                if (temp !== null)
+                {
+                    var subscribed = Subscriptions({type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show}).get().length;
+                    if (subscribed === 0)
+                    {
+                        temp.style.display = "inline";
+                    } else {
+                        temp.style.display = "none";
+                    }
+                    temp3.innerHTML = Meta.show;
+                    if (device === null && !isMobile)
+                    {
+                        temp2.innerHTML = "Show Prompt";
+                        temp2.onclick = () => OneSignal.showNativePrompt();
+                    } else {
+                        temp2.innerHTML = "Subscribe";
+                        temp2.onclick = () => {
+                            if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
+                            {
+                                subscribe(`calendar-all`, Meta.show);
+                            } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                subscribe(`calendar-all`, `Sports: ${Meta.show}`);
+                            }
+                        };
                     }
                 }
             } else {
@@ -839,15 +890,19 @@ function doMeta(response)
                 }
             }
         }
-        blocked = false;
-        if (messageText)
+
+        if (Meta.webchat)
         {
-            messageText.disabled = false;
-            sendButton.disabled = false;
+            blocked = false;
+            if (messageText)
+            {
+                messageText.disabled = false;
+                sendButton.disabled = false;
+            }
+            var temp = document.getElementById('msg-disabled');
+            if (temp)
+                temp.remove();
         }
-        var temp = document.getElementById('msg-disabled');
-        if (temp)
-            temp.remove();
 
         // If a track ID change was passed, do some stuff in recent tracks
         if (typeof response.history !== 'undefined')
