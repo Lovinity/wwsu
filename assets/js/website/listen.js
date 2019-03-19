@@ -888,6 +888,35 @@ function doMeta(response)
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
                     }
                 }
+                var temp = document.querySelector(`#show-subscribe`);
+                var temp2 = document.querySelector(`#show-subscribe-button`);
+                var temp3 = document.querySelector(`#show-subscribe-name`);
+                if (temp !== null)
+                {
+                    var subscribed = Subscriptions({type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show}).get().length;
+                    if (subscribed === 0)
+                    {
+                        temp.style.display = "inline";
+                    } else {
+                        temp.style.display = "none";
+                    }
+                    temp3.innerHTML = Meta.show;
+                    if (device === null && !isMobile)
+                    {
+                        temp2.innerHTML = "Show Prompt";
+                        temp2.onclick = () => OneSignal.showNativePrompt();
+                    } else {
+                        temp2.innerHTML = "Subscribe";
+                        temp2.onclick = () => {
+                            if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
+                            {
+                                subscribe(`calendar-all`, Meta.show);
+                            } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                subscribe(`calendar-all`, `Sports: ${Meta.show}`);
+                            }
+                        };
+                    }
+                }
             }
         }
 
@@ -1608,6 +1637,9 @@ function subscribe(type, subtype) {
                     timeout: 10000
                 });
                 Subscriptions.insert({type: type, subtype: subtype});
+                var temp = document.querySelector(`#show-subscribe`);
+                if (temp !== null && (subtype === Meta.show || subtype === `Sports: ${Meta.show}`))
+                    temp.style.display = "none";
             }
         } catch (e) {
             iziToast.show({
