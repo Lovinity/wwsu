@@ -508,7 +508,7 @@ function onlineSocket()
     {
         if (device === null && !isMobile)
         {
-            temp.style.display = "inline";
+            temp.style.display = "block";
         } else {
             temp.style.display = "none";
         }
@@ -519,7 +519,7 @@ function onlineSocket()
     {
         if (device === null && !isMobile)
         {
-            temp.style.display = "inline";
+            temp.style.display = "block";
         } else {
             temp.style.display = "none";
         }
@@ -854,7 +854,7 @@ function doMeta(response)
                     var subscribed = Subscriptions({type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show}).get().length;
                     if (subscribed === 0)
                     {
-                        temp.style.display = "inline";
+                        temp.style.display = "block";
                     } else {
                         temp.style.display = "none";
                     }
@@ -896,7 +896,7 @@ function doMeta(response)
                     var subscribed = Subscriptions({type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show}).get().length;
                     if (subscribed === 0)
                     {
-                        temp.style.display = "inline";
+                        temp.style.display = "block";
                     } else {
                         temp.style.display = "none";
                     }
