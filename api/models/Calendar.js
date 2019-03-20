@@ -515,6 +515,7 @@ module.exports = {
                                 {
                                     needsUpdate = true;
                                     break;
+                                    console.log(`Needs update: ${key} WHERE ${criteria[key]} !== ${theEvent[key]} .`)
                                 }
                             }
                         }
