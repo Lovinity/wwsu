@@ -511,7 +511,7 @@ module.exports = {
                         {
                             if (theEvent.hasOwnProperty(key))
                             {
-                                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID')
+                                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`)
                                 {
                                     needsUpdate = true;
                                     break;
