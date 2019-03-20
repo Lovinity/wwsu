@@ -598,7 +598,7 @@ function processCalendar(db)
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
         db.get()
                 .sort(compare)
-                .filter(event => !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:"))
+                .filter(event => !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(8, 'days')))
                 .map(event =>
                 {
                     try {
