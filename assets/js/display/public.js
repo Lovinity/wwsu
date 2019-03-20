@@ -257,7 +257,7 @@ try {
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: #FFFFFF">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
         fn: ((slide) => {
-          processCalendar(Calendar.db);  
+          processCalendar(Calendar.db());  
         })
     });
 
