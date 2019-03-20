@@ -1438,10 +1438,11 @@ function updateCalendar() {
                     }
                 });
                 
-                var temp = `<option value="0">Today ${moment(Meta.time).format(`MM/DD`)}</option>`;
                 for (var i = 1; i < 28; i++)
                 {
-                    temp += `<option value="${i}">${moment(Meta.time).format(`dddd MM/DD`)}</option>`;
+                    var temp0 = document.querySelector(`#calendar-select-${i}`);
+                    if (temp0 !== null)
+                        temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`);
                 }
                 
                 calendarOptions.innerHTML = temp;
