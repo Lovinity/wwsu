@@ -562,7 +562,7 @@ module.exports = {
                                 // Check if the event started over 10 minutes prior to start time, and if so, update the attendance record accordingly.
                                 if (Meta['A'].attendanceID !== null)
                                 {
-                                    if (attendanceRecord.event === event.summary && (attendanceRecord.unique === null || attendanceRecord.unique === ``))
+                                    if (attendanceRecord.event === event.summary && event.active === 1 && (attendanceRecord.unique === null || attendanceRecord.unique === ``))
                                     {
                                         await Attendance.update({ID: Meta['A'].attendanceID}, {unique: event.id, scheduledStart: moment(criteria.start).toISOString(true), scheduledEnd: moment(criteria.end).toISOString(true)}).fetch();
                                     }
