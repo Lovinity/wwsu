@@ -514,8 +514,8 @@ module.exports = {
                                 if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`)
                                 {
                                     needsUpdate = true;
-                                    break;
                                     sails.log.warn(`Needs update: ${key} WHERE ${criteria[key]} !== ${theEvent[key]} .`);
+                                    break;
                                 }
                             }
                         }
