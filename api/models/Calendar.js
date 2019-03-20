@@ -220,7 +220,8 @@ module.exports = {
                     calendarId: sails.config.custom.GoogleAPI.calendarId,
                     timeMin: currentdate.toISOString(),
                     timeMax: nextWeekDate.toISOString(),
-                    singleEvents: true
+                    singleEvents: true,
+                    maxResults: 1000
                             //orderBy: 'startTime' does not work correctly, so ignoring as it's not a big deal if events are not in time order
                 });
                 events = events.data.items;
