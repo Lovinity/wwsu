@@ -613,68 +613,67 @@ module.exports = {
                         // Send out cancellation notifications for cancelled shows. Also add a log for cancelled shows.
                         if (cancelled.length > 1)
                         {
-                            cancelled.map((cEvent) => {
-                                (async () => {
-                                    var dj = cEvent.title;
-                                    if (dj.includes(" - ") && dj.includes(": "))
-                                    {
-                                        dj = dj.split(" - ")[0];
-                                        dj = dj.substring(dj.indexOf(": ") + 2);
-                                    } else {
-                                        dj = null;
-                                    }
-                                    if (dj !== null)
-                                        dj = await Djs.findOrCreate({name: dj}, {name: dj, lastSeen: moment("2002-01-01").toISOString(true)});
-                                    var attendance = await Attendance.create({unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: `${cEvent.title} {CANCELLED via Google Calendar}`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true)});
-                                    if (cEvent.title.startsWith("Show: "))
-                                    {
-                                        var temp = cEvent.title.replace("Show: ", "");
-                                        await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                        await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Show was cancelled via Google Calendar!<br />Show: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
-                                                .tolerate((err) => {
-                                                    sails.log.error(err);
-                                                });
-                                    }
-                                    if (cEvent.title.startsWith("Remote: "))
-                                    {
-                                        var temp = cEvent.title.replace("Remote: ", "");
-                                        await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                        await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Remote broadcast was cancelled via Google Calendar!<br />Remote: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
-                                                .tolerate((err) => {
-                                                    sails.log.error(err);
-                                                });
-                                    }
-                                    if (cEvent.title.startsWith("Sports: "))
-                                    {
-                                        var temp = cEvent.title.replace("Sports: ", "");
-                                        await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                        await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Sports broadcast was cancelled via Google Calendar!<br />Sports: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
-                                                .tolerate((err) => {
-                                                    sails.log.error(err);
-                                                });
-                                    }
-                                    if (cEvent.title.startsWith("Prerecord: "))
-                                    {
-                                        var temp = cEvent.title.replace("Prerecord: ", "");
-                                        await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                        await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Prerecorded show was cancelled via Google Calendar!<br />Prerecord: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
-                                                .tolerate((err) => {
-                                                    sails.log.error(err);
-                                                });
-                                    }
-                                    // We don't care about logging cancelled genres nor playlists, but we still want to send notifications out.
-                                    if (cEvent.title.startsWith("Genre: "))
-                                    {
-                                        var temp = cEvent.title.replace("Genre: ", "");
-                                        await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                    }
-                                    if (cEvent.title.startsWith("Playlist: "))
-                                    {
-                                        var temp = cEvent.title.replace("Playlist: ", "");
-                                        await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                    }
-                                })();
+                            var maps = cancelled.map(async (cEvent) => {
+                                var dj = cEvent.title;
+                                if (dj.includes(" - ") && dj.includes(": "))
+                                {
+                                    dj = dj.split(" - ")[0];
+                                    dj = dj.substring(dj.indexOf(": ") + 2);
+                                } else {
+                                    dj = null;
+                                }
+                                if (dj !== null)
+                                    dj = await Djs.findOrCreate({name: dj}, {name: dj, lastSeen: moment("2002-01-01").toISOString(true)});
+                                var attendance = await Attendance.create({unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: `${cEvent.title} {CANCELLED via Google Calendar}`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true)});
+                                if (cEvent.title.startsWith("Show: "))
+                                {
+                                    var temp = cEvent.title.replace("Show: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Show was cancelled via Google Calendar!<br />Show: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err);
+                                            });
+                                }
+                                if (cEvent.title.startsWith("Remote: "))
+                                {
+                                    var temp = cEvent.title.replace("Remote: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Remote broadcast was cancelled via Google Calendar!<br />Remote: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err);
+                                            });
+                                }
+                                if (cEvent.title.startsWith("Sports: "))
+                                {
+                                    var temp = cEvent.title.replace("Sports: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Sports broadcast was cancelled via Google Calendar!<br />Sports: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err);
+                                            });
+                                }
+                                if (cEvent.title.startsWith("Prerecord: "))
+                                {
+                                    var temp = cEvent.title.replace("Prerecord: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Prerecorded show was cancelled via Google Calendar!<br />Prerecord: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err);
+                                            });
+                                }
+                                // We don't care about logging cancelled genres nor playlists, but we still want to send notifications out.
+                                if (cEvent.title.startsWith("Genre: "))
+                                {
+                                    var temp = cEvent.title.replace("Genre: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                }
+                                if (cEvent.title.startsWith("Playlist: "))
+                                {
+                                    var temp = cEvent.title.replace("Playlist: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                }
                             });
+                            await Promise.all(maps);
                         }
 
                     }
