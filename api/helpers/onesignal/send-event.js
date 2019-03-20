@@ -30,6 +30,11 @@ module.exports = {
             allowNull: true,
             description: `The Google Calendar ID of the event that just started, or null if there is no event.`
         },
+
+        cancellationDate: {
+            type: 'string',
+            description: `If specified, this notification is a cancellation notice, and this is the date which the event was cancelled for.`
+        }
     },
 
     fn: async function (inputs, exits) {
@@ -43,8 +48,15 @@ module.exports = {
             records = await Subscribers.find({type: `calendar-all`, subtype: [inputs.event, `${inputs.prefix}${inputs.event}`]});
             records.map((record) => devices.push(record.device));
             if (devices.length > 0)
-                await sails.helpers.onesignal.send(devices, `request`, `WWSU - ${inputs.type} is On the Air!`, `${inputs.event} just started on WWSU Radio!`, (60 * 180));
-            
+            {
+                if (!inputs.cancellationDate)
+                {
+                    await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} is On the Air!`, `${inputs.event} just started on WWSU Radio!`, (60 * 60 * 3));
+                } else {
+                    await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} was cancelled.`, `${inputs.event} was cancelled for the date of ${inputs.cancellationDate}.`, (60 * 60 * 24 * 7));
+                }
+            }
+
             return exits.success(true);
         } catch (e) {
             // No erroring if there's an error; just ignore it

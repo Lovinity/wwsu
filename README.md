@@ -1,4 +1,4 @@
-# WWSU 6.0.0 ALPHA 1
+# WWSU 6.0.0 ALPHA 2
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 **The master branch should NOT be used for your own deployment; please use a release instead**
@@ -196,7 +196,7 @@ Get an array of events for the next 7 days, in no particular order (client will 
                 "updatedAt": "2018-05-15T22:31:34.381Z",
                 "ID": 1,
                 "unique": "578vfod7icjde4ikdbmtii9ren_20180516T080000Z", // Unique event ID as provided by Google Calendar
-                "active": true, // Becomes false when the event passed the end time, or when the event was marked as canceled.
+                "active": 1, // -1 means the event was cancelled, 0 means the event expired, 1 means the event is scheduled / active.
                 "title": "Genre: New Rock", // Title of the event
                 "description": "", // Description of the event, if provided (HTML is stripped from the Google Calendar API field)
                 "color": "#5484ed", // Hexadecimal color representing this event

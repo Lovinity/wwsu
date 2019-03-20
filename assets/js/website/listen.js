@@ -1323,7 +1323,7 @@ function processCalendar(data, replace = false)
                     {
                         try {
                             var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
-                            if (!event.active)
+                            if (event.active < 1)
                                 finalColor = hexRgb("#161616");
                             finalColor.red = Math.round(finalColor.red / 2);
                             finalColor.green = Math.round(finalColor.green / 2);
@@ -1331,7 +1331,7 @@ function processCalendar(data, replace = false)
                             if (event.title.startsWith("Show: "))
                             {
                                 var stripped = event.title.replace("Show: ", "");
-                                var eventType = "SHOW";
+                                var eventType = event.active > -1 ? "SHOW" : `CANCELED`;
                                 var eventClass = "primary";
                                 var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
                                 var temp = stripped.split(" - ");
@@ -1346,7 +1346,7 @@ function processCalendar(data, replace = false)
                             } else if (event.title.startsWith("Prerecord: "))
                             {
                                 var stripped = event.title.replace("Prerecord: ", "");
-                                var eventType = "PRERECORD";
+                                var eventType = event.active > -1 ? "PRERECORD" : `CANCELED`;
                                 var eventClass = "danger";
                                 var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
                                 var temp = stripped.split(" - ");
@@ -1361,7 +1361,7 @@ function processCalendar(data, replace = false)
                             } else if (event.title.startsWith("Remote: "))
                             {
                                 var stripped = event.title.replace("Remote: ", "");
-                                var eventType = "REMOTE";
+                                var eventType = event.active > -1 ? "REMOTE" : `CANCELED`;
                                 var eventClass = "purple";
                                 var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
                                 var temp = stripped.split(" - ");
@@ -1376,14 +1376,14 @@ function processCalendar(data, replace = false)
                             } else if (event.title.startsWith("Sports: "))
                             {
                                 var stripped = event.title.replace("Sports: ", "");
-                                var eventType = "SPORTS";
+                                var eventType = event.active > -1 ? "SPORTS" : `CANCELED`;
                                 var eventClass = "success";
                                 var line1 = "Raider Sports";
                                 var line2 = stripped;
                                 var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
                             } else if (event.title.startsWith("Playlist: ")) {
                                 var stripped = event.title.replace("Playlist: ", "");
-                                var eventType = "Playlist";
+                                var eventType = event.active > -1 ? "PLAYLIST" : `CANCELED`;
                                 var eventClass = "info";
                                 var image = `<i class="fas fa-list" style="font-size: 96px;"></i>`;
                                 var temp = stripped.split(" - ");
@@ -1398,13 +1398,13 @@ function processCalendar(data, replace = false)
                             } else if (event.title.startsWith("Genre: "))
                             {
                                 var stripped = event.title.replace("Genre: ", "");
-                                var eventType = "Genre";
+                                var eventType = event.active > -1 ? "GENRE" : `CANCELED`;
                                 var eventClass = "info";
                                 var line1 = "";
                                 var line2 = stripped;
                                 var image = `<i class="fas fa-music" style="font-size: 96px;"></i>`;
                             } else {
-                                var eventType = "Event";
+                                var eventType = event.active > -1 ? "EVENT" : `CANCELED`;
                                 var eventClass = "secondary";
                                 var line1 = "";
                                 var line2 = event.title;

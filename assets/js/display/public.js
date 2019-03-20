@@ -673,33 +673,15 @@ function processCalendar(db)
                 calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].map((dodo, index) => {
                     try {
                         var color = hexRgb(dodo.color);
-                        var borderColor = '#000000';
-                        var timeleft = '';
-                        if (moment(Meta.time).isBefore(moment(dodo.start)))
-                        {
-                            timeleft = `Starts ${moment(Meta.time).to(moment(dodo.start))}`;
-                            color.red = Math.round(color.red / 1.5);
-                            color.green = Math.round(color.green / 1.5);
-                            color.blue = Math.round(color.blue / 1.5);
-                            borderColor = "#FFEB3B";
-                        } else if (moment(Meta.time).isAfter(moment(dodo.end)))
-                        {
-                            color.red = Math.round(color.red / 1.5);
-                            color.green = Math.round(color.green / 1.5);
-                            color.blue = Math.round(color.blue / 1.5);
-                            timeleft = `Ended ${moment(dodo.ends).from(moment(Meta.time))}`;
-                            borderColor = "#f44336";
-                        } else {
-                            color.red = Math.round(color.red / 1.5);
-                            color.green = Math.round(color.green / 1.5);
-                            color.blue = Math.round(color.blue / 1.5);
-                            timeleft = `Ends ${moment(Meta.time).to(moment(dodo.ends))}`;
-                            borderColor = "#4CAF50";
-                        }
+                        if (dodo.active < 1)
+                            color = hexRgb(`#161616`);
+                        color.red = Math.round(color.red / 1.5);
+                        color.green = Math.round(color.green / 1.5);
+                        color.blue = Math.round(color.blue / 1.5);
                         if (dodo.title.startsWith("Show: "))
                         {
                             var stripped = dodo.title.replace("Show: ", "");
-                            var eventType = "SHOW";
+                            var eventType = dodo.active > -1 ? "SHOW" : `CANCELED`;
                             var eventClass = "primary";
                             var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
@@ -714,7 +696,7 @@ function processCalendar(db)
                         } else if (dodo.title.startsWith("Prerecord: "))
                         {
                             var stripped = dodo.title.replace("Prerecord: ", "");
-                            var eventType = "PRERECORD";
+                            var eventType = dodo.active > -1 ? "PRERECORD" : `CANCELED`;
                             var eventClass = "danger";
                             var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
@@ -729,7 +711,7 @@ function processCalendar(db)
                         } else if (dodo.title.startsWith("Remote: "))
                         {
                             var stripped = dodo.title.replace("Remote: ", "");
-                            var eventType = "REMOTE";
+                            var eventType = dodo.active > -1 ? "REMOTE" : `CANCELED`;
                             var eventClass = "purple";
                             var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
@@ -744,20 +726,20 @@ function processCalendar(db)
                         } else if (dodo.title.startsWith("Sports: "))
                         {
                             var stripped = dodo.title.replace("Sports: ", "");
-                            var eventType = "SPORTS";
+                            var eventType = dodo.active > -1 ? "SPORTS" : `CANCELED`;
                             var eventClass = "success";
                             var line1 = "Raider Sports";
                             var line2 = stripped;
                             var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
                         } else {
-                            var eventType = "Event";
+                            var eventType = dodo.active > -1 ? "EVENT" : `CANCELED`;
                             var eventClass = "secondary";
                             var line1 = "";
                             var line2 = dodo.title;
                             var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
                         }
                         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                        innercontent.innerHTML += `<div style="width: 190px; position: relative; background-color: ${color}; border: 3px solid ${borderColor};" class="m-2 text-white rounded shadow-8">
+                        innercontent.innerHTML += `<div style="width: 190px; position: relative; background-color: ${color};" class="m-2 text-white rounded shadow-8">
              <div class="p-1 text-center" style="width: 100%;">${image}
              <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
              <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
@@ -813,6 +795,8 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-2-4-row${index}-col1`);
                         color = hexRgb(dodo.color);
+                        if (dodo.active < 1)
+                            color = hexRgb(`#161616`);
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -892,6 +876,8 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-2-4-row${index}-col2`);
                         color = hexRgb(dodo.color);
+                        if (dodo.active < 1)
+                            color = hexRgb(`#161616`);
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -971,6 +957,8 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-2-4-row${index}-col3`);
                         color = hexRgb(dodo.color);
+                        if (dodo.active < 1)
+                            color = hexRgb(`#161616`);
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -1067,6 +1055,8 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-5-7-row${index}-col1`);
                         color = hexRgb(dodo.color);
+                        if (dodo.active < 1)
+                            color = hexRgb(`#161616`);
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -1146,6 +1136,8 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-5-7-row${index}-col2`);
                         color = hexRgb(dodo.color);
+                        if (dodo.active < 1)
+                            color = hexRgb(`#161616`);
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -1225,6 +1217,8 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-5-7-row${index}-col3`);
                         color = hexRgb(dodo.color);
+                        if (dodo.active < 1)
+                            color = hexRgb(`#161616`);
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);

@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "device=" query-string parameter for /listen and all /listen/* web pages. Specify OneSignal ID if loading these pages from the WWSU app. That way, subscribing / push notifications will be enabled for that device.
  - "device" optional parameter for recipients/add-web . Provide the OneSignal ID if the recipient is from the WWSU mobile app.
  - "device" optional parameter in sails.helpers.recipients.add. Provide the OneSignal ID if the recipient is from the WWSU mobile app.
+ - Logging of when Google Calendar events were cancelled (removed) [only applicable for events within the next week to date]. Logged via "cancellation" logtype.
+ - When logging an absence or cancellation, if the DJ does not exist in the system, it will be created instead of ignored.
+ - sails.helpers.onesignal.send() and sails.helpers.onesignal.sendEvent() helpers for sending out push notifications.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
@@ -19,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "active" parameter of calendar events will now be false either if the event passed the end time, or if the event was marked as canceled.
  - requests/place response object changed. HTML property removed; instead, message property will be used, which will NOT contain div/bootstrap data.
  - sails.helpers.requests.checkRequestable now returns message property instead of HTML property; message property does not contain div/bootstrap data.
+ - "active" property of calendar events is now a number instead of boolean: -1 is cancelled, 0 is expired, 1 is active.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated
