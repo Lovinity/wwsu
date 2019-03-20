@@ -624,7 +624,7 @@ module.exports = {
                                 }
                                 if (dj !== null)
                                     dj = await Djs.findOrCreate({name: dj}, {name: dj, lastSeen: moment("2002-01-01").toISOString(true)});
-                                var attendance = await Attendance.create({unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: `${cEvent.title} {CANCELLED via Google Calendar}`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true)});
+                                var attendance = await Attendance.create({unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: `${cEvent.title} {CANCELLED via Google Calendar}`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true)}).fetch();
                                 if (cEvent.title.startsWith("Show: "))
                                 {
                                     var temp = cEvent.title.replace("Show: ", "");
