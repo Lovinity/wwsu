@@ -513,6 +513,11 @@ module.exports = {
                             {
                                 if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`)
                                 {
+                                    // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
+                                    if (key === `start` && moment(theEvent[key]).isSame(moment(criteria[key])))
+                                        break;
+                                    if (key === `end` && moment(theEvent[key]).isSame(moment(criteria[key])))
+                                        break;
                                     needsUpdate = true;
                                     sails.log.warn(`Needs update: ${key} WHERE ${criteria[key]} !== ${theEvent[key]} .`);
                                     break;
