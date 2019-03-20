@@ -673,7 +673,7 @@ module.exports = {
                                         var temp = cEvent.title.replace("Playlist: ", "");
                                         await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, cEvent.unique, moment(cEvent.start).format("LLL"));
                                     }
-                                });
+                                })();
                             });
                         }
 
