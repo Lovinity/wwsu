@@ -520,7 +520,7 @@ module.exports = {
                         }
                         if (needsUpdate)
                         {
-                            await Calendar.update({unique: event.id}, criteria).fetch();
+                            await Calendar.update({unique: event.id}, criteriaB).fetch();
                         }
 
                         // Check to see if any of the events are triggering events, and if so, see if it trumps the priority of the current event to be triggered.
