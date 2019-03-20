@@ -611,7 +611,7 @@ module.exports = {
                                 .fetch();
 
                         // Send out cancellation notifications for cancelled shows. Also add a log for cancelled shows.
-                        if (cancelled.length > 1)
+                        if (cancelled.length > 0)
                         {
                             var maps = cancelled.map(async (cEvent) => {
                                 var dj = cEvent.title;
