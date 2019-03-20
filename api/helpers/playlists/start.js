@@ -148,7 +148,7 @@ module.exports = {
                             });
                     await loadPlaylist();
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
-                    await sails.helpers.onesignal.sendEvent(`Playlist: `, theplaylist.name, `Playlist`, attendance.unique);   
+                    await sails.helpers.onesignal.sendEvent(`Playlist: `, theplaylist.name, `Playlist`, attendance.unique);
                     // Prerecords
                 } else if (inputs.type === 1) {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
@@ -156,6 +156,25 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                     await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), show: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 256)});
                     await loadPlaylist();
+                    
+                    // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.
+                    var timeToFirstTrack = 0;
+                    var queue = await sails.helpers.rest.getQueue();
+                    var firstTrack = false;
+                    queue.map((track) => {
+                        if (Playlists.active.tracks.indexOf(parseInt(track.ID)) === -1 && !firstTrack)
+                        {
+                            timeToFirstTrack += parseInt(track.Duration) - parseInt(track.Elapsed);
+                        } else {
+                            firstTrack = true;
+                        }
+                    });
+                    if (timeToFirstTrack >= sails.config.custom.queueCorrection.prerecord)
+                    {
+                        if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
+                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
+                    }
+                    
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                 }
                 if (!inputs.ignoreChangingState)
