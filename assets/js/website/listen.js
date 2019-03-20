@@ -1311,6 +1311,10 @@ function updateCalendar() {
         // Prepare the formatted calendar variable for our formatted events
         calendar = [];
 
+        // Get the value of the currently selected calendar item
+        var calendarOptions = document.getElementById('calendar-select');
+        var selectedOption = parseInt(calendarOptions.options[calendarOptions.selectedIndex].value || 0) || 0;
+
         // Define a comparison function that will order calendar events by start time when we run the iteration
         var compare = function (a, b) {
             try {
@@ -1329,7 +1333,7 @@ function updateCalendar() {
 
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
         Calendar().get().sort(compare)
-                .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).startOf('day').isSameOrBefore(moment(Meta.time)))
+                .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
                 .map(event =>
                 {
                     try {
@@ -1433,6 +1437,14 @@ function updateCalendar() {
                         });
                     }
                 });
+                
+                var temp = `<option value="0">Today ${moment(Meta.time).format(`MM/DD`)}</option>`;
+                for (var i = 1; i < 28; i++)
+                {
+                    temp += `<option value="${i}">${moment(Meta.time).format(`dddd MM/DD`)}</option>`;
+                }
+                
+                calendarOptions.innerHTML = temp;
     }
 }
 
