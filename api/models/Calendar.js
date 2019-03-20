@@ -498,7 +498,7 @@ module.exports = {
 
                         // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
                         var criteriaB = _.cloneDeep(criteria);
-
+                        var criteriaC = _.cloneDeep(criteria);
                         // TODO: Make so that new records do not also trigger an update
 
                         // Find existing record of event. If does not exist, create it in the Calendar.
@@ -515,13 +515,13 @@ module.exports = {
                                 {
                                     needsUpdate = true;
                                     break;
-                                    console.log(`Needs update: ${key} WHERE ${criteria[key]} !== ${theEvent[key]} .`)
+                                    sails.log.warn(`Needs update: ${key} WHERE ${criteria[key]} !== ${theEvent[key]} .`);
                                 }
                             }
                         }
                         if (needsUpdate)
                         {
-                            await Calendar.update({unique: event.id}, criteriaB).fetch();
+                            await Calendar.update({unique: event.id}, criteriaC).fetch();
                         }
 
                         // Check to see if any of the events are triggering events, and if so, see if it trumps the priority of the current event to be triggered.
