@@ -1445,7 +1445,6 @@ function updateCalendar() {
                         temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`);
                 }
                 
-                calendarOptions.innerHTML = temp;
     }
 }
 
