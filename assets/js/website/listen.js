@@ -526,14 +526,17 @@ function onlineSocket()
     }
 
     var temp = document.querySelector(`#show-subscribe-button`);
+    var temp2 = document.querySelector(`#show-subscribe-instructions`);
     if (temp !== null)
     {
         if (device === null && !isMobile)
         {
             temp.innerHTML = "Show Prompt";
+            temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
             temp.onclick = () => OneSignal.showNativePrompt();
         } else {
             temp.innerHTML = "Subscribe";
+            temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`;
             temp.onclick = () => {
                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
                 {
@@ -849,6 +852,7 @@ function doMeta(response)
                 var temp = document.querySelector(`#show-subscribe`);
                 var temp2 = document.querySelector(`#show-subscribe-button`);
                 var temp3 = document.querySelector(`#show-subscribe-name`);
+                var temp4 = document.querySelector(`#show-subscribe-instructions`);
                 if (temp !== null)
                 {
                     var subscribed = Subscriptions({type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show}).get().length;
@@ -862,9 +866,11 @@ function doMeta(response)
                     if (device === null && !isMobile)
                     {
                         temp2.innerHTML = "Show Prompt";
+                        temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                         temp2.onclick = () => OneSignal.showNativePrompt();
                     } else {
                         temp2.innerHTML = "Subscribe";
+                        temp4.innerHTML = `Click "Subscribe" to receive notifications when this show is on the air.`;
                         temp2.onclick = () => {
                             if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
                             {
@@ -891,6 +897,7 @@ function doMeta(response)
                 var temp = document.querySelector(`#show-subscribe`);
                 var temp2 = document.querySelector(`#show-subscribe-button`);
                 var temp3 = document.querySelector(`#show-subscribe-name`);
+                var temp4 = document.querySelector(`#show-subscribe-instructions`);
                 if (temp !== null)
                 {
                     var subscribed = Subscriptions({type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show}).get().length;
@@ -904,9 +911,11 @@ function doMeta(response)
                     if (device === null && !isMobile)
                     {
                         temp2.innerHTML = "Show Prompt";
+                        temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                         temp2.onclick = () => OneSignal.showNativePrompt();
                     } else {
                         temp2.innerHTML = "Subscribe";
+                        temp4.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`;
                         temp2.onclick = () => {
                             if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
                             {
@@ -1579,7 +1588,7 @@ function displayEventInfo(showID) {
             ];
         }
     } else if (!isMobile) {
-        message += `<hr><p>If you want to receive notifications for when events go on the air, you first need to grant permission in your web browser for us to show notifications. Click "Show Prompt". After allowing notifications, re-load this event.</p>`;
+        message += `<hr><p>If you want to receive notifications for when events go on the air, you first need to grant permission in your web browser for us to show notifications. Click "Show Prompt". After allowing notifications, wait about 10 seconds and then click the event again to re-open this screen.</p>`;
         buttons = [
             ['<button><b>Show Prompt</b></button>', function (instance, toast) {
                     instance.hide({transitionOut: 'fadeOut'}, toast, 'button');
@@ -1628,13 +1637,13 @@ function subscribe(type, subtype) {
             } else {
                 iziToast.show({
                     title: 'Subscribed!',
-                    message: 'You successfully subscribed to that event. You will receive a push notification when it goes live.',
+                    message: `You successfully subscribed to that event. You will receive a push notification when it goes live. To un-subscribe, find the event under "Events and Shows", click it, and then click "Unsubscribe".`,
                     color: 'green',
                     zindex: 100,
                     layout: 1,
                     closeOnClick: true,
                     position: 'center',
-                    timeout: 10000
+                    timeout: 20000
                 });
                 Subscriptions.insert({type: type, subtype: subtype});
                 var temp = document.querySelector(`#show-subscribe`);
