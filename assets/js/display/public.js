@@ -256,6 +256,9 @@ try {
         displayTime: 15,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: #FFFFFF">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
+        fn: ((slide) => {
+          processCalendar(Calendar.db);  
+        })
     });
 
     // Events 2-4
@@ -556,7 +559,7 @@ function processDirectors(db)
     }
 }
 
-// When new calendar data is received, update the information in memory.
+// Update the calendar slides
 function processCalendar(db)
 {
     try {
@@ -809,7 +812,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -890,7 +893,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -971,7 +974,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -1069,7 +1072,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -1150,7 +1153,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -1231,7 +1234,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;"><strong>${dodo.title}</strong></span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -1427,11 +1430,8 @@ waitFor(() => {
         }
     });
 
-// On new calendar data, update our calendar memory and run the process function.
+// On new calendar data, update our calendar memory and run the process function. Only do this for replace; for all others, will be updated on next slide cycle.
     Calendar.assignSocketEvent('calendar', io.socket);
-    Calendar.setOnUpdate((data, db) => processCalendar(db));
-    Calendar.setOnInsert((data, db) => processCalendar(db));
-    Calendar.setOnRemove((data, db) => processCalendar(db));
     Calendar.setOnReplace((db) => processCalendar(db));
 
 // On new directors data, update our directors memory and run the process function.

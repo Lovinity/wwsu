@@ -799,8 +799,8 @@ function doMeta(response)
                 position: 'bottomCenter',
                 timeout: 10000
             });
-            // Reload calendar each time a new track is given
-            processCalendar({});
+            // Refresh calendar each time a new track is given
+            updateCalendar();
         }
 
         // If a false was returned for web chatting, then disable it
@@ -1271,6 +1271,7 @@ function processCalendar(data, replace = false)
         {
             Calendar = TAFFY();
             Calendar.insert(data);
+            updateCalendar();
         } else {
             for (var key in data)
             {
@@ -1291,138 +1292,6 @@ function processCalendar(data, replace = false)
                 }
             }
         }
-
-        if (document.querySelector('#calendar'))
-        {
-            var caldata = document.querySelector("#calendar");
-            caldata.innerHTML = ``;
-
-            // Prepare the formatted calendar variable for our formatted events
-            calendar = [];
-
-            // Define a comparison function that will order calendar events by start time when we run the iteration
-            var compare = function (a, b) {
-                try {
-                    if (moment(a.start).valueOf() < moment(b.start).valueOf())
-                        return -1;
-                    if (moment(a.start).valueOf() > moment(b.start).valueOf())
-                        return 1;
-                    if (a.ID < b.ID)
-                        return -1;
-                    if (a.ID > b.ID)
-                        return 1;
-                    return 0;
-                } catch (e) {
-                }
-            };
-
-            // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-            Calendar().get().sort(compare)
-                    .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).startOf('day').isSameOrBefore(moment(Meta.time)))
-                    .map(event =>
-                    {
-                        try {
-                            var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
-                            if (event.active < 1)
-                                finalColor = hexRgb("#161616");
-                            finalColor.red = Math.round(finalColor.red / 2);
-                            finalColor.green = Math.round(finalColor.green / 2);
-                            finalColor.blue = Math.round(finalColor.blue / 2);
-                            if (event.title.startsWith("Show: "))
-                            {
-                                var stripped = event.title.replace("Show: ", "");
-                                var eventType = event.active > -1 ? "SHOW" : `CANCELED`;
-                                var eventClass = "primary";
-                                var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "Unknown DJ";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Prerecord: "))
-                            {
-                                var stripped = event.title.replace("Prerecord: ", "");
-                                var eventType = event.active > -1 ? "PRERECORD" : `CANCELED`;
-                                var eventClass = "danger";
-                                var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "Unknown DJ";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Remote: "))
-                            {
-                                var stripped = event.title.replace("Remote: ", "");
-                                var eventType = event.active > -1 ? "REMOTE" : `CANCELED`;
-                                var eventClass = "purple";
-                                var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "Unknown Host";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Sports: "))
-                            {
-                                var stripped = event.title.replace("Sports: ", "");
-                                var eventType = event.active > -1 ? "SPORTS" : `CANCELED`;
-                                var eventClass = "success";
-                                var line1 = "Raider Sports";
-                                var line2 = stripped;
-                                var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
-                            } else if (event.title.startsWith("Playlist: ")) {
-                                var stripped = event.title.replace("Playlist: ", "");
-                                var eventType = event.active > -1 ? "PLAYLIST" : `CANCELED`;
-                                var eventClass = "info";
-                                var image = `<i class="fas fa-list" style="font-size: 96px;"></i>`;
-                                var temp = stripped.split(" - ");
-                                if (temp.length === 2)
-                                {
-                                    var line1 = temp[0];
-                                    var line2 = temp[1];
-                                } else {
-                                    var line1 = "";
-                                    var line2 = temp;
-                                }
-                            } else if (event.title.startsWith("Genre: "))
-                            {
-                                var stripped = event.title.replace("Genre: ", "");
-                                var eventType = event.active > -1 ? "GENRE" : `CANCELED`;
-                                var eventClass = "info";
-                                var line1 = "";
-                                var line2 = stripped;
-                                var image = `<i class="fas fa-music" style="font-size: 96px;"></i>`;
-                            } else {
-                                var eventType = event.active > -1 ? "EVENT" : `CANCELED`;
-                                var eventClass = "secondary";
-                                var line1 = "";
-                                var line2 = event.title;
-                                var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
-                            }
-                            caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="m-2 text-white rounded shadow-8">
-             <div class="p-1 text-center" style="width: 100%;">${image}
-             <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
-             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
-                        } catch (e) {
-                            console.error(e);
-                            iziToast.show({
-                                title: 'An error occurred - Please check the logs',
-                                message: `Error occurred during calendar iteration in processCalendar.`
-                            });
-                        }
-                    });
-        }
     } catch (e) {
         console.error(e);
         iziToast.show({
@@ -1430,6 +1299,141 @@ function processCalendar(data, replace = false)
             message: 'Error occurred during the call of processCalendar.'
         });
 }
+}
+
+// Actually reflect the changes on the website
+function updateCalendar() {
+    if (document.querySelector('#calendar'))
+    {
+        var caldata = document.querySelector("#calendar");
+        caldata.innerHTML = ``;
+
+        // Prepare the formatted calendar variable for our formatted events
+        calendar = [];
+
+        // Define a comparison function that will order calendar events by start time when we run the iteration
+        var compare = function (a, b) {
+            try {
+                if (moment(a.start).valueOf() < moment(b.start).valueOf())
+                    return -1;
+                if (moment(a.start).valueOf() > moment(b.start).valueOf())
+                    return 1;
+                if (a.ID < b.ID)
+                    return -1;
+                if (a.ID > b.ID)
+                    return 1;
+                return 0;
+            } catch (e) {
+            }
+        };
+
+        // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
+        Calendar().get().sort(compare)
+                .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).startOf('day').isSameOrBefore(moment(Meta.time)))
+                .map(event =>
+                {
+                    try {
+                        var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
+                        if (event.active < 1)
+                            finalColor = hexRgb("#161616");
+                        finalColor.red = Math.round(finalColor.red / 2);
+                        finalColor.green = Math.round(finalColor.green / 2);
+                        finalColor.blue = Math.round(finalColor.blue / 2);
+                        if (event.title.startsWith("Show: "))
+                        {
+                            var stripped = event.title.replace("Show: ", "");
+                            var eventType = event.active > -1 ? "SHOW" : `CANCELED`;
+                            var eventClass = "primary";
+                            var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
+                            var temp = stripped.split(" - ");
+                            if (temp.length === 2)
+                            {
+                                var line1 = temp[0];
+                                var line2 = temp[1];
+                            } else {
+                                var line1 = "Unknown DJ";
+                                var line2 = temp;
+                            }
+                        } else if (event.title.startsWith("Prerecord: "))
+                        {
+                            var stripped = event.title.replace("Prerecord: ", "");
+                            var eventType = event.active > -1 ? "PRERECORD" : `CANCELED`;
+                            var eventClass = "danger";
+                            var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
+                            var temp = stripped.split(" - ");
+                            if (temp.length === 2)
+                            {
+                                var line1 = temp[0];
+                                var line2 = temp[1];
+                            } else {
+                                var line1 = "Unknown DJ";
+                                var line2 = temp;
+                            }
+                        } else if (event.title.startsWith("Remote: "))
+                        {
+                            var stripped = event.title.replace("Remote: ", "");
+                            var eventType = event.active > -1 ? "REMOTE" : `CANCELED`;
+                            var eventClass = "purple";
+                            var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
+                            var temp = stripped.split(" - ");
+                            if (temp.length === 2)
+                            {
+                                var line1 = temp[0];
+                                var line2 = temp[1];
+                            } else {
+                                var line1 = "Unknown Host";
+                                var line2 = temp;
+                            }
+                        } else if (event.title.startsWith("Sports: "))
+                        {
+                            var stripped = event.title.replace("Sports: ", "");
+                            var eventType = event.active > -1 ? "SPORTS" : `CANCELED`;
+                            var eventClass = "success";
+                            var line1 = "Raider Sports";
+                            var line2 = stripped;
+                            var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
+                        } else if (event.title.startsWith("Playlist: ")) {
+                            var stripped = event.title.replace("Playlist: ", "");
+                            var eventType = event.active > -1 ? "PLAYLIST" : `CANCELED`;
+                            var eventClass = "info";
+                            var image = `<i class="fas fa-list" style="font-size: 96px;"></i>`;
+                            var temp = stripped.split(" - ");
+                            if (temp.length === 2)
+                            {
+                                var line1 = temp[0];
+                                var line2 = temp[1];
+                            } else {
+                                var line1 = "";
+                                var line2 = temp;
+                            }
+                        } else if (event.title.startsWith("Genre: "))
+                        {
+                            var stripped = event.title.replace("Genre: ", "");
+                            var eventType = event.active > -1 ? "GENRE" : `CANCELED`;
+                            var eventClass = "info";
+                            var line1 = "";
+                            var line2 = stripped;
+                            var image = `<i class="fas fa-music" style="font-size: 96px;"></i>`;
+                        } else {
+                            var eventType = event.active > -1 ? "EVENT" : `CANCELED`;
+                            var eventClass = "secondary";
+                            var line1 = "";
+                            var line2 = event.title;
+                            var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
+                        }
+                        caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="m-2 text-white rounded shadow-8">
+             <div class="p-1 text-center" style="width: 100%;">${image}
+             <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
+             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
+                    } catch (e) {
+                        console.error(e);
+                        iziToast.show({
+                            title: 'An error occurred - Please check the logs',
+                            message: `Error occurred during calendar iteration in processCalendar.`
+                        });
+                    }
+                });
+    }
 }
 
 function hexRgb(hex, options = {}) {

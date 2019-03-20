@@ -209,7 +209,7 @@ module.exports = {
                 var toTrigger = null;
                 var calendar = google.calendar({version: 'v3', auth: auth});
                 var currentdate = moment().startOf('day');
-                var nextWeekDate = moment().startOf('day').add(8, 'days');
+                var nextWeekDate = moment().startOf('day').add(28, 'days');
                 var badEvent = false;
                 //formatted.push(currentdate.format("YYYY-MM-DDTHH:mm:ssZ"));
                 //formatted.push(tomorrowdate.format("YYYY-MM-DDTHH:mm:ssZ"));
