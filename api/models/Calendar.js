@@ -895,7 +895,7 @@ module.exports = {
                         if (cancelled.length > 0)
                         {
                             var maps = cancelled.map(async (cEvent) => {
-                                var attendance = await Timesheet.create({unique: cEvent.unique, name: cEvent.title, scheduled_in: moment(cEvent.start).toISOString(true), scheduled_out: moment(cEvent.end).toISOString(true), approved: true}).fetch();
+                                var attendance = await Timesheet.create({unique: cEvent.unique, name: cEvent.director, scheduled_in: moment(cEvent.start).toISOString(true), scheduled_out: moment(cEvent.end).toISOString(true), approved: true}).fetch();
                                 await Logs.create({attendanceID: null, logtype: 'director-cancellation', loglevel: 'warning', logsubtype: cEvent.title, event: `Director office hours were cancelled via Google Calendar!<br />Director: ${cEvent.title}<br />Cancelled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                         .tolerate((err) => {
                                             sails.log.error(err);
@@ -911,7 +911,7 @@ module.exports = {
                         var maps = destroyed
                                 .map(async event => {
                                     try {
-                                        Timesheet.findOrCreate({unique: event.unique}, {unique: event.unique, name: event.title, scheduled_in: moment(event.start).toISOString(true), scheduled_out: moment(event.end).toISOString(true), approved: false})
+                                        Timesheet.findOrCreate({unique: event.unique}, {unique: event.unique, name: event.director, scheduled_in: moment(event.start).toISOString(true), scheduled_out: moment(event.end).toISOString(true), approved: false})
                                                 .exec(async(err, record, wasCreated) => {
                                                     if (err)
                                                         return false;
