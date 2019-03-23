@@ -115,7 +115,10 @@ class Timesheet {
 
     constructor(data = {}) {
         this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000));
+        this._unique = data.unique || null;
         this._name = data.name || "Unknown";
+        this._scheduled_in = data.scheduled_in || null;
+        this._scheduled_out = data.scheduled_in || null;
         this._time_in = data.time_in || null;
         this._time_out = data.time_out || null;
         this._approved = data.approved || false;
@@ -125,12 +128,36 @@ class Timesheet {
         return this.ID;
     }
 
+    get unique() {
+        return this._unique;
+    }
+
+    set unique(value) {
+        this._unique = value;
+    }
+
     get name() {
         return this._name;
     }
 
     set name(value) {
         this._name = value;
+    }
+
+    get scheduled_in() {
+        return this._scheduled_in;
+    }
+
+    set scheduled_in(value) {
+        this._scheduled_in = value;
+    }
+
+    get scheduled_out() {
+        return this._scheduled_out;
+    }
+
+    set scheduled_out(value) {
+        this._scheduled_out = value;
     }
 
     get time_in() {
@@ -230,10 +257,27 @@ $(document).ready(function () {
         } catch (err) {
         }
     });
+
+    $("#clockModal").iziModal({
+        title: 'Timesheet Record',
+        headerColor: '#88A0B9',
+        width: 640,
+        focusInput: true,
+        arrowKeys: false,
+        navigateCaption: false,
+        navigateArrows: false, // Boolean, 'closeToModal', 'closeScreenEdge'
+        overlayClose: false,
+        overlayColor: 'rgba(0, 0, 0, 0.75)',
+        timeout: false,
+        timeoutProgressbar: true,
+        pauseOnHover: true,
+        timeoutProgressbarColor: 'rgba(255,255,255,0.5)',
+        zindex: 5
+    });
 });
 
 function closeModal() {
-    $('#clockModal').modal('hide');
+    $('#clockModal').iziModal(`close`);
 }
 
 function escapeHTML(str) {
@@ -248,7 +292,7 @@ function editClock(clockID, save = false) {
     var modalBody = document.getElementById('clock-body');
     if (!save)
     {
-        $('#clockModal').modal('show');
+        $('#clockModal').iziModal('open');
         modalBody.innerHTML = 'Loading clock...';
     }
 
@@ -279,14 +323,12 @@ function editClock(clockID, save = false) {
                 });
         if (!opened)
             modalBody.innerHTML = 'There was an internal error loading that clock.';
-        $('#clockModal').modal('handleUpdate');
         // Editing an entry
     } else {
         var bclockin = document.getElementById('clock-in');
         var bclockout = document.getElementById('clock-out');
         var bapproved = document.getElementById('clock-approved');
         adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/edit', data: {ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: (bapproved.checked)}}, (resHTML) => {
-            $('#clockModal').modal('handleUpdate');
         });
 }
 }
@@ -342,7 +384,7 @@ function filterDate() {
                 var scheduledout = record.scheduled_out !== null ? moment(record.scheduled_out) : null;
                 var clocknow = moment();
                 var clocknext = moment(thedate.value).add(1, 'weeks');
-                var clockday = moment(clockin).format('e');
+                var clockday = moment(clockin !== null ? clockin : scheduledin).format('e');
 
                 /* Determine status.
                  * success = Approved and scheduled.
@@ -364,7 +406,6 @@ function filterDate() {
                     if (moment(clockin).isBefore(moment().startOf('week')))
                     {
                         inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                        clockday = moment().format('e');
                     } else {
                         inT = moment(clockin).format(`h:mm A`);
                     }
@@ -379,7 +420,6 @@ function filterDate() {
                             if (moment(clockin).isBefore(moment().startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment().format('e');
                             } else {
                                 inT = moment(clockin).format(`h:mm A`);
                             }
@@ -395,7 +435,6 @@ function filterDate() {
                             if (moment(clockin).isBefore(moment().startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment().format('e');
                             } else {
                                 inT = moment(clockin).format(`h:mm A`);
                             }
@@ -410,7 +449,6 @@ function filterDate() {
                             if (moment(scheduledin).isBefore(moment().startOf('week')))
                             {
                                 inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment().format('e');
                             } else {
                                 inT = moment(scheduledin).format(`h:mm A`);
                             }
@@ -428,7 +466,6 @@ function filterDate() {
                             if (moment(clockin).isBefore(moment().startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment().format('e');
                             } else {
                                 inT = moment(clockin).format(`h:mm A`);
                             }
@@ -443,7 +480,6 @@ function filterDate() {
                             if (moment(clockin).isBefore(moment().startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment().format('e');
                             } else {
                                 inT = moment(clockin).format(`h:mm A`);
                             }
@@ -458,7 +494,6 @@ function filterDate() {
                             if (moment(scheduledin).isBefore(moment().startOf('week')))
                             {
                                 inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                clockday = moment().format('e');
                             } else {
                                 inT = moment(scheduledin).format(`h:mm A`);
                             }
