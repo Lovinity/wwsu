@@ -80,7 +80,7 @@ module.exports = {
 
                             names[record.name] = true;
                             // If there's an entry with a null time_out, then consider the director clocked in
-                            if (record.time_out === null)
+                            if (record.time_out === null && record.time_in !== null)
                             {
                                 await Uabdirectors.update({name: record.name}, {present: true, since: moment(record.time_in).toISOString(true)})
                                         .tolerate((err) => {

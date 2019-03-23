@@ -850,17 +850,17 @@ module.exports = {
                         if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter())
                         {
                             try {
-                                var record = await Timesheet.find({name: event.summary, time_out: null}).limit(1);
+                                var record = await Timesheet.find({time_in: {'!=': null}, name: event.summary, time_out: null}).limit(1);
                                 if (record.length > 0)
                                 {
                                     // If the currently clocked in timesheet is not tied to any google calendar events, tie it to this event.
                                     if (record[0].unique === null)
                                     {
-                                        await Timesheet.update({name: event.summary, unique: null, time_out: null}, {unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true)}).fetch();
+                                        await Timesheet.update({name: event.summary, unique: null, time_in: {'!=': null}, time_out: null}, {unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true)}).fetch();
                                         
                                     // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
                                     } else if (record[0].unique !== event.id) {
-                                        var updater = await Timesheet.update({name: event.summary, time_out: null}, {time_out: moment().toISOString(true)}).fetch();
+                                        var updater = await Timesheet.update({name: event.summary, time_in: {'!=': null}, time_out: null}, {time_out: moment().toISOString(true)}).fetch();
                                         await Timesheet.create({name: event.summary, unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), time_in: moment().toISOString(true), time_out: null, approved: updater[0].approved}).fetch();
                                     }
                                 }

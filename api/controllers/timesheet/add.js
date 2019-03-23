@@ -42,7 +42,7 @@ module.exports = {
                     toapprove = true;
 
                 // Add the time_out entry
-                await Timesheet.update({time_out: null, name: record.name}, {time_out: thetime.toISOString(true), approved: toapprove}).fetch();
+                await Timesheet.update({time_in: {'!=': null}, time_out: null, name: record.name}, {time_out: thetime.toISOString(true), approved: toapprove}).fetch();
 
                 // Update the director presence
                 await Directors.update({ID: record.ID}, {present: false, since: thetime.toISOString(true)})

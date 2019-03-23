@@ -1317,10 +1317,10 @@ module.exports.bootstrap = async function (done) {
             try {
                 await Meta.changeMeta({time: moment().toISOString(true)});
 
-                await Timesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
+                await Timesheet.update({time_in: {'!=': null}, time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
                         .tolerate((err) => {
                         });
-                await Uabtimesheet.update({time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
+                await Uabtimesheet.update({time_in: {'!=': null}, time_out: null}, {time_out: moment().toISOString(true), approved: false}).fetch()
                         .tolerate((err) => {
                         });
                 // Force reload all directors based on timesheets
