@@ -770,7 +770,7 @@ module.exports = {
                 var toTrigger = null;
                 var calendar = google.calendar({version: 'v3', auth: auth});
                 var currentdate = moment().startOf('day');
-                var nextWeekDate = moment().startOf('day').add(14, 'days');
+                var nextWeekDate = moment().startOf('day').add(28, 'days');
                 var genreActive = false;
                 var events = await calendar.events.list({
                     calendarId: sails.config.custom.GoogleAPI.directorHoursId,
@@ -846,11 +846,24 @@ module.exports = {
                             await Directorhours.update({unique: event.id}, criteriaC).fetch();
                         }
 
-                        // Check to see if any active timesheet records now fall within director hours. If so, update the scheduled in and out times.
+                        // Check to see if any active timesheet records now fall within director hours. If so, update the timesheets.
                         if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter())
                         {
                             try {
-                                await Timesheet.update({name: event.summary, unique: null, time_out: null}, {unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true)}).fetch();
+                                var record = await Timesheet.find({name: event.summary, time_out: null}).limit(1);
+                                if (record.length > 0)
+                                {
+                                    // If the currently clocked in timesheet is not tied to any google calendar events, tie it to this event.
+                                    if (record[0].unique === null)
+                                    {
+                                        await Timesheet.update({name: event.summary, unique: null, time_out: null}, {unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true)}).fetch();
+                                        
+                                    // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
+                                    } else if (record[0].unique !== event.id) {
+                                        var updater = await Timesheet.update({name: event.summary, time_out: null}, {time_out: moment().toISOString(true)}).fetch();
+                                        await Timesheet.create({name: event.summary, unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), time_in: moment().toISOString(true), time_out: null, approved: updater[0].approved}).fetch();
+                                    }
+                                }
                             } catch (e) {
                                 sails.log.error(e);
                             }
