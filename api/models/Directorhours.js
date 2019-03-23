@@ -14,7 +14,7 @@ var breakdance = require('breakdance');
 
 module.exports = {
     // We do not want this data to be persistent as it is being grabbed from Google Calendar
-    datastore: 'ram',
+    datastore: 'timesheets',
     attributes: {
 
         ID: {
@@ -27,13 +27,15 @@ module.exports = {
         },
 
         active: {
-            type: 'boolean',
-            defaultsTo: true
+            type: 'number',
+            min: -1,
+            max: 1,
+            defaultsTo: 1
         },
 
         director: {
             type: 'string',
-            defaultsTo: 'Unnamed Event'
+            defaultsTo: 'Unknown Director'
         },
 
         start: {

@@ -1,4 +1,4 @@
-# WWSU 6.0.0 ALPHA 2
+# WWSU 6.0.0 ALPHA 3
 The WWSU Radio Sails.js API application enables external / remote control of core WWSU functionality. Applications can be developed utilizing this API. 
 
 **The master branch should NOT be used for your own deployment; please use a release instead**
@@ -1260,13 +1260,23 @@ Return an array of timesheet entries for the week.
                 "createdAt": "2018-05-29T18:13:01.763Z",
                 "updatedAt": "2018-05-29T18:13:01.763Z",
                 "ID": 7,
+                "unique", "gergh4y4rth536", // If this timesheet record correlates with a Google Calendar scheduled office hours event, this will contain the google calendar event ID.
                 "name": "George Carlin", // The name of the director which this record applies
-                "time_in": "2018-05-29T18:13:01.763Z", // An ISO string containing when the director clocked in
-                "time_out": null, // An ISO string containing when the director clocked out. Null means the director is still in.
-                "approved": true // True if this timesheet does not require admin approval
+                "scheduled_in": "2018-05-29T18:00:00Z", // An ISO string containing when the director was scheduled to clock in, or null if this was an unscheduled record.
+                "scheduled_out": "2018-05-29T20:00:00Z", // An ISO string containing when the director was scheduled to clock out, or null if this was an unscheduled record.
+                "time_in": "2018-05-29T18:13:01.763Z", // An ISO string containing when the director clocked in, or null if the director did not clock in.
+                "time_out": null, // An ISO string containing when the director clocked out, or null if the director did not clock out yet.
+                "approved": true // True if this timesheet does not require admin approval. Will also be true (but time_in and time_out will be null) for canceled hours.
             },
             ...
         ]
+**Clients should consider the following about each timesheet based off of the following criteria:**
+ - If time_in is not null but time_out is null, the director is still clocked in.
+ - If scheduled_in, scheduled_out, time_in, and time_out are not null, and approved is true... this was an approved timesheet that fell within scheduled office hours.
+ - If scheduled_in, scheduled_out, time_in, and time_out are not null, and approved is false... this was a timesheet that fell within scheduled hours, but needs approved.
+ - If scheduled_in and scheduled_out are not null, but time_in and time_out are null, and approved is true... this is NOT a timesheet record but rather the director canceled their office hours.
+ - If scheduled_in and scheduled_out are not null, but time_in and time_out are null, and approved is false... this is NOT a timesheet record but rather the director failed to do office hours as scheduled.
+ - If scheduled_in and scheduled_out are null, but time_in is not null, then the director clocked in for unscheduled hours.
 ### /timesheet/view
 Access the timesheet web interface.
 #### Request

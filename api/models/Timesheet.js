@@ -13,9 +13,24 @@ module.exports = {
             autoIncrement: true
         },
 
+        unique: {
+            type: 'string',
+            allowNull: true
+        },
+
         name: {
             type: 'string',
             required: true
+        },
+
+        scheduled_in: {
+            type: 'ref',
+            columnType: 'datetime'
+        },
+
+        scheduled_out: {
+            type: 'ref',
+            columnType: 'datetime'
         },
 
         time_in: {
@@ -27,14 +42,14 @@ module.exports = {
             type: 'ref',
             columnType: 'datetime'
         },
-        
+
         approved: {
             type: 'boolean',
             defaultsTo: false
         }
     },
-    
-        // Websockets standards
+
+    // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};
         sails.log.silly(`timesheet socket: ${data}`);

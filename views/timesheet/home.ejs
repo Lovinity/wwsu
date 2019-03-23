@@ -46,7 +46,15 @@
     <tbody id="timesheet-records">
     </tbody>
 </table>
-<p>Time color key: <br /><br /><span class="badge badge-primary">Approved</span> - Approved clocks count towards weekly hours. Clocks are auto-approved if the director's specified clock-in or clock-out time was no more than 30 minutes from the time they logged their clock-in/out.<br /><span class="badge badge-success">In right now</span> - The director has not yet clocked out for the specified shift. Hours from clock-in to the current time are counted towards weekly hours.<br /><span class="badge badge-danger">Flagged</span> - Clock times that are 30 or more minutes off from the time the director logged them, or clocks in which the director was still clocked in at 11:59pm (auto-clock-out), get flagged, and need editing/approval by a super director before they count towards weekly hours.</p>
+<p>Time color key: <br /><br />
+<span class="badge badge-success">Approved and Scheduled</span> - These timesheet records count towards weekly hours and fell within a scheduled office hours time block.<br />
+<span class="badge badge-purple">Approved, but Unscheduled</span> - These timesheet records count towards weekly hours, but did not occur within a scheduled office hours time block.<br />
+<span class="badge badge-warning">Scheduled, but needs review</span> - These timesheet records do NOT count towards weekly hours, but they fell within a scheduled office hours time block. These records need reviewed because the director modified the time in or time out to be more than 30 minutes from the time the record was logged.<br />
+<span class="badge badge-urgent">Unscheduled and needs review</span> - These timesheet records do NOT count towards weekly hours and did not fall within a scheduled office hours time block. These records need reviewed because the director modified the time in or time out to be more than 30 minutes from the time the record was logged.<br />
+<span class="badge badge-info">In right now</span> - The director has not yet clocked out for the specified shift. Hours from clock-in to the current time are counted towards weekly hours.<br />
+<span class="badge badge-danger">Absent</span> - This is NOT an actual timesheet record. The director was scheduled to be in for hours during the indicated time, but did not clock in at all.<br />
+<span class="badge badge-secondary">Canceled</span> - This is NOT an actual timesheet record. The director canceled the specified scheduled office hours.<br />
+</p>
 
 <!-- Modal -->
         <div class="modal fade" id="clockModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">

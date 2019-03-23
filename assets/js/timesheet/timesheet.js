@@ -260,10 +260,12 @@ function editClock(clockID, save = false) {
                 .filter(timesheet => timesheet.ID === clockID)
                 .map(timesheet => {
                     modalBody.innerHTML = `<form action="javascript:editClock(${clockID}, true)"><div class="form-group">
+            <p><strong>Scheduled In:</strong> ${timesheet.scheduled_in !== null ? moment(timesheet.scheduled_in).format('YYYY-MM-DD HH:mm:ss') : `Not scheduled`}<br />
+            <strong>Scheduled Out:</strong> ${timesheet.scheduled_out !== null ? moment(timesheet.scheduled_out).format('YYYY-MM-DD HH:mm:ss') : `Not scheduled`}</p>
         <label for="clock-in">Clock In:</label>
-        <input type="text" class="form-control" id="clock-in" value="${moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss')}">
+        <input type="text" class="form-control" id="clock-in" value="${timesheet.time_in !== null ? moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss') : null}">
         <label for="clock-out">Clock Out:</label>
-        <input type="text" class="form-control" id="clock-out" value="${moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss')}">
+        <input type="text" class="form-control" id="clock-out" value="${timesheet.time_out !== null ? moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss') : null}">
                 <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="clock-approved" ${(timesheet.approved) ? 'checked' : ''}>
                             <label class="form-check-label" for="clock-approved">
@@ -334,82 +336,151 @@ function filterDate() {
                 }
 
                 // Prepare clock moments
-                var clockin = moment(record.time_in);
-                var clockout = moment(record.time_out);
+                var clockin = record.time_in !== null ? moment(record.time_in) : null;
+                var clockout = record.time_out !== null ? moment(record.time_out) : null;
+                var scheduledin = record.scheduled_in !== null ? moment(record.scheduled_in) : null;
+                var scheduledout = record.scheduled_out !== null ? moment(record.scheduled_out) : null;
                 var clocknow = moment();
                 var clocknext = moment(thedate.value).add(1, 'weeks');
                 var clockday = moment(clockin).format('e');
 
-                // Determine status. 1 = approved, 2 = no time_out (clocked in), 0 = not approved.
-                var status = 1;
-                if (!record.approved)
-                    status = 0;
-                if (record.time_out === null)
-                    status = 2;
+                /* Determine status.
+                 * success = Approved and scheduled.
+                 * purple = Approved, but not scheduled
+                 * warning = Scheduled, but not approved
+                 * urgent = Not scheduled and not approved
+                 * info = Clocked in, but not clocked out
+                 * danger = Absent / did not clock in for scheduled hours
+                 * secondary = Canceled scheduled hours
+                 */
+                var status = `urgent`;
+                var inT = ``;
+                var outT = ``;
 
-                // If approved record, add its hours for the director. If clocked in record, add hours from time_in to current time.
-                if (status === 1)
-                    hours[record.name].add(clockout.diff(clockin));
-                if (status === 2)
+                if (clockin !== null && clockout === null)
+                {
+                    status = `info`;
                     hours[record.name].add(clocknow.diff(clockin));
-
-
-                var inT = moment(clockin).format(`h:mm A`);
-                var outT = moment(clockout).format(`h:mm A`) || 'IN';
-
-                // For certain clock-ins and clock-outs, we may need to display the date as well, not just the time.
-                // If clock-in happened last week, show its date
-                if (moment(clockin).isBefore(moment(clockout).startOf('week')))
-                {
-                    inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                    clockday = moment(clockout).format('e');
-                }
-                // If clock-out happened next week, show its date
-                if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')))
-                {
-                    outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                }
-                // If clock-out was not on the same day as clock-in, show date for clock-out.
-                if (clockout !== null && !moment(clockout).isSame(moment(clockin), 'day'))
-                {
-                    outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                    if (moment(clockin).isBefore(moment().startOf('week')))
+                    {
+                        inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                        clockday = moment().format('e');
+                    } else {
+                        inT = moment(clockin).format(`h:mm A`);
+                    }
+                    outT = 'IN NOW';
+                } else {
+                    if (record.approved)
+                    {
+                        if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null)
+                        {
+                            status = `success`;
+                            hours[record.name].add(clockout.diff(clockin));
+                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            {
+                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                clockday = moment().format('e');
+                            } else {
+                                inT = moment(clockin).format(`h:mm A`);
+                            }
+                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                            {
+                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            } else {
+                                outT = moment(clockout).format(`h:mm A`);
+                            }
+                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
+                            status = `purple`;
+                            hours[record.name].add(clockout.diff(clockin));
+                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            {
+                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                clockday = moment().format('e');
+                            } else {
+                                inT = moment(clockin).format(`h:mm A`);
+                            }
+                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                            {
+                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            } else {
+                                outT = moment(clockout).format(`h:mm A`);
+                            }
+                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
+                            status = `secondary`;
+                            if (moment(scheduledin).isBefore(moment().startOf('week')))
+                            {
+                                inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                clockday = moment().format('e');
+                            } else {
+                                inT = moment(scheduledin).format(`h:mm A`);
+                            }
+                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                            {
+                                outT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            } else {
+                                outT = moment(scheduledout).format(`h:mm A`);
+                            }
+                        }
+                    } else {
+                        if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null)
+                        {
+                            status = `warning`;
+                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            {
+                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                clockday = moment().format('e');
+                            } else {
+                                inT = moment(clockin).format(`h:mm A`);
+                            }
+                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                            {
+                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            } else {
+                                outT = moment(clockout).format(`h:mm A`);
+                            }
+                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
+                            status = `urgent`;
+                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            {
+                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                clockday = moment().format('e');
+                            } else {
+                                inT = moment(clockin).format(`h:mm A`);
+                            }
+                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                            {
+                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            } else {
+                                outT = moment(clockout).format(`h:mm A`);
+                            }
+                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
+                            status = `danger`;
+                            if (moment(scheduledin).isBefore(moment().startOf('week')))
+                            {
+                                inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                clockday = moment().format('e');
+                            } else {
+                                inT = moment(scheduledin).format(`h:mm A`);
+                            }
+                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                            {
+                                outT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            } else {
+                                outT = moment(scheduledout).format(`h:mm A`);
+                            }
+                        }
+                    }
                 }
 
                 // Fill in the timesheet records for clock-ins
                 var cell = document.getElementById(`cell${(clockday * 2) + 1}-${record.name.replace(/\W/g, '')}`);
                 if (cell !== null)
-                {
-                    switch (status)
-                    {
-                        case 0:
-                            cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-danger" id="timesheet-t-${record.ID}">${inT}</span><br />`;
-                            break;
-                        case 1:
-                            cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-primary" id="timesheet-t-${record.ID}">${inT}</span><br />`;
-                            break;
-                        case 2:
-                            cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-success" id="timesheet-t-${record.ID}">${inT}</span><br />`;
-                            break;
-                    }
-                }
+                    cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-${status}" id="timesheet-t-${record.ID}">${inT}</span><br />`;
 
                 // Fill in the timesheet records for clock-outs
                 var cell = document.getElementById(`cell${(clockday * 2) + 2}-${record.name.replace(/\W/g, '')}`);
                 if (cell !== null)
-                {
-                    switch (status)
-                    {
-                        case 0:
-                            cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-danger" id="timesheet-t-${record.ID}">${outT}</span><br />`;
-                            break;
-                        case 1:
-                            cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-primary" id="timesheet-t-${record.ID}">${outT}</span><br />`;
-                            break;
-                        case 2:
-                            cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-success" id="timesheet-t-${record.ID}">${outT}</span><br />`;
-                            break;
-                    }
-                }
+                    cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-${status}" id="timesheet-t-${record.ID}">${outT}</span><br />`;
             });
 
             // Iterate through each director and list their hours worked.

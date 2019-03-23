@@ -1,4 +1,4 @@
-/* global sails, Directors, Status, Timesheet, moment, needle */
+/* global sails, Directors, Status, Timesheet, moment, needle, Promise */
 
 /**
  * Directors.js
