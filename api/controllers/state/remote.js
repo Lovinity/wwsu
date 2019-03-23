@@ -77,6 +77,7 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.start);
 
                 // Queue a show opener if there is one
                 if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')

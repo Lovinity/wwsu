@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.onesignal.send() and sails.helpers.onesignal.sendEvent() helpers for sending out push notifications.
  - "scheduled_in", "scheduled_out", and "unique" attributes in Timesheet. This allows tracking office hour consistency.
  - Logging when a director cancels office hours or does not clock in for office hours. These will fall under logtype "director-cancellation" and "director-absent" respectively.
+ - "start" property for each specialBreaks in configuration; these are queued at the start of a broadcast.
+ - "end" property for each specialBreaks in configuration; these are queued when a broadcast ends.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.

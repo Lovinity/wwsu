@@ -66,13 +66,14 @@ module.exports = {
                 await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
                 await sails.helpers.rest.cmd('EnableAssisted', 1);
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
+                Status.errorCheck.prevID = moment();
+                await sails.helpers.error.count('stationID');
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.start);
 
                 // Queue a Sports opener if there is one
                 if (typeof sails.config.custom.sportscats[inputs.sport] !== 'undefined')
                     await sails.helpers.songs.queue([sails.config.custom.sportscats[inputs.sport]["Sports Openers"]], 'Bottom', 1);
 
-                Status.errorCheck.prevID = moment();
-                await sails.helpers.error.count('stationID');
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                 var queueLength = await sails.helpers.songs.calculateQueueLength();

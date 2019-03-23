@@ -67,6 +67,16 @@ module.exports = {
             Status.errorCheck.prevID = moment();
             await sails.helpers.error.count('stationID');
 
+            // Queue ending stuff
+            if (Meta['A'].state.startsWith("live_"))
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end);
+
+            if (Meta['A'].state.startsWith("remote_"))
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end);
+
+            if (Meta['A'].state.startsWith("sports_") || Meta['A'].state.startsWith("sportsremote_"))
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end);
+
             // Queue a random PSA in case Google Calendar takes a while
             await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1);
 

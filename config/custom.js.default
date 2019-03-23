@@ -381,7 +381,7 @@ module.exports.custom = {
      * queued tracks end up in the order you specified. For example, if you put PSAs before an ID in the array, the PSAs will be above the IDs in RadioDJ, and will play first.
      * 
      */
-    specialBreaks: {
+     specialBreaks: {
 
         // Automation / during is executed when a DJ "Switches show" and goes to automation_break. It is repeatedly executed whenever the queue empties until either the
         // break times out, or another show begins.
@@ -392,8 +392,12 @@ module.exports.custom = {
         },
 
         // Breaks during live shows
-        // Do not include show openers, returns, nor closers, nor station IDs, in this configuration; those are queued automatically.
+        // Do not include show openers, returns, closers, nor station IDs, in this configuration; those are queued automatically.
         live: {
+
+            // These are queued/executed just before a live show begins.
+            start: [
+            ],
 
             // These are queued/executed once, right when the break is started.
             before: [
@@ -409,12 +413,20 @@ module.exports.custom = {
             after: [
                 {task: "queue", category: "sweepers", quantity: 1},
             ],
+
+            // These are queued/executed when the live show ends.
+            end: [
+            ]
 
         },
 
         // Breaks during remote broadcasts
-        // Do not include show openers, returns, nor closers, nor station IDs, in this configuration; those are queued automatically.
+        // Do not include show openers, returns, closers, nor station IDs, in this configuration; those are queued automatically.
         remote: {
+
+            // These are queued/executed just before a remote broadcast begins.
+            start: [
+            ],
 
             // These are queued/executed once, right when the break is started.
             before: [
@@ -429,13 +441,21 @@ module.exports.custom = {
             // These are queued/executed when the DJ returns from their break.
             after: [
                 {task: "queue", category: "sweepers", quantity: 1},
+            ],
+
+            // These are queued/executed after a remote broadcast ends.
+            end: [
             ],
 
         },
 
         // Breaks during sports broadcasts (both live and remote)
-        // Do not include sports openers, closers, nor returns, nor station IDs, in this configuration; those are queued automatically.
+        // Do not include sports openers, closers, returns, nor station IDs, in this configuration; those are queued automatically.
         sports: {
+
+            // These are queued/executed just before a sports broadcast begins.
+            start: [
+            ],
 
             // These are queued/executed once, right when the break is started.
             before: [
@@ -446,7 +466,7 @@ module.exports.custom = {
             during: [
                 {task: "queue", category: "PSAs", quantity: 1},
             ],
-            
+
             // During extended breaks / halftime, these are executed/queued repeatedly every time RadioDJ's queue gets empty until the producer returns from their break.
             duringHalftime: [
                 {task: "queue", category: "halftime", quantity: 1},
@@ -455,6 +475,10 @@ module.exports.custom = {
             // These are queued/executed when the producer returns from their break.
             after: [
                 {task: "queue", category: "sweepers", quantity: 1},
+            ],
+
+            // These are queued/executed after a sports broadcast ends.
+            end: [
             ],
 
         }

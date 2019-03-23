@@ -77,6 +77,7 @@ module.exports = {
                 await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
                 Status.errorCheck.prevID = moment();
                 await sails.helpers.error.count('stationID');
+                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.start);
 
                 // Queue a show opener if applicable
                 if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
@@ -85,16 +86,16 @@ module.exports = {
                 } else {
                     await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
                 }
-                
+
                 var queueLength = await sails.helpers.songs.calculateQueueLength();
-                
+
                 if (queueLength >= sails.config.custom.queueCorrection.live)
                 {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
                     //await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
                     if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
                         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
-                    
+
                     queueLength = await sails.helpers.songs.calculateQueueLength();
                 }
 
