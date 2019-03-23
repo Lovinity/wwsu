@@ -417,7 +417,7 @@ function filterDate() {
                         {
                             status = `success`;
                             hours[record.name].add(clockout.diff(clockin));
-                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
                             } else {
@@ -432,7 +432,7 @@ function filterDate() {
                         } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
                             status = `purple`;
                             hours[record.name].add(clockout.diff(clockin));
-                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
                             } else {
@@ -446,7 +446,7 @@ function filterDate() {
                             }
                         } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
                             status = `secondary`;
-                            if (moment(scheduledin).isBefore(moment().startOf('week')))
+                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
                             {
                                 inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
                             } else {
@@ -463,7 +463,7 @@ function filterDate() {
                         if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null)
                         {
                             status = `warning`;
-                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
                             } else {
@@ -477,7 +477,7 @@ function filterDate() {
                             }
                         } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
                             status = `urgent`;
-                            if (moment(clockin).isBefore(moment().startOf('week')))
+                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
                             } else {
@@ -491,7 +491,7 @@ function filterDate() {
                             }
                         } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
                             status = `danger`;
-                            if (moment(scheduledin).isBefore(moment().startOf('week')))
+                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
                             {
                                 inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
                             } else {
