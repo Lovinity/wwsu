@@ -1231,13 +1231,15 @@ module.exports.bootstrap = async function (done) {
                 var found = await Songs.count({enabled: -1})
                         .tolerate((err) => {
                         });
-
-                if (found && found >= sails.config.custom.status.musicLibrary.verify.error)
+                if (found && found >= sails.config.custom.status.musicLibrary.verify.critical)
                 {
-                    Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `Music library has ${found} bad tracks. This is very high; run the verify tracks utility in RadioDJ.`}]);
+                    Status.changeStatus([{name: `music-library`, status: 1, label: `Music Library`, data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Run the verify tracks utility in RadioDJ.`}]);
+                } else if (found && found >= sails.config.custom.status.musicLibrary.verify.error)
+                {
+                    Status.changeStatus([{name: `music-library`, status: 2, label: `Music Library`, data: `Music library has ${found} bad tracks. This is quite high. Run the verify tracks utility in RadioDJ.`}]);
                 } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn)
                 {
-                    Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `Music library has ${found} bad tracks. This is high; run the verify tracks utility in RadioDJ.`}]);
+                    Status.changeStatus([{name: `music-library`, status: 3, label: `Music Library`, data: `Music library has ${found} bad tracks. Run the verify tracks utility in RadioDJ.`}]);
                 } else
                 {
                     Status.changeStatus([{name: `music-library`, status: 5, label: `Music Library`, data: `Music library has ${found} bad tracks.`}]);

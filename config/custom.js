@@ -777,7 +777,10 @@ var defaultConfig = {
                 warn: 10,
 
                 // Music Library should go into partial outage status when this many tracks are detected as invalid.
-                error: 25
+                error: 50,
+                
+                // Music library should go into critical status when this many tracks are detected as invalid.
+                critical: 250,
             }
         },
 
