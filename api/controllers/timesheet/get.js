@@ -42,7 +42,7 @@ module.exports = {
                     {time_out: {'>=': start.toISOString(true), '<': end.toISOString(true)}},
                     {time_in: null, time_out: null, scheduled_in: {'>=': start.toISOString(true), '<': end.toISOString(true)}},
                     {time_in: null, time_out: null, scheduled_out: {'>=': start.toISOString(true), '<': end.toISOString(true)}}
-                ]}).sort('time_in ASC');
+                ]}).sort([{time_in: 'ASC'}, {scheduled_in: 'ASC'}]);
             sails.log.verbose(`Returned Timesheet records: ${records.length}`);
             sails.log.silly(records);
 
