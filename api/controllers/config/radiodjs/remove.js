@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'config / radiodj / remove',
+    friendlyName: 'config / radiodjs / remove',
 
     description: 'Remove a RadioDJ from the system and stop using it.',
 
@@ -20,7 +20,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller config/radiodj/remove called.');
+        sails.log.debug('Controller config/radiodjs/remove called.');
 
         try {
 

@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'config / radiodj / set',
+    friendlyName: 'config / radiodjs / set',
 
     description: 'Add or update a radioDJ instance that the system should use.',
 
@@ -41,7 +41,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller config/radiodj/set called.');
+        sails.log.debug('Controller config/radiodjs/set called.');
 
         try {
 
