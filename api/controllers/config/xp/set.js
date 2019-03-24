@@ -68,7 +68,7 @@ module.exports = {
             }
 
             // broadcast changes over websockets
-            sails.sockets.broadcast('config', 'config', {update: {XP: inputs}});
+            sails.sockets.broadcast('config', 'config', {update: {XP: sails.config.custom.XP}});
 
             return exits.success();
         } catch (e) {
