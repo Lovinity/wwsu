@@ -1,6 +1,4 @@
-/* global sails, Status, Logs */
-
-// RENAME to custom.js after you have configured it!
+/* global sails, Status, Logs, moment */
 
 /**
  * Custom configuration
@@ -17,30 +15,172 @@ global['moment'] = require("moment");
 require("moment-duration-format");
 global['needle'] = require("needle");
 
-module.exports.custom = {
+// Create a config factory store; we are not using easy-config-store directly because it does not have a deleteProperty handler.
+const config = (() => {
+
+    let defaultCfg;
+    let saveConfigFunc;
+    let rawConfig = {};
+    let config;
+    let timer;
+
+    let handle = {
+        get: function (oTarget, sKey) {
+            let result = oTarget[sKey];
+            return result;
+        },
+        set: function (oTarget, sKey, vValue) {
+            if (vValue && typeof vValue === 'object') {
+                proxyObject(vValue, []);
+                vValue = new Proxy(vValue, handle);
+            } else {
+            }
+            oTarget[sKey] = vValue;
+            saveConfigFunc(config);
+            return true;
+        },
+        deleteProperty: function (oTarget, sKey) {
+            if (sKey in oTarget) {
+                delete oTarget[sKey];
+                saveConfigFunc(config);
+                return true;
+            }
+            return false;
+        }
+    };
+
+    config = new Proxy(rawConfig, handle);
+
+    Object.defineProperties(rawConfig, {
+        cfgClear: {
+            value: () => {
+                for (let k in config) {
+                    delete config[k];
+                }
+            }
+        },
+        cfgReset: {
+            value: () => {
+                for (let k in config) {
+                    delete config[k];
+                }
+                cfg = Object.assign({}, defaultCfg);
+                for (let k in cfg) {
+                    config[k] = cfg[k];
+                }
+            }
+        },
+        setOptions: {
+            value: (cfg, onSaveCallback) => {
+                if (onSaveCallback) {
+                    saveConfigFunc = onSaveCallback;
+                }
+                defaultCfg = Object.assign({}, cfg);
+                for (let k in cfg) {
+                    config[k] = cfg[k];
+                }
+            }
+        },
+        cfgUseFile: {
+            value: (cfgPath) => {
+                const fs = require('fs');
+                if (!fs.existsSync(cfgPath)) {
+                    fs.writeFileSync(cfgPath, '{}', 'utf-8');
+                }
+                let cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf-8'));
+                config.setOptions(cfg, (cfg) => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        fs.writeFileSync(cfgPath, JSON.stringify(cfg), 'utf-8');
+                    }, 300);
+                });
+            }
+        },
+        cfgUseLocalStorage: {
+            value: (key) => {
+                let cfg = JSON.parse(localStorage[key]);
+                config.setOptions(cfg, (cfg) => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        localStorage[key] = JSON.stringify(cfg);
+                    }, 300);
+                });
+            }
+        },
+        cfgUseMemory: {
+            value: (key) => {
+                config.setOptions({}, (cfg) => {
+                });
+            }
+        }
+    });
+
+    function proxyObject(obj, proxys) {
+        if (proxys.includes(obj)) {
+            return;
+        }
+        proxys.push(obj);
+        for (var k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                let v = obj[k];
+                if (v && typeof v === 'object') {
+                    proxyObject(v, proxys);
+                    obj[k] = new Proxy(v, handle);
+                } else {
+                }
+            }
+        }
+    }
+
+    function build() {
+        if (typeof (localStorage) === 'object') {
+            config.cfgUseLocalStorage('easy-config-store');
+        } else if (typeof (require('os')) === 'object') {
+            const os = require('os');
+            const path = require('path');
+            config.cfgUseFile(path.join(os.tmpdir(), 'easy-config-store.cfg'));
+        } else {
+            config.cfgUseMemory();
+        }
+    }
+
+    build();
+
+    return config;
+})();
+
+/*
+ * WARNING: Changing values in the defaultConfig will not work unless it is a new configuration parameter!
+ * Edit config.cfg instead, or use the config/* controllers in the HTTP API.
+ */
+
+var defaultConfig = {
 
     /*
      * BASIC CONFIGURATION
      */
 
-    website: '', // URL to your website. Status monitor will report outages.
+    website: 'https://wwsu1069.org', // WWSU website URL
 
-    stream: '', // URL to the Shoutcast 2.6 internet stream server. For icecast 2.3, see config/bootstrap.js and replace the Shoutcast 2.6 code with the "// ICECAST 2.3" code.
+    stream: 'http://54.39.145.182:8000', // URL to the internet stream server for WWSU.
 
-    hostSecret: 'changeme', // A random secret key used for generating hashes for public hosts / web mobile visitors. CHANGING THIS WILL INVALIDATE ACTIVE DISCIPLINE.
+    hostSecret: '', // A random secret key used for generating hashes for public hosts / web mobile visitors. CHANGING THIS WILL INVALIDATE ACTIVE DISCIPLINE.
 
     GoogleAPI: {
-        // ID of the Google Calendar used for show programming and events. Must have API access.
+        // ID of the Google Calendar used for show programming and WWSU events. Must have API access.
         calendarId: '',
-        
+
         // ID of the Google Calendar containing the office hours for directors. Must have API access.
         // NOTE: Every event in this calendar should have its title as the name of the director the hours are for, as used on the system.
         // For example, if George Carlin works Fridays 4pm-8pm, an event for Friday 4pm-8pm should be created on the calendar with the title "George Carlin".
         directorHoursId: ''
     },
 
-    // Insert a date and time in the string indicating when the current semester started; this will serve as the remote credit cutoff date
-    startOfSemester: moment("2019-01-14 00:00:00"),
+    onesignal: {
+        rest: ``
+    },
+
+    startOfSemester: moment("2019-01-14 00:00:00").toISOString(true),
 
     /*
      * TRACK CATEGORIES AND META
@@ -60,13 +200,16 @@ module.exports.custom = {
      */
     categories: {
 
+        // Restrict removal of the provided category keys by the config system.
+        _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `liners`, `requestLiners`, `promos`, `halftime`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`],
+
         /*
          * REQUIRED CATEGORIES
          * The category objects below this line must not be removed / renamed; they are required by the server. Doing so will break the server!
          * You may, however, edit what is inside each of the category objects below to specify which RadioDJ categories/subcategories apply.
          */
 
-        // All the category / subcategory pairs containing automation system music.
+        // All the category / subcategory pairs containing automation system music. This should INCLUDE Top Adds (but is up to Music/Program Director).
         // This is also used by the request system; all tracks in this config can be requested... other tracks cannot.
         music: {
             "Music": [],
@@ -82,7 +225,7 @@ module.exports.custom = {
         // Legal Station IDs
         // DEFINITION: Required FCC ID at the top of every hour that includes call sign, frequency, and coverage area
         IDs: {
-            "Station IDs": []
+            "Station IDs": ["Standard IDs"]
         },
 
         // Public Service Announcements
@@ -154,6 +297,7 @@ module.exports.custom = {
             "Show Openers": [],
             "Show Returns": [],
             "Show Closers": [],
+            "Strike Testimonials": [],
         },
 
         // When a DJ or producer requests to exit break, all tracks in these defined categories and subcategories will be removed from the queue
@@ -163,7 +307,7 @@ module.exports.custom = {
         },
 
         // Hide Meta Data for these categories, and instead display the corresponding meta.alt metadata. See meta.alt below.
-        // NOTE: This also determines when the system determines when someone has gone on the air; the first track not existing in this config is deemed when someone is on
+        // NOTE: This also determines when the system determines when someone has gone on the air; the first track not existing in this category is deemed when someone is on
         noMeta: {
             "Jingles": [],
             "Station IDs": [],
@@ -174,7 +318,8 @@ module.exports.custom = {
             "Sports Music": [],
             "Show Returns": [],
             "Sports Liners": [],
-            "Commercials": []
+            "Commercials": [],
+            "Strike Testimonials": [],
         },
 
         /*
@@ -182,12 +327,12 @@ module.exports.custom = {
          * The category objects below this line are optional. You may add, rename, or remove them as you wish.
          * However, if you remove or rename any, make sure you no longer reference them anywhere else in this config file!
          */
-
     },
 
     // sports is an array of sports configured in the system for broadcasting.
     // Each sport MUST BE a subcategory in the RadioDJ categories of Sports Openers, Sports Liners, and Sports Closers... and must contain at least one track in each... 
     // in order to operate properly.
+    // NOTE: DJ Controls code will need to be modified to include the new list of sports whenever this list is changed. It is advised not to change this except by a developer.
     sports: [
         `Men's Basketball`,
         `Women's Basketball`,
@@ -235,7 +380,7 @@ module.exports.custom = {
         // NOTE: If you do not add a space at the end of the string, no space will be added automatically!
         prefix: {
 
-            // During automation, genre, and playlist... this prefix will appear before the currently playing track on line 1 of metadata.
+            // During automation, this prefix will appear before the currently playing track on line 1 of metadata.
             automation: `Playing: `,
 
             // During genre, this will appear before the genre currently airing on line 2 of metadata.
@@ -270,7 +415,7 @@ module.exports.custom = {
 
             // During a sports broadcast, this will appear before the sport being aired on line 1 of metadata
             sports: `Raider Sports: `,
-            
+
             // In a live, remote, sports, or prerecorded show... this will appear before the track name on line 2 of metadata when something is being played
             playing: `Playing: `
 
@@ -348,15 +493,36 @@ module.exports.custom = {
     /*
      * How Breaks Work (live shows, remotes, and sports broadcasts)
      * 
-     * Breaks for shows are independent of what is configured below. When the producer goes to a break, the system plays PSAs until they request to return.
-     * Then, if the current minute past the hour is after :50, or before :10, an ID and promo is played. Else, a sweeper is played.
+     * Breaks for shows/remotes/sports broadcasts are configured in "specialBreaks"; "breaks" is only for during automation.
      * 
      */
     breaks: {
         // This break will be triggered around the :00 of every hour. You MUST ALWAYS have a 0 break.
         0: [
             {task: "log", event: "Queued :00 top of the hour ID break."},
-            {task: "queue", category: "IDs", quantity: 1}
+            {task: "queue", category: "PSAs", quantity: 1},
+            {task: "queueDuplicates"},
+            {task: "queue", category: "promos", quantity: 1},
+            {task: "queue", category: "IDs", quantity: 1},
+            {task: "queueRequests", quantity: 3}
+        ],
+
+        // This break will be triggered around the :20 of every hour.
+        20: [
+            {task: "log", event: "Queued :20 PSA break."},
+            {task: "queue", category: "PSAs", quantity: 1},
+            {task: "queueDuplicates"},
+            {task: "queue", category: "sweepers", quantity: 1},
+            {task: "queueRequests", quantity: 3}
+        ],
+
+        // This break will be triggered around the :40 of every hour.
+        40: [
+            {task: "log", event: "Queued :40 PSA break."},
+            {task: "queue", category: "PSAs", quantity: 1},
+            {task: "queueDuplicates"},
+            {task: "queue", category: "sweepers", quantity: 1},
+            {task: "queueRequests", quantity: 3}
         ]
     },
 
@@ -381,7 +547,7 @@ module.exports.custom = {
      * queued tracks end up in the order you specified. For example, if you put PSAs before an ID in the array, the PSAs will be above the IDs in RadioDJ, and will play first.
      * 
      */
-     specialBreaks: {
+    specialBreaks: {
 
         // Automation / during is executed when a DJ "Switches show" and goes to automation_break. It is repeatedly executed whenever the queue empties until either the
         // break times out, or another show begins.
@@ -416,6 +582,7 @@ module.exports.custom = {
 
             // These are queued/executed when the live show ends.
             end: [
+
             ]
 
         },
@@ -488,29 +655,29 @@ module.exports.custom = {
     // You MUST NOT have any intervals between breaks that are less than this. For example, if this is 10, and you have a break at 25 and another at 30 (5 minute difference), this will cause problems.
     // NOTE: The "0" break ignores this setting since it is required by the FCC. It has its own hard-coded check of 10 minutes that cannot be configured.
     breakCheck: 10,
-    
+
     // A track from the defined "liners" categories will be queued during automation between music tracks during non-breaks.
     // Do not play a liner more often than once every defined number of minutes below.
     // NOTE: This clock is reset when a break is played so as to avoid playing a liner too close to a break.
     linerTime: 10,
-    
-   // This object of options regards checking for queues, and triggering errorChecks if a queue is deemed too long in order to fix that and get live shows / broadcasts on the air 
-   // sooner.
-   // NOTE: these checks only run once; if, say, the queue condition satisfies, and later doesn't, errorCheck will not trigger. This is by design since hosts can add PSAs / more time.
+
+    // This object of options regards checking for queues, and triggering errorChecks if a queue is deemed too long in order to fix that and get live shows / broadcasts on the air 
+    // sooner.
+    // NOTE: these checks only run once; if, say, the queue condition satisfies, and later doesn't, errorCheck will not trigger. This is by design since hosts can add PSAs / more time.
     queueCorrection: {
-        
+
         // If trying to begin a live show, and the total queue time is greater than this in seconds, skip currently playing track and try clearing necessary tracks from the queue again.
         live: (60 * 5),
-        
+
         // If the amount of time between now and the first prerecord playlist track is greater than this many seconds, try clearing/skipping some tracks to get the prerecord on the air sooner.
         prerecord: (60 * 5),
-        
+
         // If trying to begin a sports broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get sports on sooner.
         sports: 60,
-        
+
         // When first returning from a break in a sports broadcast, if the queue is greater than this in seconds, clear out some tracks.
         sportsReturn: 30,
-        
+
         // If trying to begin a remote broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get remote on sooner.
         remote: (60 * 5)
     },
@@ -528,15 +695,17 @@ module.exports.custom = {
     // {name: 'alphaname' ("display-" prepends this), label: 'Friendly name' ("Display " will prepend this), level: 1 (1=critical, 2=significant, 3=minor), instances: 1 (number of display signs to expect to be connected)}
     // All other display signs will either give a status of 4 (online no-issue) if they are reported offline, or will not show up in the recipients table.
     displaysigns: [
+        {name: 'public', label: 'Public', level: 3, instances: 2}, // We have two display signs that show the public page
+        {name: 'internal', label: 'Internal', level: 3, instances: 1}
     ],
 
     // RadioDJ REST server configuration
     rest: {
-        auth: 'Access4WWSU' // Enter the REST authentication password for RadioDJ here. Must be the same on all RadioDJ instances
+        auth: '' // Enter the REST authentication password for RadioDJ here. Must be the same on all RadioDJ instances
     },
 
     // Object of configuration regarding XP
-    // NOTE: Changing these values does NOT change XP already earned (except for remoteCredit); for example, if a DJ earned 30 XP (10 per message) yesterday for sending 3 web messages,
+    // NOTE: Changing these values does NOT change XP already earned; for example, if a DJ earned 30 XP (10 per message) yesterday for sending 3 web messages,
     // changing web to 5 will NOT change the total they earned yesterday to 15 XP; it only affects future XP earned.
     XP: {
 
@@ -601,7 +770,7 @@ module.exports.custom = {
         // Object of options pertaining to the Music Library subsystem
         musicLibrary: {
 
-            // Config relating to checks for RadioDJ tracks marked invalid because of not being able to play them (enabled = -1)
+            // Config relating to checks for RadioDJ tracks marked invalid because of not being able to play them
             verify: {
 
                 // Music Library should go into minor issue status when this many tracks are detected as invalid.
@@ -1019,12 +1188,6 @@ module.exports.custom = {
      * OTHER SETTINGS
      */
 
-    // Settings for the silence endpoints
-    silence: {
-        // Key that must be provided as a parameter... since the silence program does not support authorization
-        key: ''
-    },
-
     lofi: false, // If true, backend will skip the checks CRON. This will also disable some subsystems like metadata. Recommended only change by a developer.
 
     /*
@@ -1041,3 +1204,12 @@ module.exports.custom = {
     secrets: {},
 
 };
+
+// Load default configuration first
+config.setOptions(defaultConfig);
+
+// Then replace default configuration with anything in the config.cfg file. Also save all changes to config.cfg.
+config.cfgUseFile('config.cfg');
+
+// Export the module for use in the Sails application
+module.exports.custom = config;

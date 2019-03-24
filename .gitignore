@@ -152,3 +152,4 @@ config
 /client_secret.json
 /api/controllers/directors/load.js
 /api/controllers/events/load.js
+/config.cfg
