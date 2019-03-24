@@ -39,6 +39,7 @@ module.exports = {
             delete returnData.onesignal.rest;
             delete returnData.hostSecret;
             delete returnData.rest;
+            delete returnData.secrets;
 
             return exits.success(returnData);
         } catch (e) {
