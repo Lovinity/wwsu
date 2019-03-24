@@ -24,6 +24,8 @@ module.exports.policies = {
     'announcements/add-problem': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'announcements/get': ['isBanned', 'isSocket'],
     'calendar/*': 'isBanned',
+    'config/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+    'config/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'directors/*': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
     'directors/get': 'isBanned',
     'directors/get-hours': 'isBanned',

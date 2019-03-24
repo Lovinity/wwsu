@@ -434,7 +434,7 @@ module.exports = {
                         } else if (Meta['A'].state === 'live_prerecord')
                         {
                             push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${Meta['A'].playlist}`;
-                            push2.line2 = `Error! No audio playing.`;
+                            push2.line2 = ``;
                             push2.stream = await sails.helpers.filterProfane(`${Meta['A'].show} (PRERECORD)`);
 
                             // Remote Broadcasts
@@ -454,19 +454,19 @@ module.exports = {
                             // Regular automation (should never happen; this is an error!)
                         } else if (Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre')
                         {
-                            push2.line1 = `Error! No audio playing.`;
+                            push2.line1 = ``;
                             push2.line2 = ``;
 
                             // Playlists (should never happen; this is an error!)
                         } else if (Meta['A'].state === 'automation_playlist')
                         {
-                            push2.line1 = `Error! No audio playing.`;
+                            push2.line1 = ``;
                             push2.line2 = `${sails.config.custom.meta.prefix.playlist}${Meta['A'].playlist}`;
 
                             // Genre automation (should never happen; this is an error!)
                         } else if (Meta['A'].state === 'automation_genre')
                         {
-                            push2.line1 = `Error! No audio playing.`;
+                            push2.line1 = ``;
                             push2.line2 = `${sails.config.custom.meta.prefix.genre}${Meta['A'].genre}`;
                         }
                     }
