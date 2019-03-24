@@ -38,6 +38,7 @@ module.exports = {
             // These are secret stuff we do not want others knowing
             delete returnData.onesignal.rest;
             delete returnData.hostSecret;
+            delete returnData.rest;
 
             return exits.success(returnData);
         } catch (e) {
