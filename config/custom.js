@@ -833,13 +833,13 @@ var defaultConfig = {
             memory: {
 
                 // If free RAM/memory is below this many bytes, trigger minor issue.
-                warn: 512000,
+                warn: 512000000,
 
                 // If free RAM/memory is below this many bytes, trigger partial outage.
-                error: 256000,
+                error: 256000000,
 
                 // If free RAM/memory is below this many bytes, trigger serious outage.
-                critical: 64000
+                critical: 64000000
             }
 
         }
