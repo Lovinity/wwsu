@@ -48,7 +48,7 @@ module.exports = {
             {
                 // Log an entry
                 case "log":
-                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: 'automation', event: inputs.event}).fetch()
+                    await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: 'automation', event: `<strong>${inputs.event}</strong>`}).fetch()
                             .tolerate((err) => {
                             });
                     break;

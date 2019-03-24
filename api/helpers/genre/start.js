@@ -60,7 +60,7 @@ module.exports = {
                     {
                         var attendance = await Attendance.createRecord(`Genre: ${inputs.event}`);
                         await Meta.changeMeta({state: 'automation_genre', genre: inputs.event});
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: 'Genre started.<br />Genre: ' + inputs.event}).fetch()
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Genre started.</strong><br />Genre: ' + inputs.event}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
@@ -68,7 +68,7 @@ module.exports = {
                     } else {
                         await Attendance.createRecord(`Genre: Default`);
                         await Meta.changeMeta({state: 'automation_on', genre: 'Default'});
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: 'Default rotation started.'}).fetch()
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Default rotation started.</strong>'}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });

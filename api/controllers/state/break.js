@@ -30,7 +30,7 @@ module.exports = {
                 inputs.halftime = false;
 
             // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: Meta['A'].show, event: 'Break requested.'}).fetch()
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Break requested.</strong>'}).fetch()
                     .tolerate((err) => {
                         // Do not throw for errors, but log it.
                         sails.log.error(err);

@@ -630,7 +630,7 @@ module.exports = {
                                 {
                                     var temp = cEvent.title.replace("Show: ", "");
                                     await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Show was cancelled via Google Calendar!<br />Show: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Show was cancelled via Google Calendar!</strong><br />Show: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
                                             });
@@ -639,7 +639,7 @@ module.exports = {
                                 {
                                     var temp = cEvent.title.replace("Remote: ", "");
                                     await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Remote broadcast was cancelled via Google Calendar!<br />Remote: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Remote broadcast was cancelled via Google Calendar!</strong><br />Remote: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
                                             });
@@ -648,7 +648,7 @@ module.exports = {
                                 {
                                     var temp = cEvent.title.replace("Sports: ", "");
                                     await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Sports broadcast was cancelled via Google Calendar!<br />Sports: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Sports broadcast was cancelled via Google Calendar!</strong><br />Sports: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
                                             });
@@ -657,7 +657,7 @@ module.exports = {
                                 {
                                     var temp = cEvent.title.replace("Prerecord: ", "");
                                     await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
-                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: temp, event: `Prerecorded show was cancelled via Google Calendar!<br />Prerecord: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                    await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Prerecorded show was cancelled via Google Calendar!</strong><br />Prerecord: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
                                             });
@@ -706,7 +706,7 @@ module.exports = {
                                                     {
                                                         if (record.event.startsWith("Show: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Show: ", ""), event: `Show did not air!<br />Show: ${record.event.replace("Show: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Show: ", ""), event: `<strong>Show did not air!</strong><br />Show: ${record.event.replace("Show: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -714,7 +714,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Prerecord: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Prerecord: ", ""), event: `Prerecord did not air!<br />Prerecord: ${record.event.replace("Prerecord: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Prerecord: ", ""), event: `<strong>Prerecord did not air!</strong><br />Prerecord: ${record.event.replace("Prerecord: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -722,7 +722,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Remote: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Remote: ", ""), event: `Remote broadcast did not air!<br />Remote: ${record.event.replace("Remote: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Remote: ", ""), event: `<strong>Remote broadcast did not air!</strong><br />Remote: ${record.event.replace("Remote: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -730,7 +730,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Sports: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Sports: ", ""), event: `Sports broadcast did not air!<br />Sport: ${record.event.replace("Sports: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Sports: ", ""), event: `<strong>Sports broadcast did not air!</strong><br />Sport: ${record.event.replace("Sports: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -738,7 +738,7 @@ module.exports = {
 
                                                         if (record.event.startsWith("Playlist: "))
                                                         {
-                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Playlist: ", ""), event: `Playlist did not air!<br />Playlist: ${record.event.replace("Playlist: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
+                                                            await Logs.create({attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: record.event.replace("Playlist: ", ""), event: `<strong>Playlist did not air!</strong><br />Playlist: ${record.event.replace("Playlist: ", "")}<br />Scheduled time: ${moment(record.scheduledStart).format("hh:mm A")} - ${moment(record.scheduledEnd).format("hh:mm A")}`, createdAt: moment().toISOString(true)}).fetch()
                                                                     .tolerate((err) => {
                                                                         sails.log.error(err);
                                                                     });
@@ -896,7 +896,7 @@ module.exports = {
                         {
                             var maps = cancelled.map(async (cEvent) => {
                                 var attendance = await Timesheet.create({unique: cEvent.unique, name: cEvent.director, scheduled_in: moment(cEvent.start).toISOString(true), scheduled_out: moment(cEvent.end).toISOString(true), approved: true}).fetch();
-                                await Logs.create({attendanceID: null, logtype: 'director-cancellation', loglevel: 'warning', logsubtype: cEvent.director, event: `Director office hours were cancelled via Google Calendar!<br />Director: ${cEvent.title}<br />Cancelled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                await Logs.create({attendanceID: null, logtype: 'director-cancellation', loglevel: 'info', logsubtype: cEvent.director, event: `<strong>Director office hours were cancelled via Google Calendar!</strong><br />Director: ${cEvent.title}<br />Cancelled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                         .tolerate((err) => {
                                             sails.log.error(err);
                                         });
@@ -918,7 +918,7 @@ module.exports = {
                                                     // if wasCreated, then the event never aired; Log an absence.
                                                     if (wasCreated)
                                                     {
-                                                        await Logs.create({attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `Director did not come in for scheduled office hours!<br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format("LLL")} - ${moment(record.scheduled_out).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                                        await Logs.create({attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format("LLL")} - ${moment(record.scheduled_out).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                                                 .tolerate((err) => {
                                                                     sails.log.error(err);
                                                                 });

@@ -20,7 +20,7 @@ module.exports = {
             if (typeof Meta.automation[0] !== 'undefined' && parseInt(Meta.automation[0].ID) !== 0)
             {
                 // Add a log about the track
-                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: Meta['A'].show, event: `Track skipped due to silence.<br />Track: ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title})`}).fetch()
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: Meta['A'].show, event: `<strong>Track skipped due to silence.</strong><br />Track: ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title})`}).fetch()
                         .tolerate((err) => {
                         });
 
@@ -37,7 +37,7 @@ module.exports = {
                 await Meta.changeMeta({changingState: `Switching automation instances due to no audio`});
                 
                 // Log the problem
-                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switching automation instances; silence detection executed multiple times.`}).fetch()
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switching automation instances;</strong> silence detection executed multiple times.`}).fetch()
                         .tolerate((err) => {
                             sails.log.error(err);
                         });

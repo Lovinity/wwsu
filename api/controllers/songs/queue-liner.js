@@ -20,7 +20,7 @@ module.exports = {
                 return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`));
 
             // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: Meta['A'].show, event: 'Sports Liner requested.'}).fetch()
+            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Sports Liner requested.</strong>'}).fetch()
                     .tolerate((err) => {
                         // Do not throw for errors, but log it
                         sails.log.error(err);

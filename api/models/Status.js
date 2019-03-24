@@ -111,7 +111,7 @@ module.exports = {
 
                         await Meta.changeMeta({changingState: `Switching radioDJ instances due to queueFail`});
                         sails.sockets.broadcast('system-error', 'system-error', true);
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; active RadioDJ was failing to return queue data.`}).fetch()
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.`}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
@@ -157,7 +157,7 @@ module.exports = {
                         if (!moment().isBefore(moment(Status.errorCheck.prevError).add(1, 'minutes')))
                         {
                             sails.log.verbose(`No recent error; attempting standard recovery.`);
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Queue recovery attempted; queue was frozen.`}).fetch()
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Queue recovery attempted; queue was frozen.</strong>`}).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -169,7 +169,7 @@ module.exports = {
 
                             await Meta.changeMeta({changingState: `Switching automation instances due to frozen`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
-                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `Switched automation instances; queue was frozen.`}).fetch()
+                            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> queue was frozen.`}).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -363,7 +363,7 @@ module.exports = {
                         }
 
                         // Log changes in status
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].show, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} - ${criteria.data ? criteria.data : `Unknown Issue`}`}).fetch()
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}`}).fetch()
                                 .tolerate((err) => {
                                     // Don't throw errors, but log them
                                     sails.log.error(err);
@@ -372,7 +372,7 @@ module.exports = {
                     if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3)
                     {
                         // Log when bad statuses are now good.
-                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].show, event: `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now good.`}).fetch()
+                        await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.`}).fetch()
                                 .tolerate((err) => {
                                     // Don't throw errors, but log them
                                     sails.log.error(err);
