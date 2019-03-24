@@ -10,11 +10,13 @@ module.exports = {
 
         website: {
             type: 'string',
+            isURL: true,
             description: `URL to WWSU's website; used by Status to check if the website goes offline.`
         },
 
         stream: {
             type: 'string',
+            isURL: true,
             description: `URL to the Shoutcast v2.6 radio stream server. Used to monitor status and record listener counts.`
         },
 

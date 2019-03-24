@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    friendlyName: 'config / categories / add',
+    friendlyName: 'config / categories / set',
 
     description: 'Add or update a RadioDJ category item.',
 
@@ -10,6 +10,7 @@ module.exports = {
         name: {
             type: 'string',
             required: true,
+            isNotIn: [`_doNotRemove`],
             description: `The name of the category to add, or add to`
         },
 
@@ -34,10 +35,6 @@ module.exports = {
         sails.log.debug('Controller config/categories/add called.');
 
         try {
-            if (inputs.name === `_doNotRemove`)
-                return exits.error(new Error(`Not allowed to change the restricted category ${inputs.name}.`));
-            
-            
             if (inputs.name && typeof sails.config.custom.categories[inputs.name] === `undefined`)
             {
                 sails.config.custom.categories[inputs.name] = {};

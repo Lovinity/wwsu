@@ -10,6 +10,7 @@ module.exports = {
         name: {
             type: 'string',
             required: true,
+            isNotIn: sails.config.custom.categories._doNotRemove,
             description: `The name of the category to remove.`
         },
     },
@@ -22,9 +23,6 @@ module.exports = {
         sails.log.debug('Controller config/categories/remove called.');
 
         try {
-            
-            if (inputs.name === `_doNotRemove` || sails.config.custom.categories._doNotRemove.indexOf(inputs.name) !== -1)
-                return exits.error(new Error(`Not allowed to remove the provided category ${inputs.name} from the system.`));
             
             delete sails.config.custom.categories[inputs.name];
             

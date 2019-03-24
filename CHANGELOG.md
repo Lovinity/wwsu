@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "start" property for each specialBreaks in configuration; these are queued at the start of a broadcast.
  - "end" property for each specialBreaks in configuration; these are queued when a broadcast ends.
  - sails.helpers.songs.reloadSubcategories() which reloads RadioDJ subcategory numbers into configuration.
+ - sails.helpers.break.validate with tasks parameter, used to validate that an array of break tasks is completely valid.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
