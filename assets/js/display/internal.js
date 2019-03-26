@@ -109,6 +109,7 @@ try {
     var clockTimer;
     var globalStatus = 4;
     var noReq;
+    var officeHoursTimer;
 
     var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
 
@@ -260,9 +261,24 @@ waitFor(() => {
     Directors.setOnRemove((data, db) => processDirectors(db));
     Directors.setOnReplace((db) => processDirectors(db));
 
-    Directorhours.setOnUpdate((data, db) => processDirectorHours(db));
-    Directorhours.setOnInsert((data, db) => processDirectorHours(db));
-    Directorhours.setOnRemove((data, db) => processDirectorHours(db));
+    Directorhours.setOnUpdate((data, db) => {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectorHours(db);
+        }, 5000);
+    });
+    Directorhours.setOnInsert((data, db) => {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectorHours(db);
+        }, 5000);
+    });
+    Directorhours.setOnRemove((data, db) => {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectorHours(db);
+        }, 5000);
+    });
     Directorhours.setOnReplace((db) => processDirectorHours(db));
 
     // Do stuff when announcements changes are made
@@ -307,6 +323,32 @@ waitFor(() => {
                         clearInterval(clockTimer);
                         clearTimeout(clockTimer);
                         clockTimer = setInterval(clockTick, 1000);
+                    }
+
+                    if (key === 'trackID')
+                    {
+                        // April Fool's
+                        if (parseInt(data[key]) >= 74255 && parseInt(data[key]) <= 74259)
+                        {
+                            setTimeout(() => {
+                                iziToast.show({
+                                    title: '',
+                                    message: `<img src="../../images/giphy.gif">`,
+                                    timeout: 25000,
+                                    close: true,
+                                    color: 'blue',
+                                    drag: false,
+                                    position: 'center',
+                                    closeOnClick: true,
+                                    pauseOnHover: false,
+                                    overlay: true,
+                                    zindex: 250,
+                                    layout: 2,
+                                    image: ``,
+                                    maxWidth: 480
+                                });
+                            }, 9500);
+                        }
                     }
                 }
             }
@@ -685,6 +727,8 @@ function processDirectorHours(db)
         var asstcalendar = {};
         db.get().sort(compare).map(event =>
         {
+            if (moment(event.start).isAfter(moment(Meta.time).add(7, 'days').startOf('day')))
+                return;
             var temp = Directors.db({name: event.director}).first();
             if (typeof temp.assistant !== 'undefined')
             {
@@ -762,11 +806,12 @@ function processDirectorHours(db)
                         asstcalendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success">IN ${event.startT}</div><div class="m-1 text-danger">OUT ${event.endT}</div></div>`;
                 }
             }
+        });
 
-            // Director hours slide
-            var innercontent = document.getElementById('office-hours-directors');
+        // Director hours slide
+        var innercontent = document.getElementById('office-hours-directors');
 
-            var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+        var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
      <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
@@ -792,14 +837,14 @@ function processDirectorHours(db)
      <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
      </div>
      </div>`;
-            var doShade = false;
-            Slides.slide(`hours-directors`).displayTime = 5;
-            for (var director in calendar)
+        var doShade = false;
+        Slides.slide(`hours-directors`).displayTime = 5;
+        for (var director in calendar)
+        {
+            if (calendar.hasOwnProperty(director))
             {
-                if (calendar.hasOwnProperty(director))
-                {
-                    Slides.slide(`hours-directors`).displayTime += 2;
-                    stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
+                Slides.slide(`hours-directors`).displayTime += 2;
+                stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
      <div class="col-3 text-warning">
      ${director}
      </div>
@@ -825,21 +870,21 @@ function processDirectorHours(db)
      ${calendar[director][6]}
      </div>
      </div>`;
-                    if (doShade)
-                    {
-                        doShade = false;
-                    } else {
-                        doShade = true;
-                    }
+                if (doShade)
+                {
+                    doShade = false;
+                } else {
+                    doShade = true;
                 }
             }
+        }
 
-            innercontent.innerHTML = stuff;
+        innercontent.innerHTML = stuff;
 
-            // Assistant hours slide
-            var innercontent = document.getElementById('office-hours-assistants');
+        // Assistant hours slide
+        var innercontent = document.getElementById('office-hours-assistants');
 
-            var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+        var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
      <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
@@ -865,14 +910,14 @@ function processDirectorHours(db)
      <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
      </div>
      </div>`;
-            var doShade = false;
-            Slides.slide(`hours-assistants`).displayTime = 5;
-            for (var director in asstcalendar)
+        var doShade = false;
+        Slides.slide(`hours-assistants`).displayTime = 5;
+        for (var director in asstcalendar)
+        {
+            if (asstcalendar.hasOwnProperty(director))
             {
-                if (asstcalendar.hasOwnProperty(director))
-                {
-                    Slides.slide(`hours-assistants`).displayTime += 2;
-                    stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
+                Slides.slide(`hours-assistants`).displayTime += 2;
+                stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
      <div class="col-3 text-warning">
      ${director}
      </div>
@@ -898,17 +943,16 @@ function processDirectorHours(db)
      ${asstcalendar[director][6]}
      </div>
      </div>`;
-                    if (doShade)
-                    {
-                        doShade = false;
-                    } else {
-                        doShade = true;
-                    }
+                if (doShade)
+                {
+                    doShade = false;
+                } else {
+                    doShade = true;
                 }
             }
+        }
 
-            innercontent.innerHTML = stuff;
-        });
+        innercontent.innerHTML = stuff;
     } catch (e) {
         iziToast.show({
             title: 'An error occurred - Please check the logs',

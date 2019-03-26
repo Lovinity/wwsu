@@ -257,7 +257,7 @@ try {
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: #FFFFFF">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
         fn: ((slide) => {
-          processCalendar(Calendar.db());  
+            processCalendar(Calendar.db());
         })
     });
 
@@ -1432,7 +1432,6 @@ waitFor(() => {
 
 // On new calendar data, update our calendar memory and run the process function. Only do this for replace; for all others, will be updated on next slide cycle.
     Calendar.assignSocketEvent('calendar', io.socket);
-    Calendar.setOnReplace((db) => processCalendar(db));
 
 // On new directors data, update our directors memory and run the process function.
     Directors.assignSocketEvent('directors', io.socket);
@@ -1870,6 +1869,29 @@ function processNowPlaying(response)
                 nowPlayingTimer = setInterval(nowPlayingTick, 1000);
             }
 
+            // April Fool's
+            if (typeof response.trackID !== `undefined` && parseInt(response.trackID) >= 74255 && parseInt(response.trackID) <= 74259)
+            {
+                setTimeout(() => {
+                    iziToast.show({
+                        title: '',
+                        message: `<img src="../../images/giphy.gif">`,
+                        timeout: 25000,
+                        close: true,
+                        color: 'blue',
+                        drag: false,
+                        position: 'center',
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        overlay: true,
+                        zindex: 250,
+                        layout: 2,
+                        image: ``,
+                        maxWidth: 480
+                    });
+                }, 9500);
+            }
+
             // First, process now playing information
             var color = 'rgba(121, 85, 72, 0.3)';
             var progress = 50;
@@ -1877,21 +1899,23 @@ function processNowPlaying(response)
             easDelay -= 1;
 
             // scoreboard
-            if (Meta.state.startsWith("sports"))
-            {
-                scoreboard.style.display = "inline";
-                nowplaying.style.display = "none";
-
-                if (Meta.show === "Women's Basketball")
-                {
-                    scoreboard.style.backgroundImage = "url(../../images/sports/mcm_womenfinals.png)";
-                } else if (Meta.show === "Men's Basketball") {
-                    scoreboard.style.backgroundImage = "url(../../images/sports/mcm_menfinals.png)";
-                }
-            } else {
-                nowplaying.style.display = "block";
-                scoreboard.style.display = "none";
-            }
+            /*
+             if (Meta.state.startsWith("sports"))
+             {
+             scoreboard.style.display = "inline";
+             nowplaying.style.display = "none";
+             
+             if (Meta.show === "Women's Basketball")
+             {
+             scoreboard.style.backgroundImage = "url(../../images/sports/mcm_womenfinals.png)";
+             } else if (Meta.show === "Men's Basketball") {
+             scoreboard.style.backgroundImage = "url(../../images/sports/mcm_menfinals.png)";
+             }
+             } else {
+             nowplaying.style.display = "block";
+             scoreboard.style.display = "none";
+             }
+             */
 
             if (disconnected || typeof Meta.state === 'undefined')
             {

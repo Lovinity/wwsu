@@ -69,9 +69,6 @@ module.exports = {
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             var criteriaB = _.cloneDeep(inputs);
 
-            // Update the announcement
-            await Announcements.update({ID: inputs.ID}, criteriaB).fetch();
-
             if (inputs.type !== null && typeof inputs.type !== 'undefined')
             {
                 // If the type changed, issue a remove websocket event to the previous type.
@@ -79,6 +76,9 @@ module.exports = {
                 if (record && record.type !== inputs.type)
                     sails.sockets.broadcast(`announcements-${record.type}`, 'announcements', {remove: inputs.ID});
             }
+
+            // Update the announcement
+            await Announcements.update({ID: inputs.ID}, criteriaB).fetch();
 
             return exits.success();
         } catch (e) {
