@@ -896,7 +896,7 @@ module.exports = {
                         {
                             var maps = cancelled.map(async (cEvent) => {
                                 var attendance = await Timesheet.create({unique: cEvent.unique, name: cEvent.director, scheduled_in: moment(cEvent.start).toISOString(true), scheduled_out: moment(cEvent.end).toISOString(true), approved: true}).fetch();
-                                await Logs.create({attendanceID: null, logtype: 'director-cancellation', loglevel: 'info', logsubtype: cEvent.director, event: `<strong>Director office hours were cancelled via Google Calendar!</strong><br />Director: ${cEvent.title}<br />Cancelled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                await Logs.create({attendanceID: null, logtype: 'director-cancellation', loglevel: 'info', logsubtype: cEvent.director, event: `<strong>Director office hours were cancelled via Google Calendar!</strong><br />Director: ${cEvent.director}<br />Cancelled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                         .tolerate((err) => {
                                             sails.log.error(err);
                                         });
