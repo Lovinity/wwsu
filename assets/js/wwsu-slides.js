@@ -6,7 +6,7 @@ class Slide {
         this._weight = data.weight || 0;
         this._isSticky = data.isSticky || false;
         this._color = data.color || "secondary";
-        this._active = data.active || true;
+        this._active = (typeof data.active !== `undefined`) ? data.active : true;
         this._starts = data.starts || null;
         this._expires = data.expires || null;
         this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`;
