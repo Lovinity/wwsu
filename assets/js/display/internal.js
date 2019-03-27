@@ -77,6 +77,20 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status"></div>`
     });
 
+    Slides.newSlide({
+        name: `director-clockout`,
+        label: `Director Auto Clock Out`,
+        weight: 800000,
+        isSticky: true,
+        color: `danger`,
+        active: false,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 60,
+        fitContent: true,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1>All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.`
+    });
+
 // Define data variables
     var Directors = new WWSUdb(TAFFY());
     var Directorhours = new WWSUdb(TAFFY());
@@ -110,6 +124,7 @@ try {
     var globalStatus = 4;
     var noReq;
     var officeHoursTimer;
+    var directorNotify;
 
     var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
 
@@ -431,6 +446,19 @@ waitFor(() => {
 
 function clockTick() {
     Meta.time = moment(Meta.time).add(1, 'seconds');
+    if (moment(Meta.time).hour() === 23 && moment(Meta.time).minute() >= 55 && !directorNotify)
+    {
+        directorNotify = true;
+        var directorMentions = [];
+        Directors.db({present: true}).each((director) => {
+            directorMentions.push(director.name);
+        });
+        Slides.slide(`director-clockout`).active = true;
+        responsiveVoice.speak(`Attention all directors! Attention all directors! It is almost midnight. Any director who is still clocked in needs to clock out before midnight, and re-clock in after midnight. Guests in the lobby, please inform any directors still in the office about this. The following directors, if any, are still clocked in and need to clock out now: ${directorMentions.join(", ")}.`);
+    } else if (directorNotify) {
+        Slides.slide(`director-clockout`).active = false;
+        directorNotify = false;
+    }
 }
 
 // Define data-specific functions
