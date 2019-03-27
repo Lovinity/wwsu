@@ -25,7 +25,7 @@ module.exports = {
         },
         pInstances: {
             type: 'number',
-            description: `How many signs should be connected to display/[internal]ublic for this to be considered good?`
+            description: `How many signs should be connected to display/public for this to be considered good?`
         }
     },
 
@@ -39,23 +39,24 @@ module.exports = {
         try {
             // Make changes
             sails.config.custom.displaysigns
-                    .filter((sign) => sign.name === `internal`)
                     .map((sign, index) => {
-                        if (typeof inputs.iLevel !== `undefined`)
-                            sails.config.custom.displaysigns[index].level = inputs.iLevel;
+                        if (sign.name === `internal`)
+                        {
+                            if (typeof inputs.iLevel !== `undefined`)
+                                sails.config.custom.displaysigns[index].level = inputs.iLevel;
 
-                        if (typeof inputs.iInstances !== `undefined`)
-                            sails.config.custom.displaysigns[index].instances = inputs.iInstances;
-                    });
+                            if (typeof inputs.iInstances !== `undefined`)
+                                sails.config.custom.displaysigns[index].instances = inputs.iInstances;
+                        }
 
-            sails.config.custom.displaysigns
-                    .filter((sign) => sign.name === `public`)
-                    .map((sign, index) => {
-                        if (typeof inputs.pLevel !== `undefined`)
-                            sails.config.custom.displaysigns[index].level = inputs.pLevel;
+                        if (sign.name === `public`)
+                        {
+                            if (typeof inputs.pLevel !== `undefined`)
+                                sails.config.custom.displaysigns[index].level = inputs.pLevel;
 
-                        if (typeof inputs.pInstances !== `undefined`)
-                            sails.config.custom.displaysigns[index].instances = inputs.pInstances;
+                            if (typeof inputs.pInstances !== `undefined`)
+                                sails.config.custom.displaysigns[index].instances = inputs.pInstances;
+                        }
                     });
 
             // Add and remove a dummy public display sign recipient so we can update the status according to the new configuration.
