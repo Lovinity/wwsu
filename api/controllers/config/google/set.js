@@ -36,9 +36,9 @@ module.exports = {
 
                     // Destroy existing data whenever API keys are changed
                     if (key === `calendarId`)
-                        await Calendar.destroy().fetch();
+                        await Calendar.destroy({}).fetch();
                     if (key === `directorHoursId`)
-                        await Directorhours.destroy().fetch();
+                        await Directorhours.destroy({}).fetch();
                 }
             }
 
