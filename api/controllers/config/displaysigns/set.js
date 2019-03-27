@@ -41,20 +41,20 @@ module.exports = {
             sails.config.custom.displaysigns
                     .filter((sign) => sign.name === `internal`)
                     .map((sign, index) => {
-                        if (typeof inputs.level !== `undefined`)
+                        if (typeof inputs.iLevel !== `undefined`)
                             sails.config.custom.displaysigns[index].level = inputs.iLevel;
 
-                        if (typeof inputs.instances !== `undefined`)
+                        if (typeof inputs.iInstances !== `undefined`)
                             sails.config.custom.displaysigns[index].instances = inputs.iInstances;
                     });
 
             sails.config.custom.displaysigns
                     .filter((sign) => sign.name === `public`)
                     .map((sign, index) => {
-                        if (typeof inputs.level !== `undefined`)
+                        if (typeof inputs.pLevel !== `undefined`)
                             sails.config.custom.displaysigns[index].level = inputs.pLevel;
 
-                        if (typeof inputs.instances !== `undefined`)
+                        if (typeof inputs.pInstances !== `undefined`)
                             sails.config.custom.displaysigns[index].instances = inputs.pInstances;
                     });
 
