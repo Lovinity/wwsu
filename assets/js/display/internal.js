@@ -446,15 +446,18 @@ waitFor(() => {
 
 function clockTick() {
     Meta.time = moment(Meta.time).add(1, 'seconds');
-    if (moment(Meta.time).hour() === 23 && moment(Meta.time).minute() >= 55 && !directorNotify)
+    if (moment(Meta.time).hour() === 23 && moment(Meta.time).minute() >= 55)
     {
-        directorNotify = true;
-        var directorMentions = [];
-        Directors.db({present: true}).each((director) => {
-            directorMentions.push(director.name);
-        });
-        Slides.slide(`director-clockout`).active = true;
-        responsiveVoice.speak(`Attention all directors! Attention all directors! It is almost midnight. Any director who is still clocked in needs to clock out before midnight, and re-clock in after midnight. Guests in the lobby, please inform any directors still in the office about this. The following directors, if any, are still clocked in and need to clock out now: ${directorMentions.join(", ")}.`);
+        if (!directorNotify)
+        {
+            directorNotify = true;
+            var directorMentions = [];
+            Directors.db({present: true}).each((director) => {
+                directorMentions.push(director.name);
+            });
+            Slides.slide(`director-clockout`).active = true;
+            responsiveVoice.speak(`Attention all directors! Attention all directors! It is almost midnight. Any director who is still clocked in needs to clock out before midnight, and re-clock in after midnight. Guests in the lobby, please inform any directors still in the office about this. The following directors, if any, are still clocked in and need to clock out now: ${directorMentions.join(", ")}.`);
+        }
     } else if (directorNotify) {
         Slides.slide(`director-clockout`).active = false;
         directorNotify = false;
