@@ -845,9 +845,9 @@ function processDirectorHours(db)
 
                     // Push the final products into our formatted variable
                     if (!assistant)
-                        calendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br />${endText}` : ``}</div>`;
+                        calendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">IN: ${event.startT}</span><br /><span class="text-danger">OUT: ${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
                     if (assistant)
-                        asstcalendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br />${endText}` : ``}</div>`;
+                        asstcalendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">IN: ${event.startT}</span><br /><span class="text-danger">OUT: ${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
                 }
             }
         });
