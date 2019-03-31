@@ -29,7 +29,7 @@ module.exports = {
         active: {
             type: 'number',
             min: -1,
-            max: 1,
+            max: 2,
             defaultsTo: 1
         },
 

@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Logging of when Google Calendar events were cancelled (removed) [only applicable for events within the next week to date]. Logged via "cancellation" logtype.
  - When logging an absence or cancellation, if the DJ does not exist in the system, it will be created instead of ignored.
  - sails.helpers.onesignal.send() and sails.helpers.onesignal.sendEvent() helpers for sending out push notifications.
+ - Push notification subscription system where users can be notified when shows go on the air, get cancelled, or get changed.
  - "scheduled_in", "scheduled_out", and "unique" attributes in Timesheet. This allows tracking office hour consistency.
  - Logging when a director cancels office hours or does not clock in for office hours. These will fall under logtype "director-cancellation" and "director-absent" respectively.
+ - Logging of when a director's office hours changed. These will fall under logtype "director-change".
  - "start" property for each specialBreaks in configuration; these are queued at the start of a broadcast.
  - "end" property for each specialBreaks in configuration; these are queued when a broadcast ends.
  - sails.helpers.songs.reloadSubcategories() which reloads RadioDJ subcategory numbers into configuration.
@@ -24,11 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
  - Removed a lot of the logging that could potentially output sensitive data to the console.
- - "calendar" model now uses nodebase datastore instead of RAM. This is so we can persist-store event cancellations.
- - "directorhours" model now uses timesheets datastore instead of RAM. This is so we can persist-store office hour cancellations.
+ - "calendar" model now uses nodebase datastore instead of RAM. This is so we can persist-store event cancellations and time changes.
+ - "directorhours" model now uses timesheets datastore instead of RAM. This is so we can persist-store office hour cancellations and time changes.
  - requests/place response object changed. HTML property removed; instead, message property will be used, which will NOT contain div/bootstrap data.
  - sails.helpers.requests.checkRequestable now returns message property instead of HTML property; message property does not contain div/bootstrap data.
- - "active" property of calendar events is now a number instead of boolean: -1 is cancelled, 0 is expired, 1 is active.
+ - "active" property of calendar events and directorhours is now a number instead of boolean: -1 is cancelled, 0 is expired, 1 is active, 2 is active but date/time changed.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

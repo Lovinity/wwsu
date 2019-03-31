@@ -29,7 +29,7 @@ module.exports = {
         active: {
             type: 'number',
             min: -1,
-            max: 1,
+            max: 2,
             defaultsTo: 1
         },
 
@@ -229,7 +229,7 @@ module.exports = {
                 sails.log.silly(events);
                 // Alert if no events returned; this may be a problem. Also exit.
                 if (events.length === 0) {
-                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no events for the next 7 days.', status: 3}]);
+                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no events for the next 28 days.', status: 3}]);
                     return resolve();
                 } else {
                     // Iterate through each returned event from Google Calendar
@@ -510,6 +510,7 @@ module.exports = {
                         //sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
                         // Check if the event changed. If so, update it and push it out to clients.
                         var needsUpdate = false;
+                        var isChanged = false;
                         for (var key in theEvent)
                         {
                             if (theEvent.hasOwnProperty(key))
@@ -521,6 +522,11 @@ module.exports = {
                                         continue;
                                     if (key === `end` && moment(theEvent[key]).isSame(moment(criteria[key])))
                                         continue;
+                                    if (key === `start` && !moment(theEvent[key]).isSame(moment(criteria[key])))
+                                        isChanged = true;
+                                    if (key === `end` && !moment(theEvent[key]).isSame(moment(criteria[key])))
+                                        isChanged = true;
+
                                     needsUpdate = true;
                                     break;
                                 }
@@ -528,6 +534,49 @@ module.exports = {
                         }
                         if (needsUpdate)
                         {
+                            // The time/date for the event changed. Send out a push notification.
+                            if (isChanged && theEvent.active >= 1)
+                            {
+                                criteriaC.active = 2;
+                                var dj = criteria.title;
+                                if (dj.includes(" - ") && dj.includes(": "))
+                                {
+                                    dj = dj.split(" - ")[0];
+                                    dj = dj.substring(dj.indexOf(": ") + 2);
+                                } else {
+                                    dj = null;
+                                }
+                                if (criteria.title.startsWith("Show: "))
+                                {
+                                    var temp = criteria.title.replace("Show: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, criteria.unique, moment(criteria.start).format("LLL"), false);
+                                }
+                                if (criteria.title.startsWith("Remote: "))
+                                {
+                                    var temp = criteria.title.replace("Remote: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, criteria.unique, moment(criteria.start).format("LLL"), false);
+                                }
+                                if (criteria.title.startsWith("Sports: "))
+                                {
+                                    var temp = criteria.title.replace("Sports: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, criteria.unique, moment(criteria.start).format("LLL"), false);
+                                }
+                                if (criteria.title.startsWith("Prerecord: "))
+                                {
+                                    var temp = criteria.title.replace("Prerecord: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, criteria.unique, moment(criteria.start).format("LLL"), false);
+                                }
+                                if (criteria.title.startsWith("Genre: "))
+                                {
+                                    var temp = criteria.title.replace("Genre: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, criteria.unique, moment(criteria.start).format("LLL"), false);
+                                }
+                                if (criteria.title.startsWith("Playlist: "))
+                                {
+                                    var temp = criteria.title.replace("Playlist: ", "");
+                                    await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, criteria.unique, moment(criteria.start).format("LLL"), false);
+                                }
+                            }
                             await Calendar.update({unique: event.id}, criteriaC).fetch();
                         }
 
@@ -563,7 +612,7 @@ module.exports = {
                                 // Check if the event started over 10 minutes prior to start time, and if so, update the attendance record accordingly.
                                 if (Meta['A'].attendanceID !== null)
                                 {
-                                    if (attendanceRecord.event === event.summary && event.active === 1 && (attendanceRecord.unique === null || attendanceRecord.unique === ``))
+                                    if (attendanceRecord.event === event.summary && event.active >= 1 && (attendanceRecord.unique === null || attendanceRecord.unique === ``))
                                     {
                                         await Attendance.update({ID: Meta['A'].attendanceID}, {unique: event.id, scheduledStart: moment(criteria.start).toISOString(true), scheduledEnd: moment(criteria.end).toISOString(true)}).fetch();
                                     }
@@ -592,7 +641,7 @@ module.exports = {
                     }
 
                     // Update entries in the calendar which passed their end time
-                    var destroyed = await Calendar.update({active: 1, end: {"<=": moment().toISOString(true)}}, {active: 0})
+                    var destroyed = await Calendar.update({active: {'>=': 1}, end: {"<=": moment().toISOString(true)}}, {active: 0})
                             .tolerate((err) => {
                             })
                             .fetch();
@@ -606,7 +655,7 @@ module.exports = {
                                 .fetch();
 
                         // Entries no longer in Google Calendar should be updated to active = -1 to indicate they were canceled.
-                        var cancelled = await Calendar.update({unique: {'nin': eventIds}, active: 1}, {active: -1})
+                        var cancelled = await Calendar.update({unique: {'nin': eventIds}, active: {'>=': 1}}, {active: -1})
                                 .tolerate((err) => {
                                 })
                                 .fetch();
@@ -629,7 +678,7 @@ module.exports = {
                                 if (cEvent.title.startsWith("Show: "))
                                 {
                                     var temp = cEvent.title.replace("Show: ", "");
-                                    await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
                                     await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Show was cancelled via Google Calendar!</strong><br />Show: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
@@ -638,7 +687,7 @@ module.exports = {
                                 if (cEvent.title.startsWith("Remote: "))
                                 {
                                     var temp = cEvent.title.replace("Remote: ", "");
-                                    await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
                                     await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Remote broadcast was cancelled via Google Calendar!</strong><br />Remote: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
@@ -647,7 +696,7 @@ module.exports = {
                                 if (cEvent.title.startsWith("Sports: "))
                                 {
                                     var temp = cEvent.title.replace("Sports: ", "");
-                                    await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
                                     await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Sports broadcast was cancelled via Google Calendar!</strong><br />Sports: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
@@ -656,7 +705,7 @@ module.exports = {
                                 if (cEvent.title.startsWith("Prerecord: "))
                                 {
                                     var temp = cEvent.title.replace("Prerecord: ", "");
-                                    await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
                                     await Logs.create({attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Prerecorded show was cancelled via Google Calendar!</strong><br />Prerecord: ${temp}<br />Scheduled time: ${moment(cEvent.start).format("LLL")} - ${moment(cEvent.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err);
@@ -666,12 +715,12 @@ module.exports = {
                                 if (cEvent.title.startsWith("Genre: "))
                                 {
                                     var temp = cEvent.title.replace("Genre: ", "");
-                                    await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
                                 }
                                 if (cEvent.title.startsWith("Playlist: "))
                                 {
                                     var temp = cEvent.title.replace("Playlist: ", "");
-                                    await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, cEvent.unique, moment(cEvent.start).format("LLL"));
+                                    await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
                                 }
                             });
                             await Promise.all(maps);
@@ -785,7 +834,7 @@ module.exports = {
 
                 // Should have at least one event.
                 if (events.length === 0) {
-                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no director hours for the next 7 days.', status: 3}]);
+                    Status.changeStatus([{name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no director hours for the next 28 days.', status: 3}]);
                     return resolve();
                 } else {
                     var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
@@ -825,6 +874,7 @@ module.exports = {
                         //sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
                         // Check if the event changed. If so, update it and push it out to clients.
                         var needsUpdate = false;
+                        var isChanged = false;
                         for (var key in theEvent)
                         {
                             if (theEvent.hasOwnProperty(key))
@@ -836,6 +886,12 @@ module.exports = {
                                         continue;
                                     if (key === `end` && moment(theEvent[key]).isSame(moment(criteria[key])))
                                         continue;
+
+                                    if (key === `start` && !moment(theEvent[key]).isSame(moment(criteria[key])))
+                                        isChanged = true;
+                                    if (key === `end` && !moment(theEvent[key]).isSame(moment(criteria[key])))
+                                        isChanged = true;
+
                                     needsUpdate = true;
                                     break;
                                 }
@@ -843,6 +899,15 @@ module.exports = {
                         }
                         if (needsUpdate)
                         {
+                            // Director changed their hours
+                            if (isChanged && theEvent.active >= 1)
+                            {
+                                criteriaC.active = 2;
+                                await Logs.create({attendanceID: null, logtype: 'director-change', loglevel: 'info', logsubtype: criteria.director, event: `<strong>Director changed their office hours via Google Calendar!</strong><br />Director: ${criteria.director}<br />Old hours: ${moment(theEvent.start).format("LLL")} - ${moment(theEvent.end).format("LT")}<br />Updated hours: ${moment(criteria.start).format("LLL")} - ${moment(criteria.end).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                        .tolerate((err) => {
+                                            sails.log.error(err);
+                                        });
+                            }
                             await Directorhours.update({unique: event.id}, criteriaC).fetch();
                         }
 
@@ -857,8 +922,8 @@ module.exports = {
                                     if (record[0].unique === null)
                                     {
                                         await Timesheet.update({name: event.summary, unique: null, time_in: {'!=': null}, time_out: null}, {unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true)}).fetch();
-                                        
-                                    // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
+
+                                        // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
                                     } else if (record[0].unique !== event.id) {
                                         var updater = await Timesheet.update({name: event.summary, time_in: {'!=': null}, time_out: null}, {time_out: moment().toISOString(true)}).fetch();
                                         await Timesheet.create({name: event.summary, unique: event.id, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), time_in: moment().toISOString(true), time_out: null, approved: updater[0].approved}).fetch();
@@ -871,7 +936,7 @@ module.exports = {
                     }
 
                     // Update entries in the calendar which passed their end time
-                    var destroyed = await Directorhours.update({active: 1, end: {"<=": moment().toISOString(true)}}, {active: 0})
+                    var destroyed = await Directorhours.update({active: {'>=': 1}, end: {"<=": moment().toISOString(true)}}, {active: 0})
                             .tolerate((err) => {
                             })
                             .fetch();
@@ -886,7 +951,7 @@ module.exports = {
                                 .fetch();
 
                         // Entries no longer in Google Calendar should be updated to active = -1 to indicate they were canceled.
-                        var cancelled = await Directorhours.update({unique: {'nin': eventIds}, active: 1}, {active: -1})
+                        var cancelled = await Directorhours.update({unique: {'nin': eventIds}, active: {'>=': 1}}, {active: -1})
                                 .tolerate((err) => {
                                 })
                                 .fetch();

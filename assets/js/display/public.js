@@ -681,11 +681,19 @@ function processCalendar(db)
                         color.red = Math.round(color.red / 1.5);
                         color.green = Math.round(color.green / 1.5);
                         color.blue = Math.round(color.blue / 1.5);
+                        var badgeInfo;
+                        if (dodo.active === 2)
+                        {
+                            badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">TIME CHANGED</span>`;
+                        }
+                        if (dodo.active === -1)
+                        {
+                            badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELLED</span>`;
+                        }
                         if (dodo.title.startsWith("Show: "))
                         {
                             var stripped = dodo.title.replace("Show: ", "");
-                            var eventType = dodo.active > -1 ? "SHOW" : `CANCELED`;
-                            var eventClass = "primary";
+                            var eventType = "SHOW";
                             var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
@@ -699,8 +707,7 @@ function processCalendar(db)
                         } else if (dodo.title.startsWith("Prerecord: "))
                         {
                             var stripped = dodo.title.replace("Prerecord: ", "");
-                            var eventType = dodo.active > -1 ? "PRERECORD" : `CANCELED`;
-                            var eventClass = "danger";
+                            var eventType = "PRERECORD";
                             var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
@@ -714,8 +721,7 @@ function processCalendar(db)
                         } else if (dodo.title.startsWith("Remote: "))
                         {
                             var stripped = dodo.title.replace("Remote: ", "");
-                            var eventType = dodo.active > -1 ? "REMOTE" : `CANCELED`;
-                            var eventClass = "purple";
+                            var eventType = "REMOTE";
                             var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
@@ -729,14 +735,12 @@ function processCalendar(db)
                         } else if (dodo.title.startsWith("Sports: "))
                         {
                             var stripped = dodo.title.replace("Sports: ", "");
-                            var eventType = dodo.active > -1 ? "SPORTS" : `CANCELED`;
-                            var eventClass = "success";
+                            var eventType = "SPORTS";
                             var line1 = "Raider Sports";
                             var line2 = stripped;
                             var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
                         } else {
-                            var eventType = dodo.active > -1 ? "EVENT" : `CANCELED`;
-                            var eventClass = "secondary";
+                            var eventType = "EVENT";
                             var line1 = "";
                             var line2 = dodo.title;
                             var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
@@ -744,8 +748,8 @@ function processCalendar(db)
                         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
                         innercontent.innerHTML += `<div style="width: 190px; position: relative; background-color: ${color};" class="m-2 text-white rounded shadow-8">
              <div class="p-1 text-center" style="width: 100%;">${image}
-             <span class="notification badge badge-${eventClass} shadow-2" style="font-size: 1em;">${eventType}</span>
-             <div class="m-1" style="text-align: center;"><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
+             ${badgeInfo ? badgeInfo : ``}
+             <div class="m-1" style="text-align: center;"><span class="text-white" style="font-size: 0.8em;">${eventType}</span><br><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
                     } catch (e) {
                         console.error(e);
                         iziToast.show({

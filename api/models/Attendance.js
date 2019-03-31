@@ -109,7 +109,7 @@ module.exports = {
                 var currentID = Meta['A'].attendanceID;
 
                 // Find a calendar record with the provided event name. Allow up to 10 grace minutes before start time
-                var record = await Calendar.find({title: event, active: 1, start: {"<=": moment().add(10, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
+                var record = await Calendar.find({title: event, active: {'>=': 1}, start: {"<=": moment().add(10, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
                 sails.log.debug(`Calendar records found: ${record.length || 0}`);
 
                 // Create the new attendance record

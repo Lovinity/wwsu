@@ -31,9 +31,14 @@ module.exports = {
             description: `The Google Calendar ID of the event that just started, or null if there is no event.`
         },
 
-        cancellationDate: {
+        date: {
             type: 'string',
             description: `If specified, this notification is a cancellation notice, and this is the date which the event was cancelled for.`
+        },
+
+        cancelled: {
+            type: 'boolean',
+            description: 'If true, and date was provided, consider event as cancelled. If false and date provided, consider event as changed date/time.'
         }
     },
 
@@ -49,11 +54,16 @@ module.exports = {
             records.map((record) => devices.push(record.device));
             if (devices.length > 0)
             {
-                if (!inputs.cancellationDate)
+                if (!inputs.date)
                 {
                     await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} is On the Air!`, `${inputs.event} just started on WWSU Radio!`, (60 * 60 * 3));
                 } else {
-                    await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} was cancelled.`, `${inputs.event} was cancelled for the date of ${inputs.cancellationDate}.`, (60 * 60 * 24 * 7));
+                    if (!inputs.cancelled)
+                    {
+                        await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} changed the date/time.`, `The date/time for ${inputs.event} was changed to ${inputs.date}.`, (60 * 60 * 24 * 7));
+                    } else {
+                        await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} was cancelled.`, `${inputs.event} was cancelled for the date of ${inputs.date}.`, (60 * 60 * 24 * 7));
+                    }
                 }
             }
 

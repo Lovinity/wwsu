@@ -803,6 +803,8 @@ function processDirectorHours(db)
                 var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
                 var start2;
                 var end2;
+                var bg;
+                var endText;
                 if (moment(event.start).isBefore(looptime))
                 {
                     start2 = moment(looptime);
@@ -814,6 +816,17 @@ function processDirectorHours(db)
                     end2 = moment(looptime2);
                 } else {
                     end2 = moment(event.end);
+                }
+                
+                if (event.active === 2)
+                {
+                    bg = `background-color: rgba(255, 255, 0, 0.25);`;
+                    endText = `<strong>Hours were Updated</strong>`;
+                }
+                if (event.active === -1)
+                {
+                    bg = `background-color: rgba(255, 0, 0, 0.25);`;
+                    endText = `<strong>CANCELLED</strong>`;
                 }
                 if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
                 {
@@ -832,9 +845,9 @@ function processDirectorHours(db)
 
                     // Push the final products into our formatted variable
                     if (!assistant)
-                        calendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success">IN ${event.startT}</div><div class="m-1 text-danger">OUT ${event.endT}</div></div>`;
+                        calendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br />${endText}` : ``}</div>`;
                     if (assistant)
-                        asstcalendar[event.director][i] += `<div class="m-1"><div class="m-1 text-success">IN ${event.startT}</div><div class="m-1 text-danger">OUT ${event.endT}</div></div>`;
+                        asstcalendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br />${endText}` : ``}</div>`;
                 }
             }
         });
