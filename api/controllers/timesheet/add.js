@@ -53,7 +53,7 @@ module.exports = {
                 thetime = moment(inputs.timestamp);
 
                 // Check if an office hours record exists. Allow 30 minutes grace.
-                var calendar = await Directorhours.find({director: record.name, active: 1, start: {"<=": moment().add(30, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
+                var calendar = await Directorhours.find({director: record.name, active: {'>=': 1}, start: {"<=": moment().add(30, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
 
                 // If the entry is less than 30 minutes off from the current time, approve automatically
                 if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))

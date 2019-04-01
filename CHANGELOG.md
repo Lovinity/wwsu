@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - requests/place response object changed. HTML property removed; instead, message property will be used, which will NOT contain div/bootstrap data.
  - sails.helpers.requests.checkRequestable now returns message property instead of HTML property; message property does not contain div/bootstrap data.
  - "active" property of calendar events and directorhours is now a number instead of boolean: -1 is cancelled, 0 is expired, 1 is active, 2 is active but date/time changed.
+ - Display signs and website no longer removes cancelled events (except for genres) but displays them with a "cancelled" badge so people know it was cancelled.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated
