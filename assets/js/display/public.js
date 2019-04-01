@@ -688,7 +688,7 @@ function processCalendar(db)
                         }
                         if (dodo.active === -1)
                         {
-                            badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELLED</span>`;
+                            badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`;
                         }
                         if (dodo.title.startsWith("Show: "))
                         {
@@ -816,7 +816,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -897,7 +897,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -978,7 +978,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -1076,7 +1076,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -1157,7 +1157,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>
@@ -1238,7 +1238,7 @@ function processCalendar(db)
                         innercontent2.innerHTML += `<div class="container shadow-4" style="width: 100%; text-align: center; background-color: ${color2}; border: 0px solid ${color}; border-left-width: 5px;">
              <div class="row">
              <div class="col-8" style="text-align: left;">
-             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELLED</strong>` : ``}</span>
+             <span class="m-1 text-white" style="font-size: 1em;">${dodo.title}${dodo.active === -1 ? `<br /><strong>CANCELED</strong>` : ``}</span>
              </div>
              <div class="col" style="text-align: right;">
              <span class="m-2 text-white" style="font-size: 0.75em;">${dodo.startT} to<br />${dodo.endT}</span>

@@ -1350,7 +1350,7 @@ function updateCalendar() {
                         }
                         if (event.active === -1)
                         {
-                            badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELLED</span>`;
+                            badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`;
                         }
                         if (event.title.startsWith("Show: "))
                         {
