@@ -820,13 +820,13 @@ function processDirectorHours(db)
                 
                 if (event.active === 2)
                 {
-                    bg = `background-color: rgba(255, 255, 0, 0.25);`;
-                    endText = `<strong>Hours were Updated</strong>`;
+                    bg = `background-color: rgba(255, 255, 0, 0.2);`;
+                    endText = `<strong>Updated</strong>`;
                 }
                 if (event.active === -1)
                 {
-                    bg = `background-color: rgba(255, 0, 0, 0.25);`;
-                    endText = `<strong>CANCELLED</strong>`;
+                    bg = `background-color: rgba(255, 0, 0, 0.2);`;
+                    endText = `<strong>CANCELED</strong>`;
                 }
                 if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
                 {
