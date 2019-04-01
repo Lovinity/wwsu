@@ -716,6 +716,8 @@ module.exports = {
                                 {
                                     var temp = cEvent.title.replace("Genre: ", "");
                                     await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
+                                    // We do not want to maintain cancellation records of genres in the system.
+                                    await Calendar.destroy({ID: cEvent.ID}).fetch();
                                 }
                                 if (cEvent.title.startsWith("Playlist: "))
                                 {
