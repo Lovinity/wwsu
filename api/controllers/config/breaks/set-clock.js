@@ -36,15 +36,15 @@ module.exports = {
             if (inputs.tasks.length < 1 && inputs.minute !== 0)
             {
                 delete sails.config.custom.breaks[inputs.minute];
-                return exits.success(`DELETED`);
+                return exits.success();
             } else
             {
-                sails.config.custom.breaks[inputs.minute] = inputs.tasks;
+                sails.config.custom.breaks[inputs.minute] = JSON.parse(inputs.tasks);
             }
 
             sails.sockets.broadcast('config', 'config', {update: {breaks: sails.config.custom.breaks}});
 
-            return exits.success(`OK`);
+            return exits.success();
         } catch (e) {
             return exits.error(e);
         }
