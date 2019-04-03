@@ -36,7 +36,6 @@ module.exports = {
             if (inputs.tasks.length < 1 && inputs.minute !== 0)
             {
                 delete sails.config.custom.breaks[inputs.minute];
-                return exits.success();
             } else
             {
                 sails.config.custom.breaks[inputs.minute] = inputs.tasks;
