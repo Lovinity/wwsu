@@ -31,22 +31,20 @@ module.exports = {
         sails.log.debug('Controller config/breaks/set-clock called.');
 
         try {
-            
+
             // If an ampty tasks array was provided, delete this break and exit, unless the provided minute was 0 (never delete break 0).
             if (inputs.tasks.length < 1 && inputs.minute !== 0)
             {
                 delete sails.config.custom.breaks[inputs.minute];
-                return exits.success();
-            }
-            
-            if (inputs.minute && inputs.tasks.length > 0)
+                return exits.success(`DELETED`);
+            } else
             {
                 sails.config.custom.breaks[inputs.minute] = inputs.tasks;
             }
-            
+
             sails.sockets.broadcast('config', 'config', {update: {breaks: sails.config.custom.breaks}});
 
-            return exits.success();
+            return exits.success(`OK`);
         } catch (e) {
             return exits.error(e);
         }
