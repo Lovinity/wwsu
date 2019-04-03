@@ -39,7 +39,7 @@ module.exports = {
                 return exits.success();
             }
             
-            if (inputs.minute && typeof sails.config.custom.breaks[inputs.minute] === `undefined`)
+            if (inputs.minute && inputs.tasks.length > 0)
             {
                 sails.config.custom.breaks[inputs.minute] = inputs.tasks;
             }
