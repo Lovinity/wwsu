@@ -39,7 +39,7 @@ module.exports = {
                 return exits.success();
             } else
             {
-                sails.config.custom.breaks[inputs.minute] = JSON.parse(inputs.tasks);
+                sails.config.custom.breaks[inputs.minute] = inputs.tasks;
             }
 
             sails.sockets.broadcast('config', 'config', {update: {breaks: sails.config.custom.breaks}});
