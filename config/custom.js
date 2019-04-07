@@ -194,6 +194,7 @@ var defaultConfig = {
      *          ...
      *       }
      * 
+     * CATEGORY NAMES MUST BE ALPHANUMERIC (no spaces nor symbols)!
      * NOTE: Any configured categories or subcategories not found will be ignored.
      * NOTE2: Whenever something else in this configuration files mentions "category", it refers to the categories configured here.
      *        For example, if an "IDs" category is configured here, you might specify "IDs" as the category of station IDs to queue somewhere else in this config file.
