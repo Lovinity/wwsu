@@ -171,6 +171,7 @@ try {
 
     // Define additional variables
     var flashInterval = null;
+    var processCalendarTimer;
     var disconnected = true;
     var slide = 1;
     var slides = {};
@@ -256,9 +257,6 @@ try {
         displayTime: 15,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: #FFFFFF">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
-        fn: ((slide) => {
-            processCalendar(Calendar.db());
-        })
     });
 
     // Events 2-4
@@ -597,8 +595,8 @@ function processCalendar(db)
 
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
         db.get()
-                .sort(compare)
                 .filter(event => !event.title.startsWith("Genre:") && !event.title.startsWith("Playlist:") && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(8, 'days')))
+                .sort(compare)
                 .map(event =>
                 {
                     try {
@@ -1434,8 +1432,32 @@ waitFor(() => {
         }
     });
 
-// On new calendar data, update our calendar memory and run the process function. Only do this for replace; for all others, will be updated on next slide cycle.
+// On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
     Calendar.assignSocketEvent('calendar', io.socket);
+    Calendar.setOnUpdate((data, db) => {
+        clearTimeout(processCalendarTimer);
+        processCalendarTimer = setTimeout(() => {
+            processCalendar(db);
+        }, 5000);
+    });
+    Calendar.setOnInsert((data, db) => {
+        clearTimeout(processCalendarTimer);
+        processCalendarTimer = setTimeout(() => {
+            processCalendar(db);
+        }, 5000);
+    });
+    Calendar.setOnRemove((data, db) => {
+        clearTimeout(processCalendarTimer);
+        processCalendarTimer = setTimeout(() => {
+            processCalendar(db);
+        }, 5000);
+    });
+    Calendar.setOnReplace((db) => {
+        clearTimeout(processCalendarTimer);
+        processCalendarTimer = setTimeout(() => {
+            processCalendar(db);
+        }, 5000);
+    });
 
 // On new directors data, update our directors memory and run the process function.
     Directors.assignSocketEvent('directors', io.socket);
