@@ -25,6 +25,7 @@ module.exports.policies = {
     'announcements/get': ['isBanned', 'isSocket'],
     'calendar/*': 'isBanned',
     'config/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+    'config/categories/get-available': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'config/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'directors/*': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
     'directors/get': 'isBanned',
