@@ -14,16 +14,32 @@ module.exports = {
             description: `The name of the category to add, or add to`
         },
 
-        category: {
-            type: 'string',
-            description: `The name of the main RadioDJ category to add in, or replace if it already exists in the configuration.`
-        },
-
-        subcategories: {
+        config: {
             type: 'json',
-            custom: (value) => _.isArray(value),
-            description: `An array of RadioDJ subcategories that should be used within the specified category. Omit or use [] for all subcategories.`,
-            defaultsTo: []
+            custom: (value) => {
+              var isValid = true;
+              for (var key in value)
+              {
+                  if (value.hasOwnProperty(key))
+                  {
+                      // The value of every key should be an array.
+                      if (!_.isArray(value[key]))
+                        isValid = false;
+                    
+                      if (value[key].length > 0)
+                      {
+                          // Every item in the array should be a string
+                          value[key].map((item) => {
+                             if (!_.isString(item))
+                                 isValid = false;
+                          });
+                      }
+                  }
+              }
+              return isValid;
+            },
+            description: `JSON configuration of RadioDJ categories/subcategories to use for this category. Each key is a RadioDJ main category. Each value is an array of subcategories in the main category; use an empty array to use all subcategories.`,
+            defaultsTo: {}
         }
     },
 
@@ -32,16 +48,10 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller config/categories/add called.');
+        sails.log.debug('Controller config/categories/set called.');
 
         try {
-            if (inputs.name && typeof sails.config.custom.categories[inputs.name] === `undefined`)
-            {
-                sails.config.custom.categories[inputs.name] = {};
-            }
-
-            if (inputs.category)
-                sails.config.custom.categories[inputs.name][inputs.category] = inputs.subcategories;
+            sails.config.custom.categories[inputs.name] = inputs.config;
             
             sails.sockets.broadcast('config', 'config', {update: {categories: sails.config.custom.categories}});
 
