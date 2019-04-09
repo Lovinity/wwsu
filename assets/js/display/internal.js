@@ -910,13 +910,12 @@ function processDirectors(ddb, hdb)
     <div class="col">
                 ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
     </div>
-    <div class="col">
+    <div class="col text-warning">
       ${director}<br />
       ${temp.present ? `<span class="badge badge-success">IN</span>` : `<span class="badge badge-danger">OUT</span>`}
     </div>
   </div>
 </div>
-     ${director}
      </div>
      <div class="col" style="font-size: 0.75em;">
      ${calendar[director][0]}
@@ -995,13 +994,12 @@ function processDirectors(ddb, hdb)
     <div class="col">
                 ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
     </div>
-    <div class="col">
+    <div class="col text-warning">
       ${director}<br />
       ${temp.present ? `<span class="badge badge-success">IN</span>` : `<span class="badge badge-danger">OUT</span>`}
     </div>
   </div>
 </div>
-     ${director}
      </div>
      <div class="col" style="font-size: 0.75em;">
      ${asstcalendar[director][0]}
