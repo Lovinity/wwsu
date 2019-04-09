@@ -904,15 +904,16 @@ function processDirectors(ddb, hdb)
                 var temp = directors[director] || null;
                 Slides.slide(`hours-directors`).displayTime += 2;
                 stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.8)` : `rgba(211, 47, 47, 0.8)`};">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
                 <div class="container">
   <div class="row">
-    <div class="col">
+    <div class="col" style="width: 52px;">
                 ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
     </div>
     <div class="col text-warning">
       ${director}<br />
-      ${temp.present ? `<span class="badge badge-success">IN</span>` : `<span class="badge badge-danger">OUT</span>`}
+      ${temp.position}<br />
+      ${temp.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
     </div>
   </div>
 </div>
@@ -988,15 +989,16 @@ function processDirectors(ddb, hdb)
                 var temp = directors[director] || null;
                 Slides.slide(`hours-assistants`).displayTime += 2;
                 stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.8)` : `rgba(211, 47, 47, 0.8)`};">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
                 <div class="container">
   <div class="row">
-    <div class="col">
+    <div class="col" style="width: 52px;">
                 ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
     </div>
     <div class="col text-warning">
       ${director}<br />
-      ${temp.present ? `<span class="badge badge-success">IN</span>` : `<span class="badge badge-danger">OUT</span>`}
+      ${temp.position}<br />
+      ${temp.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
     </div>
   </div>
 </div>
