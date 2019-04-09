@@ -907,12 +907,12 @@ function processDirectors(ddb, hdb)
      <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
                 <div class="container">
   <div class="row">
-    <div class="col" style="width: 52px;">
+    <div class="col-4">
                 ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
     </div>
-    <div class="col text-warning">
-      ${director}<br />
-      ${temp.position}<br />
+    <div class="col-8">
+      <span class="text-white">${director}</span><br />
+      <span class="text-warning" style="font-size: 0.8em;">${temp.position}</span><br />
       ${temp.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
     </div>
   </div>
@@ -992,12 +992,12 @@ function processDirectors(ddb, hdb)
      <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
                 <div class="container">
   <div class="row">
-    <div class="col" style="width: 52px;">
+    <div class="col-4">
                 ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
     </div>
-    <div class="col text-warning">
-      ${director}<br />
-      ${temp.position}<br />
+    <div class="col-8">
+      <span class="text-white">${director}</span><br />
+      <span class="text-warning" style="font-size: 0.8em;">${temp.position}</span><br />
       ${temp.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
     </div>
   </div>
