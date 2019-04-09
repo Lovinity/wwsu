@@ -3,13 +3,14 @@
 try {
     // Define default slide templates
     // Directors
+    // DEPRECATED
     Slides.newSlide({
         name: `directors`,
         label: `Directors`,
         weight: 1000000,
         isSticky: false,
         color: `primary`,
-        active: true,
+        active: false,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 5,
@@ -48,13 +49,14 @@ try {
     });
 
     // Weekly Stats
+    // DEPRECATED; TODO: Move to public sign
     Slides.newSlide({
         name: `weekly-stats`,
         label: `Weekly Stats`,
         weight: 900000,
         isSticky: false,
         color: `success`,
-        active: true,
+        active: false,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 15,
@@ -69,7 +71,7 @@ try {
         weight: -1000000,
         isSticky: false,
         color: `danger`,
-        active: true,
+        active: false,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 15,
@@ -271,30 +273,55 @@ waitFor(() => {
     Status.setOnRemove((data, db) => processStatus(db));
     Status.setOnReplace((db) => processStatus(db));
 
-    Directors.setOnUpdate((data, db) => processDirectors(db));
-    Directors.setOnInsert((data, db) => processDirectors(db));
-    Directors.setOnRemove((data, db) => processDirectors(db));
-    Directors.setOnReplace((db) => processDirectors(db));
+    Directors.setOnUpdate((data, db) => {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectors(Directors.db(), Directorhours.db());
+        }, 5000);
+    });
+    Directors.setOnInsert((data, db) => {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectors(Directors.db(), Directorhours.db());
+        }, 5000);
+    });
+    Directors.setOnRemove((data, db) =>{
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectors(Directors.db(), Directorhours.db());
+        }, 5000);
+    });
+    Directors.setOnReplace((db) => {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectors(Directors.db(), Directorhours.db());
+        }, 5000);
+    });
 
     Directorhours.setOnUpdate((data, db) => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
-            processDirectorHours(db);
+            processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
     Directorhours.setOnInsert((data, db) => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
-            processDirectorHours(db);
+            processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
     Directorhours.setOnRemove((data, db) => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
-            processDirectorHours(db);
+            processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directorhours.setOnReplace((db) => processDirectorHours(db));
+    Directorhours.setOnReplace((db) => {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectors(Directors.db(), Directorhours.db());
+        }, 5000);
+    });
 
     // Do stuff when announcements changes are made
     Announcements.setOnUpdate((data, db) => {
@@ -592,7 +619,7 @@ function processStatus(db)
                 }, 1000);
 
                 Slides.slide(`system`).isSticky = true;
-
+                Slides.slide(`system`).active = true;
                 break;
             case 1:
                 color = 'rgba(244, 67, 54, 0.5)';
@@ -609,7 +636,7 @@ function processStatus(db)
                 }, 1000);
 
                 Slides.slide(`system`).isSticky = true;
-
+                Slides.slide(`system`).active = true;
                 break;
             case 2:
                 color = 'rgba(245, 124, 0, 0.5)';
@@ -627,7 +654,7 @@ function processStatus(db)
                 }, 5000);
 
                 Slides.slide(`system`).isSticky = true;
-
+                Slides.slide(`system`).active = true;
                 break;
             case 3:
                 statusLine.innerHTML = 'WWSU is experiencing minor issues';
@@ -635,18 +662,19 @@ function processStatus(db)
                 color = 'rgba(251, 192, 45, 0.5)';
 
                 Slides.slide(`system`).isSticky = false;
+                Slides.slide(`system`).active = true;
                 break;
             case 5:
                 statusLine.innerHTML = 'WWSU is operational';
                 clearTimeout(offlineTimer);
                 color = 'rgba(76, 175, 80, 0.5)';
-
+                Slides.slide(`system`).active = false;
                 Slides.slide(`system`).isSticky = false;
                 break;
             default:
                 statusLine.innerHTML = 'WWSU status is unknown';
                 color = 'rgba(158, 158, 158, 0.3)';
-
+                Slides.slide(`system`).active = false;
                 Slides.slide(`system`).isSticky = false;
         }
 
@@ -671,15 +699,11 @@ function processStatus(db)
 }
 
 // Mark if a director is present or not
-function processDirectors(db)
+function processDirectors(ddb, hdb)
 {
     try {
         directorpresent = false;
-
-        db.each(function (dodo) {
-            if (dodo.present)
-                directorpresent = true;
-        });
+        var directors = {};
 
         // Update directors html
         var innercontent = document.getElementById('directors');
@@ -687,15 +711,16 @@ function processDirectors(db)
             innercontent.innerHTML = '';
 
         Slides.slide(`directors`).displayTime = 5;
-        db.each(function (dodo) {
+
+        ddb.each(function (dodo) {
             try {
+                directors[dodo.name] = dodo;
+                if (dodo.present)
+                    directorpresent = true;
                 Slides.slide(`directors`).displayTime += 1;
                 var color = 'rgba(211, 47, 47, 0.8)';
                 var text1 = 'OUT';
                 var theClass = 'danger';
-                var text2 = '';
-                if (dodo.since !== null && moment(dodo.since).isValid())
-                    text2 = moment(dodo.since).from(moment(Meta.time), true);
                 if (dodo.present)
                 {
                     var color = 'rgba(56, 142, 60, 0.8)';
@@ -707,6 +732,8 @@ function processDirectors(db)
     <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
   <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
+
+
             } catch (e) {
                 console.error(e);
                 iziToast.show({
@@ -716,20 +743,6 @@ function processDirectors(db)
             }
         });
 
-        processDirectorHours(Directorhours.db());
-    } catch (e) {
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred during the call of Directors[0].'
-        });
-        console.error(e);
-    }
-}
-
-// Mark if a director is present or not
-function processDirectorHours(db)
-{
-    try {
         // A list of Office Hours for the directors
 
         // Define a comparison function that will order calendar events by start time when we run the iteration
@@ -756,101 +769,102 @@ function processDirectorHours(db)
         // Prepare the formatted calendar variable for our formatted events
         var calendar = {};
         var asstcalendar = {};
-        db.get().sort(compare).map(event =>
-        {
-            if (moment(event.start).isAfter(moment(Meta.time).add(7, 'days').startOf('day')))
-                return;
-            var temp = Directors.db({name: event.director}).first();
-            if (typeof temp.assistant !== 'undefined')
-            {
-                var assistant = temp.assistant;
-            } else {
-                var assistant = true;
-            }
-            // Format calendar for the director
-            if (!assistant && typeof calendar[event.director] === 'undefined')
-            {
-                calendar[event.director] = {};
-                calendar[event.director][0] = ``;
-                calendar[event.director][1] = ``;
-                calendar[event.director][2] = ``;
-                calendar[event.director][3] = ``;
-                calendar[event.director][4] = ``;
-                calendar[event.director][5] = ``;
-                calendar[event.director][6] = ``;
-            }
-            if (assistant && typeof asstcalendar[event.director] === 'undefined')
-            {
-                asstcalendar[event.director] = {};
-                asstcalendar[event.director][0] = ``;
-                asstcalendar[event.director][1] = ``;
-                asstcalendar[event.director][2] = ``;
-                asstcalendar[event.director][3] = ``;
-                asstcalendar[event.director][4] = ``;
-                asstcalendar[event.director][5] = ``;
-                asstcalendar[event.director][6] = ``;
-            }
-
-            // null start or end? Use a default to prevent errors.
-            if (!moment(event.start).isValid())
-                event.start = moment(Meta.time).startOf('day');
-            if (!moment(event.end).isValid())
-                event.end = moment(Meta.time).add(1, 'days').startOf('day');
-
-            // Cycle through each day of the week, and add in director hours
-            for (var i = 0; i < 7; i++) {
-                var looptime = moment(Meta.time).startOf('day').add(i, 'days');
-                var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
-                var start2;
-                var end2;
-                var bg;
-                var endText;
-                if (moment(event.start).isBefore(looptime))
+        hdb.get()
+                .filter(event => !moment(event.start).isAfter(moment(Meta.time).add(7, 'days').startOf('day')))
+                .sort(compare)
+                .map(event =>
                 {
-                    start2 = moment(looptime);
-                } else {
-                    start2 = moment(event.start);
-                }
-                if (moment(event.end).isAfter(looptime2))
-                {
-                    end2 = moment(looptime2);
-                } else {
-                    end2 = moment(event.end);
-                }
-                
-                if (event.active === 2)
-                {
-                    bg = `background-color: rgba(255, 255, 0, 0.2);`;
-                    endText = `<strong>Updated</strong>`;
-                }
-                if (event.active === -1)
-                {
-                    bg = `background-color: rgba(255, 0, 0, 0.2);`;
-                    endText = `<strong>CANCELED</strong>`;
-                }
-                if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
-                {
-                    event.startT = moment(event.start).format('hh:mm A');
-                    event.endT = moment(event.end).format('hh:mm A');
-
-                    // Update strings if need be, if say, start time was before this day, or end time is after this day.
-                    if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
+                    var temp = directors[event.director];
+                    if (typeof temp.assistant !== 'undefined')
                     {
-                        event.endT = moment(event.start).format('MM/DD hh:mm A');
+                        var assistant = temp.assistant;
+                    } else {
+                        var assistant = true;
                     }
-                    if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
+                    // Format calendar for the director
+                    if (!assistant && typeof calendar[event.director] === 'undefined')
                     {
-                        event.startT = moment(event.start).format('MM/DD hh:mm A');
+                        calendar[event.director] = {};
+                        calendar[event.director][0] = ``;
+                        calendar[event.director][1] = ``;
+                        calendar[event.director][2] = ``;
+                        calendar[event.director][3] = ``;
+                        calendar[event.director][4] = ``;
+                        calendar[event.director][5] = ``;
+                        calendar[event.director][6] = ``;
+                    }
+                    if (assistant && typeof asstcalendar[event.director] === 'undefined')
+                    {
+                        asstcalendar[event.director] = {};
+                        asstcalendar[event.director][0] = ``;
+                        asstcalendar[event.director][1] = ``;
+                        asstcalendar[event.director][2] = ``;
+                        asstcalendar[event.director][3] = ``;
+                        asstcalendar[event.director][4] = ``;
+                        asstcalendar[event.director][5] = ``;
+                        asstcalendar[event.director][6] = ``;
                     }
 
-                    // Push the final products into our formatted variable
-                    if (!assistant)
-                        calendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">IN: ${event.startT}</span><br /><span class="text-danger">OUT: ${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
-                    if (assistant)
-                        asstcalendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">IN: ${event.startT}</span><br /><span class="text-danger">OUT: ${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
-                }
-            }
-        });
+                    // null start or end? Use a default to prevent errors.
+                    if (!moment(event.start).isValid())
+                        event.start = moment(Meta.time).startOf('day');
+                    if (!moment(event.end).isValid())
+                        event.end = moment(Meta.time).add(1, 'days').startOf('day');
+
+                    // Cycle through each day of the week, and add in director hours
+                    for (var i = 0; i < 7; i++) {
+                        var looptime = moment(Meta.time).startOf('day').add(i, 'days');
+                        var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
+                        var start2;
+                        var end2;
+                        var bg;
+                        var endText;
+                        if (moment(event.start).isBefore(looptime))
+                        {
+                            start2 = moment(looptime);
+                        } else {
+                            start2 = moment(event.start);
+                        }
+                        if (moment(event.end).isAfter(looptime2))
+                        {
+                            end2 = moment(looptime2);
+                        } else {
+                            end2 = moment(event.end);
+                        }
+
+                        if (event.active === 2)
+                        {
+                            bg = `background-color: rgba(255, 255, 0, 0.2);`;
+                            endText = `<strong>Updated</strong>`;
+                        }
+                        if (event.active === -1)
+                        {
+                            bg = `background-color: rgba(255, 0, 0, 0.2);`;
+                            endText = `<strong>CANCELED</strong>`;
+                        }
+                        if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
+                        {
+                            event.startT = moment(event.start).format('hh:mm A');
+                            event.endT = moment(event.end).format('hh:mm A');
+
+                            // Update strings if need be, if say, start time was before this day, or end time is after this day.
+                            if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
+                            {
+                                event.endT = moment(event.start).format('MM/DD hh:mm A');
+                            }
+                            if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
+                            {
+                                event.startT = moment(event.start).format('MM/DD hh:mm A');
+                            }
+
+                            // Push the final products into our formatted variable
+                            if (!assistant)
+                                calendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">IN: ${event.startT}</span><br /><span class="text-danger">OUT: ${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
+                            if (assistant)
+                                asstcalendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">IN: ${event.startT}</span><br /><span class="text-danger">OUT: ${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
+                        }
+                    }
+                });
 
         // Director hours slide
         var innercontent = document.getElementById('office-hours-directors');
@@ -887,9 +901,21 @@ function processDirectorHours(db)
         {
             if (calendar.hasOwnProperty(director))
             {
+                var temp = directors[director] || null;
                 Slides.slide(`hours-directors`).displayTime += 2;
                 stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 text-warning">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.8)` : `rgba(211, 47, 47, 0.8)`};">
+                <div class="container">
+  <div class="row">
+    <div class="col">
+                ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
+    </div>
+    <div class="col">
+      ${director}<br />
+      ${temp.present ? `<span class="badge badge-success">IN</span>` : `<span class="badge badge-danger">OUT</span>`}
+    </div>
+  </div>
+</div>
      ${director}
      </div>
      <div class="col" style="font-size: 0.75em;">
@@ -960,9 +986,21 @@ function processDirectorHours(db)
         {
             if (asstcalendar.hasOwnProperty(director))
             {
+                var temp = directors[director] || null;
                 Slides.slide(`hours-assistants`).displayTime += 2;
                 stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 text-warning">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.8)` : `rgba(211, 47, 47, 0.8)`};">
+                <div class="container">
+  <div class="row">
+    <div class="col">
+                ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
+    </div>
+    <div class="col">
+      ${director}<br />
+      ${temp.present ? `<span class="badge badge-success">IN</span>` : `<span class="badge badge-danger">OUT</span>`}
+    </div>
+  </div>
+</div>
      ${director}
      </div>
      <div class="col" style="font-size: 0.75em;">
