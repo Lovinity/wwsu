@@ -21,10 +21,10 @@ try {
     // Director hours
     Slides.newSlide({
         name: `hours-directors`,
-        label: `Hours`,
+        label: `Directors`,
         weight: 999999,
         isSticky: false,
-        color: `info`,
+        color: `success`,
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
@@ -36,10 +36,10 @@ try {
     // Assistant Director hours
     Slides.newSlide({
         name: `hours-assistants`,
-        label: `Hours`,
+        label: `Assistants`,
         weight: 999998,
         isSticky: false,
-        color: `info`,
+        color: `success`,
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
@@ -847,12 +847,12 @@ function processDirectors(ddb, hdb)
                             event.startT = moment(event.start).minutes() === 0 ? moment(event.start).format('h') : moment(event.start).format('h:mm');
                             if ((moment(event.start).hours() < 12 && moment(event.end).hours() >= 12) || (moment(event.start).hours() >= 12) && moment(event.end).hours() < 12)
                                 event.startT += moment(event.start).format('A');
-                            event.endT = moment(event.end).minutes() === 0 ? moment(event.end).format('hA') : moment(event.start).format('h:mmA');
+                            event.endT = moment(event.end).minutes() === 0 ? moment(event.end).format('hA') : moment(event.end).format('h:mmA');
 
                             // Update strings if need be, if say, start time was before this day, or end time is after this day.
                             if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(i + 1, 'days')))
                             {
-                                event.endT = moment(event.start).format('MM/DD h:mmA');
+                                event.endT = moment(event.end).format('MM/DD h:mmA');
                             }
                             if (moment(event.start).isBefore(moment(Meta.time).add(i, 'days').startOf('day')))
                             {
@@ -861,9 +861,9 @@ function processDirectors(ddb, hdb)
 
                             // Push the final products into our formatted variable
                             if (!assistant)
-                                calendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
+                                calendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
                             if (assistant)
-                                asstcalendar[event.director][i] += `<div class="m-1" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
+                                asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
                         }
                     }
                 });
