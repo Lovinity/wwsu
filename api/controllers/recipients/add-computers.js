@@ -18,7 +18,14 @@ module.exports = {
 
             // Add the recipient
             var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), this.req.payload.host, 'computers', this.req.payload.host);
-            
+
+
+            if (this.req.isSocket)
+            {
+                sails.sockets.join(this.req, 'bad-call');
+                sails.log.verbose('Request was a socket. Joining bad-call.');
+            }
+
             // Return the host label object
             return exits.success({label: label});
 
