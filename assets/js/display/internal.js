@@ -847,16 +847,16 @@ function processDirectors(ddb, hdb)
                                 event.startT = moment(event.start).format('MM/DD h:mmA');
                             }
 
-                            var endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}`;
+                            var endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>`;
                             if (event.active === 2)
                             {
                                 bg = `background-color: rgba(255, 255, 0, 0.2);`;
-                                endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span><i class="fas fa-edit"></i>` : ``}`;
+                                endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span><i class="fas fa-edit m-1"></i>`;
                             }
                             if (event.active === -1)
                             {
                                 bg = `background-color: rgba(255, 0, 0, 0.2);`;
-                                endText = `<strike><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span></strike><i class="fas fa-ban"></i>` : ``}`;
+                                endText = `<strike><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span></strike><i class="fas fa-ban m-1"></i>`;
                             }
 
                             // Push the final products into our formatted variable
