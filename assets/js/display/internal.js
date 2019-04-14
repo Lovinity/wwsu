@@ -285,7 +285,7 @@ waitFor(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directors.setOnRemove((data, db) =>{
+    Directors.setOnRemove((data, db) => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
@@ -818,7 +818,6 @@ function processDirectors(ddb, hdb)
                         var start2;
                         var end2;
                         var bg;
-                        var endText;
                         if (moment(event.start).isBefore(looptime))
                         {
                             start2 = moment(looptime);
@@ -830,17 +829,6 @@ function processDirectors(ddb, hdb)
                             end2 = moment(looptime2);
                         } else {
                             end2 = moment(event.end);
-                        }
-
-                        if (event.active === 2)
-                        {
-                            bg = `background-color: rgba(255, 255, 0, 0.2);`;
-                            endText = `<strong>Updated</strong>`;
-                        }
-                        if (event.active === -1)
-                        {
-                            bg = `background-color: rgba(255, 0, 0, 0.2);`;
-                            endText = `<strong>CANCELED</strong>`;
                         }
                         if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
                         {
@@ -859,11 +847,23 @@ function processDirectors(ddb, hdb)
                                 event.startT = moment(event.start).format('MM/DD h:mmA');
                             }
 
+                            var endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}`;
+                            if (event.active === 2)
+                            {
+                                bg = `background-color: rgba(255, 255, 0, 0.2);`;
+                                endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span><i class="fas fa-edit"></i>` : ``}`;
+                            }
+                            if (event.active === -1)
+                            {
+                                bg = `background-color: rgba(255, 0, 0, 0.2);`;
+                                endText = `<strike><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span></strike><i class="fas fa-ban"></i>` : ``}`;
+                            }
+
                             // Push the final products into our formatted variable
                             if (!assistant)
-                                calendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
+                                calendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}">${endText}</div>`;
                             if (assistant)
-                                asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}"><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>${endText ? `<br /><span class="text-white">${endText}</span>` : ``}</div>`;
+                                asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}">${endText}</div>`;
                         }
                     }
                 });
