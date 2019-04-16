@@ -32,7 +32,9 @@ module.exports = {
             {
                 DJs[record.dj].remotes += record.amount;
                 DJs[0].remotes += record.amount;
-            }    
+                DJs[record.dj].xp += (record.amount * sails.config.custom.XP.remoteCredit);
+                DJs[0].xp += (record.amount * sails.config.custom.XP.remoteCredit);
+            }
         });
 
         // Showtime and listenership
