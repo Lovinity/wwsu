@@ -30,7 +30,7 @@ module.exports = {
             }
             if (record.type === `remote`)
             {
-                DJs[record.DJ].remotes += record.amount;
+                DJs[record.dj].remotes += record.amount;
                 DJs[0].remotes += record.amount;
             }    
         });
