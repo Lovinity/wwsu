@@ -49,6 +49,20 @@ module.exports = {
                     DJs[0].showtime += record.showTime;
                     DJs[0].listeners += (record.listenerMinutes);
                 });
+                
+        // Compile human readable format:
+        var temp = ``;
+        for (var dj in DJs)
+        {
+            if (DJs.hasOwnProperty(dj))
+            {
+                var showtimeH = DJs[dj].showtime / 60;
+                var listenersH = DJs[dj].listeners / 60;
+                temp += "\n" + `${DJs[dj].name}: ${showtimeH.toFixed(1)} show hours (${DJs[dj].showtime} minutes); ${listenersH.toFixed(1)} online listener hours (${DJs[dj].listeners} minutes); ${DJs[dj].xp} XP; ${DJs[dj].remotes} remote credits.`;
+            }
+        }
+        
+        DJs[`humanReadable`] = temp;
 
         // All done.
         return exits.success(DJs);
