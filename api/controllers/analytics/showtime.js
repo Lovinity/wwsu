@@ -108,22 +108,7 @@ module.exports = {
                     }
                 });
 
-
-        // Compile human readable format:
-        var temp = {};
-        DJs.map((dj, index) => {
-            var showtimeH = dj.showtime / 60;
-            var listenersH = dj.listeners / 60;
-            DJs[index].ratio = showtimeH / listenersH;
-            temp[dj.name] = {};
-            temp[dj.name]["Shows"] = `Live: ${dj.shows}; Prerecorded: ${dj.prerecords}`;
-            temp[dj.name]["Show/Attendance Reputation Score"] = `${dj.attendanceScore} (Early/Late starts: ${dj.offStart}; Early/Late ends: ${dj.offEnd}; Cancellations: ${dj.cancellations}; Absences: ${dj.absences}; Missed Top-of-Hour ID Breaks: ${dj.missedIDs})`;
-            temp[dj.name]["Show Time"] = `${showtimeH.toFixed(1)} hours (${dj.showtime} minutes)`;
-            temp[dj.name]["Online Listener Time"] = `${listenersH.toFixed(1)} hours (${dj.listeners} minutes)`;
-            temp[dj.name]["Showtime to Listener Ratio"] = DJs[index].ratio.toFixed(3);
-            temp[dj.name]["XP"] = dj.xp;
-            temp[dj.name]["Remote Credits"] = dj.remotes;
-        });
+        DJs.map((dj, index) => DJs[index].ratio = dj.listeners / dj.showtime);
 
         var compare = function (a, b) {
             if (a.ratio < b.ratio)
@@ -134,6 +119,21 @@ module.exports = {
         };
 
         DJs = DJs.sort(compare);
+
+        // Compile human readable format:
+        var temp = {};
+        DJs.map((dj, index) => {
+            var showtimeH = dj.showtime / 60;
+            var listenersH = dj.listeners / 60;
+            temp[dj.name] = {};
+            temp[dj.name]["Shows"] = `Live: ${dj.shows}; Prerecorded: ${dj.prerecords}`;
+            temp[dj.name]["Show/Attendance Reputation Score"] = `${dj.attendanceScore} (Early/Late starts: ${dj.offStart}; Early/Late ends: ${dj.offEnd}; Cancellations: ${dj.cancellations}; Absences: ${dj.absences}; Missed Top-of-Hour ID Breaks: ${dj.missedIDs})`;
+            temp[dj.name]["Show Time"] = `${showtimeH.toFixed(1)} hours (${dj.showtime} minutes)`;
+            temp[dj.name]["Online Listener Time"] = `${listenersH.toFixed(1)} hours (${dj.listeners} minutes)`;
+            temp[dj.name]["Showtime to Listener Ratio"] = dj.ratio.toFixed(3);
+            temp[dj.name]["XP"] = dj.xp;
+            temp[dj.name]["Remote Credits"] = dj.remotes;
+        });
 
         // All done.
         return exits.success({data: DJs, humanReadable: temp});
