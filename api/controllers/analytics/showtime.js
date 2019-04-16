@@ -25,7 +25,7 @@ module.exports = {
                 return;
             if (record.type === `xp`)
             {
-                DJs[record.DJ].xp += record.amount;
+                DJs[record.dj].xp += record.amount;
                 DJs[0].xp += record.amount;
             }
             if (record.type === `remote`)
