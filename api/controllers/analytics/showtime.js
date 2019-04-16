@@ -116,13 +116,13 @@ module.exports = {
             var listenersH = dj.listeners / 60;
             DJs[index].ratio = showtimeH / listenersH;
             temp[dj.name] = {};
-            temp[dj.name]["Shows"] = `Live: ${DJs[dj].shows}; Prerecorded: ${DJs[dj].prerecords}`;
-            temp[dj.name]["Show/Attendance Reputation Score"] = `${DJs[dj].attendanceScore} (Early/Late starts: ${DJs[dj].offStart}; Early/Late ends: ${DJs[dj].offEnd}; Cancellations: ${DJs[dj].cancellations}; Absences: ${DJs[dj].absences}; Missed Top-of-Hour ID Breaks: ${DJs[dj].missedIDs})`;
+            temp[dj.name]["Shows"] = `Live: ${dj.shows}; Prerecorded: ${dj.prerecords}`;
+            temp[dj.name]["Show/Attendance Reputation Score"] = `${dj.attendanceScore} (Early/Late starts: ${dj.offStart}; Early/Late ends: ${dj.offEnd}; Cancellations: ${dj.cancellations}; Absences: ${dj.absences}; Missed Top-of-Hour ID Breaks: ${dj.missedIDs})`;
             temp[dj.name]["Show Time"] = `${showtimeH.toFixed(1)} hours (${dj.showtime} minutes)`;
             temp[dj.name]["Online Listener Time"] = `${listenersH.toFixed(1)} hours (${dj.listeners} minutes)`;
             temp[dj.name]["Showtime to Listener Ratio"] = DJs[index].ratio.toFixed(3);
-            temp[dj.name]["XP"] = DJs[dj].xp;
-            temp[dj.name]["Remote Credits"] = DJs[dj].remotes;
+            temp[dj.name]["XP"] = dj.xp;
+            temp[dj.name]["Remote Credits"] = dj.remotes;
         });
 
         var compare = function (a, b) {
