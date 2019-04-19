@@ -66,6 +66,11 @@ module.exports = {
             type: 'boolean',
             defaultsTo: false
         },
+        
+        accountability: {
+            type: 'boolean',
+            defaultsTo: false
+        },
 
         webmessages: {
             type: 'boolean',

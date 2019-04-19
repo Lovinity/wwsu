@@ -58,6 +58,11 @@ module.exports = {
             type: 'boolean',
             description: 'If provided, whether or not this host should receive emergency / status notifications will be changed to this.'
         },
+        
+        accountability: {
+            type: 'boolean',
+            description: 'If provided, whether or not this host should receive notifications regarding director and show absences/changes/cancellations and failed Top-of-the-hour ID breaks.'
+        },
 
         webmessages: {
             type: 'boolean',

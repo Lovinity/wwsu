@@ -775,7 +775,7 @@ function processDirectors(ddb, hdb)
                 .map(event =>
                 {
                     var temp = directors[event.director];
-                    if (typeof temp.assistant !== 'undefined')
+                    if (typeof temp !== `undefined` && typeof temp.assistant !== 'undefined')
                     {
                         var assistant = temp.assistant;
                     } else {
