@@ -775,7 +775,12 @@ function processDirectors(ddb, hdb)
                 .map(event =>
                 {
                     var temp = directors[event.director];
-                    if (typeof temp !== `undefined` && typeof temp.assistant !== 'undefined')
+                    
+                    // No temp record? Exit immediately.
+                    if (typeof temp === `undefined`)
+                        return null;
+                    
+                    if (typeof temp.assistant !== 'undefined')
                     {
                         var assistant = temp.assistant;
                     } else {
