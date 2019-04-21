@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.songs.reloadSubcategories() which reloads RadioDJ subcategory numbers into configuration.
  - sails.helpers.break.validate with tasks parameter, used to validate that an array of break tasks is completely valid.
  - "accountability" column to hosts. Instead of using "emergencies" for both tech issues and DJ/Director accountability notifications, emergencies will just be for tech issues, and accountability will be for DJ/director notifications.
+ - analytics/showtime and sails.helpers.analytics.showtime(Djs.ID) for gathering showtime analytics about Djs.ID, or all DJs if Djs.ID is not passed.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.

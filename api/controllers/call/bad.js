@@ -7,6 +7,11 @@ module.exports = {
     description: 'Transmit socket event indicating the currently connected call is of bad quality.',
 
     inputs: {
+        bitRate: {
+            type: 'number',
+            required: false,
+            description: `If provided, request a new bitrate to use in kbps.`
+        }
     },
 
     exits: {
@@ -16,7 +21,7 @@ module.exports = {
         sails.log.debug('Controller call/bad called.');
 
         try {
-            sails.sockets.broadcast('bad-call', 'bad-call', true);
+            sails.sockets.broadcast('bad-call', 'bad-call', inputs.bitRate);
             return exits.success();
         } catch (e) {
             return exits.error(e);
