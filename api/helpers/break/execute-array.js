@@ -19,11 +19,11 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            
+
             // Empty array? No need to continue.
             if (inputs.array.length <= 0)
                 return exits.success();
-            
+
             // Get the configured break tasks, but clone it. We're going to reverse the order, so we don't want to reverse the original object.
             var breakOpts = _.cloneDeep(inputs.array);
 
@@ -43,7 +43,7 @@ module.exports = {
                     await sails.helpers.break.execute(task.task, task.event, task.category, task.quantity, task.rules);
                 });
             }
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

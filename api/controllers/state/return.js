@@ -24,11 +24,13 @@ module.exports = {
             await Meta.changeMeta({changingState: `Returning from break`});
 
             // log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'return', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Return from break requested.</strong>'}).fetch()
-                    .tolerate((err) => {
-                        // Don't throw errors, but log them
-                        sails.log.error(err);
-                    });
+            (async() => {
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'return', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Return from break requested.</strong>'}).fetch()
+                        .tolerate((err) => {
+                            // Don't throw errors, but log them
+                            sails.log.error(err);
+                        });
+            })();
 
             await sails.helpers.rest.cmd('EnableAssisted', 1);
 
@@ -102,7 +104,7 @@ module.exports = {
                     case 'sports_break':
                         // Queue after break
                         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after);
-                        
+
                         var queueLength = await sails.helpers.songs.calculateQueueLength();
 
                         if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
