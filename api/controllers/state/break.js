@@ -29,12 +29,14 @@ module.exports = {
             if (!Meta['A'].state.startsWith("sports") && inputs.halftime)
                 inputs.halftime = false;
 
-            // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Break requested.</strong>'}).fetch()
-                    .tolerate((err) => {
-                        // Do not throw for errors, but log it.
-                        sails.log.error(err);
-                    });
+            // Log it in a separate self-calling async function that we do not await so it does not block the rest of the call.
+            (async() => {
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Break requested.</strong>'}).fetch()
+                        .tolerate((err) => {
+                            // Do not throw for errors, but log it.
+                            sails.log.error(err);
+                        });
+            })();
 
             // halftime break? Play a station ID and then begin halftime music
             if (inputs.halftime)
