@@ -1,4 +1,4 @@
-/* global sails */
+/* global sails, Subscribers, Logs, needle */
 
 module.exports = {
 
@@ -13,10 +13,10 @@ module.exports = {
             description: `A list of OneSignal IDs to send this notification to.`
         },
         category: {
-          type: 'string',
-          isIn: ["message", "event", "announcement", "request"],
-          required: true,
-          description: `The category of the notification.`
+            type: 'string',
+            isIn: ["message", "event", "announcement", "request"],
+            required: true,
+            description: `The category of the notification.`
         },
         title: {
             type: 'string',
@@ -39,10 +39,10 @@ module.exports = {
         try {
             // TODO: add configuration for this
             var categories = {
-              "message": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
-              "event": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
-              "announcement": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
-              "request": "0aa0e762-ca89-4eef-89a2-82009a58cb1a"
+                "message": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
+                "event": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
+                "announcement": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
+                "request": "0aa0e762-ca89-4eef-89a2-82009a58cb1a"
             };
             needle('post', `https://onesignal.com/api/v1/notifications`, {
                 app_id: `150c0123-e224-4e5b-a8b2-fc202d78e2f1`,
@@ -56,8 +56,36 @@ module.exports = {
                 thread_id: categories[inputs.category],
                 summary_arg: `${inputs.category}s`,
                 ttl: inputs.ttl,
-                }, {headers: {'Content-Type': 'application/json', 'Authorization': `Basic ${sails.config.custom.onesignal.rest}`}})
+            }, {headers: {'Content-Type': 'application/json', 'Authorization': `Basic ${sails.config.custom.onesignal.rest}`}})
                     .then(async function (resp) {
+                        if (typeof resp.body.errors !== `undefined`)
+                        {
+                            if (typeof resp.body.errors["invalid_player_ids"] !== `undefined`)
+                            {
+                                resp.body.errors["invalid_player_ids"].map((invalid) => {
+                                    (async(invalid2) => {
+                                        await Subscribers.destroy({device: invalid2});
+                                        await Logs.create({attendanceID: null, logtype: 'subscribers', loglevel: 'info', logsubtype: 'inactive', event: `<strong>An inactive subscriber was removed from the system.</strong><br />Device: ${invalid2}`}).fetch()
+                                                .tolerate((err) => {
+                                                    // Don't throw errors, but log them
+                                                    sails.log.error(err);
+                                                });
+                                    })(invalid);
+                                })
+                            } else if (resp.body.errors.indexOf("All included players are not subscribed") !== -1)
+                            {
+                                inputs.devices.map((invalid) => {
+                                    (async(invalid2) => {
+                                        await Subscribers.destroy({device: invalid2});
+                                        await Logs.create({attendanceID: null, logtype: 'subscribers', loglevel: 'info', logsubtype: 'inactive', event: `<strong>An inactive subscriber was removed from the system.</strong><br />Device: ${invalid2}`}).fetch()
+                                                .tolerate((err) => {
+                                                    // Don't throw errors, but log them
+                                                    sails.log.error(err);
+                                                });
+                                    })(invalid);
+                                })
+                            }
+                        }
                         return exits.success(true);
                     });
 
