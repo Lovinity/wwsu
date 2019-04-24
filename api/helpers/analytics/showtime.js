@@ -1,4 +1,4 @@
-/* global Attendance, sails, moment, Djs, Xp, Logs */
+/* global Attendance, sails, moment, Djs, Xp, Logs, Promise */
 
 module.exports = {
 
@@ -23,95 +23,107 @@ module.exports = {
         var records = await Djs.find(inputs.dj ? {ID: inputs.dj} : {});
         records.map(record => DJs[record.ID] = {name: record.name, showtime: 0, listeners: 0, ratio: 1, xp: 0, remotes: 0, shows: 0, offStart: 0, offEnd: 0, prerecords: 0, absences: 0, cancellations: 0, missedIDs: 0, attendanceScore: 0});
 
-        // XP and remote credits
-        var records = await Xp.find({dj: inputs.dj ? inputs.dj : {'!=': null}, createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}});
-        records.map((record) => {
-            if (typeof DJs[record.dj] === 'undefined')
-                return;
-            if (record.type === `xp`)
-            {
-                DJs[record.dj].xp += record.amount;
-                DJs[0].xp += record.amount;
-            }
-            if (record.type === `remote`)
-            {
-                DJs[record.dj].remotes += record.amount;
-                DJs[0].remotes += record.amount;
-                DJs[record.dj].xp += (record.amount * sails.config.custom.XP.remoteCredit);
-                DJs[0].xp += (record.amount * sails.config.custom.XP.remoteCredit);
-            }
-        });
+        // Initialize our parallel async functions
+        var records2 = await Attendance.find({dj: inputs.dj ? inputs.dj : {'!=': null}, createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}});
+        
+        var process1 = async () => {
+            // XP and remote credits
+            var records = await Xp.find({dj: inputs.dj ? inputs.dj : {'!=': null}, createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}});
+            records.map((record) => {
+                if (typeof DJs[record.dj] === 'undefined')
+                    return;
+                if (record.type === `xp`)
+                {
+                    DJs[record.dj].xp += record.amount;
+                    DJs[0].xp += record.amount;
+                }
+                if (record.type === `remote`)
+                {
+                    DJs[record.dj].remotes += record.amount;
+                    DJs[0].remotes += record.amount;
+                    DJs[record.dj].xp += (record.amount * sails.config.custom.XP.remoteCredit);
+                    DJs[0].xp += (record.amount * sails.config.custom.XP.remoteCredit);
+                }
+            });
+            return true;
+        };
 
-        var records = await Attendance.find({dj: inputs.dj ? inputs.dj : {'!=': null}, createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}});
-
-        // Showtime and listenership calculations
-        records
-                .filter(record => record.dj !== null && typeof DJs[record.dj] !== 'undefined' && record.showTime !== null && record.listenerMinutes !== null)
-                .map(record => {
-                    DJs[record.dj].showtime += record.showTime;
-                    DJs[record.dj].listeners += (record.listenerMinutes);
-                    DJs[0].showtime += record.showTime;
-                    DJs[0].listeners += (record.listenerMinutes);
-                });
+        var process2 = async () => {
+            // Showtime and listenership calculations
+            records2
+                    .filter(record => record.dj !== null && typeof DJs[record.dj] !== 'undefined' && record.showTime !== null && record.listenerMinutes !== null)
+                    .map(record => {
+                        DJs[record.dj].showtime += record.showTime;
+                        DJs[record.dj].listeners += (record.listenerMinutes);
+                        DJs[0].showtime += record.showTime;
+                        DJs[0].listeners += (record.listenerMinutes);
+                    });
+            return true;
+        };
 
         // Attendance calculations; Add 5 attendance score for every aired scheduled live radio show; 2 for prerecords.
         // Subtract 1 score if the live show started 10+ minutes early or late.
         // Subtract 1 score if the live show ended 10+ minutes early or late
         // Subtract 5 score for every scheduled show absence (we will later add 5 back for every logged cancellation).
-        var attendanceIDs = {};
-        records
-                .filter((record) => record.dj !== null && typeof DJs[record.dj] !== 'undefined')
-                .map((record) => {
-                    attendanceIDs[record.ID] = record.dj;
-                    if (record.actualStart !== null && record.actualEnd !== null)
-                    {
-                        if (!record.event.startsWith("Prerecord: "))
+        var process3 = async () => {
+            var attendanceIDs = {};
+            records2
+                    .filter((record) => record.dj !== null && typeof DJs[record.dj] !== 'undefined')
+                    .map((record) => {
+                        attendanceIDs[record.ID] = record.dj;
+                        if (record.actualStart !== null && record.actualEnd !== null)
                         {
-                            DJs[record.dj].shows += 1;
-                            if (record.scheduledStart !== null && record.scheduledEnd !== null)
+                            if (!record.event.startsWith("Prerecord: "))
                             {
-                                DJs[record.dj].attendanceScore += 5;
-                                if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
+                                DJs[record.dj].shows += 1;
+                                if (record.scheduledStart !== null && record.scheduledEnd !== null)
                                 {
-                                    DJs[record.dj].attendanceScore -= 1;
-                                    DJs[record.dj].offStart += 1;
+                                    DJs[record.dj].attendanceScore += 5;
+                                    if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
+                                    {
+                                        DJs[record.dj].attendanceScore -= 1;
+                                        DJs[record.dj].offStart += 1;
+                                    }
+                                    if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
+                                    {
+                                        DJs[record.dj].attendanceScore -= 1;
+                                        DJs[record.dj].offEnd += 1;
+                                    }
                                 }
-                                if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
-                                {
-                                    DJs[record.dj].attendanceScore -= 1;
-                                    DJs[record.dj].offEnd += 1;
-                                }
+                            } else {
+                                DJs[record.dj].prerecords += 1;
+                                DJs[record.dj].attendanceScore += 2;
                             }
-                        } else {
-                            DJs[record.dj].prerecords += 1;
-                            DJs[record.dj].attendanceScore += 2;
+                        } else if (record.scheduledStart !== null && record.scheduledEnd !== null) {
+                            DJs[record.dj].attendanceScore -= 5;
+                            DJs[record.dj].absences += 1;
                         }
-                    } else if (record.scheduledStart !== null && record.scheduledEnd !== null) {
-                        DJs[record.dj].attendanceScore -= 5;
-                        DJs[record.dj].absences += 1;
-                    }
-                });
+                    });
 
-        // Show cancellations and missed IDs
-        // Add 5 attendance score for every cancellation to equalize to 0 instead of -5 like for unexcused absences.
-        // Subtract 2 score for every missed top of the hour ID break.
-        var records = await Logs.find({attendanceID: {'!=': null}, logtype: ["cancellation", "id"], createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}});
 
-        records
-                .filter((record) => typeof attendanceIDs[record.attendanceID] !== `undefined`)
-                .map((record) => {
-                    if (record.logtype === `cancellation`)
-                    {
-                        DJs[attendanceIDs[record.attendanceID]].attendanceScore += 5;
-                        DJs[attendanceIDs[record.attendanceID]].absences -= 1;
-                        DJs[attendanceIDs[record.attendanceID]].cancellations += 1;
-                    }
-                    if (record.logtype === `id`)
-                    {
-                        DJs[attendanceIDs[record.attendanceID]].attendanceScore -= 2;
-                        DJs[attendanceIDs[record.attendanceID]].missedIDs += 1;
-                    }
-                });
+            // Show cancellations and missed IDs
+            // Add 5 attendance score for every cancellation to equalize to 0 instead of -5 like for unexcused absences.
+            // Subtract 2 score for every missed top of the hour ID break.
+            var records3 = await Logs.find({attendanceID: {'!=': null}, logtype: ["cancellation", "id"], createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}});
+            records3
+                    .filter((record) => typeof attendanceIDs[record.attendanceID] !== `undefined`)
+                    .map((record) => {
+                        if (record.logtype === `cancellation`)
+                        {
+                            DJs[attendanceIDs[record.attendanceID]].attendanceScore += 5;
+                            DJs[attendanceIDs[record.attendanceID]].absences -= 1;
+                            DJs[attendanceIDs[record.attendanceID]].cancellations += 1;
+                        }
+                        if (record.logtype === `id`)
+                        {
+                            DJs[attendanceIDs[record.attendanceID]].attendanceScore -= 2;
+                            DJs[attendanceIDs[record.attendanceID]].missedIDs += 1;
+                        }
+                    });
+            return true;
+        };
+        
+        await Promise.all([process1, process2, process3]);
 
         DJs.map((dj, index) => DJs[index].ratio = dj.listeners / dj.showtime);
 
