@@ -1,4 +1,4 @@
-/* global Meta, sails, Logs, Status, Playlists, Calendar, moment, Listeners, Xp, Messages, Attendance */
+/* global Meta, sails, Logs, Status, Playlists, Calendar, moment, Listeners, Xp, Messages, Attendance, Promise */
 const UrlSafeString = require('url-safe-string'),
         tagGenerator = new UrlSafeString();
 
@@ -29,231 +29,261 @@ module.exports = {
             await Meta.changeMeta({changingState: `Changing to automation / calculating show stats`});
 
             // What to return for DJ Controls show stats, if applicable
-            var returnData = {showTime: 0};
-
-            // Log the request
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>Show ended.</strong>'}).fetch()
-                    .tolerate((err) => {
-                        // Do not throw for error, but log it
-                        sails.log.error(err);
-                    });
+            var returnData = {showTime: 0, subtotalXP: 0, totalXP: 0};
 
             // Duplicate current meta dj since it's about to change; we need it for stats calculations
             var dj = Meta['A'].dj;
             var attendanceID = Meta['A'].attendanceID;
-            var djcontrols = Meta['A'].djcontrols;
             var showStamp = Meta['A'].showStamp;
 
-            // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
-            await sails.helpers.rest.cmd('EnableAssisted', 1);
-
-            // If coming out of a sports broadcast, queue a closer if exists.
-            if (Meta['A'].state.startsWith("sports"))
+            if (dj === null)
             {
-                if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
+                delete returnData.subtotalXP;
+                delete returnData.totalXP;
+            }
+
+            // Define parallel functions
+
+            var f1 = async () => {
+                // Log the request
+                await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>Show ended.</strong>'}).fetch()
+                        .tolerate((err) => {
+                            // Do not throw for error, but log it
+                            sails.log.error(err);
+                        });
+                return true;
+            };
+
+            var f2 = async () => {
+                // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
+                await sails.helpers.rest.cmd('EnableAssisted', 1);
+
+                // If coming out of a sports broadcast, queue a closer if exists.
+                if (Meta['A'].state.startsWith("sports"))
                 {
-                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Closers"]], 'Bottom', 1);
-                }
-            } else {
-                if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
-                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Closers"]], 'Bottom', 1);
-            }
-
-            // Queue a station ID
-            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1);
-
-            // Start playing something
-            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-            Status.errorCheck.prevID = moment();
-            await sails.helpers.error.count('stationID');
-
-            // Queue ending stuff
-            if (Meta['A'].state.startsWith("live_"))
-                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end);
-
-            if (Meta['A'].state.startsWith("remote_"))
-                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end);
-
-            if (Meta['A'].state.startsWith("sports_") || Meta['A'].state.startsWith("sportsremote_"))
-                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end);
-
-            // Queue a random PSA in case Google Calendar takes a while
-            await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 1);
-
-            // We are going to automation
-            if (!inputs.transition)
-            {
-                await Meta.changeMeta({genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
-                await sails.helpers.error.reset('automationBreak');
-
-                // Add up to 3 track requests if any are pending
-                await sails.helpers.requests.queue(3, true, true);
-
-                // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-                try {
-                    await Calendar.preLoadEvents(true);
-                } catch (e2) {
-                    // Couldn't load calendar? Fall back to Default automation
-                    await sails.helpers.genre.start('Default', true);
+                    if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
+                    {
+                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Closers"]], 'Bottom', 1);
+                    }
+                } else {
+                    if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
+                        await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Closers"]], 'Bottom', 1);
                 }
 
-                // Enable Auto DJ
-                await sails.helpers.rest.cmd('EnableAutoDJ', 1);
+                // Queue a station ID and a PSA
+                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
+                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
 
-                // We are going to break
-            } else {
-                await Meta.changeMeta({genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
-                await Attendance.createRecord(`Genre: Default`);
-            }
+                // Start playing something
+                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                Status.errorCheck.prevID = moment();
+                await sails.helpers.error.count('stationID');
 
-            // Finish up
-            await sails.helpers.songs.queuePending();
-            await sails.helpers.rest.cmd('EnableAssisted', 0);
+                // Queue ending stuff
+                if (Meta['A'].state.startsWith("live_"))
+                    await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end);
 
+                if (Meta['A'].state.startsWith("remote_"))
+                    await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end);
 
+                if (Meta['A'].state.startsWith("sports_") || Meta['A'].state.startsWith("sportsremote_"))
+                    await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end);
 
+                // We are going to automation
+                if (!inputs.transition)
+                {
+                    await Meta.changeMeta({genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                    await sails.helpers.error.reset('automationBreak');
 
-            // Calculate XP and other stats
-            var attendance = await Attendance.findOne({ID: attendanceID});
+                    // Add up to 3 track requests if any are pending
+                    await sails.helpers.requests.queue(3, true, true);
 
-            if (dj !== null)
-                returnData.subtotalXP = 0;
+                    // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
+                    try {
+                        await Calendar.preLoadEvents(true);
+                    } catch (e2) {
+                        // Couldn't load calendar? Fall back to Default automation
+                        await sails.helpers.genre.start('Default', true);
+                    }
 
-            // Award XP based on time on the air
-            returnData.showTime = moment().diff(moment(showStamp), 'minutes');
+                    // Enable Auto DJ
+                    await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
-            if (dj !== null)
-            {
-                returnData.showXP = Math.round(returnData.showTime / sails.config.custom.XP.showMinutes);
-                returnData.subtotalXP += returnData.showXP;
-                await Xp.create({dj: dj, type: 'xp', subtype: 'showtime', amount: returnData.showXP, description: `DJ was on the air for ${returnData.showTime} minutes.`})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                            returnData.subtotalXP -= returnData.showXP;
-                            delete returnData.showXP;
-                        });
-            }
+                    // We are going to break
+                } else {
+                    await Meta.changeMeta({genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
+                    await Attendance.createRecord(`Genre: Default`);
+                }
 
-            // Grab listener minutes from attendance record, and award XP as necessary
-            returnData.listenerMinutes = attendance.listenerMinutes || 0;
+                // Finish up
+                await sails.helpers.songs.queuePending();
+                await sails.helpers.rest.cmd('EnableAssisted', 0);
 
-            if (dj !== null)
-            {
-                returnData.listenerXP = Math.round(returnData.listenerMinutes / sails.config.custom.XP.listenerMinutes);
-                returnData.subtotalXP += returnData.listenerXP;
-                await Xp.create({dj: dj, type: 'xp', subtype: 'listeners', amount: returnData.listenerXP, description: `DJ had ${returnData.listenerMinutes} online listener minutes during their show.`})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                            returnData.subtotalXP -= returnData.listenerXP;
-                            delete returnData.listenerXP;
-                        });
-            }
+                var attendance = await Attendance.findOne({ID: attendanceID});
 
-            // Earn XP for sending messages to website visitors
-            returnData.messagesWeb = await Messages.count({from: djcontrols, to: {startsWith: 'website'}, createdAt: {'>=': moment(showStamp).toISOString(true)}})
-                    .tolerate((err) => {
-                        // Do not throw for error, but log it
-                        sails.log.error(err);
-                    });
-            if (returnData.messagesWeb)
-            {
+                // Grab show time and listener minutes from attendance record and award XP.
+                // We do this in the same function because it cannot be called until after a new attendance record has been created.
+                returnData.showTime = attendance.showTime || 0;
+                returnData.listenerMinutes = attendance.listenerMinutes || 0;
                 if (dj !== null)
                 {
-                    returnData.messagesXP = Math.round(returnData.messagesWeb * sails.config.custom.XP.web);
-                    returnData.subtotalXP += returnData.messagesXP;
-                    await Xp.create({dj: dj, type: 'xp', subtype: 'messages', amount: returnData.messagesXP, description: `DJ sent ${returnData.messagesWeb} messages to web visitors during their show.`})
+                    returnData.showXP = Math.round(returnData.showTime / sails.config.custom.XP.showMinutes);
+                    returnData.subtotalXP += returnData.showXP;
+                    await Xp.create({dj: dj, type: 'xp', subtype: 'showtime', amount: returnData.showXP, description: `DJ was on the air for ${returnData.showTime} minutes.`})
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);
-                                returnData.subtotalXP -= returnData.messagesXP;
-                                delete returnData.messagesXP;
+                                returnData.subtotalXP -= returnData.showXP;
+                                delete returnData.showXP;
+                            });
+
+                    returnData.listenerXP = Math.round(returnData.listenerMinutes / sails.config.custom.XP.listenerMinutes);
+                    returnData.subtotalXP += returnData.listenerXP;
+                    await Xp.create({dj: dj, type: 'xp', subtype: 'listeners', amount: returnData.listenerXP, description: `DJ had ${returnData.listenerMinutes} online listener minutes during their show.`})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                                returnData.subtotalXP -= returnData.listenerXP;
+                                delete returnData.listenerXP;
                             });
                 }
-            }
+                return true;
+            };
 
+            var f3 = async () => {
+                // Earn XP for sending messages to website visitors
+                returnData.messagesWeb = await Messages.count({from: this.payload.host, to: {startsWith: 'website'}, createdAt: {'>=': moment(showStamp).toISOString(true)}})
+                        .tolerate((err) => {
+                            // Do not throw for error, but log it
+                            sails.log.error(err);
+                        });
+                if (returnData.messagesWeb)
+                {
+                    if (dj !== null)
+                    {
+                        returnData.messagesXP = Math.round(returnData.messagesWeb * sails.config.custom.XP.web);
+                        returnData.subtotalXP += returnData.messagesXP;
+                        await Xp.create({dj: dj, type: 'xp', subtype: 'messages', amount: returnData.messagesXP, description: `DJ sent ${returnData.messagesWeb} messages to web visitors during their show.`})
+                                .tolerate((err) => {
+                                    // Do not throw for error, but log it
+                                    sails.log.error(err);
+                                    returnData.subtotalXP -= returnData.messagesXP;
+                                    delete returnData.messagesXP;
+                                });
+                    }
+                }
+                return true;
+            };
+
+            //Start the first batch as XP needs to be awarded before we start the second batch of functions.
+            await Promise.all([f1, f2, f3]);
 
             // Calculate XP earned this show from Top Adds
-            if (dj !== null)
-            {
-                returnData.topAdds = await Xp.count({dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(showStamp).toISOString(true)}})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        });
-            }
+            var f4 = async () => {
+                if (dj !== null)
+                {
+                    returnData.topAdds = await Xp.count({dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(showStamp).toISOString(true)}})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            });
+                }
+                return true;
+            };
 
-            if (dj !== null)
-            {
-                returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(showStamp).toISOString(true)}})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        });
-                returnData.subtotalXP += returnData.topAddsXP || 0;
-            }
+            var f5 = async () => {
+                if (dj !== null)
+                {
+                    returnData.topAddsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'topadd', createdAt: {'>=': moment(showStamp).toISOString(true)}})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            });
+                    returnData.subtotalXP += returnData.topAddsXP || 0;
+                }
+                return true;
+            };
 
-            // Calculate XP earned this show from doing the mandatory Legal IDs
-            if (dj !== null)
-            {
-                returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'id', createdAt: {'>=': moment(showStamp).toISOString(true)}})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        });
-                returnData.subtotalXP += returnData.IDsXP || 0;
-            }
+            var f6 = async () => {
+                // Calculate XP earned this show from doing the mandatory Legal IDs
+                if (dj !== null)
+                {
+                    returnData.IDsXP = await Xp.sum('amount', {dj: dj, type: 'xp', subtype: 'id', createdAt: {'>=': moment(showStamp).toISOString(true)}})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            });
+                    returnData.subtotalXP += returnData.IDsXP || 0;
+                }
+                return true;
+            };
 
-            // Calculate a DJ's total XP earned ever
-            if (dj !== null)
-            {
-                returnData.totalXP = await Xp.sum('amount', {dj: dj, type: {'!=': 'remote'}})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        });
-            }
+            var f7 = async () => {
+                // Calculate a DJ's total XP earned ever
+                if (dj !== null)
+                {
+                    returnData.totalXP += await Xp.sum('amount', {dj: dj, type: {'!=': 'remote'}})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            });
+                }
+                return true;
+            };
 
-            if (dj !== null)
-            {
-                // Add to total XP for remote credits
-                returnData.totalXP += (sails.config.custom.XP.remoteCredit * await Xp.sum('amount', {dj: dj, type: 'remote'})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        }) || 0);
-            }
+            var f8 = async () => {
+                if (dj !== null)
+                {
+                    // Add to total XP for remote credits
+                    returnData.totalXP += (sails.config.custom.XP.remoteCredit * await Xp.sum('amount', {dj: dj, type: 'remote'})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            }) || 0);
+                }
+                return true;
+            };
 
-            if (dj !== null)
-            {
-                // Calculate a DJ's remote credits for the semester
-                returnData.remoteCredits = await Xp.sum('amount', {dj: dj, type: 'remote', createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        });
-            }
+            var f9 = async () => {
+                if (dj !== null)
+                {
+                    // Calculate a DJ's remote credits for the semester
+                    returnData.remoteCredits = await Xp.sum('amount', {dj: dj, type: 'remote', createdAt: {'>=': moment(sails.config.custom.startOfSemester).toISOString(true)}})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            });
+                }
+                return true;
+            };
 
-            // Calculate a DJ's total OnAir time ever
-            if (dj !== null)
-            {
-                returnData.totalShowTime = await Attendance.sum('showTime', {dj: dj})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        });
-            }
+            var f10 = async () => {
+                // Calculate a DJ's total OnAir time ever
+                if (dj !== null)
+                {
+                    returnData.totalShowTime = await Attendance.sum('showTime', {dj: dj})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            });
+                }
+                return true;
+            };
 
-            // Calculate a DJ's total listener time
-            if (dj !== null)
-            {
-                returnData.totalListenerMinutes = await Attendance.sum('listenerMinutes', {dj: dj})
-                        .tolerate((err) => {
-                            // Do not throw for error, but log it
-                            sails.log.error(err);
-                        });
-            }
+            var f11 = async () => {
+                // Calculate a DJ's total listener time
+                if (dj !== null)
+                {
+                    returnData.totalListenerMinutes = await Attendance.sum('listenerMinutes', {dj: dj})
+                            .tolerate((err) => {
+                                // Do not throw for error, but log it
+                                sails.log.error(err);
+                            });
+                }
+                return true;
+            };
+
+            await Promise.all([f4, f5, f6, f7, f8, f9, f10, f11]);
 
             await Meta.changeMeta({changingState: null});
             return exits.success(returnData);
