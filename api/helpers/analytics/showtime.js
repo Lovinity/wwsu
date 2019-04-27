@@ -17,7 +17,7 @@ module.exports = {
     fn: async function (inputs, exits) {
 
         // Initialize for every DJ in the system + one for all DJs
-        var DJs = [];
+        var DJs = {};
         DJs[0] = {
             name: "EVERYONE",
             semester: {
@@ -419,7 +419,7 @@ module.exports = {
         DJs = DJs.sort(compare);
 
         // All done.
-        return exits.success(inputs.dj ? DJs[inputs.dj] : DJs);
+        return exits.success(DJs);
 
     }
 
