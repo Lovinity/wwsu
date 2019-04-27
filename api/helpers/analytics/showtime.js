@@ -298,6 +298,8 @@ module.exports = {
         });
 
         var compare = function (a, b) {
+            if (a.name === "EVERYONE")
+                return -1;
             if (a.semester.ratio < b.semester.ratio)
                 return 1;
             if (a.semester.ratio > b.semester.ratio)
