@@ -145,7 +145,7 @@ module.exports = {
             }
 
             // Earn XP for sending messages to website visitors
-            returnData.messagesWeb = await Messages.count({from: this.payload.host, to: {startsWith: 'website'}, createdAt: {'>=': moment(showStamp).toISOString(true)}})
+            returnData.messagesWeb = await Messages.count({from: this.req.payload.host, to: {startsWith: 'website'}, createdAt: {'>=': moment(showStamp).toISOString(true)}})
                     .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err);
