@@ -21,7 +21,8 @@ module.exports = {
         if (!inputs.dj)
             DJs[0] = {name: "EVERYONE", showtime: 0, listeners: 0, ratio: 1, xp: 0, remoteCredits: 0};
         var records = await Djs.find(inputs.dj ? {ID: inputs.dj} : {});
-        records.map(record => DJs[record.ID] = {
+        records.map(record => {
+            DJs[record.ID] = {
                 name: record.name,
                 semester: {
                     showtime: 0,
@@ -57,7 +58,8 @@ module.exports = {
                     attendanceScore: 0,
                     attendancePercent: 0
                 }
-            });
+            }
+        });
 
         // Initialize our parallel async functions
         var records2 = await Attendance.find({dj: inputs.dj ? inputs.dj : {'!=': null}});
@@ -282,14 +284,16 @@ module.exports = {
         await Promise.all([process1, process2, process3]);
 
         DJs.map((dj, index) => {
-            DJs[index].overall.ratio = dj.overall.listeners / dj.overall.showtime;
-            DJs[index].semester.ratio = dj.semester.listeners / dj.semester.showtime;
+            if (index === 0)
+                return null;
+            DJs[index].overall.ratio = DJs[index].overall.listeners / DJs[index].overall.showtime;
+            DJs[index].semester.ratio = DJs[index].semester.listeners / DJs[index].semester.showtime;
             
-            var maxAttendance = (dj.overall.shows * 5) + (dj.overall.remotes * 5) + (dj.overall.prerecords * 2) + (dj.overall.cancellations);
-            DJs[index].overall.attendancePercent = ((dj.overall.attendanceScore / maxAttendance) * 100).toFixed(1);
+            var maxAttendance = (DJs[index].overall.shows * 5) + (DJs[index].overall.remotes * 5) + (DJs[index].overall.prerecords * 2) + (DJs[index].overall.cancellations);
+            DJs[index].overall.attendancePercent = ((DJs[index].overall.attendanceScore / maxAttendance) * 100).toFixed(1);
             
-            var maxAttendance = (dj.semester.shows * 5) + (dj.semester.remotes * 5) + (dj.semester.prerecords * 2) + (dj.semester.cancellations);
-            DJs[index].semester.attendancePercent = ((dj.semester.attendanceScore / maxAttendance) * 100).toFixed(1);
+            var maxAttendance = (DJs[index].semester.shows * 5) + (DJs[index].semester.remotes * 5) + (DJs[index].semester.prerecords * 2) + (DJs[index].semester.cancellations);
+            DJs[index].semester.attendancePercent = ((DJs[index].semester.attendanceScore / maxAttendance) * 100).toFixed(1);
             
         });
 
