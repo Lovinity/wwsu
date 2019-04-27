@@ -63,6 +63,7 @@ module.exports = {
                 returnData.attendance = await Attendance.find({dj: inputs.dj});
                 returnData.stats = await sails.helpers.analytics.showtime(inputs.dj);
                 
+                return exits.success(returnData);
             }
 
         } catch (e) {
