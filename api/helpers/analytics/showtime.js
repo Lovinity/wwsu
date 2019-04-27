@@ -406,6 +406,9 @@ module.exports = {
 
         });
 
+        if (inputs.dj)
+            return exits.success(DJs[inputs.dj]);
+
         var compare = function (a, b) {
             if (a.name === "EVERYONE")
                 return -1;
