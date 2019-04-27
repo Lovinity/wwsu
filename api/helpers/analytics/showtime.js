@@ -18,9 +18,48 @@ module.exports = {
 
         // Initialize for every DJ in the system + one for all DJs
         var DJs = [];
-        if (!inputs.dj)
-            DJs[0] = {name: "EVERYONE", showtime: 0, listeners: 0, ratio: 1, xp: 0, remoteCredits: 0};
+        DJs[0] = {
+            name: "EVERYONE",
+            semester: {
+                showtime: 0,
+                listeners: 0,
+                ratio: 1,
+                xp: 0,
+                remoteCredits: 0,
+                shows: 0,
+                prerecords: 0,
+                remotes: 0,
+                offStart: 0,
+                offEnd: 0,
+                absences: 0,
+                cancellations: 0,
+                missedIDs: 0,
+                attendanceScore: 0,
+                attendancePercent: 0
+            },
+            overall: {
+                showtime: 0,
+                listeners: 0,
+                ratio: 1,
+                xp: 0,
+                remoteCredits: 0,
+                shows: 0,
+                prerecords: 0,
+                remotes: 0,
+                offStart: 0,
+                offEnd: 0,
+                absences: 0,
+                cancellations: 0,
+                missedIDs: 0,
+                attendanceScore: 0,
+                attendancePercent: 0
+            }
+        };
         var records = await Djs.find(inputs.dj ? {ID: inputs.dj} : {});
+        
+        if (records.length <= 0)
+            return exits.success(inputs.dj ? {} : []);
+        
         records.map(record => {
             DJs[record.ID] = {
                 name: record.name,
@@ -73,21 +112,26 @@ module.exports = {
                 if (record.type === `xp`)
                 {
                     DJs[record.dj].overall.xp += record.amount;
-                    DJs[0].xp += record.amount;
+                    DJs[0].overall.xp += record.amount;
                     if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
+                    {
                         DJs[record.dj].semester.xp += record.amount;
+                        DJs[0].semester.xp += record.amount;
+                    }
                 }
                 if (record.type === `remote`)
                 {
                     DJs[record.dj].overall.remoteCredits += record.amount;
-                    DJs[0].remoteCredits += record.amount;
+                    DJs[0].overall.remoteCredits += record.amount;
                     DJs[record.dj].overall.xp += (record.amount * sails.config.custom.XP.remoteCredit);
-                    DJs[0].xp += (record.amount * sails.config.custom.XP.remoteCredit);
+                    DJs[0].overall.xp += (record.amount * sails.config.custom.XP.remoteCredit);
 
                     if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                     {
                         DJs[record.dj].semester.remoteCredits += record.amount;
+                        DJs[0].semester.remoteCredits += record.amount;
                         DJs[record.dj].semester.xp += (record.amount * sails.config.custom.XP.remoteCredit);
+                        DJs[0].semester.xp += (record.amount * sails.config.custom.XP.remoteCredit);
                     }
                 }
             });
@@ -100,12 +144,14 @@ module.exports = {
                     .map(record => {
                         DJs[record.dj].overall.showtime += record.showTime;
                         DJs[record.dj].overall.listeners += record.listenerMinutes;
-                        DJs[0].showtime += record.showTime;
-                        DJs[0].listeners += record.listenerMinutes;
+                        DJs[0].overall.showtime += record.showTime;
+                        DJs[0].overall.listeners += record.listenerMinutes;
                         if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                         {
                             DJs[record.dj].semester.showtime += record.showTime;
                             DJs[record.dj].semester.listeners += record.listenerMinutes;
+                            DJs[0].semester.showtime += record.showTime;
+                            DJs[0].semester.listeners += record.listenerMinutes;
                         }
                     });
         };
@@ -154,35 +200,47 @@ module.exports = {
                         {
                             attendanceIDs3.push(record.ID);
                             DJs[record.dj].overall.shows += 1;
+                            DJs[0].overall.shows += 1;
                             if (record.scheduledStart !== null && record.scheduledEnd !== null)
                             {
                                 DJs[record.dj].overall.attendanceScore += 5;
+                                DJs[0].overall.attendanceScore += 5;
                                 if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
                                 {
                                     DJs[record.dj].overall.attendanceScore -= 1;
                                     DJs[record.dj].overall.offStart += 1;
+                                    DJs[0].overall.attendanceScore -= 1;
+                                    DJs[0].overall.offStart += 1;
                                 }
                                 if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
                                 {
                                     DJs[record.dj].overall.attendanceScore -= 1;
                                     DJs[record.dj].overall.offEnd += 1;
+                                    DJs[0].overall.attendanceScore -= 1;
+                                    DJs[0].overall.offEnd += 1;
                                 }
                             }
                             if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                             {
                                 DJs[record.dj].semester.shows += 1;
+                                DJs[0].semester.shows += 1;
                                 if (record.scheduledStart !== null && record.scheduledEnd !== null)
                                 {
                                     DJs[record.dj].semester.attendanceScore += 5;
+                                    DJs[0].semester.attendanceScore += 5;
                                     if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
                                     {
                                         DJs[record.dj].semester.attendanceScore -= 1;
                                         DJs[record.dj].semester.offStart += 1;
+                                        DJs[0].semester.attendanceScore -= 1;
+                                        DJs[0].semester.offStart += 1;
                                     }
                                     if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
                                     {
                                         DJs[record.dj].semester.attendanceScore -= 1;
                                         DJs[record.dj].semester.offEnd += 1;
+                                        DJs[0].semester.attendanceScore -= 1;
+                                        DJs[0].semester.offEnd += 1;
                                     }
                                 }
                             }
@@ -200,35 +258,47 @@ module.exports = {
                         {
                             attendanceIDs3.push(record.ID);
                             DJs[record.dj].overall.remotes += 1;
+                            DJs[0].overall.remotes += 1;
                             if (record.scheduledStart !== null && record.scheduledEnd !== null)
                             {
                                 DJs[record.dj].overall.attendanceScore += 5;
+                                DJs[0].overall.attendanceScore += 5;
                                 if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
                                 {
                                     DJs[record.dj].overall.attendanceScore -= 1;
                                     DJs[record.dj].overall.offStart += 1;
+                                    DJs[0].overall.attendanceScore -= 1;
+                                    DJs[0].overall.offStart += 1;
                                 }
                                 if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
                                 {
                                     DJs[record.dj].overall.attendanceScore -= 1;
                                     DJs[record.dj].overall.offEnd += 1;
+                                    DJs[0].overall.attendanceScore -= 1;
+                                    DJs[0].overall.offEnd += 1;
                                 }
                             }
                             if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                             {
                                 DJs[record.dj].semester.remotes += 1;
+                                DJs[0].semester.remotes += 1;
                                 if (record.scheduledStart !== null && record.scheduledEnd !== null)
                                 {
                                     DJs[record.dj].semester.attendanceScore += 5;
+                                    DJs[0].semester.attendanceScore += 5;
                                     if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
                                     {
                                         DJs[record.dj].semester.attendanceScore -= 1;
                                         DJs[record.dj].semester.offStart += 1;
+                                        DJs[0].semester.attendanceScore -= 1;
+                                        DJs[0].semester.offStart += 1;
                                     }
                                     if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
                                     {
                                         DJs[record.dj].semester.attendanceScore -= 1;
                                         DJs[record.dj].semester.offEnd += 1;
+                                        DJs[0].semester.attendanceScore -= 1;
+                                        DJs[0].semester.offEnd += 1;
                                     }
                                 }
                             }
@@ -236,11 +306,15 @@ module.exports = {
                     } else if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                         DJs[record.dj].overall.attendanceScore -= 5;
                         DJs[record.dj].overall.absences += 1;
+                        DJs[0].overall.attendanceScore -= 5;
+                        DJs[0].overall.absences += 1;
                         attendanceIDs2.push(record.ID);
                         if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                         {
                             DJs[record.dj].semester.attendanceScore -= 5;
                             DJs[record.dj].semester.absences += 1;
+                            DJs[0].semester.attendanceScore -= 5;
+                            DJs[0].semester.absences += 1;
                         }
                     }
                 }
@@ -258,21 +332,31 @@ module.exports = {
                             DJs[attendanceIDs[record.attendanceID]].overall.attendanceScore += 5;
                             DJs[attendanceIDs[record.attendanceID]].overall.absences -= 1;
                             DJs[attendanceIDs[record.attendanceID]].overall.cancellations += 1;
+                            DJs[0].overall.attendanceScore += 5;
+                            DJs[0].overall.absences -= 1;
+                            DJs[0].overall.cancellations += 1;
                             if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                             {
                                 DJs[attendanceIDs[record.attendanceID]].semester.attendanceScore += 5;
                                 DJs[attendanceIDs[record.attendanceID]].semester.absences -= 1;
                                 DJs[attendanceIDs[record.attendanceID]].semester.cancellations += 1;
+                                DJs[0].semester.attendanceScore += 5;
+                                DJs[0].semester.absences -= 1;
+                                DJs[0].semester.cancellations += 1;
                             }
                         }
                         if (record.logtype === `id`)
                         {
                             DJs[attendanceIDs[record.attendanceID]].overall.attendanceScore -= 3;
                             DJs[attendanceIDs[record.attendanceID]].overall.missedIDs += 1;
+                            DJs[0].overall.attendanceScore -= 3;
+                            DJs[0].overall.missedIDs += 1;
                             if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                             {
                                 DJs[attendanceIDs[record.attendanceID]].semester.attendanceScore -= 3;
                                 DJs[attendanceIDs[record.attendanceID]].semester.missedIDs += 1;
+                                DJs[0].semester.attendanceScore -= 3;
+                                DJs[0].semester.missedIDs += 1;
                             }
                         }
                     });
@@ -281,17 +365,15 @@ module.exports = {
         await Promise.all([process1(), process2(), process3()]);
 
         DJs.map((dj, index) => {
-            if (index === 0)
-                return null;
             DJs[index].overall.ratio = DJs[index].overall.listeners / DJs[index].overall.showtime;
             DJs[index].semester.ratio = DJs[index].semester.listeners / DJs[index].semester.showtime;
-            
+
             var maxAttendance = (DJs[index].overall.shows * 5) + (DJs[index].overall.remotes * 5) + (DJs[index].overall.prerecords * 2) + (DJs[index].overall.cancellations);
             DJs[index].overall.attendancePercent = ((DJs[index].overall.attendanceScore / maxAttendance) * 100).toFixed(1);
-            
+
             var maxAttendance = (DJs[index].semester.shows * 5) + (DJs[index].semester.remotes * 5) + (DJs[index].semester.prerecords * 2) + (DJs[index].semester.cancellations);
             DJs[index].semester.attendancePercent = ((DJs[index].semester.attendanceScore / maxAttendance) * 100).toFixed(1);
-            
+
         });
 
         var compare = function (a, b) {
@@ -307,7 +389,7 @@ module.exports = {
         DJs = DJs.sort(compare);
 
         // All done.
-        return exits.success(DJs);
+        return exits.success(inputs.dj ? DJs[inputs.dj] : DJs);
 
     }
 
