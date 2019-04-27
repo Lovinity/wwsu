@@ -304,6 +304,17 @@ module.exports = {
                             }
                         }
                     } else if (record.scheduledStart !== null && record.scheduledEnd !== null) {
+                        
+                        // Because absences and cancellations were not differentiated until March 16, 2019, any absence records prior should only dock 1 point instead of 5
+                        if (moment(record.createdAt).isBefore(moment("2019-03-16 00:00:00")))
+                        {
+                            DJs[record.dj].overall.attendanceScore -= 1;
+                            DJs[0].overall.attendanceScore -= 1;
+                        } else {
+                            DJs[record.dj].overall.attendanceScore -= 5;
+                            DJs[0].overall.attendanceScore -= 5;
+                        }
+                        
                         DJs[record.dj].overall.attendanceScore -= 5;
                         DJs[record.dj].overall.absences += 1;
                         DJs[0].overall.attendanceScore -= 5;

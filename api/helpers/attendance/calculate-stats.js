@@ -146,7 +146,7 @@ module.exports = {
                     Attendance.weeklyAnalytics.topPlaylist = totalsA.sort(compare)[0].name;
             };
 
-            await Promise.all([f1, f2]);
+            await Promise.all([f1(), f2()]);
 
             // Broadcast socket
             sails.sockets.broadcast('analytics-weekly-dj', 'analytics-weekly-dj', Attendance.weeklyAnalytics);
