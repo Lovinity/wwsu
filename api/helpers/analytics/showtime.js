@@ -91,7 +91,6 @@ module.exports = {
                     }
                 }
             });
-            return true;
         };
 
         var process2 = async () => {
@@ -109,7 +108,6 @@ module.exports = {
                             DJs[record.dj].semester.listeners += record.listenerMinutes;
                         }
                     });
-            return true;
         };
 
         // Attendance calculations; Add 5 attendance score for every aired scheduled live radio show; 2 for prerecords.
@@ -278,10 +276,9 @@ module.exports = {
                             }
                         }
                     });
-            return true;
         };
 
-        await Promise.all([process1, process2, process3]);
+        await Promise.all([process1(), process2(), process3()]);
 
         DJs.map((dj, index) => {
             if (index === 0)
