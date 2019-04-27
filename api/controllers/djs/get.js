@@ -1,13 +1,17 @@
-/* global sails, Xp, Djs */
+/* global sails, Xp, Djs, Attendance, moment */
+// TODO: Update doc
 
 module.exports = {
 
     friendlyName: 'djs / get',
 
-    description: 'Retrieve a list of DJs in the system.',
+    description: 'Retrieve a list of DJs in the system, or get information about a single DJ.',
 
     inputs: {
-
+        dj: {
+            type: 'number',
+            description: `If provided, instead of returning an array of DJs, will return information about the specified DJ.`
+        }
     },
 
     exits: {
@@ -19,6 +23,8 @@ module.exports = {
 
         try {
             
+            if (!inputs.dj)
+            {
             // Grab DJs
             var records = await Djs.find();
             
@@ -43,6 +49,20 @@ module.exports = {
                 return exits.success([]);
             } else {
                 return exits.success(records);
+            }
+            
+            } else {
+                
+                var record = await Djs.findOne({ID: inputs.dj});
+                var returnData = {startOfSemester: moment(sails.config.custom.startOfSemester).toISOString(true)};
+                
+                if (!record || record === null)
+                    return exits.success({});
+                
+                returnData.XP = await Xp.find({dj: inputs.dj});
+                returnData.attendance = await Attendance.find({dj: inputs.dj});
+                returnData.stats = await sails.helpers.analytics.showtime(inputs.dj);
+                
             }
 
         } catch (e) {
