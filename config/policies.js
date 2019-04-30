@@ -23,6 +23,8 @@ module.exports.policies = {
     'announcements/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
     'announcements/add-problem': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'announcements/get': ['isBanned', 'isSocket'],
+    'attendance/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+    'attendance/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
     'calendar/*': 'isBanned',
     'config/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
     'config/categories/get-available': ['isBanned', 'isSocket', 'isAuthorizedHost'],
