@@ -408,10 +408,10 @@ module.exports = {
             DJs[index].overall.ratio = DJs[index].overall.listeners / DJs[index].overall.showtime;
             DJs[index].semester.ratio = DJs[index].semester.listeners / DJs[index].semester.showtime;
 
-            var maxAttendance = (DJs[index].overall.shows * 5) + (DJs[index].overall.remotes * 5) + (DJs[index].overall.prerecords * 2) + (DJs[index].overall.cancellations);
+            var maxAttendance = (DJs[index].overall.shows * 5) + (DJs[index].overall.remotes * 5) + (DJs[index].overall.prerecords * 2);
             DJs[index].overall.reputationPercent = maxAttendance > 0 && DJs[index].overall.reputationScore ? ((DJs[index].overall.reputationScore / maxAttendance) * 100).toFixed(1) : 0;
 
-            var maxAttendance = (DJs[index].semester.shows * 5) + (DJs[index].semester.remotes * 5) + (DJs[index].semester.prerecords * 2) + (DJs[index].semester.cancellations);
+            var maxAttendance = (DJs[index].semester.shows * 5) + (DJs[index].semester.remotes * 5) + (DJs[index].semester.prerecords * 2);
             DJs[index].semester.reputationPercent = maxAttendance > 0 && DJs[index].semester.reputationScore > 0 ? ((DJs[index].semester.reputationScore / maxAttendance) * 100).toFixed(1) : 0;
 
         });
