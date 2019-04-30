@@ -28,6 +28,20 @@ module.exports = {
         event: {
             type: 'string'
         },
+        
+        happened: {
+            type: 'number',
+            defaultsTo: 1,
+            min: -1,
+            max: 1
+        },
+        
+        ignore: {
+            type: 'number',
+            defaultsTo: 0,
+            min: 0,
+            max: 2
+        },
 
         showTime: {
             type: 'number',

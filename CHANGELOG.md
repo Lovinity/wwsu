@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.break.validate with tasks parameter, used to validate that an array of break tasks is completely valid.
  - "accountability" column to hosts. Instead of using "emergencies" for both tech issues and DJ/Director accountability notifications, emergencies will just be for tech issues, and accountability will be for DJ/director notifications.
  - analytics/showtime and sails.helpers.analytics.showtime(Djs.ID) for gathering showtime analytics about Djs.ID, or all DJs if Djs.ID is not passed.
+ - "happened" and "ignore" columns in Attendance. Happened = 1 for events that happened, 0 for unexcused absences, and -1 for cancellations. Ignore = 0 when record should not be ignored in reputation, 1 when it should only be ignored in %, and 2 if it should be ignored completely.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
@@ -34,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.requests.checkRequestable now returns message property instead of HTML property; message property does not contain div/bootstrap data.
  - "active" property of calendar events and directorhours is now a number instead of boolean: -1 is cancelled, 0 is expired, 1 is active, 2 is active but date/time changed.
  - Display signs and website no longer removes cancelled events (except for genres) but displays them with a "cancelled" badge so people know it was cancelled.
+ - state/automation output utilizes sails.helpers.showtime.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

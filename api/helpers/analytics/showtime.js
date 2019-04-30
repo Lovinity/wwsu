@@ -159,7 +159,8 @@ module.exports = {
         // Attendance calculations; Add 5 reputation score for every aired scheduled live radio show; 2 for prerecords.
         // Subtract 1 score if the live show started 10+ minutes early or late.
         // Subtract 1 score if the live show ended 10+ minutes early or late
-        // Subtract 5 score for every scheduled show absence (we will later add 5 back for every logged cancellation).
+        // Subtract 5 score for every unignored unexcused absence (ignore = 0, happened = 0).
+        // Subtract 1 score for every unignored cancellation (ignore = 0, happened = -1).
         // Combine records with the same Google Calendar unique ID as one show. That way, accidental sign-offs sign-ons are not counted as two separate shows.
         var process3 = async () => {
             var attendanceIDs = {};
@@ -171,7 +172,7 @@ module.exports = {
                     .filter((record) => record.dj !== null && typeof DJs[record.dj] !== 'undefined')
                     .map((record) => {
                         attendanceIDs[record.ID] = record.dj;
-                        if (record.unique !== null)
+                        if (record.unique !== null && record.unique !== ``)
                         {
                             // Combine records with the same Google Calendar unique ID
                             if (record.unique in unique)
@@ -194,7 +195,7 @@ module.exports = {
                 if (unique.hasOwnProperty(uniqueRecord))
                 {
                     var record = unique[uniqueRecord];
-                    if (record.actualStart !== null && record.actualEnd !== null)
+                    if (record.actualStart !== null && record.actualEnd !== null && record.happened === 1)
                     {
                         if (record.event.startsWith("Show: "))
                         {
@@ -205,18 +206,22 @@ module.exports = {
                             {
                                 DJs[record.dj].overall.reputationScore += 5;
                                 DJs[0].overall.reputationScore += 5;
-                                if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
+                                if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10 && record.ignore !== 2)
                                 {
-                                    DJs[record.dj].overall.reputationScore -= 1;
+                                    if (record.ignore === 0)
+                                        DJs[record.dj].overall.reputationScore -= 1;
                                     DJs[record.dj].overall.offStart += 1;
-                                    DJs[0].overall.reputationScore -= 1;
+                                    if (record.ignore === 0)
+                                        DJs[0].overall.reputationScore -= 1;
                                     DJs[0].overall.offStart += 1;
                                 }
-                                if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
+                                if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10 && record.ignore !== 2)
                                 {
-                                    DJs[record.dj].overall.reputationScore -= 1;
+                                    if (record.ignore === 0)
+                                        DJs[record.dj].overall.reputationScore -= 1;
                                     DJs[record.dj].overall.offEnd += 1;
-                                    DJs[0].overall.reputationScore -= 1;
+                                    if (record.ignore === 0)
+                                        DJs[0].overall.reputationScore -= 1;
                                     DJs[0].overall.offEnd += 1;
                                 }
                             }
@@ -228,18 +233,22 @@ module.exports = {
                                 {
                                     DJs[record.dj].semester.reputationScore += 5;
                                     DJs[0].semester.reputationScore += 5;
-                                    if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
+                                    if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10 && record.ignore !== 2)
                                     {
-                                        DJs[record.dj].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[record.dj].semester.reputationScore -= 1;
                                         DJs[record.dj].semester.offStart += 1;
-                                        DJs[0].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[0].semester.reputationScore -= 1;
                                         DJs[0].semester.offStart += 1;
                                     }
-                                    if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
+                                    if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10 && record.ignore !== 2)
                                     {
-                                        DJs[record.dj].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[record.dj].semester.reputationScore -= 1;
                                         DJs[record.dj].semester.offEnd += 1;
-                                        DJs[0].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[0].semester.reputationScore -= 1;
                                         DJs[0].semester.offEnd += 1;
                                     }
                                 }
@@ -263,14 +272,16 @@ module.exports = {
                             {
                                 DJs[record.dj].overall.reputationScore += 5;
                                 DJs[0].overall.reputationScore += 5;
-                                if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
+                                if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10 && record.ignore !== 2)
                                 {
-                                    DJs[record.dj].overall.reputationScore -= 1;
+                                    if (record.ignore === 0)
+                                        DJs[record.dj].overall.reputationScore -= 1;
                                     DJs[record.dj].overall.offStart += 1;
-                                    DJs[0].overall.reputationScore -= 1;
+                                    if (record.ignore === 0)
+                                        DJs[0].overall.reputationScore -= 1;
                                     DJs[0].overall.offStart += 1;
                                 }
-                                if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
+                                if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10 && record.ignore !== 2)
                                 {
                                     DJs[record.dj].overall.reputationScore -= 1;
                                     DJs[record.dj].overall.offEnd += 1;
@@ -286,18 +297,22 @@ module.exports = {
                                 {
                                     DJs[record.dj].semester.reputationScore += 5;
                                     DJs[0].semester.reputationScore += 5;
-                                    if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10)
+                                    if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10 && record.ignore !== 2)
                                     {
-                                        DJs[record.dj].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[record.dj].semester.reputationScore -= 1;
                                         DJs[record.dj].semester.offStart += 1;
-                                        DJs[0].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[0].semester.reputationScore -= 1;
                                         DJs[0].semester.offStart += 1;
                                     }
-                                    if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10)
+                                    if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10 && record.ignore !== 2)
                                     {
-                                        DJs[record.dj].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[record.dj].semester.reputationScore -= 1;
                                         DJs[record.dj].semester.offEnd += 1;
-                                        DJs[0].semester.reputationScore -= 1;
+                                        if (record.ignore === 0)
+                                            DJs[0].semester.reputationScore -= 1;
                                         DJs[0].semester.offEnd += 1;
                                     }
                                 }
@@ -306,88 +321,83 @@ module.exports = {
                     } else if (record.scheduledStart !== null && record.scheduledEnd !== null) {
 
                         // Because absences and cancellations were not differentiated until March 16, 2019, any absence records prior should only dock 1 point instead of 5
-                        if (moment(record.createdAt).isBefore(moment("2019-03-16 00:00:00")))
+                        if (moment(record.createdAt).isBefore(moment("2019-03-16 00:00:00")) && record.ignore === 0)
                         {
                             DJs[record.dj].overall.reputationScore -= 1;
                             DJs[0].overall.reputationScore -= 1;
+                            DJs[record.dj].overall.cancellations += 1;
+                            DJs[0].overall.cancellations += 1;
                         } else {
-                            DJs[record.dj].overall.reputationScore -= 5;
-                            DJs[0].overall.reputationScore -= 5;
+                            if (record.happened === 0 && record.ignore !== 2)
+                            {
+                                if (record.ignore === 0)
+                                {
+                                    DJs[record.dj].overall.reputationScore -= 5;
+                                    DJs[0].overall.reputationScore -= 5;
+                                }
+                                DJs[record.dj].overall.absences += 1;
+                                DJs[0].overall.absences += 1;
+                            } else if (record.happened === -1 && record.ignore !== 2) {
+                                if (record.ignore === 0)
+                                {
+                                    DJs[record.dj].overall.reputationScore -= 1;
+                                    DJs[0].overall.reputationScore -= 1;
+                                }
+                                DJs[record.dj].overall.cancellations += 1;
+                                DJs[0].overall.cancellations += 1;
+                            }
                         }
 
-                        DJs[record.dj].overall.absences += 1;
-                        DJs[0].overall.absences += 1;
                         attendanceIDs2.push(record.ID);
                         if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                         {
                             // Because absences and cancellations were not differentiated until March 16, 2019, any absence records prior should only dock 1 point instead of 5
-                            if (moment(record.createdAt).isBefore(moment("2019-03-16 00:00:00")))
+                            if (moment(record.createdAt).isBefore(moment("2019-03-16 00:00:00")) && record.ignore === 0)
                             {
                                 DJs[record.dj].semester.reputationScore -= 1;
                                 DJs[0].semester.reputationScore -= 1;
+                                DJs[record.dj].semester.cancellations += 1;
+                                DJs[0].semester.cancellations += 1;
                             } else {
-                                DJs[record.dj].semester.reputationScore -= 5;
-                                DJs[0].semester.reputationScore -= 5;
+                                if (record.happened === 0 && record.ignore !== 2)
+                                {
+                                    if (record.ignore === 0)
+                                    {
+                                        DJs[record.dj].semester.reputationScore -= 5;
+                                        DJs[0].semester.reputationScore -= 5;
+                                    }
+                                    DJs[record.dj].semester.absences += 1;
+                                    DJs[0].semester.absences += 1;
+                                } else if (record.happened === -1 && record.ignore !== 2) {
+                                    if (record.ignore === 0)
+                                    {
+                                        DJs[record.dj].semester.reputationScore -= 1;
+                                        DJs[0].semester.reputationScore -= 1;
+                                    }
+                                    DJs[record.dj].semester.cancellations += 1;
+                                    DJs[0].semester.cancellations += 1;
+                                }
                             }
-                            DJs[record.dj].semester.absences += 1;
-                            DJs[0].semester.absences += 1;
                         }
                     }
                 }
             }
 
-            // Show cancellations and missed IDs
-            // Add 5 attendance score for every cancellation to equalize to 0 instead of -5 like for unexcused absences.
             // Subtract 2 score for every missed top of the hour ID break.
-            var records3 = await Logs.find({or: [{attendanceID: attendanceIDs2, logtype: "cancellation"}, {attendanceID: attendanceIDs3, logtype: "id"}]});
+            var records3 = await Logs.find({attendanceID: attendanceIDs3, logtype: "id"});
             records3
                     .filter((record) => typeof attendanceIDs[record.attendanceID] !== `undefined`)
                     .map((record) => {
-                        if (record.logtype === `cancellation`)
+                        DJs[attendanceIDs[record.attendanceID]].overall.reputationScore -= 2;
+                        DJs[0].overall.reputationScore -= 2;
+                        DJs[attendanceIDs[record.attendanceID]].overall.missedIDs += 1;
+                        DJs[0].overall.missedIDs += 1;
+                        if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
                         {
-                            // Because absences and cancellations were not differentiated until March 16, 2019, any absence records prior should only dock 1 point instead of 5
-                            if (moment(record.createdAt).isBefore(moment("2019-03-16 00:00:00")))
-                            {
-                                DJs[attendanceIDs[record.attendanceID]].overall.reputationScore += 1;
-                                DJs[0].overall.reputationScore += 1;
-                            } else {
-                                DJs[attendanceIDs[record.attendanceID]].overall.reputationScore += 5;
-                                DJs[0].overall.reputationScore += 5;
-                            }
-                            DJs[attendanceIDs[record.attendanceID]].overall.absences -= 1;
-                            DJs[attendanceIDs[record.attendanceID]].overall.cancellations += 1;
-                            DJs[0].overall.absences -= 1;
-                            DJs[0].overall.cancellations += 1;
-                            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
-                            {
-                                // Because absences and cancellations were not differentiated until March 16, 2019, any absence records prior should only dock 1 point instead of 5
-                                if (moment(record.createdAt).isBefore(moment("2019-03-16 00:00:00")))
-                                {
-                                    DJs[attendanceIDs[record.attendanceID]].semester.reputationScore += 1;
-                                    DJs[0].overall.reputationScore += 1;
-                                } else {
-                                    DJs[attendanceIDs[record.attendanceID]].semester.reputationScore += 5;
-                                    DJs[0].overall.reputationScore += 5;
-                                }
-                                DJs[attendanceIDs[record.attendanceID]].semester.absences -= 1;
-                                DJs[attendanceIDs[record.attendanceID]].semester.cancellations += 1;
-                                DJs[0].semester.absences -= 1;
-                                DJs[0].semester.cancellations += 1;
-                            }
-                        }
-                        if (record.logtype === `id`)
-                        {
-                            DJs[attendanceIDs[record.attendanceID]].overall.reputationScore -= 2;
-                            DJs[attendanceIDs[record.attendanceID]].overall.missedIDs += 1;
-                            DJs[0].overall.reputationScore -= 2;
-                            DJs[0].overall.missedIDs += 1;
-                            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt)))
-                            {
-                                DJs[attendanceIDs[record.attendanceID]].semester.reputationScore -= 2;
-                                DJs[attendanceIDs[record.attendanceID]].semester.missedIDs += 1;
-                                DJs[0].semester.reputationScore -= 2;
-                                DJs[0].semester.missedIDs += 1;
-                            }
+                            DJs[attendanceIDs[record.attendanceID]].semester.reputationScore -= 2;
+                            DJs[attendanceIDs[record.attendanceID]].semester.missedIDs += 1;
+                            DJs[0].semester.reputationScore -= 2;
+                            DJs[0].semester.missedIDs += 1;
                         }
                     });
         };
