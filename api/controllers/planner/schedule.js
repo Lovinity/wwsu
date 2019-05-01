@@ -96,7 +96,7 @@ module.exports = {
                     while (shows.length > 0)
                     {
                         // Choose a random show among the priority
-                        var index = Math.floor(Math.random() * Math.floor(shows.length));
+                        var index = Math.floor(Math.random() * Math.floor(shows.length - 1));
                         var show = shows[index];
 
                         if (_.isArray(show.proposal) && show.proposal.length > 0)
