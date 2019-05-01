@@ -93,23 +93,21 @@ module.exports = {
             if (byPriority.length > 0)
             {
                 byPriority.map((shows) => {
-                    while (shows.length > 0)
+                    while (typeof shows[0] !== `undefined` && typeof shows[0].proposal !== `undefined`)
                     {
                         // Choose a random show among the priority
                         var index = Math.floor(Math.random() * Math.floor(shows.length - 1));
                         var show = shows[index];
                         
-                        sails.log.error(shows);
-                        sails.log.error(index);
-                        sails.log.error(show);
+                        console.log(`show ${index}`);
 
                         if (_.isArray(show.proposal) && show.proposal.length > 0)
                         {
                             var scheduled = false;
-                            var index2 = 0;
-                            while (!scheduled && index2 <= show.proposal.length)
+                            while (typeof show.proposal[0] !== `undefined` && typeof show.proposal[0].start !== `undefined`)
                             {
-                                var proposal = show.proposal[index2];
+                                var proposal = show.proposal[0];
+                                console.log(`checking proposal ${proposal}`);
                                 if (isAvailable(proposal.start, proposal.end))
                                 {
                                     scheduled = true;
@@ -117,15 +115,14 @@ module.exports = {
                                     (async(showB, proposalB) => {
                                         await Planner.update({ID: showB.ID}, {actual: {start: proposalB.start, end: proposalB.end}}).fetch();
                                     })(show, proposal);
-                                } else {
-                                    index2++;
                                 }
+                                show.proposal.splice(0, 1);
                             }
                             if (!scheduled)
                                 badRecords.push(show);
                         }
 
-                        delete shows[index];
+                        shows.splice(index,1);
                     }
                 });
             }
