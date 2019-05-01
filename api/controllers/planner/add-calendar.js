@@ -35,7 +35,7 @@ module.exports = {
                 var end = await sails.helpers.weekToInt(moment(record.end).day(), moment(record.end).hour(), moment(record.end).minute());
                 
                 // Create the planner record
-                await Planner.create({dj: dj, show: show, actual: {start: start, end: end}, finalized: inputs.finalized});
+                await Planner.create({dj: dj, show: show, actual: {start: start, end: end}, finalized: inputs.finalized}).fetch();
             });
             
             await Promise.all(maps);
