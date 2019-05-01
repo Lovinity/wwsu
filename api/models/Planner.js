@@ -20,9 +20,7 @@ module.exports = {
         
         priority: {
             type: 'number',
-            defaultsTo: 2,
-            min: 0,
-            max: 100
+            allowNull: true
         },
         
         proposal: {
@@ -31,12 +29,7 @@ module.exports = {
         
         actual: {
             type: 'json',
-        },
-        
-        finalized: {
-            type: 'boolean',
-            defaultsTo: false
-        },
+        }
         
     },
 

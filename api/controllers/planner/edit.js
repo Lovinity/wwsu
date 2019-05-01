@@ -2,9 +2,9 @@
 
 module.exports = {
 
-    friendlyName: 'Planner / add',
+    friendlyName: 'Planner / edit',
 
-    description: 'Add a proposed show into the planner system.',
+    description: 'edit a proposed show in the planner system.',
 
     inputs: {
         ID: {
@@ -50,6 +50,10 @@ module.exports = {
 
                 return valid;
             }
+        },
+        clearActual: {
+            type: 'boolean',
+            defaultsTo: false
         }
     },
 
@@ -58,7 +62,7 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug('Controller planner/add called.');
+        sails.log.debug('Controller planner/edit called.');
 
         try {
             var criteria = {};
@@ -70,6 +74,9 @@ module.exports = {
                     criteria[key] = inputs[key];
                 }
             }
+            
+            if (inputs.clearActual)
+                criteria.actual = null;
             
             var criteriaB = _.cloneDeep(criteria);
             

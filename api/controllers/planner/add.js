@@ -19,7 +19,7 @@ module.exports = {
             type: 'number',
             required: true,
             min: 0,
-            max: 100
+            max: 1000
         },
         proposal: {
             type: 'json',
