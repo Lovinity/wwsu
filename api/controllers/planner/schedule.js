@@ -98,7 +98,7 @@ module.exports = {
                         // Choose a random show among the priority
                         var index = Math.floor(Math.random() * Math.floor(shows.length - 1));
                         var show = shows[index];
-                        
+
                         console.log(`show ${index}`);
 
                         if (_.isArray(show.proposal) && show.proposal.length > 0)
@@ -122,12 +122,14 @@ module.exports = {
                                 badRecords.push(show);
                         }
 
-                        shows.splice(index,1);
+                        shows.splice(index, 1);
                     }
                 });
             }
 
-            return exits.success({schedule: await Planner.find(), failed: badRecords});
+            setTimeout(async() => {
+                return exits.success({schedule: await Planner.find(), failed: badRecords});
+            }, 3000);
         } catch (e) {
             return exits.error(e);
         }
