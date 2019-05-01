@@ -98,6 +98,8 @@ module.exports = {
                         // Choose a random show among the priority
                         var index = Math.floor(Math.random() * Math.floor(shows.length - 1));
                         var show = shows[index];
+                        
+                        sails.log.error(show);
 
                         if (_.isArray(show.proposal) && show.proposal.length > 0)
                         {
