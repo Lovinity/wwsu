@@ -23,7 +23,7 @@ module.exports = {
             // First, log all of the already-final (actual) times.
             var final = [];
             records
-                    .filter((record) => record.actual !== null)
+                    .filter((record) => record.actual !== null && typeof record.actual.start !== `undefined` && typeof record.actual.end !== `undefined`)
                     .map((record) => {
                         final.push(record.actual);
                     });
@@ -78,7 +78,7 @@ module.exports = {
             // Group the Planner by priority
             var byPriority = [];
             records
-                    .filter((record) => record.actual === null)
+                    .filter((record) => record.actual === null || typeof record.actual.start === `undefined` || typeof record.actual.end === `undefined`)
                     .map((record) => {
                         if (typeof byPriority[record.priority] === `undefined`)
                             byPriority[record.priority] = [];

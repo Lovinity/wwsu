@@ -27,12 +27,10 @@ module.exports = {
         
         proposal: {
             type: 'json',
-            allowNull: true
         },
         
         actual: {
             type: 'json',
-            allowNull: true
         },
         
         finalized: {
