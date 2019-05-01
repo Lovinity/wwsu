@@ -40,7 +40,7 @@ module.exports = {
             
             await Promise.all(maps);
 
-            return exits.success(records);
+            return exits.success(await Planner.find());
         } catch (e) {
             return exits.error(e);
         }

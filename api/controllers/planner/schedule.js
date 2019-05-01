@@ -111,7 +111,7 @@ module.exports = {
                                     scheduled = true;
                                     final.push({start: proposal.start, end: proposal.end});
                                     (async(showB, proposalB) => {
-                                        await Planner.update({ID: showB.ID}, {actual: {start: proposalB.start, end: proposalB.end}});
+                                        await Planner.update({ID: showB.ID}, {actual: {start: proposalB.start, end: proposalB.end}}).fetch();
                                     })(show, proposal);
                                 } else {
                                     index2++;
