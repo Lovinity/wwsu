@@ -1,5 +1,4 @@
 /* global sails, Xp, Attendance, _, Djs, Listeners, Promise, Meta */
-const bcrypt = require('bcrypt');
 module.exports = {
 
     friendlyName: 'djs / edit',

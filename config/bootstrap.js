@@ -1,4 +1,4 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise, Uabdirectors, Uabtimesheet, Subscribers, Djs, Sports, Songsliked */
+/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise, Uabdirectors, Uabtimesheet, Subscribers, Djs, Sports, Songsliked, Planner */
 
 /**
  * Bootstrap
@@ -1099,7 +1099,7 @@ module.exports.bootstrap = async function (done) {
                 // TODO: Find a way to auto-populate these arrays.
                 var checksMemory = [Recipients, Status];
                 var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
-                var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Attendance, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp];
+                var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Planner, Attendance, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp];
 
                 // Memory checks
                 var checkStatus = {data: ``, status: 5};
@@ -1173,7 +1173,7 @@ module.exports.bootstrap = async function (done) {
                                         checkStatus.status = 1;
                                         checkStatus.data += `Model failure (query error): ${index}. `;
                                     });
-                            if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') && index > 4)
+                            if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') && index > 5)
                             {
                                 if (checkStatus.status > 3)
                                     checkStatus.status = 3;
