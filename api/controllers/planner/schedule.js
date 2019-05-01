@@ -80,6 +80,12 @@ module.exports = {
             records
                     .filter((record) => record.actual === null || typeof record.actual.start === `undefined` || typeof record.actual.end === `undefined`)
                     .map((record) => {
+                        if (record.priority === null)
+                        {
+                            record.badReason = "Record does not have a scheduling priority set.";
+                            badRecords.push(record);
+                            return null;
+                        }
                         if (typeof byPriority[record.priority] === `undefined`)
                             byPriority[record.priority] = [];
                         byPriority[record.priority].push(record);
@@ -119,7 +125,13 @@ module.exports = {
                                 show.proposal.splice(0, 1);
                             }
                             if (!scheduled)
+                            {
+                                show.badReason = "None of the proposed show times are available.";
                                 badRecords.push(show);
+                            }
+                        } else {
+                            show.badReason = "Record has no proposed show times added.";
+                            badRecords.push(show);
                         }
 
                         shows.splice(index, 1);
