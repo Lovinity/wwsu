@@ -246,7 +246,7 @@ directorsdb.assignSocketEvent('directors', socket);
 timesheetsdb.assignSocketEvent('timesheet', socket);
 
 $(document).ready(function () {
-    document.querySelector(`#timesheet-records`).addEventListener("click", function (e) {
+    document.querySelector(`#options-timesheets-records`).addEventListener("click", function (e) {
         try {
             if (e.target) {
                 if (e.target.id.startsWith(`timesheet-t`))
@@ -333,48 +333,276 @@ function editClock(clockID, save = false) {
 }
 }
 
-function filterDate() {
-    var thedate = document.getElementById('weekly-date-picker');
-    var tableRef = document.getElementById('timesheet-table').getElementsByTagName('tbody')[0];
-    // Delete all table rows except the first (header) one
-    for (var i = tableRef.rows.length; i > 0; i--)
-    {
-        tableRef.deleteRow(i - 1);
-    }
-
-    // Get timesheet records
-    noReq.request({method: 'POST', url: '/timesheet/get', data: {date: moment(thedate.value).toISOString(true)}}, (resHTML) => {
-        try {
-            // Reset our timesheets array
-            if (resHTML.length <= 0)
-            {
-                timesheets = [];
-                return null;
-            }
-
-            // parse new timesheet
-            timesheets = resHTML;
-
-            // iterate through each timesheet record
+function filterDate()
+{
+    try {
+        var records = document.querySelector('#options-timesheets-records');
+        var thedate = document.getElementById('weekly-date-picker');
+        records.innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`;
+        noReq.request({method: 'POST', url: '/timesheet/get', data: {date: moment(thedate.value).toISOString(true)}}, function (response) {
+            records.innerHTML = ``;
+            timesheets = response;
             var hours = {};
             timesheets.map((record, index) => {
-                var newRow = document.getElementById(`director-${record.name.replace(/\W/g, '')}`);
+                var newRow = document.getElementById(`options-timesheets-director-${record.name.replace(/\W/g, '')}`);
+
                 // If there is not a row for this director yet, create one
                 if (!newRow || newRow === null)
                 {
-                    var newRow = tableRef.insertRow(tableRef.rows.length);
-                    newRow.classList.add(`table-info`);
+                    records.innerHTML += `<div id="options-timesheets-director-${record.name.replace(/\W/g, '')}" class="card p-1 m-1 bg-light-1" style="width: 850px; position: relative;">
+                    <div class="card-body">
+                    <h5 class="card-title">${record.name}</h5>
+                    <p class="card-text">
+                    <div class="container">    
+                        <div class="row shadow-2">
+                            <div class="col text-dark">
+                                > Day <br>
+                                v Time
+                            </div>
+                            <div class="col text-dark border-left">
+                                Sun
+                            </div>
+                            <div class="col text-dark border-left">
+                                Mon
+                            </div>
+                            <div class="col text-dark border-left">
+                                Tue
+                            </div>
+                            <div class="col text-dark border-left">
+                                Wed
+                            </div>
+                            <div class="col text-dark border-left">
+                                Thu
+                            </div>
+                            <div class="col text-dark border-left">
+                                Fri
+                            </div>
+                            <div class="col text-dark border-left">
+                                Sat
+                            </div>
+                        </div>
+                        <div class="row border border-dark" style="height: 240px;">
+                            <div class="col text-dark" style="position: relative;">
+                                <div style="position: absolute; top: 8.5%;">3a</div>
+                                <div style="position: absolute; top: 21%;">6a</div>
+                                <div style="position: absolute; top: 33.5%;">9a</div>
+                                <div style="position: absolute; top: 46%;">12p</div>
+                                <div style="position: absolute; top: 58.5%;">3p</div>
+                                <div style="position: absolute; top: 71%;">6p</div>
+                                <div style="position: absolute; top: 83.5%;">9p</div>
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                            <div class="col text-dark border-left" id="options-timesheets-director-cell-0-${record.name.replace(/\W/g, '')}" style="position: relative;">
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                            <div class="col text-dark border-left" id="options-timesheets-director-cell-1-${record.name.replace(/\W/g, '')}" style="position: relative;">
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                            <div class="col text-dark border-left" id="options-timesheets-director-cell-2-${record.name.replace(/\W/g, '')}" style="position: relative;">
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                            <div class="col text-dark border-left" id="options-timesheets-director-cell-3-${record.name.replace(/\W/g, '')}" style="position: relative;">
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                            <div class="col text-dark border-left" id="options-timesheets-director-cell-4-${record.name.replace(/\W/g, '')}" style="position: relative;">
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                            <div class="col text-dark border-left" id="options-timesheets-director-cell-5-${record.name.replace(/\W/g, '')}" style="position: relative;">
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                            <div class="col text-dark border-left" id="options-timesheets-director-cell-6-${record.name.replace(/\W/g, '')}" style="position: relative;">
+                                <div class="border-top" style="position: absolute; top: 4.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 8.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 12.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 16.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 20.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 25%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 29.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 33.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 37.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 41.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 45.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 50%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 54.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 58.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 62.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 66.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 70.83%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 75%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 79.16%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 83.33%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 87.5%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 91.66%; width: 100%;"></div>
+                                <div class="border-top" style="position: absolute; top: 95.83%; width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 text-primary">
+                            Weekly Hours
+                            </div>
+                            <div class="col-6 text-primary" id="options-timesheets-director-cell-h-${record.name.replace(/\W/g, '')}">
+                            </div>
+                        </div>
+                    </div>
+                    </p>
+                    </div>
+                    </div>
+                    `;
                     hours[record.name] = moment.duration();
-                    newRow.setAttribute("id", `director-${record.name.replace(/\W/g, '')}`);
-                    // Create applicable cells
-                    for (var i = 0; i < 16; i++)
-                    {
-                        var cell = newRow.insertCell(i);
-                        cell.setAttribute('id', `cell${i}-${record.name.replace(/\W/g, '')}`);
-                        // Cell 0 should be director name
-                        if (i === 0)
-                            cell.innerHTML = record.name;
-                    }
                 }
 
                 // Prepare clock moments
@@ -396,18 +624,55 @@ function filterDate() {
                  * secondary = Canceled scheduled hours
                  */
                 var status = `urgent`;
+                var status2 = `This record is NOT approved, and did not fall within a scheduled office hours time block.`;
                 var inT = ``;
                 var outT = ``;
+                var sInT = ``;
+                var sOutT = ``;
+                var timeline = ``;
+                var divWidth = $(`#options-timesheets-director-${record.name.replace(/\W/g, '')}`).height();
+                var dayValue = (1000 * 60 * 60 * 24);
+                var width = 0;
+                var left = 0;
+                var sWidth = 0;
+                var sLeft = 0;
 
                 if (clockin !== null && clockout === null)
                 {
-                    status = `info`;
+                    status = `purple`;
+                    status2 = `This record / director is still clocked in.`;
                     hours[record.name].add(clocknow.diff(clockin));
+                    if (scheduledin !== null && scheduledout !== null)
+                    {
+                        if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                        {
+                            sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                            sLeft = 0;
+                        } else {
+                            sInT = moment(scheduledin).format(`h:mm A`);
+                            sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                        {
+                            sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            sWidth = 100 - sLeft;
+                        } else {
+                            sOutT = moment(scheduledout).format(`h:mm A`);
+                            sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div title="Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                    }
                     if (moment(clockin).isBefore(moment().startOf('week')))
                     {
                         inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                        left = 0;
+                        width = (((moment().valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                        timeline += `<div title="Director still clocked in since ${inT}" id="timesheet-t-${record.ID}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: 0%; height: ${width}%;"></div>`;
                     } else {
                         inT = moment(clockin).format(`h:mm A`);
+                        width = (((moment().valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                        left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
+                        timeline += `<div title="Director still clocked in since ${inT}" id="timesheet-t-${record.ID}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
                     }
                     outT = 'IN NOW';
                 } else {
@@ -416,130 +681,194 @@ function filterDate() {
                         if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null)
                         {
                             status = `success`;
+                            status2 = `This record is approved and fell within a scheduled office hours block.`;
                             hours[record.name].add(clockout.diff(clockin));
                             if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                left = 0;
                             } else {
                                 inT = moment(clockin).format(`h:mm A`);
+                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
                             }
                             if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
                             {
                                 outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                                width = 100 - left;
                             } else {
                                 outT = moment(clockout).format(`h:mm A`);
+                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
                             }
-                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
-                            status = `purple`;
-                            hours[record.name].add(clockout.diff(clockin));
-                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
-                            {
-                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                            } else {
-                                inT = moment(clockin).format(`h:mm A`);
-                            }
-                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
-                            {
-                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                            } else {
-                                outT = moment(clockout).format(`h:mm A`);
-                            }
-                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
-                            status = `secondary`;
                             if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
                             {
-                                inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                sLeft = 0;
                             } else {
-                                inT = moment(scheduledin).format(`h:mm A`);
+                                sInT = moment(scheduledin).format(`h:mm A`);
+                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
                             }
                             if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
                             {
-                                outT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                                sWidth = 100 - sLeft;
                             } else {
-                                outT = moment(scheduledout).format(`h:mm A`);
+                                sOutT = moment(scheduledout).format(`h:mm A`);
+                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
                             }
+                            timeline += `<div title="Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Hours (approved): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
+                            status = `success`;
+                            status2 = `This record is approved, but did not fall within a scheduled office hours block.`;
+                            hours[record.name].add(clockout.diff(clockin));
+                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
+                            {
+                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                left = 0;
+                            } else {
+                                inT = moment(clockin).format(`h:mm A`);
+                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
+                            }
+                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                            {
+                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                                width = 100 - left;
+                            } else {
+                                outT = moment(clockout).format(`h:mm A`);
+                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                            }
+                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Unscheduled Hours (approved): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
+                            status = `secondary`;
+                            status2 = `This is NOT an actual timesheet; the director canceled scheduled office hours.`;
+                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                            {
+                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                sLeft = 0;
+                            } else {
+                                sInT = moment(scheduledin).format(`h:mm A`);
+                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                            }
+                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                            {
+                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                                sWidth = 100 - sLeft;
+                            } else {
+                                sOutT = moment(scheduledout).format(`h:mm A`);
+                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                            }
+                            timeline += `<div title="Scheduled Hours (CANCELED): ${sInT} - ${sOutT}" class="" style="background-color: #787878; position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
                         }
                     } else {
                         if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null)
                         {
                             status = `warning`;
+                            status2 = `This record is NOT approved, but fell within a scheduled office hours block.`;
                             if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                             {
                                 inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                left = 0;
                             } else {
                                 inT = moment(clockin).format(`h:mm A`);
+                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
                             }
                             if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
                             {
                                 outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                                width = 100 - left;
                             } else {
                                 outT = moment(clockout).format(`h:mm A`);
+                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
                             }
-                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
-                            status = `urgent`;
-                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
-                            {
-                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                            } else {
-                                inT = moment(clockin).format(`h:mm A`);
-                            }
-                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
-                            {
-                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                            } else {
-                                outT = moment(clockout).format(`h:mm A`);
-                            }
-                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
-                            status = `danger`;
                             if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
                             {
-                                inT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                sLeft = 0;
                             } else {
-                                inT = moment(scheduledin).format(`h:mm A`);
+                                sInT = moment(scheduledin).format(`h:mm A`);
+                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
                             }
                             if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
                             {
-                                outT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                                sWidth = 100 - sLeft;
                             } else {
-                                outT = moment(scheduledout).format(`h:mm A`);
+                                sOutT = moment(scheduledout).format(`h:mm A`);
+                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
                             }
+                            timeline += `<div title="Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Hours (NEEDS REVIEW): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null)) {
+                            status = `warning`;
+                            status2 = `This record is NOT approved and did not fall within a scheduled office hours block.`;
+                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
+                            {
+                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                                left = 0;
+                            } else {
+                                inT = moment(clockin).format(`h:mm A`);
+                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
+                            }
+                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                            {
+                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                                width = 100 - left;
+                            } else {
+                                outT = moment(clockout).format(`h:mm A`);
+                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                            }
+                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Unscheduled Hours (NEEDS REVIEW): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null) {
+                            status = `danger`;
+                            status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
+                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                            {
+                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                                sLeft = 0;
+                            } else {
+                                sInT = moment(scheduledin).format(`h:mm A`);
+                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                            }
+                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                            {
+                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                                sWidth = 100 - sLeft;
+                            } else {
+                                sOutT = moment(scheduledout).format(`h:mm A`);
+                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                            }
+                            timeline += `<div title="Scheduled Hours (NO SHOW): ${sInT} - ${sOutT}" class="bg-danger" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
                         }
                     }
                 }
 
-                // Fill in the timesheet records for clock-ins
-                var cell = document.getElementById(`cell${(clockday * 2) + 1}-${record.name.replace(/\W/g, '')}`);
+                // Fill in the timesheet record
+                var cell = document.getElementById(`options-timesheets-director-cell-${clockday}-${record.name.replace(/\W/g, '')}`);
                 if (cell !== null)
-                    cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-${status}" id="timesheet-t-${record.ID}">${inT}</span><br />`;
+                    cell.innerHTML += timeline;
 
-                // Fill in the timesheet records for clock-outs
-                var cell = document.getElementById(`cell${(clockday * 2) + 2}-${record.name.replace(/\W/g, '')}`);
-                if (cell !== null)
-                    cell.innerHTML += `<span style="cursor: pointer;" class="badge badge-${status}" id="timesheet-t-${record.ID}">${outT}</span><br />`;
-            });
-
-            // Iterate through each director and list their hours worked.
-            for (var key in hours)
-            {
-                if (hours.hasOwnProperty(key))
+                // Iterate through each director and list their hours worked.
+                for (var key in hours)
                 {
-                    var cell = document.getElementById(`cell15-${key.replace(/\W/g, '')}`);
-                    if (cell)
+                    if (hours.hasOwnProperty(key))
                     {
-                        cell.innerHTML = `${hours[key].format('h', 1)}`;
+                        var cell = document.getElementById(`options-timesheets-director-cell-h-${key.replace(/\W/g, '')}`);
+                        if (cell)
+                        {
+                            cell.innerHTML = `${hours[key].format('h', 1)}`;
+                        }
                     }
                 }
-            }
-        } catch (e) {
-            var newRow = tableRef.insertRow(tableRef.rows.length);
-            newRow.classList.add(`table-danger`);
-            var cell = newRow.insertCell(0);
-            cell.innerHTML = 'ERROR fetching timesheets';
-        }
+
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        iziToast.show({
+            title: 'An error occurred - Please check the logs',
+            message: 'Error occurred during loadTimesheets.'
+        });
     }
-    );
 }
 
 filterDate();
-
-

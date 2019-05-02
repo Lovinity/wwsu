@@ -1,5 +1,15 @@
 <h1>WWSU Director Timesheets</h1>
-<p>Click a timesheet entry to edit it. You will need to authenticate with an administrator director to edit timesheets.</p>
+<div class="bs-callout bs-callout-info shadow-4 text-white">
+                    <strong>Hover your cursor over a shaded block to see exact in/out times. Click a shaded block to view more information about that timesheet and to edit.</strong> 
+                    <p>
+                        <span class="badge badge-success m-2">Approved timesheet</span>
+                        <span class="badge badge-purple m-2">Still Clocked In</span>
+                        <span class="badge badge-warning m-2">Timesheet Needs Review</span>
+                        <span class="badge badge-secondary m-2">Scheduled Hours</span>
+                        <span class="badge badge-secondary m-2" style="background-color: #787878;">Cancelled Hours</span>
+                        <span class="badge badge-danger m-2">NO-SHOW Hours</span>
+                    </p>
+                </div>
 	<div class="container">    
     <div class="row">
         <div class="col-sm-6 form-group">
@@ -13,48 +23,8 @@
       </div>
   </div>
 </div>
-		<table border="1" class="table table-hover" cellpadding="1" cellspacing="1" style="width: 100%;" id="timesheet-table">
-		<thead>
-        <tr>
-            <th rowspan="2">Director</th>
-            <th colspan="2">Sunday</th>
-            <th colspan="2">Monday</th>
-            <th colspan="2">Tuesday</th>
-            <th colspan="2">Wednesday</th>
-            <th colspan="2">Thursday</th>
-            <th colspan="2">Friday</th>
-            <th colspan="2">Saturday</th>
-            <th rowspan="2">Total Hours</th>
-        </tr>
-        <tr>
-            <th> In </th>
-            <th> Out </th>
-            <th> In </th>
-            <th> Out </th>
-            <th> In </th>
-            <th> Out </th>
-            <th> In </th>
-            <th> Out </th>
-            <th> In </th>
-            <th> Out </th>
-            <th> In </th>
-            <th> Out </th>
-            <th> In </th>
-            <th> Out </th>
-        </tr>
-    </thead>
-    <tbody id="timesheet-records">
-    </tbody>
-</table>
-<p>Time color key: <br /><br />
-<span class="badge badge-success">Approved and Scheduled</span> - These timesheet records count towards weekly hours and fell within a scheduled office hours time block.<br />
-<span class="badge badge-purple">Approved, but Unscheduled</span> - These timesheet records count towards weekly hours, but did not occur within a scheduled office hours time block.<br />
-<span class="badge badge-warning">Scheduled, but needs review</span> - These timesheet records do NOT count towards weekly hours, but they fell within a scheduled office hours time block. These records need reviewed because the director modified the time in or time out to be more than 30 minutes from the time the record was logged.<br />
-<span class="badge badge-urgent">Unscheduled and needs review</span> - These timesheet records do NOT count towards weekly hours and did not fall within a scheduled office hours time block. These records need reviewed because the director modified the time in or time out to be more than 30 minutes from the time the record was logged.<br />
-<span class="badge badge-info">In right now</span> - The director has not yet clocked out for the specified shift. Hours from clock-in to the current time are counted towards weekly hours.<br />
-<span class="badge badge-danger">Absent</span> - This is NOT an actual timesheet record. The director was scheduled to be in for hours during the indicated time, but did not clock in at all.<br />
-<span class="badge badge-secondary">Canceled</span> - This is NOT an actual timesheet record. The director canceled the specified scheduled office hours.<br />
-</p>
+<div class="d-flex justify-content-start flex-wrap" id="options-timesheets-records">
+</div>
 
 <!-- Modal -->
         <div class="modal" id="clockModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
