@@ -68,6 +68,8 @@ module.exports = {
                                 available = false;
                             if (end < start)
                                 available = false;
+                            if (end > sched.start)
+                                available = false;
                         }
                     });
                 }
