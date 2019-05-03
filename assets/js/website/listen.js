@@ -479,6 +479,7 @@ function onlineSocket()
                 nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
             }
             onlineSocketDone = true;
+            automationpost = ``;
             doMeta({webchat: Meta.webchat, state: Meta.state});
         } catch (e) {
             setTimeout(onlineSocket, 10000);
