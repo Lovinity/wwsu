@@ -15,13 +15,14 @@ var notificationsStatus = document.getElementById('messages-status');
 var messageText = document.getElementById('themessage');
 var nickname = document.getElementById('nickname');
 var sendButton = document.getElementById('sendmessage');
+var sendButtonP = document.getElementById('sendmessagep');
 var recentTracks = document.getElementById('recent-tracks');
 
 // Load variables
 var messageIDs = [];
 var announcementIDs = [];
 var automationpost = null;
-var Meta = {time: moment().toISOString(true)};
+var Meta = {time: moment().toISOString(true), history: [], webchat: true, state: 'unknown'};
 var shouldScroll = false;
 var skipIt = -1;
 var blocked = false;
@@ -32,6 +33,7 @@ var Subscriptions = TAFFY();
 var calendar = [];
 var likedTracks = [];
 var clockTimer;
+var onlineSocketDone = false;
 var device = getUrlParameter(`device`);
 var isMobile = device !== null;
 var OneSignal;
@@ -403,13 +405,21 @@ function doSockets(firsttime = false)
     if (isMobile || !firsttime || (!isMobile && device !== null))
     {
         onlineSocket();
-        messagesSocket();
+        tracksLikedSocket();
         metaSocket();
         announcementsSocket();
+        messagesSocket();
+        calendarSocket();
         loadGenres();
         // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
     } else {
         OneSignal = window.OneSignal || [];
+        tracksLikedSocket();
+        metaSocket();
+        announcementsSocket();
+        messagesSocket();
+        calendarSocket();
+        loadGenres();
         OneSignal.push(function () {
             OneSignal.init({
                 appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
@@ -422,18 +432,10 @@ function doSockets(firsttime = false)
                     OneSignal.getUserId().then(function (userId) {
                         device = userId;
                         onlineSocket();
-                        messagesSocket();
-                        metaSocket();
-                        announcementsSocket();
-                        loadGenres();
                     });
                 } else {
                     device = null;
                     onlineSocket();
-                    messagesSocket();
-                    metaSocket();
-                    announcementsSocket();
-                    loadGenres();
                 }
             });
 
@@ -443,17 +445,6 @@ function doSockets(firsttime = false)
                     OneSignal.getUserId().then(function (userId) {
                         device = userId;
                         onlineSocket();
-                        if (device && device !== null)
-                        {
-                            io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
-                                try {
-                                    Subscriptions = TAFFY();
-                                    Subscriptions.insert(body);
-                                } catch (e) {
-                                    setTimeout(metaSocket, 10000);
-                                }
-                            });
-                        }
                     });
                 } else if (currentPermission === "denied" && device !== null) {
                     device = null;
@@ -467,17 +458,6 @@ function doSockets(firsttime = false)
                     OneSignal.getUserId().then(function (userId) {
                         device = userId;
                         onlineSocket();
-                        if (device && device !== null)
-                        {
-                            io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
-                                try {
-                                    Subscriptions = TAFFY();
-                                    Subscriptions.insert(body);
-                                } catch (e) {
-                                    setTimeout(metaSocket, 10000);
-                                }
-                            });
-                        }
                     });
                 } else if (!isSubscribed && device !== null) {
                     device = null;
@@ -498,10 +478,25 @@ function onlineSocket()
                 nickname.value = nickname.value.replace('Web ', '');
                 nickname.value = nickname.value.match(/\(([^)]+)\)/)[1];
             }
+            onlineSocketDone = true;
+            doMeta({webchat: Meta.webchat, state: Meta.state});
         } catch (e) {
             setTimeout(onlineSocket, 10000);
         }
     });
+
+    if (device && device !== null)
+    {
+        io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
+            try {
+                Subscriptions = TAFFY();
+                Subscriptions.insert(body);
+                doMeta({state: Meta.state});
+            } catch (e) {
+                setTimeout(metaSocket, 10000);
+            }
+        });
+    }
 
     var temp = document.querySelector(`#track-info-subscribe`);
     if (temp !== null)
@@ -566,44 +561,41 @@ function messagesSocket()
 
 function metaSocket()
 {
+    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
+        //console.log(body);
+        try {
+            for (var key in body)
+            {
+                if (body.hasOwnProperty(key))
+                {
+                    Meta[key] = body[key];
+                }
+            }
+            doMeta(body);
+        } catch (e) {
+            setTimeout(metaSocket, 10000);
+        }
+    });
+}
+
+function tracksLikedSocket()
+{
     io.socket.post('/songs/get-liked', {}, function serverResponded(body, JWR) {
         try {
             likedTracks = body;
-            io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
-                //console.log(body);
-                try {
-                    for (var key in body)
-                    {
-                        if (body.hasOwnProperty(key))
-                        {
-                            Meta[key] = body[key];
-                        }
-                    }
-                    doMeta(body);
-                    if (device && device !== null)
-                    {
-                        io.socket.post('/subscribers/get-web', {device: device}, function serverResponded(body, JWR) {
-                            try {
-                                Subscriptions = TAFFY();
-                                Subscriptions.insert(body);
-                            } catch (e) {
-                                setTimeout(metaSocket, 10000);
-                            }
-                        });
-                    }
-                    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
-                        try {
-                            processCalendar(body, true);
-                        } catch (e) {
-                            setTimeout(metaSocket, 10000);
-                        }
-                    });
-                } catch (e) {
-                    setTimeout(metaSocket, 10000);
-                }
-            });
+            doMeta({history: Meta.history});
         } catch (e) {
-            setTimeout(metaSocket, 10000);
+            setTimeout(tracksLikedSocket, 10000);
+        }
+    });
+}
+
+function calendarSocket() {
+    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+        try {
+            processCalendar(body, true);
+        } catch (e) {
+            setTimeout(calendarSocket, 10000);
         }
     });
 }
@@ -809,7 +801,8 @@ function doMeta(response)
             blocked = true;
             messageText.disabled = true;
             sendButton.disabled = true;
-            if (notificationsStatus)
+            sendButtonP.disabled = true;
+            if (notificationsStatus && onlineSocketDone)
                 notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>`;
             if (shouldScroll && document.querySelector('#messages')) {
                 $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -826,7 +819,7 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    if (notificationsStatus)
+                    if (notificationsStatus && onlineSocketDone)
                         notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-default shadow-4 text-light"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>`;
                     if (shouldScroll && document.querySelector('#messages')) {
                         $("#messages").animate({scrollTop: $("#messages").prop('scrollHeight')}, 1000);
@@ -842,7 +835,7 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    if (notificationsStatus)
+                    if (notificationsStatus && onlineSocketDone)
                         notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>`;
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
@@ -887,7 +880,7 @@ function doMeta(response)
                     var temp = document.getElementById('msg-state');
                     if (temp)
                         temp.remove();
-                    if (notificationsStatus)
+                    if (notificationsStatus && onlineSocketDone)
                         notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>`;
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
@@ -932,10 +925,11 @@ function doMeta(response)
         if (Meta.webchat)
         {
             blocked = false;
-            if (messageText)
+            if (messageText && onlineSocketDone)
             {
                 messageText.disabled = false;
                 sendButton.disabled = false;
+                sendButtonP.disabled = false;
             }
             var temp = document.getElementById('msg-disabled');
             if (temp)
@@ -1439,14 +1433,14 @@ function updateCalendar() {
                         });
                     }
                 });
-                
-                for (var i = 1; i < 28; i++)
-                {
-                    var temp0 = document.querySelector(`#calendar-select-${i}`);
-                    if (temp0 !== null)
-                        temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`);
-                }
-                
+
+        for (var i = 1; i < 28; i++)
+        {
+            var temp0 = document.querySelector(`#calendar-select-${i}`);
+            if (temp0 !== null)
+                temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`);
+        }
+
     }
 }
 
