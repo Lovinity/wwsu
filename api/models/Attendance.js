@@ -36,6 +36,11 @@ module.exports = {
             max: 1
         },
         
+        happenedReason: {
+            type: 'string',
+            allowNull: true
+        },
+        
         ignore: {
             type: 'number',
             defaultsTo: 0,

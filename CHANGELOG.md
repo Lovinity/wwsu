@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - analytics/showtime and sails.helpers.analytics.showtime(Djs.ID) for gathering showtime analytics about Djs.ID, or all DJs if Djs.ID is not passed.
  - "happened" and "ignore" columns in Attendance. Happened = 1 for events that happened, 0 for unexcused absences, and -1 for cancellations. Ignore = 0 when record should not be ignored in reputation, 1 when it should only be ignored in %, and 2 if it should be ignored completely.
  - planner/* endpoints and Planner model to use as a tool for generating schedules for DJ shows.
+ - calendar/remove for removing calendar events (mainly canceled ones that should not appear in the system; removing active events may result in them getting re-added).
+ - directors/remove-hours for removing director hours (mainly canceled ones that should not appear in the system; removing active events may result in them getting re-added).
+ - Added column "happenedReason" to attendance which contains any reasoning for show/event cancellations, specifically if an event is canceled from the web panel.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
