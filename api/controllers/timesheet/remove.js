@@ -21,12 +21,13 @@ module.exports = {
         sails.log.debug('Controller timesheet/remove called.');
 
         try {
-            
+
             // Update the timesheet record
             var records = await Timesheet.destroy({ID: inputs.ID}).fetch();
             var IDs = [];
             records.map((record) => IDs.push(record.unique));
-            await Directorhours.destroy({unique: IDs}).fetch();
+            if (IDs.length > 0)
+                await Directorhours.destroy({unique: IDs}).fetch();
 
             // Force a re-load of all directors to update any possible changes in presence
             await Directors.updateDirectors();

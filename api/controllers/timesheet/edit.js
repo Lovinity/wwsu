@@ -1,4 +1,4 @@
-/* global sails, Directors, Timesheet, moment */
+/* global sails, Directors, Timesheet, moment, Directorhours */
 
 module.exports = {
 
@@ -56,7 +56,23 @@ module.exports = {
 
         try {
             // Update the timesheet record
-            await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(true), time_out: moment(inputs.time_out).toISOString(true), approved: inputs.approved}).fetch();
+            var records = await Timesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(true), time_out: moment(inputs.time_out).toISOString(true), approved: inputs.approved}).fetch();
+
+            // Update director calendar
+            var IDs = [];
+            records.map((record) => IDs.push(record.unique));
+
+            if (IDs.length > 0)
+            {
+                if (inputs.approved === -1)
+                    await Directorhours.update({unique: IDs, active: [1, 2]}, {active: -1}).fetch();
+
+                if (inputs.approved === 0 || inputs.approved === 1)
+                    await Directorhours.update({unique: IDs, active: [-1, 2]}, {active: 1}).fetch();
+
+                if (inputs.approved === 2)
+                    await Directorhours.update({unique: IDs, active: [-1, 1]}, {active: 2}).fetch();
+            }
 
             // Force a re-load of all directors to update any possible changes in presence
             await Directors.updateDirectors();
