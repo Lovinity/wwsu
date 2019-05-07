@@ -44,8 +44,10 @@ module.exports = {
         },
 
         approved: {
-            type: 'boolean',
-            defaultsTo: false
+            type: 'number',
+            defaultsTo: 1,
+            min: -1,
+            max: 2
         }
     },
 

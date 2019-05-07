@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "active" property of calendar events and directorhours is now a number instead of boolean: -1 is cancelled, 0 is expired, 1 is active, 2 is active but date/time changed.
  - Display signs and website no longer removes cancelled events (except for genres) but displays them with a "cancelled" badge so people know it was cancelled.
  - state/automation output utilizes sails.helpers.showtime.
+ - Timesheet.approved no longer boolean. -1 = cancelled, 0 = not approved or absent, 1 = approved or upcoming hours.
+ - Timesheet now creates records in advance for upcoming director hours. Timesheet system will merge clock in/out entries with these ones as necessary. Allows for better logging of director absences, cancellations, and scheduled hours.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated
