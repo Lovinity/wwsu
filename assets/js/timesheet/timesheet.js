@@ -857,7 +857,7 @@ function filterDate()
                                 sOutT = moment(scheduledout).format(`h:mm A`);
                                 sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
                             }
-                            timeline += `<div title="Future Scheduled Hours: ${sInT} - ${sOutT}" class="bg-danger" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                            timeline += `<div title="Future Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
                         } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === 2) {
                             status = `secondary`;
                             status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
@@ -877,7 +877,7 @@ function filterDate()
                                 sOutT = moment(scheduledout).format(`h:mm A`);
                                 sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
                             }
-                            timeline += `<div title="Future Scheduled Hours (CHANGED): ${sInT} - ${sOutT}" class="bg-danger" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                            timeline += `<div title="Future Scheduled Hours (CHANGED): ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
                         }
                     }
 
