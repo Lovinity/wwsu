@@ -15,6 +15,13 @@ module.exports = {
             allowNull: true,
             description: `moment() parsable string of a date to get logs.`
         },
+        duration: {
+          type: 'number',
+          defaultsTo: 1,
+          min: 1,
+          max: 14,
+          description: `Number of days to get records for if date is provided. Defaults to 1.`
+        },
         dj: {
             type: 'number',
             allowNull: true,
@@ -44,7 +51,7 @@ module.exports = {
                 }
 
                 var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
-                var end = moment(start).add(1, 'days');
+                var end = moment(start).add(inputs.duration, 'days');
                 query = {or: [{scheduledStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}, {actualStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}]};
                 
             } else {
