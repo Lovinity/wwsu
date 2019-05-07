@@ -1,4 +1,4 @@
-/* global Calendar, sails, Directorhours */
+/* global Calendar, sails, Directorhours, Timesheet */
 
 module.exports = {
 
@@ -17,8 +17,15 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller directors/remove-hours called.');
         try {
-            // Grab events
-            await Directorhours.destroy({ID: inputs.ID}).fetch();
+            
+            // Delete records from director calendar
+            var records = await Directorhours.destroy({ID: inputs.ID}).fetch();
+            
+            // Also delete records from timesheets
+            var IDs = [];
+            records.map((record) => IDs.push(record.unique));
+            await Timesheet.destroy({unique: IDs}).fetch();
+            
             return exits.success();
         } catch (e) {
             return exits.error(e);

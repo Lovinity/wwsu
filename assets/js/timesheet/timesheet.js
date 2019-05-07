@@ -310,12 +310,15 @@ function editClock(clockID, save = false) {
         <input type="text" class="form-control" id="clock-in" value="${timesheet.time_in !== null ? moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss') : null}">
         <label for="clock-out">Clock Out:</label>
         <input type="text" class="form-control" id="clock-out" value="${timesheet.time_out !== null ? moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss') : null}">
-                <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="clock-approved" ${(timesheet.approved) ? 'checked' : ''}>
-                            <label class="form-check-label" for="clock-approved">
-                                Approved Record
-                            </label>
-                        </div>
+        <div class="form-group" title="Choose the status for this timesheet record">
+                        <label for="clock-approved">Timesheet record status</label>
+                        <select class="form-control" id="clock-approved">
+                            <option value="-1"${timesheet.approved === -1 ? ` selected` : ``}>Canceled Hours</option>
+                            <option value="0"${timesheet.approved === 0 ? ` selected` : ``}>Not Approved / Absent</option>
+                            <option value="1"${timesheet.approved === 1 ? ` selected` : ``}>Approved / Scheduled Hours</option>
+                            <option value="2"${timesheet.approved === 2 ? ` selected` : ``}>Changed Scheduled Hours</option>
+                        </select>
+                    </div>
         <button type="submit" class="btn btn-primary">Edit</button>
         </form>`;
                     opened = true;
@@ -328,7 +331,8 @@ function editClock(clockID, save = false) {
         var bclockin = document.getElementById('clock-in');
         var bclockout = document.getElementById('clock-out');
         var bapproved = document.getElementById('clock-approved');
-        adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/edit', data: {ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: (bapproved.checked)}}, (resHTML) => {
+        var selectedOption = bapproved.options[bapproved.selectedIndex].value;
+        adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/edit', data: {ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: selectedOption}}, (resHTML) => {
         });
 }
 }
