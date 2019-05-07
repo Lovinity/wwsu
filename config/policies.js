@@ -69,6 +69,7 @@ module.exports.policies = {
     'timesheet/add': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
     'timesheet/edit': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
     'timesheet/get': ['isBanned', 'isSocket'],
+    'timesheet/remove': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
     'timesheet/view': 'isBanned',
     'uab/directors/*': ['isBanned', 'isSocket', 'isAuthorizedAdminDirectorUab'],
     'uab/directors/get': 'isBanned',

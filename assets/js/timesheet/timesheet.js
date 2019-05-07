@@ -313,6 +313,7 @@ function editClock(clockID, save = false) {
         <div class="form-group" title="Choose the status for this timesheet record">
                         <label for="clock-approved">Timesheet record status</label>
                         <select class="form-control" id="clock-approved">
+                            <option value="delete">DELETE THIS ENTRY</option>
                             <option value="-1"${timesheet.approved === -1 ? ` selected` : ``}>Canceled Hours</option>
                             <option value="0"${timesheet.approved === 0 ? ` selected` : ``}>Not Approved / Absent</option>
                             <option value="1"${timesheet.approved === 1 ? ` selected` : ``}>Approved / Scheduled Hours</option>
@@ -332,8 +333,14 @@ function editClock(clockID, save = false) {
         var bclockout = document.getElementById('clock-out');
         var bapproved = document.getElementById('clock-approved');
         var selectedOption = bapproved.options[bapproved.selectedIndex].value;
-        adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/edit', data: {ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: selectedOption}}, (resHTML) => {
-        });
+        if (selectedOption !== `delete`)
+        {
+            adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/edit', data: {ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: selectedOption}}, (resHTML) => {
+            });
+        } else {
+            adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/remove', data: {ID: clockID}}, (resHTML) => {
+            });
+        }
 }
 }
 
@@ -680,206 +687,206 @@ function filterDate()
                     }
                     outT = 'IN NOW';
                 } else {
-                        if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null && record.approved === 1)
+                    if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null && record.approved === 1)
+                    {
+                        status = `success`;
+                        status2 = `This record is approved and fell within a scheduled office hours block.`;
+                        hours[record.name].add(clockout.diff(clockin));
+                        if (moment(clockin).isBefore(moment(clockout).startOf('week')))
                         {
-                            status = `success`;
-                            status2 = `This record is approved and fell within a scheduled office hours block.`;
-                            hours[record.name].add(clockout.diff(clockin));
-                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
-                            {
-                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                left = 0;
-                            } else {
-                                inT = moment(clockin).format(`h:mm A`);
-                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
-                            {
-                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                width = 100 - left;
-                            } else {
-                                outT = moment(clockout).format(`h:mm A`);
-                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
-                            }
-                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
-                            {
-                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                sLeft = 0;
-                            } else {
-                                sInT = moment(scheduledin).format(`h:mm A`);
-                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
-                            {
-                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
-                                sWidth = 100 - sLeft;
-                            } else {
-                                sOutT = moment(scheduledout).format(`h:mm A`);
-                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div title="Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
-                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Hours (approved): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
-                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null) && record.approved === 1) {
-                            status = `success`;
-                            status2 = `This record is approved, but did not fall within a scheduled office hours block.`;
-                            hours[record.name].add(clockout.diff(clockin));
-                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
-                            {
-                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                left = 0;
-                            } else {
-                                inT = moment(clockin).format(`h:mm A`);
-                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
-                            {
-                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                width = 100 - left;
-                            } else {
-                                outT = moment(clockout).format(`h:mm A`);
-                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Unscheduled Hours (approved): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
-                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === -1) {
-                            status = `secondary`;
-                            status2 = `This is NOT an actual timesheet; the director canceled scheduled office hours.`;
-                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
-                            {
-                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                sLeft = 0;
-                            } else {
-                                sInT = moment(scheduledin).format(`h:mm A`);
-                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
-                            {
-                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
-                                sWidth = 100 - sLeft;
-                            } else {
-                                sOutT = moment(scheduledout).format(`h:mm A`);
-                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div title="Scheduled Hours (CANCELED): ${sInT} - ${sOutT}" class="" style="background-color: #787878; position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
-                        } else if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null && record.approved === 0)
-                        {
-                            status = `warning`;
-                            status2 = `This record is NOT approved, but fell within a scheduled office hours block.`;
-                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
-                            {
-                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                left = 0;
-                            } else {
-                                inT = moment(clockin).format(`h:mm A`);
-                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
-                            {
-                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                width = 100 - left;
-                            } else {
-                                outT = moment(clockout).format(`h:mm A`);
-                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
-                            }
-                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
-                            {
-                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                sLeft = 0;
-                            } else {
-                                sInT = moment(scheduledin).format(`h:mm A`);
-                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
-                            {
-                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
-                                sWidth = 100 - sLeft;
-                            } else {
-                                sOutT = moment(scheduledout).format(`h:mm A`);
-                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div title="Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
-                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Hours (NEEDS REVIEW): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
-                        } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null) && record.approved === 0) {
-                            status = `warning`;
-                            status2 = `This record is NOT approved and did not fall within a scheduled office hours block.`;
-                            if (moment(clockin).isBefore(moment(clockout).startOf('week')))
-                            {
-                                inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
-                                left = 0;
-                            } else {
-                                inT = moment(clockin).format(`h:mm A`);
-                                left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
-                            {
-                                outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
-                                width = 100 - left;
-                            } else {
-                                outT = moment(clockout).format(`h:mm A`);
-                                width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div id="timesheet-t-${record.ID}" title="Actual Unscheduled Hours (NEEDS REVIEW): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
-                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === 0) {
-                            status = `danger`;
-                            status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
-                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
-                            {
-                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                sLeft = 0;
-                            } else {
-                                sInT = moment(scheduledin).format(`h:mm A`);
-                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
-                            {
-                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
-                                sWidth = 100 - sLeft;
-                            } else {
-                                sOutT = moment(scheduledout).format(`h:mm A`);
-                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div title="Scheduled Hours (NO SHOW): ${sInT} - ${sOutT}" class="bg-danger" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
-                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === 1) {
-                            status = `secondary`;
-                            status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
-                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
-                            {
-                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                sLeft = 0;
-                            } else {
-                                sInT = moment(scheduledin).format(`h:mm A`);
-                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
-                            {
-                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
-                                sWidth = 100 - sLeft;
-                            } else {
-                                sOutT = moment(scheduledout).format(`h:mm A`);
-                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div title="Future Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
-                        } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === 2) {
-                            status = `secondary`;
-                            status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
-                            if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
-                            {
-                                sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
-                                sLeft = 0;
-                            } else {
-                                sInT = moment(scheduledin).format(`h:mm A`);
-                                sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
-                            }
-                            if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
-                            {
-                                sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
-                                sWidth = 100 - sLeft;
-                            } else {
-                                sOutT = moment(scheduledout).format(`h:mm A`);
-                                sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
-                            }
-                            timeline += `<div title="Future Scheduled Hours (CHANGED): ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                            inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                            left = 0;
+                        } else {
+                            inT = moment(clockin).format(`h:mm A`);
+                            left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
                         }
+                        if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                        {
+                            outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            width = 100 - left;
+                        } else {
+                            outT = moment(clockout).format(`h:mm A`);
+                            width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                        }
+                        if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                        {
+                            sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                            sLeft = 0;
+                        } else {
+                            sInT = moment(scheduledin).format(`h:mm A`);
+                            sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                        {
+                            sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            sWidth = 100 - sLeft;
+                        } else {
+                            sOutT = moment(scheduledout).format(`h:mm A`);
+                            sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div title="Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                        timeline += `<div id="timesheet-t-${record.ID}" title="Actual Hours (approved): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                    } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null) && record.approved === 1) {
+                        status = `success`;
+                        status2 = `This record is approved, but did not fall within a scheduled office hours block.`;
+                        hours[record.name].add(clockout.diff(clockin));
+                        if (moment(clockin).isBefore(moment(clockout).startOf('week')))
+                        {
+                            inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                            left = 0;
+                        } else {
+                            inT = moment(clockin).format(`h:mm A`);
+                            left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                        {
+                            outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            width = 100 - left;
+                        } else {
+                            outT = moment(clockout).format(`h:mm A`);
+                            width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div id="timesheet-t-${record.ID}" title="Actual Unscheduled Hours (approved): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                    } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === -1) {
+                        status = `secondary`;
+                        status2 = `This is NOT an actual timesheet; the director canceled scheduled office hours.`;
+                        if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                        {
+                            sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                            sLeft = 0;
+                        } else {
+                            sInT = moment(scheduledin).format(`h:mm A`);
+                            sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                        {
+                            sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            sWidth = 100 - sLeft;
+                        } else {
+                            sOutT = moment(scheduledout).format(`h:mm A`);
+                            sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div title="Scheduled Hours (CANCELED): ${sInT} - ${sOutT}" class="" style="background-color: #787878; position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                    } else if (clockin !== null && clockout !== null && scheduledin !== null && scheduledout !== null && record.approved === 0)
+                    {
+                        status = `warning`;
+                        status2 = `This record is NOT approved, but fell within a scheduled office hours block.`;
+                        if (moment(clockin).isBefore(moment(clockout).startOf('week')))
+                        {
+                            inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                            left = 0;
+                        } else {
+                            inT = moment(clockin).format(`h:mm A`);
+                            left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                        {
+                            outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            width = 100 - left;
+                        } else {
+                            outT = moment(clockout).format(`h:mm A`);
+                            width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                        }
+                        if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                        {
+                            sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                            sLeft = 0;
+                        } else {
+                            sInT = moment(scheduledin).format(`h:mm A`);
+                            sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                        {
+                            sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            sWidth = 100 - sLeft;
+                        } else {
+                            sOutT = moment(scheduledout).format(`h:mm A`);
+                            sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div title="Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                        timeline += `<div id="timesheet-t-${record.ID}" title="Actual Hours (NEEDS REVIEW): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                    } else if (clockin !== null && clockout !== null && (scheduledin === null || scheduledout === null) && record.approved === 0) {
+                        status = `warning`;
+                        status2 = `This record is NOT approved and did not fall within a scheduled office hours block.`;
+                        if (moment(clockin).isBefore(moment(clockout).startOf('week')))
+                        {
+                            inT = moment(clockin).format(`YYYY-MM-DD h:mm A`);
+                            left = 0;
+                        } else {
+                            inT = moment(clockin).format(`h:mm A`);
+                            left = ((moment(clockin).valueOf() - moment(clockin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks')) || !moment(clockout).isSame(moment(clockin), 'day'))
+                        {
+                            outT = moment(clockout).format(`YYYY-MM-DD h:mm A`);
+                            width = 100 - left;
+                        } else {
+                            outT = moment(clockout).format(`h:mm A`);
+                            width = (((moment(clockout).valueOf() - moment(clockin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div id="timesheet-t-${record.ID}" title="Actual Unscheduled Hours (NEEDS REVIEW): ${inT} - ${outT}" class="bg-${status}" style="position: absolute; left: 20%; width: 75%; top: ${left}%; height: ${width}%;"></div>`;
+                    } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === 0) {
+                        status = `danger`;
+                        status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
+                        if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                        {
+                            sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                            sLeft = 0;
+                        } else {
+                            sInT = moment(scheduledin).format(`h:mm A`);
+                            sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                        {
+                            sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            sWidth = 100 - sLeft;
+                        } else {
+                            sOutT = moment(scheduledout).format(`h:mm A`);
+                            sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div title="Scheduled Hours (NO SHOW): ${sInT} - ${sOutT}" class="bg-danger" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                    } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === 1) {
+                        status = `secondary`;
+                        status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
+                        if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                        {
+                            sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                            sLeft = 0;
+                        } else {
+                            sInT = moment(scheduledin).format(`h:mm A`);
+                            sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                        {
+                            sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            sWidth = 100 - sLeft;
+                        } else {
+                            sOutT = moment(scheduledout).format(`h:mm A`);
+                            sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div title="Future Scheduled Hours: ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
+                    } else if (scheduledin !== null && scheduledout !== null && clockin === null && clockout === null && record.approved === 2) {
+                        status = `secondary`;
+                        status2 = `This is NOT an actual timesheet; the director failed to clock in during scheduled office hours.`;
+                        if (moment(scheduledin).isBefore(moment(scheduledout).startOf('week')))
+                        {
+                            sInT = moment(scheduledin).format(`YYYY-MM-DD h:mm A`);
+                            sLeft = 0;
+                        } else {
+                            sInT = moment(scheduledin).format(`h:mm A`);
+                            sLeft = ((moment(scheduledin).valueOf() - moment(scheduledin).startOf('day').valueOf()) / dayValue) * 100;
+                        }
+                        if (moment(scheduledout).isAfter(moment(scheduledin).startOf('week').add(1, 'weeks')) || !moment(scheduledout).isSame(moment(scheduledin), 'day'))
+                        {
+                            sOutT = moment(scheduledout).format(`YYYY-MM-DD h:mm A`);
+                            sWidth = 100 - sLeft;
+                        } else {
+                            sOutT = moment(scheduledout).format(`h:mm A`);
+                            sWidth = (((moment(scheduledout).valueOf() - moment(scheduledin).valueOf()) / dayValue) * 100);
+                        }
+                        timeline += `<div title="Future Scheduled Hours (CHANGED): ${sInT} - ${sOutT}" class="bg-secondary" style="position: absolute; left: 5%; width: 15%; top: ${sLeft}%; height: ${sWidth}%;"></div>`;
                     }
+                }
 
                 // Fill in the timesheet record
                 var cell = document.getElementById(`options-timesheets-director-cell-${clockday}-${record.name.replace(/\W/g, '')}`);

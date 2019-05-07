@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - calendar/remove for removing calendar events (mainly canceled ones that should not appear in the system; removing active events may result in them getting re-added).
  - directors/remove-hours for removing director hours (mainly canceled ones that should not appear in the system; removing active events may result in them getting re-added).
  - Added column "happenedReason" to attendance which contains any reasoning for show/event cancellations, specifically if an event is canceled from the web panel.
+ - timesheet/remove to remove timesheets and their corresponding Directorhours events.
+ - "duration" parameter to attendance/get to specify number of days of attendance records to get, if using date based filtering. Can specify between 1 and 14. Defaults to 1.
+ - "fourteenDays" parameter to timesheet/get. If true, will get records up to 7 days prior to specified date, and 7 days ahead of specified date, instead of records for the week which the date falls in. Defaults to false.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
