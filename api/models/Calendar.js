@@ -996,13 +996,13 @@ module.exports = {
                                                     if (err)
                                                         return false;
                                                     // if wasCreated, then the event never aired; Log an absence.
-                                                    if (wasCreated)
+                                                    if (wasCreated || record.time_in === null && record.time_out === null)
                                                     {
                                                         await Logs.create({attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format("LLL")} - ${moment(record.scheduled_out).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
                                                                 .tolerate((err) => {
                                                                     sails.log.error(err);
                                                                 });
-                                                        await Timesheet.update({ID: record.ID}, {approved: 0}).fetch();
+                                                        await Timesheet.update({unique: event.unique}, {approved: 0}).fetch();
                                                     }
                                                 });
                                         return true;
