@@ -62,7 +62,7 @@ module.exports = {
                 // Clock-ins need a new entry
                 if (calendar.length > 0)
                 {
-                    var records = await Timesheet.update({unique: calendar[0].unique}, {name: record.name, unique: calendar[0].unique, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
+                    var records = await Timesheet.update({unique: calendar[0].unique, time_in: null}, {name: record.name, unique: calendar[0].unique, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
                     if (records.length === 0)
                         await Timesheet.create({name: record.name, unique: calendar[0].unique, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
                 } else {
