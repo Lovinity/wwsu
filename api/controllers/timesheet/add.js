@@ -64,7 +64,7 @@ module.exports = {
                 {
                     var records = await Timesheet.update({unique: calendar[0].unique, time_in: null}, {name: record.name, unique: calendar[0].unique, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
                     if (records.length === 0)
-                        await Timesheet.create({name: record.name, unique: calendar[0].unique, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
+                        await Timesheet.create({name: record.name, unique: calendar[0].unique, scheduled_in: moment(calendar[0].start).toISOString(true), scheduled_out: moment(calendar[0].end).toISOString(true), time_in: thetime.toISOString(true), approved: toapprove}).fetch();
                 } else {
                     await Timesheet.create({name: record.name, unique: null, scheduled_in: null, scheduled_out: null, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
                 }

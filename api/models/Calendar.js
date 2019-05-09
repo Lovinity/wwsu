@@ -878,7 +878,9 @@ module.exports = {
 
                         // Find existing record of event. If does not exist, create it in the Calendar.
                         var theEvent = await Directorhours.findOrCreate({unique: event.id}, criteriaB);
-                        var theEvent2 = await Timesheet.findOrCreate({unique: criteria.unique}, {unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 1});
+                        var theEvent2 = await Timesheet.count({unique: criteria.unique});
+                        if (theEvent2 === 0)
+                            theEvent2 = await Timesheet.create({unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 1}).fetch();
 
                         //sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
                         // Check if the event changed. If so, update it and push it out to clients.
@@ -991,19 +993,16 @@ module.exports = {
                         var maps = destroyed
                                 .map(async event => {
                                     try {
-                                        Timesheet.findOrCreate({unique: event.unique}, {unique: event.unique, name: event.director, scheduled_in: moment(event.start).toISOString(true), scheduled_out: moment(event.end).toISOString(true), approved: 0})
+                                        Timesheet.findOrCreate({unique: event.unique, time_in: null, time_out: null, approved: {'>': 0}}, {unique: event.unique, name: event.director, scheduled_in: moment(event.start).toISOString(true), scheduled_out: moment(event.end).toISOString(true), approved: 0})
                                                 .exec(async(err, record, wasCreated) => {
                                                     if (err)
                                                         return false;
-                                                    // if wasCreated, then the event never aired; Log an absence.
-                                                    if (wasCreated || record.time_in === null && record.time_out === null)
-                                                    {
-                                                        await Logs.create({attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format("LLL")} - ${moment(record.scheduled_out).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
-                                                                .tolerate((err) => {
-                                                                    sails.log.error(err);
-                                                                });
-                                                        await Timesheet.update({unique: event.unique}, {approved: 0}).fetch();
-                                                    }
+                                                    await Logs.create({attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format("LLL")} - ${moment(record.scheduled_out).format("LT")}`, createdAt: moment().toISOString(true)}).fetch()
+                                                            .tolerate((err) => {
+                                                                sails.log.error(err);
+                                                            });
+                                                    if (!wasCreated)
+                                                        await Timesheet.update({unique: event.unique, time_in: null, time_out: null, approved: {'>': 0}}, {approved: 0}).fetch();
                                                 });
                                         return true;
                                     } catch (e) {
