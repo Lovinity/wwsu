@@ -678,7 +678,7 @@ module.exports = {
                                         .exec(async(err, attendance, wasCreated) => {
                                             if (!wasCreated)
                                             {
-                                                attendance = await Attendance.update({ID: record.ID, happened: 1}, {unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: cEvent.title, happened: -1, happenedReason: `Removed from Google Calendar`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true)});
+                                                attendance = await Attendance.update({ID: attendance.ID, happened: 1}, {unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: cEvent.title, happened: -1, happenedReason: `Removed from Google Calendar`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true)});
                                             }
                                             if (cEvent.title.startsWith("Show: "))
                                             {
