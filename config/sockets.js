@@ -57,18 +57,21 @@ module.exports.sockets = {
         var theip = typeof handshake.headers['x-forwarded-for'] !== 'undefined' ? handshake.headers['x-forwarded-for'] : handshake.address;
         var theid = sh.unique(theip + sails.config.custom.hostSecret);
         try {
-            var record = await Discipline.find({where: {active: 1, or: [
-                        {action: 'permaban'},
-                        {action: 'dayban', createdAt: {'>': searchto}},
-                        {action: 'showban'}
-                    ], IP: [theip, `website-${theid}`]}}).sort(`createdAt DESC`).limit(1);
+            var record = await Discipline.find({
+                where: {
+                    active: 1, or: [
+                        { action: 'permaban' },
+                        { action: 'dayban', createdAt: { '>': searchto } },
+                        { action: 'showban' }
+                    ], IP: [theip, `website-${theid}`]
+                }
+            }).sort(`createdAt DESC`).limit(1);
             if (typeof record !== 'undefined' && typeof record[0] !== 'undefined') {
                 record = record[0];
                 var references = record.ID;
-                if (record.active === 1)
-                {
-                    if (record.action === 'permaban' || record.action === 'dayban' || record.action === 'showban')
-                    {
+                if (record.active === 1) {
+                    if (record.action === 'permaban' || record.action === 'dayban' || record.action === 'showban') {
+                        sails.log.error(new Error(`Socket connection from ${theip} REJECTED; discipline ${reference} in place`));
                         return proceed(new Error(`Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${references}`), false);
                     }
                 }
@@ -79,24 +82,25 @@ module.exports.sockets = {
         }
 
         // Allow requests from origin baseUrl, otherwise require an authorized host header
-        if (handshake.headers && handshake.headers.origin && handshake.headers.origin.startsWith(sails.config.custom.baseUrl || `http://localhost:${sails.config.port}`))
-        {
+        if (handshake.headers && handshake.headers.origin && handshake.headers.origin.startsWith(sails.config.custom.baseUrl || `http://localhost:${sails.config.port}`)) {
+            sails.log.error(new Error(`Socket connection from ${theip} ACCEPTED; headers present: ${handshake.headers.origin}`));
             return proceed(undefined, true);
         } else {
-            if (typeof handshake._query === 'undefined' || typeof handshake._query.host === 'undefined')
-            {
+            if (typeof handshake._query === 'undefined' || typeof handshake._query.host === 'undefined') {
+                sails.log.error(new Error(`Socket connection from ${theip} REJECTED; host query required, but not provided.`));
                 return proceed(new Error(`You must provide a host query parameter to authorize this websocket connection.`), false);
             }
 
-            var record = await Hosts.findOrCreate({host: handshake._query.host}, {host: handshake._query.host, friendlyname: handshake._query.host});
+            var record = await Hosts.findOrCreate({ host: handshake._query.host }, { host: handshake._query.host, friendlyname: handshake._query.host });
 
-            if (!record.authorized)
-            {
+            if (!record.authorized) {
+                sails.log.error(new Error(`Socket connection from ${theip} REJECTED; host is not authorized.`));
                 return proceed(new Error(`The provided host is not yet authorized to connect to WWSU. Please have an administrator authorize this host.`), false);
             }
         }
 
         // At this point, allow the connection
+        sails.log.error(new Error(`Socket connection from ${theip} ACCEPTED; passed the end of the function.`));
         return proceed(undefined, true);
     },
 
