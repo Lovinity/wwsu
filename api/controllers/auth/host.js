@@ -36,7 +36,7 @@ module.exports = {
             var host = await Hosts.findOrCreate({host: inputs.username}, { host: inputs.username, friendlyname: inputs.username});
 
             if (!host || !host.authorized)
-                return exits.noToken({errToken: "The provided host either does not exist or is not authorized."});
+                return exits.noToken({errToken: `The provided host either does not exist or is not authorized. To grant access, please use a DJ Controls with administrator privileges and authorize the host ${inputs.username}`});
             
             // Generate the token valid for 10 minutes
             var token = jwt.sign({host: host.host, admin: host.admin, exp: Math.floor(Date.now() / 1000) + (60 * 10)}, sails.config.custom.secrets.host, {subject: 'host'});
