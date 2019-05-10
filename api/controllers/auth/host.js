@@ -33,8 +33,9 @@ module.exports = {
         try {
             
             // Verify the host first
-            var host = await Hosts.findOne({host: inputs.username, authorized: true});
-            if (!host)
+            var host = await Hosts.findOrCreate({host: inputs.username}, { host: inputs.username, friendlyname: inputs.username});
+
+            if (!host || !host.authorized)
                 return exits.noToken({errToken: "The provided host either does not exist or is not authorized."});
             
             // Generate the token valid for 10 minutes
