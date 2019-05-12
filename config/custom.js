@@ -202,7 +202,7 @@ var defaultConfig = {
     categories: {
 
         // Restrict removal of the provided category keys by the config system.
-        _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `liners`, `requestLiners`, `promos`, `halftime`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`],
+        _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`],
 
         /*
          * REQUIRED CATEGORIES
@@ -263,6 +263,11 @@ var defaultConfig = {
         // Music used for sports haltime and other extended sports breaks
         halftime: {
             "Sports Music": ["Halftime and Break Music"]
+        },
+
+        // Liners played when the system is sent to break because of a technical issue (remote broadcasts)
+        technicalIssues: {
+            "Liners": ["Technical Issues Liners"]
         },
 
         // When the system changes to a new playlist or genre, all tracks will be removed from the current queue EXCEPT tracks that are in these defined categories / subcategories.
