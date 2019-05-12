@@ -925,16 +925,17 @@ module.exports = {
                         var maps = destroyed
                             .map(async event => {
                                 try {
-                                    Timesheet.findOrCreate({ unique: event.unique, time_in: null, time_out: null, approved: { '>': 0 } }, { unique: event.unique, name: event.director, scheduled_in: moment(event.start).toISOString(true), scheduled_out: moment(event.end).toISOString(true), approved: 0 })
+                                    Timesheet.findOrCreate({ unique: event.unique }, { unique: event.unique, name: event.director, scheduled_in: moment(event.start).toISOString(true), scheduled_out: moment(event.end).toISOString(true), approved: 0 })
                                         .exec(async (err, record, wasCreated) => {
                                             if (err)
                                                 return false;
-                                            await Logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format("LLL")} - ${moment(record.scheduled_out).format("LT")}`, createdAt: moment().toISOString(true) }).fetch()
-                                                .tolerate((err) => {
-                                                    sails.log.error(err);
-                                                });
-                                            if (!wasCreated)
-                                                await Timesheet.update({ unique: event.unique, time_in: null, time_out: null, approved: { '>': 0 } }, { approved: 0 }).fetch();
+                                            if (wasCreated || (!wasCreated && record.time_in === null && record.approved === 1)) {
+                                                await Logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format("LLL")} - ${moment(record.scheduled_out).format("LT")}`, createdAt: moment().toISOString(true) }).fetch()
+                                                    .tolerate((err) => {
+                                                        sails.log.error(err);
+                                                    });
+                                                await Timesheet.update({ ID: record.ID }, { approved: 0 }).fetch();
+                                            }
                                         });
                                     return true;
                                 } catch (e) {

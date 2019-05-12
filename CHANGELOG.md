@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - timesheet/remove to remove timesheets and their corresponding Directorhours events.
  - "duration" parameter to attendance/get to specify number of days of attendance records to get, if using date based filtering. Can specify between 1 and 14. Defaults to 1.
  - "fourteenDays" parameter to timesheet/get. If true, will get records up to 7 days prior to specified date, and 7 days ahead of specified date, instead of records for the week which the date falls in. Defaults to false.
+ - "problem" parameter to state/break and categories.technicalIssues in configuration. If problem=true, a liner from categories.technicalIssues will queue and play at the beginning of the break. This is used when a break was triggered because of an issue with a remote broadcast.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
