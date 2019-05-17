@@ -305,7 +305,7 @@ module.exports = {
                         var event = events[i];
                         eventIds.push(event.id);
                         
-                        sails.log.error(event);
+                        //sails.log.error(event);
 
                         // Skip events without a start time or without an end time or without a summary
                         if (typeof event.start === 'undefined' || typeof event.end === 'undefined' || typeof event.summary === 'undefined') {
