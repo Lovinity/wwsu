@@ -890,7 +890,7 @@ module.exports = {
                                         });
                                     toUpdate = { scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 2 };
                                 }
-                                toUpdate.director = criteria.director;
+                                toUpdate.name = criteria.director;
                                 await Timesheet.update({ unique: criteria.unique }, toUpdate).fetch();
                                 await Directorhours.update({ unique: event.id }, criteriaC).fetch();
                             }

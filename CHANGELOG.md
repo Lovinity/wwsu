@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.break.validate with tasks parameter, used to validate that an array of break tasks is completely valid.
  - "accountability" column to hosts. Instead of using "emergencies" for both tech issues and DJ/Director accountability notifications, emergencies will just be for tech issues, and accountability will be for DJ/director notifications.
  - analytics/showtime and sails.helpers.analytics.showtime(Djs.ID) for gathering showtime analytics about Djs.ID, or all DJs if Djs.ID is not passed.
- - "happened" and "ignore" columns in Attendance. Happened = 1 for events that happened, 0 for unexcused absences, and -1 for cancellations. Ignore = 0 when record should not be ignored in reputation, 1 when it should only be ignored in %, and 2 if it should be ignored completely.
+ - "happened" and "ignore" columns in Attendance. Happened = 1 for events that happened, 0 for unexcused absences, and -1 for cancellations. Ignore = 0 when record should not be ignored in reputation, 1 when it should only be ignored in %, and 2 if it should be ignored completely. [Issue 84](https://github.com/Lovinity/wwsu/issues/84)
  - planner/* endpoints and Planner model to use as a tool for generating schedules for DJ shows.
  - calendar/remove for removing calendar events (mainly canceled ones that should not appear in the system; removing active events may result in them getting re-added).
  - directors/remove-hours for removing director hours (mainly canceled ones that should not appear in the system; removing active events may result in them getting re-added).
@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "duration" parameter to attendance/get to specify number of days of attendance records to get, if using date based filtering. Can specify between 1 and 14. Defaults to 1.
  - "fourteenDays" parameter to timesheet/get. If true, will get records up to 7 days prior to specified date, and 7 days ahead of specified date, instead of records for the week which the date falls in. Defaults to false.
  - "problem" parameter to state/break and categories.technicalIssues in configuration. If problem=true, a liner from categories.technicalIssues will queue and play at the beginning of the break. This is used when a break was triggered because of an issue with a remote broadcast.
+ - Status check on Google Calendar for Office Hours events that exist on Google Calendar, but provided director does not actually exist in the system. [Issue 85](https://github.com/Lovinity/wwsu/issues/85)
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
@@ -46,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - state/automation output utilizes sails.helpers.showtime.
  - Timesheet.approved no longer boolean. -1 = cancelled, 0 = not approved or absent, 1 = approved or upcoming hours.
  - Timesheet now creates records in advance for upcoming director hours. Timesheet system will merge clock in/out entries with these ones as necessary. Allows for better logging of director absences, cancellations, and scheduled hours.
+ - Google Calendar status will now list each specific issue found with calendar events. [Issue 86](https://github.com/Lovinity/wwsu/issues/86)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated
