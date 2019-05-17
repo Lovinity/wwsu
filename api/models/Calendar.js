@@ -202,13 +202,15 @@ module.exports = {
             sails.log.verbose(`Calendar.loadEvents called`);
             try {
 
+                var status = 5;
+                var issues = [];
+
                 // First, calendarID for WWSU Events
                 var { google } = require('googleapis');
                 var toTrigger = null;
                 var calendar = google.calendar({ version: 'v3', auth: auth });
                 var currentdate = moment().startOf('day');
                 var nextWeekDate = moment().startOf('day').add(28, 'days');
-                var badEvent = false;
                 //formatted.push(currentdate.format("YYYY-MM-DDTHH:mm:ssZ"));
                 //formatted.push(tomorrowdate.format("YYYY-MM-DDTHH:mm:ssZ"));
                 var colors = await calendar.colors.get();
@@ -227,8 +229,9 @@ module.exports = {
                 sails.log.silly(events);
                 // Alert if no events returned; this may be a problem. Also exit.
                 if (events.length === 0) {
-                    Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no events for the next 28 days.', status: 3 }]);
-                    return resolve();
+                    if (status > 3)
+                        status = 3;
+                    issues.push(`WWSU Events Google Calendar returned no events. Is this normal?`);
                 } else {
                     // Iterate through each returned event from Google Calendar
                     var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
@@ -344,7 +347,9 @@ module.exports = {
                                 criteria.verify = 'Valid';
                                 criteria.verify_message = `Valid. DJ in yellow, show in green.`;
                             } else {
-                                badEvent = true;
+                                if (status > 3)
+                                    status = 3;
+                                issues.push(`The formatting of the live show "${summary}" is invalid; must have a " - " to separate DJ/handle from show name.`);
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                                 criteria.verify = 'Invalid';
                                 criteria.verify_message = `Invalid; cannot determine DJ and show. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>.`;
@@ -361,7 +366,9 @@ module.exports = {
                                 criteria.verify = 'Valid';
                                 criteria.verify_message = `Valid. Host / org in yellow, show name in green.`;
                             } else {
-                                badEvent = true;
+                                if (status > 3)
+                                    status = 3;
+                                issues.push(`The formatting of the remote event "${summary}" is invalid; must have a " - " to separate DJ/host from show name.`);
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                                 criteria.verify = 'Invalid';
                                 criteria.verify_message = `Invalid; cannot determine host and show. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>.`;
@@ -377,7 +384,9 @@ module.exports = {
                                 criteria.verify = 'Valid';
                                 criteria.verify_message = `Valid. Sport in green.`;
                             } else {
-                                badEvent = true;
+                                if (status > 3)
+                                    status = 3;
+                                issues.push(`A sport event "${summary}" is invalid; the specified sport does not exist in the system.`);
                                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`;
                                 criteria.verify = 'Invalid';
                                 criteria.verify_message = `Invalid; sport is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.`;
@@ -414,8 +423,11 @@ module.exports = {
                                 }
                             }
 
-                            if (criteria.verify === 'Invalid')
-                                badEvent = true;
+                            if (criteria.verify === 'Invalid') {
+                                if (status > 3)
+                                    status = 3;
+                                issues.push(`Prerecord "${summary}" is invalid; a playlist with this name does not exist in RadioDJ.`);
+                            }
 
                             // Playlists (RadioDJ)
                         } else if (criteria.title.startsWith("Playlist: ")) {
@@ -445,8 +457,11 @@ module.exports = {
                                 }
                             }
 
-                            if (criteria.verify === 'Invalid')
-                                badEvent = true;
+                            if (criteria.verify === 'Invalid') {
+                                if (status > 3)
+                                    status = 3;
+                                issues.push(`Playlist "${summary}" is invalid; a playlist with this name does not exist in RadioDJ.`);
+                            }
 
                             // Genre rotations (via manual events in RadioDJ)
                         } else if (criteria.title.startsWith("Genre: ")) {
@@ -468,16 +483,23 @@ module.exports = {
                                 } else if (djevents[summary].enabled === "True") {
                                     criteria.verify = 'Invalid';
                                     criteria.verify_message = `Invalid; a "Load Rotation" action does not exist in the RadioDJ event. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`;
-
+                                    if (status > 3)
+                                        status = 3;
+                                    issues.push(`Genre "${summary}" is invalid; the event for this genre in RadioDJ does not contain a "Load Rotation" action.`);
                                     // Event is not enabled
                                 } else {
                                     criteria.verify = 'Invalid';
                                     criteria.verify_message = `Invalid; the event in RadioDJ is disabled. <strong>Please enable the manual event in RadioDJ</strong>.`;
+                                    if (status > 3)
+                                        status = 3;
+                                    issues.push(`Genre "${summary}" is invalid; the event for this genre in RadioDJ is disabled.`);
                                 }
+                            } else {
+                                if (status > 3)
+                                    status = 3;
+                                issues.push(`Genre "${summary}" is invalid; an event with this name does not exist in RadioDJ.`);
                             }
 
-                            if (criteria.verify === 'Invalid')
-                                badEvent = true;
                         } else {
                             criteria.verify_titleHTML = `<span style="background: rgba(128, 128, 128, 0.2);">${criteria.verify_titleHTML}</span>`;
                         }
@@ -757,11 +779,6 @@ module.exports = {
                             });
                         await Promise.all(maps);
                     }
-
-
-                    if (badEvent) {
-                        Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Invalid events in Google Calendar. Please see DJ Controls administration / Calendar Verification.', status: 3 }]);
-                    }
                 }
 
 
@@ -786,11 +803,17 @@ module.exports = {
 
                 // Should have at least one event.
                 if (events.length === 0) {
-                    Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar returned no director hours for the next 28 days.', status: 3 }]);
-                    return resolve();
+                    if (status > 3)
+                        status = 3;
+                    issues.push(`Google Calendar Office Hours returned no events. Is this normal?`);
                 } else {
                     var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
                     var retData = [];
+
+                    // Get all directors in the system so we can error if a nonexisting director is on the calendar
+                    var directorRecords = await Directors.find();
+                    var directors = [];
+                    directorRecords.map((record) => directors.push(record.name));
 
                     // Iterate through each returned event from Google Calendar
                     for (var i = 0; i < events.length; i++) {
@@ -803,86 +826,96 @@ module.exports = {
                             continue;
                         }
 
-                        // Prepare data structure for event
-                        var criteria = {
-                            unique: event.id,
-                            director: event.summary,
-                            start: event.start.dateTime || event.start.date,
-                            end: event.end.dateTime || event.end.date
-                        };
+                        if (directors.indexOf(event.summary) === -1 && issues.indexOf(`Office Hours for ${event.summary} exists on Google Calendar, but this director does not exist in the system. These hours were ignored.`) === -1) {
+                            if (status > 3)
+                                status = 3;
+                            issues.push(`Office Hours for ${event.summary} exists on Google Calendar, but this director does not exist in the system. These hours were ignored.`);
+                        } else {
 
-                        sails.log.silly(`Directorhours criteria: ${JSON.stringify(criteria)}`);
+                            // Prepare data structure for event
+                            var criteria = {
+                                unique: event.id,
+                                director: event.summary,
+                                start: event.start.dateTime || event.start.date,
+                                end: event.end.dateTime || event.end.date
+                            };
 
-                        // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                        var criteriaB = _.cloneDeep(criteria);
-                        var criteriaC = _.cloneDeep(criteria);
+                            sails.log.silly(`Directorhours criteria: ${JSON.stringify(criteria)}`);
 
-                        // TODO: Make so that new records do not also trigger an update
+                            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
+                            var criteriaB = _.cloneDeep(criteria);
+                            var criteriaC = _.cloneDeep(criteria);
 
-                        // Find existing record of event. If does not exist, create it in the Calendar.
-                        var theEvent = await Directorhours.findOrCreate({ unique: event.id }, criteriaB);
-                        var theEvent2 = await Timesheet.count({ unique: criteria.unique });
-                        if (theEvent2 === 0)
-                            theEvent2 = await Timesheet.create({ unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 1 }).fetch();
+                            // Find existing record of event. If does not exist, create it in the Calendar.
+                            var theEvent = await Directorhours.findOrCreate({ unique: event.id }, criteriaB);
+                            var theEvent2 = await Timesheet.count({ unique: criteria.unique });
+                            if (theEvent2 === 0)
+                                theEvent2 = await Timesheet.create({ unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 1 }).fetch();
 
-                        //sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
-                        // Check if the event changed. If so, update it and push it out to clients.
-                        var needsUpdate = false;
-                        var isChanged = false;
-                        for (var key in theEvent) {
-                            if (theEvent.hasOwnProperty(key)) {
-                                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`) {
-                                    // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
-                                    if (key === `start` && moment(theEvent[key]).isSame(moment(criteria[key])))
-                                        continue;
-                                    if (key === `end` && moment(theEvent[key]).isSame(moment(criteria[key])))
-                                        continue;
+                            //sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
+                            // Check if the event changed. If so, update it and push it out to clients.
+                            var needsUpdate = false;
+                            var isChanged = false;
+                            for (var key in theEvent) {
+                                if (theEvent.hasOwnProperty(key)) {
+                                    if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`) {
+                                        // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
+                                        if (key === `start` && moment(theEvent[key]).isSame(moment(criteria[key])))
+                                            continue;
+                                        if (key === `end` && moment(theEvent[key]).isSame(moment(criteria[key])))
+                                            continue;
 
-                                    if (key === `start` && !moment(theEvent[key]).isSame(moment(criteria[key])))
-                                        isChanged = true;
-                                    if (key === `end` && !moment(theEvent[key]).isSame(moment(criteria[key])))
-                                        isChanged = true;
+                                        if (key === `director` && theEvent[key] !== criteria[key])
+                                            isChanged = true;
+                                        if (key === `start` && !moment(theEvent[key]).isSame(moment(criteria[key])))
+                                            isChanged = true;
+                                        if (key === `end` && !moment(theEvent[key]).isSame(moment(criteria[key])))
+                                            isChanged = true;
 
-                                    needsUpdate = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (needsUpdate) {
-                            // Director changed their hours
-                            if (isChanged && theEvent.active >= 1) {
-                                criteriaC.active = 2;
-                                await Logs.create({ attendanceID: null, logtype: 'director-change', loglevel: 'info', logsubtype: criteria.director, event: `<strong>Director changed their office hours via Google Calendar!</strong><br />Director: ${criteria.director}<br />Old hours: ${moment(theEvent.start).format("LLL")} - ${moment(theEvent.end).format("LT")}<br />Updated hours: ${moment(criteria.start).format("LLL")} - ${moment(criteria.end).format("LT")}`, createdAt: moment().toISOString(true) }).fetch()
-                                    .tolerate((err) => {
-                                        sails.log.error(err);
-                                    });
-                                await Timesheet.update({ unique: criteria.unique }, { scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 2 }).fetch();
-                            }
-                            await Directorhours.update({ unique: event.id }, criteriaC).fetch();
-                        }
-
-                        // Check to see if any active timesheet records now fall within director hours. If so, update the timesheets.
-                        if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter()) {
-                            try {
-                                var record = await Timesheet.find({ time_in: { '!=': null }, name: criteria.director, time_out: null }).limit(1);
-                                if (record.length > 0) {
-                                    // If the currently clocked in timesheet is not tied to any google calendar events, tie it to this event.
-                                    if (record[0].unique === null) {
-                                        // Try to find another record that may have already been created for these hours, and merge it if found.
-                                        var record2 = await Timesheet.find({ unique: criteria.unique, approved: { '>': -1 }, time_in: null, time_out: null }).limit(1);
-                                        if (record2.length > 0)
-                                            await Timesheet.destroy({ ID: record2[0].ID }).fetch();
-
-                                        await Timesheet.update({ name: record[0].name, unique: null, time_in: { '!=': null }, time_out: null }, { unique: criteria.unique, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true) }).fetch();
-
-                                        // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
-                                    } else if (record[0].unique !== criteria.unique) {
-                                        var updater = await Timesheet.update({ name: criteria.director, time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true) }).fetch();
-                                        await Timesheet.create({ unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), time_in: moment().toISOString(true), time_out: null, approved: updater[0].approved }).fetch();
+                                        needsUpdate = true;
+                                        break;
                                     }
                                 }
-                            } catch (e) {
-                                sails.log.error(e);
+                            }
+                            var toUpdate = {};
+                            if (needsUpdate) {
+                                // Director changed their hours
+                                if (isChanged && theEvent.active >= 1) {
+                                    criteriaC.active = 2;
+                                    await Logs.create({ attendanceID: null, logtype: 'director-change', loglevel: 'info', logsubtype: criteria.director, event: `<strong>Director changed their office hours via Google Calendar!</strong><br />Director: ${criteria.director}<br />Old hours: ${moment(theEvent.start).format("LLL")} - ${moment(theEvent.end).format("LT")}<br />Updated hours: ${moment(criteria.start).format("LLL")} - ${moment(criteria.end).format("LT")}`, createdAt: moment().toISOString(true) }).fetch()
+                                        .tolerate((err) => {
+                                            sails.log.error(err);
+                                        });
+                                    toUpdate = { scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 2 };
+                                }
+                                toUpdate.director = criteria.director;
+                                await Timesheet.update({ unique: criteria.unique }, toUpdate).fetch();
+                                await Directorhours.update({ unique: event.id }, criteriaC).fetch();
+                            }
+
+                            // Check to see if any active timesheet records now fall within director hours. If so, update the timesheets.
+                            if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter()) {
+                                try {
+                                    var record = await Timesheet.find({ time_in: { '!=': null }, name: criteria.director, time_out: null }).limit(1);
+                                    if (record.length > 0) {
+                                        // If the currently clocked in timesheet is not tied to any google calendar events, tie it to this event.
+                                        if (record[0].unique === null) {
+                                            // Try to find another record that may have already been created for these hours, and merge it if found.
+                                            var record2 = await Timesheet.find({ unique: criteria.unique, approved: { '>': -1 }, time_in: null, time_out: null }).limit(1);
+                                            if (record2.length > 0)
+                                                await Timesheet.destroy({ ID: record2[0].ID }).fetch();
+
+                                            await Timesheet.update({ name: record[0].name, unique: null, time_in: { '!=': null }, time_out: null }, { unique: criteria.unique, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true) }).fetch();
+
+                                            // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
+                                        } else if (record[0].unique !== criteria.unique) {
+                                            var updater = await Timesheet.update({ name: criteria.director, time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true) }).fetch();
+                                            await Timesheet.create({ unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), time_in: moment().toISOString(true), time_out: null, approved: updater[0].approved }).fetch();
+                                        }
+                                    }
+                                } catch (e) {
+                                    sails.log.error(e);
+                                }
                             }
                         }
                     }
@@ -946,9 +979,11 @@ module.exports = {
                         await Promise.all(maps);
                     }
 
-                    if (!badEvent)
-                        Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Operational, and all events are formatted correctly.', status: 5 }]);
-
+                    if (issues.length === 0) {
+                        Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar is operational and all events are valid.`, status: 5 }]);
+                    } else {
+                        Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: issues.join(` `), status: status }]);
+                    }
                     return resolve();
                 }
             } catch (e) {
