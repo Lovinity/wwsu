@@ -989,7 +989,7 @@ module.exports = {
                     return resolve();
                 }
             } catch (e) {
-                Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar error: ' + e.message, status: 2 }]);
+                Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar error: ' + breakdance(e.message), status: 2 }]);
                 sails.log.error(e);
                 return reject(e);
             }
