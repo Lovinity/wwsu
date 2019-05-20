@@ -58,6 +58,11 @@ module.exports = {
             allowNull: true
         },
 
+        missedIDs: {
+            type: 'number',
+            defaultsTo: 0
+        },
+
         scheduledStart: {
             type: 'ref',
             columnType: 'datetime'

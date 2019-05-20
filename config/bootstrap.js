@@ -611,6 +611,18 @@ module.exports.bootstrap = async function (done) {
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
+
+                                if (Meta['A'].attendanceID !== null)
+                                {
+                                    var attendanceRecord = await Attendance.findOne({ID: Meta['A'].attendanceID});
+                                    if (attendanceRecord)
+                                    {
+                                        await Attendance.update({ID: Meta['A'].attendanceID}, {missedIDs: attendanceRecord.missedIDs + 1}).fetch()
+                                        .tolerate((err) => {
+                                            sails.log.error(err);
+                                        });
+                                    }
+                                }
                     }
 
 
