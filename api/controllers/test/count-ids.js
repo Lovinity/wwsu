@@ -18,7 +18,7 @@ module.exports = {
     fn: async function (inputs, exits) {
 
         try {
-            var records3 = await Logs.find({ attendanceID: attendanceIDs3, logtype: "id" });
+            var records3 = await Logs.find({logtype: "id"});
             records3
             .filter((record) => record.attendanceID !== null)
             .map((record) => {
