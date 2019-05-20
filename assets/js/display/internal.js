@@ -653,7 +653,7 @@ function processStatus(db)
                     }, 250);
                 }, 5000);
 
-                Slides.slide(`system`).isSticky = true;
+                Slides.slide(`system`).isSticky = false;
                 Slides.slide(`system`).active = true;
                 break;
             case 3:
