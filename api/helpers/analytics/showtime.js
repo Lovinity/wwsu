@@ -167,27 +167,27 @@ module.exports = {
             records2
                 .filter((record) => record.dj !== null && typeof DJs[record.dj] !== 'undefined')
                 .map((record) => {
+                    attendanceIDs[record.ID] = record.dj;
 
                     // First, subtract for missed IDs; we do not want to combine missed ID records.
                     if (record.ignore !== 2) {
                         if (record.ignore !== 1) {
-                            DJs[attendanceIDs[record.attendanceID]].overall.reputationScore -= (2 * record.missedIDs);
+                            DJs[record.dj].overall.reputationScore -= (2 * record.missedIDs);
                             DJs[0].overall.reputationScore -= (2 * record.missedIDs);
                         }
-                        DJs[attendanceIDs[record.attendanceID]].overall.missedIDs += record.missedIDs;
+                        DJs[record.dj].overall.missedIDs += record.missedIDs;
                         DJs[0].overall.missedIDs += record.missedIDs;
                         if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                             if (record.ignore !== 1) {
-                                DJs[attendanceIDs[record.attendanceID]].semester.reputationScore -= (2 * record.missedIDs);
+                                DJs[record.dj].semester.reputationScore -= (2 * record.missedIDs);
                                 DJs[0].semester.reputationScore -= (2 * record.missedIDs);
                             }
-                            DJs[attendanceIDs[record.attendanceID]].semester.missedIDs += record.missedIDs;
+                            DJs[record.dj].semester.missedIDs += record.missedIDs;
                             DJs[0].semester.missedIDs += record.missedIDs;
                         }
                     }
 
                     // Now, combine records in case of accidental end show / start a new show within the same scheduled time block
-                    attendanceIDs[record.ID] = record.dj;
                     if (record.unique !== null && record.unique !== ``) {
                         // Combine records with the same Google Calendar unique ID
                         if (record.unique in unique) {
