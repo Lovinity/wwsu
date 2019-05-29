@@ -202,7 +202,7 @@ var defaultConfig = {
     categories: {
 
         // Restrict removal of the provided category keys by the config system.
-        _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`],
+        _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`, `noFade`],
 
         /*
          * REQUIRED CATEGORIES
@@ -303,7 +303,6 @@ var defaultConfig = {
             "Show Openers": [],
             "Show Returns": [],
             "Show Closers": [],
-            "Strike Testimonials": [],
         },
 
         // When a DJ or producer requests to exit break, all tracks in these defined categories and subcategories will be removed from the queue
@@ -325,7 +324,14 @@ var defaultConfig = {
             "Show Returns": [],
             "Sports Liners": [],
             "Commercials": [],
-            "Strike Testimonials": [],
+        },
+
+        // CRON will routinely check tracks in the specified categories. If there is a set fade in or fade out on these tracks, the system will reset these to zero (eg. no fading).
+        noFade: {
+            "Station IDs": [],
+            "Promos": [],
+            "PSAs": [],
+            "Commercials": [],
         },
 
         /*

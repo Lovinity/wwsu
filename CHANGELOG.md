@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "fourteenDays" parameter to timesheet/get. If true, will get records up to 7 days prior to specified date, and 7 days ahead of specified date, instead of records for the week which the date falls in. Defaults to false.
  - "problem" parameter to state/break and categories.technicalIssues in configuration. If problem=true, a liner from categories.technicalIssues will queue and play at the beginning of the break. This is used when a break was triggered because of an issue with a remote broadcast.
  - Status check on Google Calendar for Office Hours events that exist on Google Calendar, but provided director does not actually exist in the system. [Issue 85](https://github.com/Lovinity/wwsu/issues/85)
+ - "noFade" category; tracks in this category will be checked hourly for any fade cue points. Tracks with any fading will have the fade zeroed (removed).
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
