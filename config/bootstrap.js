@@ -1221,9 +1221,11 @@ module.exports.bootstrap = async function (done) {
             sails.log.debug(`CRON checkNoFade called.`);
             try {
                 // Get all noFade tracks
-                var records = await Songs.find({ id_subcat: sails.config.custom.subcats.noFade });
+                var records = await Songs.find();
                 if (records && records.length > 0) {
-                    records.map((record) => {
+                    records
+                    .filter((record) => sails.config.custom.subcats.noFade.indexOf(record.id_subcat) !== -1)
+                    .map((record) => {
                         var cueData = queryString.parse(record.cue_times);
                         // If fade in and fade out are both 0 (treat when fade in or fade out is not specified as being 0), skip this track; nothing to do.
                         if ((!cueData.fin || cueData.fin === 0) && (!cueData.fou || cueData.fou === 0))
