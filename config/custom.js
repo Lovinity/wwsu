@@ -202,7 +202,7 @@ var defaultConfig = {
     categories: {
 
         // Restrict removal of the provided category keys by the config system.
-        _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`, `noFade`],
+        _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `underwritings`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`, `noFade`],
 
         /*
          * REQUIRED CATEGORIES
@@ -239,6 +239,12 @@ var defaultConfig = {
         // DEFINITION: Fun audio clips, generally 15-30 seconds, identifying the station, played as defined in break configuration.
         sweepers: {
             "Sweepers": ["Break Sweepers"]
+        },
+
+        // Station underwritings and commercials
+        // DEFINITION: A promotional audio clip usually paid for by the organization / company. Used in the underwriting queuing system.
+        underwritings: {
+            "Commercials": []
         },
 
         // Station Liners

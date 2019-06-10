@@ -22,6 +22,11 @@ module.exports = {
             allowNull: true,
             description: 'Optionally filter returned songs by provided subcategory ID.'
         },
+        type: {
+            type: "string",
+            isIn: ["underwritings"],
+            description: "Optionally filter by hard-coded type. Currently supports underwritings."
+        },
         genre: {
             type: 'number',
             allowNull: true,
@@ -62,7 +67,7 @@ module.exports = {
             var subcatIDs = [];
             var cats = {};
             var subcats = {};
-            var query = {};
+            var query = {id_subcat: []};
             var songs;
 
             // No song ID specified?
@@ -71,7 +76,9 @@ module.exports = {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 query.id_subcat = sails.config.custom.subcats.music;
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
-                    query.id_subcat = inputs.subcategory;
+                    query.id_subcat.push(inputs.subcategory);
+                if (inputs.type === `underwritings`)
+                    query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats.underwritings);
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)
                     query.id_genre = inputs.genre;
 
