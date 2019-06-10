@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.break.addUnderwriting helper, with fastForwardOnly and quantity parameters. This helper determines which underwritings should be queued to air, and queues them.
  - Underwritings status system for alerting of underwritings that are behind schedule.
  - queueUnderwritings break task for specifying in breaks config to queue underwritings. The quantity parameter determines the maximum underwritings to queue (rule may be ignored if more underwritings are way behind schedule).
+ - Added parameter "category" to songs/get; allows to filter songs by configured Node music category (not the same as RadioDJ main category).
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.

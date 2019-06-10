@@ -17,15 +17,19 @@ module.exports = {
             allowNull: true,
             description: 'Search by provided artist or title.'
         },
+        category: {
+            type: "string",
+            custom: (value) => {
+                if (typeof sails.config.custom.subcats[value] === `undefined`)
+                    return false;
+                return true;
+            },
+            description: "Optionally filter by configured Node music category."
+        },
         subcategory: {
             type: 'number',
             allowNull: true,
             description: 'Optionally filter returned songs by provided subcategory ID.'
-        },
-        type: {
-            type: "string",
-            isIn: ["underwritings"],
-            description: "Optionally filter by hard-coded type. Currently supports underwritings."
         },
         genre: {
             type: 'number',
@@ -71,34 +75,33 @@ module.exports = {
             var songs;
 
             // No song ID specified?
-            if (typeof inputs.ID === 'undefined' || inputs.ID === null)
-            {
+            if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 query.id_subcat = sails.config.custom.subcats.music;
-                if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.type !== 'undefined' && inputs.type !== null))
+                if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
                     query.id_subcat = [];
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
                     query.id_subcat.push(inputs.subcategory);
-                if (inputs.type === `underwritings`)
-                    query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats.underwritings);
+                if (inputs.category !== 'undefined' && inputs.category !== null)
+                    query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats[inputs.category]);
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)
                     query.id_genre = inputs.genre;
 
                 // Filter by search string, if provided
                 if (typeof inputs.search !== 'undefined' && inputs.search !== null)
-                    query.or = [{artist: {'contains': inputs.search}}, {title: {'contains': inputs.search}}];
+                    query.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];
 
-                songs = await Songs.find(query).sort([{artist: 'ASC'}, {title: 'ASC'}]).skip(inputs.skip).limit(inputs.limit);
+                songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
 
             } else {
                 sails.log.verbose(`Querying single track ID: ${inputs.ID}`);
 
                 // Find the song matching the defined ID
-                query = {ID: inputs.ID};
-                songs = await Songs.find(query).sort([{artist: 'ASC'}, {title: 'ASC'}]).skip(inputs.skip).limit(inputs.limit);
+                query = { ID: inputs.ID };
+                songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
-                
+
                 // No record retrieved? Assume we could not find the song.
                 if (!songs || typeof songs === 'undefined' || songs.length <= 0)
                     return exits.notFound();
@@ -113,7 +116,7 @@ module.exports = {
                 var maps = songs.map(async (song, index) => {
                     try {
                         // Get those subcategories
-                        var subcats2 = await Subcategory.findOne({ID: song.id_subcat});
+                        var subcats2 = await Subcategory.findOne({ ID: song.id_subcat });
                         sails.log.verbose(`Subcategories retrieved: ${subcats2.length}`);
                         sails.log.silly(subcats2);
 
@@ -145,8 +148,7 @@ module.exports = {
             // Add genre data to the songs
             songs.map((song, index) => {
                 try {
-                    if (typeof genres[songs[index].id_genre] !== 'undefined')
-                    {
+                    if (typeof genres[songs[index].id_genre] !== 'undefined') {
                         songs[index].genre = genres[songs[index].id_genre];
                     } else {
                         songs[index].genre = 'Unknown';
