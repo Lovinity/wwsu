@@ -57,7 +57,8 @@ module.exports = {
         {name: 'EAS-internal', label: 'EAS NWS CAPS', data: 'No successful connection to all EAS NWS CAPS has been made yet since initialization.', status: 4, time: null},
         {name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 4, time: null},
         {name: 'music-library', label: 'Music Library', data: 'Music library tests have not yet executed since initialization.', status: 4, time: null},
-        {name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar has not been loaded since initialization.', status: 4, time: null}
+        {name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar has not been loaded since initialization.', status: 4, time: null},
+        {name: 'underwritings', label: 'Underwritings', data: 'Underwritings were not yet checked since initialization.', status: 4, time: null}
     ],
 
     /* Object used internally to check for errors.

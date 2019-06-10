@@ -470,6 +470,7 @@ var defaultConfig = {
      *         {task: "queueDuplicates"}, // This adds any underwritings etc that were previously removed from the queue due to duplicates
      *         {task: "queue", category: "sweepers", quantity: 1}, // This queues 1 sweeper (track configured in categories.sweepers)
      *         {task: "queueRequests", quantity: 3} // This queues up to 3 requested tracks, and adds a request liner (categories.requestLiners) at the beginning.
+     *         {task: "queueUnderwritings", quantity: 2} // Queue up to quantity number of scheduled underwritings. Quantity may be ignored if there are more underwritings way behind schedule.
      *     ],
      * 
      * // This break and set of options will queue at around :40 past every hour. We won't give another array of options example as it is redundant.
@@ -514,6 +515,7 @@ var defaultConfig = {
             {task: "log", event: "Queued :00 top of the hour ID break."},
             {task: "queue", category: "PSAs", quantity: 1},
             {task: "queueDuplicates"},
+            {task: "queueUnderwritings", quantity: 1},
             {task: "queue", category: "promos", quantity: 1},
             {task: "queue", category: "IDs", quantity: 1},
             {task: "queueRequests", quantity: 3}
@@ -524,6 +526,7 @@ var defaultConfig = {
             {task: "log", event: "Queued :20 PSA break."},
             {task: "queue", category: "PSAs", quantity: 1},
             {task: "queueDuplicates"},
+            {task: "queueUnderwritings", quantity: 2},
             {task: "queue", category: "sweepers", quantity: 1},
             {task: "queueRequests", quantity: 3}
         ],
@@ -533,6 +536,7 @@ var defaultConfig = {
             {task: "log", event: "Queued :40 PSA break."},
             {task: "queue", category: "PSAs", quantity: 1},
             {task: "queueDuplicates"},
+            {task: "queueUnderwritings", quantity: 2},
             {task: "queue", category: "sweepers", quantity: 1},
             {task: "queueRequests", quantity: 3}
         ]
@@ -575,11 +579,13 @@ var defaultConfig = {
 
             // These are queued/executed just before a live show begins.
             start: [
+                {task: "queueUnderwritings", quantity: 1},
             ],
 
             // These are queued/executed once, right when the break is started.
             before: [
-                {task: "queueDuplicates"}
+                {task: "queueDuplicates"},
+                {task: "queueUnderwritings", quantity: 2},
             ],
 
             // These are executed/queued repeatedly every time RadioDJ's queue gets empty until the DJ returns from their break.
@@ -605,11 +611,13 @@ var defaultConfig = {
 
             // These are queued/executed just before a remote broadcast begins.
             start: [
+                {task: "queueUnderwritings", quantity: 1},
             ],
 
             // These are queued/executed once, right when the break is started.
             before: [
-                {task: "queueDuplicates"}
+                {task: "queueDuplicates"},
+                {task: "queueUnderwritings", quantity: 2},
             ],
 
             // These are executed/queued repeatedly every time RadioDJ's queue gets empty until the DJ returns from their break.
@@ -638,7 +646,8 @@ var defaultConfig = {
 
             // These are queued/executed once, right when the break is started.
             before: [
-                {task: "queueDuplicates"}
+                {task: "queueDuplicates"},
+                {task: "queueUnderwritings", quantity: 2},
             ],
 
             // During standard breaks, these are executed/queued repeatedly every time RadioDJ's queue gets empty until the producer returns from their break.

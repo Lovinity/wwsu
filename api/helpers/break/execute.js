@@ -64,6 +64,9 @@ module.exports = {
                 case "queueDuplicates":
                     await sails.helpers.songs.queuePending();
                     break;
+                case "queueUnderwritings":
+                    await sails.helpers.break.addUnderwritings(false, inputs.quantity);
+                    break;
             }
             
             return exits.success();

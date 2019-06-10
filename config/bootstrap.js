@@ -689,6 +689,7 @@ module.exports.bootstrap = async function (done) {
                                             if (queue.length > 1 && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[1].IDSubcat)) === -1) {
                                                 Status.errorCheck.prevLiner = moment();
                                                 await sails.helpers.songs.queue(sails.config.custom.subcats.liners, 'Top', 1);
+                                                await sails.helpers.break.addUnderwritings(true);
                                             }
                                         }
                                     }
@@ -1043,7 +1044,7 @@ module.exports.bootstrap = async function (done) {
                 // TODO: Find a way to auto-populate these arrays.
                 var checksMemory = [Recipients, Status];
                 var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
-                var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Planner, Attendance, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp];
+                var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Planner, Underwritings, Attendance, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp];
 
                 // Memory checks
                 var checkStatus = { data: ``, status: 5 };
@@ -1115,7 +1116,7 @@ module.exports.bootstrap = async function (done) {
                                     checkStatus.status = 1;
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
-                            if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') && index > 5) {
+                            if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') && index > 6) {
                                 if (checkStatus.status > 3)
                                     checkStatus.status = 3;
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;

@@ -26,7 +26,7 @@ module.exports = {
 
     },
 
-    memory: {dj: null, listeners: null} // Used to track when listener count or DJ changes; only adds entries in the database when things change, so that it doesn't get flooded with rows.
+    memory: {dj: null, listeners: 0} // Used to track when listener count or DJ changes; only adds entries in the database when things change, so that it doesn't get flooded with rows.
 
 };
 

@@ -35,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "problem" parameter to state/break and categories.technicalIssues in configuration. If problem=true, a liner from categories.technicalIssues will queue and play at the beginning of the break. This is used when a break was triggered because of an issue with a remote broadcast.
  - Status check on Google Calendar for Office Hours events that exist on Google Calendar, but provided director does not actually exist in the system. [Issue 85](https://github.com/Lovinity/wwsu/issues/85)
  - "noFade" category; tracks in this category will be checked hourly for any fade cue points. Tracks with any fading will have the fade zeroed (removed).
+ - Underwritings model for management of underwritings in Node rather than RadioDJ.
+ - sails.helpers.break.addUnderwriting helper, with fastForwardOnly and quantity parameters. This helper determines which underwritings should be queued to air, and queues them.
+ - Underwritings status system for alerting of underwritings that are behind schedule.
+ - queueUnderwritings break task for specifying in breaks config to queue underwritings. The quantity parameter determines the maximum underwritings to queue (rule may be ignored if more underwritings are way behind schedule).
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
@@ -49,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Timesheet.approved no longer boolean. -1 = cancelled, 0 = not approved or absent, 1 = approved or upcoming hours.
  - Timesheet now creates records in advance for upcoming director hours. Timesheet system will merge clock in/out entries with these ones as necessary. Allows for better logging of director absences, cancellations, and scheduled hours.
  - Google Calendar status will now list each specific issue found with calendar events. [Issue 86](https://github.com/Lovinity/wwsu/issues/86)
+ - Liners might also queue underwritings if any of them are way behind schedule.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

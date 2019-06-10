@@ -56,6 +56,7 @@ module.exports = {
                         // No enforcements for these tasks
                     case "queueRequests":
                     case "queueDuplicates":
+                    case "queueUnderwritings":
                         break;
                         // If the task name is not satisfied by the switch, it is an invalid task.
                     default:
