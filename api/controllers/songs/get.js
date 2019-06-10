@@ -67,7 +67,7 @@ module.exports = {
             var subcatIDs = [];
             var cats = {};
             var subcats = {};
-            var query = {id_subcat: []};
+            var query = {};
             var songs;
 
             // No song ID specified?
@@ -75,6 +75,8 @@ module.exports = {
             {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 query.id_subcat = sails.config.custom.subcats.music;
+                if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.type !== 'undefined' && inputs.type !== null))
+                    query.id_subcat = [];
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
                     query.id_subcat.push(inputs.subcategory);
                 if (inputs.type === `underwritings`)
