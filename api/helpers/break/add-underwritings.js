@@ -57,7 +57,7 @@ module.exports = {
                                 var ffQueue = false;
                                 if (moment(song.end_date).isAfter(moment("2002-01-01 00:00:01")) && song.play_limit > 0) {
                                     sails.log.debug(`Underwriting ${underwriting.ID}: End date and spin counts set. Using algorithm.`);
-                                    var x = sails.config.custom.breaks.length;
+                                    var x = Object.keys(sails.config.custom.breaks).length;
                                     var y1 = moment(song.start_date).isAfter(moment("2002-01-01 00:00:01")) ? song.start_date : underwriting.createdAt;
                                     var y2 = moment(song.end_date).diff(moment(y1));
                                     var y = (y2 / 1000 / 60 / 60) * x;
@@ -125,7 +125,7 @@ module.exports = {
                                     // Both end date and spin count limit specified
                                 } else {
                                     sails.log.debug(`Underwriting ${underwriting.ID}: End date and spin limit. Using algorithm.`);
-                                    var x = sails.config.custom.breaks.length;
+                                    var x = Object.keys(sails.config.custom.breaks).length;
                                     var y1 = moment(song.start_date).isAfter(moment("2002-01-01 00:00:01")) ? song.start_date : underwriting.createdAt;
                                     var y2 = moment(song.end_date).diff(moment(y1));
                                     var y = (y2 / 1000 / 60 / 60) * x;
