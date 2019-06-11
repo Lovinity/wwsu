@@ -67,10 +67,8 @@ module.exports = {
                                     var e = (y - z) / y; // percent of expected breaks completed
                                     var f = (e - ((1 - e) / 2)); // F factor
                                     var g = (a - b) / z; // Number of airs per clockwheel break required to satisfy the underwriting's requirements.
-                                    if (g >= 2)
-                                        veryBad.push(`The underwriting "${underwriting.name}" is severely behind schedule in spin counts and may not get satisfied.`);
-                                    else
-                                        bad.push(`The underwriting "${underwriting.name}" is behind schedule in spin counts and will air during liners to catch up.`);
+                                    if (g >= 1)
+                                        bad.push(`The underwriting "${underwriting.name}" is significantly behind schedule in spin counts and will air extra times to catch up.`);
 
                                     if ((!fastForwardOnly && d <= f) || (fastForwardOnly && g >= 1)) {
                                         toQueue.push({ ID: underwriting.trackID, priority: g });
@@ -125,10 +123,8 @@ module.exports = {
                                     var e = ((y - z) / y); // Percent of expected breaks completed
                                     var f = (e - ((1 - e) / 2)); // F factor
                                     var g = (a - b) / z; // Number of airs per clockwheel break required to satisfy the underwriting's requirements.
-                                    if (g >= 2)
-                                        veryBad.push(`The underwriting "${underwriting.name}" is severely behind schedule in spin counts and may not get satisfied.`);
-                                    else
-                                        bad.push(`The underwriting "${underwriting.name}" is behind schedule in spin counts and will air during liners to catch up.`);
+                                    if (g >= 1)
+                                        bad.push(`The underwriting "${underwriting.name}" is significantly behind schedule in spin counts and will air extra times to catch up.`);
 
                                     // Underwriting is considered behind schedule. Do not consider online listeners in the algorithm
                                     if (d <= f) {
@@ -147,6 +143,8 @@ module.exports = {
                                     }
                                 }
                             }
+                        } else if (moment(song.end_date).isAfter(moment("2002-01-02 00:00:01")) && moment().isSameOrAfter(moment(song.end_date)) && song.play_limit > 0 && song.count_played < song.play_limit) {
+                            veryBad.push(`The underwriting "${underwriting.name}" expired, but did not meet the required spin counts.`);
                         }
                     }
                 });
@@ -177,14 +175,12 @@ module.exports = {
             }
 
             // Change underwriting statuses
-            if (veryBad.length > 0)
-            {
+            if (veryBad.length > 0) {
                 await Status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: veryBad.join(` `) + ` ` + bad.join(` `), status: 2 }]);
-            } else if (bad.length > 0)
-            {
+            } else if (bad.length > 0) {
                 await Status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: bad.join(` `), status: 3 }]);
             } else {
-                await Status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: `All underwritings are reasonably on schedule.`, status: 5 }]);
+                await Status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: `No underwritings are significantly behind schedule.`, status: 5 }]);
             }
 
             return exits.success();
