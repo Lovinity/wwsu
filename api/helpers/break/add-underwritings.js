@@ -70,14 +70,14 @@ module.exports = {
                                     if (g >= 1)
                                         bad.push(`The underwriting "${underwriting.name}" is significantly behind schedule in spin counts and will air extra times to catch up.`);
 
-                                    if ((!fastForwardOnly && d <= f) || (fastForwardOnly && g >= 1)) {
+                                    if ((!inputs.fastForwardOnly && d <= f) || (inputs.fastForwardOnly && g >= 1)) {
                                         toQueue.push({ ID: underwriting.trackID, priority: g });
                                         ffQueue = true;
                                     }
                                 }
 
                                 // If the next recurrence is before the current time and the track was not already fast-forward queued, then the underwriting needs to be played.
-                                if (moment(next).isSameOrBefore(moment(now)) && !fastForwardOnly && !ffQueue) {
+                                if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue) {
                                     toQueue.push({ ID: underwriting.trackID, priority: g ? g : (sails.config.custom.breaks.length > 0 ? (1 / sails.config.custom.breaks.length) : 1) });
                                 }
 
@@ -91,7 +91,7 @@ module.exports = {
 
                                     // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
                                     var chance = (1 + (0.3 * c)) / (12 * x);
-                                    if (Math.random() < chance && !fastForwardOnly) {
+                                    if (Math.random() < chance && !inputs.fastForwardOnly) {
                                         toQueue.push({ ID: underwriting.trackID, priority: 1 / (6 * x) });
                                     }
 
@@ -103,7 +103,7 @@ module.exports = {
                                     // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
                                     // Underwritings with an end date set have 2x the queuing priority of those without an end date set
                                     var chance = (1 + (0.3 * c)) / (12 * x);
-                                    if (Math.random() < chance && !fastForwardOnly) {
+                                    if (Math.random() < chance && !inputs.fastForwardOnly) {
                                         toQueue.push({ ID: underwriting.trackID, priority: 1 / (3 * x) });
                                     }
 
@@ -128,7 +128,7 @@ module.exports = {
 
                                     // Underwriting is considered behind schedule. Do not consider online listeners in the algorithm
                                     if (d <= f) {
-                                        if ((!fastForwardOnly && Math.random() < g) || (fastForwardOnly && g >= 1)) {
+                                        if ((!inputs.fastForwardOnly && Math.random() < g) || (inputs.fastForwardOnly && g >= 1)) {
                                             toQueue.push({ ID: underwriting.trackID, priority: g });
                                         }
 
@@ -137,7 +137,7 @@ module.exports = {
                                         var h = g * (1 - (d - f)); // The further the underwriting is from being significantly behind schedule, the more we should reduce the percentile.
                                         var i = (g / 10); // Increase the chance of queuing the underwriting by g% for every 10 online listeners connected.
                                         var chance = (h + (i * c));
-                                        if ((!fastForwardOnly && Math.random() < chance) || (fastForwardOnly && g >= 1)) {
+                                        if ((!inputs.fastForwardOnly && Math.random() < chance) || (inputs.fastForwardOnly && g >= 1)) {
                                             toQueue.push({ ID: underwriting.trackID, priority: g });
                                         }
                                     }
@@ -160,12 +160,12 @@ module.exports = {
                     return 0;
                 }
 
-                // if fastForwardOnly, only queue items with a priority of 1 or more. Otherwise, queue the first quantity tracks, plus any others with a priority >= 1.
+                // if inputs.fastForwardOnly, only queue items with a priority of 1 or more. Otherwise, queue the first quantity tracks, plus any others with a priority >= 1.
                 var queueLeft = inputs.quantity;
                 toQueue
                     .sort(compare)
                     .map((item) => {
-                        if (item.priority >= 1 || (!fastForwardOnly && queueLeft > 0)) {
+                        if (item.priority >= 1 || (!inputs.fastForwardOnly && queueLeft > 0)) {
                             queueLeft--;
                             (async (item2) => {
                                 await sails.helpers.rest.cmd('LoadTrackToTop', item.ID);
