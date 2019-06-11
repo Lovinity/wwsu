@@ -14,7 +14,7 @@ module.exports = {
   
     fn: async function (inputs, exits) {
   
-      return sails.helpers.break.addUnderwritings(false, 1);
+      return await sails.helpers.break.addUnderwritings(false, 1);
   
     }
   
