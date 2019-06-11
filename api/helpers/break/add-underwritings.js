@@ -138,7 +138,7 @@ module.exports = {
                                     var d = (b / a); // Percent of spin counts aired
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Percent of spins aired: ${d}.`);
                                     var e = ((y - z) / y); // Percent of expected breaks completed
-                                    sails.log.debug(`Underwriting ${underwriting.ID}: Percent of expected breaks completed: ${e}.`);
+                                    sails.log.debug(`Underwriting ${underwriting.ID}: Percent of expected breaks completed: ${e}. (x ${x}, y1 ${y1}, y2 ${y2}, y ${y}, z1 ${z1}, z ${z})`);
                                     var f = (e - ((1 - e) / 2)); // F factor
                                     sails.log.debug(`Underwriting ${underwriting.ID}: F factor: ${f}.`);
                                     var g = (a - b) / z; // Number of airs per clockwheel break required to satisfy the underwriting's requirements.
