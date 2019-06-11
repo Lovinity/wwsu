@@ -32,11 +32,11 @@ module.exports = {
 
             // Load all underwritings from memory
             var underwritings = await Underwritings.find();
-
+            sails.log.debug(`Fetched underwritings.`);
             if (underwritings.length > 0) {
+                sails.log.debug(`Received more than 0 underwritings.`);
                 var toQueue = [];
                 var maps = underwritings.map(async (underwriting) => {
-
                     sails.log.debug(`Beginning underwriting ${underwriting.ID}`);
                     // Load in the RadioDJ track pertaining to this underwriting
                     var song = await Songs.findOne({ ID: underwriting.trackID });
@@ -181,6 +181,7 @@ module.exports = {
                 });
 
                 await Promise.all(maps);
+
                 sails.log.debug(`Finished all underwritings.`);
 
                 // Sort toQueue by priority
