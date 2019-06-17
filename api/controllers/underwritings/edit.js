@@ -20,9 +20,8 @@ module.exports = {
         },
         mode: {
             type: "json",
-            description: "Updated mode data for this underwriting.",
             custom: (value) => {
-                if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1))
+                if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1 && value.mode !== 2))
                     return false;
 
                 if (value.mode === 0) {
@@ -36,8 +35,14 @@ module.exports = {
                         return false;
                 }
 
+                if (value.mode === 2) {
+                    if (typeof value.show === `undefined`)
+                        return false;
+                }
+
                 return true;
             },
+            description: "Mode data for this underwriting."
         },
     },
 
