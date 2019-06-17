@@ -46,26 +46,26 @@ waitFor(function () {
     });
 });
 
-// Initialize the web player
-if (document.querySelector('#nativeflashradio'))
+// Load web player
+jQuery(function () {
     $("#nativeflashradio").flashradio({
         token: "dGZzd2ZzL3h4dHYyMTc6L3BzaAE=",
         userinterface: "small",
-        backgroundcolor: "#263238",
-        themecolor: "#d31e38",
-        themefontcolor: "#ffffff",
-        startvolume: "75",
-        radioname: "WWSU 106.9 FM",
+        backgroundcolor: "#ffffff",
+        themecolor: "#000000",
+        themefontcolor: "#000000",
+        startvolume: "100",
+        radioname: ``,
         scroll: "auto",
         autoplay: "false",
         useanalyzer: "real",
-        analyzertype: "4",
+        analyzertype: "6",
         usecover: "true",
-        usestreamcorsproxy: "false",
+        usestreamcorsproxy: "true",
         affiliatetoken: "1000lIPN",
         debug: "false",
         ownsongtitleurl: "",
-        radiocover: "",
+        radiocover: "https://server.wwsu1069.org/images/embeds/logo.png",
         songgooglefontname: "",
         songfontname: "",
         titlegooglefontname: "",
@@ -79,8 +79,9 @@ if (document.querySelector('#nativeflashradio'))
         streampath: "/live",
         streamtype: "other",
         streamurl: "https://server.wwsu1069.org",
-        songinformationinterval: "600000"
+        songinformationinterval: "5000"
     });
+});
 
 // Change the theme when the player loads
 waitFor(function () {
