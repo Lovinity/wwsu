@@ -45,6 +45,7 @@ module.exports = {
                         // Ignore this underwriting if the associated track is expired or disabled
                         if (song.enabled === 1 && moment(song.start_date).isSameOrBefore(moment()) && (moment(song.end_date).isSameOrBefore(moment("2002-01-02 00:00:02")) || moment().isBefore(moment(song.end_date))) && (song.play_limit === 0 || song.count_played < song.play_limit)) {
                             sails.log.debug(`Underwriting ${underwriting.ID}: Track enabled.`);
+
                             // Underwriting to be triggered manually by day of week and time
                             if (underwriting.mode.mode === 0) {
                                 sails.log.debug(`Underwriting ${underwriting.ID}: Mode 0.`);
@@ -167,6 +168,58 @@ module.exports = {
                                             toQueue.push({ ID: underwriting.trackID, priority: g });
                                         }
                                     }
+                                }
+                                // Air based on current show
+                            } else if (underwriting.mode.mode === 2) {
+                                sails.log.debug(`Underwriting ${underwriting.ID}: Mode 2.`);
+
+                                if (underwriting.mode.show === Meta["A"].show) {
+                                    // No end date set
+                                    if (moment(song.end_date).isSameOrBefore(moment("2002-01-01 00:00:01"))) {
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: No end date.`);
+                                        var x = sails.config.custom.breaks.length;
+                                        var c = Listeners.memory.listeners;
+
+                                        // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
+                                        var chance = (1 + (0.3 * c)) / 4;
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}.`);
+                                        if (Math.random() < chance && !inputs.fastForwardOnly) {
+                                            sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
+                                            toQueue.push({ ID: underwriting.trackID, priority: 1 / 4 });
+                                        }
+
+                                        // End date, but no spin count limit
+                                    } else if (song.play_limit === 0) {
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: End date, but no spin limit.`);
+                                        var x = sails.config.custom.breaks.length;
+                                        var c = Listeners.memory.listeners;
+
+                                        // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
+                                        // Underwritings with an end date set have 1.5x the queuing priority of those without an end date set
+                                        var chance = (1 + (0.3 * c)) / 3;
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}.`);
+                                        if (Math.random() < chance && !inputs.fastForwardOnly) {
+                                            sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
+                                            toQueue.push({ ID: underwriting.trackID, priority: 1 / 3 });
+                                        }
+
+                                        // Both end date and spin count limit specified
+                                    } else {
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: End date and spin limit. Using algorithm.`);
+                                        var x = sails.config.custom.breaks.length;
+                                        var c = Listeners.memory.listeners;
+
+                                        // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
+                                        // Underwritings with an end date set and spin count limit have 2x the queuing priority of those without an end date set.
+                                        var chance = (1 + (0.3 * c)) / 2;
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}.`);
+                                        if (Math.random() < chance && !inputs.fastForwardOnly) {
+                                            sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
+                                            toQueue.push({ ID: underwriting.trackID, priority: 1 / 2 });
+                                        }
+                                    }
+                                } else {
+                                    sails.log.debug(`Underwriting ${underwriting.ID}: SKIPPED; show not airing.`);
                                 }
                             }
                         } else if (moment(song.end_date).isAfter(moment("2002-01-02 00:00:01")) && moment().isSameOrAfter(moment(song.end_date)) && song.play_limit > 0 && song.count_played < song.play_limit) {
