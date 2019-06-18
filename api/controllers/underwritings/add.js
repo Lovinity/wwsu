@@ -19,7 +19,7 @@ module.exports = {
             type: "json",
             required: true,
             custom: (value) => {
-                if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1 && value.mode !== 2))
+                if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1))
                     return false;
 
                 if (value.mode === 0) {
@@ -30,11 +30,6 @@ module.exports = {
                         return false;
 
                     if (typeof value.schedule.schedules === `undefined`)
-                        return false;
-                }
-
-                if (value.mode === 2) {
-                    if (typeof value.show === `undefined`)
                         return false;
                 }
 
