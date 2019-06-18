@@ -190,7 +190,7 @@ module.exports = {
                 })
                 .catch(err => {
                     sails.log.error(err);
-                    Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar Error: ' + err.message, status: 2 }]);
+                    Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar Error: ' + breakdance(err.message), status: 2 }]);
                     return reject(err);
                 });
         });
