@@ -25,9 +25,6 @@ module.exports = {
                     return false;
 
                 if (value.mode === 0) {
-                    if (typeof value.times === `undefined`)
-                        return false;
-
                     if (typeof value.schedule === `undefined`)
                         return false;
 
