@@ -20,7 +20,7 @@ module.exports = {
         sails.log.debug('Helper songs.getSpins called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            var song = await Songs.findOne({ID: inputs.ID});
+            var song = await Songs.findOne({ ID: inputs.ID });
             sails.log.silly(`Song: ${song}`);
 
             // Reject if no song was returned
@@ -28,17 +28,16 @@ module.exports = {
                 return exits.error(new Error("The song was not found."));
 
             // Get history from RadioDJ
-            var history = await History.find({artist: song.artist, title: song.title});
+            var history = await History.find({ artist: song.artist, title: song.title }).sort(`date_played ASC`);
             sails.log.verbose(`Retrieved history records: ${history.length}`);
             sails.log.silly(history);
 
             // Get history from manually logged track airs via DJs (EXPERIMENTAL: may need to revise to be more accurate, say, for mixed cases etc)
-            var history2 = await Logs.find({event: {'contains': 'DJ/Producer'}, trackArtist: song.artist, trackTitle: song.title});
+            var history2 = await Logs.find({ event: { 'contains': 'DJ/Producer' }, trackArtist: song.artist, trackTitle: song.title }).sort(`createdAt ASC`);
             sails.log.verbose(`Retrieved logs records: ${history2.length}`);
             sails.log.silly(history2);
 
-            if (!history || !history2)
-            {
+            if (!history || !history2) {
                 return exits.success({});
             } else {
                 // Go through all the histories and count spins for last week, month, year to date, and year. Determine also the last time the track played.
@@ -47,7 +46,10 @@ module.exports = {
                 var spins30 = 0;
                 var spinsYTD = 0;
                 var spins365 = 0;
+                var automation = [];
+                var logged = [];
                 history.map(record => {
+                    automation.push(moment(record.date_played).format("LLL"));
                     if (moment(record.date_played).isAfter(lastplayed))
                         lastplayed = moment(record.date_played);
                     if (moment(record.date_played).isAfter(moment().subtract(1, 'weeks')))
@@ -60,8 +62,9 @@ module.exports = {
                         spinsYTD += 1;
                 });
                 history2.map(record => {
+                    logged.push(moment(record.createdAt).format("LLL"));
                     if (moment(record.createdAt).isAfter(lastplayed))
-                        lastplayed = moment(record.date_played);
+                        lastplayed = moment(record.createdAt);
                     if (moment(record.createdAt).isAfter(moment().subtract(1, 'weeks')))
                         spins7 += 1;
                     if (moment(record.createdAt).isAfter(moment().subtract(1, 'months')))
@@ -72,7 +75,7 @@ module.exports = {
                         spinsYTD += 1;
                 });
 
-                return exits.success({7: spins7, 30: spins30, 'YTD': spinsYTD, 365: spins365});
+                return exits.success({ 7: spins7, 30: spins30, 'YTD': spinsYTD, 365: spins365, automation: automation, logged: logged });
             }
 
         } catch (e) {
