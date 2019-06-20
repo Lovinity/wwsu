@@ -102,11 +102,12 @@ module.exports = {
                                 // No end date set
                                 if (moment(song.end_date).isSameOrBefore(moment("2002-01-01 00:00:01"))) {
                                     sails.log.debug(`Underwriting ${underwriting.ID}: No end date.`);
+                                    var w = underwriting.weight / 100;
                                     var x = sails.config.custom.breaks.length;
                                     var c = Listeners.memory.listeners;
 
                                     // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
-                                    var chance = (1 + (0.3 * c)) / (12 * x);
+                                    var chance = (1 + (((0.6 * w) + 0.1) * c)) / (12 * x);
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}.`);
                                     if (Math.random() < chance && !inputs.fastForwardOnly) {
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
@@ -116,12 +117,13 @@ module.exports = {
                                     // End date, but no spin count limit
                                 } else if (song.play_limit === 0) {
                                     sails.log.debug(`Underwriting ${underwriting.ID}: End date, but no spin limit.`);
+                                    var w = underwriting.weight / 100;
                                     var x = sails.config.custom.breaks.length;
                                     var c = Listeners.memory.listeners;
 
                                     // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
                                     // Underwritings with an end date set have 2x the queuing priority of those without an end date set
-                                    var chance = (1 + (0.3 * c)) / (12 * x);
+                                    var chance = (1 + (((0.6 * w) + 0.1) * c)) / (12 * x);
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}.`);
                                     if (Math.random() < chance && !inputs.fastForwardOnly) {
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
