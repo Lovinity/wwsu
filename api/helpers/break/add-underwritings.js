@@ -36,6 +36,23 @@ module.exports = {
             if (underwritings.length > 0) {
                 sails.log.debug(`Received more than 0 underwritings.`);
                 var toQueue = [];
+
+                // Calculate listenerFactor, which is (peak listeners over 7 days + average listeners over 7 days) / 2
+                var records = await Attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, createdAt: { '>=': moment().subtract(7, 'days').toISOString(true) } });
+                var peak = 0;
+                var showTime = 0;
+                var listenerMinutes = 0;
+
+                if (records.length > 0)
+                    records.map((record) => {
+                        if (record.showTime > 0 && record.listenerMinutes / record.showTime > peak)
+                            peak = record.listenerMinutes / record.showTime;
+                        showTime += record.showTime;
+                        listenerMinutes += record.listenerMinutes;
+                    });
+
+                var listenerFactor = ((showTime > 0 ? listenerMinutes / showTime : 0) + peak) / 2;
+
                 var maps = underwritings.map(async (underwriting) => {
                     sails.log.debug(`Beginning underwriting ${underwriting.ID}`);
                     // Load in the RadioDJ track pertaining to this underwriting
@@ -71,11 +88,11 @@ module.exports = {
 
                                         var d = b / a; // Percent of spin counts aired
                                         sails.log.debug(`Underwriting ${underwriting.ID}: percent spin counts: ${d}.`);
-                                        var e = (y - z) / y; // percent of expected breaks completed
+                                        var e = y > 0 ? (y - z) / y : 0; // percent of expected breaks completed
                                         sails.log.debug(`Underwriting ${underwriting.ID}: percent expected breaks completed: ${e}.`);
                                         var f = (e - ((1 - e) / 2)); // F factor
                                         sails.log.debug(`Underwriting ${underwriting.ID}: F factor: ${f}.`);
-                                        var g = (a - b) / z; // Number of airs per clockwheel break required to satisfy the underwriting's requirements.
+                                        var g = z > 0 ? (a - b) / z : 0; // Number of airs per clockwheel break required to satisfy the underwriting's requirements.
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Airs per clockwheel break required: ${g}.`);
                                         if (g >= 1)
                                             bad.push(`The underwriting "${underwriting.name}" is significantly behind schedule in spin counts and will air extra times to catch up.`);
@@ -99,6 +116,7 @@ module.exports = {
                                 // Automatic queuing
                             } else if (underwriting.mode.mode === 1) {
                                 sails.log.debug(`Underwriting ${underwriting.ID}: mode 1.`);
+
                                 // No end date set
                                 if (moment(song.end_date).isSameOrBefore(moment("2002-01-01 00:00:01"))) {
                                     sails.log.debug(`Underwriting ${underwriting.ID}: No end date.`);
@@ -106,7 +124,20 @@ module.exports = {
                                     var x = sails.config.custom.breaks.length;
                                     var c = Listeners.memory.listeners;
 
-                                    // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
+                                    // Initial chance = % of all breaks in a 24-hour period that 1 break covers
+                                    // We want to average 1 air per day if no online listeners are connected the entire day.
+                                    var chance = x > 0 ? 1 / (24 * x) : 0;
+
+                                    // For every listenerFactor connected online right now, add chance to itself.
+                                    chance = listenerFactor > 0 ? chance + (chance * (c / listenerFactor)) : chance;
+
+                                    // Weight chance by track priority. 0.5 = chance. 1 = double chance. 0 = 1/2 chance.
+                                    if (w > 0.5)
+                                        chance = chance + (chance * ((w - 0.5) * 2));
+                                    if (w < 0.5)
+                                        chance = chance / (1 + ((0.5 - w) * 2));
+
+                                    // Randomly queue the underwriting.
                                     var chance = (1 + (((0.6 * w) + 0.1) * c)) / (12 * x);
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}.`);
                                     if (Math.random() < chance && !inputs.fastForwardOnly) {
@@ -121,9 +152,19 @@ module.exports = {
                                     var x = sails.config.custom.breaks.length;
                                     var c = Listeners.memory.listeners;
 
-                                    // Randomly queue the underwriting; the more online listeners currently connected, the higher chance there is this underwriting will play.
-                                    // Underwritings with an end date set have 2x the queuing priority of those without an end date set
-                                    var chance = (1 + (((0.6 * w) + 0.1) * c)) / (12 * x);
+                                    // Initial chance = % of all breaks in a 12-hour period that 1 break covers
+                                    // We want to average 2 airs per day if no online listeners are connected the entire day.
+                                    var chance = x > 0 ? 1 / (12 * x) : 0;
+
+                                    // For every listenerFactor connected online right now, add chance to itself.
+                                    chance = listenerFactor > 0 ? chance + (chance * (c / listenerFactor)) : chance;
+
+                                    // Weight chance by track priority. 0.5 = chance. 1 = double chance. 0 = 1/2 chance.
+                                    if (w > 0.5)
+                                        chance = chance + (chance * ((w - 0.5) * 2));
+                                    if (w < 0.5)
+                                        chance = chance / (1 + ((0.5 - w) * 2));
+
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}.`);
                                     if (Math.random() < chance && !inputs.fastForwardOnly) {
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
@@ -145,11 +186,11 @@ module.exports = {
 
                                     var d = (b / a); // Percent of spin counts aired
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Percent of spins aired: ${d}.`);
-                                    var e = ((y - z) / y); // Percent of expected breaks completed
+                                    var e = y > 0 ? ((y - z) / y) : 0; // Percent of expected breaks completed
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Percent of expected breaks completed: ${e}. (x ${x}, y1 ${y1}, y2 ${y2}, y ${y}, z1 ${z1}, z ${z})`);
                                     var f = (e - ((1 - e) / 2)); // F factor
                                     sails.log.debug(`Underwriting ${underwriting.ID}: F factor: ${f}.`);
-                                    var g = (a - b) / z; // Number of airs per clockwheel break required to satisfy the underwriting's requirements.
+                                    var g = z > 0 ? (a - b) / z : 0; // Number of airs per clockwheel break required to satisfy the underwriting's requirements.
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Airs per clockwheel break required: ${g}.`);
                                     if (g >= 1)
                                         bad.push(`The underwriting "${underwriting.name}" is significantly behind schedule in spin counts and will air extra times to catch up.`);
@@ -166,9 +207,15 @@ module.exports = {
                                     } else {
                                         var h = g * (1 - (d - f)); // The further the underwriting is from being significantly behind schedule, the more we should reduce the percentile.
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Reduce percentile based on how on-time underwriting is on schedule: ${h}.`);
-                                        var i = (g / 10); // Increase the chance of queuing the underwriting by g% for every 10 online listeners connected.
-                                        sails.log.debug(`Underwriting ${underwriting.ID}: Increase chance by g for every 10 online listeners: ${i}.`);
-                                        var chance = (h + (i * c));
+
+                                        // Initial chance = h
+                                        var chance = h;
+
+                                        // For every listenerFactor connected online right now, add chance to itself.
+                                        chance = listenerFactor > 0 ? chance + (chance * (c / listenerFactor)) : chance;
+
+                                        // Ignore track priorities; they could mess up the algorithm that keeps underwritings on track
+
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Chance: ${chance}.`);
                                         if ((!inputs.fastForwardOnly && Math.random() < chance) || (inputs.fastForwardOnly && g >= 1)) {
                                             sails.log.debug(`Underwriting ${underwriting.ID}: Queued.`);
