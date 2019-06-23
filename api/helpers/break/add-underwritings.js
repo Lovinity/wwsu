@@ -138,7 +138,7 @@ module.exports = {
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}`);
 
                                         // If the next recurrence is before the current time and the track was not already fast-forward queued, then the underwriting needs to be played.
-                                        if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue) {
+                                        if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue && Math.random() < chance) {
                                             sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue activated.`);
                                             toQueue.push({ ID: underwriting.trackID, priority: g ? g : (x > 0 ? (1 / x) : 1) });
                                         } else {
@@ -177,11 +177,15 @@ module.exports = {
                                     // Divide by 7 to get average breaks in a day
                                     total = total / 7;
 
+                                    sails.log.sebug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`);
+
                                     var v = moment(song.end_date).isAfter(moment("2002-01-01 00:00:01"));
 
                                     // Initial chance: 2x % of breaks in a day (4x if end date is set) for one break.
                                     // We want to average 2 airs per day, 4 if end date is set, for tracks with no spin limit.
                                     var chance = v ? 1 / (total / 4) : 1 / (total / 2);
+
+                                    sails.log.sebug(`Underwriting ${underwriting.ID}: Initial chance is ${chance}.`);
 
                                     // If mode = 1, then account online listeners in the algorithm
                                     if (underwriting.mode.mode === 1) {
@@ -200,10 +204,10 @@ module.exports = {
                                     if (w < 0.5)
                                         chance = chance / (1 + ((0.5 - w) * 2));
 
-                                    sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}`);
+                                    sails.log.debug(`Underwriting ${underwriting.ID}: Final chance is ${chance}`);
 
                                     // Determine if we are to queue. If so, priority of queue is based on number of potential queues today
-                                    if (Math.random() < chance && !inputs.fastForwardOnly) {
+                                    if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue && Math.random() < chance) {
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
                                         toQueue.push({ ID: underwriting.trackID, priority: total > 0 && x > 0 ? 1 / (total / x) : 0 });
                                     } else {
