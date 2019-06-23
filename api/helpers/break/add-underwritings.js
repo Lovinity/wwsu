@@ -171,7 +171,7 @@ module.exports = {
                                             ms = schedule.m.length;
                                         }
 
-                                        total += (dws * hs * m);
+                                        total += (dws * hs * ms);
                                     });
 
                                     // Divide by 7 to get average breaks in a day
