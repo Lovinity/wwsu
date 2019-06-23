@@ -177,7 +177,7 @@ module.exports = {
                                     // Divide by 7 to get average breaks in a day
                                     total = total / 7;
 
-                                    sails.log.sebug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`);
+                                    sails.log.debug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`);
 
                                     var v = moment(song.end_date).isAfter(moment("2002-01-01 00:00:01"));
 
@@ -185,7 +185,7 @@ module.exports = {
                                     // We want to average 2 airs per day, 4 if end date is set, for tracks with no spin limit.
                                     var chance = v ? 1 / (total / 4) : 1 / (total / 2);
 
-                                    sails.log.sebug(`Underwriting ${underwriting.ID}: Initial chance is ${chance}.`);
+                                    sails.log.debug(`Underwriting ${underwriting.ID}: Initial chance is ${chance}.`);
 
                                     // If mode = 1, then account online listeners in the algorithm
                                     if (underwriting.mode.mode === 1) {
