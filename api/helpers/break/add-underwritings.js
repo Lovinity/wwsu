@@ -42,7 +42,6 @@ module.exports = {
                 var peak = 0;
                 var showTime = 0;
                 var listenerMinutes = 0;
-                var avgListeners = (showTime > 0 ? listenerMinutes / showTime : 0);
 
                 if (records.length > 0)
                     records.map((record) => {
@@ -52,6 +51,7 @@ module.exports = {
                         listenerMinutes += record.listenerMinutes;
                     });
 
+                var avgListeners = (showTime > 0 ? listenerMinutes / showTime : 0);
                 var listenerFactor = (avgListeners + peak) / 2;
 
                 sails.log.debug(`avgListeners: ${avgListeners}`);
@@ -135,6 +135,8 @@ module.exports = {
                                             }
                                         }
 
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}`);
+
                                         // If the next recurrence is before the current time and the track was not already fast-forward queued, then the underwriting needs to be played.
                                         if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue) {
                                             sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue activated.`);
@@ -197,6 +199,8 @@ module.exports = {
                                         chance = chance + (chance * ((w - 0.5) * 2));
                                     if (w < 0.5)
                                         chance = chance / (1 + ((0.5 - w) * 2));
+
+                                    sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}`);
 
                                     // Determine if we are to queue. If so, priority of queue is based on number of potential queues today
                                     if (Math.random() < chance && !inputs.fastForwardOnly) {
