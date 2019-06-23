@@ -54,6 +54,9 @@ module.exports = {
 
                 var listenerFactor = (avgListeners + peak) / 2;
 
+                sails.log.debug(`avgListeners: ${avgListeners}`);
+                sails.log.debug(`listenerFactor: ${listenerFactor}`);
+
                 // Set up other variables that do not need re-loading on each underwriting check
                 var now = moment().toISOString(false);
                 var x = Object.keys(sails.config.custom.breaks).length;

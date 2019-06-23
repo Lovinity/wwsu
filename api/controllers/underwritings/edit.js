@@ -24,13 +24,11 @@ module.exports = {
                 if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1))
                     return false;
 
-                if (value.mode === 0) {
-                    if (typeof value.schedule === `undefined`)
-                        return false;
+                if (typeof value.schedule === `undefined`)
+                    return false;
 
-                    if (typeof value.schedule.schedules === `undefined`)
-                        return false;
-                }
+                if (typeof value.schedule.schedules === `undefined`)
+                    return false;
 
                 return true;
             },
