@@ -149,30 +149,34 @@ module.exports = {
                                 } else {
                                     // Count the number of breaks in a week selected in the schedule
                                     var total = 0;
-                                    underwriting.mode.schedule.schedules.map((schedule, index) => {
-                                        var dws = 0;
-                                        var hs = 0;
-                                        var ms = 0;
-                                        if (typeof schedule.dw === `undefined` || schedule.dw.length === 0) {
-                                            dws = 7;
-                                        } else {
-                                            dws = schedule.dw.length;
-                                        }
+                                    if (underwriting.mode.schedule.schedules.length > 0) {
+                                        underwriting.mode.schedule.schedules.map((schedule, index) => {
+                                            var dws = 0;
+                                            var hs = 0;
+                                            var ms = 0;
+                                            if (typeof schedule.dw === `undefined` || schedule.dw.length === 0) {
+                                                dws = 7;
+                                            } else {
+                                                dws = schedule.dw.length;
+                                            }
 
-                                        if (typeof schedule.h === `undefined` || schedule.h.length === 0) {
-                                            hs = 24;
-                                        } else {
-                                            hs = schedule.h.length;
-                                        }
+                                            if (typeof schedule.h === `undefined` || schedule.h.length === 0) {
+                                                hs = 24;
+                                            } else {
+                                                hs = schedule.h.length;
+                                            }
 
-                                        if (typeof schedule.m === `undefined` || schedule.m.length === 0) {
-                                            ms = x;
-                                        } else {
-                                            ms = schedule.m.length;
-                                        }
+                                            if (typeof schedule.m === `undefined` || schedule.m.length === 0) {
+                                                ms = x;
+                                            } else {
+                                                ms = schedule.m.length;
+                                            }
 
-                                        total += (dws * hs * ms);
-                                    });
+                                            total += (dws * hs * ms);
+                                        });
+                                    } else {
+                                        total = (7 * 24 * x);
+                                    }
 
                                     // Divide by 7 to get average breaks in a day
                                     total = total / 7;
