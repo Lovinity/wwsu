@@ -177,6 +177,11 @@ module.exports = {
                                     // Divide by 7 to get average breaks in a day
                                     total = total / 7;
 
+                                    // Use a different algorithm if show filters are specified; based off of an average show length of 2 hours.
+                                    if (typeof underwriting.mode.show !== `undefined` && underwriting.mode.show.length > 0) {
+                                        total = (x * 2) * underwriting.mode.show.length;
+                                    }
+
                                     sails.log.debug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`);
 
                                     var v = moment(song.end_date).isAfter(moment("2002-01-01 00:00:01"));
