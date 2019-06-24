@@ -114,6 +114,8 @@ module.exports = {
                                 var start = moment(song.date_played).toISOString(false);
                                 var next = moment(schedule.next(1, start)).toISOString(false);
 
+                                sails.log.debug(`Underwriting ${underwriting.ID}: Next date/time queue: ${next}`);
+
                                 // Algorithms
                                 var ffQueue = false;
                                 var w = underwriting.weight / 100;
@@ -150,6 +152,9 @@ module.exports = {
                                         var scheduleF = later.schedule(underwriting.mode.scheduleForced);
                                         var startF = moment(song.date_played).toISOString(false);
                                         var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
+
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Next forced queue: ${nextF}`);
+                                        
 
                                         if (underwriting.mode.scheduleForced.schedules.length > 0 && moment(nextF).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue) {
                                             sails.log.debug(`Underwriting ${underwriting.ID}: Forced queue activated.`);
@@ -189,6 +194,8 @@ module.exports = {
                                     var scheduleF = later.schedule(underwriting.mode.scheduleForced);
                                     var startF = moment(song.date_played).toISOString(false);
                                     var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
+
+                                    sails.log.debug(`Underwriting ${underwriting.ID}: Next forced queue: ${nextF}`);
 
                                     if (underwriting.mode.scheduleForced.schedules.length > 0 && moment(nextF).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue) {
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Forced queue activated.`);
