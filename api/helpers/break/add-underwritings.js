@@ -78,7 +78,7 @@ module.exports = {
                 sails.log.debug(`listenerFactor: ${listenerFactor}`);
 
                 // Set up other variables that do not need re-loading on each underwriting check
-                var now = moment().toISOString(false);
+                var now = moment().toISOString(true);
 
                 sails.log.debug(`Now time: ${now}`);
                 
@@ -153,8 +153,8 @@ module.exports = {
                                     } else {
                                         // For non fast forwarding queues, check to see if a forced queue is necessary
                                         var scheduleF = later.schedule(underwriting.mode.scheduleForced);
-                                        var startF = moment(song.date_played).toISOString(false);
-                                        var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
+                                        var startF = moment(song.date_played).toISOString(true);
+                                        var nextF = moment(scheduleF.next(1, startF)).toISOString(true);
 
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Next forced queue: ${nextF}`);
                                         
@@ -195,8 +195,8 @@ module.exports = {
                                 } else {
                                     // For non fast forwarding queues, check to see if a forced queue is necessary
                                     var scheduleF = later.schedule(underwriting.mode.scheduleForced);
-                                    var startF = moment(song.date_played).toISOString(false);
-                                    var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
+                                    var startF = moment(song.date_played).toISOString(true);
+                                    var nextF = moment(scheduleF.next(1, startF)).toISOString(true);
 
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Next forced queue: ${nextF}`);
 
