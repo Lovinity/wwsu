@@ -153,8 +153,8 @@ module.exports = {
                                     } else {
                                         // For non fast forwarding queues, check to see if a forced queue is necessary
                                         var scheduleF = later.schedule(underwriting.mode.scheduleForced);
-                                        var startF = moment(song.date_played).toISOString(true);
-                                        var nextF = moment(scheduleF.next(1, startF)).toISOString(true);
+                                        var startF = moment(song.date_played).toISOString(false);
+                                        var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
 
                                         sails.log.debug(`Underwriting ${underwriting.ID}: Next forced queue: ${nextF}`);
                                         
@@ -195,8 +195,8 @@ module.exports = {
                                 } else {
                                     // For non fast forwarding queues, check to see if a forced queue is necessary
                                     var scheduleF = later.schedule(underwriting.mode.scheduleForced);
-                                    var startF = moment(song.date_played).toISOString(true);
-                                    var nextF = moment(scheduleF.next(1, startF)).toISOString(true);
+                                    var startF = moment(song.date_played).toISOString(false);
+                                    var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
 
                                     sails.log.debug(`Underwriting ${underwriting.ID}: Next forced queue: ${nextF}`);
 
