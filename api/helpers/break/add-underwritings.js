@@ -30,6 +30,26 @@ module.exports = {
             var veryBad = [];
             var bad = [];
 
+            var x = 0;
+
+            // Calculate number of queueUnderwritings breaks in an hour
+            for (var minute in sails.config.custom.breaks) {
+                if (sails.config.custom.breaks.hasOwnProperty(minute)) {
+                    if (sails.config.custom.breaks[minute].length > 0) {
+                        sails.config.custom.breaks[minute].map((task) => {
+                            if (task.task === `queueUnderwritings` && task.quantity > 0)
+                                x++;
+                        });
+                    }
+                }
+            }
+
+            // If there are no queueUnderwritings breaks, this is an error! Bail.
+            if (x === 0) {
+                await Status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: `Underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration.`, status: 2 }]);
+                return exits.success();
+            }
+
             // Load all underwritings from memory
             var underwritings = await Underwritings.find();
             sails.log.debug(`Fetched underwritings.`);
@@ -59,7 +79,6 @@ module.exports = {
 
                 // Set up other variables that do not need re-loading on each underwriting check
                 var now = moment().toISOString(false);
-                var x = Object.keys(sails.config.custom.breaks).length;
                 var c = Listeners.memory.listeners;
 
                 var maps = underwritings.map(async (underwriting) => {
@@ -68,6 +87,7 @@ module.exports = {
                     var song = await Songs.findOne({ ID: underwriting.trackID });
                     if (song) {
                         sails.log.debug(`Underwriting ${underwriting.ID}: Found song.`);
+
                         // Ignore this underwriting if the associated track is expired or disabled
                         if (song.enabled === 1 && moment(song.start_date).isSameOrBefore(moment()) && (moment(song.end_date).isSameOrBefore(moment("2002-01-02 00:00:02")) || moment().isBefore(moment(song.end_date))) && (song.play_limit === 0 || song.count_played < song.play_limit)) {
                             sails.log.debug(`Underwriting ${underwriting.ID}: Track enabled.`);
@@ -83,7 +103,13 @@ module.exports = {
                                 }
                             });
 
+                            // every scheduleForced should have "minute" set to 0 and only 0
+                            underwriting.mode.scheduleForced.schedules.map((schedule, index) => {
+                                underwriting.mode.scheduleForced.schedules[index].m = [0];
+                            });
+
                             if (typeof underwriting.mode.show === `undefined` || underwriting.mode.show.length === 0 || underwriting.mode.show.indexOf(Meta["A"].show) !== -1) {
+
                                 var schedule = later.schedule(underwriting.mode.schedule);
                                 var start = moment(song.date_played).toISOString(false);
                                 var next = moment(schedule.next(1, start)).toISOString(false);
@@ -120,9 +146,103 @@ module.exports = {
                                         toQueue.push({ ID: underwriting.trackID, priority: g });
                                         ffQueue = true;
                                     } else {
-                                        var h = g * (1 - (d - f)); // The further the underwriting is from being significantly behind schedule, the more we should reduce the percentile.
+                                        // For non fast forwarding queues, check to see if a forced queue is necessary
+                                        var scheduleF = later.schedule(underwriting.mode.scheduleForced);
+                                        var startF = moment(song.date_played).toISOString(false);
+                                        var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
 
-                                        chance = h;
+                                        if (underwriting.mode.scheduleForced.schedules.length > 0 && moment(nextF).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue) {
+                                            sails.log.debug(`Underwriting ${underwriting.ID}: Forced queue activated.`);
+                                            toQueue.push({ ID: underwriting.trackID, priority: 0.99 });
+                                            ffQueue = true;
+                                        } else {
+
+                                            var h = g * (1 - (d - f)); // The further the underwriting is from being significantly behind schedule, the more we should reduce the percentile.
+
+                                            chance = h;
+
+                                            // If mode = 1, then account online listeners in the algorithm
+                                            if (underwriting.mode.mode === 1) {
+                                                // If there are less than average number of listeners connected, decrease chance by a max of 50% of itself.
+                                                if (c < avgListeners) {
+                                                    chance -= avgListeners > 0 ? ((chance / 2) * ((avgListeners - c) / avgListeners)) : 0;
+                                                    // Otherwise, add chance to itself for every listenerFactor number of listeners connected.
+                                                } else {
+                                                    chance = listenerFactor > 0 ? chance + (chance * (c / listenerFactor)) : chance;
+                                                }
+                                            }
+
+                                            sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}`);
+
+                                            // If the next recurrence is before the current time and the track was not already fast-forward queued, then the underwriting needs to be played.
+                                            if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue && Math.random() < chance) {
+                                                sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue activated.`);
+                                                toQueue.push({ ID: underwriting.trackID, priority: g ? g : (x > 0 ? (1 / x) : 1) });
+                                            } else {
+                                                sails.log.debug(`Underwriting ${underwriting.ID}: Skipped; chance condition not met for this break.`);
+                                            }
+                                        }
+                                    }
+                                    // All other conditions
+                                } else {
+                                    // For non fast forwarding queues, check to see if a forced queue is necessary
+                                    var scheduleF = later.schedule(underwriting.mode.scheduleForced);
+                                    var startF = moment(song.date_played).toISOString(false);
+                                    var nextF = moment(scheduleF.next(1, startF)).toISOString(false);
+
+                                    if (underwriting.mode.scheduleForced.schedules.length > 0 && moment(nextF).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue) {
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Forced queue activated.`);
+                                        toQueue.push({ ID: underwriting.trackID, priority: 0.99 });
+                                        ffQueue = true;
+                                    } else {
+                                        // Count the number of breaks in a week selected in the schedule
+                                        var total = 0;
+                                        if (underwriting.mode.schedule.schedules.length > 0) {
+                                            underwriting.mode.schedule.schedules.map((schedule, index) => {
+                                                var dws = 0;
+                                                var hs = 0;
+                                                var ms = 0;
+                                                if (typeof schedule.dw === `undefined` || schedule.dw.length === 0) {
+                                                    dws = 7;
+                                                } else {
+                                                    dws = schedule.dw.length;
+                                                }
+
+                                                if (typeof schedule.h === `undefined` || schedule.h.length === 0) {
+                                                    hs = 24;
+                                                } else {
+                                                    hs = schedule.h.length;
+                                                }
+
+                                                if (typeof schedule.m === `undefined` || schedule.m.length === 0) {
+                                                    ms = x;
+                                                } else {
+                                                    ms = schedule.m.length;
+                                                }
+
+                                                total += (dws * hs * ms);
+                                            });
+                                        } else {
+                                            total = (7 * 24 * x);
+                                        }
+
+                                        // Divide by 7 to get average breaks in a day
+                                        total = total / 7;
+
+                                        // Use a different algorithm if show filters are specified; based off of an average show length of 2 hours.
+                                        if (typeof underwriting.mode.show !== `undefined` && underwriting.mode.show.length > 0) {
+                                            total = (x * 2) * underwriting.mode.show.length;
+                                        }
+
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`);
+
+                                        var v = moment(song.end_date).isAfter(moment("2002-01-01 00:00:01"));
+
+                                        // Initial chance: 2x % of breaks in a day (4x if end date is set) for one break.
+                                        // We want to average 2 airs per day, 4 if end date is set, for tracks with no spin limit.
+                                        var chance = v ? 1 / (total / 4) : 1 / (total / 2);
+
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Initial chance is ${chance}.`);
 
                                         // If mode = 1, then account online listeners in the algorithm
                                         if (underwriting.mode.mode === 1) {
@@ -135,92 +255,21 @@ module.exports = {
                                             }
                                         }
 
-                                        sails.log.debug(`Underwriting ${underwriting.ID}: Chance is ${chance}`);
+                                        // Weight chance by track priority. 0.5 = chance. 1 = double chance. 0 = 1/2 chance.
+                                        if (w > 0.5)
+                                            chance = chance + (chance * ((w - 0.5) * 2));
+                                        if (w < 0.5)
+                                            chance = chance / (1 + ((0.5 - w) * 2));
 
-                                        // If the next recurrence is before the current time and the track was not already fast-forward queued, then the underwriting needs to be played.
+                                        sails.log.debug(`Underwriting ${underwriting.ID}: Final chance is ${chance}`);
+
+                                        // Determine if we are to queue. If so, priority of queue is based on number of potential queues today
                                         if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue && Math.random() < chance) {
-                                            sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue activated.`);
-                                            toQueue.push({ ID: underwriting.trackID, priority: g ? g : (x > 0 ? (1 / x) : 1) });
+                                            sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
+                                            toQueue.push({ ID: underwriting.trackID, priority: total > 0 && x > 0 ? 1 / (total / x) : 0 });
                                         } else {
                                             sails.log.debug(`Underwriting ${underwriting.ID}: Skipped; chance condition not met for this break.`);
                                         }
-                                    }
-                                    // All other conditions
-                                } else {
-                                    // Count the number of breaks in a week selected in the schedule
-                                    var total = 0;
-                                    if (underwriting.mode.schedule.schedules.length > 0) {
-                                        underwriting.mode.schedule.schedules.map((schedule, index) => {
-                                            var dws = 0;
-                                            var hs = 0;
-                                            var ms = 0;
-                                            if (typeof schedule.dw === `undefined` || schedule.dw.length === 0) {
-                                                dws = 7;
-                                            } else {
-                                                dws = schedule.dw.length;
-                                            }
-
-                                            if (typeof schedule.h === `undefined` || schedule.h.length === 0) {
-                                                hs = 24;
-                                            } else {
-                                                hs = schedule.h.length;
-                                            }
-
-                                            if (typeof schedule.m === `undefined` || schedule.m.length === 0) {
-                                                ms = x;
-                                            } else {
-                                                ms = schedule.m.length;
-                                            }
-
-                                            total += (dws * hs * ms);
-                                        });
-                                    } else {
-                                        total = (7 * 24 * x);
-                                    }
-
-                                    // Divide by 7 to get average breaks in a day
-                                    total = total / 7;
-
-                                    // Use a different algorithm if show filters are specified; based off of an average show length of 2 hours.
-                                    if (typeof underwriting.mode.show !== `undefined` && underwriting.mode.show.length > 0) {
-                                        total = (x * 2) * underwriting.mode.show.length;
-                                    }
-
-                                    sails.log.debug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`);
-
-                                    var v = moment(song.end_date).isAfter(moment("2002-01-01 00:00:01"));
-
-                                    // Initial chance: 2x % of breaks in a day (4x if end date is set) for one break.
-                                    // We want to average 2 airs per day, 4 if end date is set, for tracks with no spin limit.
-                                    var chance = v ? 1 / (total / 4) : 1 / (total / 2);
-
-                                    sails.log.debug(`Underwriting ${underwriting.ID}: Initial chance is ${chance}.`);
-
-                                    // If mode = 1, then account online listeners in the algorithm
-                                    if (underwriting.mode.mode === 1) {
-                                        // If there are less than average number of listeners connected, decrease chance by a max of 50% of itself.
-                                        if (c < avgListeners) {
-                                            chance -= avgListeners > 0 ? ((chance / 2) * ((avgListeners - c) / avgListeners)) : 0;
-                                            // Otherwise, add chance to itself for every listenerFactor number of listeners connected.
-                                        } else {
-                                            chance = listenerFactor > 0 ? chance + (chance * (c / listenerFactor)) : chance;
-                                        }
-                                    }
-
-                                    // Weight chance by track priority. 0.5 = chance. 1 = double chance. 0 = 1/2 chance.
-                                    if (w > 0.5)
-                                        chance = chance + (chance * ((w - 0.5) * 2));
-                                    if (w < 0.5)
-                                        chance = chance / (1 + ((0.5 - w) * 2));
-
-                                    sails.log.debug(`Underwriting ${underwriting.ID}: Final chance is ${chance}`);
-
-                                    // Determine if we are to queue. If so, priority of queue is based on number of potential queues today
-                                    if (moment(next).isSameOrBefore(moment(now)) && !inputs.fastForwardOnly && !ffQueue && Math.random() < chance) {
-                                        sails.log.debug(`Underwriting ${underwriting.ID}: Regular queue.`);
-                                        toQueue.push({ ID: underwriting.trackID, priority: total > 0 && x > 0 ? 1 / (total / x) : 0 });
-                                    } else {
-                                        sails.log.debug(`Underwriting ${underwriting.ID}: Skipped; chance condition not met for this break.`);
                                     }
                                 }
                             }

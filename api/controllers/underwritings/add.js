@@ -28,6 +28,12 @@ module.exports = {
                 if (typeof value.schedule.schedules === `undefined`)
                     return false;
 
+                if (typeof value.scheduleForced === `undefined`)
+                    return false;
+
+                if (typeof value.scheduleForced.schedules === `undefined`)
+                    return false;
+
                 return true;
             },
             description: "Mode data for this underwriting."
