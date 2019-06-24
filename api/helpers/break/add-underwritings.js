@@ -79,6 +79,9 @@ module.exports = {
 
                 // Set up other variables that do not need re-loading on each underwriting check
                 var now = moment().toISOString(false);
+
+                sails.log.debug(`Now time: ${now}`);
+                
                 var c = Listeners.memory.listeners;
 
                 var maps = underwritings.map(async (underwriting) => {
