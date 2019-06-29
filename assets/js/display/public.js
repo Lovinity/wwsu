@@ -191,7 +191,8 @@ try {
     wrapper.height = window.innerHeight;
 
     // Define slides
-    // WWSU
+    // WWSU OLD
+    /*
     Slides.newSlide({
         name: `wwsu`,
         label: `WWSU`,
@@ -227,6 +228,22 @@ try {
                 });
             }, 7000);
         })
+    });
+    */
+
+    // WWSU NEW
+    Slides.newSlide({
+        name: `wwsu`,
+        label: `WWSU`,
+        weight: 1000000,
+        isSticky: false,
+        color: `primary`,
+        active: true,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 15,
+        fitContent: true,
+        html: `<img src="../images/display/front.jpeg">`,
     });
 
     // On the Air
@@ -293,8 +310,8 @@ try {
     });
     Slides.slide(`events-5-7`).active = false;
 
-    // Be a DJ
-    // WWSU
+    // Be a DJ OLD
+    /*
     Slides.newSlide({
         name: `be-a-dj`,
         label: `Be a DJ`,
@@ -319,6 +336,22 @@ try {
                 $('.jump-text').animateCss('tada');
             }, 5500);
         })
+    });
+    */
+
+    // Be a Dj NEW
+    Slides.newSlide({
+        name: `be-a-dj`,
+        label: `Be a DJ`,
+        weight: -500000,
+        isSticky: false,
+        color: `purple`,
+        active: true,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 15,
+        fitContent: true,
+        html: `<img src="../images/display/beadj.jpeg">`,
     });
 
     // Weather alerts
@@ -1966,6 +1999,7 @@ function processNowPlaying(response)
             }
             if (typeof response.state !== `undefined` || typeof response.topic !== `undefined` || typeof response.show !== `undefined`)
             {
+                /*
                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
                 {
                     var temp = Meta.show.split(" - ");
@@ -1992,6 +2026,7 @@ function processNowPlaying(response)
             </div>
             </div>`
                 }
+                */
                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_") || Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_"))
                 {
                     Slides.slide(`on-air`).active = true;
