@@ -79,7 +79,9 @@ module.exports = {
                 sails.log.debug(`listenerFactor: ${listenerFactor}`);
 
                 // Set up other variables that do not need re-loading on each underwriting check
-                var now = moment().toISOString(true);
+                
+                // For "now", add 10 minutes because top of the hour ID breaks may queue up to 10 minutes early.
+                var now = moment().add(10, 'minutes').toISOString(true);
 
                 sails.log.debug(`Now time: ${now}`);
                 
