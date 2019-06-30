@@ -79,7 +79,7 @@ module.exports = {
                 sails.log.debug(`listenerFactor: ${listenerFactor}`);
 
                 // Set up other variables that do not need re-loading on each underwriting check
-                
+
                 // For "now", add 10 minutes because top of the hour ID breaks may queue up to 10 minutes early.
                 var now = moment().add(10, 'minutes').toISOString(true);
 
@@ -287,12 +287,13 @@ module.exports = {
                                 }
                             }
                         } else if (moment(song.end_date).isAfter(moment("2002-01-02 00:00:01")) && moment().isSameOrAfter(moment(song.end_date)) && song.play_limit > 0 && song.count_played < song.play_limit) {
-                            veryBad.push(`The underwriting "${underwriting.name}" expired, but did not meet the required spin counts.`);
+                            veryBad.push(`The underwriting "${underwriting.name}" expired, but did not meet the required spin counts (this alert will go away on the next break after removing the underwriting).`);
                             sails.log.debug(`Underwriting ${underwriting.ID}: Track disabled / expired and failed spin counts.`);
                         } else {
                             sails.log.debug(`Underwriting ${underwriting.ID}: Track disabled / expired.`);
                         }
                     } else {
+                        bad.push(`The set track for underwriting "${underwriting.name}" was not found in RadioDJ; this underwriting will not air.`);
                         sails.log.debug(`Underwriting ${underwriting.ID}: Did NOT find song.`);
                     }
                 });
