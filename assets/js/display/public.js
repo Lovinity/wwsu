@@ -192,6 +192,10 @@ try {
         document.body.style.color = `#000000`;
         var temp = document.querySelector(`#bg-canvas`);
         temp.style.opacity = 0.5;
+        var temp = document.querySelector(`#dj-alert`);
+        temp.style.backgroundColor = `#ffffff`;
+        var temp = document.querySelector(`#eas-alert`);
+        temp.style.backgroundColor = `#0000ff`;
     }
     var queueReminder = false;
 
@@ -1396,11 +1400,13 @@ function processEas(db)
                     timeleft = `Expires ${moment(Meta.time).to(moment(dodo.expires))}`;
                 }
                 color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass} rounded shadow-4">
+                if (!isStudio) {
+                    color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`;
+                }
+                innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="text-info">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="text-warning">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
-<span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="text-danger">${timeleft}</span></div>
+                        <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
                         </div>
                         `;
 
@@ -1764,11 +1770,11 @@ function doEas()
                 color4.blue = Math.round((color4.blue / 2) + 127);
                 color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`;
                 easAlert.style.display = "inline";
-                easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};">
+                easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
                     <div id="eas-alert-text" class="m-3" style="color: ${color4}; font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${alert}</div>
-                    <div class="m-1 text-info" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
-                    <div class="m-1 text-warning" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
+                    <div class="m-1 text-white" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Effective ${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
+                    <div class="m-1 text-white" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">for the counties ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`;
                 if (!isStudio)
@@ -1776,7 +1782,7 @@ function doEas()
                 if (easExtreme)
                 {
                     easAlert.style.display = "inline";
-                    easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger"><strong>Life-threatening alert(s) in effect!</strong> Please stand by...</h2>`;
+                    easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`;
                 }
                 $('#alert-marquee')
                         .bind('finished', function () {
@@ -1844,7 +1850,7 @@ function doEas()
             flashInterval = setInterval(function () {
                 $("#eas-alert").css("background-color", "#D50000");
                 setTimeout(function () {
-                    $("#eas-alert").css("background-color", "#320000");
+                    $("#eas-alert").css("background-color", isStudio ? `#320000` : `#f6cccc`);
                     voiceCount++;
                     if (voiceCount > 179)
                     {
@@ -1859,8 +1865,8 @@ function doEas()
             easAlert.style.display = "inline";
             easAlert.innerHTML = `<div id="slide-interrupt-eas">
             <h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
-            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">Extreme Alerts in effect</h2>
-            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">SEEK SHELTER NOW!!!</h2>
+            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">Extreme Alerts in effect</h2>
+            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
             var innercontent = document.getElementById('alerts');
             Eas.db({severity: "Extreme"}).each(function (dodo) {
@@ -1869,10 +1875,10 @@ function doEas()
                     var borderclass = 'black';
                     borderclass = 'danger';
                     color = `rgb(${Math.round(color.red / 4)}, ${Math.round(color.green / 4)}, ${Math.round(color.blue / 4)});`;
-                    innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 text-white border border-${borderclass} rounded shadow-4">
+                    innercontent.innerHTML += `<div style="width: 32%;${isStudio ? `background-color: ${color}` : ``}" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark bg-light-1`} border border-${borderclass} rounded shadow-4">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="text-info">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="text-warning">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
+                        <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
                         </div>
                         `;
                 } catch (e) {
