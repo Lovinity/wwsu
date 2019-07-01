@@ -194,8 +194,6 @@ try {
         temp.style.opacity = 0.5;
         var temp = document.querySelector(`#dj-alert`);
         temp.style.backgroundColor = `#ffffff`;
-        var temp = document.querySelector(`#eas-alert`);
-        temp.style.backgroundColor = `#0000ff`;
     }
     var queueReminder = false;
 
@@ -792,7 +790,7 @@ function processCalendar(db)
                         innercontent.innerHTML += `<div style="width: 190px; position: relative;${isStudio ? `background-color: ${color};` : dodo.active ? `` : `background-color: #8d8d8d;`}" class="m-2 text-dark rounded shadow-4${isStudio || !dodo.active ? `` : `bg-light-1`}">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
-             <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
+             <div class="m-1" style="text-align: center;"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 0.8em;">${eventType}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
                     } catch (e) {
                         console.error(e);
                         iziToast.show({
@@ -1770,9 +1768,10 @@ function doEas()
                 color4.blue = Math.round((color4.blue / 2) + 127);
                 color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`;
                 easAlert.style.display = "inline";
+                easAlert.style.backgroundColor = `#0000ff`;
                 easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
-                    <div id="eas-alert-text" class="m-3" style="color: ${color4}; font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${alert}</div>
+                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${alert}</div>
                     <div class="m-1 text-white" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Effective ${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
                     <div class="m-1 text-white" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">for the counties ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
