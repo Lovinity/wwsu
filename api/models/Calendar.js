@@ -307,7 +307,7 @@ module.exports = {
                     for (var i = 0; i < events.length; i++) {
                         var event = events[i];
                         eventIds.push(event.id);
-                        
+
                         //sails.log.error(event);
 
                         // Skip events without a start time or without an end time or without a summary
@@ -699,8 +699,12 @@ module.exports = {
                                         if (cEvent.title.startsWith("Genre: ")) {
                                             var temp = cEvent.title.replace("Genre: ", "");
                                             await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, cEvent.unique, moment(cEvent.start).format("LLL"), true);
+
                                             // We do not want to maintain cancellation records of genres in the system.
                                             await Calendar.destroy({ ID: cEvent.ID }).fetch();
+
+                                            // Also remove the attendance record if the genre never aired; we do not want a bunch of canceled attendance records for genres.
+                                            await Attendance.destroy({ ID: attendance.ID, actualStart: null }).fetch();
                                         }
                                         if (cEvent.title.startsWith("Playlist: ")) {
                                             var temp = cEvent.title.replace("Playlist: ", "");
