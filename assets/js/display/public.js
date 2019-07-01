@@ -185,6 +185,14 @@ try {
     var lastBurnIn = null;
     var nowPlayingTimer;
     var isStudio = window.location.search.indexOf('studio=true') !== -1;
+
+    if (!isStudio)
+    {
+        document.body.style.backgroundColor = `#ffffff`;
+        document.body.style.color = `#000000`;
+        var temp = document.querySelector(`#bg-canvas`);
+        temp.style.opacity = 0.5;
+    }
     var queueReminder = false;
 
     wrapper.width = window.innerWidth;
@@ -258,7 +266,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 10,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">On the Air Right Now</h1><div id="ontheair"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`,
     });
 
     // Events Today
@@ -273,7 +281,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 15,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: #FFFFFF">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
     });
 
     // Events 2-4
@@ -366,7 +374,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 15,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: #FFFFFF">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${isStudio ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
     });
 
     //scoreboard
@@ -791,11 +799,11 @@ function processCalendar(db)
                 });
             } else {
                 innercontent.className = '';
-                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: #ffffff; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">There are no events today.</div>`;
+                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">There are no events today.</div>`;
             }
         } else {
             innercontent.className = '';
-            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: #ffffff; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">There was an error getting today's events.</div>`;
+            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">There was an error getting today's events.</div>`;
         }
 
         // Process days 2-4
@@ -1522,7 +1530,7 @@ waitFor(() => {
             if (data.hasOwnProperty(key) && key === 'insert')
             {
                 iziToast.show({
-                    title: 'DJ says',
+                    title: 'Message',
                     message: data[key].message,
                     timeout: 60000,
                     backgroundColor: '#FFF59D',
@@ -1756,12 +1764,12 @@ function doEas()
                 color4.blue = Math.round((color4.blue / 2) + 127);
                 color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`;
                 easAlert.style.display = "inline";
-                easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
+                easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};">
                     <h1 style="font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
                     <div id="eas-alert-text" class="m-3" style="color: ${color4}; font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${alert}</div>
                     <div class="m-1 text-info" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
                     <div class="m-1 text-warning" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Counties: ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
-                    <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 2)}, ${Math.round(color2.green / 2)}, ${Math.round(color2.blue / 2)}); font-size: 2.5em;">${text}</div>
+                    <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`;
                 if (!isStudio)
                     responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
@@ -1850,8 +1858,8 @@ function doEas()
             // Display the extreme alerts
             easAlert.style.display = "inline";
             easAlert.innerHTML = `<div id="slide-interrupt-eas">
-            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
-            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-warning">Extreme Alerts in effect</h2>
+            <h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
+            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">Extreme Alerts in effect</h2>
             <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
             var innercontent = document.getElementById('alerts');
@@ -1952,7 +1960,7 @@ function processNowPlaying(response)
             }
 
             // First, process now playing information
-            var color = 'rgba(121, 85, 72, 0.3)';
+            var color = 'rgba(121, 85, 72, 1)';
             var progress = 50;
             var statebadge = '';
             easDelay -= 1;
@@ -1983,19 +1991,19 @@ function processNowPlaying(response)
             } else if (Meta.state.startsWith("automation_"))
             {
                 statebadge = `<span class="badge badge-info shadow-2">MUSIC</span>`;
-                color = 'rgba(3, 169, 244, 0.5)';
+                color = 'rgba(3, 169, 244, 1)';
             } else if (Meta.state.startsWith("live_"))
             {
                 statebadge = `<span class="badge badge-primary shadow-2">SHOW</span>`;
-                color = 'rgba(231, 13, 47, 0.5)';
+                color = 'rgba(231, 13, 47, 1)';
             } else if (Meta.state.startsWith("remote_"))
             {
                 statebadge = `<span class="badge badge-purple shadow-2">REMOTE</span>`;
-                color = 'rgba(103, 58, 183, 0.5)';
+                color = 'rgba(103, 58, 183, 1)';
             } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_"))
             {
                 statebadge = `<span class="badge badge-success shadow-2">SPORTS</span>`;
-                color = 'rgba(76, 175, 80, 0.5)';
+                color = 'rgba(76, 175, 80, 1)';
             }
             if (typeof response.state !== `undefined` || typeof response.topic !== `undefined` || typeof response.show !== `undefined`)
             {
@@ -2038,19 +2046,19 @@ function processNowPlaying(response)
                         innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
                         } else {
-                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
                         }
-                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: #FFFFFF; height: 320px;" class="bg-dark-4 text-white p-1 m-1 shadow-8">${Meta.topic}</div>`;
+                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}; height: 320px;" class=" ${isStudio ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8">${Meta.topic}</div>`;
                     } else {
                         Slides.slide(`on-air`).displayTime = 10;
                         innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
                         } else {
-                            innercontent += '<h3 style="text-align: center; font-size: 2em; color: #FFFFFF; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>';
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
                         }
                     }
                     var temp = document.getElementById(`ontheair`);
@@ -2180,7 +2188,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
                     <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
                     </div></div>`;
@@ -2224,9 +2232,9 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                    </div></div>`;
+<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2265,9 +2273,9 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
+<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2307,9 +2315,9 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
+<div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2349,9 +2357,9 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
+<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2390,9 +2398,9 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>                      </div></div>`;
+<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
@@ -2535,7 +2543,7 @@ function processAnnouncements() {
                 slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                         $('#slide').animateCss('slideOutUp', function () {
                             content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: #ffffff; text-align: left;" class="container-full p-2 m-1 scale-content text-white" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: #FFFFFF">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: ${isStudio ? `#ffffff` : `#000000`}; text-align: left;" class="container-full p-2 m-1 scale-content ${isStudio ? `text-white` : `text-dark`}" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
                             var pageWidth, pageHeight;
 
@@ -2620,7 +2628,7 @@ function createAnnouncement(data) {
             transitionOut: `fadeOut`,
             displayTime: data.displayTime || 15,
             fitContent: true,
-            html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`
+            html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}" id="content-attn-${data.ID}">${data.announcement}</div>`
         });
     }
 }
