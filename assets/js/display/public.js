@@ -789,7 +789,7 @@ function processCalendar(db)
                             var image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
                         }
                         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                        innercontent.innerHTML += `<div style="width: 190px; position: relative;" class="m-2 text-dark rounded shadow-4 bg-light-1">
+                        innercontent.innerHTML += `<div style="width: 190px; position: relative;${isStudio ? `background-color: ${color};` : dodo.active ? `` : `background-color: #8d8d8d;`}" class="m-2 text-dark rounded shadow-4${isStudio || !dodo.active ? `` : `bg-light-1`}">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
              <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
