@@ -735,7 +735,7 @@ function processCalendar(db)
                         {
                             var stripped = dodo.title.replace("Show: ", "");
                             var eventType = "SHOW";
-                            var image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-microphone ${isStudio ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
                             {
@@ -749,7 +749,7 @@ function processCalendar(db)
                         {
                             var stripped = dodo.title.replace("Prerecord: ", "");
                             var eventType = "PRERECORD";
-                            var image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-play-circle ${isStudio ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
                             {
@@ -763,7 +763,7 @@ function processCalendar(db)
                         {
                             var stripped = dodo.title.replace("Remote: ", "");
                             var eventType = "REMOTE";
-                            var image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-broadcast-tower ${isStudio ? `text-white` : `text-purple`}" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
                             {
@@ -779,18 +779,18 @@ function processCalendar(db)
                             var eventType = "SPORTS";
                             var line1 = "Raider Sports";
                             var line2 = stripped;
-                            var image = `<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-trophy ${isStudio ? `text-white` : `text-success`}" style="font-size: 96px;"></i>`;
                         } else {
                             var eventType = "EVENT";
                             var line1 = "";
                             var line2 = dodo.title;
-                            var image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-calendar ${isStudio ? `text-white` : `text-secondary`}" style="font-size: 96px;"></i>`;
                         }
                         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                        innercontent.innerHTML += `<div style="width: 190px; position: relative;${isStudio ? `background-color: ${color};` : dodo.active ? `` : `background-color: #8d8d8d;`}" class="m-2 text-dark rounded shadow-4${isStudio || !dodo.active ? `` : `bg-light-1`}">
+                        innercontent.innerHTML += `<div style="width: 190px; position: relative;${isStudio ? ` background-color: ${color};` : dodo.active ? `` : ` background-color: #8d8d8d;`}" class="m-2 text-dark rounded shadow-4${isStudio || !dodo.active ? `` : ` bg-light-1`}">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
-             <div class="m-1" style="text-align: center;"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 0.8em;">${eventType}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
+             <div class="m-1" style="text-align: center;"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 0.8em;">${eventType}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
                     } catch (e) {
                         console.error(e);
                         iziToast.show({
@@ -1401,8 +1401,8 @@ function processEas(db)
                 if (!isStudio) {
                     color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`;
                 }
-                innercontent.innerHTML += `<div style="width: 32%; background-color: ${color};" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4">
-                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
+                innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 bg-light-1">
+                        <div class="m-1" style="text-align: center; width: 100%"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.5em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
                         <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
 <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
                         </div>
@@ -2216,7 +2216,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#F44336");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", "#000000");
+                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2259,7 +2259,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#9C27B0");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", "#000000");
+                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2300,7 +2300,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#4CAF50");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", "#000000");
+                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2342,7 +2342,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#F44336");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", "#000000");
+                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2384,7 +2384,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#9C27B0");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", "#000000");
+                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2425,7 +2425,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#4CAF50");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", "#000000");
+                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
