@@ -619,7 +619,11 @@ module.exports = {
                     if (toTrigger !== null && toTrigger.priority < 3) {
                         await sails.helpers.playlists.start(toTrigger.event, false, toTrigger.type, toTrigger.description, ignoreChangingState);
                     } else if (toTrigger !== null && toTrigger.priority === 3) {
-                        await sails.helpers.genre.start(toTrigger.event, ignoreChangingState);
+                        try {
+                            await sails.helpers.genre.start(toTrigger.event, ignoreChangingState);
+                        } catch (eee) {
+                            await sails.helpers.genre.start('Default', ignoreChangingState);
+                        }
                     }
 
                     // No genre events active right now? Switch back to regular automation.
