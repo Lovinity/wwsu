@@ -514,10 +514,18 @@ function onlineSocket(doOneSignal = false) {
                 temp.innerHTML = "Show Prompt";
                 temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                 temp.onclick = () => OneSignal.showNativePrompt();
+                temp.onkeydown = () => OneSignal.showNativePrompt();
             } else {
                 temp.innerHTML = "Subscribe";
                 temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`;
                 temp.onclick = () => {
+                    if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                        subscribe(`calendar-all`, Meta.show);
+                    } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                        subscribe(`calendar-all`, `Sports: ${Meta.show}`);
+                    }
+                };
+                temp.onkeydown = () => {
                     if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
                         subscribe(`calendar-all`, Meta.show);
                     } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
@@ -529,6 +537,7 @@ function onlineSocket(doOneSignal = false) {
             temp.innerHTML = "Not Supported";
             temp2.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU Mobile app in the future!`;
             temp.onclick = () => { };
+            temp.onkeydown = () => { };
         }
     }
 }
@@ -828,10 +837,18 @@ function doMeta(response) {
                             temp2.innerHTML = "Show Prompt";
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                             temp2.onclick = () => OneSignal.showNativePrompt();
+                            temp2.onkeydown = () => OneSignal.showNativePrompt();
                         } else {
                             temp2.innerHTML = "Subscribe";
                             temp4.innerHTML = `Click "Subscribe" to receive notifications when this show is on the air.`;
                             temp2.onclick = () => {
+                                if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                                    subscribe(`calendar-all`, Meta.show);
+                                } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                    subscribe(`calendar-all`, `Sports: ${Meta.show}`);
+                                }
+                            };
+                            temp2.onkeydown = () => {
                                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
                                     subscribe(`calendar-all`, Meta.show);
                                 } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
@@ -843,6 +860,7 @@ function doMeta(response) {
                         temp2.innerHTML = "Not Supported";
                         temp4.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!`;
                         temp2.onclick = () => { };
+                        temp2.onkeydown = () => { };
                     }
                 }
             } else {
@@ -875,10 +893,18 @@ function doMeta(response) {
                             temp2.innerHTML = "Show Prompt";
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                             temp2.onclick = () => OneSignal.showNativePrompt();
+                            temp2.onkeydown = () => OneSignal.showNativePrompt();
                         } else {
                             temp2.innerHTML = "Subscribe";
                             temp4.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`;
                             temp2.onclick = () => {
+                                if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                                    subscribe(`calendar-all`, Meta.show);
+                                } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                    subscribe(`calendar-all`, `Sports: ${Meta.show}`);
+                                }
+                            };
+                            temp2.onkeydown = () => {
                                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
                                     subscribe(`calendar-all`, Meta.show);
                                 } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
@@ -890,6 +916,7 @@ function doMeta(response) {
                         temp2.innerHTML = "Not Supported";
                         temp4.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!`;
                         temp2.onclick = () => { };
+                        temp2.onkeydown = () => { };
                     }
                 }
             }
@@ -920,7 +947,7 @@ function doMeta(response) {
                 ${track.track}
                 </td>
                 <td>
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                 </td>
                 </tr>`;
             });
@@ -1164,7 +1191,7 @@ function likeTrack(trackID) {
                     ${track.track}
                     </td>
                     <td>
-                    ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                    ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                     </td>
                     </tr>`;
                 });
@@ -1365,7 +1392,7 @@ function updateCalendar() {
                         var line2 = event.title;
                         var image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
                     }
-                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #8d8d8d;` : ``}" class="m-2 text-dark rounded shadow-8 bg-light-1" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
+                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #8d8d8d;` : ``}" class="m-2 text-dark rounded shadow-8 bg-light-1" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
              <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="text-dark" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;

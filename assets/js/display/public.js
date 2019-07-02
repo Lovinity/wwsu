@@ -1401,7 +1401,7 @@ function processEas(db)
                 if (!isStudio) {
                     color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`;
                 }
-                innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 bg-light-1">
+                innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${isStudio ? `bg-dark-4` : `bg-light-1`}">
                         <div class="m-1" style="text-align: center; width: 100%"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.5em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
                         <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
 <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
@@ -1812,6 +1812,7 @@ function doEas()
                             //true or false - should the marquee be duplicated to show an effect of continues flow
                             duplicated: false
                         });
+                        /*
                 clearInterval(flashInterval);
                 flashInterval = setInterval(function () {
                     var temp = document.querySelector(`#eas-alert-text`);
@@ -1828,6 +1829,7 @@ function doEas()
                         doEas();
                     }
                 }, 1000);
+                */
             } else {
                 easActive = false;
                 newEas.shift();
