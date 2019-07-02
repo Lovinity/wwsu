@@ -984,10 +984,11 @@ module.exports = {
                             });
                         await Promise.all(maps);
                     }
-
                     if (issues.length === 0) {
                         Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar is operational and all events are valid.`, status: 5 }]);
                     } else {
+                        // Remove duplicates
+                        issues = issues.filter((v, i, a) => a.indexOf(v) === i);
                         Status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: issues.join(` `), status: status }]);
                     }
                     return resolve();
