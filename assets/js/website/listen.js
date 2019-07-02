@@ -82,6 +82,12 @@ if (document.querySelector('#themessage'))
                 ['link'],
                 ['clean']
             ],
+            keyboard: {
+                bindings: {
+                    // Disable tab input (ADA compliance)
+                    tab: false
+                }
+            }
         },
         theme: 'snow'
     });
