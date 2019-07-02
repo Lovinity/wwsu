@@ -2,9 +2,9 @@
     <div class="col">
         <div class="p-1 m-3 card text-dark bg-light-3">
   <div class="form-group row">
-    <label for="staticEmail" class="col-sm-3 col-form-label">Events and Shows</label>
+    <label for="calendar-select" class="col-sm-3 col-form-label">Events and Shows</label>
     <div class="col-sm-9">
-          <select class="form-control" id="calendar-select" onchange="updateCalendar()">
+          <select class="form-control" id="calendar-select" onchange="updateCalendar()" tabindex="0">
       <option value="0" id="calendar-select-0">Today</option>
       <option value="1" id="calendar-select-1">Day 2</option>
       <option value="2" id="calendar-select-2">Day 3</option>
@@ -37,7 +37,7 @@
     </div>
   </div>
             <div class="card-body">
-                <div style="text-center">Click an event for more information. You can also subscribe to an event to receive a notification when it goes on the air.</div>
+                <div class="text-center">Click an event for more information. You can also subscribe to an event to receive a notification when it goes on the air.</div>
                 <div id='calendar' class="d-flex flex-wrap"></div>
                 <div class="modal fade" id="dialog" tabindex="-1" role="dialog" aria-labelledby="dialogTitle" aria-describedby="dialogDesc" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">

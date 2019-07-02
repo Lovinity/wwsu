@@ -1,21 +1,21 @@
 <div class="row">
     <div class="col">
         <div class="p-1 m-3 card text-dark bg-light-3">
-            <div class="card-header text-center" style="font-size: 1.5em;">Listen to WWSU</div>
+            <h2 class="card-header text-center">Listen to WWSU</h2>
             <div class="card-body">
-                <div class="card-title" style="text-align: center;"><a href="https://www.wright.edu/wwsu"><img src="../images/display/logo_true.png" style="width: 100%; max-width: 640px;"></a></div>
+                <div class="card-title" style="text-align: center;"><a href="https://www.wright.edu/wwsu"><img src="../images/display/logo_true.png" style="width: 100%; max-width: 640px;" alt="Logo of WWSU 106.9 FM. Click to go to the home page."></a></div>
                 <p class="card-text" style="text-align: center;">Listen live to WWSU, chat with the DJ, or make song requests here.</p>
                 <div id="nativeflashradio" class="shadow-8" style="height:65px; width:100%;"></div>
                 <br style="clear:both;">
                 <p class="card-text"><div style="text-align: center;" id="nowplaying"><div class="p-3 mb-2 shadow-4 bg-light-1">Connecting...</div></div></p>
 <div class="card-text m-1 bs-callout bs-callout-info shadow-4 text-light" id="show-subscribe" style="display: none;">
-Are you enjoying <strong><span id="show-subscribe-name"></span></strong>? Don't miss another episode! <span id="show-subscribe-instructions"></span> <button type="button" id="show-subscribe-button" class="btn btn-info" onclick="OneSignal.showNativePrompt();">Subscribe</button>
+Are you enjoying <strong><span id="show-subscribe-name"></span></strong>? Don't miss another episode! <span id="show-subscribe-instructions"></span> <button type="button" id="show-subscribe-button" class="btn btn-info" onclick="OneSignal.showNativePrompt();" tabindex="0">Subscribe</button>
 </div>
-                <p class="card-text" style="text-align: center; font-size: 1.5em;">Recent Tracks</p>
+                <h3 class="card-text" style="text-align: center;">Recent Tracks</h3>
                 <div class="table-responsive">
-<table class="table table-borderless shadow-2 bg-light-2" id="recent-tracks">
+<table class="table table-borderless shadow-2 bg-light-2">
 <tbody id="recent-tracks">
-  </tbody>
+</tbody>
 </table>
 </div>
             </div>

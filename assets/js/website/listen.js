@@ -914,7 +914,7 @@ function doMeta(response) {
                 ${track.track}
                 </td>
                 <td>
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                 </td>
                 </tr>`;
             });
@@ -991,11 +991,13 @@ function loadTrackInfo(trackID) {
 
                 if (response[0].request.requestable) {
                     $('#track-info-request').html(`<div class="form-group">
-                                    <label for="request-name"><strong>Request this track</strong></label>
-                                    <input type="text" class="form-control" id="track-request-name" placeholder="Your name (optional)">
-                                    <textarea class="form-control" id="track-request-message" rows="2" placeholder="Message for the DJ (optional)"></textarea>
+                                    <h6>Request this Track</h6>
+                                    <label for="track-request-name">Name (optional; displayed when the request plays)</label>
+                                    <input type="text" class="form-control" id="track-request-name" tabindex="0">
+                                    <label for="track-request-message">Message for the DJ (optional)</label>
+                                    <textarea class="form-control" id="track-request-message" rows="2" tabindex="0"></textarea>
                                     </div>                    
-                                    <button type="submit" id="track-request-submit" class="btn btn-primary">Place Request</button>`);
+                                    <button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0">Place Request</button>`);
                 } else {
                     $('#track-info-request').html(`<div class="bs-callout bs-callout-${response[0].request.listDiv} shadow-4 text-white">
                         ${response[0].request.message}
@@ -1077,11 +1079,11 @@ function loadTracks(skip = 0) {
             //response = JSON.parse(response);
             if (response.length > 0) {
                 response.map(track => {
-                    songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 shadow-2 bg-${(track.enabled === 1) ? 'primary' : 'secondary'} text-white" style="cursor: pointer;"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
+                    songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 shadow-2 bg-${(track.enabled === 1) ? 'primary' : 'secondary'} text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
                     skipIt++;
                 });
 
-                songData.innerHTML += `<div id="track-load" class="p-1 m-1 shadow-2 bg-success text-white" style="cursor: pointer;"><span id="track-l-load">Load more tracks</span></div>`;
+                songData.innerHTML += `<div id="track-load" class="p-1 m-1 shadow-2 bg-success text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-load">Load more tracks</span></div>`;
             } else {
                 skipIt = -1;
                 songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`;
@@ -1148,17 +1150,17 @@ function likeTrack(trackID) {
                 // reset recent tracks
                 if (recentTracks)
                     recentTracks.innerHTML = ``;
-                Meta.history.map(track => {
+                Meta.history.history.map(track => {
                     console.dir(track);
                     if (recentTracks)
-                        recentTracks.innerHTML += `<div class="row">
-                <div class="col-8">
-                ${track.track}
-                </div>
-                <div class="col-4">
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
-                </div>
-                </div>`;
+                        recentTracks.innerHTML += `<tr>
+                    <td>
+                    ${track.track}
+                    </td>
+                    <td>
+                    ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                    </td>
+                    </tr>`;
                 });
                 iziToast.show({
                     title: 'Track liked!',
@@ -1294,7 +1296,7 @@ function updateCalendar() {
                     if (event.title.startsWith("Show: ")) {
                         var stripped = event.title.replace("Show: ", "");
                         var eventType = "SHOW";
-                        var image = `<i class="fas fa-microphone" style="font-size: 96px;"></i>`;
+                        var image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`;
                         var temp = stripped.split(" - ");
                         if (temp.length === 2) {
                             var line1 = temp[0];
@@ -1306,7 +1308,7 @@ function updateCalendar() {
                     } else if (event.title.startsWith("Prerecord: ")) {
                         var stripped = event.title.replace("Prerecord: ", "");
                         var eventType = "PRERECORD";
-                        var image = `<i class="fas fa-play-circle" style="font-size: 96px;"></i>`;
+                        var image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`;
                         var temp = stripped.split(" - ");
                         if (temp.length === 2) {
                             var line1 = temp[0];
@@ -1318,7 +1320,7 @@ function updateCalendar() {
                     } else if (event.title.startsWith("Remote: ")) {
                         var stripped = event.title.replace("Remote: ", "");
                         var eventType = "REMOTE";
-                        var image = `<i class="fas fa-broadcast-tower" style="font-size: 96px;"></i>`;
+                        var image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`;
                         var temp = stripped.split(" - ");
                         if (temp.length === 2) {
                             var line1 = temp[0];
@@ -1332,11 +1334,11 @@ function updateCalendar() {
                         var eventType = "SPORTS";
                         var line1 = "Raider Sports";
                         var line2 = stripped;
-                        var image = `<i class="fas fa-trophy" style="font-size: 96px;"></i>`;
+                        var image = `<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>`;
                     } else if (event.title.startsWith("Playlist: ")) {
                         var stripped = event.title.replace("Playlist: ", "");
                         var eventType = event.active > -1 ? "PLAYLIST" : `CANCELED`;
-                        var image = `<i class="fas fa-list" style="font-size: 96px;"></i>`;
+                        var image = `<i class="fas fa-list text-info" style="font-size: 96px;"></i>`;
                         var temp = stripped.split(" - ");
                         if (temp.length === 2) {
                             var line1 = temp[0];
@@ -1350,17 +1352,17 @@ function updateCalendar() {
                         var eventType = "GENRE";
                         var line1 = "";
                         var line2 = stripped;
-                        var image = `<i class="fas fa-music" style="font-size: 96px;"></i>`;
+                        var image = `<i class="fas fa-music text-info" style="font-size: 96px;"></i>`;
                     } else {
                         var eventType = "EVENT";
                         var line1 = "";
                         var line2 = event.title;
-                        var image = `<i class="fas fa-calendar" style="font-size: 96px;"></i>`;
+                        var image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
                     }
-                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" style="width: 190px; position: relative; background-color: rgb(${finalColor.red}, ${finalColor.green}, ${finalColor.blue});" class="m-2 text-white rounded shadow-8">
+                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #8d8d8d;` : ``}" class="m-2 text-dark rounded shadow-8 bg-light-1" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
-             <div class="m-1" style="text-align: center;"><span class="text-white" style="font-size: 0.8em;">${eventType}</span><br><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-info" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
+             <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-warning" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="text-dark" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
                 } catch (e) {
                     console.error(e);
                     iziToast.show({

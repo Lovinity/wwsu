@@ -1,32 +1,32 @@
 <div class="row">
     <div class="col">
         <div class="p-1 m-3 card text-dark bg-light-3">
-            <div class="card-header text-center" style="font-size: 1.5em;">Chat with the WWSU DJ</div>
+            <h2 class="card-header text-center">Chat with the WWSU DJ</h2>
             <div class="card-body">
                 <div id="messages-status"><div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Connecting...</h4>The chat system is not yet ready for use.</div></div>
                 <div class="container-fluid bg-light-2 text-dark" id="messages" style="height: 360px; overflow-y: auto;">
                 </div>
                 <div class="form-group">
                     <label for="nickname">Nickname (Change if you want the DJ to know who you are)</label>
-                    <input type="text" class="form-control" id="nickname" maxlength="32" placeholder="">
+                    <input type="text" class="form-control" id="nickname" maxlength="32" placeholder="" tabindex="0">
                     <label for="themessage">Message</label>
                     <div class="bg-light text-dark">
-                        <div id="themessage" disabled></div>
+                        <div id="themessage" class="form-control" tabindex="0" disabled></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <button type="button" class="btn btn-primary m-1" id="sendmessage" onclick="sendMessage(false);" disabled>
+                    <button type="button" class="btn btn-primary m-1" id="sendmessage" onclick="sendMessage(false);" tabindex="0" disabled>
                         Send Publicly
                     </button>
-                    <button type="button" class="btn btn-secondary m-1" id="sendmessagep" onclick="sendMessage(true);" disabled>
+                    <button type="button" class="btn btn-secondary m-1" id="sendmessagep" onclick="sendMessage(true);" tabindex="0" disabled>
                         DM the DJ <i class="fas fa-bell"></i>
                     </button>
-                    <button type="button" class="btn btn-secondary m-1" id="clearchat" onclick="clearChat();">
+                    <button type="button" class="btn btn-secondary m-1" id="clearchat" onclick="clearChat();" tabindex="0">
                         Clear Messages
                     </button>
                 </div>
 <div class="m-1 bs-callout bs-callout-info shadow-4 text-light" id="chat-subscribe" style="display: none;">
-Click "subscribe" if you want push notifications when the DJ sends you a direct message. <button type="button" class="btn btn-info" onclick="OneSignal.showNativePrompt();">Subscribe</button>
+Click "subscribe" if you want push notifications when the DJ sends you a direct message. <button type="button" class="btn btn-info" onclick="OneSignal.showNativePrompt();" tabindex="0">Subscribe</button>
 </div>
                 <div class="p-3 bs-callout bs-callout-warning text-light shadow-2"><strong>Your IP address is logged when you send messages.</strong> Abuse of the chat system could result in being banned from the listener's corner.</div>
             </div>
