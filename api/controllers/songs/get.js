@@ -82,9 +82,9 @@ module.exports = {
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
                     id_subcat = [];
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
-                    query.id_subcat.push(inputs.subcategory);
+                   id_subcat.push(inputs.subcategory);
                 if (inputs.category !== 'undefined' && inputs.category !== null)
-                    query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats[inputs.category]);
+                    id_subcat = id_subcat.concat(sails.config.custom.subcats[inputs.category]);
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)
                     query.id_genre = inputs.genre;
 
