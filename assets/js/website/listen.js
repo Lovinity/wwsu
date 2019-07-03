@@ -273,6 +273,28 @@ waitFor(function () {
     io.socket._raw.io._reconnectionAttempts = Infinity;
 });
 
+waitFor(function () {
+    return (document.querySelector(`#nativeflashradioplaystopcontainer`) !== null && document.querySelector(`#nativeflashradioplaybutton`) !== null && document.querySelector(`#nativeflashradioimagecontainer`) !== null && document.querySelector(`#nativeflashradiovolumecontroller`) !== null);
+}, function () {
+    $("#nativeflashradioplaystopcontainer").attr("tabindex",0);
+    $("#nativeflashradiovolumegrab").attr("tabindex",0);
+    $("#nativeflashradiovolumegrab").attr("alt","Change Volume");
+    $("#nativeflashradiovolumehit").attr("alt","Volume");
+    $("#nativeflashradioimagehit1").attr("alt","logo");
+});
+
+waitFor(function () {
+    return (document.querySelector(`.ql-bold`) !== null);
+}, function () {
+    $(".ql-bold").each(function(i) { $(this).attr("value","bold"); });
+    $(".ql-italic").each(function(i) { $(this).attr("value","italics"); });
+    $(".ql-underline").each(function(i) { $(this).attr("value","underline"); });
+    $(".ql-strike").each(function(i) { $(this).attr("value","strike-through"); });
+    $(".ql-color").each(function(i) { $(this).attr("title","Change the color of the selected text"); });
+    $(".ql-link").each(function(i) { $(this).attr("value","hyperlink"); });
+    $(".ql-clean").each(function(i) { $(this).attr("value","remove formatting"); });
+});
+
 function escapeHTML(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
@@ -1183,7 +1205,7 @@ function likeTrack(trackID) {
                 // reset recent tracks
                 if (recentTracks)
                     recentTracks.innerHTML = ``;
-                Meta.history.history.map(track => {
+                Meta.history.map(track => {
                     console.dir(track);
                     if (recentTracks)
                         recentTracks.innerHTML += `<tr>
@@ -1392,7 +1414,7 @@ function updateCalendar() {
                         var line2 = event.title;
                         var image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
                     }
-                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #8d8d8d;` : ``}" class="m-2 text-dark rounded shadow-8 bg-light-1" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
+                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${event.active < 1 ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
              <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="text-dark" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;

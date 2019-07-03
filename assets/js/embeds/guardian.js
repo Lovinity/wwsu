@@ -91,6 +91,12 @@ waitFor(function () {
     $("#nativeflashradioimagecontainer").css("border", "rgb(255, 255, 255);");
     $("#nativeflashradioimagecontainer").css("background-color", "rgb(255, 255, 255);");
     $("#nativeflashradiovolumecontroller").css("background-color", "rgb(255, 255, 255);");
+
+    $("#nativeflashradioplaystopcontainer").attr("tabindex",0);
+    $("#nativeflashradiovolumegrab").attr("tabindex",0);
+    $("#nativeflashradiovolumegrab").attr("alt","Change Volume");
+    $("#nativeflashradiovolumehit").attr("alt","Volume");
+    $("#nativeflashradioimagehit1").attr("alt","logo");
 });
 
 // Make a call to the meta/get API endpoint

@@ -787,10 +787,10 @@ function processCalendar(db)
                             var image = `<i class="fas fa-calendar ${isStudio ? `text-white` : `text-secondary`}" style="font-size: 96px;"></i>`;
                         }
                         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                        innercontent.innerHTML += `<div style="width: 190px; position: relative;${isStudio ? ` background-color: ${color};` : dodo.active ? `` : ` background-color: #8d8d8d;`}" class="m-2 text-dark rounded shadow-4${isStudio || !dodo.active ? `` : ` bg-light-1`}">
+                        innercontent.innerHTML += `<div style="width: 190px; position: relative;${isStudio ? ` background-color: ${color};` : dodo.active ? `` : ` background-color: #969696;`}" class="m-2 text-dark rounded shadow-4${isStudio || !dodo.active ? `` : ` bg-light-1`}">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
-             <div class="m-1" style="text-align: center;"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 0.8em;">${eventType}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${dodo.startT} - ${dodo.endT}</span></div>`;
+             <div class="m-1" style="text-align: center;"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 0.8em;">${eventType}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em;">${line1}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.25em;">${line2}</span><br /><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span></div>`;
                     } catch (e) {
                         console.error(e);
                         iziToast.show({
@@ -801,11 +801,11 @@ function processCalendar(db)
                 });
             } else {
                 innercontent.className = '';
-                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">There are no events today.</div>`;
+                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">There are no events today.</div>`;
             }
         } else {
             innercontent.className = '';
-            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">There was an error getting today's events.</div>`;
+            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">There was an error getting today's events.</div>`;
         }
 
         // Process days 2-4
@@ -1402,9 +1402,9 @@ function processEas(db)
                     color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`;
                 }
                 innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${isStudio ? `bg-dark-4` : `bg-light-1`}">
-                        <div class="m-1" style="text-align: center; width: 100%"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.5em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
+                        <div class="m-1" style="text-align: center; width: 100%"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
+                        <span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
                         </div>
                         `;
 
@@ -1770,10 +1770,10 @@ function doEas()
                 easAlert.style.display = "inline";
                 easAlert.style.backgroundColor = `#0000ff`;
                 easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
-                    <h1 style="font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
-                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 6em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${alert}</div>
-                    <div class="m-1 text-white" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Effective ${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
-                    <div class="m-1 text-white" style="font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">for the counties ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
+                    <h1 style="font-size: 3em;">WWSU Emergency Alert System</h1>
+                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 6em;">${alert}</div>
+                    <div class="m-1 text-white" style="font-size: 2em;">Effective ${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</div>
+                    <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`;
                 if (!isStudio)
@@ -1781,7 +1781,7 @@ function doEas()
                 if (easExtreme)
                 {
                     easAlert.style.display = "inline";
-                    easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`;
+                    easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`;
                 }
                 $('#alert-marquee')
                         .bind('finished', function () {
@@ -1865,9 +1865,9 @@ function doEas()
             // Display the extreme alerts
             easAlert.style.display = "inline";
             easAlert.innerHTML = `<div id="slide-interrupt-eas">
-            <h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">WWSU Emergency Alert System</h1>
-            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">Extreme Alerts in effect</h2>
-            <h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
+            <h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`};">WWSU Emergency Alert System</h1>
+            <h2 style="text-align: center; font-size: 3em;" class="${isStudio ? `text-white` : `text-dark`}">Extreme Alerts in effect</h2>
+            <h2 style="text-align: center; font-size: 3em;" class="${isStudio ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
             var innercontent = document.getElementById('alerts');
             Eas.db({severity: "Extreme"}).each(function (dodo) {
@@ -1877,9 +1877,9 @@ function doEas()
                     borderclass = 'danger';
                     color = `rgb(${Math.round(color.red / 4)}, ${Math.round(color.green / 4)}, ${Math.round(color.blue / 4)});`;
                     innercontent.innerHTML += `<div style="width: 32%;${isStudio ? `background-color: ${color}` : ``}" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark bg-light-1`} border border-${borderclass} rounded shadow-4">
-                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
+                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
+                        <span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
                         </div>
                         `;
                 } catch (e) {
@@ -2050,22 +2050,22 @@ function processNowPlaying(response)
                     if (Meta.topic.length > 2)
                     {
                         Slides.slide(`on-air`).displayTime = 20;
-                        innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
+                        innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
                         } else {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
                         }
-                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}; height: 320px;" class=" ${isStudio ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8">${Meta.topic}</div>`;
+                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}; height: 320px;" class="${isStudio ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8">${Meta.topic}</div>`;
                     } else {
                         Slides.slide(`on-air`).displayTime = 10;
-                        innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
+                        innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
                         } else {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
                         }
                     }
                     var temp = document.getElementById(`ontheair`);
@@ -2177,7 +2177,7 @@ function processNowPlaying(response)
             nowplayingtime.style.color = 'rgba(255, 235, 59, 1)';
             nowplayingtime.innerHTML = `<div class="d-flex align-items-stretch">
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
-                        <div class="container-fluid m-1" style="text-align: center; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}</div>
+                        <div class="container-fluid m-1" style="text-align: center; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}</div>
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
                         </div>`;
             if (Meta.state === 'automation_live' && queuelength < 60 && typeof response.state === 'undefined')
@@ -2196,7 +2196,7 @@ function processNowPlaying(response)
                     });
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
                     <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
                     </div></div>`;
                     countdown = document.getElementById('countdown');
@@ -2240,7 +2240,7 @@ function processNowPlaying(response)
                     });
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
@@ -2281,7 +2281,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
@@ -2323,7 +2323,7 @@ function processNowPlaying(response)
                     });
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
@@ -2365,7 +2365,7 @@ function processNowPlaying(response)
                     });
                     var temp = Meta.show.split(" - ");
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
@@ -2406,7 +2406,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
                     countdowntext = document.getElementById('countdown-text');
@@ -2635,7 +2635,7 @@ function createAnnouncement(data) {
             transitionOut: `fadeOut`,
             displayTime: data.displayTime || 15,
             fitContent: true,
-            html: `<div style="overflow-y: hidden; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${isStudio ? `text-white` : `text-dark`}" id="content-attn-${data.ID}">${data.announcement}</div>`
+            html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${isStudio ? `text-white` : `text-dark`}" id="content-attn-${data.ID}">${data.announcement}</div>`
         });
     }
 }

@@ -1355,6 +1355,11 @@ module.exports.bootstrap = async function (done) {
     sails.log.verbose(`BOOTSTRAP: calculate weekly analytics.`);
     await sails.helpers.attendance.calculateStats();
 
+    sails.log.verbose(`Set a 30 second timer for display-refresh.`);
+    setTimeout(function() {
+        sails.sockets.broadcast('display-refresh', 'display-refresh', true);
+    }, 30000);
+
     sails.log.verbose(`BOOTSTRAP: Done.`);
 
     return done();
