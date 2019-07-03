@@ -82,26 +82,29 @@ module.exports = {
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
                     id_subcat = [];
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
-                   id_subcat.push(inputs.subcategory);
-                if (inputs.category !== 'undefined' && inputs.category !== null)
+                    id_subcat.push(inputs.subcategory);
+                if (inputs.category !== 'undefined' && inputs.category !== null && typeof sails.config.custom.subcats[inputs.category] !== `undefined`)
                     id_subcat = id_subcat.concat(sails.config.custom.subcats[inputs.category]);
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)
                     query.id_genre = inputs.genre;
 
                 // Filter by search string, if provided
-                if (typeof inputs.search !== 'undefined' && inputs.search !== null)
+                if (typeof inputs.search !== 'undefined' && inputs.search !== null && inputs.search !== "")
                     query.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];
 
                 songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
 
                 // No songs returned? send "false" to indicate we are at the end of the list.
                 if (songs.length === 0)
-                return exits.success(false);
+                    return exits.success(false);
 
                 // Because Waterline does not like long subcat WHERE queries, we have to filter manually.
                 // TODO: If Waterline ever fixes this, get rid of this hack. It's UGLY!
+                // Wow, even this doesn't work...
+                /*
                 if (id_subcat.length > 0)
-                songs = songs.filter((song) => id_subcat.indexOf(song.id_subcat) !== -1);
+                    songs = songs.filter((song) => id_subcat.indexOf(song.id_subcat) !== -1);
+                    */
 
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
 
