@@ -1122,7 +1122,7 @@ function loadTracks(skip = 0) {
         temp.parentNode.removeChild(temp);
     var songData = document.getElementById('song-data');
     var search = document.getElementById('searchterm');
-    var query = { search: escapeHTML(search.value), skip: skip };
+    var query = { search: escapeHTML(search.value), skip: skip, limit: 50 };
     var genreOptions = document.getElementById('filter-genre');
     var selectedOption = genreOptions.options[genreOptions.selectedIndex].value;
     if (selectedOption !== "0")
@@ -1132,16 +1132,20 @@ function loadTracks(skip = 0) {
     io.socket.post('/songs/get', query, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
-            if (response.length > 0) {
+            if (response === "false" || !response)
+            {
+                skipIt = -1;
+                songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`;
+            } else if (response.length > 0) {
+                skipIt += 50;
+
                 response.map(track => {
                     songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 shadow-2 bg-${(track.enabled === 1) ? 'primary' : 'secondary'} text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
-                    skipIt++;
                 });
 
                 songData.innerHTML += `<div id="track-load" class="p-1 m-1 shadow-2 bg-success text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-load">Load more tracks</span></div>`;
-            } else {
-                skipIt = -1;
-                songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`;
+            } else if (response.length === 0) {
+                loadTracks(skip + 50);
             }
         } catch (e) {
             iziToast.show({
