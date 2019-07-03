@@ -38,7 +38,7 @@ module.exports = {
         },
         limit: {
             type: 'number',
-            defaultsTo: 25,
+            defaultsTo: 50,
             description: 'Limit the number of songs returned to this number.'
         },
         skip: {
@@ -72,14 +72,15 @@ module.exports = {
             var cats = {};
             var subcats = {};
             var query = {};
-            var songs;
+            var songs = [];
+            var id_subcat = [];
 
             // No song ID specified?
             if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
-                query.id_subcat = sails.config.custom.subcats.music;
+                id_subcat = sails.config.custom.subcats.music;
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
-                    query.id_subcat = [];
+                    id_subcat = [];
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
                     query.id_subcat.push(inputs.subcategory);
                 if (inputs.category !== 'undefined' && inputs.category !== null)
@@ -92,6 +93,16 @@ module.exports = {
                     query.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];
 
                 songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
+
+                // No songs returned? send "false" to indicate we are at the end of the list.
+                if (songs.length === 0)
+                return exits.success(false);
+
+                // Because Waterline does not like long subcat WHERE queries, we have to filter manually.
+                // TODO: If Waterline ever fixes this, get rid of this hack. It's UGLY!
+                if (id_subcat.length > 0)
+                songs = songs.filter((song) => id_subcat.indexOf(song.id_subcat) !== -1);
+
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
 
             } else {
@@ -99,7 +110,7 @@ module.exports = {
 
                 // Find the song matching the defined ID
                 query = { ID: inputs.ID };
-                songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
+                songs = await Songs.find(query);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
 
                 // No record retrieved? Assume we could not find the song.
