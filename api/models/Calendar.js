@@ -622,7 +622,8 @@ module.exports = {
                         try {
                             await sails.helpers.genre.start(toTrigger.event, ignoreChangingState);
                         } catch (eee) {
-                            await sails.helpers.genre.start('Default', ignoreChangingState);
+                            if (Meta['A'].state === `automation_genre`)
+                                await sails.helpers.genre.start('Default', ignoreChangingState);
                         }
                     }
 
