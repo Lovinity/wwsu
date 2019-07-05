@@ -1545,7 +1545,8 @@ waitFor(() => {
                     closeOnClick: true,
                     titleSize: '2em',
                     messageSize: '1.5em',
-                    balloon: true
+                    balloon: true,
+                    zindex: 999,
                 });
                 if (!isStudio)
                     responsiveVoice.speak(`Attention guests! There is a new message. ${data[key].message}`);
