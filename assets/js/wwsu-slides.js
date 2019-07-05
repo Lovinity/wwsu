@@ -221,7 +221,7 @@ var Slides = (() => {
 
             var html = ``;
             _slides.map((_slide) => {
-                html += `<span class="m-1 chip shadow-4 ${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name ? `bg-light-1` : `bg-dark-4`}"><i class="chip-icon bg-${_slide.color}">${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name && timeLeft !== null && _slides.length > 1 ? timeLeft : ``}</i>${_slide.label}</span>`;
+                html += `<span class="m-1 chip shadow-4 ${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name ? `bg-light-1 text-dark` : `bg-dark-4 text-white`}"><i class="chip-icon bg-${_slide.color} ${_slide.color === `warning` || _slide.color === `info` ? `text-dark` : `text-white`}">${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name && timeLeft !== null && _slides.length > 1 ? timeLeft : ``}</i>${_slide.label}</span>`;
             });
 
             temp.innerHTML = html;
