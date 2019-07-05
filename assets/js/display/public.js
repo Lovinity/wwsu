@@ -185,8 +185,9 @@ try {
     var lastBurnIn = null;
     var nowPlayingTimer;
     var isStudio = window.location.search.indexOf('studio=true') !== -1;
+    var isLightTheme = window.location.search.indexOf('light=true') !== -1;
 
-    if (!isStudio)
+    if (isLightTheme)
     {
         document.body.style.backgroundColor = `#ffffff`;
         document.body.style.color = `#000000`;
@@ -268,7 +269,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 10,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`,
     });
 
     // Events Today
@@ -283,7 +284,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 15,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
     });
 
     // Events 2-4
@@ -376,7 +377,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 15,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${isStudio ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
     });
 
     //scoreboard
@@ -735,7 +736,7 @@ function processCalendar(db)
                         {
                             var stripped = dodo.title.replace("Show: ", "");
                             var eventType = "SHOW";
-                            var image = `<i class="fas fa-microphone ${isStudio ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
                             {
@@ -749,7 +750,7 @@ function processCalendar(db)
                         {
                             var stripped = dodo.title.replace("Prerecord: ", "");
                             var eventType = "PRERECORD";
-                            var image = `<i class="fas fa-play-circle ${isStudio ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
                             {
@@ -763,7 +764,7 @@ function processCalendar(db)
                         {
                             var stripped = dodo.title.replace("Remote: ", "");
                             var eventType = "REMOTE";
-                            var image = `<i class="fas fa-broadcast-tower ${isStudio ? `text-white` : `text-purple`}" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 96px;"></i>`;
                             var temp = stripped.split(" - ");
                             if (temp.length === 2)
                             {
@@ -779,18 +780,18 @@ function processCalendar(db)
                             var eventType = "SPORTS";
                             var line1 = "Raider Sports";
                             var line2 = stripped;
-                            var image = `<i class="fas fa-trophy ${isStudio ? `text-white` : `text-success`}" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-trophy ${!isLightTheme ? `text-white` : `text-success`}" style="font-size: 96px;"></i>`;
                         } else {
                             var eventType = "EVENT";
                             var line1 = "";
                             var line2 = dodo.title;
-                            var image = `<i class="fas fa-calendar ${isStudio ? `text-white` : `text-secondary`}" style="font-size: 96px;"></i>`;
+                            var image = `<i class="fas fa-calendar ${!isLightTheme ? `text-white` : `text-secondary`}" style="font-size: 96px;"></i>`;
                         }
                         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                        innercontent.innerHTML += `<div style="width: 190px; position: relative;${isStudio ? ` background-color: ${color};` : dodo.active ? `` : ` background-color: #969696;`}" class="m-2 text-dark rounded shadow-4${isStudio || !dodo.active ? `` : ` bg-light-1`}">
+                        innercontent.innerHTML += `<div style="width: 190px; position: relative;${!isLightTheme ? ` background-color: ${color};` : dodo.active ? `` : ` background-color: #969696;`}" class="m-2 text-dark rounded shadow-4${!isLightTheme || !dodo.active ? `` : ` bg-light-1`}">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
-             <div class="m-1" style="text-align: center;"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 0.8em;">${eventType}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em;">${line1}</span><br><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.25em;">${line2}</span><br /><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span></div>`;
+             <div class="m-1" style="text-align: center;"><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 0.8em;">${eventType}</span><br><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1em;">${line1}</span><br><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1.25em;">${line2}</span><br /><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1em;">${dodo.startT} - ${dodo.endT}</span></div>`;
                     } catch (e) {
                         console.error(e);
                         iziToast.show({
@@ -801,11 +802,11 @@ function processCalendar(db)
                 });
             } else {
                 innercontent.className = '';
-                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">There are no events today.</div>`;
+                innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #363636, color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">There are no events today.</div>`;
             }
         } else {
             innercontent.className = '';
-            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">There was an error getting today's events.</div>`;
+            innercontent.innerHTML += `<div style="text-danger font-size: 2em; text-align: center; background-color: #360000, color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">There was an error getting today's events.</div>`;
         }
 
         // Process days 2-4
@@ -1398,13 +1399,13 @@ function processEas(db)
                     timeleft = `Expires ${moment(Meta.time).to(moment(dodo.expires))}`;
                 }
                 color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                if (!isStudio) {
+                if (isLightTheme) {
                     color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`;
                 }
-                innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${isStudio ? `bg-dark-4` : `bg-light-1`}">
-                        <div class="m-1" style="text-align: center; width: 100%"><span class="${isStudio ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
+                innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${!isLightTheme ? `bg-dark-4` : `bg-light-1`}">
+                        <div class="m-1" style="text-align: center; width: 100%"><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
                         </div>
                         `;
 
@@ -1776,7 +1777,7 @@ function doEas()
                     <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`;
-                if (!isStudio)
+                if (isLightTheme)
                     responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format("LLL") : 'UNKNOWN'}.`);
                 if (easExtreme)
                 {
@@ -1851,7 +1852,7 @@ function doEas()
             flashInterval = setInterval(function () {
                 $("#eas-alert").css("background-color", "#D50000");
                 setTimeout(function () {
-                    $("#eas-alert").css("background-color", isStudio ? `#320000` : `#f6cccc`);
+                    $("#eas-alert").css("background-color", !isLightTheme ? `#320000` : `#f6cccc`);
                     voiceCount++;
                     if (voiceCount > 179)
                     {
@@ -1865,9 +1866,9 @@ function doEas()
             // Display the extreme alerts
             easAlert.style.display = "inline";
             easAlert.innerHTML = `<div id="slide-interrupt-eas">
-            <h1 style="text-align: center; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`};">WWSU Emergency Alert System</h1>
-            <h2 style="text-align: center; font-size: 3em;" class="${isStudio ? `text-white` : `text-dark`}">Extreme Alerts in effect</h2>
-            <h2 style="text-align: center; font-size: 3em;" class="${isStudio ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
+            <h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`};">WWSU Emergency Alert System</h1>
+            <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">Extreme Alerts in effect</h2>
+            <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
             var innercontent = document.getElementById('alerts');
             Eas.db({severity: "Extreme"}).each(function (dodo) {
@@ -1876,10 +1877,10 @@ function doEas()
                     var borderclass = 'black';
                     borderclass = 'danger';
                     color = `rgb(${Math.round(color.red / 4)}, ${Math.round(color.green / 4)}, ${Math.round(color.blue / 4)});`;
-                    innercontent.innerHTML += `<div style="width: 32%;${isStudio ? `background-color: ${color}` : ``}" class="d-flex align-items-stretch m-1 ${isStudio ? `text-white` : `text-dark bg-light-1`} border border-${borderclass} rounded shadow-4">
+                    innercontent.innerHTML += `<div style="width: 32%;${!isLightTheme ? `background-color: ${color}` : ``}" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark bg-light-1`} border border-${borderclass} rounded shadow-4">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em;" class="${isStudio ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format("MM/DD h:mmA") : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format("MM/DD h:mmA") : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
                         </div>
                         `;
                 } catch (e) {
@@ -2053,19 +2054,19 @@ function processNowPlaying(response)
                         innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
                         } else {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
                         }
-                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: ${isStudio ? `#ffffff` : `#000000`}; height: 320px;" class="${isStudio ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8">${Meta.topic}</div>`;
+                        innercontent += `<div style="overflow-y: hidden; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; height: 320px;" class="${!isLightTheme ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8">${Meta.topic}</div>`;
                     } else {
                         Slides.slide(`on-air`).displayTime = 10;
                         innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" class="text-danger">${Meta.show}</h2>`;
                         if ('webchat' in Meta && Meta.webchat)
                         {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <span class="text-primary">wwsu1069.org</span></h3>`;
                         } else {
-                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
+                            innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <span class="text-primary">wwsu1069.org</span></h3>`;
                         }
                     }
                     var temp = document.getElementById(`ontheair`);
@@ -2195,7 +2196,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
                     <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
                     </div></div>`;
@@ -2218,7 +2219,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#F44336");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
+                            $("#dj-alert").css("background-color", !isLightTheme ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2239,7 +2240,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
@@ -2261,7 +2262,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#9C27B0");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
+                            $("#dj-alert").css("background-color", !isLightTheme ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2280,7 +2281,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
@@ -2302,7 +2303,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#4CAF50");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
+                            $("#dj-alert").css("background-color", !isLightTheme ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2322,7 +2323,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
@@ -2344,7 +2345,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#F44336");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
+                            $("#dj-alert").css("background-color", !isLightTheme ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2364,7 +2365,7 @@ function processNowPlaying(response)
                         wrapper.style.display = "none";
                     });
                     var temp = Meta.show.split(" - ");
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
@@ -2386,7 +2387,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#9C27B0");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
+                            $("#dj-alert").css("background-color", !isLightTheme ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2405,7 +2406,7 @@ function processNowPlaying(response)
                         lines.clear();
                         wrapper.style.display = "none";
                     });
-                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${isStudio ? `#ffffff` : `#000000`};" id="countdown">
+                    djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
                     countdown = document.getElementById('countdown');
@@ -2427,7 +2428,7 @@ function processNowPlaying(response)
                     {
                         $("#dj-alert").css("background-color", "#4CAF50");
                         setTimeout(function () {
-                            $("#dj-alert").css("background-color", isStudio ? `#000000` : `#ffffff`);
+                            $("#dj-alert").css("background-color", !isLightTheme ? `#000000` : `#ffffff`);
                         }, 250);
                     }
                 }
@@ -2550,7 +2551,7 @@ function processAnnouncements() {
                 slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
                         $('#slide').animateCss('slideOutUp', function () {
                             content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: ${isStudio ? `#ffffff` : `#000000`}; text-align: left;" class="container-full p-2 m-1 scale-content ${isStudio ? `text-white` : `text-dark`}" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: ${isStudio ? `#ffffff` : `#000000`}">${announcement.title}</h1>${announcement.announcement}</div></div>`;
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-align: left;" class="container-full p-2 m-1 scale-content ${!isLightTheme ? `text-white` : `text-dark`}" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
                             var pageWidth, pageHeight;
 
@@ -2635,7 +2636,7 @@ function createAnnouncement(data) {
             transitionOut: `fadeOut`,
             displayTime: data.displayTime || 15,
             fitContent: true,
-            html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${isStudio ? `text-white` : `text-dark`}" id="content-attn-${data.ID}">${data.announcement}</div>`
+            html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${!isLightTheme ? `text-white` : `text-dark`}" id="content-attn-${data.ID}">${data.announcement}</div>`
         });
     }
 }
