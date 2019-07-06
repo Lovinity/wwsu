@@ -804,7 +804,7 @@ function doMeta(response) {
         // If a false was returned for web chatting, then disable it
         if ('webchat' in response && !response.webchat && messageText) {
             blocked = true;
-            messageText.disabled = true;
+            messageText.style.display = "none";
             sendButton.disabled = true;
             sendButtonP.disabled = true;
             if (notificationsStatus && onlineSocketDone)
@@ -947,7 +947,7 @@ function doMeta(response) {
         if (Meta.webchat) {
             blocked = false;
             if (messageText && onlineSocketDone) {
-                messageText.disabled = false;
+                messageText.style.removeProperty("display");
                 sendButton.disabled = false;
                 sendButtonP.disabled = false;
             }
