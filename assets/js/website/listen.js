@@ -36,6 +36,7 @@ var clockTimer;
 var onlineSocketDone = false;
 var device = getUrlParameter(`device`);
 var isMobile = device !== null;
+var notificationsSupported = false;
 var OneSignal;
 
 // Initialize the web player
@@ -453,6 +454,8 @@ function onlineSocket(doOneSignal = false) {
                         autoResubscribe: true,
                     });
 
+                    notificationsSupported = OneSignal.isPushNotificationsSupported();
+
                     OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
                         if (isEnabled) {
                             OneSignal.getUserId().then(function (userId) {
@@ -530,8 +533,7 @@ function onlineSocket(doOneSignal = false) {
     var temp = document.querySelector(`#show-subscribe-button`);
     var temp2 = document.querySelector(`#show-subscribe-instructions`);
     if (temp !== null) {
-        var isPushSupported = OneSignal.isPushNotificationsSupported();
-        if (isPushSupported) {
+        if (notificationsSupported) {
             if (device === null && !isMobile) {
                 temp.innerHTML = "Show Prompt";
                 temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
@@ -853,8 +855,7 @@ function doMeta(response) {
                         temp.style.display = "none";
                     }
                     temp3.innerHTML = Meta.show;
-                    var isPushSupported = OneSignal.isPushNotificationsSupported();
-                    if (isPushSupported) {
+                    if (notificationsSupported) {
                         if (device === null && !isMobile) {
                             temp2.innerHTML = "Show Prompt";
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
@@ -909,8 +910,7 @@ function doMeta(response) {
                         temp.style.display = "none";
                     }
                     temp3.innerHTML = Meta.show;
-                    var isPushSupported = OneSignal.isPushNotificationsSupported();
-                    if (isPushSupported) {
+                    if (notificationsSupported) {
                         if (device === null && !isMobile) {
                             temp2.innerHTML = "Show Prompt";
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
@@ -1537,8 +1537,7 @@ function displayEventInfo(showID) {
                         <p>${item.description}</p>`;
 
     // If a device ID was provided from the WWSU mobile app
-    var isPushSupported = OneSignal.isPushNotificationsSupported();
-    if (!isPushSupported) {
+    if (!notificationsSupported) {
         message += `<hr><p>Sorry, your web browser does not support push notifications at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!</p>`;
     } else if (device !== null) {
         // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
