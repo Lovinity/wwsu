@@ -78,13 +78,13 @@ module.exports = {
             // No song ID specified?
             if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
-                id_subcat = sails.config.custom.subcats.music;
+                query.id_subcat = sails.config.custom.subcats.music;
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
-                    id_subcat = [];
+                    query.id_subcat = [];
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
-                    id_subcat.push(inputs.subcategory);
+                    query.id_subcat.push(inputs.subcategory);
                 if (inputs.category !== 'undefined' && inputs.category !== null && typeof sails.config.custom.subcats[inputs.category] !== `undefined`)
-                    id_subcat = id_subcat.concat(sails.config.custom.subcats[inputs.category]);
+                    query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats[inputs.category]);
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)
                     query.id_genre = inputs.genre;
 
@@ -97,14 +97,6 @@ module.exports = {
                 // No songs returned? send "false" to indicate we are at the end of the list.
                 if (songs.length === 0)
                     return exits.success(false);
-
-                // Because Waterline does not like long subcat WHERE queries, we have to filter manually.
-                // TODO: If Waterline ever fixes this, get rid of this hack. It's UGLY!
-                // Wow, even this doesn't work...
-                /*
-                if (id_subcat.length > 0)
-                    songs = songs.filter((song) => id_subcat.indexOf(song.id_subcat) !== -1);
-                    */
 
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
 
