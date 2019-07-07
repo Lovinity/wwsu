@@ -30,7 +30,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 5,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="p-2 m-2 text-white"><span class="m-3"><i class="fas fa-edit m-1"></i>: Changed office hours.</span> <span class="m-3"><i class="fas fa-ban m-1"></i>: Canceled office hours.</span></p>`
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Changed office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span></p>`
     });
 
     // Assistant Director hours
@@ -45,7 +45,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 5,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="p-2 m-2 text-white"><span class="m-3"><i class="fas fa-edit m-1"></i>: Changed office hours.</span> <span class="m-3"><i class="fas fa-ban m-1"></i>: Canceled office hours.</span></p>`
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Changed office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span></p>`
     });
 
     // Weekly Stats
@@ -855,11 +855,11 @@ function processDirectors(ddb, hdb)
                             var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`;
                             if (event.active === 2)
                             {
-                                endText = `<span class="text-white">${event.startT} - ${event.endT}</span><i class="fas fa-edit m-1"></i>`;
+                                endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`;
                             }
                             if (event.active === -1)
                             {
-                                endText = `<strike><span class="text-white">${event.startT} - ${event.endT}</span></strike><i class="fas fa-ban m-1"></i>`;
+                                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`;
                             }
 
                             // Push the final products into our formatted variable
