@@ -499,7 +499,7 @@ function processStatus(db)
         var doRow = false;
         var secondRow = false;
         globalStatus = 4;
-        statusMarquee = `<div class="row">
+        statusMarquee = `<div class="row bg-dark-1">
                       <div class="col-2 text-warning">
                   	<strong>System</strong>
                       </div>
@@ -512,7 +512,7 @@ function processStatus(db)
                       <div class="col text-white">
                   	<strong>Status</strong>
                       </div>
-                    </div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
+                    </div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`;
 
 
         db.each(function (thestatus) {
@@ -525,7 +525,7 @@ function processStatus(db)
                     } else {
                         secondRow = false;
                     }
-                    statusMarquee += `</div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
+                    statusMarquee += `</div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`;
                     doRow = false;
                 } else {
                     doRow = true;
@@ -852,16 +852,14 @@ function processDirectors(ddb, hdb)
                                 event.startT = moment(event.start).format('MM/DD h:mmA');
                             }
 
-                            var endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>`;
+                            var endText = `<span class="text-white">${event.startT}</span> - <span class="text-white">${event.endT}</span>`;
                             if (event.active === 2)
                             {
-                                bg = `background-color: rgba(255, 255, 0, 0.2);`;
-                                endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span><i class="fas fa-edit m-1"></i>`;
+                                endText = `<span class="text-white">${event.startT}</span> - <span class="text-white">${event.endT}</span><i class="fas fa-edit m-1"></i>`;
                             }
                             if (event.active === -1)
                             {
-                                bg = `background-color: rgba(255, 0, 0, 0.2);`;
-                                endText = `<strike><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span></strike><i class="fas fa-ban m-1"></i>`;
+                                endText = `<strike><span class="text-muted">${event.startT}</span> - <span class="text-muted">${event.endT}</span></strike><i class="fas fa-ban m-1"></i>`;
                             }
 
                             // Push the final products into our formatted variable
@@ -876,7 +874,7 @@ function processDirectors(ddb, hdb)
         // Director hours slide
         var innercontent = document.getElementById('office-hours-directors');
 
-        var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+        var stuff = `<div class="row shadow-2 bg-dark-1">
      <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
@@ -903,15 +901,17 @@ function processDirectors(ddb, hdb)
      </div>
      </div>`;
         var doShade = false;
-        Slides.slide(`hours-directors`).displayTime = 5;
+        var isActive = false;
+        Slides.slide(`hours-directors`).displayTime = 7;
         for (var director in calendar)
         {
             if (calendar.hasOwnProperty(director))
             {
+                isActive = true;
                 var temp = directors[director] || null;
-                Slides.slide(`hours-directors`).displayTime += 2;
-                stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
+                Slides.slide(`hours-directors`).displayTime += 3;
+                stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
@@ -955,13 +955,14 @@ function processDirectors(ddb, hdb)
                 }
             }
         }
-
+        
+        Slides.slide(`hours-directors`).active = isActive;
         innercontent.innerHTML = stuff;
 
         // Assistant hours slide
         var innercontent = document.getElementById('office-hours-assistants');
 
-        var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+        var stuff = `<div class="row shadow-2 bg-dark-1">
      <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
@@ -988,15 +989,17 @@ function processDirectors(ddb, hdb)
      </div>
      </div>`;
         var doShade = false;
-        Slides.slide(`hours-assistants`).displayTime = 5;
+        var isActive = false;
+        Slides.slide(`hours-assistants`).displayTime = 7;
         for (var director in asstcalendar)
         {
             if (asstcalendar.hasOwnProperty(director))
             {
+                isActive = true;
                 var temp = directors[director] || null;
-                Slides.slide(`hours-assistants`).displayTime += 2;
-                stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
+                Slides.slide(`hours-assistants`).displayTime += 3;
+                stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
@@ -1040,6 +1043,8 @@ function processDirectors(ddb, hdb)
                 }
             }
         }
+
+        Slides.slide(`hours-assistants`).active = isActive;
 
         innercontent.innerHTML = stuff;
     } catch (e) {
