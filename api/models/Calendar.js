@@ -218,6 +218,7 @@ module.exports = {
                 var isChanged;
                 var destroyed;
                 var cancelled;
+                var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
                 var calendar = google.calendar({ version: 'v3', auth: auth });
                 var currentdate = moment().startOf('day');
                 var nextWeekDate = moment().startOf('day').add(28, 'days');
@@ -244,7 +245,6 @@ module.exports = {
                     issues.push(`WWSU Events Google Calendar returned no events. Is this normal?`);
                 } else {
                     // Iterate through each returned event from Google Calendar
-                    var eventIds = []; // Used for determining which events in memory no longer exist, and therefore should be destroyed
 
                     var playlists = {};
                     var djevents = {};
