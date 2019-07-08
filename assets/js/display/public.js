@@ -364,8 +364,8 @@ try {
                                 <i style="font-size: 64px;" class="fas fa-sun"></i>
                             </div>
                             <div class="media-body">
-                                <h5 class="mt-0 text-white">Current Weather</h5>
-                                <p class="text-white"><strong><span id="weather-current-summary"></span></strong>; <span id="weather-current-temperature"></span></p>
+                                <h5 class="mt-0 text-white"><strong>Current Weather</strong></h5>
+                                <p class="text-white"><span id="weather-current-summary"></span>; <span id="weather-current-temperature"></span></p>
                             </div>
                         </div>
                     </div>
@@ -373,15 +373,15 @@ try {
                     </div>
                 </div>
 
-                <div class="row shadow-4 bg-dark-2">
+                <div class="row shadow-4 bg-dark-2 m-1 p-1">
                     <div class="col-6">
                         <div class="media">
                             <div class="align-self-center mr-3 text-white" id="weather-1-icon">
                                 <i style="font-size: 64px;" class="fas fa-sun"></i>
                             </div>
                             <div class="media-body">
-                                <h5 class="mt-0 text-white" id="weather-1-label"></h5>
-                                <p class="text-white"><strong><span id="weather-1-summary"></span></strong><br />
+                                <strong><h5 class="mt-0 text-white" id="weather-1-label"></h5></strong>
+                                <p class="text-white"><span id="weather-1-summary"></span><br />
                                 High <span id="weather-1-temperature-high"></span>, Low <span id="weather-1-temperature-low"></span><br />
                                 <span id="weather-1-precip"></span>% chance of <span id="weather-1-precipType"></span></p>
                             </div>
@@ -393,8 +393,8 @@ try {
                                 <i style="font-size: 64px;" class="fas fa-sun"></i>
                             </div>
                             <div class="media-body">
-                                <h5 class="mt-0 text-white" id="weather-2-label"></h5>
-                                <p class="text-white"><strong><span id="weather-2-summary"></span></strong><br />
+                                <strong><h5 class="mt-0 text-white" id="weather-2-label"></h5></strong>
+                                <p class="text-white"><span id="weather-2-summary"></span><br />
                                 High <span id="weather-2-temperature-high"></span>, Low <span id="weather-2-temperature-low"></span><br />
                                 <span id="weather-2-precip"></span>% chance of <span id="weather-2-precipType"></span></p>
                             </div>
@@ -404,8 +404,10 @@ try {
             
             </div>
             
+            <div class="m-1 p-1">
             <h3 style="text-align: center; font-size: 1.5em; color: #ffffff;">EAS / Weather Alerts (Clark, Greene, Montgomery)</h3>
-            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
+            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>
+            </div>`,
     });
 
     //scoreboard
