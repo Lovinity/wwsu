@@ -66,7 +66,7 @@ module.exports = {
                                 });
                         await sails.helpers.onesignal.sendEvent(`Genre: `, inputs.event, `Genre`, attendance.unique);
                     } else {
-                        await Attendance.createRecord(`Genre: Default`);
+                        var attendance = await Attendance.createRecord(`Genre: Default`);
                         await Meta.changeMeta({state: 'automation_on', genre: 'Default'});
                         await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Default rotation started.</strong>'}).fetch()
                                 .tolerate((err) => {
