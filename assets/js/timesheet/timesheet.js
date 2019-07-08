@@ -1,4 +1,4 @@
-/* global moment, io */
+/* global moment, WWSUdb, TAFFY, WWSUreq, $, iziToast */
 
 /*
  * DIRECTORS
@@ -75,11 +75,11 @@ var Directors = [];
 var directorsdb = new WWSUdb(TAFFY());
 
 // Add database event handlers
-directorsdb.setOnInsert((data, db) => {
+directorsdb.setOnInsert((data) => {
     Directors[data.ID] = new Director(data);
 });
 
-directorsdb.setOnUpdate((data, db) => {
+directorsdb.setOnUpdate((data) => {
     if (typeof Directors[data.ID] === `undefined`)
     {
         Directors[data.ID] = new Director(data);
@@ -94,7 +94,7 @@ directorsdb.setOnUpdate((data, db) => {
     }
 });
 
-directorsdb.setOnRemove((data, db) => {
+directorsdb.setOnRemove((data) => {
     if (typeof Directors[data] !== `undefined`)
         {delete Directors[data];}
 });
@@ -190,12 +190,12 @@ var Timesheets = [];
 var timesheetsdb = new WWSUdb(TAFFY());
 
 // Add database event handlers
-timesheetsdb.setOnInsert((data, db) => {
+timesheetsdb.setOnInsert((data) => {
     Timesheets[data.ID] = new Timesheet(data);
     filterDate();
 });
 
-timesheetsdb.setOnUpdate((data, db) => {
+timesheetsdb.setOnUpdate((data) => {
     if (typeof Timesheets[data.ID] === `undefined`)
     {
         Timesheets[data.ID] = new Timesheet(data);
@@ -211,7 +211,7 @@ timesheetsdb.setOnUpdate((data, db) => {
     filterDate();
 });
 
-timesheetsdb.setOnRemove((data, db) => {
+timesheetsdb.setOnRemove((data) => {
     if (typeof Timesheets[data] !== `undefined`)
         {delete Timesheets[data];}
     filterDate();
@@ -225,14 +225,12 @@ timesheetsdb.setOnReplace((db) => {
     filterDate();
 });
 
-var theopts = {};
 var timesheets = [];
 
 // connect the socket
 var socket = io.sails.connect();
 
 // Create request objects
-var hostReq = new WWSUreq(socket, null, 'host', '/auth/host', 'Host');
 var noReq = new WWSUreq(socket, null);
 var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director', 'Administrator Director');
 
@@ -254,7 +252,7 @@ $(document).ready(() => {
                     editClock(parseInt(e.target.id.replace(`timesheet-t-`, ``)));
                 }
             }
-        } catch (err) {
+        } catch (unusedE) {
         }
     });
 
@@ -338,7 +336,7 @@ function editClock(clockID, save = false) {
             adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/edit', data: {ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: selectedOption}}, (resHTML) => {
             });
         } else {
-            adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/remove', data: {ID: clockID}}, (resHTML) => {
+            adminDirectorReq.request({db: directorsdb.db({admin: true}), method: 'POST', url: '/timesheet/remove', data: {ID: clockID}}, () => {
             });
         }
 }
@@ -354,7 +352,7 @@ function filterDate()
             records.innerHTML = ``;
             timesheets = response;
             var hours = {};
-            timesheets.map((record, index) => {
+            timesheets.map((record) => {
                 var newRow = document.getElementById(`options-timesheets-director-${record.name.replace(/\W/g, '')}`);
 
                 // If there is not a row for this director yet, create one
@@ -622,7 +620,6 @@ function filterDate()
                 var scheduledin = record.scheduled_in !== null ? moment(record.scheduled_in) : null;
                 var scheduledout = record.scheduled_out !== null ? moment(record.scheduled_out) : null;
                 var clocknow = moment();
-                var clocknext = moment(thedate.value).add(1, 'weeks');
                 var clockday = moment(clockin !== null ? clockin : scheduledin).format('e');
 
                 /* Determine status.
@@ -635,13 +632,14 @@ function filterDate()
                  * secondary = Canceled scheduled hours
                  */
                 var status = `urgent`;
+                // LINT LIES: variable is used
+                // eslint-disable-next-line no-unused-vars
                 var status2 = `This record is NOT approved, and did not fall within a scheduled office hours time block.`;
                 var inT = ``;
                 var outT = ``;
                 var sInT = ``;
                 var sOutT = ``;
                 var timeline = ``;
-                var divWidth = $(`#options-timesheets-director-${record.name.replace(/\W/g, '')}`).height();
                 var dayValue = (1000 * 60 * 60 * 24);
                 var width = 0;
                 var left = 0;
@@ -898,7 +896,7 @@ function filterDate()
                 {
                     if (hours.hasOwnProperty(key))
                     {
-                        var cell = document.getElementById(`options-timesheets-director-cell-h-${key.replace(/\W/g, '')}`);
+                        cell = document.getElementById(`options-timesheets-director-cell-h-${key.replace(/\W/g, '')}`);
                         if (cell)
                         {
                             cell.innerHTML = `${hours[key].format('h', 1)}`;

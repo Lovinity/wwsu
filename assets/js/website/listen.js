@@ -1,4 +1,4 @@
-/* global io, moment, iziToast, Infinity, jdenticon */
+/* global moment, iziToast, jdenticon, TAFFY, $, Quill, jQuery */
 
 // Define hexrgb constants
 var hexChars = 'a-f\\d';
@@ -27,9 +27,10 @@ var shouldScroll = false;
 var skipIt = -1;
 var blocked = false;
 var firstTime = true;
-var nicknameTimer = null;
 var Calendar = TAFFY();
 var Subscriptions = TAFFY();
+// LINT LIES: this variable is used.
+// eslint-disable-next-line no-unused-vars
 var calendar = [];
 var likedTracks = [];
 var clockTimer;
@@ -136,12 +137,12 @@ function quillGetHTML(inputDelta) {
 
 // Set up schedule calendar
 var focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]';
-var focusedElementBeforeModal;
-var pwidth = null;
+// Used in html
+// eslint-disable-next-line no-unused-vars
 function trapEscapeKey(obj, evt) {
 
     // if escape pressed
-    if (evt.which == 27) {
+    if (evt.which === 27) {
 
         // get list of all children elements in given object
         var o = obj.find('*');
@@ -156,10 +157,12 @@ function trapEscapeKey(obj, evt) {
     }
 
 }
+// Used in html
+// eslint-disable-next-line no-unused-vars
 function trapTabKey(obj, evt) {
 
     // if tab or shift-tab pressed
-    if (evt.which == 9) {
+    if (evt.which === 9) {
 
         // get list of all children elements in given object
         var o = obj.find('*');
@@ -183,7 +186,7 @@ function trapTabKey(obj, evt) {
         if (evt.shiftKey) {
             //back tab
             // if focused on first item and user preses back-tab, go to the last focusable item
-            if (focusedItemIndex == 0) {
+            if (focusedItemIndex === 0) {
                 focusableItems.get(numberOfFocusableItems - 1).focus();
                 evt.preventDefault();
             }
@@ -191,7 +194,7 @@ function trapTabKey(obj, evt) {
         } else {
             //forward tab
             // if focused on the last item and user preses tab, go to the first focusable item
-            if (focusedItemIndex == numberOfFocusableItems - 1) {
+            if (focusedItemIndex === numberOfFocusableItems - 1) {
                 focusableItems.get(0).focus();
                 evt.preventDefault();
             }
@@ -200,15 +203,21 @@ function trapTabKey(obj, evt) {
 
 }
 
+// Used in html
+// eslint-disable-next-line no-unused-vars
 function setInitialFocusModal(obj) {
     // get list of all children elements in given object
     var o = obj.find('*');
 
     // set focus to first focusable item
+    // LINT LIES: variable is used
+    // eslint-disable-next-line no-unused-vars
     var focusableItems;
     focusableItems = o.filter(focusableElementsString).filter(':visible').first().focus();
-
 }
+
+// Used in html
+// eslint-disable-next-line no-unused-vars
 function setFocusToFirstItemInModal(obj) {
     // get list of all children elements in given object
     var o = obj.find('*');
@@ -230,7 +239,7 @@ if (document.querySelector('#song-data'))
                     }
                 }
             }
-        } catch (err) {
+        } catch (unusedE) {
 
         }
     });}
@@ -243,13 +252,13 @@ if (document.querySelector('#track-info-request'))
                     requestTrack(parseInt($('#track-info-ID').html()));
                 }
             }
-        } catch (err) {
+        } catch (unusedE) {
 
         }
     });}
 
 if (document.querySelector('#filter-submit'))
-    {document.querySelector(`#filter-submit`).addEventListener('click', (e) => {
+    {document.querySelector(`#filter-submit`).addEventListener('click', () => {
         loadTracks(0);
     });}
 
@@ -263,7 +272,7 @@ function waitFor(check, callback, count = 0) {
         } else {
         }
     } else {
-        callback();
+        return callback();
     }
 }
 
@@ -287,13 +296,13 @@ waitFor(() => {
 waitFor(() => {
     return (document.querySelector(`.ql-bold`) !== null);
 }, () => {
-    $('.ql-bold').each(function(i) { $(this).attr('value','bold'); });
-    $('.ql-italic').each(function(i) { $(this).attr('value','italics'); });
-    $('.ql-underline').each(function(i) { $(this).attr('value','underline'); });
-    $('.ql-strike').each(function(i) { $(this).attr('value','strike-through'); });
-    $('.ql-color').each(function(i) { $(this).attr('title','Change the color of the selected text'); });
-    $('.ql-link').each(function(i) { $(this).attr('value','hyperlink'); });
-    $('.ql-clean').each(function(i) { $(this).attr('value','remove formatting'); });
+    $('.ql-bold').each(function() { $(this).attr('value','bold'); });
+    $('.ql-italic').each(function() { $(this).attr('value','italics'); });
+    $('.ql-underline').each(function() { $(this).attr('value','underline'); });
+    $('.ql-strike').each(function() { $(this).attr('value','strike-through'); });
+    $('.ql-color').each(function() { $(this).attr('title','Change the color of the selected text'); });
+    $('.ql-link').each(function() { $(this).attr('value','hyperlink'); });
+    $('.ql-clean').each(function() { $(this).attr('value','remove formatting'); });
 });
 
 function escapeHTML(str) {
@@ -302,6 +311,8 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
+// Used in html
+// eslint-disable-next-line no-unused-vars
 function closeModal() {
     if (document.querySelector('#trackModal'))
         {$('#trackModal').iziModal('close');}
@@ -345,7 +356,7 @@ waitFor(() => {
             });
             io.socket._raw.io._reconnection = true;
             io.socket._raw.io._reconnectionAttempts = Infinity;
-        } catch (e) {
+        } catch (unusedE) {
         }
     });
 
@@ -376,7 +387,7 @@ waitFor(() => {
                     }
                 }
             }
-        } catch (e) {
+        } catch (unusedE) {
         }
     });
 
@@ -386,7 +397,7 @@ waitFor(() => {
             if (announcementIDs.indexOf(data.ID) === -1) {
                 addAnnouncement(data);
             }
-        } catch (e) {
+        } catch (unusedE) {
         }
     });
 
@@ -437,7 +448,7 @@ function doSockets(firsttime = false) {
 }
 
 function onlineSocket(doOneSignal = false) {
-    io.socket.post('/recipients/add-web', { device: device }, function serverResponded(body, JWR) {
+    io.socket.post('/recipients/add-web', { device: device }, function serverResponded(body) {
         try {
             if (nickname) {
                 nickname.value = body.label;
@@ -495,18 +506,18 @@ function onlineSocket(doOneSignal = false) {
                     });
                 });
             }
-        } catch (e) {
+        } catch (unusedE) {
             setTimeout(onlineSocket, 10000);
         }
     });
 
     if (device && device !== null) {
-        io.socket.post('/subscribers/get-web', { device: device }, function serverResponded(body, JWR) {
+        io.socket.post('/subscribers/get-web', { device: device }, function serverResponded(body) {
             try {
                 Subscriptions = TAFFY();
                 Subscriptions.insert(body);
                 doMeta({ state: Meta.state });
-            } catch (e) {
+            } catch (unusedE) {
                 setTimeout(metaSocket, 10000);
             }
         });
@@ -521,7 +532,7 @@ function onlineSocket(doOneSignal = false) {
         }
     }
 
-    var temp = document.querySelector(`#chat-subscribe`);
+    temp = document.querySelector(`#chat-subscribe`);
     if (temp !== null) {
         if (device === null && !isMobile) {
             temp.style.display = 'block';
@@ -530,7 +541,7 @@ function onlineSocket(doOneSignal = false) {
         }
     }
 
-    var temp = document.querySelector(`#show-subscribe-button`);
+    temp = document.querySelector(`#show-subscribe-button`);
     var temp2 = document.querySelector(`#show-subscribe-instructions`);
     if (temp !== null) {
         if (notificationsSupported) {
@@ -567,21 +578,21 @@ function onlineSocket(doOneSignal = false) {
 }
 
 function messagesSocket() {
-    io.socket.post('/messages/get-web', {}, function serverResponded(body, JWR) {
+    io.socket.post('/messages/get-web', {}, function serverResponded(body) {
         //console.log(body);
         try {
             body
                 .filter(message => messageIDs.indexOf(message.ID) === -1)
                 .map(message => addMessage(message, firstTime));
             firstTime = false;
-        } catch (e) {
+        } catch (unusedE) {
             setTimeout(messagesSocket, 10000);
         }
     });
 }
 
 function metaSocket() {
-    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
+    io.socket.post('/meta/get', {}, function serverResponded(body) {
         //console.log(body);
         try {
             for (var key in body) {
@@ -590,41 +601,41 @@ function metaSocket() {
                 }
             }
             doMeta(body);
-        } catch (e) {
+        } catch (unusedE) {
             setTimeout(metaSocket, 10000);
         }
     });
 }
 
 function tracksLikedSocket() {
-    io.socket.post('/songs/get-liked', {}, function serverResponded(body, JWR) {
+    io.socket.post('/songs/get-liked', {}, function serverResponded(body) {
         try {
             likedTracks = body;
             doMeta({ history: Meta.history });
-        } catch (e) {
+        } catch (unusedE) {
             setTimeout(tracksLikedSocket, 10000);
         }
     });
 }
 
 function calendarSocket() {
-    io.socket.post('/calendar/get', {}, function serverResponded(body, JWR) {
+    io.socket.post('/calendar/get', {}, function serverResponded(body) {
         try {
             processCalendar(body, true);
-        } catch (e) {
+        } catch (unusedE) {
             setTimeout(calendarSocket, 10000);
         }
     });
 }
 
 function announcementsSocket() {
-    io.socket.post('/announcements/get', { type: 'website' }, function serverResponded(body, JWR) {
+    io.socket.post('/announcements/get', { type: 'website' }, function serverResponded(body) {
         //console.log(body);
         try {
             body
                 .filter(announcement => announcementIDs.indexOf(announcement.ID) === -1)
                 .map(announcement => addAnnouncement(announcement));
-        } catch (e) {
+        } catch (unusedE) {
             setTimeout(announcementsSocket, 10000);
         }
     });
@@ -633,7 +644,7 @@ function announcementsSocket() {
 // Whenever the nickname is changed, (re)set a 5 second timeout. After 5 seconds, if nickname is not changed, send the new nickname to the server for all clients to see.
 if (nickname)
     {nickname.addEventListener('change', () => {
-        io.socket.post('/recipients/edit-web', { label: nickname.value }, function serverResponded(body, JWR) {
+        io.socket.post('/recipients/edit-web', { label: nickname.value }, function serverResponded() {
         });
     });}
 
@@ -768,6 +779,11 @@ function addMessage(data, firsttime = false) {
 // Process meta info. Pass new meta received as response object.
 function doMeta(response) {
     try {
+        var temp;
+        var temp2;
+        var temp3;
+        var temp4;
+        var subscribed;
         if (notificationsBox)
             {shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;}
 
@@ -818,7 +834,7 @@ function doMeta(response) {
         if ('state' in response) {
             if (response.state.includes('automation_') || Meta.state === 'unknown') {
                 if (automationpost !== 'automation') {
-                    var temp = document.getElementById('msg-state');
+                    temp = document.getElementById('msg-state');
                     if (temp)
                         {temp.remove();}
                     if (notificationsStatus && onlineSocketDone)
@@ -828,12 +844,12 @@ function doMeta(response) {
                     }
                     automationpost = 'automation';
                 }
-                var temp = document.querySelector(`#show-subscribe`);
+                temp = document.querySelector(`#show-subscribe`);
                 if (temp !== null)
                     {temp.style.display = 'none';}
             } else if (response.state === 'live_prerecord') {
                 if (automationpost !== response.live) {
-                    var temp = document.getElementById('msg-state');
+                    temp = document.getElementById('msg-state');
                     if (temp)
                         {temp.remove();}
                     if (notificationsStatus && onlineSocketDone)
@@ -843,12 +859,12 @@ function doMeta(response) {
                         $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);
                     }
                 }
-                var temp = document.querySelector(`#show-subscribe`);
-                var temp2 = document.querySelector(`#show-subscribe-button`);
-                var temp3 = document.querySelector(`#show-subscribe-name`);
-                var temp4 = document.querySelector(`#show-subscribe-instructions`);
+                temp = document.querySelector(`#show-subscribe`);
+                temp2 = document.querySelector(`#show-subscribe-button`);
+                temp3 = document.querySelector(`#show-subscribe-name`);
+                temp4 = document.querySelector(`#show-subscribe-instructions`);
                 if (temp !== null) {
-                    var subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length;
+                    subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length;
                     if (subscribed === 0) {
                         temp.style.display = 'block';
                     } else {
@@ -888,7 +904,7 @@ function doMeta(response) {
                 }
             } else {
                 if (automationpost !== response.live) {
-                    var temp = document.getElementById('msg-state');
+                    temp = document.getElementById('msg-state');
                     if (temp)
                         {temp.remove();}
                     if (notificationsStatus && onlineSocketDone)
@@ -898,12 +914,12 @@ function doMeta(response) {
                         $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);
                     }
                 }
-                var temp = document.querySelector(`#show-subscribe`);
-                var temp2 = document.querySelector(`#show-subscribe-button`);
-                var temp3 = document.querySelector(`#show-subscribe-name`);
-                var temp4 = document.querySelector(`#show-subscribe-instructions`);
+                temp = document.querySelector(`#show-subscribe`);
+                temp2 = document.querySelector(`#show-subscribe-button`);
+                temp3 = document.querySelector(`#show-subscribe-name`);
+                temp4 = document.querySelector(`#show-subscribe-instructions`);
                 if (temp !== null) {
-                    var subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length;
+                    subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length;
                     if (subscribed === 0) {
                         temp.style.display = 'block';
                     } else {
@@ -951,7 +967,7 @@ function doMeta(response) {
                 sendButton.disabled = false;
                 sendButtonP.disabled = false;
             }
-            var temp = document.getElementById('msg-disabled');
+            temp = document.getElementById('msg-disabled');
             if (temp)
                 {temp.remove();}
         }
@@ -984,11 +1000,13 @@ function clockTick() {
 }
 
 // Send a message through the system
+// USED in html
+// eslint-disable-next-line no-unused-vars
 function sendMessage(privateMsg) {
     if (blocked || !nickname)
         {return null;}
     var message = quillGetHTML(quill.getContents());
-    io.socket.post('/messages/send-web', { message: message, nickname: nickname.value, private: privateMsg }, function serverResponded(response, JWR) {
+    io.socket.post('/messages/send-web', { message: message, nickname: nickname.value, private: privateMsg }, function serverResponded(response) {
         try {
             //response = JSON.parse(response);
             if (response !== 'OK') {
@@ -999,7 +1017,7 @@ function sendMessage(privateMsg) {
                 return null;
             }
             quill.setText('');
-        } catch (e) {
+        } catch (unusedE) {
             if (notificationsBox)
                 {notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;}
             if (document.querySelector('#messages'))
@@ -1009,6 +1027,8 @@ function sendMessage(privateMsg) {
 }
 
 // Used to empty the chat box
+// USED in html
+// eslint-disable-next-line no-unused-vars
 function clearChat() {
     if (notificationsBox)
         {notificationsBox.innerHTML = '';}
@@ -1017,7 +1037,7 @@ function clearChat() {
 // Used to get info about a specific track to display as an overlay box
 function loadTrackInfo(trackID) {
     console.log(`getting ${trackID}`);
-    io.socket.post('/songs/get', { ID: trackID }, function serverResponded(response, JWR) {
+    io.socket.post('/songs/get', { ID: trackID }, function serverResponded(response) {
         try {
             //response = JSON.parse(response);
             console.log(`got ${trackID}`);
@@ -1073,7 +1093,7 @@ function requestTrack(trackID) {
     var data = { ID: trackID, name: requestName.value, message: requestMessage.value };
     if (device !== null)
         {data.device = device;}
-    io.socket.post('/requests/place', data, function serverResponded(response, JWR) {
+    io.socket.post('/requests/place', data, function serverResponded(response) {
         try {
             if (response.requested) {
                 iziToast.show({
@@ -1100,7 +1120,7 @@ function requestTrack(trackID) {
             }
             if (document.querySelector('#trackModal'))
                 {$('#trackModal').iziModal('close');}
-        } catch (e) {
+        } catch (unusedE) {
             iziToast.show({
                 title: 'Request system failed',
                 message: 'Failed to request this track. Please try again later.',
@@ -1129,7 +1149,7 @@ function loadTracks(skip = 0) {
         {query.genre = parseInt(selectedOption);}
     if (skip === 0)
         {songData.innerHTML = ``;}
-    io.socket.post('/songs/get', query, function serverResponded(response, JWR) {
+    io.socket.post('/songs/get', query, function serverResponded(response) {
         try {
             //response = JSON.parse(response);
             if (response === 'false' || !response)
@@ -1147,7 +1167,7 @@ function loadTracks(skip = 0) {
             } else if (response.length === 0) {
                 loadTracks(skip + 50);
             }
-        } catch (e) {
+        } catch (unusedE) {
             iziToast.show({
                 title: 'Request system failed',
                 message: 'Error loading tracks. Please try again later.',
@@ -1164,7 +1184,7 @@ function loadTracks(skip = 0) {
 
 function loadGenres() {
     if (document.getElementById('filter-genre')) {
-        io.socket.post('/songs/get-genres', {}, function serverResponded(response, JWR) {
+        io.socket.post('/songs/get-genres', {}, function serverResponded(response) {
             try {
                 document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
                 var x = document.getElementById('filter-genre');
@@ -1174,7 +1194,7 @@ function loadGenres() {
                     c.text = subcat.name;
                     x.options.add(c, 1);
                 });
-            } catch (e) {
+            } catch (unusedE) {
                 iziToast.show({
                     title: 'Request system failed',
                     message: 'Error loading genres. Please try again later.',
@@ -1190,8 +1210,10 @@ function loadGenres() {
     }
 }
 
+// Used in html
+// eslint-disable-next-line no-unused-vars
 function likeTrack(trackID) {
-    io.socket.post('/songs/like', { trackID: trackID }, function serverResponded(response, JWR) {
+    io.socket.post('/songs/like', { trackID: trackID }, function serverResponded(response) {
         try {
             if (response !== 'OK') {
                 iziToast.show({
@@ -1232,7 +1254,7 @@ function likeTrack(trackID) {
                     timeout: 15000
                 });
             }
-        } catch (e) {
+        } catch (unusedE) {
             iziToast.show({
                 title: 'Track liking failed',
                 message: 'Error liking the track. Internal error.',
@@ -1330,7 +1352,7 @@ function updateCalendar() {
                 if (a.ID > b.ID)
                     {return 1;}
                 return 0;
-            } catch (e) {
+            } catch (unusedE) {
             }
         };
 
@@ -1339,6 +1361,12 @@ function updateCalendar() {
             .filter(event => (event.title.startsWith('Show:') || event.title.startsWith('Genre:') || event.title.startsWith('Playlist:') || event.title.startsWith('Prerecord:') || event.title.startsWith('Remote:') || event.title.startsWith('Sports:') || event.title.startsWith('Podcast:')) && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
             .map(event => {
                 try {
+                    var line1;
+                    var line2;
+                    var stripped;
+                    var eventType;
+                    var image;
+                    var temp;
                     var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
                     if (event.active < 1)
                         {finalColor = hexRgb('#161616');}
@@ -1353,75 +1381,75 @@ function updateCalendar() {
                         badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`;
                     }
                     if (event.title.startsWith('Show: ')) {
-                        var stripped = event.title.replace('Show: ', '');
-                        var eventType = 'SHOW';
-                        var image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(' - ');
+                        stripped = event.title.replace('Show: ', '');
+                        eventType = 'SHOW';
+                        image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`;
+                        temp = stripped.split(' - ');
                         if (temp.length === 2) {
-                            var line1 = temp[0];
-                            var line2 = temp[1];
+                            line1 = temp[0];
+                            line2 = temp[1];
                         } else {
-                            var line1 = 'Unknown DJ';
-                            var line2 = temp;
+                            line1 = 'Unknown DJ';
+                            line2 = temp;
                         }
                     } else if (event.title.startsWith('Prerecord: ')) {
-                        var stripped = event.title.replace('Prerecord: ', '');
-                        var eventType = 'PRERECORD';
-                        var image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(' - ');
+                        stripped = event.title.replace('Prerecord: ', '');
+                        eventType = 'PRERECORD';
+                        image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`;
+                        temp = stripped.split(' - ');
                         if (temp.length === 2) {
-                            var line1 = temp[0];
-                            var line2 = temp[1];
+                            line1 = temp[0];
+                            line2 = temp[1];
                         } else {
-                            var line1 = 'Unknown DJ';
-                            var line2 = temp;
+                            line1 = 'Unknown DJ';
+                            line2 = temp;
                         }
                     } else if (event.title.startsWith('Remote: ')) {
-                        var stripped = event.title.replace('Remote: ', '');
-                        var eventType = 'REMOTE';
-                        var image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(' - ');
+                        stripped = event.title.replace('Remote: ', '');
+                        eventType = 'REMOTE';
+                        image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`;
+                        temp = stripped.split(' - ');
                         if (temp.length === 2) {
-                            var line1 = temp[0];
-                            var line2 = temp[1];
+                            line1 = temp[0];
+                            line2 = temp[1];
                         } else {
-                            var line1 = 'Unknown Host';
-                            var line2 = temp;
+                            line1 = 'Unknown Host';
+                            line2 = temp;
                         }
                     } else if (event.title.startsWith('Sports: ')) {
-                        var stripped = event.title.replace('Sports: ', '');
-                        var eventType = 'SPORTS';
-                        var line1 = 'Raider Sports';
-                        var line2 = stripped;
-                        var image = `<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>`;
+                        stripped = event.title.replace('Sports: ', '');
+                        eventType = 'SPORTS';
+                        line1 = 'Raider Sports';
+                        line2 = stripped;
+                        image = `<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>`;
                     } else if (event.title.startsWith('Playlist: ')) {
-                        var stripped = event.title.replace('Playlist: ', '');
-                        var eventType = event.active > -1 ? 'PLAYLIST' : `CANCELED`;
-                        var image = `<i class="fas fa-list text-info" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(' - ');
+                        stripped = event.title.replace('Playlist: ', '');
+                        eventType = event.active > -1 ? 'PLAYLIST' : `CANCELED`;
+                        image = `<i class="fas fa-list text-info" style="font-size: 96px;"></i>`;
+                        temp = stripped.split(' - ');
                         if (temp.length === 2) {
-                            var line1 = temp[0];
-                            var line2 = temp[1];
+                            line1 = temp[0];
+                            line2 = temp[1];
                         } else {
-                            var line1 = '';
-                            var line2 = temp;
+                            line1 = '';
+                            line2 = temp;
                         }
                     } else if (event.title.startsWith('Genre: ')) {
-                        var stripped = event.title.replace('Genre: ', '');
-                        var eventType = 'GENRE';
-                        var line1 = '';
-                        var line2 = stripped;
-                        var image = `<i class="fas fa-music text-info" style="font-size: 96px;"></i>`;
+                        stripped = event.title.replace('Genre: ', '');
+                        eventType = 'GENRE';
+                        line1 = '';
+                        line2 = stripped;
+                        image = `<i class="fas fa-music text-info" style="font-size: 96px;"></i>`;
                     } else {
-                        var eventType = 'EVENT';
-                        var line1 = '';
-                        var line2 = event.title;
-                        var image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
+                        eventType = 'EVENT';
+                        line1 = '';
+                        line2 = event.title;
+                        image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
                     }
                     caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${event.active < 1 ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
-             <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="text-dark" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format('hh:mm A')} - ${moment(event.end).format('hh:mm A')}</span></div>`;
+             <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em;">${line1}</span><br><span class="text-dark" style="font-size: 1.25em;">${line2}</span><br /><span class="text-dark" style="font-size: 1em;">${moment(event.start).format('hh:mm A')} - ${moment(event.end).format('hh:mm A')}</span></div>`;
                 } catch (e) {
                     console.error(e);
                     iziToast.show({
@@ -1480,54 +1508,8 @@ function hexRgb(hex, options = {}) {
     }
 }
 
-function rgbHex(red, green, blue, alpha) {
-    try {
-        const isPercent = (red + (alpha || '')).toString().includes('%');
-
-        if (typeof red === 'string') {
-            const res = red.match(/(0?\.?\d{1,3})%?\b/g).map(Number);
-            // TODO: use destructuring when targeting Node.js 6
-            red = res[0];
-            green = res[1];
-            blue = res[2];
-            alpha = res[3];
-        } else if (alpha !== undefined) {
-            alpha = parseFloat(alpha);
-        }
-
-        if (typeof red !== 'number' ||
-            typeof green !== 'number' ||
-            typeof blue !== 'number' ||
-            red > 255 ||
-            green > 255 ||
-            blue > 255) {
-            throw new TypeError('Expected three numbers below 256');
-        }
-
-        if (typeof alpha === 'number') {
-            if (!isPercent && alpha >= 0 && alpha <= 1) {
-                alpha = Math.round(255 * alpha);
-            } else if (isPercent && alpha >= 0 && alpha <= 100) {
-                alpha = Math.round(255 * alpha / 100);
-            } else {
-                throw new TypeError(`Expected alpha value (${alpha}) as a fraction or percentage`);
-            }
-            alpha = (alpha | 1 << 8).toString(16).slice(1);
-        } else {
-            alpha = '';
-        }
-
-        return ((blue | green << 8 | red << 16) | 1 << 24).toString(16).slice(1) + alpha;
-    } catch (e) {
-        console.error(e);
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred during rgbHex.'
-        });
-    }
-}
-
-
+// Used in HTML
+// eslint-disable-next-line no-unused-vars
 function displayEventInfo(showID) {
     var item = Calendar({ ID: parseInt(showID) }).first();
     var buttons = [];
@@ -1625,7 +1607,7 @@ function getUrlParameter(name) {
 
 
 function subscribe(type, subtype) {
-    io.socket.post('/subscribers/add', { device: device, type: type, subtype: subtype }, function serverResponded(response, JWR) {
+    io.socket.post('/subscribers/add', { device: device, type: type, subtype: subtype }, function serverResponded(response) {
         try {
             if (response !== 'OK') {
                 iziToast.show({
@@ -1654,7 +1636,7 @@ function subscribe(type, subtype) {
                 if (temp !== null && (subtype === Meta.show || subtype === `Sports: ${Meta.show}`))
                     {temp.style.display = 'none';}
             }
-        } catch (e) {
+        } catch (unusedE) {
             iziToast.show({
                 title: 'Subscription failed',
                 message: 'Unable to subscribe you to this event at this time. Please try again later.',
@@ -1670,7 +1652,7 @@ function subscribe(type, subtype) {
 }
 
 function unsubscribe(ID, event) {
-    io.socket.post('/subscribers/remove', { device: device, type: `calendar-once`, subtype: ID }, function serverResponded(response, JWR) {
+    io.socket.post('/subscribers/remove', { device: device, type: `calendar-once`, subtype: ID }, function serverResponded(response) {
         try {
             if (response !== 'OK') {
                 iziToast.show({
@@ -1684,7 +1666,7 @@ function unsubscribe(ID, event) {
                     timeout: 10000
                 });
             } else {
-                io.socket.post('/subscribers/remove', { device: device, type: `calendar-all`, subtype: event }, function serverResponded(response, JWR) {
+                io.socket.post('/subscribers/remove', { device: device, type: `calendar-all`, subtype: event }, function serverResponded(response) {
                     try {
                         if (response !== 'OK') {
                             iziToast.show({
@@ -1711,7 +1693,7 @@ function unsubscribe(ID, event) {
                             Subscriptions({ type: `calendar-once`, subtype: ID }).remove();
                             Subscriptions({ type: `calendar-all`, subtype: event }).remove();
                         }
-                    } catch (e) {
+                    } catch (unusedE) {
                         iziToast.show({
                             title: 'Failed to unsubscribe',
                             message: 'Unable to un-subscribe you to this event at this time. Please try again later.',
@@ -1725,7 +1707,7 @@ function unsubscribe(ID, event) {
                     }
                 });
             }
-        } catch (e) {
+        } catch (unusedE) {
             iziToast.show({
                 title: 'Failed to unsubscribe',
                 message: 'Unable to un-subscribe you to this event at this time. Please try again later.',

@@ -405,8 +405,6 @@ try {
         window.location.reload(true);
     }, 15000);
 
-    var afterSlide = function () {};
-
     // Define default settings for iziToast (overlaying messages)
     iziToast.settings({
         titleColor: '#000000',
@@ -499,65 +497,6 @@ $.fn.extend({
     }
 });
 
-// Define functions for the analog clock
-function computeTimePositions($h, $m, $s) {
-    console.log(`Compute Time`);
-    var now = new Date();
-            var h = now.getHours();
-            var m = now.getMinutes();
-            var s = now.getSeconds();
-            var ms = now.getMilliseconds();
-            var degS; var degM; var degH;
-
-    degS = (s * 6) + (6 / 1000 * ms);
-    degM = (m * 6) + (6 / 60 * s) + (6 / (60 * 1000) * ms);
-    degH = (h * 30) + (30 / 60 * m);
-
-    $s.css({'transform': 'rotate(' + degS + 'deg)'});
-    $m.css({'transform': 'rotate(' + degM + 'deg)'});
-    $h.css({'transform': 'rotate(' + degH + 'deg)'});
-
-    requestAnimationFrame(() => {
-        computeTimePositions($h, $m, $s);
-    });
-}
-
-function setUpFace() {
-    for (var x = 1; x <= 60; x += 1) {
-        addTick(x);
-    }
-
-    function addTick(n) {
-        var tickClass = 'smallTick';
-                var tickBox = $('<div class="faceBox"></div>');
-                var tick = $('<div></div>');
-                var tickNum = '';
-
-        if (n % 5 === 0) {
-            tickClass = (n % 15 === 0) ? 'largeTick' : 'mediumTick';
-            tickNum = $('<div class="tickNum"></div>').text(n / 5).css({'transform': 'rotate(-' + (n * 6) + 'deg)'});
-            if (n >= 50) {
-                tickNum.css({'left': '-0.5em'});
-            }
-        }
-
-
-        tickBox.append(tick.addClass(tickClass)).css({'transform': 'rotate(' + (n * 6) + 'deg)'});
-        tickBox.append(tickNum);
-
-        $('#clock').append(tickBox);
-    }
-}
-
-function setSize() {
-    var b = $(this); //html, body
-            var w = b.width();
-            var x = Math.floor(w / 30) - 1;
-            var px = (x > 25 ? 26 : x) + 'px';
-
-    $('#clock').css({'font-size': px});
-}
-
 // Process Director data when received by updating local database and marking if a director is present.
 function processDirectors(db)
 {
@@ -639,7 +578,11 @@ function processCalendar(db)
                         for (var i = 0; i < 7; i++) {
                             var looptime = moment(Meta.time).startOf('day').add(i, 'days');
                             var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
+                            // LINT LIES: this variable is used!
+                            // eslint-disable-next-line no-unused-vars
                             var start2;
+                            // LINT LIES: This variable is used!
+                            // eslint-disable-next-line no-unused-vars
                             var end2;
                             if (moment(event.start).isBefore(looptime))
                             {
@@ -703,6 +646,12 @@ function processCalendar(db)
                 calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].map((dodo, index) => {
                     try {
                         var color = hexRgb(dodo.color);
+                        var line1;
+                        var line2;
+                        var stripped;
+                        var eventType;
+                        var image;
+                        var temp;
                         if (dodo.active < 1)
                             {color = hexRgb(`#161616`);}
                         color.red = Math.round(color.red / 1.5);
@@ -719,58 +668,58 @@ function processCalendar(db)
                         }
                         if (dodo.title.startsWith('Show: '))
                         {
-                            var stripped = dodo.title.replace('Show: ', '');
-                            var eventType = 'SHOW';
-                            var image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
-                            var temp = stripped.split(' - ');
+                            stripped = dodo.title.replace('Show: ', '');
+                            eventType = 'SHOW';
+                            image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
+                            temp = stripped.split(' - ');
                             if (temp.length === 2)
                             {
-                                var line1 = temp[0];
-                                var line2 = temp[1];
+                                line1 = temp[0];
+                                line2 = temp[1];
                             } else {
-                                var line1 = 'Unknown DJ';
-                                var line2 = temp;
+                                line1 = 'Unknown DJ';
+                                line2 = temp;
                             }
                         } else if (dodo.title.startsWith('Prerecord: '))
                         {
-                            var stripped = dodo.title.replace('Prerecord: ', '');
-                            var eventType = 'PRERECORD';
-                            var image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
-                            var temp = stripped.split(' - ');
+                            stripped = dodo.title.replace('Prerecord: ', '');
+                            eventType = 'PRERECORD';
+                            image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
+                            temp = stripped.split(' - ');
                             if (temp.length === 2)
                             {
-                                var line1 = temp[0];
-                                var line2 = temp[1];
+                                line1 = temp[0];
+                                line2 = temp[1];
                             } else {
-                                var line1 = 'Unknown DJ';
-                                var line2 = temp;
+                                line1 = 'Unknown DJ';
+                                line2 = temp;
                             }
                         } else if (dodo.title.startsWith('Remote: '))
                         {
-                            var stripped = dodo.title.replace('Remote: ', '');
-                            var eventType = 'REMOTE';
-                            var image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 96px;"></i>`;
-                            var temp = stripped.split(' - ');
+                            stripped = dodo.title.replace('Remote: ', '');
+                            eventType = 'REMOTE';
+                            image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 96px;"></i>`;
+                            temp = stripped.split(' - ');
                             if (temp.length === 2)
                             {
-                                var line1 = temp[0];
-                                var line2 = temp[1];
+                                line1 = temp[0];
+                                line2 = temp[1];
                             } else {
-                                var line1 = 'Unknown Host';
-                                var line2 = temp;
+                                line1 = 'Unknown Host';
+                                line2 = temp;
                             }
                         } else if (dodo.title.startsWith('Sports: '))
                         {
-                            var stripped = dodo.title.replace('Sports: ', '');
-                            var eventType = 'SPORTS';
-                            var line1 = 'Raider Sports';
-                            var line2 = stripped;
-                            var image = `<i class="fas fa-trophy ${!isLightTheme ? `text-white` : `text-success`}" style="font-size: 96px;"></i>`;
+                            stripped = dodo.title.replace('Sports: ', '');
+                            eventType = 'SPORTS';
+                            line1 = 'Raider Sports';
+                            line2 = stripped;
+                            image = `<i class="fas fa-trophy ${!isLightTheme ? `text-white` : `text-success`}" style="font-size: 96px;"></i>`;
                         } else {
-                            var eventType = 'EVENT';
-                            var line1 = '';
-                            var line2 = dodo.title;
-                            var image = `<i class="fas fa-calendar ${!isLightTheme ? `text-white` : `text-secondary`}" style="font-size: 96px;"></i>`;
+                            eventType = 'EVENT';
+                            line1 = '';
+                            line2 = dodo.title;
+                            image = `<i class="fas fa-calendar ${!isLightTheme ? `text-white` : `text-secondary`}" style="font-size: 96px;"></i>`;
                         }
                         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
                         innercontent.innerHTML += `<div style="width: 190px; position: relative;${!isLightTheme ? ` background-color: ${color};` : dodo.active ? `` : ` background-color: #969696;`}" class="m-2 text-dark rounded shadow-4${!isLightTheme || !dodo.active ? `` : ` bg-light-1`}">
@@ -796,6 +745,7 @@ function processCalendar(db)
 
         // Process days 2-4
         var temp = document.getElementById(`events-2-4`);
+        var temp2;
         temp.innerHTML = `<table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events-2-4-table">
              <thead>
              <tr style="border-style: none;">
@@ -807,7 +757,7 @@ function processCalendar(db)
              <tbody id="events-2-4-table-body">
              </tbody>
              </table>`;
-        var innercontent = document.getElementById('events-2-4-table-body');
+        innercontent = document.getElementById('events-2-4-table-body');
         var displayTime = 7;
         if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')] !== 'undefined')
         {
@@ -817,6 +767,7 @@ function processCalendar(db)
                 calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].map((dodo, index) => {
                     try {
                         var color = null;
+                        var innercontent2;
                         var temp2 = document.getElementById(`events-2-4-row-${index}`);
                         if (temp2 === null)
                         {
@@ -827,7 +778,7 @@ function processCalendar(db)
              </tr>`;
                             temp2 = document.getElementById(`events-2-4-row-${index}`);
                         }
-                        var innercontent2 = document.getElementById(`events-2-4-row${index}-col1`);
+                        innercontent2 = document.getElementById(`events-2-4-row${index}-col1`);
                         color = hexRgb(dodo.color);
                         if (dodo.active < 1)
                             {color = hexRgb(`#161616`);}
@@ -859,7 +810,8 @@ function processCalendar(db)
                     }
                 });
             } else {
-                var temp2 = document.getElementById(`events-2-4-row-0`);
+                temp2 = document.getElementById(`events-2-4-row-0`);
+                var innercontent2;
                 if (temp2 === null)
                 {
                     innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
@@ -869,13 +821,13 @@ function processCalendar(db)
              </tr>`;
                     temp2 = document.getElementById(`events-2-4-row-0`);
                 }
-                var innercontent2 = document.getElementById(`events-2-4-row0-col1`);
+                innercontent2 = document.getElementById(`events-2-4-row0-col1`);
                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
              No events this day.
              </div>`;
             }
         } else {
-            var temp2 = document.getElementById(`events-2-4-row-0`);
+            temp2 = document.getElementById(`events-2-4-row-0`);
             if (temp2 === null)
             {
                 innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
@@ -885,7 +837,7 @@ function processCalendar(db)
              </tr>`;
                 temp2 = document.getElementById(`events-2-4-row-0`);
             }
-            var innercontent2 = document.getElementById(`events-2-4-row0-col1`);
+            innercontent2 = document.getElementById(`events-2-4-row0-col1`);
             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
              Error loading events for this day.
              </div>`;
@@ -940,7 +892,7 @@ function processCalendar(db)
                     }
                 });
             } else {
-                var temp2 = document.getElementById(`events-2-4-row-0`);
+                temp2 = document.getElementById(`events-2-4-row-0`);
                 if (temp2 === null)
                 {
                     innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
@@ -950,13 +902,13 @@ function processCalendar(db)
              </tr>`;
                     temp2 = document.getElementById(`events-2-4-row-0`);
                 }
-                var innercontent2 = document.getElementById(`events-2-4-row0-col2`);
+                innercontent2 = document.getElementById(`events-2-4-row0-col2`);
                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
              No events this day.
              </div>`;
             }
         } else {
-            var temp2 = document.getElementById(`events-2-4-row-0`);
+            temp2 = document.getElementById(`events-2-4-row-0`);
             if (temp2 === null)
             {
                 innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
@@ -966,7 +918,7 @@ function processCalendar(db)
              </tr>`;
                 temp2 = document.getElementById(`events-2-4-row-0`);
             }
-            var innercontent2 = document.getElementById(`events-2-4-row0-col2`);
+            innercontent2 = document.getElementById(`events-2-4-row0-col2`);
             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
              Error loading events for this day.
              </div>`;
@@ -1021,7 +973,7 @@ function processCalendar(db)
                     }
                 });
             } else {
-                var temp2 = document.getElementById(`events-2-4-row-0`);
+                temp2 = document.getElementById(`events-2-4-row-0`);
                 if (temp2 === null)
                 {
                     innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
@@ -1031,13 +983,13 @@ function processCalendar(db)
              </tr>`;
                     temp2 = document.getElementById(`events-2-4-row-0`);
                 }
-                var innercontent2 = document.getElementById(`events-2-4-row0-col3`);
+                innercontent2 = document.getElementById(`events-2-4-row0-col3`);
                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
              No events this day.
              </div>`;
             }
         } else {
-            var temp2 = document.getElementById(`events-2-4-row-0`);
+            temp2 = document.getElementById(`events-2-4-row-0`);
             if (temp2 === null)
             {
                 innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
@@ -1047,7 +999,7 @@ function processCalendar(db)
              </tr>`;
                 temp2 = document.getElementById(`events-2-4-row-0`);
             }
-            var innercontent2 = document.getElementById(`events-2-4-row0-col3`);
+            innercontent2 = document.getElementById(`events-2-4-row0-col3`);
             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
              Error loading events for this day.
              </div>`;
@@ -1055,7 +1007,7 @@ function processCalendar(db)
         Slides.slide(`events-2-4`).displayTime = displayTime;
 
         // Process days 5-7
-        var temp = document.getElementById(`events-5-7`);
+        temp = document.getElementById(`events-5-7`);
         temp.innerHTML = `<table style="overflow-y: hidden; text-align: center; background: rgba(0, 0, 0, 0);" class="table table-sm table-dark border-0" id="events-5-7-table">
              <thead>
              <tr style="border-style: none;">
@@ -1067,8 +1019,8 @@ function processCalendar(db)
              <tbody id="events-5-7-table-body">
              </tbody>
              </table>`;
-        var innercontent = document.getElementById('events-5-7-table-body');
-        var displayTime = 7;
+        innercontent = document.getElementById('events-5-7-table-body');
+        displayTime = 7;
         if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')] !== 'undefined')
         {
             if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].length > 0)
@@ -1119,7 +1071,7 @@ function processCalendar(db)
                     }
                 });
             } else {
-                var temp2 = document.getElementById(`events-5-7-row-0`);
+                temp2 = document.getElementById(`events-5-7-row-0`);
                 if (temp2 === null)
                 {
                     innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
@@ -1129,13 +1081,13 @@ function processCalendar(db)
              </tr>`;
                     temp2 = document.getElementById(`events-5-7-row-0`);
                 }
-                var innercontent2 = document.getElementById(`events-5-7-row0-col1`);
+                innercontent2 = document.getElementById(`events-5-7-row0-col1`);
                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
              No events this day.
              </div>`;
             }
         } else {
-            var temp2 = document.getElementById(`events-5-7-row-0`);
+            temp2 = document.getElementById(`events-5-7-row-0`);
             if (temp2 === null)
             {
                 innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
@@ -1145,7 +1097,7 @@ function processCalendar(db)
              </tr>`;
                 temp2 = document.getElementById(`events-5-7-row-0`);
             }
-            var innercontent2 = document.getElementById(`events-5-7-row0-col1`);
+            innercontent2 = document.getElementById(`events-5-7-row0-col1`);
             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
              Error loading events for this day.
              </div>`;
@@ -1200,7 +1152,7 @@ function processCalendar(db)
                     }
                 });
             } else {
-                var temp2 = document.getElementById(`events-5-7-row-0`);
+                temp2 = document.getElementById(`events-5-7-row-0`);
                 if (temp2 === null)
                 {
                     innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
@@ -1210,13 +1162,13 @@ function processCalendar(db)
              </tr>`;
                     temp2 = document.getElementById(`events-5-7-row-0`);
                 }
-                var innercontent2 = document.getElementById(`events-5-7-row0-col2`);
+                innercontent2 = document.getElementById(`events-5-7-row0-col2`);
                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
              No events this day.
              </div>`;
             }
         } else {
-            var temp2 = document.getElementById(`events-5-7-row-0`);
+            temp2 = document.getElementById(`events-5-7-row-0`);
             if (temp2 === null)
             {
                 innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
@@ -1226,7 +1178,7 @@ function processCalendar(db)
              </tr>`;
                 temp2 = document.getElementById(`events-5-7-row-0`);
             }
-            var innercontent2 = document.getElementById(`events-5-7-row0-col2`);
+            innercontent2 = document.getElementById(`events-5-7-row0-col2`);
             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
              Error loading events for this day.
              </div>`;
@@ -1281,7 +1233,7 @@ function processCalendar(db)
                     }
                 });
             } else {
-                var temp2 = document.getElementById(`events-5-7-row-0`);
+                temp2 = document.getElementById(`events-5-7-row-0`);
                 if (temp2 === null)
                 {
                     innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
@@ -1291,13 +1243,13 @@ function processCalendar(db)
              </tr>`;
                     temp2 = document.getElementById(`events-5-7-row-0`);
                 }
-                var innercontent2 = document.getElementById(`events-5-7-row0-col3`);
+                innercontent2 = document.getElementById(`events-5-7-row0-col3`);
                 innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(0, 0, 0, 0.8);">
              No events this day.
              </div>`;
             }
         } else {
-            var temp2 = document.getElementById(`events-5-7-row-0`);
+            temp2 = document.getElementById(`events-5-7-row-0`);
             if (temp2 === null)
             {
                 innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
@@ -1307,7 +1259,7 @@ function processCalendar(db)
              </tr>`;
                 temp2 = document.getElementById(`events-5-7-row-0`);
             }
-            var innercontent2 = document.getElementById(`events-5-7-row0-col3`);
+            innercontent2 = document.getElementById(`events-5-7-row0-col3`);
             innercontent2.innerHTML += `<div class="container" style="width: 100%; text-align: center; font-size: 1em; background: rgba(255, 0, 0, 0.8);">
              Error loading events for this day.
              </div>`;
@@ -1372,6 +1324,8 @@ function processEas(db)
                         borderclass = 'primary';
                     }
                 }
+                // LINT LIES: This variable is used.
+                // eslint-disable-next-line no-unused-vars
                 var timeleft = '';
                 if (moment(Meta.time).isBefore(moment(dodo.starts)))
                 {
@@ -1498,11 +1452,11 @@ waitFor(() => {
 
     // scoreboard
     sportsdb.assignSocketEvent('sports', io.socket);
-    sportsdb.setOnInsert((data, db) => {
+    sportsdb.setOnInsert((data) => {
         changeData(data);
     });
 
-    sportsdb.setOnUpdate((data, db) => {
+    sportsdb.setOnUpdate((data) => {
         changeData(data);
     });
 
@@ -1600,23 +1554,23 @@ waitFor(() => {
     Eas.setOnRemove((data, db) => processEas(db));
     Eas.setOnReplace((db) => processEas(db));
 
-    io.socket.on('display-refresh', (data) => {
+    io.socket.on('display-refresh', () => {
         window.location.reload(true);
     });
 
     // When an announcement comes through
     Announcements.assignSocketEvent('announcements', io.socket);
     // Do stuff when announcements changes are made
-    Announcements.setOnUpdate((data, db) => {
+    Announcements.setOnUpdate((data) => {
         Slides.removeSlide(`attn-${data.ID}`);
         createAnnouncement(data);
         checkSlideCounts();
     });
-    Announcements.setOnInsert((data, db) => {
+    Announcements.setOnInsert((data) => {
         createAnnouncement(data);
         checkSlideCounts();
     });
-    Announcements.setOnRemove((data, db) => {
+    Announcements.setOnRemove((data) => {
         Slides.removeSlide(`attn-${data}`);
         checkSlideCounts();
     });
@@ -1636,9 +1590,9 @@ waitFor(() => {
 function onlineSocket()
 {
     console.log('attempting online socket');
-    noReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-public'}}, (body) => {
+    noReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-public'}}, () => {
         try {
-        } catch (e) {
+        } catch (unusedE) {
             console.log('FAILED ONLINE CONNECTION');
             setTimeout(onlineSocket, 10000);
         }
@@ -1650,7 +1604,7 @@ function easSocket()
     console.log('attempting eas socket');
     try {
         Eas.replaceData(noReq, '/eas/get');
-    } catch (e) {
+    } catch (unusedE) {
         console.log('FAILED CONNECTION');
         setTimeout(easSocket, 10000);
     }
@@ -1670,7 +1624,7 @@ function MetaSocket()
                 }
             }
             processNowPlaying(temp);
-        } catch (e) {
+        } catch (unusedE) {
             console.log('FAILED CONNECTION');
             setTimeout(MetaSocket, 10000);
         }
@@ -1696,7 +1650,7 @@ function directorSocket()
     console.log('attempting director socket');
     try {
         Directors.replaceData(noReq, '/directors/get');
-    } catch (e) {
+    } catch (unusedE) {
         console.log('FAILED CONNECTION');
         setTimeout(directorSocket, 10000);
     }
@@ -1885,14 +1839,6 @@ function doEas()
     }
 }
 
-// Determine if something is overflowing
-function isElementOverflowing(element) {
-    var overflowX = element.offsetWidth < element.scrollWidth;
-            var overflowY = element.offsetHeight < element.scrollHeight;
-
-    return (overflowX || overflowY);
-}
-
 // This function is called whenever meta is changed. The parameter response contains only the meta that has changed / to be updated.
 function processNowPlaying(response)
 {
@@ -1942,9 +1888,12 @@ function processNowPlaying(response)
 
             // First, process now playing information
             var color = 'rgba(72, 51, 43, 1)';
-            var progress = 50;
             var statebadge = '';
             easDelay -= 1;
+            var temp;
+            var countdown;
+            var countdowntext;
+            var countdownclock;
 
             // scoreboard
             /*
@@ -2042,7 +1991,7 @@ function processNowPlaying(response)
                             innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`;
                         }
                     }
-                    var temp = document.getElementById(`ontheair`);
+                    temp = document.getElementById(`ontheair`);
                     if (temp)
                         {temp.innerHTML = innercontent;}
                 } else {
@@ -2157,13 +2106,13 @@ function processNowPlaying(response)
             if (Meta.state === 'automation_live' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = 'inline';
-                var countdown = document.getElementById('countdown');
-                var countdowntext = document.getElementById('countdown-text');
-                var countdownclock = document.getElementById('countdown-clock');
+                countdown = document.getElementById('countdown');
+                countdowntext = document.getElementById('countdown-text');
+                countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
 
-                    var temp = Meta.show.split(' - ');
+                    temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
                     <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
@@ -2196,13 +2145,13 @@ function processNowPlaying(response)
             } else if (Meta.state === 'automation_remote' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = 'inline';
-                var countdown = document.getElementById('countdown');
-                var countdowntext = document.getElementById('countdown-text');
-                var countdownclock = document.getElementById('countdown-clock');
+                countdown = document.getElementById('countdown');
+                countdowntext = document.getElementById('countdown-text');
+                countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
 
-                    var temp = Meta.show.split(' - ');
+                    temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
@@ -2233,9 +2182,9 @@ function processNowPlaying(response)
             } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = 'inline';
-                var countdown = document.getElementById('countdown');
-                var countdowntext = document.getElementById('countdown-text');
-                var countdownclock = document.getElementById('countdown-clock');
+                countdown = document.getElementById('countdown');
+                countdowntext = document.getElementById('countdown-text');
+                countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
 
@@ -2269,13 +2218,13 @@ function processNowPlaying(response)
             } else if (Meta.state === 'live_returning' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = 'inline';
-                var countdown = document.getElementById('countdown');
-                var countdowntext = document.getElementById('countdown-text');
-                var countdownclock = document.getElementById('countdown-clock');
+                countdown = document.getElementById('countdown');
+                countdowntext = document.getElementById('countdown-text');
+                countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
 
-                    var temp = Meta.show.split(' - ');
+                    temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
@@ -2306,13 +2255,13 @@ function processNowPlaying(response)
             } else if (Meta.state === 'remote_returning' && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = 'inline';
-                var countdown = document.getElementById('countdown');
-                var countdowntext = document.getElementById('countdown-text');
-                var countdownclock = document.getElementById('countdown-clock');
+                countdown = document.getElementById('countdown');
+                countdowntext = document.getElementById('countdown-text');
+                countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
 
-                    var temp = Meta.show.split(' - ');
+                    temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
@@ -2343,9 +2292,9 @@ function processNowPlaying(response)
             } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && typeof response.state === 'undefined')
             {
                 djAlert.style.display = 'inline';
-                var countdown = document.getElementById('countdown');
-                var countdowntext = document.getElementById('countdown-text');
-                var countdownclock = document.getElementById('countdown-clock');
+                countdown = document.getElementById('countdown');
+                countdowntext = document.getElementById('countdown-text');
+                countdownclock = document.getElementById('countdown-clock');
                 if (!countdown || !countdowntext || !countdownclock)
                 {
 
@@ -2396,23 +2345,6 @@ function nowPlayingTick()
     processNowPlaying({});
 }
 
-
-function text_truncate(str, length = 100, ending = '...') {
-    try {
-        if (str.length > length) {
-            return str.substring(0, length - ending.length) + ending;
-        } else {
-            return str;
-        }
-    } catch (e) {
-        console.error(e);
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred during text_truncate.'
-        });
-}
-}
-
 function hexRgb(hex, options = {}) {
     try {
         if (typeof hex !== 'string' || nonHexChars.test(hex) || !validHexSize.test(hex)) {
@@ -2453,6 +2385,8 @@ function hexRgb(hex, options = {}) {
 }
 }
 
+// LINT LIES: This function is used.
+// eslint-disable-next-line no-unused-vars
 function processAnnouncements() {
     // Define a comparison function that will order announcements by createdAt
     var compare = function (a, b) {
@@ -2536,8 +2470,6 @@ function processAnnouncements() {
                                     basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
 
                                     var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
-                                    var newTopPos = Math.abs(Math.floor((($('#scaled-content').height() * basePage.scale) - maxHeight) / 2));
-
                                     page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
                                 }
                             });

@@ -1,4 +1,4 @@
-/* global io */
+/* global $, WWSUdb, TAFFY, WWSUreq */
 
 // Define the animate.css JQuery function
 $.fn.extend({
@@ -22,7 +22,7 @@ $.fn.extend({
             $(this).removeClass('animated ' + animationName);
 
             if (typeof callback === 'function')
-                {callback();}
+                {return callback();}
         });
 
         return this;
@@ -191,11 +191,11 @@ var changeData = (data) => {
     }
 };
 
-sportsdb.setOnInsert((data, db) => {
+sportsdb.setOnInsert((data) => {
     changeData(data);
 });
 
-sportsdb.setOnUpdate((data, db) => {
+sportsdb.setOnUpdate((data) => {
     changeData(data);
 });
 

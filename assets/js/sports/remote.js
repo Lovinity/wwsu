@@ -1,4 +1,4 @@
-/* global io */
+/* global WWSUdb, TAFFY, WWSUreq */
 
 var sportsdb = new WWSUdb(TAFFY());
 
@@ -39,11 +39,11 @@ var changeData = (data) => {
     }
 };
 
-sportsdb.setOnInsert((data, db) => {
+sportsdb.setOnInsert((data) => {
     changeData(data);
 });
 
-sportsdb.setOnUpdate((data, db) => {
+sportsdb.setOnUpdate((data) => {
     changeData(data);
 });
 
@@ -77,20 +77,26 @@ function updateValue(name, value)
 {
     var temp = sportsdb.db({name: name}).first();
     if (!temp || typeof temp.value === `undefined` || temp.value !== value)
-        {noReq.request({method: 'POST', url: '/sports/update', data: {name: name, value: value}}, (resHTML) => {
+        {noReq.request({method: 'POST', url: '/sports/update', data: {name: name, value: value}}, () => {
         });}
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function wsuScore(amount)
 {
     updateValue(`wsuScore`, parseInt(document.querySelector('#wsu-score').value) + amount);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function oppScore(amount)
 {
     updateValue(`oppScore`, parseInt(document.querySelector('#opp-score').value) + amount);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function clearAlt()
 {
     updateValue(`wsuText`, ``);
@@ -99,6 +105,8 @@ function clearAlt()
     updateValue(`oppNum`, ``);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function showAlt()
 {
     updateValue(`wsuText`, document.querySelector('#wsu-text').value);
@@ -107,6 +115,8 @@ function showAlt()
     updateValue(`oppNum`, document.querySelector('#opp-num').value);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function wsuTimeout()
 {
     document.querySelector('#wsu-timeouts').value = parseInt(document.querySelector('#wsu-timeouts').value) - 1;
@@ -117,6 +127,8 @@ function wsuTimeout()
     updateValue(`oppNum`, document.querySelector('#opp-timeouts').value);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function oppTimeout()
 {
     document.querySelector('#opp-timeouts').value = parseInt(document.querySelector('#opp-timeouts').value) - 1;
@@ -127,6 +139,8 @@ function oppTimeout()
     updateValue(`oppNum`, document.querySelector('#opp-timeouts').value);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function mediaTimeout()
 {
     updateValue(`wsuText`, `MEDIA TIMEOUT`);
@@ -135,6 +149,8 @@ function mediaTimeout()
     updateValue(`oppNum`, ``);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function refReview()
 {
     updateValue(`wsuText`, `REFEREE REVIEW`);
@@ -143,6 +159,8 @@ function refReview()
     updateValue(`oppNum`, ``);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function wsuInjury()
 {
     updateValue(`wsuText`, `INJURY TIMEOUT`);
@@ -151,6 +169,8 @@ function wsuInjury()
     updateValue(`oppNum`, ``);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function oppInjury()
 {
     updateValue(`wsuText`, ``);
@@ -159,6 +179,8 @@ function oppInjury()
     updateValue(`oppNum`, ``);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function wsuFoul()
 {
     document.querySelector('#wsu-fouls').value = parseInt(document.querySelector('#wsu-fouls').value) + 1;
@@ -169,6 +191,8 @@ function wsuFoul()
     updateValue(`oppNum`, document.querySelector('#opp-fouls').value);
 }
 
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function oppFoul()
 {
     document.querySelector('#opp-fouls').value = parseInt(document.querySelector('#opp-fouls').value) + 1;

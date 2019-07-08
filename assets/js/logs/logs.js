@@ -1,4 +1,4 @@
-/* global moment */
+/* global moment, $ */
 
 $(document).ready(() => {
 
@@ -8,20 +8,13 @@ $(document).ready(() => {
     });
 
     //Get the value of Start and End of Week
-    $('#weekly-date-picker').on('dp.change', (e) => {
+    $('#weekly-date-picker').on('dp.change', () => {
         var value = $('#weekly-date-picker').val();
         var firstDate = moment(value, 'MM-DD-YYYY').format('MM-DD-YYYY');
         $('#weekly-date-picker').val(firstDate);
     });
 });
 
-var theopts = {};
-
-function escapeHTML(str) {
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
-}
 
 // Show logs
 function filterLogs(subtype = null) {
@@ -49,11 +42,11 @@ function filterLogs(subtype = null) {
                             var newRow = header.insertRow(0);
                             var cell = newRow.insertCell(0);
                             cell.innerHTML = 'Choose a log for this day';
-                            var newRow = tableData.insertRow(tableData.rows.length);
-                            var cell = newRow.insertCell(0);
+                            newRow = tableData.insertRow(tableData.rows.length);
+                            cell = newRow.insertCell(0);
                             cell.innerHTML = `<a href="javascript:filterLogs(\`\`)" title="Show the log" role="button" class="btn btn-success">View all logs for this day</a>`;
-                            var newRow = tableData.insertRow(tableData.rows.length);
-                            var cell = newRow.insertCell(0);
+                            newRow = tableData.insertRow(tableData.rows.length);
+                            cell = newRow.insertCell(0);
                             cell.innerHTML = `<a href="javascript:filterLogs(\`ISSUES\`)" title="Show the log" role="button" class="btn btn-warning">View logged problems/issues for this day</a>`;
                             resHTML.map(logtype => {
                                 var newRow = tableData.insertRow(tableData.rows.length);
@@ -61,7 +54,7 @@ function filterLogs(subtype = null) {
                                 cell.innerHTML = `<a href="javascript:filterLogs(\`${logtype.logsubtype}\`)" title="Show the log" role="button" class="btn btn-primary">${logtype.logsubtype}</a>`;
                             });
                         },
-                        function fail(data, status) {
+                        function fail() {
                         }
                 );
 
@@ -99,7 +92,7 @@ function filterLogs(subtype = null) {
                                 cell4.innerHTML = thelog.trackTitle;
                             });
                         },
-                        function fail(data, status) {
+                        function fail() {
                         }
                 );
 }

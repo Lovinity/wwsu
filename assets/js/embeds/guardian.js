@@ -1,4 +1,4 @@
-/* global io */
+/* global $ */
 
 var Meta = {line1: '', line2: ''};
 var nowPlaying = document.getElementById('nowplaying');
@@ -16,7 +16,7 @@ function waitFor(check, callback, count = 0)
         } else {
         }
     } else {
-        callback();
+        return callback();
 }
 }
 
@@ -102,7 +102,7 @@ waitFor(() => {
 // Make a call to the meta/get API endpoint
 function doSockets()
 {
-    io.socket.post('/meta/get', {}, function serverResponded(body, JWR) {
+    io.socket.post('/meta/get', {}, function serverResponded(body) {
         try {
             for (var key in body)
             {
@@ -112,7 +112,7 @@ function doSockets()
                 }
             }
             doMeta(body);
-        } catch (e) {
+        } catch (unusedE) {
             //console.error(e);
             setTimeout(doSockets, 10000);
         }

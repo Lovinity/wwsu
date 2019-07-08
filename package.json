@@ -13,6 +13,7 @@
     "breakdance": "^3.0.1",
     "configstore": "^4.0.0",
     "crypto-random-string": "^1.0.0",
+    "dark-sky-api": "^0.6.32",
     "easy-config-store": "^1.0.1",
     "google-auth-library": "^1.6.1",
     "googleapis": "^30.0.0",
