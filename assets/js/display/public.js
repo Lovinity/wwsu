@@ -352,7 +352,7 @@ try {
         active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
-        displayTime: 15,
+        displayTime: 20,
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State University Weather</h1>
             <div class="container">
@@ -360,21 +360,51 @@ try {
                 <div class="row shadow-4 bg-dark-2">
                     <div class="col-6">
                         <div class="media">
-                            <div class="align-self-center mr-3 text-white">
-                                <i style="font-size: 64px;" class="fas fa-sun" id="weather-current-icon"></i>
+                            <div class="align-self-center mr-3 text-white" id="weather-current-icon">
+                                <i style="font-size: 64px;" class="fas fa-sun"></i>
                             </div>
                             <div class="media-body">
                                 <h5 class="mt-0 text-white">Current Weather</h5>
-                                <p><strong><span id="weather-current-summary"></span></strong>; <span id="weather-current-temperature"></span></p>
+                                <p class="text-white"><strong><span id="weather-current-summary"></span></strong>; <span id="weather-current-temperature"></span></p>
                             </div>
                         </div>
                     </div>
                     <div class="col-6" id="weather-minutely-summary">
                     </div>
                 </div>
+
+                <div class="row shadow-4 bg-dark-2">
+                    <div class="col-6">
+                        <div class="media">
+                            <div class="align-self-center mr-3 text-white" id="weather-1-icon">
+                                <i style="font-size: 64px;" class="fas fa-sun"></i>
+                            </div>
+                            <div class="media-body">
+                                <h5 class="mt-0 text-white" id="weather-1-label"></h5>
+                                <p class="text-white"><strong><span id="weather-1-summary"></span></strong><br />
+                                High <span id="weather-1-temperature-high"></span>, Low <span id="weather-1-temperature-low"></span><br />
+                                <span id="weather-1-precip"></span>% chance of <span id="weather-1-precipType"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="media">
+                            <div class="align-self-center mr-3 text-white" id="weather-2-icon">
+                                <i style="font-size: 64px;" class="fas fa-sun"></i>
+                            </div>
+                            <div class="media-body">
+                                <h5 class="mt-0 text-white" id="weather-2-label"></h5>
+                                <p class="text-white"><strong><span id="weather-2-summary"></span></strong><br />
+                                High <span id="weather-2-temperature-high"></span>, Low <span id="weather-2-temperature-low"></span><br />
+                                <span id="weather-2-precip"></span>% chance of <span id="weather-2-precipType"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             
             </div>
             
+            <h3 style="text-align: center; font-size: 1.5em; color: #ffffff;">EAS / Weather Alerts (Clark, Greene, Montgomery)</h3>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
     });
 
@@ -2388,7 +2418,7 @@ function processDarksky(db) {
 
                 // Current conditions
                 temp = document.querySelector(`#weather-current-icon`);
-                temp.classList = `fas ${getConditionIcon(item.currently.icon)}`;
+                temp.innerHTML = `<i style="font-size: 64px;" class="fas ${getConditionIcon(item.currently.icon)}"></i>`;
                 temp = document.querySelector(`#weather-current-temperature`);
                 temp.innerHTML = `${item.currently.temperature}°F`;
                 temp = document.querySelector(`#weather-current-summary`);
@@ -2397,17 +2427,17 @@ function processDarksky(db) {
                 // Determine when precipitation is going to fall
                 var precipExpected = false;
                 temp = document.querySelector(`#weather-minutely-summary`);
-                if (item.currently.precipIntensity > 0 && item.currently.precipProbability >= 0.2)
-                {
+                temp.innerHTML = ``;
+                if (item.currently.precipIntensity > 0 && item.currently.precipProbability >= 0.2) {
                     precipExpected = true;
-                    temp.innerHTML = `<div class="bs-callout bs-callout-danger shadow-4 text-light">Precipitation is reported now or in the vicinity at a rate of ${item.currently.precipIntensity} inches of liquid water per hour.</div>`;
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light">${item.currently.precipType || `precipitation`} is reported now or in the vicinity at a rate of ${item.currently.precipIntensity} inches of liquid water per hour.</div>`;
                 }
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
                             if (data.precipProbability >= 0.2) {
                                 precipExpected = true;
-                                temp.innerHTML = `<div class="bs-callout bs-callout-urgent shadow-4 text-light">Precipitation is forecast to begin in ${index} minutes.</div>`;
+                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light">${data.precipType || `precipitation`} is forecast to begin in ${index} minutes.</div>`;
                             }
                         }
                     });
@@ -2417,16 +2447,96 @@ function processDarksky(db) {
                         if (!precipExpected && index < 24) {
                             if (data.precipProbability >= 0.2) {
                                 precipExpected = true;
-                                temp.innerHTML = `<div class="bs-callout bs-callout-warning shadow-4 text-light">Precipitation is forecast to begin at ${moment(Meta.time).add(index, 'hours').format('LT')}.</div>`;
+                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light">${data.precipType || `precipitation`} is forecast to begin at ${moment(Meta.time).add(index, 'hours').format('LT')}.</div>`;
                             }
                         }
                     });
                 }
                 if (!precipExpected) {
-                    temp.innerHTML = `<div class="bs-callout bs-callout-success shadow-4 text-light">No precipitation in the forecast for the next 24 hours.</div>`;
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-success shadow-4 text-light">No precipitation in the forecast for the next 24 hours.</div>`;
                 }
 
-                
+                // Is it windy?
+                if (item.currently.windSpeed >= 73) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><strong>Hurricane-force wind reported now!</strong> Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
+                } else if (item.currently.windSpeed >= 55) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light">Whole gale force wind reported now! Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
+                } else if (item.currently.windSpeed >= 39) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light">Gale force wind reported now! Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
+                } else if (item.currently.windSpeed >= 25) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light">It is windy right now. Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
+                }
+
+                // UV index
+                if (item.currently.uvIndex >= 10) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><strong>UV index is extremely high!</strong> Sun burn is very likely. Index is currently ${item.currently.uvIndex}.</div>`;
+                } else if (item.currently.uvIndex >= 8) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><strong>UV index is very high!</strong> Sun burn is likely. Index is currently ${item.currently.uvIndex}.</div>`;
+                } else if (item.currently.uvIndex >= 6) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light">UV index is high. Sun burn is possible. Index is currently ${item.currently.uvIndex}.</div>`;
+                }
+
+                // Visibility
+                if (item.currently.visibility <= 0.25) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><strong>Dangerously low visibility right now!</strong> Be very cautious on the roads. Visibility is currently ${item.currently.visibility} miles.</div>`;
+                } else if (item.currently.visibility <= 1) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><strong>Very low visibility right now!</strong> Be cautious on the roads. Visibility is currently ${item.currently.visibility} miles.</div>`;
+                } else if (item.currently.visibility <= 3) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light">Low visibility right now! Be cautious on the roads. Visibility is currently ${item.currently.visibility} miles.</div>`;
+                }
+
+                // Apparent temperature, cold
+                if (item.currently.apparentTemperature <= -48) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><strong>Extremely dangerous wind chill right now!</strong> Frostbite can occur in 5 minutes. Wind Chill is currently ${item.currently.apparentTemperature}°F.</div>`;
+                } else if (item.currently.apparentTemperature <= -32) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><strong>Dangerous wind chill right now!</strong> Frostbite can occur in 10 minutes. Wind Chill is currently ${item.currently.apparentTemperature}°F.</div>`;
+                } else if (item.currently.apparentTemperature <= -18) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light">Cold wind chill right now. Frostbite can occur in 15 minutes. Wind Chill is currently ${item.currently.apparentTemperature}°F.</div>`;
+                }
+
+                // Apparent temperature, hot
+                if (item.currently.apparentTemperature >= 115) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><strong>Extremely dangerous heat index right now!</strong> Postpone outdoor activities if possible. Heat index is currently ${item.currently.apparentTemperature}°F.</div>`;
+                } else if (item.currently.apparentTemperature >= 103) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><strong>Dangerous heat index right now!</strong> Take frequent water breaks when outdoors. Heat index is currently ${item.currently.apparentTemperature}°F.</div>`;
+                } else if (item.currently.apparentTemperature >= 91) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light">High heat index right now. Drink extra water when outside. Heat index is currently ${item.currently.apparentTemperature}°F.</div>`;
+                }
+
+
+                // Day 1 weather
+                var temp2 = item.daily.data[0] || {};
+                temp = document.querySelector(`#weather-1-label`);
+                temp.innerHTML = moment.unix(temp2.time).format('dddd');
+                temp = document.querySelector(`#weather-1-icon`);
+                temp.innerHTML = `<i style="font-size: 64px;" class="fas ${getConditionIcon(temp2.icon)}"></i>`;
+                temp = document.querySelector(`#weather-1-summary`);
+                temp.innerHTML = temp2.summary;
+                temp = document.querySelector(`#weather-1-temperature-high`);
+                temp.innerHTML = `${temp2.temperatureHigh}°F`;
+                temp = document.querySelector(`#weather-1-temperature-low`);
+                temp.innerHTML = `${temp2.temperatureLow}°F`;
+                temp = document.querySelector(`#weather-1-precip`);
+                temp.innerHTML = `${temp2.precipProbability || 0}`;
+                temp = document.querySelector(`#weather-1-precipType`);
+                temp.innerHTML = `${temp2.precipType || `precipitation`}`;
+
+                // Day 2 weather
+                temp2 = item.daily.data[1] || {};
+                temp = document.querySelector(`#weather-2-label`);
+                temp.innerHTML = moment.unix(temp2.time).format('dddd');
+                temp = document.querySelector(`#weather-2-icon`);
+                temp.innerHTML = `<i style="font-size: 64px;" class="fas ${getConditionIcon(temp2.icon)}"></i>`;
+                temp = document.querySelector(`#weather-2-summary`);
+                temp.innerHTML = temp2.summary;
+                temp = document.querySelector(`#weather-2-temperature-high`);
+                temp.innerHTML = `${temp2.temperatureHigh}°F`;
+                temp = document.querySelector(`#weather-2-temperature-low`);
+                temp.innerHTML = `${temp2.temperatureLow}°F`;
+                temp = document.querySelector(`#weather-2-precip`);
+                temp.innerHTML = `${temp2.precipProbability || 0}`;
+                temp = document.querySelector(`#weather-2-precipType`);
+                temp.innerHTML = `${temp2.precipType || `precipitation`}`;
 
             } catch (e) {
                 console.error(e);
