@@ -1267,6 +1267,7 @@ module.exports.bootstrap = async function (done) {
                 try {
                     DarkSkyApi.loadItAll('alerts', sails.config.custom.darksky.position)
                         .then(async (resp) => {
+                            sails.log.debug(JSON.stringify(resp));
                             await Darksky.update({ID: 1}, {currently: resp.currently, minutely: resp.minutely, hourly: resp.hourly, daily: resp.daily}).fetch();
                         })
                         .catch((err) => {
