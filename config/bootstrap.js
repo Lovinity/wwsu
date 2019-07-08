@@ -1041,8 +1041,7 @@ module.exports.bootstrap = async function (done) {
                 // LINT: RadioDJ tables cannot be changed
                 // eslint-disable-next-line camelcase
                 var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
-                var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Planner, Underwritings, Attendance, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp];
-                var checksDisk = [Darksky];
+                var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Planner, Underwritings, Attendance, Darksky, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp];
                 // Memory checks
                 var checkStatus = { data: ``, status: 5 };
                 sails.log.debug(`CHECK: DB Memory`);
@@ -1124,39 +1123,11 @@ module.exports.bootstrap = async function (done) {
                 if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.`; }
                 Status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status }]);
 
-                // Disk checks
-                sails.log.debug(`CHECK: DB Disk`);
-                checkStatus = { data: ``, status: 5 };
-                sails.log.debug(`Calling asyncForEach in cron checkDB for disk database checks`);
-                await sails.helpers.asyncForEach(checksDisk, (check, index) => {
-                    return new Promise(async (resolve) => {
-                        try {
-                            var record = await check.find().limit(1)
-                                .tolerate(() => {
-                                    checkStatus.status = 1;
-                                    checkStatus.data += `Model failure (query error): ${index}. `;
-                                });
-                            if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined')) {
-                                if (checkStatus.status > 3) { checkStatus.status = 3; }
-                                checkStatus.data += `Model failure (No records returned): ${index}. `;
-                            }
-                            return resolve(false);
-                        } catch (unusedE) {
-                            checkStatus.status = 1;
-                            checkStatus.data += `Model failure (internal error): ${index}. `;
-                            return resolve(false);
-                        }
-                    });
-                });
-                if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.`; }
-                Status.changeStatus([{ name: 'db-disk', label: 'DB Disk', data: checkStatus.data, status: checkStatus.status }]);
-
                 return true;
             } catch (e) {
                 Status.changeStatus([{ name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed.', status: 1 }]);
                 Status.changeStatus([{ name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed.', status: 1 }]);
                 Status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: 'The CRON checkDB failed.', status: 1 }]);
-                Status.changeStatus([{ name: 'db-disk', label: 'DB Nodebase', data: 'The CRON checkDB failed.', status: 1 }]);
                 sails.log.error(e);
                 return null;
             }
@@ -1244,7 +1215,6 @@ module.exports.bootstrap = async function (done) {
                     .exclude('alerts')
                     .get()
                     .then(async (resp) => {
-                        sails.log.debug(JSON.stringify(resp));
                         await Darksky.update({ ID: 1 }, { currently: resp.currently, minutely: resp.minutely, hourly: resp.hourly, daily: resp.daily }).fetch();
                     })
                     .catch(err => {

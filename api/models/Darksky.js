@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-    datastore: 'disk',
+    datastore: 'nodebase',
     attributes: {
         ID: {
             type: 'number',
