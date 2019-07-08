@@ -373,7 +373,7 @@ try {
                     </div>
                 </div>
 
-                <div class="row shadow-4 bg-dark-2 m-1 p-1">
+                <div class="row shadow-4 bg-dark-3 p-2">
                     <div class="col-6">
                         <div class="media">
                             <div class="align-self-center mr-3 text-white" id="weather-1-icon">
@@ -404,7 +404,7 @@ try {
             
             </div>
             
-            <div class="m-1 p-1">
+            <div class="p-2">
             <h3 style="text-align: center; font-size: 1.5em; color: #ffffff;">EAS / Weather Alerts (Clark, Greene, Montgomery)</h3>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>
             </div>`,
@@ -1317,6 +1317,11 @@ function processEas(db) {
                 });
             }
         });
+
+        if (prevEas.length === 0)
+        {
+            innercontent.HTML = `<strong class="text-white">No active alerts</strong>`;
+        }
 
         checkSlideCounts();
 
