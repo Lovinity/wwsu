@@ -356,50 +356,23 @@ try {
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State University Weather</h1>
             <div class="container">
-              <div class="row shadow-4 bg-dark-2">
-                <div class="col-4">
-                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <div class="card-img-top text-white" style="text-align: center;">
-                        <i style="font-size: 64px;" class="fas fa-sun" id="weather-current-icon"></i>
+            
+                <div class="row shadow-4 bg-dark-2">
+                    <div class="col-6">
+                        <div class="media">
+                            <div class="align-self-center mr-3 text-white">
+                                <i style="font-size: 64px;" class="fas fa-sun" id="weather-current-icon"></i>
+                            </div>
+                            <div class="media-body">
+                                <h5 class="mt-0 text-white">Current Weather</h5>
+                                <p><strong><span id="weather-current-summary"></span></strong>; <span id="weather-current-temperature"></span></p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <h5 class="card-title text-white" id="weather-current-temperature">0</h5>
-                        <p class="card-text text-white" id="weather-current-summary"></p>
-                    </div>
-                </div>
-            </div>
-                <div class="col-8" id="weather-minutely-summary">
-                </div>
-            </div>
-
-            <div class="row shadow-4 bg-dark-3">
-                <div class="col-4">
-                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <i style="font-size: 64px;" class="card-img-top fas fa-sun text-white" id="weather-1-icon"></i>
-                    <div class="card-body">
-                        <h5 class="card-title" id="weather-1-summary">Clear</h5>
+                    <div class="col-6" id="weather-minutely-summary">
                     </div>
                 </div>
-            </div>
-
-            <div class="col-4">
-                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <i style="font-size: 64px;" class="card-img-top fas fa-sun text-white" id="weather-2-icon"></i>
-                    <div class="card-body">
-                        <h5 class="card-title" id="weather-2-summary">Clear</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-4">
-                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <i style="font-size: 64px;" class="card-img-top fas fa-sun text-white" id="weather-3-icon"></i>
-                    <div class="card-body">
-                        <h5 class="card-title" id="weather-3-summary">Clear</h5>
-                    </div>
-                </div>
-            </div>
-
+            
             </div>
             
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
