@@ -356,7 +356,7 @@ try {
         fitContent: false,
         html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State University Weather</h1>
             <div class="container">
-            
+
                 <div class="row shadow-4 bg-dark-2">
                     <div class="col-6">
                         <div class="media">
@@ -2386,14 +2386,47 @@ function processDarksky(db) {
             try {
                 var temp;
 
+                // Current conditions
                 temp = document.querySelector(`#weather-current-icon`);
                 temp.classList = `fas ${getConditionIcon(item.currently.icon)}`;
-
                 temp = document.querySelector(`#weather-current-temperature`);
                 temp.innerHTML = `${item.currently.temperature}°F`;
-
                 temp = document.querySelector(`#weather-current-summary`);
                 temp.innerHTML = item.currently.summary;
+
+                // Determine when precipitation is going to fall
+                var precipExpected = false;
+                temp = document.querySelector(`#weather-minutely-summary`);
+                if (item.currently.precipIntensity > 0 && item.currently.precipProbability >= 0.2)
+                {
+                    precipExpected = true;
+                    temp.innerHTML = `<div class="bs-callout bs-callout-danger shadow-4 text-light">Precipitation is reported now or in the vicinity at a rate of ${item.currently.precipIntensity} inches of liquid water per hour.</div>`;
+                }
+                if (!precipExpected) {
+                    item.minutely.data.map((data, index) => {
+                        if (!precipExpected) {
+                            if (data.precipProbability >= 0.2) {
+                                precipExpected = true;
+                                temp.innerHTML = `<div class="bs-callout bs-callout-urgent shadow-4 text-light">Precipitation is forecast to begin in ${index} minutes.</div>`;
+                            }
+                        }
+                    });
+                }
+                if (!precipExpected) {
+                    item.hourly.data.map((data, index) => {
+                        if (!precipExpected && index < 24) {
+                            if (data.precipProbability >= 0.2) {
+                                precipExpected = true;
+                                temp.innerHTML = `<div class="bs-callout bs-callout-warning shadow-4 text-light">Precipitation is forecast to begin at ${moment(Meta.time).add(index, 'hours').format('LT')}.</div>`;
+                            }
+                        }
+                    });
+                }
+                if (!precipExpected) {
+                    temp.innerHTML = `<div class="bs-callout bs-callout-success shadow-4 text-light">No precipitation in the forecast for the next 24 hours.</div>`;
+                }
+
+                
 
             } catch (e) {
                 console.error(e);
