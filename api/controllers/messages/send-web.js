@@ -40,7 +40,7 @@ module.exports = {
 
         try {
             // Send the message
-            await sails.helpers.messages.sendWeb(opts.host, opts.message, opts.from_IP, opts.nickname, opts.private);
+            await sails.helpers.messages.sendWeb(opts.host, opts.message, opts.fromIP, opts.nickname, opts.private);
             return exits.success();
         } catch (e) {
             return exits.error(e);
