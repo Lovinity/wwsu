@@ -1,5 +1,3 @@
-/* global sails, Meta, _, needle, Status, Songs, moment */
-
 module.exports = {
 
     friendlyName: 'rest.getQueue',
@@ -15,31 +13,36 @@ module.exports = {
         try {
             // Return queue in memory instead of checking for the current queue if we are waiting for a healthy RadioDJ to report
             if (Status.errorCheck.waitForGoodRadioDJ)
-                return exits.success(Meta.automation);
+                {return exits.success(Meta.automation);}
             // Query for the radioDJ queue and update Meta.automation with the queue.
+            // LINT: Do not camel case; parameters are for needle.
+            // eslint-disable-next-line camelcase
             needle('get', Meta['A'].radiodj + '/p?auth=' + sails.config.custom.rest.auth, {}, {open_timeout: 2000, response_timeout: 2000, read_timeout: 2000, headers: {'Content-Type': 'application/json'}})
-                    .then(async function (resp) {
+                    .then(async (resp) => {
                         try {
+                            // No queue? Return empty array
                             if (typeof resp.body.name === 'undefined' || (resp.body.name !== 'ArrayOfSongData' && resp.body.name !== 'SongData'))
                             {
                                 return exits.success([]);
                             }
+
+                            // RadioDJ will not return an array if there is only one song in the queue. But we ALWAYS want an array.
                             if (resp.body.name === 'ArrayOfSongData')
                             {
                                 Meta.automation = [];
                                 resp.body.children.map(trackA => {
                                     var theTrack = {};
-                                    trackA.children.map(track => theTrack[track.name] = track.value);
+                                    trackA.children.map(track => {theTrack[track.name] = track.value;});
                                     Meta.automation.push(theTrack);
                                 });
                             } else {
                                 Meta.automation = [];
                                 var theTrack = {};
-                                resp.body.children.map(track => theTrack[track.name] = track.value);
+                                resp.body.children.map(track => {theTrack[track.name] = track.value;});
                                 Meta.automation.push(theTrack);
                             }
-                            
-                            // Run through Songs.queueCheck
+
+                            // Run through Songs.queueCheck and resolve any songs detected as in the queue.
                             var inQueue = [];
                             Meta.automation.map(track => inQueue.push(parseInt(track.ID)));
                             sails.log.verbose(JSON.stringify(inQueue));
@@ -56,13 +59,13 @@ module.exports = {
                                     delete Songs.queueCheck[index];
                                 }
                             });
-                            
+
                             return exits.success(Meta.automation);
                         } catch (e) {
                             throw e;
                         }
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         return exits.error(err);
                     });
         } catch (e) {

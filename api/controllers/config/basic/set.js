@@ -1,5 +1,3 @@
-/* global sails, moment */
-
 module.exports = {
 
     friendlyName: 'config / basic / set',
@@ -57,7 +55,7 @@ module.exports = {
 
                     // Do not return hostSecret through websockets; this is a secret
                     if (key !== `hostSecret`)
-                        returnData[key] = inputs[key];
+                        {returnData[key] = inputs[key];}
                 }
             }
 

@@ -1,5 +1,3 @@
-/* global moment, Listeners, sails */
-
 module.exports = {
 
     friendlyName: 'listeners / get',
@@ -32,25 +30,24 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller listeners/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             var records = [];
             var start = moment(inputs.start);
             var end = moment(inputs.end);
-            
+
             // First, get the listeners within the given range
             var records1 = await Listeners.find({createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}}).sort('createdAt ASC');
-            
+
             if (records1)
-                records = records.concat(records1);
-            
+                {records = records.concat(records1);}
+
             // If the earliest returned record still falls after the provided start time, add the latest record before the provided start time as a baseline.
             if (typeof records1[0] === 'undefined' || moment(start).isBefore(moment(records1[0].createdAt)))
             {
                 var records2 = await Listeners.find({createdAt: {'<': start.toISOString(true)}}).sort('createdAt DESC').limit(1);
                 if (records2)
-                    records = records2.concat(records);
+                    {records = records2.concat(records);}
             }
 
             return exits.success(records);

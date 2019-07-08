@@ -1,5 +1,3 @@
-/* global _, sails, Planner */
-
 module.exports = {
 
     friendlyName: 'Planner / edit',
@@ -26,14 +24,14 @@ module.exports = {
             type: 'json',
             custom: (value) => {
                 if (!_.isArray(value))
-                    return false;
+                    {return false;}
                 if (value.length < 1)
-                    return true;
+                    {return true;}
 
                 var valid = true;
                 value.map((val) => {
                     if (!valid)
-                        return null;
+                        {return null;}
 
                     if (typeof val !== 'object')
                     {
@@ -66,7 +64,8 @@ module.exports = {
 
         try {
             var criteria = {};
-            
+
+            // Determine what needs editing and edit it
             for (var key in inputs)
             {
                 if (inputs.hasOwnProperty(key) && key !== `ID`)
@@ -74,14 +73,14 @@ module.exports = {
                     criteria[key] = inputs[key];
                 }
             }
-            
+
             if (inputs.clearActual)
-                criteria.actual = null;
-            
+                {criteria.actual = null;}
+
             var criteriaB = _.cloneDeep(criteria);
-            
+
             await Planner.update({ID: inputs.ID}, criteriaB).fetch();
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

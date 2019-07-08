@@ -1,5 +1,3 @@
-/* global Calendar, sails, moment, Attendance, Meta, Listeners, Logs */
-
 /**
  * Attendance.js
  *
@@ -28,19 +26,19 @@ module.exports = {
         event: {
             type: 'string'
         },
-        
+
         happened: {
             type: 'number',
             defaultsTo: 1,
             min: -1,
             max: 1
         },
-        
+
         happenedReason: {
             type: 'string',
             allowNull: true
         },
-        
+
         ignore: {
             type: 'number',
             defaultsTo: 0,
@@ -118,9 +116,9 @@ module.exports = {
         webMessagesExchanged: 0
     },
 
-    // Create a new record in the attendance table. 
-    // Switch to that record for logging / operations. 
-    // Automatically add current time as actualStart. 
+    // Create a new record in the attendance table.
+    // Switch to that record for logging / operations.
+    // Automatically add current time as actualStart.
     // Automatically add current time as actualEnd in the previous Attendance record being used.
     // Use Google Calendar info if an event matches.
     createRecord: function (event) {
@@ -133,7 +131,7 @@ module.exports = {
                 var currentID = Meta['A'].attendanceID;
 
                 // Find a calendar record with the provided event name. Allow up to 10 grace minutes before start time
-                var record = await Calendar.find({title: event, active: {'>=': 1}, start: {"<=": moment().add(10, 'minutes').toISOString(true)}, end: {">=": moment().toISOString(true)}}).limit(1);
+                var record = await Calendar.find({title: event, active: {'>=': 1}, start: {'<=': moment().add(10, 'minutes').toISOString(true)}, end: {'>=': moment().toISOString(true)}}).limit(1);
                 sails.log.debug(`Calendar records found: ${record.length || 0}`);
 
                 // Create the new attendance record
@@ -145,17 +143,17 @@ module.exports = {
                     created = await Attendance.create({unique: record[0].unique, dj: Meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true)}).fetch();
                 } else {
                     created = await Attendance.create({dj: Meta['A'].dj, event: event, actualStart: moment().toISOString(true)}).fetch();
-                    
+
                     // Broadcasts without a calendar ID are unauthorized. Log them!
-                    if (event.startsWith("Show: ") || event.startsWith("Remote: ") || event.startsWith("Sports: "))
+                    if (event.startsWith('Show: ') || event.startsWith('Remote: ') || event.startsWith('Sports: '))
                     {
-                        await Logs.create({attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: event.replace("Show: ", "").replace("Remote: ", "").replace("Sports: ", ""), event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${event}`, createdAt: moment().toISOString(true)}).fetch()
+                        await Logs.create({attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: event.replace('Show: ', '').replace('Remote: ', '').replace('Sports: ', ''), event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${event}`, createdAt: moment().toISOString(true)}).fetch()
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
                     }
                 }
-                
+
                 returnData.newID = created.ID;
 
                 // Switch to the new record in the system
@@ -173,10 +171,10 @@ module.exports = {
                         var updateData = {showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true)};
 
                         // Fetch listenerRecords since beginning of Attendance, as well as the listener count prior to start of attendance record.
-                        var listenerRecords = await Listeners.find({createdAt: {'>=': currentRecord.actualStart}}).sort("createdAt ASC");
+                        var listenerRecords = await Listeners.find({createdAt: {'>=': currentRecord.actualStart}}).sort('createdAt ASC');
                         var prevListeners = await Listeners.find({'createdAt': {'<=': currentRecord.actualStart}}).sort('createdAt DESC').limit(1) || 0;
                         if (prevListeners[0])
-                            prevListeners = prevListeners[0].listeners || 0;
+                            {prevListeners = prevListeners[0].listeners || 0;}
 
                         // Calculate listener minutes
                         var prevTime = moment(currentRecord.actualStart);

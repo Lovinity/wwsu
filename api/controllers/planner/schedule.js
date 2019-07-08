@@ -1,5 +1,3 @@
-/* global Recipients, sails, Planner, Promise, _ */
-
 module.exports = {
 
     friendlyName: 'Planner / schedule',
@@ -13,12 +11,12 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller planner/schedule called.');
         try {
-
+            // Get all planner records
             var records = await Planner.find();
 
             // Bail if there are no planner records to process
             if (records.length <= 0)
-                return exits.success([]);
+                {return exits.success([]);}
 
             // First, log all of the already-final (actual) times.
             var final = [];
@@ -44,7 +42,7 @@ module.exports = {
                             // -----
                             //   -----
                             if (start <= sched.start && end > sched.start)
-                                available = false;
+                                {available = false;}
 
                             //    -----
                             // -----
@@ -52,7 +50,7 @@ module.exports = {
                             //   -----
                             //  -------
                             if (start >= sched.start && start < sched.end)
-                                available = false;
+                                {available = false;}
 
                             // -------
                             //  -----
@@ -60,16 +58,16 @@ module.exports = {
                             // -----
                             // -----
                             if (start <= sched.start && end >= sched.end)
-                                available = false;
+                                {available = false;}
                         } else {
                             if (start > sched.start)
-                                available = false;
+                                {available = false;}
                             if (start < sched.end)
-                                available = false;
+                                {available = false;}
                             if (end < start)
-                                available = false;
+                                {available = false;}
                             if (end > sched.start)
-                                available = false;
+                                {available = false;}
                         }
                     });
                 }
@@ -84,12 +82,12 @@ module.exports = {
                     .map((record) => {
                         if (record.priority === null)
                         {
-                            record.badReason = "Record does not have a scheduling priority set.";
+                            record.badReason = 'Record does not have a scheduling priority set.';
                             badRecords.push(record);
                             return null;
                         }
                         if (typeof byPriority[record.priority] === `undefined`)
-                            byPriority[record.priority] = [];
+                            {byPriority[record.priority] = [];}
                         byPriority[record.priority].push(record);
                     });
 
@@ -107,17 +105,18 @@ module.exports = {
                         var index = Math.floor(Math.random() * Math.floor(shows.length - 1));
                         var show = shows[index];
 
-                        console.log(`show ${index}`);
-
+                        // Double check to ensure this show has at least 1 proposal
                         if (_.isArray(show.proposal) && show.proposal.length > 0)
                         {
                             var scheduled = false;
+
+                            // Try to schedule one of the proposed show times by while looping until we do, or until we run out of options.
                             while (typeof show.proposal[0] !== `undefined` && typeof show.proposal[0].start !== `undefined`)
                             {
                                 var proposal = show.proposal[0];
-                                console.log(`checking proposal ${proposal}`);
                                 if (isAvailable(proposal.start, proposal.end))
                                 {
+                                    // The scheduling is available, so schedule it and make it final
                                     scheduled = true;
                                     final.push({start: proposal.start, end: proposal.end});
                                     (async(showB, proposalB) => {
@@ -126,13 +125,14 @@ module.exports = {
                                 }
                                 show.proposal.splice(0, 1);
                             }
+                            // If the while loop exited without a schedule, then this show could not be scheduled with the proposals.
                             if (!scheduled)
                             {
-                                show.badReason = "None of the proposed show times are available.";
+                                show.badReason = 'None of the proposed show times are available; please have the DJ provide alternative show times.';
                                 badRecords.push(show);
                             }
                         } else {
-                            show.badReason = "Record has no proposed show times added.";
+                            show.badReason = 'Show has no proposed show times added.';
                             badRecords.push(show);
                         }
 
@@ -141,6 +141,7 @@ module.exports = {
                 });
             }
 
+            // Set a 3-second timeout for when this controller returns. This should be sufficient. We have no easy way ATM to wait programmatically.
             setTimeout(async() => {
                 return exits.success({schedule: await Planner.find(), failed: badRecords});
             }, 3000);

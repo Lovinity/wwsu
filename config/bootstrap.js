@@ -13,7 +13,7 @@
 
 module.exports.bootstrap = async function (done) {
     var cron = require('node-cron');
-    var sh = require("shorthash");
+    var sh = require('shorthash');
     const queryString = require('query-string');
 
     // By convention, this is a good place to set up fake data during development.
@@ -59,7 +59,7 @@ module.exports.bootstrap = async function (done) {
 
     // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
     sails.log.verbose(`BOOTSTRAP: Loading RadioDJ instances into template`);
-    sails.config.custom.radiodjs.forEach(function (radiodj) {
+    sails.config.custom.radiodjs.forEach((radiodj) => {
         Status.template.push({ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: radiodj.level, data: 'This RadioDJ has not reported online since initialization.', time: null });
     });
     sails.log.verbose(`BOOTSTRAP: Loading Client instances into template`);
@@ -69,7 +69,7 @@ module.exports.bootstrap = async function (done) {
             sails.log.error(err);
         });
     if (clients.length > 0) {
-        clients.forEach(function (client) {
+        clients.forEach((client) => {
             var offStatus = 4;
             if (client.silenceDetection || client.recordAudio || client.answerCalls) {
                 if (client.silenceDetection || client.recordAudio) {
@@ -83,7 +83,7 @@ module.exports.bootstrap = async function (done) {
     }
 
     sails.log.verbose(`BOOTSTRAP: Loading Display Sign instances into template`);
-    sails.config.custom.displaysigns.forEach(function (display) {
+    sails.config.custom.displaysigns.forEach((display) => {
         Status.template.push({ name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: 'This display sign has not reported online since initialization.', time: null });
     });
 
@@ -103,13 +103,13 @@ module.exports.bootstrap = async function (done) {
 
     // Generate recipients based off of messages from the last hour... website only.
     sails.log.verbose(`BOOTSTRAP: Adding recipients from messages sent within the last hour into database.`);
-    var records = await Messages.find({ status: 'active', from: { "startsWith": 'website-' }, createdAt: { ">": moment().subtract(1, 'hours').toDate() } }).sort('createdAt DESC')
+    var records = await Messages.find({ status: 'active', from: { 'startsWith': 'website-' }, createdAt: { '>': moment().subtract(1, 'hours').toDate() } }).sort('createdAt DESC')
         .tolerate((err) => {
         });
     if (records && records.length > 0) {
         var insertRecords = [];
         var hosts = [];
-        records.forEach(function (record) {
+        records.forEach((record) => {
             if (hosts.indexOf(record.from) === -1) {
                 hosts.push(record.from);
                 insertRecords.push({ host: record.from, group: 'website', label: record.from_friendly, status: 0, time: record.createdAt });
@@ -143,7 +143,7 @@ module.exports.bootstrap = async function (done) {
                 });
             Playlists.active.tracks = [];
             if (typeof playlistTracks !== 'undefined') {
-                playlistTracks.forEach(function (playlistTrack) {
+                playlistTracks.forEach((playlistTrack) => {
                     Playlists.active.tracks.push(playlistTrack.sID);
                 });
             }
@@ -212,7 +212,7 @@ module.exports.bootstrap = async function (done) {
                             });
                         Playlists.active.tracks = [];
                         if (typeof playlistTracks !== 'undefined') {
-                            playlistTracks.forEach(function (playlistTrack) {
+                            playlistTracks.forEach((playlistTrack) => {
                                 Playlists.active.tracks.push(playlistTrack.sID);
                             });
                         }
@@ -249,10 +249,10 @@ module.exports.bootstrap = async function (done) {
                     var breakQueueLength = -2;
                     var firstNoMeta = 0;
                     change.queueMusic = false;
-                    if ((Meta['A'].state.includes("_returning") || Meta['A'].state === 'automation_live' || Meta['A'].state === 'automation_remote' || Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote')) {
+                    if ((Meta['A'].state.includes('_returning') || Meta['A'].state === 'automation_live' || Meta['A'].state === 'automation_remote' || Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote')) {
                         breakQueueLength = -1;
                         firstNoMeta = -1;
-                        queue.forEach(function (track, index) {
+                        queue.forEach((track, index) => {
                             if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1) {
                                 if (firstNoMeta > -1 && breakQueueLength < 0) {
                                     breakQueueLength = index;
@@ -267,7 +267,7 @@ module.exports.bootstrap = async function (done) {
                     // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
                     if (Meta['A'].changingState === null) {
                         sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`);
-                        await sails.helpers.asyncForEach(queue, function (track, index) {
+                        await sails.helpers.asyncForEach(queue, (track, index) => {
                             return new Promise(async (resolve2, reject2) => {
                                 var title = `${track.Artist} - ${track.Title}`;
                                 // If there is a duplicate, remove the track, store for later queuing if necessary.
@@ -275,7 +275,7 @@ module.exports.bootstrap = async function (done) {
                                 if (theTracks.indexOf(title) > -1) {
                                     sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
                                     if (track.TrackType !== 'Music')
-                                        Songs.pending.push(track.ID);
+                                        {Songs.pending.push(track.ID);}
                                     await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
                                     theTracks = [];
                                     queue = await sails.helpers.rest.getQueue();
@@ -323,14 +323,14 @@ module.exports.bootstrap = async function (done) {
                         //Statemeta.final.queueLength = (Statesystem.errors.prevqueuelength - 1);
                     }
                     if (queueLength < 0)
-                        queueLength = 0;
+                        {queueLength = 0;}
                 } else { // No error wait time [remaining]? Use actual detected queue time.
                 }
             } else {
                 Status.errorCheck.trueZero = 5; // Wait up to 5 seconds before considering the queue accurate
                 // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
                 if (queueLength < 0)
-                    queueLength = 0;
+                    {queueLength = 0;}
             }
 
             Status.errorCheck.prevQueueLength = queueLength;
@@ -347,7 +347,7 @@ module.exports.bootstrap = async function (done) {
                             });
                         Playlists.active.tracks = [];
                         if (typeof playlistTracks !== 'undefined') {
-                            playlistTracks.forEach(function (playlistTrack) {
+                            playlistTracks.forEach((playlistTrack) => {
                                 Playlists.active.tracks.push(playlistTrack.sID);
                             });
                         }
@@ -368,7 +368,7 @@ module.exports.bootstrap = async function (done) {
             }
 
             // Clear manual metadata if it is old
-            if (Meta['A'].trackStamp !== null && (moment().isAfter(moment(Meta['A'].trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== 'live_prerecord')) {
+            if (Meta['A'].trackStamp !== null && (moment().isAfter(moment(Meta['A'].trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !Meta['A'].state.startsWith('automation_') && Meta['A'].state !== 'live_prerecord')) {
                 change.trackStamp = null;
                 change.trackArtist = null;
                 change.trackTitle = null;
@@ -383,7 +383,7 @@ module.exports.bootstrap = async function (done) {
             if ((Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_prerecord' || Meta['A'].state === 'live_prerecord')) {
                 // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
                 sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`);
-                await sails.helpers.asyncForEach(queue, function (autoTrack, index) {
+                await sails.helpers.asyncForEach(queue, (autoTrack, index) => {
                     return new Promise(async (resolve2, reject2) => {
                         try {
                             for (var i = 0; i < Playlists.active.tracks.length; i++) {
@@ -391,7 +391,7 @@ module.exports.bootstrap = async function (done) {
                                 if (name === parseInt(autoTrack.ID)) {
                                     // Waiting for the playlist to begin, and it has begun? Switch states.
                                     if (Meta['A'].state === 'automation_prerecord' && index === 0 && !Playlists.queuing && Meta['A'].changingState === null) {
-                                        // State switching should be pushed in sockets 
+                                        // State switching should be pushed in sockets
                                         await Meta.changeMeta({ state: 'live_prerecord', showStamp: moment().toISOString(true) });
                                         var attendance = await Attendance.createRecord(`Prerecord: ${Meta['A'].playlist}`);
                                         await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `<strong>A prerecord started airing.</strong><br />Prerecord: ${Meta['A'].playlist}` }).fetch()
@@ -425,14 +425,14 @@ module.exports.bootstrap = async function (done) {
                     if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && Meta['A'].changingState === null) {
                         await Meta.changeMeta({ changingState: `Ending playlist` });
                         switch (Meta['A'].state) {
-                            case "automation_playlist":
+                            case 'automation_playlist':
                                 await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `<strong>A playlist finished airing.</strong>` }).fetch()
                                     .tolerate((err) => {
                                         // Do not throw for errors, but log it.
                                         sails.log.error(err);
                                     });
                                 break;
-                            case "live_prerecord":
+                            case 'live_prerecord':
                                 await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
                                     .tolerate((err) => {
                                         // Do not throw for errors, but log it.
@@ -516,7 +516,7 @@ module.exports.bootstrap = async function (done) {
                             case 'live_returning':
                                 await Meta.changeMeta({ state: 'live_on' });
                                 if (!change.queueMusic)
-                                    await sails.helpers.rest.cmd('EnableAssisted', 1);
+                                    {await sails.helpers.rest.cmd('EnableAssisted', 1);}
                                 break;
                             case 'remote_returning':
                                 await Meta.changeMeta({ state: 'remote_on' });
@@ -524,7 +524,7 @@ module.exports.bootstrap = async function (done) {
                             case 'sports_returning':
                                 await Meta.changeMeta({ state: 'sports_on' });
                                 if (!change.queueMusic)
-                                    await sails.helpers.rest.cmd('EnableAssisted', 1);
+                                    {await sails.helpers.rest.cmd('EnableAssisted', 1);}
                                 break;
                             case 'sportsremote_returning':
                                 await Meta.changeMeta({ state: 'sportsremote_on' });
@@ -557,12 +557,12 @@ module.exports.bootstrap = async function (done) {
 
                     // Counter to ensure automation break is not running for too long
                     if (Meta['A'].state === 'automation_break')
-                        await sails.helpers.error.count('automationBreak');
+                        {await sails.helpers.error.count('automationBreak');}
 
                     // Check if a DJ neglected the required top of the hour break (passes :05 after)
                     var d = new Date();
                     var n = d.getMinutes();
-                    if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(Meta['A'].lastID)) && !Meta['A'].state.startsWith("automation_") && Meta['A'].state !== `live_prerecord`) {
+                    if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(Meta['A'].lastID)) && !Meta['A'].state.startsWith('automation_') && Meta['A'].state !== `live_prerecord`) {
                         await Meta.changeMeta({ lastID: moment().toISOString(true) });
                         await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `<strong>Required top of the hour break was not taken!</strong><br />Show: ${Meta['A'].show}` }).fetch()
                             .tolerate((err) => {
@@ -582,7 +582,7 @@ module.exports.bootstrap = async function (done) {
 
 
                     // Do automation system error checking and handling
-                    if (queue.length > 0 && queue[0].Duration === Status.errorCheck.prevDuration && queue[0].Elapsed === Status.errorCheck.prevElapsed && (Meta['A'].state.startsWith("automation_") || Meta['A'].state.endsWith("_break") || Meta['A'].state.endsWith("_disconnected") || Meta['A'].state === 'live_prerecord')) {
+                    if (queue.length > 0 && queue[0].Duration === Status.errorCheck.prevDuration && queue[0].Elapsed === Status.errorCheck.prevElapsed && (Meta['A'].state.startsWith('automation_') || Meta['A'].state.endsWith('_break') || Meta['A'].state.endsWith('_disconnected') || Meta['A'].state === 'live_prerecord')) {
                         await sails.helpers.error.count('frozen');
                     } else {
                         Status.errorCheck.prevDuration = queue[0].Duration;
@@ -609,7 +609,7 @@ module.exports.bootstrap = async function (done) {
 
                                 // If the current time is before scheduled break, but the currently playing track will finish after scheduled break, consider queuing the break.
                                 if ((moment().isBefore(moment(breakTime)) && moment(endTime).isAfter(moment(breakTime))) || (moment().isBefore(moment(breakTime2)) && moment(endTime).isAfter(moment(breakTime2))))
-                                    doBreak = true;
+                                    {doBreak = true;}
 
                                 // If the currently playing track will not end after the scheduled break,
                                 // but the following track will end further after the scheduled break than the current track would,
@@ -620,34 +620,34 @@ module.exports.bootstrap = async function (done) {
                                         var endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
                                         var distanceafter = endtime2.diff(breakTime);
                                         if (moment(endtime2).isAfter(moment(breakTime)) && distanceafter > distancebefore)
-                                            doBreak = true;
+                                            {doBreak = true;}
                                     } else {
                                         var distancebefore = moment(breakTime2).diff(moment(endTime));
                                         var endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
                                         var distanceafter = endtime2.diff(breakTime2);
                                         if (moment(endtime2).isAfter(moment(breakTime2)) && distanceafter > distancebefore)
-                                            doBreak = true;
+                                            {doBreak = true;}
                                     }
                                 }
 
                                 // Do not queue if we are not in automation, playlist, genre, or prerecord states
                                 if (Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'live_prerecord')
-                                    doBreak = false;
+                                    {doBreak = false;}
 
                                 // Do not queue if we queued a break less than the configured failsafe time, and this isn't the 0 break
                                 if (key !== 0 && Status.errorCheck.prevBreak !== null && moment(Status.errorCheck.prevBreak).isAfter(moment().subtract(sails.config.custom.breakCheck, 'minutes')))
-                                    doBreak = false;
+                                    {doBreak = false;}
 
                                 // The 0 break has its own hard coded failsafe of 10 minutes, separate from other breaks, since it's a FCC required break
                                 if (key === 0 && Status.errorCheck.prevID !== null && moment(Status.errorCheck.prevID).isAfter(moment().subtract(10, 'minutes')))
-                                    doBreak = false;
+                                    {doBreak = false;}
 
                                 // Do not queue anything yet if the current track has breakCheck minutes or more left (resolves a discrepancy with the previous logic)
                                 if (key !== 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * sails.config.custom.breakCheck))
-                                    doBreak = false;
+                                    {doBreak = false;}
 
                                 if (key === 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * 10))
-                                    doBreak = false;
+                                    {doBreak = false;}
 
                                 // Do the break if we are supposed to
                                 if (doBreak) {
@@ -684,7 +684,7 @@ module.exports.bootstrap = async function (done) {
                                     // Don't do a liner if it was too soon.
                                     if (Status.errorCheck.prevLiner === null || moment().diff(moment(Status.errorCheck.prevLiner), 'minutes') > sails.config.custom.linerTime) {
                                         // Only do liners when in automation
-                                        if (Meta['A'].state.startsWith("automation_")) {
+                                        if (Meta['A'].state.startsWith('automation_')) {
                                             // If there is at least 1 track in the queue, and both the current track and the next track are not noMeta tracks, queue a liner
                                             if (queue.length > 1 && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[1].IDSubcat)) === -1) {
                                                 Status.errorCheck.prevLiner = moment();
@@ -700,7 +700,7 @@ module.exports.bootstrap = async function (done) {
                     }
                 } else {
                     // We have no queue... which should never happen because RadioDJ always returns a dummy track in position 0. This is an error.
-                    if (Meta['A'].state.startsWith("automation_") || Meta['A'].state.endsWith("_break") || Meta['A'].state.endsWith("_disconnected") || Meta['A'].state === 'live_prerecord') {
+                    if (Meta['A'].state.startsWith('automation_') || Meta['A'].state.endsWith('_break') || Meta['A'].state.endsWith('_disconnected') || Meta['A'].state === 'live_prerecord') {
                         await sails.helpers.error.count('frozen');
                     }
                 }
@@ -744,7 +744,7 @@ module.exports.bootstrap = async function (done) {
         try {
             // SHOUTCAST 2.6
             needle('get', sails.config.custom.stream + `/statistics?json=1`, {}, { headers: { 'Content-Type': 'application/json' } })
-                .then(async function (resp) {
+                .then(async (resp) => {
                     try {
                         var streams = resp.body.streams;
                         var publicStream = false;
@@ -805,12 +805,12 @@ module.exports.bootstrap = async function (done) {
              // Mark stream as good
              Status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Operational.', status: 5}]);
              publicStream = true;
-             
+
              // Log listeners
              if (typeof source.listeners !== 'undefined')
              {
              var dj = '';
-             
+
              // Do not tie DJ with listener count unless DJ is actually on the air
              if (!Meta['A'].state.startsWith("automation_"))
              {
@@ -829,7 +829,7 @@ module.exports.bootstrap = async function (done) {
              Listeners.memory = {dj: dj, listeners: source.listeners};
              }
              }
-             
+
              // Source is mountpoint /remote?
              if (source.listenurl.endsWith("/remote"))
              {
@@ -882,12 +882,12 @@ module.exports.bootstrap = async function (done) {
             sails.log.debug(`CRON checkRadioDJs triggered.`);
             try {
                 sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`);
-                await sails.helpers.asyncForEach(sails.config.custom.radiodjs, function (radiodj) {
+                await sails.helpers.asyncForEach(sails.config.custom.radiodjs, (radiodj) => {
                     return new Promise(async (resolve2, reject2) => {
                         var status = await Status.findOne({ name: `radiodj-${radiodj.name}` });
                         try {
                             needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, { headers: { 'Content-Type': 'application/json' } })
-                                .then(async function (resp) {
+                                .then(async (resp) => {
                                     if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined') {
                                         Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is online.', status: 5 }]);
 
@@ -928,7 +928,7 @@ module.exports.bootstrap = async function (done) {
                                             if (typeof automation[0] !== 'undefined' && parseInt(automation[0].ID) !== 0) {
                                                 try {
                                                     needle('get', radiodj.rest + '/opt?auth=' + sails.config.custom.rest.auth + '&command=StopPlayer&arg=1', {}, { open_timeout: 10000, response_timeout: 10000, read_timeout: 10000, headers: { 'Content-Type': 'application/json' } })
-                                                        .catch(function (err) {
+                                                        .catch((err) => {
                                                             // Ignore errors
                                                         });
                                                 } catch (e3) {
@@ -938,18 +938,18 @@ module.exports.bootstrap = async function (done) {
                                         }
                                     } else {
                                         if (status && status.status !== 1)
-                                            Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level }]);
+                                            {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level }]);}
                                     }
                                     return resolve2(false);
                                 })
-                                .catch(function (err) {
+                                .catch((err) => {
                                     if (status && status.status !== 1)
-                                        Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level }]);
+                                        {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level }]);}
                                     return resolve2(false);
                                 });
                         } catch (e) {
                             if (status && status.status !== 1)
-                                Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding.', status: radiodj.level }]);
+                                {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding.', status: radiodj.level }]);}
                             return resolve2(false);
                         }
                     });
@@ -968,14 +968,14 @@ module.exports.bootstrap = async function (done) {
         sails.log.debug(`CRON checkWebsite triggered.`);
         try {
             needle('get', sails.config.custom.website, {}, { headers: { 'Content-Type': 'application/json' } })
-                .then(async function (resp) {
+                .then(async (resp) => {
                     if (typeof resp.body !== 'undefined') {
                         Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website is online.', status: 5 }]);
                     } else {
                         Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website did not return body data.', status: 2 }]);
                     }
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website is offline.', status: 2 }]);
                 });
         } catch (e) {
@@ -1019,7 +1019,7 @@ module.exports.bootstrap = async function (done) {
                 if (complete >= sails.config.custom.EAS.NWSX.length) {
                     Status.changeStatus([{ name: 'EAS-internal', label: 'Internal EAS', data: 'All NWS CAPS are online.', status: 5 }]);
                 } else {
-                    Status.changeStatus([{ name: 'EAS-internal', label: 'Internal EAS', data: `Could not fetch the following NWS CAPS counties: ${bad.join(", ")}`, status: 3 }]);
+                    Status.changeStatus([{ name: 'EAS-internal', label: 'Internal EAS', data: `Could not fetch the following NWS CAPS counties: ${bad.join(', ')}`, status: 3 }]);
                 }
 
                 // Finish up
@@ -1050,7 +1050,7 @@ module.exports.bootstrap = async function (done) {
                 var checkStatus = { data: ``, status: 5 };
                 sails.log.debug(`CHECK: DB Memory`);
                 sails.log.debug(`Calling asyncForEach in cron checkDB for memory tests`);
-                await sails.helpers.asyncForEach(checksMemory, function (check, index) {
+                await sails.helpers.asyncForEach(checksMemory, (check, index) => {
                     return new Promise(async (resolve, reject) => {
                         try {
                             var record = await check.find().limit(1)
@@ -1060,7 +1060,7 @@ module.exports.bootstrap = async function (done) {
                                 });
                             if (typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') {
                                 if (checkStatus.status > 3)
-                                    checkStatus.status = 3;
+                                    {checkStatus.status = 3;}
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
@@ -1072,14 +1072,14 @@ module.exports.bootstrap = async function (done) {
                     });
                 });
                 if (checkStatus.status === 5)
-                    checkStatus.data = `This datastore is fully operational.`;
+                    {checkStatus.data = `This datastore is fully operational.`;}
                 Status.changeStatus([{ name: 'db-memory', label: 'DB Memory', data: checkStatus.data, status: checkStatus.status }]);
 
                 // RadioDJ checks
                 sails.log.debug(`CHECK: DB RadioDJ`);
                 var checkStatus = { data: ``, status: 5 };
                 sails.log.debug(`Calling asyncForEach in cron checkDB for RadioDJ database checks`);
-                await sails.helpers.asyncForEach(checksRadioDJ, function (check, index) {
+                await sails.helpers.asyncForEach(checksRadioDJ, (check, index) => {
                     return new Promise(async (resolve, reject) => {
                         try {
                             var record = await check.find().limit(1)
@@ -1089,7 +1089,7 @@ module.exports.bootstrap = async function (done) {
                                 });
                             if (typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') {
                                 if (checkStatus.status > 3)
-                                    checkStatus.status = 3;
+                                    {checkStatus.status = 3;}
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
@@ -1101,14 +1101,14 @@ module.exports.bootstrap = async function (done) {
                     });
                 });
                 if (checkStatus.status === 5)
-                    checkStatus.data = `This datastore is fully operational.`;
+                    {checkStatus.data = `This datastore is fully operational.`;}
                 Status.changeStatus([{ name: 'db-radiodj', label: 'DB RadioDJ', data: checkStatus.data, status: checkStatus.status }]);
 
                 // Nodebase checks
                 sails.log.debug(`CHECK: DB Nodebase`);
                 var checkStatus = { data: ``, status: 5 };
                 sails.log.debug(`Calling asyncForEach in cron checkDB for nodebase database checks`);
-                await sails.helpers.asyncForEach(checksNodebase, function (check, index) {
+                await sails.helpers.asyncForEach(checksNodebase, (check, index) => {
                     return new Promise(async (resolve, reject) => {
                         try {
                             var record = await check.find().limit(1)
@@ -1118,7 +1118,7 @@ module.exports.bootstrap = async function (done) {
                                 });
                             if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') && index > 6) {
                                 if (checkStatus.status > 3)
-                                    checkStatus.status = 3;
+                                    {checkStatus.status = 3;}
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
@@ -1130,7 +1130,7 @@ module.exports.bootstrap = async function (done) {
                     });
                 });
                 if (checkStatus.status === 5)
-                    checkStatus.data = `This datastore is fully operational.`;
+                    {checkStatus.data = `This datastore is fully operational.`;}
                 Status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status }]);
 
                 return true;
@@ -1197,15 +1197,15 @@ module.exports.bootstrap = async function (done) {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON recipientsCheck called.`);
             try {
-                var records = await Recipients.find({ host: { "!=": ["website"] }, status: 0 });
+                var records = await Recipients.find({ host: { '!=': ['website'] }, status: 0 });
                 var destroyIt = [];
                 var searchto = moment().subtract(4, 'hours');
-                records.forEach(function (record) {
+                records.forEach((record) => {
                     if (moment(record.time).isBefore(moment(searchto)))
-                        destroyIt.push(record.ID);
+                        {destroyIt.push(record.ID);}
                 });
                 if (destroyIt.length > 0)
-                    await Recipients.destroy({ ID: destroyIt }).fetch();
+                    {await Recipients.destroy({ ID: destroyIt }).fetch();}
 
                 return resolve();
             } catch (e) {
@@ -1230,7 +1230,7 @@ module.exports.bootstrap = async function (done) {
                         var cueData = queryString.parse(record.cue_times);
                         // If fade in and fade out are both 0 (treat when fade in or fade out is not specified as being 0), skip this track; nothing to do.
                         if ((!cueData.fin || cueData.fin === 0) && (!cueData.fou || cueData.fou === 0))
-                            return null;
+                            {return null;}
 
                         // Get rid of any fading, and reset the xta cue point
                         cueData.fin = 0;
@@ -1260,7 +1260,7 @@ module.exports.bootstrap = async function (done) {
         new Promise(async (resolve, reject) => {
             sails.log.debug(`CRON serverCheck called.`);
             try {
-                var os = require("os");
+                var os = require('os');
 
                 // Get CPU load and free memory
                 var load = os.loadavg();
@@ -1317,15 +1317,15 @@ module.exports.bootstrap = async function (done) {
             sails.log.debug(`CRON priorityCheck called`);
             try {
                 // First, get the value of default priority
-                var defaultPriority = await Settings.find({ source: "settings_general", setting: "DefaultTrackPriority" }).limit(1);
+                var defaultPriority = await Settings.find({ source: 'settings_general', setting: 'DefaultTrackPriority' }).limit(1);
 
                 if (typeof defaultPriority[0] === 'undefined' || defaultPriority === null || defaultPriority[0] === null)
-                    throw new Error("Could not find DefaultTrackPriority setting in the RadioDJ database");
+                    {throw new Error('Could not find DefaultTrackPriority setting in the RadioDJ database');}
 
                 var songs = await Songs.find();
 
                 sails.log.debug(`Calling asyncForEach in cron priorityCheck for every RadioDJ song`);
-                await sails.helpers.asyncForEach(songs, function (song) {
+                await sails.helpers.asyncForEach(songs, (song) => {
                     return new Promise(async (resolve2, reject2) => {
                         try {
 
@@ -1333,7 +1333,7 @@ module.exports.bootstrap = async function (done) {
                             minPriority = Math.round(minPriority * 10) / 10;
 
                             if (song.weight < minPriority)
-                                await Songs.update({ ID: song.ID }, { weight: minPriority });
+                                {await Songs.update({ ID: song.ID }, { weight: minPriority });}
 
                             return resolve2(false);
 
@@ -1354,6 +1354,11 @@ module.exports.bootstrap = async function (done) {
 
     sails.log.verbose(`BOOTSTRAP: calculate weekly analytics.`);
     await sails.helpers.attendance.calculateStats();
+
+    sails.log.verbose(`Set a 30 second timer for display-refresh.`);
+    setTimeout(() => {
+        sails.sockets.broadcast('display-refresh', 'display-refresh', true);
+    }, 30000);
 
     sails.log.verbose(`BOOTSTRAP: Done.`);
 

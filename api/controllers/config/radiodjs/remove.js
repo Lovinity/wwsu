@@ -1,5 +1,3 @@
-/* global sails, Meta, Status */
-
 module.exports = {
 
     friendlyName: 'config / radiodjs / remove',
@@ -28,8 +26,8 @@ module.exports = {
             var changeRadioDj = false;
             sails.config.custom.radiodjs
                     .filter((radiodj) => radiodj.rest === Meta['A'].radiodj && radiodj.name === inputs.name)
-                    .map(() => changeRadioDj = true);
-            
+                    .map(() => {changeRadioDj = true;});
+
 
             // Delete the RadioDJ
             sails.config.custom.radiodjs
@@ -44,10 +42,11 @@ module.exports = {
             {
                 // Forcefully clear the current active radioDJ since it no longer exists in configuration.
                 await Meta.changeMeta({radiodj: ``});
-                
+
                 await sails.helpers.rest.changeRadioDj();
             }
 
+            // Transmit new config over websockets
             sails.sockets.broadcast('config', 'config', {update: {radiodjs: sails.config.custom.radiodjs}});
 
             return exits.success();

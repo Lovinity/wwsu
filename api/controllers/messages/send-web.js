@@ -1,5 +1,4 @@
-/* global sails */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -31,14 +30,14 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller messages/send-web called.');
-        
+
         // Get the client's IP address
-        var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
-        
+        var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
+
         // Prepare data
-        var opts = {message: inputs.message, from_IP: from_IP, nickname: inputs.nickname || null, private: inputs.private};
-        opts.host = sh.unique(from_IP + sails.config.custom.hostSecret);
-        
+        var opts = {message: inputs.message, fromIP: fromIP, nickname: inputs.nickname || null, private: inputs.private};
+        opts.host = sh.unique(fromIP + sails.config.custom.hostSecret);
+
         try {
             // Send the message
             await sails.helpers.messages.sendWeb(opts.host, opts.message, opts.from_IP, opts.nickname, opts.private);

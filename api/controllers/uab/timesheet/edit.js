@@ -1,5 +1,3 @@
-/* global sails, Directors, Timesheet, moment */
-
 module.exports = {
 
     friendlyName: 'uab / Timesheet / Edit',

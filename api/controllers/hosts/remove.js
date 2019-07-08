@@ -1,5 +1,4 @@
-/* global sails, Hosts, Status */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -14,7 +13,7 @@ module.exports = {
             description: 'The ID of the director to edit.'
         }
     },
-    
+
     exits: {
         conflict: {
             statusCode: 409
@@ -32,11 +31,11 @@ module.exports = {
 
             // Block requests to remove this host if there are 1 or less authorized admin hosts and this host is an authorized admin.
             if (lockout <= 1 && toDestroy.authorized && toDestroy.admin)
-                return exits.conflict("To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing this host.");
+                {return exits.conflict('To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing this host.');}
 
             // Destroy it
             var hostRecord = await Hosts.destroyOne({ID: inputs.ID});
-            
+
             // Destroy the status records for this host as well
             await Status.destroy({name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`}).fetch();
 

@@ -1,5 +1,4 @@
-/* global sails */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -21,15 +20,16 @@ module.exports = {
         try {
             // Request must be a socket
             if (!this.req.isSocket)
-                return exits.error(new Error('This controller requires a websocket.'));
+                {return exits.error(new Error('This controller requires a websocket.'));}
 
             // Get client IP address and form a host hash from it
-            var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
-            var host = sh.unique(from_IP + sails.config.custom.hostSecret);
+            var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
+            var host = sh.unique(fromIP + sails.config.custom.hostSecret);
 
-            sails.sockets.join(this.req, `discipline-${host}`); // If a ban is issued for this client later on, it is sent through this
+            // If a ban is issued for this client later on, it is sent through this socket
+            sails.sockets.join(this.req, `discipline-${host}`);
 
-            // Mark the client as online
+            // Mark the client as online and retrieve their nickname
             var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`, inputs.device);
 
             // Return the nickname of this client as a label object

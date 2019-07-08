@@ -1,5 +1,3 @@
-/* global Calendar, sails, Directorhours */
-
 module.exports = {
 
     friendlyName: 'config / onesignal / set',

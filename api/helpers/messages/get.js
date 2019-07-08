@@ -1,5 +1,3 @@
-/* global Hosts, Messages, sails, moment */
-
 module.exports = {
 
     friendlyName: 'messages.get',
@@ -26,7 +24,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var searchto = moment().subtract(1, 'hours').toDate(); // Get messages sent within the last hour
             //

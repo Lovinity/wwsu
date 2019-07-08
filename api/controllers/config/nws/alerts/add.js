@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / nws / alerts / add',

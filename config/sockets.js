@@ -53,7 +53,7 @@ module.exports.sockets = {
         // Reject immediately if this is a disciplined host
         var moment = require('moment');
         var searchto = moment().subtract(1, 'days').toDate();
-        var sh = require("shorthash");
+        var sh = require('shorthash');
         var theip = typeof handshake.headers['x-forwarded-for'] !== 'undefined' ? handshake.headers['x-forwarded-for'] : handshake.address;
         var theid = sh.unique(theip + sails.config.custom.hostSecret);
         try {

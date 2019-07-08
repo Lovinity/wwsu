@@ -1,4 +1,4 @@
-/* global io, moment, Infinity, iziToast, responsiveVoice, jdenticon, Slides */
+/* global moment, iziToast, responsiveVoice, jdenticon, Slides, WWSUdb, TAFFY, $, WWSUreq */
 
 try {
     // Define default slide templates
@@ -30,7 +30,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 5,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div>`
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Changed office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span></p>`
     });
 
     // Assistant Director hours
@@ -45,7 +45,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 5,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div>`
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Changed office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span></p>`
     });
 
     // Weekly Stats
@@ -101,26 +101,20 @@ try {
     var Status = new WWSUdb(TAFFY());
 
 // Define HTML elements
-    var noConnection = document.getElementById("no-connection");
-    var slidebadges = document.getElementById('slide-badges');
     var statusLine = document.getElementById('status-line');
-    var content = document.getElementById('slide');
-    var title = document.getElementById('title');
-    var wrapper = document.getElementById("wrapper");
-    var background = document.getElementById("bg-canvas");
+    var wrapper = document.getElementById('wrapper');
     wrapper.width = window.innerWidth;
     wrapper.height = window.innerHeight;
     var flashInterval = null;
     var statusMarquee = ``;
 
 // Define other variables
-    var nodeURL = 'https://server.wwsu1069.org';
+    // LINT says directorpresent is never used. That is a lie.
+    // eslint-disable-next-line no-unused-vars
     var directorpresent = false;
     var disconnected = true;
     var slidetimer = false;
-    var lastBurnIn = null;
     var prevStatus = 5;
-    var stickySlides = false;
     var offlineTimer;
     var clockTimer;
     var globalStatus = 4;
@@ -128,7 +122,7 @@ try {
     var officeHoursTimer;
     var directorNotify;
 
-    var colors = ['#FF0000', '#00FF00', '#0000FF'], color = 0, delay = 300000, scrollDelay = 15000;
+    var colors = ['#FF0000', '#00FF00', '#0000FF']; var color = 0; var delay = 300000; var scrollDelay = 15000;
 
 // burnGuard is a periodic line that sweeps across the screen to prevent burn-in. Define / construct it.
     var $burnGuard = $('<div>').attr('id', 'burnGuard').css({
@@ -141,15 +135,6 @@ try {
         'display': 'none',
         'z-index': 9999
     }).appendTo('body');
-
-// Construct a new LineJS instance (the periodic line marquee screensaver)
-    var lines = new LinesJS({
-        canvasId: 'wrapper',
-        skipMin: 5,
-        skipMax: 15,
-        numLines: 30,
-        timeInterval: 50
-    });
 
     // Define default settings for iziToast (overlaying messages)
     iziToast.settings({
@@ -224,7 +209,8 @@ $.fn.extend({
             $(this).removeClass('animated ' + animationName);
 
             if (typeof callback === 'function')
-                callback();
+                // eslint-disable-next-line callback-return
+                {callback();}
         });
 
         return this;
@@ -232,7 +218,7 @@ $.fn.extend({
 });
 
 // Define a reload timer; terminates if socket connection gets established. This ensures if no connection is made, page will refresh itself to try again.
-var restart = setTimeout(function () {
+var restart = setTimeout(() => {
     window.location.reload(true);
 }, 15000);
 
@@ -249,7 +235,7 @@ function waitFor(check, callback, count = 0)
         } else {
         }
     } else {
-        callback();
+        return callback();
 }
 }
 
@@ -273,50 +259,50 @@ waitFor(() => {
     Status.setOnRemove((data, db) => processStatus(db));
     Status.setOnReplace((db) => processStatus(db));
 
-    Directors.setOnUpdate((data, db) => {
+    Directors.setOnUpdate(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directors.setOnInsert((data, db) => {
+    Directors.setOnInsert(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directors.setOnRemove((data, db) => {
+    Directors.setOnRemove(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directors.setOnReplace((db) => {
+    Directors.setOnReplace(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
 
-    Directorhours.setOnUpdate((data, db) => {
+    Directorhours.setOnUpdate(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directorhours.setOnInsert((data, db) => {
+    Directorhours.setOnInsert(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directorhours.setOnRemove((data, db) => {
+    Directorhours.setOnRemove(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
         }, 5000);
     });
-    Directorhours.setOnReplace((db) => {
+    Directorhours.setOnReplace(() => {
         clearTimeout(officeHoursTimer);
         officeHoursTimer = setTimeout(() => {
             processDirectors(Directors.db(), Directorhours.db());
@@ -324,12 +310,12 @@ waitFor(() => {
     });
 
     // Do stuff when announcements changes are made
-    Announcements.setOnUpdate((data, db) => {
+    Announcements.setOnUpdate((data) => {
         Slides.removeSlide(`attn-${data.ID}`);
         createAnnouncement(data);
     });
-    Announcements.setOnInsert((data, db) => createAnnouncement(data));
-    Announcements.setOnRemove((data, db) => Slides.removeSlide(`attn-${data}`));
+    Announcements.setOnInsert((data) => createAnnouncement(data));
+    Announcements.setOnRemove((data) => Slides.removeSlide(`attn-${data}`));
     Announcements.setOnReplace((db) => {
         console.dir(db.get());
         // Remove all announcement slides
@@ -342,13 +328,13 @@ waitFor(() => {
     });
 
     // Assign additional event handlers
-    io.socket.on('display-refresh', function (data) {
+    io.socket.on('display-refresh', () => {
         // Reload the display sign when this event is called
         window.location.reload(true);
     });
 
     // Update meta information when meta is provided
-    io.socket.on('meta', function (data) {
+    io.socket.on('meta', (data) => {
         try {
             for (var key in data)
             {
@@ -358,7 +344,7 @@ waitFor(() => {
 
                     // Do a status update if a state change was returned; this could impact power saving mode
                     if (key === 'state')
-                        processStatus(Status.db());
+                        {processStatus(Status.db());}
 
                     if (key === 'time')
                     {
@@ -404,7 +390,7 @@ waitFor(() => {
     });
 
     // Update weekly analytics
-    io.socket.on('analytics-weekly-dj', function (data) {
+    io.socket.on('analytics-weekly-dj', (data) => {
         try {
             processWeeklyStats(data);
         } catch (e) {
@@ -417,7 +403,7 @@ waitFor(() => {
     });
 
 // When a socket connection is established
-    io.socket.on('connect', function () {
+    io.socket.on('connect', () => {
         onlineSocket();
         metaSocket();
         directorSocket();
@@ -449,7 +435,7 @@ waitFor(() => {
     }
 
 // When a socket connection is lost
-    io.socket.on('disconnect', function () {
+    io.socket.on('disconnect', () => {
         console.log('Lost connection');
         try {
             io.socket._raw.io._reconnection = true;
@@ -483,7 +469,7 @@ function clockTick() {
                 directorMentions.push(director.name);
             });
             Slides.slide(`director-clockout`).active = true;
-            responsiveVoice.speak(`Attention all directors! Attention all directors! It is almost midnight. Any director who is still clocked in needs to clock out before midnight, and re-clock in after midnight. Guests in the lobby, please inform any directors still in the office about this. The following directors, if any, are still clocked in and need to clock out now: ${directorMentions.join(", ")}.`);
+            responsiveVoice.speak(`Attention all directors! Attention all directors! It is almost midnight. Any director who is still clocked in needs to clock out before midnight, and re-clock in after midnight. Guests in the lobby, please inform any directors still in the office about this. The following directors, if any, are still clocked in and need to clock out now: ${directorMentions.join(', ')}.`);
         }
     } else if (directorNotify) {
         Slides.slide(`director-clockout`).active = false;
@@ -499,7 +485,7 @@ function processStatus(db)
         var doRow = false;
         var secondRow = false;
         globalStatus = 4;
-        statusMarquee = `<div class="row">
+        statusMarquee = `<div class="row bg-dark-1">
                       <div class="col-2 text-warning">
                   	<strong>System</strong>
                       </div>
@@ -512,10 +498,10 @@ function processStatus(db)
                       <div class="col text-white">
                   	<strong>Status</strong>
                       </div>
-                    </div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
+                    </div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`;
 
 
-        db.each(function (thestatus) {
+        db.each((thestatus) => {
             try {
                 if (doRow)
                 {
@@ -525,7 +511,7 @@ function processStatus(db)
                     } else {
                         secondRow = false;
                     }
-                    statusMarquee += `</div><div class="row" style="${secondRow ? `background: rgba(255, 255, 255, 0.1);` : ``}">`;
+                    statusMarquee += `</div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`;
                     doRow = false;
                 } else {
                     doRow = true;
@@ -541,7 +527,7 @@ function processStatus(db)
                   	<strong>CRITICAL</strong>: ${thestatus.data}
                       </div>`;
                         if (globalStatus > 1)
-                            globalStatus = 1;
+                            {globalStatus = 1;}
                         break;
                     case 2:
                         statusMarquee += `<div class="col-2">
@@ -551,7 +537,7 @@ function processStatus(db)
                   	<strong>Urgent</strong>: ${thestatus.data}
                       </div>`;
                         if (globalStatus > 2)
-                            globalStatus = 2;
+                            {globalStatus = 2;}
                         break;
                     case 3:
                         statusMarquee += `<div class="col-2">
@@ -561,7 +547,7 @@ function processStatus(db)
                   	<strong>Warning</strong>: ${thestatus.data}
                       </div>`;
                         if (globalStatus > 3)
-                            globalStatus = 3;
+                            {globalStatus = 3;}
                         break;
                     case 4:
                         statusMarquee += `<div class="col-2">
@@ -579,7 +565,7 @@ function processStatus(db)
                   	<strong>Good</strong>: ${thestatus.data}
                       </div>`;
                         if (globalStatus > 3)
-                            globalStatus = 5;
+                            {globalStatus = 5;}
                         break;
                     default:
                 }
@@ -595,7 +581,7 @@ function processStatus(db)
         statusMarquee += `</div>`;
 
         if (disconnected)
-            globalStatus = 0;
+            {globalStatus = 0;}
 
 
         var status = document.getElementById('status-div');
@@ -607,14 +593,14 @@ function processStatus(db)
                 color = 'rgba(244, 67, 54, 0.5)';
                 statusLine.innerHTML = 'No connection to WWSU! The server might be offline and WWSU not functional';
                 if (globalStatus !== prevStatus)
-                    offlineTimer = setTimeout(function () {
-                        responsiveVoice.speak("Attention! The display sign has been disconnected from the server for one minute. This could indicate a network problem, the server crashed, or the server is rebooting.");
-                    }, 60000);
+                    {offlineTimer = setTimeout(() => {
+                        responsiveVoice.speak('Attention! The display sign has been disconnected from the server for one minute. This could indicate a network problem, the server crashed, or the server is rebooting.');
+                    }, 60000);}
                 // Flash screen for major outages every second
-                flashInterval = setInterval(function () {
-                    $("html, body").css("background-color", "#D32F2F");
-                    setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                flashInterval = setInterval(() => {
+                    $('html, body').css('background-color', '#D32F2F');
+                    setTimeout(() => {
+                        $('html, body').css('background-color', '#000000');
                     }, 250);
                 }, 1000);
 
@@ -626,12 +612,12 @@ function processStatus(db)
                 statusLine.innerHTML = 'WWSU is critically unstable and is not functioning properly!';
                 clearTimeout(offlineTimer);
                 if (globalStatus !== prevStatus)
-                    responsiveVoice.speak("Warning! Warning! The WWSU system is in a critically unstable state. Please review the display sign and take action immediately to fix the problems.");
+                    {responsiveVoice.speak('Warning! Warning! The WWSU system is in a critically unstable state. Please review the display sign and take action immediately to fix the problems.');}
                 // Flash screen for major outages every second
-                flashInterval = setInterval(function () {
-                    $("html, body").css("background-color", "#D32F2F");
-                    setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                flashInterval = setInterval(() => {
+                    $('html, body').css('background-color', '#D32F2F');
+                    setTimeout(() => {
+                        $('html, body').css('background-color', '#000000');
                     }, 250);
                 }, 1000);
 
@@ -643,13 +629,13 @@ function processStatus(db)
                 statusLine.innerHTML = 'WWSU is experiencing issues that may impact operation';
                 clearTimeout(offlineTimer);
                 if (globalStatus !== prevStatus)
-                    responsiveVoice.speak("Attention! The WWSU system is encountering issues at this time that need addressed.");
+                    {responsiveVoice.speak('Attention! The WWSU system is encountering issues at this time that need addressed.');}
                 // Flash screen for partial outages every 5 seconds
                 // Flash screen for major outages every second
-                flashInterval = setInterval(function () {
-                    $("html, body").css("background-color", "#FF9800");
-                    setTimeout(function () {
-                        $("html, body").css("background-color", "#000000");
+                flashInterval = setInterval(() => {
+                    $('html, body').css('background-color', '#FF9800');
+                    setTimeout(() => {
+                        $('html, body').css('background-color', '#000000');
                     }, 250);
                 }, 5000);
 
@@ -687,7 +673,7 @@ function processStatus(db)
         // Update status html
         var innercontent = document.getElementById('system-status');
         if (innercontent)
-            innercontent.innerHTML = statusMarquee;
+            {innercontent.innerHTML = statusMarquee;}
 
     } catch (e) {
         iziToast.show({
@@ -704,34 +690,37 @@ function processDirectors(ddb, hdb)
     try {
         directorpresent = false;
         var directors = {};
+        var doShade = false;
+        var isActive = false;
 
         // Update directors html
         var innercontent = document.getElementById('directors');
+        var stuff;
         if (innercontent)
-            innercontent.innerHTML = '';
+            {innercontent.innerHTML = '';}
 
         Slides.slide(`directors`).displayTime = 5;
 
-        ddb.each(function (dodo) {
+        ddb.each((dodo) => {
             try {
                 directors[dodo.name] = dodo;
                 if (dodo.present)
-                    directorpresent = true;
+                    {directorpresent = true;}
                 Slides.slide(`directors`).displayTime += 1;
                 var color = 'rgba(211, 47, 47, 0.8)';
                 var text1 = 'OUT';
                 var theClass = 'danger';
                 if (dodo.present)
                 {
-                    var color = 'rgba(56, 142, 60, 0.8)';
-                    var text1 = 'IN';
-                    var theClass = 'success';
+                    color = 'rgba(56, 142, 60, 0.8)';
+                    text1 = 'IN';
+                    theClass = 'success';
                 }
                 if (innercontent)
-                    innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded shadow-8">
+                    {innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded shadow-8">
     <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;
+  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`;}
 
 
             } catch (e) {
@@ -749,13 +738,13 @@ function processDirectors(ddb, hdb)
         var compare = function (a, b) {
             try {
                 if (moment(a.start).valueOf() < moment(b.start).valueOf())
-                    return -1;
+                    {return -1;}
                 if (moment(a.start).valueOf() > moment(b.start).valueOf())
-                    return 1;
+                    {return 1;}
                 if (a.ID < b.ID)
-                    return -1;
+                    {return -1;}
                 if (a.ID > b.ID)
-                    return 1;
+                    {return 1;}
                 return 0;
             } catch (e) {
                 console.error(e);
@@ -775,16 +764,16 @@ function processDirectors(ddb, hdb)
                 .map(event =>
                 {
                     var temp = directors[event.director];
-                    
+
                     // No temp record? Exit immediately.
                     if (typeof temp === `undefined`)
-                        return null;
-                    
+                        {return null;}
+                    var assistant;
                     if (typeof temp.assistant !== 'undefined')
                     {
-                        var assistant = temp.assistant;
+                        assistant = temp.assistant;
                     } else {
-                        var assistant = true;
+                        assistant = true;
                     }
                     // Format calendar for the director
                     if (!assistant && typeof calendar[event.director] === 'undefined')
@@ -812,34 +801,28 @@ function processDirectors(ddb, hdb)
 
                     // null start or end? Use a default to prevent errors.
                     if (!moment(event.start).isValid())
-                        event.start = moment(Meta.time).startOf('day');
+                        {event.start = moment(Meta.time).startOf('day');}
                     if (!moment(event.end).isValid())
-                        event.end = moment(Meta.time).add(1, 'days').startOf('day');
+                        {event.end = moment(Meta.time).add(1, 'days').startOf('day');}
 
                     // Cycle through each day of the week, and add in director hours
                     for (var i = 0; i < 7; i++) {
                         var looptime = moment(Meta.time).startOf('day').add(i, 'days');
                         var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
-                        var start2;
-                        var end2;
                         var bg;
                         if (moment(event.start).isBefore(looptime))
                         {
-                            start2 = moment(looptime);
                         } else {
-                            start2 = moment(event.start);
                         }
                         if (moment(event.end).isAfter(looptime2))
                         {
-                            end2 = moment(looptime2);
                         } else {
-                            end2 = moment(event.end);
                         }
                         if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
                         {
                             event.startT = moment(event.start).minutes() === 0 ? moment(event.start).format('h') : moment(event.start).format('h:mm');
                             if ((moment(event.start).hours() < 12 && moment(event.end).hours() >= 12) || (moment(event.start).hours() >= 12) && moment(event.end).hours() < 12)
-                                event.startT += moment(event.start).format('A');
+                                {event.startT += moment(event.start).format('A');}
                             event.endT = moment(event.end).minutes() === 0 ? moment(event.end).format('hA') : moment(event.end).format('h:mmA');
 
                             // Update strings if need be, if say, start time was before this day, or end time is after this day.
@@ -852,31 +835,29 @@ function processDirectors(ddb, hdb)
                                 event.startT = moment(event.start).format('MM/DD h:mmA');
                             }
 
-                            var endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span>`;
+                            var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`;
                             if (event.active === 2)
                             {
-                                bg = `background-color: rgba(255, 255, 0, 0.2);`;
-                                endText = `<span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span><i class="fas fa-edit m-1"></i>`;
+                                endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`;
                             }
                             if (event.active === -1)
                             {
-                                bg = `background-color: rgba(255, 0, 0, 0.2);`;
-                                endText = `<strike><span class="text-success">${event.startT}</span> - <span class="text-danger">${event.endT}</span></strike><i class="fas fa-ban m-1"></i>`;
+                                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`;
                             }
 
                             // Push the final products into our formatted variable
                             if (!assistant)
-                                calendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}">${endText}</div>`;
+                                {calendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}">${endText}</div>`;}
                             if (assistant)
-                                asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}">${endText}</div>`;
+                                {asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg ? bg : ``}">${endText}</div>`;}
                         }
                     }
                 });
 
         // Director hours slide
-        var innercontent = document.getElementById('office-hours-directors');
+        innercontent = document.getElementById('office-hours-directors');
 
-        var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+        stuff = `<div class="row shadow-2 bg-dark-1">
      <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
@@ -902,16 +883,18 @@ function processDirectors(ddb, hdb)
      <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
      </div>
      </div>`;
-        var doShade = false;
-        Slides.slide(`hours-directors`).displayTime = 5;
+        doShade = false;
+        isActive = false;
+        Slides.slide(`hours-directors`).displayTime = 7;
         for (var director in calendar)
         {
             if (calendar.hasOwnProperty(director))
             {
+                isActive = true;
                 var temp = directors[director] || null;
-                Slides.slide(`hours-directors`).displayTime += 2;
-                stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
+                Slides.slide(`hours-directors`).displayTime += 3;
+                stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
@@ -956,12 +939,13 @@ function processDirectors(ddb, hdb)
             }
         }
 
+        Slides.slide(`hours-directors`).active = isActive;
         innercontent.innerHTML = stuff;
 
         // Assistant hours slide
-        var innercontent = document.getElementById('office-hours-assistants');
+        innercontent = document.getElementById('office-hours-assistants');
 
-        var stuff = `<div class="row shadow-2" style="background: rgba(0, 0, 0, 0.5);">
+        stuff = `<div class="row shadow-2 bg-dark-1">
      <div class="col-3 text-info">
      <strong>Director</strong>
      </div>
@@ -987,49 +971,51 @@ function processDirectors(ddb, hdb)
      <strong>${moment(Meta.time).add(6, 'days').format('ddd MM/DD')}</strong>
      </div>
      </div>`;
-        var doShade = false;
-        Slides.slide(`hours-assistants`).displayTime = 5;
-        for (var director in asstcalendar)
+        doShade = false;
+        isActive = false;
+        Slides.slide(`hours-assistants`).displayTime = 7;
+        for (var director2 in asstcalendar)
         {
-            if (asstcalendar.hasOwnProperty(director))
+            if (asstcalendar.hasOwnProperty(director2))
             {
-                var temp = directors[director] || null;
-                Slides.slide(`hours-assistants`).displayTime += 2;
-                stuff += `<div class="row shadow-2" style="${doShade ? `background: rgba(0, 0, 0, 0.25);` : `background: rgba(0, 0, 0, 0.5);`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.5)` : `rgba(211, 47, 47, 0.5)`};">
+                isActive = true;
+                var temp2 = directors[director2] || null;
+                Slides.slide(`hours-assistants`).displayTime += 3;
+                stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
+     <div class="col-3 shadow-2" style="background-color: ${temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
-                ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
+                ${temp2.avatar && temp2.avatar !== '' ? `<img src="${temp2.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director2}`, 48)}
     </div>
     <div class="col-8">
-      <span class="text-white">${director}</span><br />
-      <span class="text-warning" style="font-size: 0.8em;">${temp.position}</span><br />
-      ${temp.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
+      <span class="text-white">${director2}</span><br />
+      <span class="text-warning" style="font-size: 0.8em;">${temp2.position}</span><br />
+      ${temp2.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
     </div>
   </div>
 </div>
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][0]}
+     ${asstcalendar[director2][0]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][1]}
+     ${asstcalendar[director2][1]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][2]}
+     ${asstcalendar[director2][2]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][3]}
+     ${asstcalendar[director2][3]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][4]}
+     ${asstcalendar[director2][4]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][5]}
+     ${asstcalendar[director2][5]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director][6]}
+     ${asstcalendar[director2][6]}
      </div>
      </div>`;
                 if (doShade)
@@ -1040,6 +1026,8 @@ function processDirectors(ddb, hdb)
                 }
             }
         }
+
+        Slides.slide(`hours-assistants`).active = isActive;
 
         innercontent.innerHTML = stuff;
     } catch (e) {
@@ -1054,9 +1042,9 @@ function processDirectors(ddb, hdb)
 function onlineSocket()
 {
     console.log('attempting online socket');
-    noReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-internal'}}, function (body) {
+    noReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-internal'}}, () => {
         try {
-        } catch (e) {
+        } catch (unusedE) {
             console.log('FAILED ONLINE CONNECTION');
             setTimeout(onlineSocket, 10000);
         }
@@ -1081,9 +1069,9 @@ function directorSocket()
 function metaSocket()
 {
     console.log('attempting meta socket');
-    noReq.request({method: 'POST', url: '/meta/get', data: {}}, function (body) {
+    noReq.request({method: 'POST', url: '/meta/get', data: {}}, (body) => {
         try {
-            temp = body;
+            var temp = body;
             for (var key in temp)
             {
                 if (temp.hasOwnProperty(key))
@@ -1123,7 +1111,7 @@ function statusSocket()
 function weeklyDJSocket()
 {
     console.log('attempting weeklyDJ socket');
-    noReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, function (body) {
+    noReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, (body) => {
         try {
             processWeeklyStats(body);
         } catch (e) {
@@ -1138,9 +1126,9 @@ function announcementsSocket()
 {
     try {
         var data = [];
-        noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal'}}, function (body) {
+        noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal'}}, (body) => {
             data = data.concat(body);
-            noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal-sticky'}}, function (body) {
+            noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-internal-sticky'}}, (body) => {
                 data = data.concat(body);
 
                 Announcements.query(data, true);
@@ -1156,10 +1144,10 @@ function announcementsSocket()
 function processWeeklyStats(data) {
     var temp = document.getElementById(`analytics`);
     if (temp !== null)
-        temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+        {temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
      <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
      <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
-     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;
+     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;}
 }
 
 function createAnnouncement(data) {

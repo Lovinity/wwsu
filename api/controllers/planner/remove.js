@@ -1,5 +1,3 @@
-/* global sails, Planner */
-
 module.exports = {
 
     friendlyName: 'planner / remove',

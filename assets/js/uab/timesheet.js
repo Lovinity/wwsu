@@ -9,10 +9,10 @@ class Director {
 
     constructor(data = {}) {
         this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000));
-        this._name = data.name || "Unknown";
+        this._name = data.name || 'Unknown';
         this._admin = data.admin || false;
         this._avatar = data.avatar || null;
-        this._position = data.position || "Unknown";
+        this._position = data.position || 'Unknown';
         this._present = data.present || false;
         this._since = data.since || moment();
     }
@@ -96,7 +96,7 @@ directorsdb.setOnUpdate((data, db) => {
 
 directorsdb.setOnRemove((data, db) => {
     if (typeof Directors[data] !== `undefined`)
-        delete Directors[data];
+        {delete Directors[data];}
 });
 
 directorsdb.setOnReplace((db) => {
@@ -115,7 +115,7 @@ class Timesheet {
 
     constructor(data = {}) {
         this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000));
-        this._name = data.name || "Unknown";
+        this._name = data.name || 'Unknown';
         this._time_in = data.time_in || null;
         this._time_out = data.time_out || null;
         this._approved = data.approved || false;
@@ -186,7 +186,7 @@ timesheetsdb.setOnUpdate((data, db) => {
 
 timesheetsdb.setOnRemove((data, db) => {
     if (typeof Timesheets[data] !== `undefined`)
-        delete Timesheets[data];
+        {delete Timesheets[data];}
     filterDate();
 });
 
@@ -209,7 +209,7 @@ var hostReq = new WWSUreq(socket, null, 'host', '/auth/host', 'Host');
 var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director-uab', 'Administrator UAB Director');
 
 // Register event handlers
-socket.on('connect', function () {
+socket.on('connect', () => {
     directorsdb.replaceData(hostReq, '/uab/directors/get');
     timesheetsdb.replaceData(hostReq, '/uab/timesheet/get');
 });
@@ -217,8 +217,8 @@ socket.on('connect', function () {
 directorsdb.assignSocketEvent('uabdirectors', socket);
 timesheetsdb.assignSocketEvent('uabtimesheet', socket);
 
-$(document).ready(function () {
-    document.querySelector(`#timesheet-records`).addEventListener("click", function (e) {
+$(document).ready(() => {
+    document.querySelector(`#timesheet-records`).addEventListener('click', (e) => {
         try {
             if (e.target) {
                 if (e.target.id.startsWith(`timesheet-t`))
@@ -275,7 +275,7 @@ function editClock(clockID, save = false) {
                     return null;
                 });
         if (!opened)
-            modalBody.innerHTML = 'There was an internal error loading that clock.';
+            {modalBody.innerHTML = 'There was an internal error loading that clock.';}
         $('#clockModal').modal('handleUpdate');
         // Editing an entry
     } else {
@@ -320,7 +320,7 @@ function filterDate() {
                     var newRow = tableRef.insertRow(tableRef.rows.length);
                     newRow.classList.add(`table-info`);
                     hours[record.name] = moment.duration();
-                    newRow.setAttribute("id", `director-${record.name.replace(/\W/g, '')}`);
+                    newRow.setAttribute('id', `director-${record.name.replace(/\W/g, '')}`);
                     // Create applicable cells
                     for (var i = 0; i < 16; i++)
                     {
@@ -328,7 +328,7 @@ function filterDate() {
                         cell.setAttribute('id', `cell${i}-${record.name.replace(/\W/g, '')}`);
                         // Cell 0 should be director name
                         if (i === 0)
-                            cell.innerHTML = record.name;
+                            {cell.innerHTML = record.name;}
                     }
                 }
 
@@ -342,15 +342,15 @@ function filterDate() {
                 // Determine status. 1 = approved, 2 = no time_out (clocked in), 0 = not approved.
                 var status = 1;
                 if (!record.approved)
-                    status = 0;
+                    {status = 0;}
                 if (record.time_out === null)
-                    status = 2;
+                    {status = 2;}
 
                 // If approved record, add its hours for the director. If clocked in record, add hours from time_in to current time.
                 if (status === 1)
-                    hours[record.name].add(clockout.diff(clockin));
+                    {hours[record.name].add(clockout.diff(clockin));}
                 if (status === 2)
-                    hours[record.name].add(clocknow.diff(clockin));
+                    {hours[record.name].add(clocknow.diff(clockin));}
 
 
                 var inT = moment(clockin).format(`h:mm A`);

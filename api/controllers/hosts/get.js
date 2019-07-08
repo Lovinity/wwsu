@@ -1,5 +1,3 @@
-/* global sails, Hosts */
-
 module.exports = {
 
     friendlyName: 'hosts / get',
@@ -35,7 +33,7 @@ module.exports = {
             sails.log.silly(record);
 
             if (!record)
-                return exits.notFound();
+                {return exits.notFound();}
 
             // Subscribe to websockets if applicable
             if (record.authorized && this.req.isSocket && record.admin)

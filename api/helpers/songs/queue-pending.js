@@ -1,5 +1,3 @@
-/* global sails, Songs, Promise */
-
 module.exports = {
 
     friendlyName: 'songs.queuePending',
@@ -23,7 +21,7 @@ module.exports = {
             var maps = Songs.pending.map(async (track, index) => {
                 await sails.helpers.rest.cmd('LoadTrackToTop', track, 10000);
                 if (inputs.queue)
-                    await sails.helpers.rest.checkQueue(track);
+                    {await sails.helpers.rest.checkQueue(track);}
                 //wait.for.time(1);
                 delete Songs.pending[index];
                 return true;

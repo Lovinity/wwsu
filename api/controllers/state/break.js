@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs, Status, Xp, moment */
-
 module.exports = {
 
     friendlyName: 'State / Break',
@@ -22,18 +20,17 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller state/break called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Block this request if we are already trying to change states
             if (Meta['A'].changingState !== null)
-                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+                {return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));}
 
             // Lock so that other state changing requests get blocked until we are done
             await Meta.changeMeta({ changingState: `Going into break` });
 
             // Do not allow a halftime break if not in a sports broadcast
-            if (!Meta['A'].state.startsWith("sports") && inputs.halftime)
-                inputs.halftime = false;
+            if (!Meta['A'].state.startsWith('sports') && inputs.halftime)
+                {inputs.halftime = false;}
 
             // Log it in a separate self-calling async function that we do not await so it does not block the rest of the call.
             (async () => {
@@ -44,8 +41,9 @@ module.exports = {
                     });
             })();
 
+            // If this break was triggered because of a technical problem, play a technical problem liner
             if (inputs.problem)
-                await sails.helpers.songs.queue(sails.config.custom.subcats.technicalIssues, 'top', 1);
+                {await sails.helpers.songs.queue(sails.config.custom.subcats.technicalIssues, 'top', 1);}
 
             // halftime break? Play a station ID and then begin halftime music
             if (inputs.halftime) {
@@ -62,7 +60,7 @@ module.exports = {
                 await sails.helpers.error.count('stationID');
 
                 // Change state to halftime mode
-                if (Meta['A'].state.startsWith("sportsremote")) {
+                if (Meta['A'].state.startsWith('sportsremote')) {
                     await Meta.changeMeta({ state: 'sportsremote_halftime', lastID: moment().toISOString(true) });
                 } else {
                     await Meta.changeMeta({ state: 'sports_halftime', lastID: moment().toISOString(true) });
@@ -84,8 +82,8 @@ module.exports = {
                     await Meta.changeMeta({ lastID: moment().toISOString(true) });
 
                     // Earn XP for doing the top of the hour ID break, if the show is live
-                    if (Meta['A'].state.startsWith("live_") && (num >= 55 || num < 5)) {
-                        await Xp.create({ dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: "DJ played an on-time Top of the Hour ID break." })
+                    if (Meta['A'].state.startsWith('live_') && (num >= 55 || num < 5)) {
+                        await Xp.create({ dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: 'DJ played an on-time Top of the Hour ID break.' })
                             .tolerate((err) => {
                                 // Do not throw for error, but log it
                                 sails.log.error(err);

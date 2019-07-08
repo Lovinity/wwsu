@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * Announcements.js
  *
@@ -32,7 +30,7 @@ module.exports = {
         announcement: {
             type: 'string'
         },
-        
+
         displayTime: {
             type: 'number',
             defaultsTo: 15,

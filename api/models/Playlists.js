@@ -1,4 +1,3 @@
-/* global moment */
 
 /**
  * Playlists.js

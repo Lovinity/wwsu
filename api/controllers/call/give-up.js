@@ -1,5 +1,3 @@
-/* global moment, sails, Xp, Djs, Directors */
-const bcrypt = require('bcrypt');
 module.exports = {
 
     friendlyName: 'call / give-up',
@@ -16,6 +14,7 @@ module.exports = {
         sails.log.debug('Controller call/give-up called.');
 
         try {
+            // Transmit very-bad-call event to DJ Controls
             sails.sockets.broadcast('very-bad-call', 'very-bad-call', true);
             return exits.success();
         } catch (e) {

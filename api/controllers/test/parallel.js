@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs, moment */
-
 module.exports = {
 
     friendlyName: 'parallel',
@@ -14,7 +12,7 @@ module.exports = {
         var output = ``;
         var initTime = moment().valueOf();
         var func1 = function () {
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
                 output += `Started func1... `;
                 await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'test', loglevel: 'primary', logsubtype: '', event: 'This is a test log called from parallel.js'}).fetch()
                         .tolerate((err) => {
@@ -26,7 +24,7 @@ module.exports = {
         };
 
         var func2 = function () {
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
                 output += `Started func2... `;
                 var queue = await sails.helpers.rest.getQueue();
                 var stuff = [];
@@ -37,7 +35,7 @@ module.exports = {
         };
 
         var func3 = function () {
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
                 output += `Started func3... `;
                 var addition = 0;
                 for (var i = 0; i < 1000000; i++)
@@ -49,9 +47,8 @@ module.exports = {
             });
         };
         var func4 = function () {
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
                 output += `Started func4... `;
-                var addition = 0;
                 for (var i = 0; i < 1000; i++)
                 {
                     addition += moment().valueOf();
@@ -61,18 +58,18 @@ module.exports = {
             });
         };
         await Promise.all([func1(), func2(), func3(), func4()])
-                .then(async (values) => {
+                .then(async () => {
                     output += `PARALLEL TEST FINISHED. Time: ${moment().valueOf() - initTime}... `;
-            
+
                     initTime = moment().valueOf();
-                    
+
                     await func1();
                     await func2();
                     await func3();
                     await func4();
-                    
+
                     output += `SYNC TEST FINISHED. Time: ${moment().valueOf() - initTime}... `;
-            
+
                     return exits.success(output);
                 })
                 .catch((err) => {

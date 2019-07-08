@@ -1,5 +1,3 @@
-/* global Recipients, sails */
-
 module.exports = {
 
     friendlyName: 'Recipients / get',
@@ -17,14 +15,14 @@ module.exports = {
             var records = await Recipients.find();
             sails.log.verbose(`Recipients records retrieved: ${records.length}`);
             sails.log.silly(records);
-            
+
             // Subscribe to web socket if applicable
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'recipients');
                 sails.log.verbose('Request was a socket. Joining recipients.');
             }
-            
+
             return exits.success(records);
         } catch (e) {
             return exits.error(e);

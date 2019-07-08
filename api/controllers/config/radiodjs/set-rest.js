@@ -1,5 +1,3 @@
-/* global sails, Status, Meta */
-
 module.exports = {
 
     friendlyName: 'config / radiodjs / set-rest',

@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / breaks / set-sports',
@@ -47,6 +45,7 @@ module.exports = {
         sails.log.debug('Controller config/breaks/set-sports called.');
 
         try {
+            // Modify config
             for (var key in inputs)
             {
                 if (inputs.hasOwnProperty(key))
@@ -55,6 +54,7 @@ module.exports = {
                 }
             }
 
+            // Send new config through sockets
             sails.sockets.broadcast('config', 'config', {update: {specialBreaks: sails.config.custom.specialBreaks}});
 
             return exits.success();

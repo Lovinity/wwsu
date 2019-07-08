@@ -14,11 +14,11 @@ module.exports = {
             type: 'number',
             autoIncrement: true
         },
-        
+
         parentid: {
             type: 'number'
         },
-        
+
         name: {
             type: 'string'
         }

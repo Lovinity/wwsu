@@ -1,5 +1,3 @@
-/* global Discipline, sails */
-
 module.exports = {
 
     friendlyName: 'Discipline / Get',
@@ -15,11 +13,11 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-        sails.log.debug("controller discipline/get called.");
+        sails.log.debug('controller discipline/get called.');
 
         try {
             var records = await Discipline.find();
-            
+
             // Subscribe to sockets if applicable
             if (this.req.isSocket)
             {

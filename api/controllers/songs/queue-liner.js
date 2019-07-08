@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs */
-
 module.exports = {
 
     friendlyName: 'songs / queue-liner',
@@ -16,8 +14,8 @@ module.exports = {
         try {
 
             // Error if we are not in a sports state
-            if (Meta['A'].state.startsWith("sports"))
-                return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`));
+            if (Meta['A'].state.startsWith('sports'))
+                {return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`));}
 
             // Log it
             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Sports Liner requested.</strong>'}).fetch()
@@ -28,7 +26,7 @@ module.exports = {
 
             // Queue it
             if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
-                await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Top', 1);
+                {await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]['Sports Liners']], 'Top', 1);}
 
             // Play it
             await sails.helpers.rest.cmd('EnableAssisted', 0);

@@ -1,5 +1,3 @@
-/* global sails, Directors, Uabdirectors */
-
 module.exports = {
 
     friendlyName: 'uab / directors / remove',
@@ -32,7 +30,7 @@ module.exports = {
 
             // Block requests to remove this director if there are 1 or less admin directors and this director is an admin.
             if (lockout <= 1 && toDestroy.admin)
-                return exits.conflict("To prevent accidental lockout, this request was denied because there are 1 or less admin directors. Make another director admin first before removing this director.");
+                {return exits.conflict('To prevent accidental lockout, this request was denied because there are 1 or less admin directors. Make another director admin first before removing this director.');}
             await Uabdirectors.destroy({ID: inputs.ID}).fetch();
 
             return exits.success();

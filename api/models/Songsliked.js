@@ -12,11 +12,11 @@ module.exports = {
             type: 'number',
             autoIncrement: true
         },
-        
+
         IP: {
             type: 'string'
         },
-        
+
         trackID: {
             type: 'number'
         }

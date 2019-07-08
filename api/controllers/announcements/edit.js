@@ -1,5 +1,3 @@
-/* global sails, moment, Announcements, _ */
-
 module.exports = {
 
     friendlyName: 'Announcements / Edit',
@@ -74,7 +72,7 @@ module.exports = {
                 // If the type changed, issue a remove websocket event to the previous type.
                 var record = await Announcements.findOne({ID: inputs.ID});
                 if (record && record.type !== inputs.type)
-                    sails.sockets.broadcast(`announcements-${record.type}`, 'announcements', {remove: inputs.ID});
+                    {sails.sockets.broadcast(`announcements-${record.type}`, 'announcements', {remove: inputs.ID});}
             }
 
             // Update the announcement

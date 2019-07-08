@@ -1,5 +1,4 @@
-/* global sails, Messages */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -15,8 +14,8 @@ module.exports = {
 
         try {
             // Get the client IP address
-            var from_IP = await sails.helpers.getIp(this.req);
-            var host = sh.unique(from_IP + sails.config.custom.hostSecret);
+            var fromIP = await sails.helpers.getIp(this.req);
+            var host = sh.unique(fromIP + sails.config.custom.hostSecret);
 
             if (this.req.isSocket)
             {
@@ -31,7 +30,7 @@ module.exports = {
 
             // Get messages for this client and return them
             var records = await sails.helpers.messages.getWeb(host);
-            
+
             return exits.success(records);
         } catch (e) {
             return exits.error(e);

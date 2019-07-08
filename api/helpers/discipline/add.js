@@ -1,5 +1,3 @@
-/* global sails, Meta, Discipline */
-
 module.exports = {
 
     friendlyName: 'discipline.add',
@@ -12,40 +10,39 @@ module.exports = {
             type: 'string',
             description: 'The unique ID assigned to the host that we are banning.'
         },
-        
+
         action: {
-            type: "string",
+            type: 'string',
             required: true,
-            isIn: ["dayban", "permaban", "showban"],
-            description: "Type of ban: dayban (24 hours from createdAt), permaban (indefinite), show ban (until the current broadcast ends)."
+            isIn: ['dayban', 'permaban', 'showban'],
+            description: 'Type of ban: dayban (24 hours from createdAt), permaban (indefinite), show ban (until the current broadcast ends).'
         },
-        
+
         message: {
             type: 'string',
             defaultsTo: 'Unspecified reason',
-            description: "The reason for issuing the discipline"
+            description: 'The reason for issuing the discipline'
         },
-        
+
         active: {
             type: 'boolean',
             defaultsTo: true,
-            description: "whether or not the discipline should be active when created."
+            description: 'whether or not the discipline should be active when created.'
         }
     },
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper discipline.banDay called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
 
-            // Remove all messages by the user
+            // Remove all messages by the disciplined user
             await sails.helpers.messages.removeMass(inputs.host);
 
-            // Add a dayban to the database
+            // Add discipline to the database
             var reference = await Discipline.create({active: inputs.active, IP: inputs.host, action: inputs.action, message: inputs.message}).fetch();
 
             // Broadcast the ban to the client
-            sails.sockets.broadcast(`discipline-${inputs.host.replace('website-', '')}`, `discipline`, {"discipline": `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}`});
+            sails.sockets.broadcast(`discipline-${inputs.host.replace('website-', '')}`, `discipline`, {'discipline': `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}`});
             return exits.success();
         } catch (e) {
             return exits.error(e);

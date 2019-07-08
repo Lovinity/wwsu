@@ -1,5 +1,3 @@
-/* global Subscribers, sails */
-
 module.exports = {
 
     friendlyName: 'sails.helpers.onesignal.sendEvent',
@@ -45,22 +43,31 @@ module.exports = {
     fn: async function (inputs, exits) {
         try {
             var devices = [];
+
+            // Find and destroy any subscriptions based on single occurrence.
             if (inputs.googleUnique && inputs.googleUnique !== null)
             {
                 var records = await Subscribers.destroy({type: `calendar-once`, subtype: inputs.googleUnique}).fetch();
                 records.map((record) => devices.push(record.device));
             }
+
+            // Find any recurring subscriptions to the event.
             records = await Subscribers.find({type: `calendar-all`, subtype: [inputs.event, `${inputs.prefix}${inputs.event}`]});
             records.map((record) => devices.push(record.device));
+
+            // If we have at least 1 person to receive a push notification, continue
             if (devices.length > 0)
             {
+                // If date was not specified, this push notification is for a show that went on the air.
                 if (!inputs.date)
                 {
                     await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} is On the Air!`, `${inputs.event} just started on WWSU Radio!`, (60 * 60 * 3));
                 } else {
+                    // If date specified and cancelled is false, this push notification is to inform subscribers that an event changed date/time
                     if (!inputs.cancelled)
                     {
                         await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} changed the date/time.`, `The date/time for ${inputs.event} was changed to ${inputs.date}.`, (60 * 60 * 24 * 7));
+                    // If date specified and cancelled is true, this push notification is to inform subscribers the event was cancelled.
                     } else {
                         await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} was cancelled.`, `${inputs.event} was cancelled for the date of ${inputs.date}.`, (60 * 60 * 24 * 7));
                     }

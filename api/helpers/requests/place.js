@@ -1,5 +1,4 @@
-/* global sails, Songs, Requests, moment, Subscribers */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -31,13 +30,12 @@ module.exports = {
         device: {
             type: 'string',
             allowNull: true,
-            description: "If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays."
+            description: 'If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays.'
         }
     },
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.place called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // First, confirm the track can actually be requested.
             var requestable = await sails.helpers.requests.checkRequestable(inputs.ID, inputs.IP);
@@ -61,7 +59,7 @@ module.exports = {
                 // Get the song data
                 var record2 = await Songs.findOne({ ID: inputs.ID });
                 if (!record2)
-                    return exits.error(new Error('The provided track ID does not exist.'));
+                    {return exits.error(new Error('The provided track ID does not exist.'));}
                 sails.log.silly(`Song: ${record2}`);
 
                 // Create the request
@@ -70,7 +68,7 @@ module.exports = {
 
                 // Bump priority if configured
                 if (sails.config.custom.requests.priorityBump !== 0)
-                    await Songs.update({ ID: inputs.ID }, { weight: record2.weight + sails.config.custom.requests.priorityBump });
+                    {await Songs.update({ ID: inputs.ID }, { weight: record2.weight + sails.config.custom.requests.priorityBump });}
 
                 // Log the request
                 await Logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: `track-request`, event: `<strong>A track was requested!</strong><br />Track: ${record2.artist} - ${record2.title} (ID ${inputs.ID})<br />Requested By: ${inputs.name}<br />Message: ${inputs.message}`, createdAt: moment().toISOString(true) }).fetch()
@@ -78,8 +76,9 @@ module.exports = {
                         sails.log.error(err);
                     });
 
-                // Add a push notification subscription if a device was provided
                 var returndata = { requested: true, message: `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.` };
+
+                // Add a push notification subscription if a device was provided
                 if (inputs.device && inputs.device !== null) {
                     await Subscribers.findOrCreate({ device: inputs.device, type: `request`, subtype: request.ID }, { host: `website-${host}`, device: inputs.device, type: `request`, subtype: request.ID });
                     returndata.message = `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.<br />

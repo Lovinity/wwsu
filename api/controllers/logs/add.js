@@ -1,5 +1,3 @@
-/* global sails, Logs, moment, Meta */
-
 module.exports = {
 
     friendlyName: 'logs / add',
@@ -68,7 +66,7 @@ module.exports = {
         sails.log.debug('Controller logs/add called.');
 
         try {
-            
+
             // Create the log entry
             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)}).fetch();
 

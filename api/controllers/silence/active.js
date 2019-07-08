@@ -1,5 +1,3 @@
-/* global sails, Status, Meta, Logs, Songs, Promise, Announcements, moment */
-
 module.exports = {
 
     friendlyName: 'silence / active',
@@ -21,7 +19,7 @@ module.exports = {
             {
                 // Add a log about the track
                 await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: Meta['A'].show, event: `<strong>Track skipped due to silence.</strong><br />Track: ${Meta.automation[0].ID} (${Meta.automation[0].Artist} - ${Meta.automation[0].Title})`}).fetch()
-                        .tolerate((err) => {
+                        .tolerate(() => {
                         });
 
                 // Skip the track if there's a track playing in automation and there's another track queued
@@ -32,16 +30,16 @@ module.exports = {
             }
 
             // If we are in automation, and prevError is less than 3 minutes ago, assume an audio issue and switch RadioDJs
-            if (moment().isBefore(moment(Status.errorCheck.prevError).add(3, 'minutes')) && (Meta['A'].state.startsWith("automation_") || Meta['A'].state === 'live_prerecord'))
+            if (moment().isBefore(moment(Status.errorCheck.prevError).add(3, 'minutes')) && (Meta['A'].state.startsWith('automation_') || Meta['A'].state === 'live_prerecord'))
             {
                 await Meta.changeMeta({changingState: `Switching automation instances due to no audio`});
-                
+
                 // Log the problem
                 await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switching automation instances;</strong> silence detection executed multiple times.`}).fetch()
                         .tolerate((err) => {
                             sails.log.error(err);
                         });
-                await Announcements.findOrCreate({type: 'djcontrols', title: `Audio Error (system)`, announcement: "System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `Audio Error (system)`, announcement: "System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                await Announcements.findOrCreate({type: 'djcontrols', title: `Audio Error (system)`, announcement: 'System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info.'}, {type: 'djcontrols', level: 'urgent', title: `Audio Error (system)`, announcement: 'System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                         .tolerate((err) => {
                             sails.log.error(err);
                         });
@@ -52,13 +50,13 @@ module.exports = {
                         .map(async (instance) => {
                             var status = await Status.findOne({name: `radiodj-${instance.name}`});
                             if (status && status.status !== 1)
-                                await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.`}]);
+                                {await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.`}]);}
                             return true;
                         });
                 await Promise.all(maps);
-                
+
                 sails.sockets.broadcast('system-error', 'system-error', true);
-                
+
                 // Prepare the radioDJ
                 await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0);
                 await sails.helpers.rest.cmd('EnableAssisted', 1, 0);

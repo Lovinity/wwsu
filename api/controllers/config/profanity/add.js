@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / profanity / add',
@@ -26,10 +24,10 @@ module.exports = {
             var exists = false;
             sails.config.custom.profanity
                     .filter((word) => word === inputs.word)
-                    .map(() => exists = true);
-            
+                    .map(() => {exists = true;});
+
             if (!exists)
-                sails.config.custom.profanity.push(inputs.word);
+                {sails.config.custom.profanity.push(inputs.word);}
 
             // broadcast changes over websockets
             sails.sockets.broadcast('config', 'config', {update: {profanity: sails.config.custom.profanity}});

@@ -1,5 +1,3 @@
-/* global Recipients */
-
 module.exports = {
 
 

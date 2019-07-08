@@ -1,5 +1,3 @@
-/* global sails, Recipients */
-
 module.exports = {
 
     friendlyName: 'Recipients / register-peer',
@@ -19,7 +17,7 @@ module.exports = {
         try {
             // Must be a websocket request
             if (!this.req.isSocket)
-                return exits.error(new Error('This controller requires a websocket.'));
+                {return exits.error(new Error('This controller requires a websocket.'));}
 
             // Update the recipient peer ID
             await Recipients.update({host: this.req.payload.host}, {peer: inputs.peer || null}).fetch();

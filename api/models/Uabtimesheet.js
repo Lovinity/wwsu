@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * Timesheet.js
  *
@@ -29,13 +27,13 @@ module.exports = {
             type: 'ref',
             columnType: 'datetime'
         },
-        
+
         approved: {
             type: 'boolean',
             defaultsTo: false
         }
     },
-    
+
         // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = {insert: newlyCreatedRecord};

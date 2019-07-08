@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * Subscribers.js
  *
@@ -21,17 +19,17 @@ module.exports = {
             type: 'string',
             required: true
         },
-        
+
         device: {
             type: 'string',
             required: true
         },
-        
+
         type: {
             type: 'string',
             required: true
         },
-        
+
         subtype: {
             type: 'string',
             required: true

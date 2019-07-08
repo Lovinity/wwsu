@@ -1,5 +1,3 @@
-/* global sails, Directors, Status, Timesheet, moment, needle, Uabdirectors, Promise, Uabtimesheet */
-
 /**
  * Directors.js
  *
@@ -57,7 +55,7 @@ module.exports = {
      * Re-updates director presence
      */
     updateDirectors: function () {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             sails.log.debug(`updateDirectors called.`);
             var names = {};
 
@@ -76,19 +74,19 @@ module.exports = {
                 var maps = records
                         .map(async record => {
                             if (typeof names[record.name] !== 'undefined')
-                                return false;
+                                {return false;}
 
                             names[record.name] = true;
                             // If there's an entry with a null time_out, then consider the director clocked in
                             if (record.time_out === null && record.time_in !== null)
                             {
                                 await Uabdirectors.update({name: record.name}, {present: true, since: moment(record.time_in).toISOString(true)})
-                                        .tolerate((err) => {
+                                        .tolerate(() => {
                                         })
                                         .fetch();
                             } else {
                                 await Uabdirectors.update({name: record.name}, {present: false, since: moment(record.time_out).toISOString(true)})
-                                        .tolerate((err) => {
+                                        .tolerate(() => {
                                         })
                                         .fetch();
                             }

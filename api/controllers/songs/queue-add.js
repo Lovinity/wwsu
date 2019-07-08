@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs, Xp */
-
 //TODO: rename to queue-top-add
 
 module.exports = {
@@ -16,7 +14,7 @@ module.exports = {
         sails.log.debug('Controller songs/get called.');
 
         try {
-            
+
             // Log it
             await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Top Add requested.</strong>'}).fetch()
                     .tolerate((err) => {
@@ -32,9 +30,9 @@ module.exports = {
             await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
 
             // Earn XP for playing a Top Add, if the show is live
-            if (Meta['A'].state.startsWith("live_"))
+            if (Meta['A'].state.startsWith('live_'))
             {
-                await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: "DJ played a Top Add."})
+                await Xp.create({dj: Meta['A'].dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: 'DJ played a Top Add.'})
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);

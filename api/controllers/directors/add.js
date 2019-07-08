@@ -1,4 +1,3 @@
-/* global moment, sails, Xp, Djs, Directors */
 const bcrypt = require('bcrypt');
 module.exports = {
 
@@ -46,6 +45,7 @@ module.exports = {
         sails.log.debug('Controller directors/add called.');
 
         try {
+            // Add the director and bcrypt the login
             await Directors.create({name: inputs.name, login: bcrypt.hashSync(inputs.login, 10), admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: moment().toISOString()}).fetch();
             return exits.success();
         } catch (e) {

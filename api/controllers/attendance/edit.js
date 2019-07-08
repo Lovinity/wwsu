@@ -1,5 +1,3 @@
-/* global moment, sails, Xp, Djs, Directors, _ */
-const bcrypt = require('bcrypt');
 module.exports = {
 
     friendlyName: 'directors / edit',
@@ -37,12 +35,12 @@ module.exports = {
 
             // Determine what needs updating
             var criteria = {};
-            
+
             if (typeof inputs.happened !== 'undefined' && inputs.happened !== null)
-                criteria.happened = inputs.happened;
+                {criteria.happened = inputs.happened;}
 
             if (typeof inputs.ignore !== 'undefined' && inputs.ignore !== null)
-                criteria.ignore = inputs.ignore;
+                {criteria.ignore = inputs.ignore;}
 
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             var criteriaB = _.cloneDeep(criteria);

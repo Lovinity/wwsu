@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * Discipline.js
  *

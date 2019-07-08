@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * Eas.js
  *
@@ -57,7 +55,7 @@ module.exports = {
     },
 
     activeCAPS: [], // Array of active NWS alerts, cleared at each check, to help determine maintenance / cleaning up of NWS alerts.
-    
+
     pendingAlerts: {}, // An object of alerts pending to be processed, key is unique ID, value is an object of alert information (includes property _new, which is true if the record is to be inserted rather than updated)
 
     // Websockets standards

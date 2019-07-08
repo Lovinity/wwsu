@@ -1,5 +1,3 @@
-/* global sails, sh, Subscribers */
-
 module.exports = {
 
 
@@ -13,7 +11,7 @@ module.exports = {
       device: {
           type: 'string',
           required: true,
-          description: "The OneSignal ID of the device to get subscriptions for."
+          description: 'The OneSignal ID of the device to get subscriptions for.'
       }
   },
 
@@ -29,7 +27,7 @@ module.exports = {
         try {
             // Get subscriptions from this host
             var records = await Subscribers.find({device: inputs.device});
-            
+
             return exits.success(records);
         } catch (e) {
             return exits.error(e);

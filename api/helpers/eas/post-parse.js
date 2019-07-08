@@ -1,5 +1,3 @@
-/* global Eas, sails, moment, Promise */
-
 module.exports = {
 
     friendlyName: 'eas.postParse',
@@ -22,21 +20,21 @@ module.exports = {
                 if (Eas.pendingAlerts.hasOwnProperty(key))
                 {
                     sails.log.verbose(`Processing EAS`, Eas.pendingAlerts[key]);
-                    
+
                     // Do not process alerts containing no information
                     if (Eas.pendingAlerts[key].information === '' || Eas.pendingAlerts[key].information === null)
                     {
                         delete Eas.pendingAlerts[key];
                         continue;
                     }
-                    
+
                     // New alerts should be created
                     if (Eas.pendingAlerts[key]._new)
                     {
                         delete Eas.pendingAlerts[key]._new;
                         await Eas.create(Eas.pendingAlerts[key]).fetch();
                         delete Eas.pendingAlerts[key];
-                        
+
                     // Non-new alerts should be updated
                     } else {
                         delete Eas.pendingAlerts[key]._new;
@@ -62,7 +60,7 @@ module.exports = {
                             });
                     return true;
                 }
-                
+
                 // Remove expired alerts. Also, NWS alerts not reported by CAPS in 5 or more minutes (via updatedAt checking) should also be considered expired or canceled.
                 if ((record.source === 'NWS' && moment().isAfter(moment(record.updatedAt).add(5, 'minutes'))) || moment().isAfter(moment(record.expires)))
                 {

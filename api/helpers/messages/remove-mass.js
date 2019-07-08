@@ -1,5 +1,3 @@
-/* global Messages, sails */
-
 module.exports = {
 
     friendlyName: 'messages.removeMass',
@@ -16,7 +14,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.removeMass called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Mark all messages from provided host as deleted
             await Messages.update({from: inputs.host}, {status: 'deleted'}).fetch();

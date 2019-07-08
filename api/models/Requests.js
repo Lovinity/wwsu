@@ -1,5 +1,3 @@
-/* global sails, Songs */
-
 /**
  * Requests.js
  *
@@ -57,11 +55,11 @@ module.exports = {
                 .then(((record2) => {
                     sails.log.silly(`Song: ${record2}`);
                     if (record2)
-                        data.insert.trackname = `${record2.artist} - ${record2.title}`;
+                        {data.insert.trackname = `${record2.artist} - ${record2.title}`;}
                     sails.sockets.broadcast('requests', 'requests', data);
                     return proceed();
                 }))
-                .catch((err) => {
+                .catch(() => {
                     sails.sockets.broadcast('requests', 'requests', data);
                     return proceed();
                 });
@@ -83,12 +81,12 @@ module.exports = {
                     .then(((record2) => {
                         sails.log.silly(`Song: ${record2}`);
                         if (record2)
-                            data.update.trackname = `${record2.artist} - ${record2.title}`;
+                            {data.update.trackname = `${record2.artist} - ${record2.title}`;}
                         sails.log.silly(`requests socket: ${data}`);
                         sails.sockets.broadcast('requests', 'requests', data);
                         return proceed();
                     }))
-                    .catch((err) => {
+                    .catch(() => {
                         sails.log.silly(`requests socket: ${data}`);
                         sails.sockets.broadcast('requests', 'requests', data);
                         return proceed();

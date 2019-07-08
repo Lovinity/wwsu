@@ -1,5 +1,3 @@
-/* global sails, Directorhours */
-
 module.exports = {
 
     friendlyName: 'Directors / get-hours',
@@ -17,15 +15,15 @@ module.exports = {
             var records = await Directorhours.find();
             sails.log.verbose(`Directorhours records retrieved: ${records.length}`);
             sails.log.silly(records);
-            
+
             // Subscribe to socket if applicable
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'directorhours');
                 sails.log.verbose('Request was a socket. Joining directorhours.');
             }
-            
-            
+
+
             return exits.success(records);
         } catch (e) {
             return exits.error(e);

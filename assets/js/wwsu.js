@@ -194,7 +194,7 @@ class WWSUreq {
                     });
                 }
             });
-        }
+        };
 
         // Token expected to be expired?
         if (this.expired())

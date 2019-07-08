@@ -1,5 +1,4 @@
-/* global Hosts, sails, Status, _ */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -58,7 +57,7 @@ module.exports = {
             type: 'boolean',
             description: 'If provided, whether or not this host should receive emergency / status notifications will be changed to this.'
         },
-        
+
         accountability: {
             type: 'boolean',
             description: 'If provided, whether or not this host should receive notifications regarding director and show absences/changes/cancellations and failed Top-of-the-hour ID breaks.'
@@ -85,20 +84,20 @@ module.exports = {
 
             // Block requests to change admin or authorized to false if there are 1 or less authorized admin hosts.
             if (lockout <= 1 && ((typeof inputs.admin !== 'undefined' && !inputs.admin) || (typeof inputs.authorized !== 'undefined' && !inputs.authorized)))
-                return exits.conflict("To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing authorized admin status from this host.");
+                {return exits.conflict('To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing authorized admin status from this host.');}
 
             // Now, if changing silenceDetection or recordAudio to true, ensure there aren't other hosts with it already true. If so, error to prevent conflict.
             if (typeof inputs.silenceDetection !== 'undefined' && inputs.silenceDetection !== null && inputs.silenceDetection)
             {
-                var lockout = await Hosts.count({ID: {'!=': inputs.ID}, silenceDetection: true});
+                lockout = await Hosts.count({ID: {'!=': inputs.ID}, silenceDetection: true});
                 if (lockout >= 1)
-                    return exits.conflict("To prevent silence detection conflicts, this request was denied because another host already has silenceDetection. Please set the other host silenceDetection to false first.");
+                    {return exits.conflict('To prevent silence detection conflicts, this request was denied because another host already has silenceDetection. Please set the other host silenceDetection to false first.');}
             }
             if (typeof inputs.recordAudio !== 'undefined' && inputs.recordAudio !== null && inputs.recordAudio)
             {
-                var lockout = await Hosts.count({ID: {'!=': inputs.ID}, recordAudio: true});
+                lockout = await Hosts.count({ID: {'!=': inputs.ID}, recordAudio: true});
                 if (lockout >= 1)
-                    return exits.conflict("To prevent audio recording conflicts, this request was denied because another host already has recordAudio. Please set the other host recordAudio to false first.");
+                    {return exits.conflict('To prevent audio recording conflicts, this request was denied because another host already has recordAudio. Please set the other host recordAudio to false first.');}
             }
 
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.

@@ -1,5 +1,3 @@
-/* global sails, Meta, moment */
-
 module.exports = {
 
     friendlyName: 'Meta / Get',
@@ -11,17 +9,17 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller meta/get called.');
-        
+
         // Subscribe to socket if applicable
         if (this.req.isSocket)
         {
             sails.sockets.join(this.req, 'meta');
             sails.log.verbose('Request was a socket. Joining meta.');
         }
-        
+
         // Return current meta, but update time to current time since it's not auto-updated automatically by changeMeta.
         var returnData = Meta['A'];
-        returnData.djcontrols = "";
+        returnData.djcontrols = '';
         returnData.time = moment().toISOString(true);
         return exits.success(returnData);
     }

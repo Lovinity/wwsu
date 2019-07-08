@@ -1,5 +1,3 @@
-/* global sails, Attendance */
-
 module.exports = {
 
     friendlyName: 'Stats',
@@ -13,18 +11,18 @@ module.exports = {
     fn: async function (inputs, exits) {
         try {
 
-            var records = await Attendance.find().sort("createdAt ASC");
-            var listenerRecordsA = await Listeners.find().sort("createdAt ASC");
+            var records = await Attendance.find().sort('createdAt ASC');
+            var listenerRecordsA = await Listeners.find().sort('createdAt ASC');
             var maps = records
                     .filter(record => record.actualStart !== null && record.actualEnd !== null)
                     .map(async currentRecord => {
                         sails.log.debug(`Updating Attendance ID ${currentRecord.ID}`);
                         // Fetch listenerRecords since beginning of Attendance, as well as the listener count prior to start of attendance record.
                         var listenerRecords = listenerRecordsA
-                                .filter(record2 => moment(record2.createdAt).isSameOrAfter(moment(currentRecord.actualStart)) && moment(record2.createdAt).isSameOrBefore(moment(currentRecord.actualEnd)))
+                                .filter(record2 => moment(record2.createdAt).isSameOrAfter(moment(currentRecord.actualStart)) && moment(record2.createdAt).isSameOrBefore(moment(currentRecord.actualEnd)));
                         var prevListeners = await Listeners.find({'createdAt': {'<=': currentRecord.actualStart}}).sort('createdAt DESC').limit(1) || 0;
                         if (prevListeners[0])
-                            prevListeners = prevListeners[0].listeners || 0;
+                            {prevListeners = prevListeners[0].listeners || 0;}
 
                         // Calculate listener minutes
                         var prevTime = moment(currentRecord.actualStart);

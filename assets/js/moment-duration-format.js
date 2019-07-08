@@ -29,7 +29,7 @@
         // Globals.
         root.momentDurationFormatSetup = root.moment ? factory(root.moment) : factory;
     }
-})(this, function (moment) {
+})(this, (moment) => {
     // `Number#tolocaleString` is tested on plugin initialization.
     // If the feature test passes, `toLocaleStringWorks` will be set to `true` and the
     // native function will be used to generate formatted output. If the feature
@@ -45,51 +45,51 @@
     var toLocaleStringRoundingWorks = false;
 
     // Token type names in order of descending magnitude.
-    var types = "escape years months weeks days hours minutes seconds milliseconds general".split(" ");
+    var types = 'escape years months weeks days hours minutes seconds milliseconds general'.split(' ');
 
     var bubbles = [
         {
-            type: "seconds",
+            type: 'seconds',
             targets: [
-                { type: "minutes", value: 60 },
-                { type: "hours", value: 3600 },
-                { type: "days", value: 86400 },
-                { type: "weeks", value: 604800 },
-                { type: "months", value: 2678400 },
-                { type: "years", value: 31536000 }
+                { type: 'minutes', value: 60 },
+                { type: 'hours', value: 3600 },
+                { type: 'days', value: 86400 },
+                { type: 'weeks', value: 604800 },
+                { type: 'months', value: 2678400 },
+                { type: 'years', value: 31536000 }
             ]
         },
         {
-            type: "minutes",
+            type: 'minutes',
             targets: [
-                { type: "hours", value: 60 },
-                { type: "days", value: 1440 },
-                { type: "weeks", value: 10080 },
-                { type: "months", value: 44640 },
-                { type: "years", value: 525600 }
+                { type: 'hours', value: 60 },
+                { type: 'days', value: 1440 },
+                { type: 'weeks', value: 10080 },
+                { type: 'months', value: 44640 },
+                { type: 'years', value: 525600 }
             ]
         },
         {
-            type: "hours",
+            type: 'hours',
             targets: [
-                { type: "days", value: 24 },
-                { type: "weeks", value: 168 },
-                { type: "months", value: 744 },
-                { type: "years", value: 8760 }
+                { type: 'days', value: 24 },
+                { type: 'weeks', value: 168 },
+                { type: 'months', value: 744 },
+                { type: 'years', value: 8760 }
             ]
         },
         {
-            type: "days",
+            type: 'days',
             targets: [
-                { type: "weeks", value: 7 },
-                { type: "months", value: 31 },
-                { type: "years", value: 365 }
+                { type: 'weeks', value: 7 },
+                { type: 'months', value: 31 },
+                { type: 'years', value: 365 }
             ]
         },
         {
-            type: "months",
+            type: 'months',
             targets: [
-                { type: "years", value: 12 }
+                { type: 'years', value: 12 }
             ]
         }
     ];
@@ -107,10 +107,10 @@
     // Returns "0" repeated `qty` times.
     // `qty` must be a integer >= 0.
     function repeatZero(qty) {
-        var result = "";
+        var result = '';
 
         while (qty) {
-            result += "0";
+            result += '0';
             qty -= 1;
         }
 
@@ -118,14 +118,14 @@
     }
 
     function stringRound(digits) {
-        var digitsArray = digits.split("").reverse();
+        var digitsArray = digits.split('').reverse();
         var i = 0;
         var carry = true;
 
         while (carry && i < digitsArray.length) {
             if (i) {
-                if (digitsArray[i] === "9") {
-                    digitsArray[i] = "0";
+                if (digitsArray[i] === '9') {
+                    digitsArray[i] = '0';
                 } else {
                     digitsArray[i] = (parseInt(digitsArray[i], 10) + 1).toString();
                     carry = false;
@@ -135,17 +135,17 @@
                     carry = false;
                 }
 
-                digitsArray[i] = "0";
+                digitsArray[i] = '0';
             }
 
             i += 1;
         }
 
         if (carry) {
-            digitsArray.push("1");
+            digitsArray.push('1');
         }
 
-        return digitsArray.reverse().join("");
+        return digitsArray.reverse().join('');
     }
 
     // formatNumber
@@ -194,7 +194,7 @@
             if (!toLocaleStringRoundingWorks) {
                 var roundingOptions = extend({}, options);
                 roundingOptions.useGrouping = false;
-                roundingOptions.decimalSeparator = ".";
+                roundingOptions.decimalSeparator = '.';
                 number = parseFloat(formatNumber(number, roundingOptions), 10);
             }
 
@@ -214,14 +214,14 @@
         var fractionString;
         var exponentString;
 
-        var temp = numberString.split("e");
+        var temp = numberString.split('e');
 
-        exponentString = temp[1] || "";
+        exponentString = temp[1] || '';
 
-        temp = temp[0].split(".");
+        temp = temp[0].split('.');
 
-        fractionString = temp[1] || "";
-        integerString = temp[0] || "";
+        fractionString = temp[1] || '';
+        integerString = temp[0] || '';
 
         // Workaround for floating point errors in `toFixed` and `toPrecision`.
         // (3.55).toFixed(1); --> "3.5"
@@ -259,7 +259,7 @@
         // Trim trailing zeroes from fractionString because toPrecision outputs
         // precision, not significant digits.
         if (maximumSignificantDigits) {
-            fractionString = fractionString.replace(/0*$/, "");
+            fractionString = fractionString.replace(/0*$/, '');
         }
 
         // Handle exponent.
@@ -270,7 +270,7 @@
                 fractionString = fractionString + repeatZero(exponent - fractionString.length);
 
                 integerString = integerString + fractionString;
-                fractionString = "";
+                fractionString = '';
             } else {
                 integerString = integerString + fractionString.slice(0, exponent);
                 fractionString = fractionString.slice(exponent);
@@ -278,7 +278,7 @@
         } else if (exponent < 0) {
             fractionString = (repeatZero(Math.abs(exponent) - integerString.length) + integerString + fractionString);
 
-            integerString = "0";
+            integerString = '0';
         }
 
         if (!maximumSignificantDigits) {
@@ -296,7 +296,7 @@
             }
         }
 
-        var formattedString = "";
+        var formattedString = '';
 
         // Handle grouping.
         if (useGrouping) {
@@ -346,14 +346,14 @@
     function durationGetLabels(token, localeData) {
         var labels = [];
 
-        each(keys(localeData), function (localeDataKey) {
-            if (localeDataKey.slice(0, 15) !== "_durationLabels") {
+        each(keys(localeData), (localeDataKey) => {
+            if (localeDataKey.slice(0, 15) !== '_durationLabels') {
                 return;
             }
 
             var labelType = localeDataKey.slice(15).toLowerCase();
 
-            each(keys(localeData[localeDataKey]), function (labelKey) {
+            each(keys(localeData[localeDataKey]), (labelKey) => {
                 if (labelKey.slice(0, 1) === token) {
                     labels.push({
                         type: labelType,
@@ -420,20 +420,20 @@
             MS: 'm:ss'
         },
         durationLabelTypes: [
-            { type: "standard", string: "__" },
-            { type: "short", string: "_" }
+            { type: 'standard', string: '__' },
+            { type: 'short', string: '_' }
         ],
         durationPluralKey: durationPluralKey
     };
 
     // isArray
     function isArray(array) {
-        return Object.prototype.toString.call(array) === "[object Array]";
+        return Object.prototype.toString.call(array) === '[object Array]';
     }
 
     // isObject
     function isObject(obj) {
-        return Object.prototype.toString.call(obj) === "[object Object]";
+        return Object.prototype.toString.call(obj) === '[object Object]';
     }
 
     // findLast
@@ -453,7 +453,7 @@
 
         var match;
 
-        if (typeof callback !== "function") {
+        if (typeof callback !== 'function') {
             match = callback;
             callback = function (item) {
                 return item === match;
@@ -468,8 +468,8 @@
 
     // each
     function each(array, callback) {
-        var index = 0,
-            max = array.length;
+        var index = 0;
+            var max = array.length;
 
         if (!array || !max) { return; }
 
@@ -481,9 +481,9 @@
 
     // map
     function map(array, callback) {
-        var index = 0,
-            max = array.length,
-            ret = [];
+        var index = 0;
+            var max = array.length;
+            var ret = [];
 
         if (!array || !max) { return ret; }
 
@@ -497,7 +497,7 @@
 
     // pluck
     function pluck(array, prop) {
-        return map(array, function (item) {
+        return map(array, (item) => {
             return item[prop];
         });
     }
@@ -506,7 +506,7 @@
     function compact(array) {
         var ret = [];
 
-        each(array, function (item) {
+        each(array, (item) => {
             if (item) { ret.push(item); }
         });
 
@@ -517,7 +517,7 @@
     function unique(array) {
         var ret = [];
 
-        each(array, function (_a) {
+        each(array, (_a) => {
             if (!find(ret, _a)) { ret.push(_a); }
         });
 
@@ -528,8 +528,8 @@
     function intersection(a, b) {
         var ret = [];
 
-        each(a, function (_a) {
-            each(b, function (_b) {
+        each(a, (_a) => {
+            each(b, (_b) => {
                 if (_a === _b) { ret.push(_a); }
             });
         });
@@ -541,7 +541,7 @@
     function rest(array, callback) {
         var ret = [];
 
-        each(array, function (item, index) {
+        each(array, (item, index) => {
             if (!callback(item)) {
                 ret = array.slice(index);
                 return false;
@@ -580,8 +580,8 @@
 
     // any
     function any(array, callback) {
-        var index = 0,
-            max = array.length;
+        var index = 0;
+            var max = array.length;
 
         if (!array || !max) { return false; }
 
@@ -597,7 +597,7 @@
     function flatten(array) {
         var ret = [];
 
-        each(array, function(child) {
+        each(array, (child) => {
             ret = ret.concat(child);
         });
 
@@ -615,12 +615,12 @@
     }
 
     function featureTestToLocaleStringRounding() {
-        return (3.55).toLocaleString("en", {
+        return (3.55).toLocaleString('en', {
             useGrouping: false,
             minimumIntegerDigits: 1,
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
-        }) === "3.6";
+        }) === '3.6';
     }
 
     function featureTestToLocaleString() {
@@ -631,29 +631,29 @@
         if (!passed) { return false; }
 
         // Test minimumIntegerDigits.
-        passed = passed && (1).toLocaleString("en", { minimumIntegerDigits: 1 }) === "1";
-        passed = passed && (1).toLocaleString("en", { minimumIntegerDigits: 2 }) === "01";
-        passed = passed && (1).toLocaleString("en", { minimumIntegerDigits: 3 }) === "001";
+        passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 1 }) === '1';
+        passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 2 }) === '01';
+        passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 3 }) === '001';
         if (!passed) { return false; }
 
         // Test maximumFractionDigits and minimumFractionDigits.
-        passed = passed && (99.99).toLocaleString("en", { maximumFractionDigits: 0, minimumFractionDigits: 0 }) === "100";
-        passed = passed && (99.99).toLocaleString("en", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) === "100.0";
-        passed = passed && (99.99).toLocaleString("en", { maximumFractionDigits: 2, minimumFractionDigits: 2 }) === "99.99";
-        passed = passed && (99.99).toLocaleString("en", { maximumFractionDigits: 3, minimumFractionDigits: 3 }) === "99.990";
+        passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) === '100';
+        passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) === '100.0';
+        passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) === '99.99';
+        passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 3, minimumFractionDigits: 3 }) === '99.990';
         if (!passed) { return false; }
 
         // Test maximumSignificantDigits.
-        passed = passed && (99.99).toLocaleString("en", { maximumSignificantDigits: 1 }) === "100";
-        passed = passed && (99.99).toLocaleString("en", { maximumSignificantDigits: 2 }) === "100";
-        passed = passed && (99.99).toLocaleString("en", { maximumSignificantDigits: 3 }) === "100";
-        passed = passed && (99.99).toLocaleString("en", { maximumSignificantDigits: 4 }) === "99.99";
-        passed = passed && (99.99).toLocaleString("en", { maximumSignificantDigits: 5 }) === "99.99";
+        passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 1 }) === '100';
+        passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 2 }) === '100';
+        passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 3 }) === '100';
+        passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 4 }) === '99.99';
+        passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 5 }) === '99.99';
         if (!passed) { return false; }
 
         // Test grouping.
-        passed = passed && (1000).toLocaleString("en", { useGrouping: true }) === "1,000";
-        passed = passed && (1000).toLocaleString("en", { useGrouping: false }) === "1000";
+        passed = passed && (1000).toLocaleString('en', { useGrouping: true }) === '1,000';
+        passed = passed && (1000).toLocaleString('en', { useGrouping: false }) === '1000';
         if (!passed) { return false; }
 
         return true;
@@ -666,21 +666,21 @@
         var durations;
 
         // Parse arguments.
-        each(args, function (arg, index) {
+        each(args, (arg, index) => {
             if (!index) {
                 if (!isArray(arg)) {
-                    throw "Expected array as the first argument to durationsFormat.";
+                    throw 'Expected array as the first argument to durationsFormat.';
                 }
 
                 durations = arg;
             }
 
-            if (typeof arg === "string" || typeof arg === "function") {
+            if (typeof arg === 'string' || typeof arg === 'function') {
                 settings.template = arg;
                 return;
             }
 
-            if (typeof arg === "number") {
+            if (typeof arg === 'number') {
                 settings.precision = arg;
                 return;
             }
@@ -696,12 +696,12 @@
 
         settings.returnMomentTypes = true;
 
-        var formattedDurations = map(durations, function (dur) {
+        var formattedDurations = map(durations, (dur) => {
             return dur.format(settings);
         });
 
         // Merge token types from all durations.
-        var outputTypes = intersection(types, unique(pluck(flatten(formattedDurations), "type")));
+        var outputTypes = intersection(types, unique(pluck(flatten(formattedDurations), 'type')));
 
         var largest = settings.largest;
 
@@ -712,7 +712,7 @@
         settings.returnMomentTypes = false;
         settings.outputTypes = outputTypes;
 
-        return map(durations, function (dur) {
+        return map(durations, (dur) => {
             return dur.format(settings);
         });
     }
@@ -730,7 +730,7 @@
         var asMonths = this.asMonths();
 
         // Treat invalid durations as having a value of 0 milliseconds.
-        if (typeof this.isValid === "function" && this.isValid() === false) {
+        if (typeof this.isValid === 'function' && this.isValid() === false) {
             asMilliseconds = 0;
             asMonths = 0;
         }
@@ -739,17 +739,17 @@
 
         // Two shadow copies are needed because of the way moment.js handles
         // duration arithmetic for years/months and for weeks/days/hours/minutes/seconds.
-        var remainder = moment.duration(Math.abs(asMilliseconds), "milliseconds");
-        var remainderMonths = moment.duration(Math.abs(asMonths), "months");
+        var remainder = moment.duration(Math.abs(asMilliseconds), 'milliseconds');
+        var remainderMonths = moment.duration(Math.abs(asMonths), 'months');
 
         // Parse arguments.
-        each(args, function (arg) {
-            if (typeof arg === "string" || typeof arg === "function") {
+        each(args, (arg) => {
+            if (typeof arg === 'string' || typeof arg === 'function') {
                 settings.template = arg;
                 return;
             }
 
-            if (typeof arg === "number") {
+            if (typeof arg === 'number') {
                 settings.precision = arg;
                 return;
             }
@@ -760,14 +760,14 @@
         });
 
         var momentTokens = {
-            years: "y",
-            months: "M",
-            weeks: "w",
-            days: "d",
-            hours: "h",
-            minutes: "m",
-            seconds: "s",
-            milliseconds: "S"
+            years: 'y',
+            months: 'M',
+            weeks: 'w',
+            days: 'd',
+            hours: 'h',
+            minutes: 'm',
+            seconds: 's',
+            milliseconds: 'S'
         };
 
         var tokenDefs = {
@@ -787,20 +787,20 @@
         settings.types = types;
 
         var typeMap = function (token) {
-            return find(types, function (type) {
+            return find(types, (type) => {
                 return tokenDefs[type].test(token);
             });
         };
 
-        var tokenizer = new RegExp(map(types, function (type) {
+        var tokenizer = new RegExp(map(types, (type) => {
             return tokenDefs[type].source;
-        }).join("|"), "g");
+        }).join('|'), 'g');
 
         // Current duration object is available in the template function.
         settings.duration = this;
 
         // Eval template function and cache template string.
-        var template = typeof settings.template === "function" ? settings.template.apply(settings) : settings.template;
+        var template = typeof settings.template === 'function' ? settings.template.apply(settings) : settings.template;
 
         // outputTypes and returnMomentTypes are settings to support durationsFormat().
 
@@ -820,15 +820,15 @@
 
         if (!outputTypes) {
             if (isArray(settings.stopTrim)) {
-                settings.stopTrim = settings.stopTrim.join("");
+                settings.stopTrim = settings.stopTrim.join('');
             }
 
             // Parse stopTrim string to create token types array.
             if (settings.stopTrim) {
-                each(settings.stopTrim.match(tokenizer), function (token) {
+                each(settings.stopTrim.match(tokenizer), (token) => {
                     var type = typeMap(token);
 
-                    if (type === "escape" || type === "general") {
+                    if (type === 'escape' || type === 'general') {
                         return;
                     }
 
@@ -845,8 +845,8 @@
         }
 
         // Fall back to this plugin's `eng` extension.
-        each(keys(engLocale), function (key) {
-            if (typeof engLocale[key] === "function") {
+        each(keys(engLocale), (key) => {
+            if (typeof engLocale[key] === 'function') {
                 if (!localeData[key]) {
                     localeData[key] = engLocale[key];
                 }
@@ -854,15 +854,15 @@
                 return;
             }
 
-            if (!localeData["_" + key]) {
-                localeData["_" + key] = engLocale[key];
+            if (!localeData['_' + key]) {
+                localeData['_' + key] = engLocale[key];
             }
         });
 
         // Replace Duration Time Template strings.
         // For locale `eng`: `_HMS_`, `_HM_`, and `_MS_`.
-        each(keys(localeData._durationTimeTemplates), function (item) {
-            template = template.replace("_" + item + "_", localeData._durationTimeTemplates[item]);
+        each(keys(localeData._durationTimeTemplates), (item) => {
+            template = template.replace('_' + item + '_', localeData._durationTimeTemplates[item]);
         });
 
         // Determine user's locale.
@@ -898,19 +898,19 @@
         var trim = settings.trim;
 
         if (isArray(trim)) {
-            trim = trim.join(" ");
+            trim = trim.join(' ');
         }
 
         if (trim === null && (largest || maxValue || useSignificantDigits)) {
-            trim = "all";
+            trim = 'all';
         }
 
-        if (trim === null || trim === true || trim === "left" || trim === "right") {
-            trim = "large";
+        if (trim === null || trim === true || trim === 'left' || trim === 'right') {
+            trim = 'large';
         }
 
         if (trim === false) {
-            trim = "";
+            trim = '';
         }
 
         var trimIncludes = function (item) {
@@ -930,13 +930,13 @@
         var trimFinal = any([rFinal, rAll], trimIncludes);
 
         // Parse format string to create raw tokens array.
-        var rawTokens = map(template.match(tokenizer), function (token, index) {
+        var rawTokens = map(template.match(tokenizer), (token, index) => {
             var type = typeMap(token);
 
-            if (token.slice(0, 1) === "*") {
+            if (token.slice(0, 1) === '*') {
                 token = token.slice(1);
 
-                if (type !== "escape" && type !== "general") {
+                if (type !== 'escape' && type !== 'general') {
                     stopTrim.push(type);
                 }
             }
@@ -944,13 +944,13 @@
             return {
                 index: index,
                 length: token.length,
-                text: "",
+                text: '',
 
                 // Replace escaped tokens with the non-escaped token text.
-                token: (type === "escape" ? token.replace(tokenDefs.escape, "$1") : token),
+                token: (type === 'escape' ? token.replace(tokenDefs.escape, '$1') : token),
 
                 // Ignore type on non-moment tokens.
-                type: ((type === "escape" || type === "general") ? null : type)
+                type: ((type === 'escape' || type === 'general') ? null : type)
             };
         });
 
@@ -958,8 +958,8 @@
         var currentToken = {
             index: 0,
             length: 0,
-            token: "",
-            text: "",
+            token: '',
+            text: '',
             type: null
         };
 
@@ -969,7 +969,7 @@
             rawTokens.reverse();
         }
 
-        each(rawTokens, function (token) {
+        each(rawTokens, (token) => {
             if (token.type) {
                 if (currentToken.type || currentToken.text) {
                     tokens.push(currentToken);
@@ -997,18 +997,18 @@
 
         // Find unique moment token types in the template in order of
         // descending magnitude.
-        var momentTypes = intersection(types, unique(compact(pluck(tokens, "type"))));
+        var momentTypes = intersection(types, unique(compact(pluck(tokens, 'type'))));
 
         // Exit early if there are no moment token types.
         if (!momentTypes.length) {
-            return pluck(tokens, "text").join("");
+            return pluck(tokens, 'text').join('');
         }
 
         // Calculate values for each moment type in the template.
         // For processing the settings, values are associated with moment types.
         // Values will be assigned to tokens at the last step in order to
         // assume nothing about frequency or order of tokens in the template.
-        momentTypes = map(momentTypes, function (momentType, index) {
+        momentTypes = map(momentTypes, (momentType, index) => {
             // Is this the least-magnitude moment token found?
             var isSmallest = ((index + 1) === momentTypes.length);
 
@@ -1018,7 +1018,7 @@
             // Get the raw value in the current units.
             var rawValue;
 
-            if (momentType === "years" || momentType === "months") {
+            if (momentType === 'years' || momentType === 'months') {
                 rawValue = remainderMonths.as(momentType);
             } else {
                 rawValue = remainder.as(momentType);
@@ -1027,7 +1027,7 @@
             var wholeValue = Math.floor(rawValue);
             var decimalValue = rawValue - wholeValue;
 
-            var token = find(tokens, function (token) {
+            var token = find(tokens, (token) => {
                 return momentType === token.type;
             });
 
@@ -1174,21 +1174,21 @@
                 }
             }
 
-            if (!foundFirst && (momentType.value > 0 || trim === "" /* trim: false */ || find(stopTrim, momentType.type) || find(outputTypes, momentType.type))) {
+            if (!foundFirst && (momentType.value > 0 || trim === '' /* trim: false */ || find(stopTrim, momentType.type) || find(outputTypes, momentType.type))) {
                 foundFirst = true;
             }
 
             momentType.formattedValue = formatNumber(momentType.value, formatOptions, userLocale);
 
             formatOptions.useGrouping = false;
-            formatOptions.decimalSeparator = ".";
-            momentType.formattedValueEn = formatNumber(momentType.value, formatOptions, "en");
+            formatOptions.decimalSeparator = '.';
+            momentType.formattedValueEn = formatNumber(momentType.value, formatOptions, 'en');
 
-            if (momentType.tokenLength === 2 && momentType.type === "milliseconds") {
+            if (momentType.tokenLength === 2 && momentType.type === 'milliseconds') {
                 momentType.formattedValueMS = formatNumber(momentType.value, {
                     minimumIntegerDigits: 3,
                     useGrouping: false
-                }, "en").slice(0, 2);
+                }, 'en').slice(0, 2);
             }
 
             return momentType;
@@ -1201,7 +1201,7 @@
         // Bubble rounded values.
         if (momentTypes.length > 1) {
             var findType = function (type) {
-                return find(momentTypes, function (momentType) {
+                return find(momentTypes, (momentType) => {
                     return momentType.type === type;
                 });
             };
@@ -1213,7 +1213,7 @@
                     return;
                 }
 
-                each(bubble.targets, function (target) {
+                each(bubble.targets, (target) => {
                     var targetMomentType = findType(target.type);
 
                     if (!targetMomentType) {
@@ -1245,8 +1245,8 @@
         }
 
         if (outputTypes && !(isMaxValue && !settings.trim)) {
-            momentTypes = map(momentTypes, function (momentType) {
-                if (find(outputTypes, function (outputType) {
+            momentTypes = map(momentTypes, (momentType) => {
+                if (find(outputTypes, (outputType) => {
                     return momentType.type === outputType;
                 })) {
                     return momentType;
@@ -1259,7 +1259,7 @@
         } else {
             // Trim Large.
             if (trimLarge) {
-                momentTypes = rest(momentTypes, function (momentType) {
+                momentTypes = rest(momentTypes, (momentType) => {
                     // Stop trimming on:
                     // - the smallest moment type
                     // - a type marked for stopTrim
@@ -1275,7 +1275,7 @@
 
             // Trim Small.
             if (trimSmall && momentTypes.length > 1) {
-                momentTypes = initial(momentTypes, function (momentType) {
+                momentTypes = initial(momentTypes, (momentType) => {
                     // Stop trimming on:
                     // - a type marked for stopTrim
                     // - a type that has a whole value
@@ -1286,7 +1286,7 @@
 
             // Trim Mid.
             if (trimMid) {
-                momentTypes = map(momentTypes, function (momentType, index) {
+                momentTypes = map(momentTypes, (momentType, index) => {
                     if (index > 0 && index < momentTypes.length - 1 && !momentType.wholeValue) {
                         return null;
                     }
@@ -1308,10 +1308,10 @@
         }
 
         // Localize and pluralize unit labels.
-        each(tokens, function (token) {
+        each(tokens, (token) => {
             var key = momentTokens[token.type];
 
-            var momentType = find(momentTypes, function (momentType) {
+            var momentType = find(momentTypes, (momentType) => {
                 return momentType.type === token.type;
             });
 
@@ -1319,12 +1319,12 @@
                 return;
             }
 
-            var values = momentType.formattedValueEn.split(".");
+            var values = momentType.formattedValueEn.split('.');
 
             values[0] = parseInt(values[0], 10);
 
             if (values[1]) {
-                values[1] = parseFloat("0." + values[1], 10);
+                values[1] = parseFloat('0.' + values[1], 10);
             } else {
                 values[1] = null;
             }
@@ -1338,8 +1338,8 @@
             var pluralizedLabels = {};
 
             // Auto-Localized unit labels.
-            each(localeData._durationLabelTypes, function (labelType) {
-                var label = find(labels, function (label) {
+            each(localeData._durationLabelTypes, (labelType) => {
+                var label = find(labels, (label) => {
                     return label.type === labelType.type && label.key === pluralKey;
                 });
 
@@ -1357,7 +1357,7 @@
             if (usePlural && !autoLocalized) {
                 labels.sort(durationLabelCompare);
 
-                each(labels, function (label) {
+                each(labels, (label) => {
                     if (pluralizedLabels[label.type] === label.label) {
                         if (stringIncludes(token.text, label.label)) {
                             // Stop checking this token if its label is already
@@ -1380,43 +1380,43 @@
         });
 
         // Build ouptut.
-        tokens = map(tokens, function (token) {
+        tokens = map(tokens, (token) => {
             if (!token.type) {
                 return token.text;
             }
 
-            var momentType = find(momentTypes, function (momentType) {
+            var momentType = find(momentTypes, (momentType) => {
                 return momentType.type === token.type;
             });
 
             if (!momentType) {
-                return "";
+                return '';
             }
 
-            var out = "";
+            var out = '';
 
             if (useLeftUnits) {
                 out += token.text;
             }
 
             if (isNegative && isMaxValue || !isNegative && isMinValue) {
-                out += "< ";
+                out += '< ';
                 isMaxValue = false;
                 isMinValue = false;
             }
 
             if (isNegative && isMinValue || !isNegative && isMaxValue) {
-                out += "> ";
+                out += '> ';
                 isMaxValue = false;
                 isMinValue = false;
             }
 
-            if (isNegative && (momentType.value > 0 || trim === "" || find(stopTrim, momentType.type) || find(outputTypes, momentType.type))) {
-                out += "-";
+            if (isNegative && (momentType.value > 0 || trim === '' || find(stopTrim, momentType.type) || find(outputTypes, momentType.type))) {
+                out += '-';
                 isNegative = false;
             }
 
-            if (token.type === "milliseconds" && momentType.formattedValueMS) {
+            if (token.type === 'milliseconds' && momentType.formattedValueMS) {
                 out += momentType.formattedValueMS;
             } else {
                 out += momentType.formattedValue;
@@ -1430,7 +1430,7 @@
         });
 
         // Trim leading and trailing comma, space, colon, and dot.
-        return tokens.join("").replace(/(,| |:|\.)*$/, "").replace(/^(,| |:|\.)*/, "");
+        return tokens.join('').replace(/(,| |:|\.)*$/, '').replace(/^(,| |:|\.)*/, '');
     }
 
     // defaultFormatTemplate
@@ -1447,54 +1447,54 @@
 
         // Default template strings for each duration dimension type.
         switch (firstType) {
-            case "milliseconds":
-                return "S __";
-            case "seconds": // Fallthrough.
-            case "minutes":
-                return "*_MS_";
-            case "hours":
-                return "_HMS_";
-            case "days": // Possible Fallthrough.
+            case 'milliseconds':
+                return 'S __';
+            case 'seconds': // Fallthrough.
+            case 'minutes':
+                return '*_MS_';
+            case 'hours':
+                return '_HMS_';
+            case 'days': // Possible Fallthrough.
                 if (firstType === lastType) {
-                    return "d __";
+                    return 'd __';
                 }
-            case "weeks":
+            case 'weeks':
                 if (firstType === lastType) {
-                    return "w __";
+                    return 'w __';
                 }
 
                 if (this.trim === null) {
-                    this.trim = "both";
+                    this.trim = 'both';
                 }
 
-                return "w __, d __, h __";
-            case "months": // Possible Fallthrough.
+                return 'w __, d __, h __';
+            case 'months': // Possible Fallthrough.
                 if (firstType === lastType) {
-                    return "M __";
+                    return 'M __';
                 }
-            case "years":
+            case 'years':
                 if (firstType === lastType) {
-                    return "y __";
+                    return 'y __';
                 }
 
                 if (this.trim === null) {
-                    this.trim = "both";
+                    this.trim = 'both';
                 }
 
-                return "y __, M __, d __";
+                return 'y __, M __, d __';
             default:
                 if (this.trim === null) {
-                    this.trim = "both";
+                    this.trim = 'both';
                 }
 
-                return "y __, d __, h __, m __, s __";
+                return 'y __, d __, h __, m __, s __';
         }
     }
 
     // init
     function init(context) {
         if (!context) {
-            throw "Moment Duration Format init cannot find moment instance.";
+            throw 'Moment Duration Format init cannot find moment instance.';
         }
 
         context.duration.format = durationsFormat;
@@ -1641,12 +1641,12 @@
             // groupingSeparator
             // The integer digit grouping separator used when using the fallback
             // formatNumber function.
-            groupingSeparator: ",",
+            groupingSeparator: ',',
 
             // decimalSeparator
             // The decimal separator used when using the fallback formatNumber
             // function.
-            decimalSeparator: ".",
+            decimalSeparator: '.',
 
             // grouping
             // The integer digit grouping used when using the fallback formatNumber

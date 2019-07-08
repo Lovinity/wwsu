@@ -1,5 +1,3 @@
-/* global Calendar, sails */
-
 module.exports = {
 
     friendlyName: 'Calendar / Remove',
@@ -17,7 +15,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller calendar/remove called.');
         try {
-            // Grab events
+            // Destroy the event
             await Calendar.destroy({ID: inputs.ID}).fetch();
             return exits.success();
         } catch (e) {

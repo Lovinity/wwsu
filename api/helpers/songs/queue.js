@@ -1,5 +1,3 @@
-/* global Category, Subcategory, Songs, Statemeta, sails, wait, moment */
-
 module.exports = {
 
     friendlyName: 'songs.queue',
@@ -47,53 +45,57 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper songs.queueFromSubcategory called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
 
-            // Get rid of all the null entries
+            // Get rid of all the null entries in our array
             try {
                 inputs.subcategories = inputs.subcategories.filter(subcategory => subcategory && subcategory !== null);
-            } catch (e2) {
+            } catch (unusedE) {
                 inputs.subcategories = [];
             }
 
             // Find all applicable songs that are in the subcategory and load them in memory (have to do randomisation by Node, not by database)
+            // LINT: no camel case; this is how it is in RadioDJ's database
+            // eslint-disable-next-line camelcase
             var thesongs = await Songs.find({id_subcat: inputs.subcategories, enabled: 1});
             sails.log.verbose(`Songs records retrieved: ${thesongs.length}`);
-            sails.log.silly(thesongs);
 
             // Remove songs that are expired
             if (thesongs.length > 0)
-                thesongs = thesongs.filter(thesong => moment(thesong.start_date).isSameOrBefore(moment()) && (moment(thesong.end_date).isSameOrBefore(moment("2002-01-02 00:00:02")) || moment().isBefore(moment(thesong.end_date))) && (thesong.play_limit === 0 || thesong.count_played < thesong.play_limit))
+                {thesongs = thesongs.filter(thesong => moment(thesong.start_date).isSameOrBefore(moment()) && (moment(thesong.end_date).isSameOrBefore(moment('2002-01-02 00:00:02')) || moment().isBefore(moment(thesong.end_date))) && (thesong.play_limit === 0 || thesong.count_played < thesong.play_limit));}
 
             // If duration is provided, remove songs that fail the duration check
             if (inputs.duration && inputs.duration !== null && thesongs.length > 0)
-                thesongs = thesongs.filter(thesong => thesong.duration <= (inputs.duration + 5) && thesong.duration >= (inputs.duration - 5));
+                {thesongs = thesongs.filter(thesong => thesong.duration <= (inputs.duration + 5) && thesong.duration >= (inputs.duration - 5));}
 
+            // Save on the server by skipping if there are no available tracks to queue.
             if (thesongs.length > 0)
             {
                 // Determine which tracks are already queued
                 var queuedtracks = 0;
                 var queuedtracksa = [];
                 var tracks = await sails.helpers.rest.getQueue();
+                var thesong;
+                var thesongs2;
+                var temp;
                 tracks.map(queuedtrack => queuedtracksa.push(queuedtrack.ID));
 
                 // Queue up the chosen tracks if they pass rotation rules, and if rules is not set to false
                 if (inputs.rules)
                 {
-                    var thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
+                    thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
                     while (queuedtracks < inputs.quantity && thesongs2.length > 0)
                     {
-                        var temp = await sails.helpers.pickRandom(thesongs2, true);
+                        temp = await sails.helpers.pickRandom(thesongs2, true);
                         thesongs2 = temp.newArray;
-                        var thesong = temp.item;
+                        thesong = temp.item;
                         if (typeof thesong.ID !== 'undefined' && await sails.helpers.songs.checkRotationRules(thesong.ID))
                         {
                             queuedtracks++;
                             sails.log.verbose(`Queued ${thesong.ID}`);
                             await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
                             if (inputs.queue)
-                                await sails.helpers.rest.checkQueue(thesong.ID);
+                                {await sails.helpers.rest.checkQueue(thesong.ID);}
                         }
                     }
                 }
@@ -103,25 +105,25 @@ module.exports = {
                 {
                     sails.log.verbose('Not enough tracks to queue when considering rotation rules.');
 
-                    // We want to be sure we don't queue any tracks that are already in the queue
-                    var tracks = await sails.helpers.rest.getQueue();
+                    // We want to be sure we don't queue any tracks that are already in the queue. Let's get the queue again.
+                    tracks = await sails.helpers.rest.getQueue();
                     queuedtracksa = [];
                     tracks.map(track => queuedtracksa.push(track.ID));
 
                     // Go through all the songs again without checking for rotation rules
-                    var thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
+                    thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1);
                     while (queuedtracks < inputs.quantity && thesongs2.length > 0)
                     {
-                        var temp = await sails.helpers.pickRandom(thesongs2, true);
+                        temp = await sails.helpers.pickRandom(thesongs2, true);
                         thesongs2 = temp.newArray;
-                        var thesong = temp.item;
+                        thesong = temp.item;
                         if (typeof thesong.ID !== 'undefined')
                         {
                             queuedtracks++;
                             sails.log.verbose(`Queued ${thesong.ID}`);
                             await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID);
                             if (inputs.queue)
-                                await sails.helpers.rest.checkQueue(thesong.ID);
+                                {await sails.helpers.rest.checkQueue(thesong.ID);}
                         }
                     }
                 }

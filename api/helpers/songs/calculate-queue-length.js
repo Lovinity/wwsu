@@ -1,5 +1,3 @@
-/* global sails, Meta */
-
 module.exports = {
 
     friendlyName: 'sails.helpers.songs.calculateQueueLength',
@@ -12,13 +10,15 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug(`helper songs.calculateQueueLength called.`);
         try {
+            // Get current RadioDJ Queue
             var queue = await sails.helpers.rest.getQueue();
             var queueLength = 0;
 
-            // When on queue to go live or return from break, search for the position of the last noMeta track
+            // When on queue to go live or return from break, search for the position of the last config.custom.categories.noMeta track.
+            // Queue length should only include up to the first track not in config.custom.categories.noMeta.
             var breakQueueLength = -2;
             var firstNoMeta = 0;
-            if ((Meta['A'].state.includes("_returning") || Meta['A'].state === 'automation_live' || Meta['A'].state === 'automation_remote' || Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote'))
+            if ((Meta['A'].state.includes('_returning') || Meta['A'].state === 'automation_live' || Meta['A'].state === 'automation_remote' || Meta['A'].state === 'automation_sports' || Meta['A'].state === 'automation_sportsremote'))
             {
                 breakQueueLength = -1;
                 firstNoMeta = -1;
@@ -39,11 +39,11 @@ module.exports = {
             // Determine the queue length
             queue
                     .filter((track, index) => index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1))
-                    .map(track => queueLength += (track.Duration - track.Elapsed));
+                    .map(track => {queueLength += (track.Duration - track.Elapsed);});
 
             return exits.success(queueLength);
-        } catch (e) {
-            // Should not throw on error; return a 0 instead.
+        } catch (unusedE) {
+            // Should not throw on error; return a 0 instead for 0 seconds.
             return exits.success(0);
         }
 

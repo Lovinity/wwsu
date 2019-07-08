@@ -1,5 +1,3 @@
-/* global Attendance, sails, moment, Djs, Xp, Logs */
-
 module.exports = {
 
     friendlyName: 'analytics / showtime',

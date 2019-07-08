@@ -1,5 +1,3 @@
-/* global Messages, sails */
-
 module.exports = {
 
     friendlyName: 'messages.remove',
@@ -16,9 +14,8 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.remove called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            // Mark message as removed.
+            // Mark message as removed. Do not actually destroy it; we want it in the database for archive.
             var records = await Messages.update({ID: inputs.ID}, {status: 'deleted'})
                     .fetch();
             if (!records || records.length === 0)

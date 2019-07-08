@@ -1,5 +1,3 @@
-/* global sails, Recipients */
-
 module.exports = {
 
     friendlyName: 'Recipients / Add-computers',
@@ -14,12 +12,12 @@ module.exports = {
         try {
             // Must be a websocket request
             if (!this.req.isSocket)
-                return exits.error(new Error('This controller requires a websocket.'));
+                {return exits.error(new Error('This controller requires a websocket.'));}
 
             // Add the recipient
             var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), this.req.payload.host, 'computers', this.req.payload.host);
 
-
+            // Subscribe to websockets dealing with remote audio calls for DJ Controls
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'bad-call');

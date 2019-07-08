@@ -57,11 +57,11 @@ var socket = io.sails.connect();
 
 var noReq = new WWSUreq(socket, null);
 
-socket.on('connect', function () {
+socket.on('connect', () => {
     sportsdb.replaceData(noReq, '/sports/get');
 });
 
-socket.on('disconnect', function () {
+socket.on('disconnect', () => {
     console.log('Lost connection');
     try {
         socket._raw.io._reconnection = true;
@@ -77,8 +77,8 @@ function updateValue(name, value)
 {
     var temp = sportsdb.db({name: name}).first();
     if (!temp || typeof temp.value === `undefined` || temp.value !== value)
-        noReq.request({method: 'POST', url: '/sports/update', data: {name: name, value: value}}, (resHTML) => {
-        });
+        {noReq.request({method: 'POST', url: '/sports/update', data: {name: name, value: value}}, (resHTML) => {
+        });}
 }
 
 function wsuScore(amount)

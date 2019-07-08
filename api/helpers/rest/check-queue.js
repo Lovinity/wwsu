@@ -1,5 +1,3 @@
-/* global sails, Meta, _, needle, Status, Songs */
-
 module.exports = {
 
     friendlyName: 'rest.checkQueue',

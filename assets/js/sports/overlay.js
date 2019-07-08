@@ -22,7 +22,7 @@ $.fn.extend({
             $(this).removeClass('animated ' + animationName);
 
             if (typeof callback === 'function')
-                callback();
+                {callback();}
         });
 
         return this;
@@ -64,11 +64,11 @@ class Scoreboard {
         {
             temp.innerHTML = value;
             if (value === null || value === ``)
-                $(this._wsuScore).fadeTo(500, 0);
+                {$(this._wsuScore).fadeTo(500, 0);}
             if (value !== null && value !== `` && (this._wsuScoreValue === null || this._wsuScoreValue === ``))
-                $(this._wsuScore).fadeTo(500, 1);
+                {$(this._wsuScore).fadeTo(500, 1);}
             if (value > this._wsuScoreValue)
-                $(this._wsuScore).animateCss('heartBeat slower');
+                {$(this._wsuScore).animateCss('heartBeat slower');}
         }
         this._wsuScoreValue = value;
     }
@@ -79,11 +79,11 @@ class Scoreboard {
         {
             temp.innerHTML = value;
             if (value === null || value === ``)
-                $(this._oppScore).fadeTo(500, 0);
+                {$(this._oppScore).fadeTo(500, 0);}
             if (value !== null && value !== `` && (this._oppScoreValue === null || this._oppScoreValue === ``))
-                $(this._oppScore).fadeTo(500, 1);
+                {$(this._oppScore).fadeTo(500, 1);}
             if (value > this._oppScoreValue)
-                $(this._oppScore).animateCss('heartBeat slower');
+                {$(this._oppScore).animateCss('heartBeat slower');}
         }
         this._oppScoreValue = value;
     }
@@ -96,7 +96,7 @@ class Scoreboard {
             $(this._wsuNum).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
                 if (value !== null && value !== ``)
-                    $(_this._wsuNum).fadeTo(500, 1);
+                    {$(_this._wsuNum).fadeTo(500, 1);}
             });
         }
         this._wsuNumValue = value;
@@ -110,7 +110,7 @@ class Scoreboard {
             $(this._oppNum).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
                 if (value !== null && value !== ``)
-                    $(_this._oppNum).fadeTo(500, 1);
+                    {$(_this._oppNum).fadeTo(500, 1);}
             });
         }
         this._oppNumValue = value;
@@ -124,7 +124,7 @@ class Scoreboard {
             $(this._wsuText).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
                 if (value !== null && value !== ``)
-                    $(_this._wsuText).fadeTo(500, 1);
+                    {$(_this._wsuText).fadeTo(500, 1);}
             });
         }
         this._wsuTextValue = value;
@@ -138,7 +138,7 @@ class Scoreboard {
             $(this._oppText).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
                 if (value !== null && value !== ``)
-                    $(_this._oppText).fadeTo(500, 1);
+                    {$(_this._oppText).fadeTo(500, 1);}
             });
         }
         this._oppTextValue = value;
@@ -209,11 +209,11 @@ var socket = io.sails.connect();
 
 var noReq = new WWSUreq(socket, null);
 
-socket.on('connect', function () {
+socket.on('connect', () => {
     sportsdb.replaceData(noReq, '/sports/get');
 });
 
-socket.on('disconnect', function () {
+socket.on('disconnect', () => {
     console.log('Lost connection');
     try {
         socket._raw.io._reconnection = true;

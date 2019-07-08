@@ -31,7 +31,7 @@ module.exports = {
                         var cueData = queryString.parse(record.cue_times);
                         // If fade in and fade out are both 0 (treat when fade in or fade out is not specified as being 0), skip this track; nothing to do.
                         if ((!cueData.fin || cueData.fin === 0) && (!cueData.fou || cueData.fou === 0))
-                            return null;
+                            {return null;}
 
                         // Get rid of any fading, and reset the xta cue point
                         cueData.fin = 0;

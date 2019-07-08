@@ -1,5 +1,3 @@
-/* global sails, Recipients */
-
 /**
  * Recipients.js
  *
@@ -20,7 +18,7 @@ module.exports = {
         host: {
             type: 'string'
         },
-        
+
         device: {
             type: 'string',
             allowNull: true
@@ -40,7 +38,7 @@ module.exports = {
             min: 0,
             max: 5
         },
-        
+
         peer: {
             type: 'string',
             allowNull: true
@@ -52,7 +50,7 @@ module.exports = {
             defaultsTo: new Date()
         }
     },
-    
+
     // Template are initial records created in the Recipients model upon execution of bootstrap.
     template: [
         {

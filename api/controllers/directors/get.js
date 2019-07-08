@@ -1,5 +1,3 @@
-/* global Directors, sails */
-
 module.exports = {
 
     friendlyName: 'Directors / Get',
@@ -33,7 +31,7 @@ module.exports = {
             // If a username was specified, find only that director. Otherwise, get all directors.
             var query = {};
             if (inputs.username !== null)
-                query = {name: inputs.name};
+                {query = {name: inputs.name};}
 
             // Subscribe to websockets if applicable
             if (this.req.isSocket)
@@ -44,7 +42,7 @@ module.exports = {
 
             // Get records
             var records = await Directors.find(query);
-            
+
             // Remove the login parameter
             records = records.map(record => {
                 delete record.login;

@@ -1,5 +1,3 @@
-/* global Djs, sails, Xp, Attendance, Listeners, Meta */
-
 module.exports = {
 
     friendlyName: 'djs / remove',
@@ -37,7 +35,7 @@ module.exports = {
 
             // Edit meta if necessary
             if (Meta['A'].dj === inputs.ID)
-                Meta.changeMeta({dj: null});
+                {Meta.changeMeta({dj: null});}
 
             return exits.success();
         } catch (e) {

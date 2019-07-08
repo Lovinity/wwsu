@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs, Status */
-
 module.exports = {
 
     friendlyName: 'State / Sports-remote',
@@ -29,17 +27,16 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller state/sports-remote called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
 
             // Do not continue if not in sports or automation mode; client should request automation before requesting sports
-            if (!Meta['A'].state.startsWith("sports") && !Meta['A'].state.startsWith("automation_"))
-                return exits.error(new Error(`Cannot execute state/sports-remote unless in automation or sports mode. Please go to automation first.`));
+            if (!Meta['A'].state.startsWith('sports') && !Meta['A'].state.startsWith('automation_'))
+                {return exits.error(new Error(`Cannot execute state/sports-remote unless in automation or sports mode. Please go to automation first.`));}
 
             // Block this request if we are already switching states
             if (Meta['A'].changingState !== null)
-                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+                {return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));}
 
             // Lock so that any other state changing requests are blocked until we are done
             await Meta.changeMeta({changingState: `Switching to sports-remote`});
@@ -56,7 +53,7 @@ module.exports = {
             Meta.changeMeta({show: inputs.sport, topic: inputs.topic, trackStamp: null});
 
             // Start the sports broadcast
-            if (!Meta['A'].state.startsWith("sports"))
+            if (!Meta['A'].state.startsWith('sports'))
             {
 
                 //await sails.helpers.error.count('goLive');
@@ -72,18 +69,19 @@ module.exports = {
 
                 // Queue a Sports opener if there is one
                 if (typeof sails.config.custom.sportscats[inputs.sport] !== 'undefined')
-                    await sails.helpers.songs.queue([sails.config.custom.sportscats[inputs.sport]["Sports Openers"]], 'Bottom', 1);
+                    {await sails.helpers.songs.queue([sails.config.custom.sportscats[inputs.sport]['Sports Openers']], 'Bottom', 1);}
 
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                 var queueLength = await sails.helpers.songs.calculateQueueLength();
 
+                // If the radioDJ queue is unacceptably long, try to reduce it.
                 if (queueLength >= sails.config.custom.queueCorrection.sports)
                 {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
                     //await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
                     if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
-                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
+                        {await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);} // Skip currently playing track if it is not a noClearShow track
 
                     queueLength = await sails.helpers.songs.calculateQueueLength();
                 }

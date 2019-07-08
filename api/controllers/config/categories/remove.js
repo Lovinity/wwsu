@@ -1,5 +1,3 @@
-/* global Calendar, sails, Directorhours, _ */
-
 module.exports = {
 
     friendlyName: 'config / categories / remove',
@@ -23,9 +21,9 @@ module.exports = {
         sails.log.debug('Controller config/categories/remove called.');
 
         try {
-            
+
             delete sails.config.custom.categories[inputs.name];
-            
+
             sails.sockets.broadcast('config', 'config', {update: {categories: sails.config.custom.categories}});
 
             // Reload subcategories in configuration

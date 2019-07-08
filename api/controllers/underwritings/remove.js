@@ -21,7 +21,7 @@ module.exports = {
 
         try {
 
-            // Edit it
+            // Remove underwritings record
             await Underwritings.destroy({ ID: inputs.ID }).fetch();
 
             return exits.success();

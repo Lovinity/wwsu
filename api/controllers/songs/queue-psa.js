@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'songs / queue-psa',
@@ -17,10 +15,10 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller songs/queue-psa called.');
         try {
-            
+
             // Queue applicable PSA
             await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, true, inputs.duration);
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

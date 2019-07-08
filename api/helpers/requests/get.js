@@ -1,5 +1,3 @@
-/* global Requests, sails, Songs */
-
 module.exports = {
 
     friendlyName: 'requests.get',
@@ -16,19 +14,20 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
+            // Get the requested tracks that have not yet played
             var records = await Requests.find({played: 0, ID: {'>': inputs.offset}});
             sails.log.verbose(`Requests records retrieved: ${records.length}`);
-            sails.log.silly(records);
 
             var thereturn = [];
+
+            // Return an empty array if there are no requested tracks that have not yet aired.
             if (typeof records === 'undefined' || records.length === 0)
             {
                 return exits.success([]);
             } else {
-                var thereturn = [];
+                thereturn = [];
 
                 // Get artist and title of each requested track
                 var maps = records.map(async record => {

@@ -19,7 +19,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
 
-    await sails.helpers.songs.queue([null], 'Top', 1)
+    await sails.helpers.songs.queue([null], 'Top', 1);
     return exits.success();
 
   }

@@ -1,4 +1,3 @@
-/* global moment, sails, Xp, Djs */
 const bcrypt = require('bcrypt');
 module.exports = {
 
@@ -12,7 +11,7 @@ module.exports = {
             required: true,
             description: 'The DJ to add.'
         },
-        
+
         login: {
             type: 'string',
             allowNull: true,
@@ -28,7 +27,8 @@ module.exports = {
         sails.log.debug('Controller djs/add called.');
 
         try {
-            await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: moment("2002-01-01 00:00:00").toISOString(true)});
+            // Use findOrCreate because we do not want to create a DJ that already exists
+            await Djs.findOrCreate({name: inputs.name}, {name: inputs.name, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: moment('2002-01-01 00:00:00').toISOString(true)});
             return exits.success();
         } catch (e) {
             return exits.error(e);

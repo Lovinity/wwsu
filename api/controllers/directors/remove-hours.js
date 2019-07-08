@@ -1,5 +1,3 @@
-/* global Calendar, sails, Directorhours, Timesheet */
-
 module.exports = {
 
     friendlyName: 'Directors / remove-hours',
@@ -25,7 +23,7 @@ module.exports = {
             var IDs = [];
             records.map((record) => IDs.push(record.unique));
             if (IDs.length > 0)
-                await Timesheet.destroy({unique: IDs}).fetch();
+                {await Timesheet.destroy({unique: IDs}).fetch();}
 
             return exits.success();
         } catch (e) {

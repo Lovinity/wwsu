@@ -1,8 +1,3 @@
-/* global Meta, sails, Logs, Status, Playlists, Calendar, moment, Listeners, Xp, Messages, Attendance, Promise */
-const UrlSafeString = require('url-safe-string'),
-        tagGenerator = new UrlSafeString();
-
-
 module.exports = {
 
     friendlyName: 'State / Automation',
@@ -23,7 +18,7 @@ module.exports = {
         try {
             // Block if we are in the process of changing states
             if (Meta['A'].changingState !== null)
-                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+                {return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));}
 
             // Lock system from any other state changing requests until we are done.
             await Meta.changeMeta({changingState: `Changing to automation / calculating show stats`});
@@ -55,15 +50,15 @@ module.exports = {
             await sails.helpers.rest.cmd('EnableAssisted', 1);
 
             // If coming out of a sports broadcast, queue a closer if exists.
-            if (Meta['A'].state.startsWith("sports"))
+            if (Meta['A'].state.startsWith('sports'))
             {
                 if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
                 {
-                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Closers"]], 'Bottom', 1);
+                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]['Sports Closers']], 'Bottom', 1);
                 }
             } else {
                 if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
-                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Closers"]], 'Bottom', 1);
+                    {await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]['Show Closers']], 'Bottom', 1);}
             }
 
             // Queue a station ID and a PSA
@@ -76,14 +71,14 @@ module.exports = {
             await sails.helpers.error.count('stationID');
 
             // Queue ending stuff
-            if (Meta['A'].state.startsWith("live_"))
-                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end);
+            if (Meta['A'].state.startsWith('live_'))
+                {await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end);}
 
-            if (Meta['A'].state.startsWith("remote_"))
-                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end);
+            if (Meta['A'].state.startsWith('remote_'))
+                {await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end);}
 
-            if (Meta['A'].state.startsWith("sports_") || Meta['A'].state.startsWith("sportsremote_"))
-                await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end);
+            if (Meta['A'].state.startsWith('sports_') || Meta['A'].state.startsWith('sportsremote_'))
+                {await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end);}
 
             // We are going to automation
             if (!inputs.transition)
@@ -97,7 +92,7 @@ module.exports = {
                 // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
                 try {
                     await Calendar.preLoadEvents(true);
-                } catch (e2) {
+                } catch (unusedE2) {
                     // Couldn't load calendar? Fall back to Default automation
                     await sails.helpers.genre.start('Default', true);
                 }
@@ -165,10 +160,10 @@ module.exports = {
                             });
                 }
             }
-            
+
             // Gather DJ stats
             if (dj !== null)
-                returnData = Object.assign(returnData, await sails.helpers.analytics.showtime(dj));
+                {returnData = Object.assign(returnData, await sails.helpers.analytics.showtime(dj));}
 
             await Meta.changeMeta({changingState: null});
             return exits.success(returnData);

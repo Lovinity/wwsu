@@ -1,5 +1,3 @@
-/* global sails, Subscribers, Logs, needle */
-
 module.exports = {
 
     friendlyName: 'sails.helpers.onesignal.send',
@@ -14,7 +12,7 @@ module.exports = {
         },
         category: {
             type: 'string',
-            isIn: ["message", "event", "announcement", "request"],
+            isIn: ['message', 'event', 'announcement', 'request'],
             required: true,
             description: `The category of the notification.`
         },
@@ -39,16 +37,18 @@ module.exports = {
         try {
             // TODO: add configuration for this
             var categories = {
-                "message": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
-                "event": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
-                "announcement": "6d890066-6cc0-4b12-84ef-4a15a9220b1e",
-                "request": "0aa0e762-ca89-4eef-89a2-82009a58cb1a"
+                'message': '6d890066-6cc0-4b12-84ef-4a15a9220b1e',
+                'event': '6d890066-6cc0-4b12-84ef-4a15a9220b1e',
+                'announcement': '6d890066-6cc0-4b12-84ef-4a15a9220b1e',
+                'request': '0aa0e762-ca89-4eef-89a2-82009a58cb1a'
             };
+            // LINT: ignore camel casing errors for needle parameters; they must be like this for oneSignal
+            // TODO: Add app ID to configuration
             needle('post', `https://onesignal.com/api/v1/notifications`, {
                 app_id: `150c0123-e224-4e5b-a8b2-fc202d78e2f1`,
                 include_player_ids: inputs.devices,
-                headings: {"en": inputs.title},
-                contents: {"en": inputs.content},
+                headings: {'en': inputs.title},
+                contents: {'en': inputs.content},
                 url: `https://server.wwsu1069.org/listen`,
                 android_channel_id: categories[inputs.category],
                 android_group: categories[inputs.category],
@@ -57,12 +57,13 @@ module.exports = {
                 summary_arg: `${inputs.category}s`,
                 ttl: inputs.ttl,
             }, {headers: {'Content-Type': 'application/json', 'Authorization': `Basic ${sails.config.custom.onesignal.rest}`}})
-                    .then(async function (resp) {
+                    .then(async (resp) => {
+                        // Remove any subscriptions made by devices that were returned as invalid from oneSignal
                         if (typeof resp.body.errors !== `undefined`)
                         {
-                            if (typeof resp.body.errors["invalid_player_ids"] !== `undefined`)
+                            if (typeof resp.body.errors['invalid_player_ids'] !== `undefined`)
                             {
-                                resp.body.errors["invalid_player_ids"].map((invalid) => {
+                                resp.body.errors['invalid_player_ids'].map((invalid) => {
                                     (async(invalid2) => {
                                         await Subscribers.destroy({device: invalid2});
                                         await Logs.create({attendanceID: null, logtype: 'subscribers', loglevel: 'info', logsubtype: 'inactive', event: `<strong>An inactive subscriber was removed from the system.</strong><br />Device: ${invalid2}`}).fetch()
@@ -71,8 +72,8 @@ module.exports = {
                                                     sails.log.error(err);
                                                 });
                                     })(invalid);
-                                })
-                            } else if (resp.body.errors.indexOf("All included players are not subscribed") !== -1)
+                                });
+                            } else if (resp.body.errors.indexOf('All included players are not subscribed') !== -1)
                             {
                                 inputs.devices.map((invalid) => {
                                     (async(invalid2) => {
@@ -83,7 +84,7 @@ module.exports = {
                                                     sails.log.error(err);
                                                 });
                                     })(invalid);
-                                })
+                                });
                             }
                         }
                         return exits.success(true);

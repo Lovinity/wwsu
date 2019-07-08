@@ -1,5 +1,3 @@
-/* global sails, _ */
-
 module.exports = {
 
     friendlyName: 'Execute array',
@@ -22,7 +20,7 @@ module.exports = {
 
             // Empty array? No need to continue.
             if (inputs.array.length <= 0)
-                return exits.success();
+                {return exits.success();}
 
             // Get the configured break tasks, but clone it. We're going to reverse the order, so we don't want to reverse the original object.
             var breakOpts = _.cloneDeep(inputs.array);
@@ -35,6 +33,8 @@ module.exports = {
             {
                 var asyncLoop = async function (array, callback) {
                     for (let index = 0; index < array.length; index++) {
+                        // LINT: Callback is executed on every item in the array; do NOT return.
+                        // eslint-disable-next-line callback-return
                         await callback(array[index], index, array);
                     }
                 };

@@ -1,5 +1,3 @@
-/* global Playlists */
-
 module.exports = {
 
     friendlyName: 'Playlist tracks',

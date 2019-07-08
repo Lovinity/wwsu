@@ -1,3 +1,5 @@
+// LINT: camel casing not used in RadioDJ
+/* eslint-disable camelcase */
 /**
  * History.js
  *

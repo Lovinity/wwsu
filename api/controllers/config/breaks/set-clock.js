@@ -1,5 +1,3 @@
-/* global _, sails */
-
 module.exports = {
 
     friendlyName: 'config / breaks / set-clock',
@@ -41,6 +39,7 @@ module.exports = {
                 sails.config.custom.breaks[inputs.minute] = inputs.tasks;
             }
 
+            // Transmit new config through socket
             sails.sockets.broadcast('config', 'config', {update: {breaks: sails.config.custom.breaks}});
 
             return exits.success();

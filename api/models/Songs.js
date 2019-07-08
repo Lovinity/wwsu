@@ -1,3 +1,5 @@
+// LINT: no camel case: RadioDJ does not use it.
+/* eslint-disable camelcase */
 /**
  * Songs.js
  *
@@ -8,7 +10,7 @@
 module.exports = {
   datastore: 'radiodj',
   attributes: {
-      
+
         ID: {
             type: 'number',
             autoIncrement: true
@@ -247,21 +249,21 @@ module.exports = {
         spins_7: {
             type: 'number'
         },
-        
+
         spins_30: {
             type: 'number'
         },
-        
+
         spins_ytd: {
             type: 'number'
         },
-        
+
         spins_year: {
             type: 'number'
         },
         */
   },
-  
+
   pending: [], // Tracks that have been removed but need to air eventually, and will be re-queued at the next break.
   pendingCmd: [], // DEPRECATED
   queueCheck: [] // Array of objects containing tracks we're waiting to confirm were queued in RadioDJ (checked by sails.helpers.rest.getQueue).

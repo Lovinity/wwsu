@@ -1,5 +1,3 @@
-/* global sails, moment */
-
 module.exports = {
 
     friendlyName: 'config / displaysigns / set',
@@ -43,19 +41,19 @@ module.exports = {
                         if (sign.name === `internal`)
                         {
                             if (typeof inputs.iLevel !== `undefined`)
-                                sails.config.custom.displaysigns[index].level = inputs.iLevel;
+                                {sails.config.custom.displaysigns[index].level = inputs.iLevel;}
 
                             if (typeof inputs.iInstances !== `undefined`)
-                                sails.config.custom.displaysigns[index].instances = inputs.iInstances;
+                                {sails.config.custom.displaysigns[index].instances = inputs.iInstances;}
                         }
 
                         if (sign.name === `public`)
                         {
                             if (typeof inputs.pLevel !== `undefined`)
-                                sails.config.custom.displaysigns[index].level = inputs.pLevel;
+                                {sails.config.custom.displaysigns[index].level = inputs.pLevel;}
 
                             if (typeof inputs.pInstances !== `undefined`)
-                                sails.config.custom.displaysigns[index].instances = inputs.pInstances;
+                                {sails.config.custom.displaysigns[index].instances = inputs.pInstances;}
                         }
                     });
 

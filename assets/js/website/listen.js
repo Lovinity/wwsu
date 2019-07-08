@@ -36,46 +36,47 @@ var clockTimer;
 var onlineSocketDone = false;
 var device = getUrlParameter(`device`);
 var isMobile = device !== null;
+var notificationsSupported = false;
 var OneSignal;
 
 // Initialize the web player
 if (document.querySelector('#nativeflashradio'))
-    $("#nativeflashradio").flashradio({
-        token: "dGZzd2ZzL3h4dHYyMTc6L3BzaAE=",
-        userinterface: "small",
-        backgroundcolor: "#263238",
-        themecolor: "#d31e38",
-        themefontcolor: "#ffffff",
-        startvolume: "75",
-        radioname: "WWSU 106.9 FM",
-        scroll: "auto",
-        autoplay: "false",
-        useanalyzer: "real",
-        analyzertype: "4",
-        usecover: "true",
-        usestreamcorsproxy: "false",
-        affiliatetoken: "1000lIPN",
-        debug: "false",
-        ownsongtitleurl: "",
-        radiocover: "",
-        songgooglefontname: "",
-        songfontname: "",
-        titlegooglefontname: "",
-        titlefontname: "",
-        corsproxy: "https://html5radioplayer2us.herokuapp.com/?q=",
-        streamprefix: "/stream",
-        mountpoint: "",
-        radiouid: "",
-        apikey: "",
-        streamid: "1",
-        streampath: "/live",
-        streamtype: "other",
-        streamurl: "https://server.wwsu1069.org",
-        songinformationinterval: "600000"
-    });
+    {$('#nativeflashradio').flashradio({
+        token: 'dGZzd2ZzL3h4dHYyMTc6L3BzaAE=',
+        userinterface: 'small',
+        backgroundcolor: '#263238',
+        themecolor: '#d31e38',
+        themefontcolor: '#ffffff',
+        startvolume: '75',
+        radioname: 'WWSU 106.9 FM',
+        scroll: 'auto',
+        autoplay: 'false',
+        useanalyzer: 'real',
+        analyzertype: '4',
+        usecover: 'true',
+        usestreamcorsproxy: 'false',
+        affiliatetoken: '1000lIPN',
+        debug: 'false',
+        ownsongtitleurl: '',
+        radiocover: '',
+        songgooglefontname: '',
+        songfontname: '',
+        titlegooglefontname: '',
+        titlefontname: '',
+        corsproxy: 'https://html5radioplayer2us.herokuapp.com/?q=',
+        streamprefix: '/stream',
+        mountpoint: '',
+        radiouid: '',
+        apikey: '',
+        streamid: '1',
+        streampath: '/live',
+        streamtype: 'other',
+        streamurl: 'https://server.wwsu1069.org',
+        songinformationinterval: '600000'
+    });}
 
 if (document.querySelector('#themessage'))
-    var quill = new Quill('#themessage', {
+    {var quill = new Quill('#themessage', {
         modules: {
             toolbar: [
                 ['bold', 'italic', 'underline', 'strike', { 'color': [] }],
@@ -90,10 +91,10 @@ if (document.querySelector('#themessage'))
             }
         },
         theme: 'snow'
-    });
+    });}
 
 if (document.querySelector(`#trackModal`)) {
-    $("#trackModal").iziModal({
+    $('#trackModal').iziModal({
         title: 'Track Information',
         headerColor: '#88A0B9',
         width: 640,
@@ -111,7 +112,7 @@ if (document.querySelector(`#trackModal`)) {
 }
 
 if (document.querySelector(`#dialog`)) {
-    $("#dialog").iziModal({
+    $('#dialog').iziModal({
         width: 640,
         focusInput: true,
         arrowKeys: false,
@@ -128,13 +129,13 @@ if (document.querySelector(`#dialog`)) {
 }
 
 function quillGetHTML(inputDelta) {
-    var tempCont = document.createElement("div");
+    var tempCont = document.createElement('div');
     (new Quill(tempCont)).setContents(inputDelta);
-    return tempCont.getElementsByClassName("ql-editor")[0].innerHTML;
+    return tempCont.getElementsByClassName('ql-editor')[0].innerHTML;
 }
 
 // Set up schedule calendar
-var focusableElementsString = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+var focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]';
 var focusedElementBeforeModal;
 var pwidth = null;
 function trapEscapeKey(obj, evt) {
@@ -147,7 +148,7 @@ function trapEscapeKey(obj, evt) {
 
         // get list of focusable items
         var cancelElement;
-        cancelElement = o.filter("#cancel")
+        cancelElement = o.filter('#cancel');
 
         // close the modal window
         cancelElement.click();
@@ -165,7 +166,7 @@ function trapTabKey(obj, evt) {
 
         // get list of focusable items
         var focusableItems;
-        focusableItems = o.filter(focusableElementsString).filter(':visible')
+        focusableItems = o.filter(focusableElementsString).filter(':visible');
 
         // get currently focused item
         var focusedItem;
@@ -173,7 +174,7 @@ function trapTabKey(obj, evt) {
 
         // get the number of focusable items
         var numberOfFocusableItems;
-        numberOfFocusableItems = focusableItems.length
+        numberOfFocusableItems = focusableItems.length;
 
         // get the index of the currently focused item
         var focusedItemIndex;
@@ -216,7 +217,7 @@ function setFocusToFirstItemInModal(obj) {
     o.filter(focusableElementsString).filter(':visible').first().focus();
 }
 if (document.querySelector('#song-data'))
-    document.querySelector(`#song-data`).addEventListener("click", function (e) {
+    {document.querySelector(`#song-data`).addEventListener('click', (e) => {
         try {
             if (e.target) {
                 if (e.target.id === `track-load` || e.target.id === `track-l-load`) {
@@ -232,31 +233,31 @@ if (document.querySelector('#song-data'))
         } catch (err) {
 
         }
-    });
+    });}
 
 if (document.querySelector('#track-info-request'))
-    document.querySelector(`#track-info-request`).addEventListener("click", function (e) {
+    {document.querySelector(`#track-info-request`).addEventListener('click', (e) => {
         try {
             if (e.target) {
-                if (e.target.id === "track-request-submit") {
+                if (e.target.id === 'track-request-submit') {
                     requestTrack(parseInt($('#track-info-ID').html()));
                 }
             }
         } catch (err) {
 
         }
-    });
+    });}
 
 if (document.querySelector('#filter-submit'))
-    document.querySelector(`#filter-submit`).addEventListener("click", function (e) {
+    {document.querySelector(`#filter-submit`).addEventListener('click', (e) => {
         loadTracks(0);
-    });
+    });}
 
 function waitFor(check, callback, count = 0) {
     if (!check()) {
         if (count < 10000) {
             count++;
-            window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(() => {
                 waitFor(check, callback, count);
             });
         } else {
@@ -266,11 +267,33 @@ function waitFor(check, callback, count = 0) {
     }
 }
 
-waitFor(function () {
+waitFor(() => {
     return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && typeof io.socket._raw !== 'undefined' && typeof io.socket._raw.io !== 'undefined');
-}, function () {
+}, () => {
     io.socket._raw.io._reconnection = true;
     io.socket._raw.io._reconnectionAttempts = Infinity;
+});
+
+waitFor(() => {
+    return (document.querySelector(`#nativeflashradioplaystopcontainer`) !== null && document.querySelector(`#nativeflashradioplaybutton`) !== null && document.querySelector(`#nativeflashradioimagecontainer`) !== null && document.querySelector(`#nativeflashradiovolumecontroller`) !== null);
+}, () => {
+    $('#nativeflashradioplaystopcontainer').attr('tabindex',0);
+    $('#nativeflashradiovolumegrab').attr('tabindex',0);
+    $('#nativeflashradiovolumegrab').attr('alt','Change Volume');
+    $('#nativeflashradiovolumehit').attr('alt','Volume');
+    $('#nativeflashradioimagehit1').attr('alt','logo');
+});
+
+waitFor(() => {
+    return (document.querySelector(`.ql-bold`) !== null);
+}, () => {
+    $('.ql-bold').each(function(i) { $(this).attr('value','bold'); });
+    $('.ql-italic').each(function(i) { $(this).attr('value','italics'); });
+    $('.ql-underline').each(function(i) { $(this).attr('value','underline'); });
+    $('.ql-strike').each(function(i) { $(this).attr('value','strike-through'); });
+    $('.ql-color').each(function(i) { $(this).attr('title','Change the color of the selected text'); });
+    $('.ql-link').each(function(i) { $(this).attr('value','hyperlink'); });
+    $('.ql-clean').each(function(i) { $(this).attr('value','remove formatting'); });
 });
 
 function escapeHTML(str) {
@@ -281,15 +304,15 @@ function escapeHTML(str) {
 
 function closeModal() {
     if (document.querySelector('#trackModal'))
-        $('#trackModal').iziModal('close');
+        {$('#trackModal').iziModal('close');}
 }
 
 // Wait for connection by io, then create event handlers and do the sockets
-waitFor(function () {
+waitFor(() => {
     return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected());
-}, function () {
+}, () => {
     // On socket connection, notify the user and do socket tasks.
-    io.socket.on('connect', function () {
+    io.socket.on('connect', () => {
         iziToast.show({
             title: 'Connected to WWSU',
             message: 'You will now receive metadata, can send or receive messages, and can place track requests.',
@@ -306,10 +329,10 @@ waitFor(function () {
     doSockets(firstTime);
 
     // On socket disconnect, notify the user.
-    io.socket.on('disconnect', function () {
+    io.socket.on('disconnect', () => {
         try {
             if (nowPlaying)
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">Connecting...</div>`;
+                {nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">Connecting...</div>`;}
             iziToast.show({
                 title: 'Lost connection to WWSU',
                 message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
@@ -327,7 +350,7 @@ waitFor(function () {
     });
 
     // On meta changes, process meta
-    io.socket.on('meta', function (data) {
+    io.socket.on('meta', (data) => {
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 Meta[key] = data[key];
@@ -337,7 +360,7 @@ waitFor(function () {
     });
 
     // When a new message is received, process it.
-    io.socket.on('messages', function (data) {
+    io.socket.on('messages', (data) => {
         try {
             for (var key in data) {
                 if (data.hasOwnProperty(key)) {
@@ -348,7 +371,7 @@ waitFor(function () {
                         case 'remove':
                             var temp = document.getElementById(`msg-${data[key]}`);
                             if (temp !== null)
-                                temp.innerHTML = 'XXX This message was deleted XXX';
+                                {temp.innerHTML = 'XXX This message was deleted XXX';}
                             break;
                     }
                 }
@@ -358,7 +381,7 @@ waitFor(function () {
     });
 
     // When an announcement comes through
-    io.socket.on('announcements', function (data) {
+    io.socket.on('announcements', (data) => {
         try {
             if (announcementIDs.indexOf(data.ID) === -1) {
                 addAnnouncement(data);
@@ -367,12 +390,12 @@ waitFor(function () {
         }
     });
 
-    io.socket.on('calendar', function (data) {
+    io.socket.on('calendar', (data) => {
         processCalendar(data);
     });
 
     // On meta changes, process meta
-    io.socket.on('discipline', function (data) {
+    io.socket.on('discipline', (data) => {
         io.socket.disconnect();
         iziToast.show({
             title: `Disciplinary notice - Disconnected from WWSU`,
@@ -425,15 +448,17 @@ function onlineSocket(doOneSignal = false) {
             automationpost = ``;
             doMeta({ webchat: Meta.webchat, state: Meta.state });
             if (doOneSignal) {
-                OneSignal.push(function () {
+                OneSignal.push(() => {
                     OneSignal.init({
-                        appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
+                        appId: '150c0123-e224-4e5b-a8b2-fc202d78e2f1',
                         autoResubscribe: true,
                     });
 
-                    OneSignal.isPushNotificationsEnabled().then(function (isEnabled) {
+                    notificationsSupported = OneSignal.isPushNotificationsSupported();
+
+                    OneSignal.isPushNotificationsEnabled().then((isEnabled) => {
                         if (isEnabled) {
-                            OneSignal.getUserId().then(function (userId) {
+                            OneSignal.getUserId().then((userId) => {
                                 device = userId;
                                 onlineSocket();
                             });
@@ -443,23 +468,23 @@ function onlineSocket(doOneSignal = false) {
                         }
                     });
 
-                    OneSignal.on('notificationPermissionChange', function (permissionChange) {
+                    OneSignal.on('notificationPermissionChange', (permissionChange) => {
                         var currentPermission = permissionChange.to;
-                        if (currentPermission === "granted" && device === null) {
-                            OneSignal.getUserId().then(function (userId) {
+                        if (currentPermission === 'granted' && device === null) {
+                            OneSignal.getUserId().then((userId) => {
                                 device = userId;
                                 onlineSocket();
                             });
-                        } else if (currentPermission === "denied" && device !== null) {
+                        } else if (currentPermission === 'denied' && device !== null) {
                             device = null;
                             onlineSocket();
                         }
                     });
 
                     // On changes to web notification subscriptions; update subscriptions and device.
-                    OneSignal.on('subscriptionChange', function (isSubscribed) {
+                    OneSignal.on('subscriptionChange', (isSubscribed) => {
                         if (isSubscribed && device === null) {
-                            OneSignal.getUserId().then(function (userId) {
+                            OneSignal.getUserId().then((userId) => {
                                 device = userId;
                                 onlineSocket();
                             });
@@ -490,51 +515,50 @@ function onlineSocket(doOneSignal = false) {
     var temp = document.querySelector(`#track-info-subscribe`);
     if (temp !== null) {
         if (device === null && !isMobile) {
-            temp.style.display = "block";
+            temp.style.display = 'block';
         } else {
-            temp.style.display = "none";
+            temp.style.display = 'none';
         }
     }
 
     var temp = document.querySelector(`#chat-subscribe`);
     if (temp !== null) {
         if (device === null && !isMobile) {
-            temp.style.display = "block";
+            temp.style.display = 'block';
         } else {
-            temp.style.display = "none";
+            temp.style.display = 'none';
         }
     }
 
     var temp = document.querySelector(`#show-subscribe-button`);
     var temp2 = document.querySelector(`#show-subscribe-instructions`);
     if (temp !== null) {
-        var isPushSupported = OneSignal.isPushNotificationsSupported();
-        if (isPushSupported) {
+        if (notificationsSupported) {
             if (device === null && !isMobile) {
-                temp.innerHTML = "Show Prompt";
+                temp.innerHTML = 'Show Prompt';
                 temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                 temp.onclick = () => OneSignal.showNativePrompt();
                 temp.onkeydown = () => OneSignal.showNativePrompt();
             } else {
-                temp.innerHTML = "Subscribe";
+                temp.innerHTML = 'Subscribe';
                 temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`;
                 temp.onclick = () => {
-                    if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                    if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
                         subscribe(`calendar-all`, Meta.show);
-                    } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                    } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                         subscribe(`calendar-all`, `Sports: ${Meta.show}`);
                     }
                 };
                 temp.onkeydown = () => {
-                    if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                    if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
                         subscribe(`calendar-all`, Meta.show);
-                    } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                    } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                         subscribe(`calendar-all`, `Sports: ${Meta.show}`);
                     }
                 };
             }
         } else {
-            temp.innerHTML = "Not Supported";
+            temp.innerHTML = 'Not Supported';
             temp2.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU Mobile app in the future!`;
             temp.onclick = () => { };
             temp.onkeydown = () => { };
@@ -608,23 +632,23 @@ function announcementsSocket() {
 
 // Whenever the nickname is changed, (re)set a 5 second timeout. After 5 seconds, if nickname is not changed, send the new nickname to the server for all clients to see.
 if (nickname)
-    nickname.addEventListener("change", function () {
+    {nickname.addEventListener('change', () => {
         io.socket.post('/recipients/edit-web', { label: nickname.value }, function serverResponded(body, JWR) {
         });
-    });
+    });}
 
 // Function called when a new message arrived that should be displayed
 function addMessage(data, firsttime = false) {
     if (notificationsBox)
-        shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;
+        {shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;}
 
     // Note the ID; used to determine new messages upon reconnection of a socket disconnect
     messageIDs.push(data.ID);
 
     // Private website message
-    if (data.to.startsWith("website-")) {
+    if (data.to.startsWith('website-')) {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+            {notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
     <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
@@ -633,9 +657,9 @@ function addMessage(data, firsttime = false) {
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
-      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+      <small>${moment(data.createdAt).format('hh:mm A')}</small>
     </div>
-  </div>`;
+  </div>`;}
         if (!firsttime) {
             iziToast.show({
                 title: 'Private message from ' + data.from_friendly,
@@ -653,7 +677,7 @@ function addMessage(data, firsttime = false) {
         // Public website message for all visitors
     } else if (data.to === 'website') {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-primary bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+            {notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-primary bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
     <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
@@ -662,9 +686,9 @@ function addMessage(data, firsttime = false) {
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
-      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+      <small>${moment(data.createdAt).format('hh:mm A')}</small>
     </div>
-  </div>`;
+  </div>`;}
         if (!firsttime) {
             iziToast.show({
                 title: 'Message from ' + data.from_friendly,
@@ -682,7 +706,7 @@ function addMessage(data, firsttime = false) {
         // Private message sent from visitor
     } else if (data.to === 'DJ-private') {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+            {notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
     <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
@@ -691,9 +715,9 @@ function addMessage(data, firsttime = false) {
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
-      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+      <small>${moment(data.createdAt).format('hh:mm A')}</small>
     </div>
-  </div>`;
+  </div>`;}
         if (!firsttime) {
             iziToast.show({
                 title: 'Message from ' + data.from_friendly,
@@ -710,7 +734,7 @@ function addMessage(data, firsttime = false) {
         // All other messages
     } else {
         if (notificationsBox)
-            notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
+            {notificationsBox.innerHTML += `<div class="message m-2 d-flex flex-wrap text-dark shadow-1 border-left border-light bg-light-1" style="width: 96%; border-left-width: 5px !important;" id="msg-${data.ID}">
     <div class="w-64 p-2">
       ${jdenticon.toSvg(data.from, 64)}
     </div>
@@ -719,9 +743,9 @@ function addMessage(data, firsttime = false) {
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
-      <small>${moment(data.createdAt).format("hh:mm A")}</small>
+      <small>${moment(data.createdAt).format('hh:mm A')}</small>
     </div>
-  </div>`;
+  </div>`;}
         if (!firsttime) {
             iziToast.show({
                 title: 'Message from ' + data.from_friendly,
@@ -737,7 +761,7 @@ function addMessage(data, firsttime = false) {
         }
     }
     if (shouldScroll && document.querySelector('#messages')) {
-        $("#messages").animate({ scrollTop: $("#messages").prop('scrollHeight') }, 1000);
+        $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);
     }
 }
 
@@ -745,7 +769,7 @@ function addMessage(data, firsttime = false) {
 function doMeta(response) {
     try {
         if (notificationsBox)
-            shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;
+            {shouldScroll = notificationsBox.scrollTop + notificationsBox.clientHeight === notificationsBox.scrollHeight;}
 
         if (typeof response.time !== 'undefined') {
             clearInterval(clockTimer);
@@ -755,14 +779,14 @@ function doMeta(response) {
 
         // Update meta and color code it, if new meta was provided
         if (('line1' in response || 'line2' in response) && nowPlaying) {
-            if (Meta.state.includes("live_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
-            if (Meta.state.includes("sports_") || Meta.state.includes("sportsremote_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>`;
-            if (Meta.state.includes("remote_"))
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;
-            if (Meta.state.includes("automation_") || Meta.state === 'unknown')
-                nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>`;
+            if (Meta.state.includes('live_'))
+                {nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;}
+            if (Meta.state.includes('sports_') || Meta.state.includes('sportsremote_'))
+                {nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>`;}
+            if (Meta.state.includes('remote_'))
+                {nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>`;}
+            if (Meta.state.includes('automation_') || Meta.state === 'unknown')
+                {nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>`;}
             iziToast.show({
                 title: Meta.line1,
                 message: Meta.line2,
@@ -780,43 +804,43 @@ function doMeta(response) {
         // If a false was returned for web chatting, then disable it
         if ('webchat' in response && !response.webchat && messageText) {
             blocked = true;
-            messageText.disabled = true;
+            messageText.style.display = 'none';
             sendButton.disabled = true;
             sendButtonP.disabled = true;
             if (notificationsStatus && onlineSocketDone)
-                notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>`;
+                {notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>`;}
             if (shouldScroll && document.querySelector('#messages')) {
-                $("#messages").animate({ scrollTop: $("#messages").prop('scrollHeight') }, 1000);
+                $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);
             }
         }
 
         // If a state change was returned, process it by informing the client whether or not there is probably a DJ at the studio to read messages
         if ('state' in response) {
-            if (response.state.includes("automation_") || Meta.state === 'unknown') {
+            if (response.state.includes('automation_') || Meta.state === 'unknown') {
                 if (automationpost !== 'automation') {
                     var temp = document.getElementById('msg-state');
                     if (temp)
-                        temp.remove();
+                        {temp.remove();}
                     if (notificationsStatus && onlineSocketDone)
-                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-default shadow-4 text-light"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>`;
+                        {notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-default shadow-4 text-light"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>`;}
                     if (shouldScroll && document.querySelector('#messages')) {
-                        $("#messages").animate({ scrollTop: $("#messages").prop('scrollHeight') }, 1000);
+                        $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);
                     }
                     automationpost = 'automation';
                 }
                 var temp = document.querySelector(`#show-subscribe`);
                 if (temp !== null)
-                    temp.style.display = "none";
+                    {temp.style.display = 'none';}
             } else if (response.state === 'live_prerecord') {
                 if (automationpost !== response.live) {
                     var temp = document.getElementById('msg-state');
                     if (temp)
-                        temp.remove();
+                        {temp.remove();}
                     if (notificationsStatus && onlineSocketDone)
-                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>`;
+                        {notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>`;}
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
-                        $("#messages").animate({ scrollTop: $("#messages").prop('scrollHeight') }, 1000);
+                        $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);
                     }
                 }
                 var temp = document.querySelector(`#show-subscribe`);
@@ -824,40 +848,39 @@ function doMeta(response) {
                 var temp3 = document.querySelector(`#show-subscribe-name`);
                 var temp4 = document.querySelector(`#show-subscribe-instructions`);
                 if (temp !== null) {
-                    var subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show }).get().length;
+                    var subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length;
                     if (subscribed === 0) {
-                        temp.style.display = "block";
+                        temp.style.display = 'block';
                     } else {
-                        temp.style.display = "none";
+                        temp.style.display = 'none';
                     }
                     temp3.innerHTML = Meta.show;
-                    var isPushSupported = OneSignal.isPushNotificationsSupported();
-                    if (isPushSupported) {
+                    if (notificationsSupported) {
                         if (device === null && !isMobile) {
-                            temp2.innerHTML = "Show Prompt";
+                            temp2.innerHTML = 'Show Prompt';
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                             temp2.onclick = () => OneSignal.showNativePrompt();
                             temp2.onkeydown = () => OneSignal.showNativePrompt();
                         } else {
-                            temp2.innerHTML = "Subscribe";
+                            temp2.innerHTML = 'Subscribe';
                             temp4.innerHTML = `Click "Subscribe" to receive notifications when this show is on the air.`;
                             temp2.onclick = () => {
-                                if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
                                     subscribe(`calendar-all`, Meta.show);
-                                } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                                     subscribe(`calendar-all`, `Sports: ${Meta.show}`);
                                 }
                             };
                             temp2.onkeydown = () => {
-                                if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
                                     subscribe(`calendar-all`, Meta.show);
-                                } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                                     subscribe(`calendar-all`, `Sports: ${Meta.show}`);
                                 }
                             };
                         }
                     } else {
-                        temp2.innerHTML = "Not Supported";
+                        temp2.innerHTML = 'Not Supported';
                         temp4.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!`;
                         temp2.onclick = () => { };
                         temp2.onkeydown = () => { };
@@ -867,12 +890,12 @@ function doMeta(response) {
                 if (automationpost !== response.live) {
                     var temp = document.getElementById('msg-state');
                     if (temp)
-                        temp.remove();
+                        {temp.remove();}
                     if (notificationsStatus && onlineSocketDone)
-                        notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>`;
+                        {notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>`;}
                     automationpost = response.live;
                     if (shouldScroll && document.querySelector('#messages')) {
-                        $("#messages").animate({ scrollTop: $("#messages").prop('scrollHeight') }, 1000);
+                        $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);
                     }
                 }
                 var temp = document.querySelector(`#show-subscribe`);
@@ -880,40 +903,39 @@ function doMeta(response) {
                 var temp3 = document.querySelector(`#show-subscribe-name`);
                 var temp4 = document.querySelector(`#show-subscribe-instructions`);
                 if (temp !== null) {
-                    var subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith("sports") ? `Sports: ${Meta.show}` : Meta.show }).get().length;
+                    var subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length;
                     if (subscribed === 0) {
-                        temp.style.display = "block";
+                        temp.style.display = 'block';
                     } else {
-                        temp.style.display = "none";
+                        temp.style.display = 'none';
                     }
                     temp3.innerHTML = Meta.show;
-                    var isPushSupported = OneSignal.isPushNotificationsSupported();
-                    if (isPushSupported) {
+                    if (notificationsSupported) {
                         if (device === null && !isMobile) {
-                            temp2.innerHTML = "Show Prompt";
+                            temp2.innerHTML = 'Show Prompt';
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
                             temp2.onclick = () => OneSignal.showNativePrompt();
                             temp2.onkeydown = () => OneSignal.showNativePrompt();
                         } else {
-                            temp2.innerHTML = "Subscribe";
+                            temp2.innerHTML = 'Subscribe';
                             temp4.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`;
                             temp2.onclick = () => {
-                                if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
                                     subscribe(`calendar-all`, Meta.show);
-                                } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                                     subscribe(`calendar-all`, `Sports: ${Meta.show}`);
                                 }
                             };
                             temp2.onkeydown = () => {
-                                if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_")) {
+                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
                                     subscribe(`calendar-all`, Meta.show);
-                                } else if (Meta.state.startsWith("sports_") || Meta.state.startsWith("sportsremote_")) {
+                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                                     subscribe(`calendar-all`, `Sports: ${Meta.show}`);
                                 }
                             };
                         }
                     } else {
-                        temp2.innerHTML = "Not Supported";
+                        temp2.innerHTML = 'Not Supported';
                         temp4.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!`;
                         temp2.onclick = () => { };
                         temp2.onkeydown = () => { };
@@ -925,31 +947,31 @@ function doMeta(response) {
         if (Meta.webchat) {
             blocked = false;
             if (messageText && onlineSocketDone) {
-                messageText.disabled = false;
+                messageText.style.removeProperty('display');
                 sendButton.disabled = false;
                 sendButtonP.disabled = false;
             }
             var temp = document.getElementById('msg-disabled');
             if (temp)
-                temp.remove();
+                {temp.remove();}
         }
 
         // If a track ID change was passed, do some stuff in recent tracks
         if (typeof response.history !== 'undefined') {
             // reset recent tracks
             if (recentTracks)
-                recentTracks.innerHTML = ``;
+                {recentTracks.innerHTML = ``;}
             response.history.map(track => {
                 console.dir(track);
                 if (recentTracks)
-                    recentTracks.innerHTML += `<tr>
+                    {recentTracks.innerHTML += `<tr>
                 <td>
                 ${track.track}
                 </td>
                 <td>
                 ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                 </td>
-                </tr>`;
+                </tr>`;}
             });
         }
     } catch (e) {
@@ -964,24 +986,24 @@ function clockTick() {
 // Send a message through the system
 function sendMessage(privateMsg) {
     if (blocked || !nickname)
-        return null;
+        {return null;}
     var message = quillGetHTML(quill.getContents());
     io.socket.post('/messages/send-web', { message: message, nickname: nickname.value, private: privateMsg }, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
             if (response !== 'OK') {
                 if (notificationsBox)
-                    notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. You may be sending messages too fast, or there was a network issue.</div>`;
+                    {notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. You may be sending messages too fast, or there was a network issue.</div>`;}
                 if (document.querySelector('#messages'))
-                    $("#messages").animate({ scrollTop: $("#messages").prop('scrollHeight') }, 1000);
+                    {$('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);}
                 return null;
             }
             quill.setText('');
         } catch (e) {
             if (notificationsBox)
-                notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;
+                {notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>`;}
             if (document.querySelector('#messages'))
-                $("#messages").animate({ scrollTop: $("#messages").prop('scrollHeight') }, 1000);
+                {$('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000);}
         }
     });
 }
@@ -989,16 +1011,16 @@ function sendMessage(privateMsg) {
 // Used to empty the chat box
 function clearChat() {
     if (notificationsBox)
-        notificationsBox.innerHTML = '';
+        {notificationsBox.innerHTML = '';}
 }
 
 // Used to get info about a specific track to display as an overlay box
 function loadTrackInfo(trackID) {
-    console.log(`getting ${trackID}`)
+    console.log(`getting ${trackID}`);
     io.socket.post('/songs/get', { ID: trackID }, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
-            console.log(`got ${trackID}`)
+            console.log(`got ${trackID}`);
             // WORK ON THIS: HTML table of song information
             if (document.querySelector('#trackModal')) {
                 $('#trackModal').iziModal('open');
@@ -1009,7 +1031,7 @@ function loadTrackInfo(trackID) {
                 $('#track-info-title').html(response[0].title);
                 $('#track-info-album').html(response[0].album);
                 $('#track-info-genre').html(response[0].genre);
-                $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format("HH:mm:ss"));
+                $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format('HH:mm:ss'));
                 $('#track-info-lastplayed').html(moment(response[0].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[0].date_played).format('LLLL') : 'Unknown');
                 $('#track-info-limits').html(`<ul>
             ${response[0].limit_action > 0 && response[0].count_played < response[0].play_limit ? `<li>Track has ${response[0].play_limit - response[0].count_played} spins left</li>` : ``}
@@ -1017,10 +1039,10 @@ function loadTrackInfo(trackID) {
             ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ``}
             ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ``}
             </ul>`);
-                $('#track-info-spins7').html(`last 7 days: ${response[0].spins["7"]}`);
-                $('#track-info-spins30').html(`last 30 days: ${response[0].spins["30"]}`);
-                $('#track-info-spinsytd').html(`since January 1: ${response[0].spins["YTD"]}`);
-                $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins["365"]}`);
+                $('#track-info-spins7').html(`last 7 days: ${response[0].spins['7']}`);
+                $('#track-info-spins30').html(`last 30 days: ${response[0].spins['30']}`);
+                $('#track-info-spinsytd').html(`since January 1: ${response[0].spins['YTD']}`);
+                $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins['365']}`);
 
                 if (response[0].request.requestable) {
                     $('#track-info-request').html(`<div class="form-group">
@@ -1050,7 +1072,7 @@ function requestTrack(trackID) {
     var requestMessage = document.getElementById('track-request-message');
     var data = { ID: trackID, name: requestName.value, message: requestMessage.value };
     if (device !== null)
-        data.device = device;
+        {data.device = device;}
     io.socket.post('/requests/place', data, function serverResponded(response, JWR) {
         try {
             if (response.requested) {
@@ -1077,7 +1099,7 @@ function requestTrack(trackID) {
                 });
             }
             if (document.querySelector('#trackModal'))
-                $('#trackModal').iziModal('close');
+                {$('#trackModal').iziModal('close');}
         } catch (e) {
             iziToast.show({
                 title: 'Request system failed',
@@ -1097,29 +1119,33 @@ function requestTrack(trackID) {
 function loadTracks(skip = 0) {
     var temp = document.getElementById(`track-load`);
     if (temp)
-        temp.parentNode.removeChild(temp);
+        {temp.parentNode.removeChild(temp);}
     var songData = document.getElementById('song-data');
     var search = document.getElementById('searchterm');
-    var query = { search: escapeHTML(search.value), skip: skip };
+    var query = { search: escapeHTML(search.value), skip: skip, limit: 50 };
     var genreOptions = document.getElementById('filter-genre');
     var selectedOption = genreOptions.options[genreOptions.selectedIndex].value;
-    if (selectedOption !== "0")
-        query.genre = parseInt(selectedOption);
+    if (selectedOption !== '0')
+        {query.genre = parseInt(selectedOption);}
     if (skip === 0)
-        songData.innerHTML = ``;
+        {songData.innerHTML = ``;}
     io.socket.post('/songs/get', query, function serverResponded(response, JWR) {
         try {
             //response = JSON.parse(response);
-            if (response.length > 0) {
+            if (response === 'false' || !response)
+            {
+                skipIt = -1;
+                songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`;
+            } else if (response.length > 0) {
+                skipIt += 50;
+
                 response.map(track => {
                     songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 shadow-2 bg-${(track.enabled === 1) ? 'primary' : 'secondary'} text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`;
-                    skipIt++;
                 });
 
                 songData.innerHTML += `<div id="track-load" class="p-1 m-1 shadow-2 bg-success text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-load">Load more tracks</span></div>`;
-            } else {
-                skipIt = -1;
-                songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`;
+            } else if (response.length === 0) {
+                loadTracks(skip + 50);
             }
         } catch (e) {
             iziToast.show({
@@ -1141,9 +1167,9 @@ function loadGenres() {
         io.socket.post('/songs/get-genres', {}, function serverResponded(response, JWR) {
             try {
                 document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`;
-                var x = document.getElementById("filter-genre");
+                var x = document.getElementById('filter-genre');
                 response.reverse().map(subcat => {
-                    var c = document.createElement("option");
+                    var c = document.createElement('option');
                     c.value = subcat.ID;
                     c.text = subcat.name;
                     x.options.add(c, 1);
@@ -1182,18 +1208,18 @@ function likeTrack(trackID) {
                 likedTracks.push(trackID);
                 // reset recent tracks
                 if (recentTracks)
-                    recentTracks.innerHTML = ``;
-                Meta.history.history.map(track => {
+                    {recentTracks.innerHTML = ``;}
+                Meta.history.map(track => {
                     console.dir(track);
                     if (recentTracks)
-                        recentTracks.innerHTML += `<tr>
+                        {recentTracks.innerHTML += `<tr>
                     <td>
                     ${track.track}
                     </td>
                     <td>
                     ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
                     </td>
-                    </tr>`;
+                    </tr>`;}
                 });
                 iziToast.show({
                     title: 'Track liked!',
@@ -1225,11 +1251,11 @@ function addAnnouncement(announcement) {
     if (moment(Meta.time).isAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires))) {
         var color = 'info';
         if (announcement.level === 'success')
-            color = 'green';
+            {color = 'green';}
         if (announcement.level === 'danger' || announcement.level === 'urgent')
-            color = 'red';
+            {color = 'red';}
         if (announcement.level === 'warning')
-            color = 'yellow';
+            {color = 'yellow';}
         announcementIDs.push(announcement.ID);
         iziToast.show({
             title: announcement.title,
@@ -1282,7 +1308,7 @@ function processCalendar(data, replace = false) {
 // Actually reflect the changes on the website
 function updateCalendar() {
     if (document.querySelector('#calendar')) {
-        var caldata = document.querySelector("#calendar");
+        var caldata = document.querySelector('#calendar');
         caldata.innerHTML = ``;
 
         // Prepare the formatted calendar variable for our formatted events
@@ -1296,13 +1322,13 @@ function updateCalendar() {
         var compare = function (a, b) {
             try {
                 if (moment(a.start).valueOf() < moment(b.start).valueOf())
-                    return -1;
+                    {return -1;}
                 if (moment(a.start).valueOf() > moment(b.start).valueOf())
-                    return 1;
+                    {return 1;}
                 if (a.ID < b.ID)
-                    return -1;
+                    {return -1;}
                 if (a.ID > b.ID)
-                    return 1;
+                    {return 1;}
                 return 0;
             } catch (e) {
             }
@@ -1310,12 +1336,12 @@ function updateCalendar() {
 
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
         Calendar().get().sort(compare)
-            .filter(event => (event.title.startsWith("Show:") || event.title.startsWith("Genre:") || event.title.startsWith("Playlist:") || event.title.startsWith("Prerecord:") || event.title.startsWith("Remote:") || event.title.startsWith("Sports:") || event.title.startsWith("Podcast:")) && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
+            .filter(event => (event.title.startsWith('Show:') || event.title.startsWith('Genre:') || event.title.startsWith('Playlist:') || event.title.startsWith('Prerecord:') || event.title.startsWith('Remote:') || event.title.startsWith('Sports:') || event.title.startsWith('Podcast:')) && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
             .map(event => {
                 try {
                     var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878');
                     if (event.active < 1)
-                        finalColor = hexRgb("#161616");
+                        {finalColor = hexRgb('#161616');}
                     finalColor.red = Math.round(finalColor.red / 2);
                     finalColor.green = Math.round(finalColor.green / 2);
                     finalColor.blue = Math.round(finalColor.blue / 2);
@@ -1326,76 +1352,76 @@ function updateCalendar() {
                     if (event.active === -1) {
                         badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`;
                     }
-                    if (event.title.startsWith("Show: ")) {
-                        var stripped = event.title.replace("Show: ", "");
-                        var eventType = "SHOW";
+                    if (event.title.startsWith('Show: ')) {
+                        var stripped = event.title.replace('Show: ', '');
+                        var eventType = 'SHOW';
                         var image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(" - ");
+                        var temp = stripped.split(' - ');
                         if (temp.length === 2) {
                             var line1 = temp[0];
                             var line2 = temp[1];
                         } else {
-                            var line1 = "Unknown DJ";
+                            var line1 = 'Unknown DJ';
                             var line2 = temp;
                         }
-                    } else if (event.title.startsWith("Prerecord: ")) {
-                        var stripped = event.title.replace("Prerecord: ", "");
-                        var eventType = "PRERECORD";
+                    } else if (event.title.startsWith('Prerecord: ')) {
+                        var stripped = event.title.replace('Prerecord: ', '');
+                        var eventType = 'PRERECORD';
                         var image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(" - ");
+                        var temp = stripped.split(' - ');
                         if (temp.length === 2) {
                             var line1 = temp[0];
                             var line2 = temp[1];
                         } else {
-                            var line1 = "Unknown DJ";
+                            var line1 = 'Unknown DJ';
                             var line2 = temp;
                         }
-                    } else if (event.title.startsWith("Remote: ")) {
-                        var stripped = event.title.replace("Remote: ", "");
-                        var eventType = "REMOTE";
+                    } else if (event.title.startsWith('Remote: ')) {
+                        var stripped = event.title.replace('Remote: ', '');
+                        var eventType = 'REMOTE';
                         var image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(" - ");
+                        var temp = stripped.split(' - ');
                         if (temp.length === 2) {
                             var line1 = temp[0];
                             var line2 = temp[1];
                         } else {
-                            var line1 = "Unknown Host";
+                            var line1 = 'Unknown Host';
                             var line2 = temp;
                         }
-                    } else if (event.title.startsWith("Sports: ")) {
-                        var stripped = event.title.replace("Sports: ", "");
-                        var eventType = "SPORTS";
-                        var line1 = "Raider Sports";
+                    } else if (event.title.startsWith('Sports: ')) {
+                        var stripped = event.title.replace('Sports: ', '');
+                        var eventType = 'SPORTS';
+                        var line1 = 'Raider Sports';
                         var line2 = stripped;
                         var image = `<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>`;
-                    } else if (event.title.startsWith("Playlist: ")) {
-                        var stripped = event.title.replace("Playlist: ", "");
-                        var eventType = event.active > -1 ? "PLAYLIST" : `CANCELED`;
+                    } else if (event.title.startsWith('Playlist: ')) {
+                        var stripped = event.title.replace('Playlist: ', '');
+                        var eventType = event.active > -1 ? 'PLAYLIST' : `CANCELED`;
                         var image = `<i class="fas fa-list text-info" style="font-size: 96px;"></i>`;
-                        var temp = stripped.split(" - ");
+                        var temp = stripped.split(' - ');
                         if (temp.length === 2) {
                             var line1 = temp[0];
                             var line2 = temp[1];
                         } else {
-                            var line1 = "";
+                            var line1 = '';
                             var line2 = temp;
                         }
-                    } else if (event.title.startsWith("Genre: ")) {
-                        var stripped = event.title.replace("Genre: ", "");
-                        var eventType = "GENRE";
-                        var line1 = "";
+                    } else if (event.title.startsWith('Genre: ')) {
+                        var stripped = event.title.replace('Genre: ', '');
+                        var eventType = 'GENRE';
+                        var line1 = '';
                         var line2 = stripped;
                         var image = `<i class="fas fa-music text-info" style="font-size: 96px;"></i>`;
                     } else {
-                        var eventType = "EVENT";
-                        var line1 = "";
+                        var eventType = 'EVENT';
+                        var line1 = '';
                         var line2 = event.title;
                         var image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`;
                     }
-                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #8d8d8d;` : ``}" class="m-2 text-dark rounded shadow-8 bg-light-1" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
+                    caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${event.active < 1 ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo ? badgeInfo : ``}
-             <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="text-dark" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format("hh:mm A")} - ${moment(event.end).format("hh:mm A")}</span></div>`;
+             <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line1}</span><br><span class="text-dark" style="font-size: 1.25em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${line2}</span><br /><span class="text-dark" style="font-size: 1em; text-shadow: 1px 2px 2px rgba(0,0,0,0.3);">${moment(event.start).format('hh:mm A')} - ${moment(event.end).format('hh:mm A')}</span></div>`;
                 } catch (e) {
                     console.error(e);
                     iziToast.show({
@@ -1408,7 +1434,7 @@ function updateCalendar() {
         for (var i = 1; i < 28; i++) {
             var temp0 = document.querySelector(`#calendar-select-${i}`);
             if (temp0 !== null)
-                temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`);
+                {temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`);}
         }
 
     }
@@ -1500,27 +1526,26 @@ function rgbHex(red, green, blue, alpha) {
         });
     }
 }
-;
+
 
 function displayEventInfo(showID) {
     var item = Calendar({ ID: parseInt(showID) }).first();
     var buttons = [];
     var subtypefilter = [];
-    var message = `<p><strong>Starts: ${moment(item.start).format("LLL")}</strong></p>
-                        <p><strong>Ends: ${moment(item.end).format("LLL")}</strong></p>
+    var message = `<p><strong>Starts: ${moment(item.start).format('LLL')}</strong></p>
+                        <p><strong>Ends: ${moment(item.end).format('LLL')}</strong></p>
                         <p>${item.description}</p>`;
 
     // If a device ID was provided from the WWSU mobile app
-    var isPushSupported = OneSignal.isPushNotificationsSupported();
-    if (!isPushSupported) {
+    if (!notificationsSupported) {
         message += `<hr><p>Sorry, your web browser does not support push notifications at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!</p>`;
     } else if (device !== null) {
         // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
 
         subtypefilter.push(item.title);
         // For show, prerecord, and remote events... filter for all 3 types, and also for the non-prefix version.
-        if ((item.title.startsWith("Show:") || item.title.startsWith("Prerecord:") || item.title.startsWith("Remote:"))) {
-            var temp = item.title.replace("Show: ", '').replace("Prerecord: ", "").replace("Remote: ", "");
+        if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
+            var temp = item.title.replace('Show: ', '').replace('Prerecord: ', '').replace('Remote: ', '');
             subtypefilter.push(`Show: ${temp}`);
             subtypefilter.push(`Prerecord: ${temp}`);
             subtypefilter.push(`Remote: ${temp}`);
@@ -1543,8 +1568,8 @@ function displayEventInfo(showID) {
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
 
                     // For shows, remotes, and prerecords... subscribe to events regardless of prefix
-                    if ((item.title.startsWith("Show:") || item.title.startsWith("Prerecord:") || item.title.startsWith("Remote:"))) {
-                        var temp = item.title.replace("Show: ", '').replace("Prerecord: ", "").replace("Remote: ", "");
+                    if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
+                        var temp = item.title.replace('Show: ', '').replace('Prerecord: ', '').replace('Remote: ', '');
                         subscribe(`calendar-all`, temp);
                     } else {
                         subscribe(`calendar-all`, item.title);
@@ -1558,8 +1583,8 @@ function displayEventInfo(showID) {
                 ['<button><b>Unsubscribe</b></button>', function (instance, toast) {
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                     // For shows, remotes, and prerecords... unsubscribe from events regardless of prefix
-                    if ((item.title.startsWith("Show:") || item.title.startsWith("Prerecord:") || item.title.startsWith("Remote:"))) {
-                        var temp = item.title.replace("Show: ", '').replace("Prerecord: ", "").replace("Remote: ", "");
+                    if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
+                        var temp = item.title.replace('Show: ', '').replace('Prerecord: ', '').replace('Remote: ', '');
                         unsubscribe(item.unique, temp);
                     } else {
                         unsubscribe(item.unique, item.title);
@@ -1597,7 +1622,7 @@ function getUrlParameter(name) {
     var results = regex.exec(window.location.search);
     return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
-;
+
 
 function subscribe(type, subtype) {
     io.socket.post('/subscribers/add', { device: device, type: type, subtype: subtype }, function serverResponded(response, JWR) {
@@ -1627,7 +1652,7 @@ function subscribe(type, subtype) {
                 Subscriptions.insert({ type: type, subtype: subtype });
                 var temp = document.querySelector(`#show-subscribe`);
                 if (temp !== null && (subtype === Meta.show || subtype === `Sports: ${Meta.show}`))
-                    temp.style.display = "none";
+                    {temp.style.display = 'none';}
             }
         } catch (e) {
             iziToast.show({

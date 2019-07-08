@@ -1,5 +1,3 @@
-/* global sails, moment */
-
 module.exports = {
 
     friendlyName: 'EAS / Test',
