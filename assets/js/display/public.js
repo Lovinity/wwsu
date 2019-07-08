@@ -31,43 +31,33 @@ class Scoreboard {
 
     set wsuScore(value) {
         var temp = document.querySelector(this._wsuScore);
-        if (temp !== null)
-        {
+        if (temp !== null) {
             temp.innerHTML = value;
-            if (value === null || value === ``)
-                {$(this._wsuScore).fadeTo(500, 0);}
-            if (value !== null && value !== `` && (this._wsuScoreValue === null || this._wsuScoreValue === ``))
-                {$(this._wsuScore).fadeTo(500, 1);}
-            if (value > this._wsuScoreValue)
-                {$(this._wsuScore).animateCss('heartBeat slower');}
+            if (value === null || value === ``) { $(this._wsuScore).fadeTo(500, 0); }
+            if (value !== null && value !== `` && (this._wsuScoreValue === null || this._wsuScoreValue === ``)) { $(this._wsuScore).fadeTo(500, 1); }
+            if (value > this._wsuScoreValue) { $(this._wsuScore).animateCss('heartBeat slower'); }
         }
         this._wsuScoreValue = value;
     }
 
     set oppScore(value) {
         var temp = document.querySelector(this._oppScore);
-        if (temp !== null)
-        {
+        if (temp !== null) {
             temp.innerHTML = value;
-            if (value === null || value === ``)
-                {$(this._oppScore).fadeTo(500, 0);}
-            if (value !== null && value !== `` && (this._oppScoreValue === null || this._oppScoreValue === ``))
-                {$(this._oppScore).fadeTo(500, 1);}
-            if (value > this._oppScoreValue)
-                {$(this._oppScore).animateCss('heartBeat slower');}
+            if (value === null || value === ``) { $(this._oppScore).fadeTo(500, 0); }
+            if (value !== null && value !== `` && (this._oppScoreValue === null || this._oppScoreValue === ``)) { $(this._oppScore).fadeTo(500, 1); }
+            if (value > this._oppScoreValue) { $(this._oppScore).animateCss('heartBeat slower'); }
         }
         this._oppScoreValue = value;
     }
 
     set wsuNum(value) {
         var temp = document.querySelector(this._wsuNum);
-        if (temp !== null)
-        {
+        if (temp !== null) {
             var _this = this;
             $(this._wsuNum).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
-                if (value !== null && value !== ``)
-                    {$(_this._wsuNum).fadeTo(500, 1);}
+                if (value !== null && value !== ``) { $(_this._wsuNum).fadeTo(500, 1); }
             });
         }
         this._wsuNumValue = value;
@@ -75,13 +65,11 @@ class Scoreboard {
 
     set oppNum(value) {
         var temp = document.querySelector(this._oppNum);
-        if (temp !== null)
-        {
+        if (temp !== null) {
             var _this = this;
             $(this._oppNum).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
-                if (value !== null && value !== ``)
-                    {$(_this._oppNum).fadeTo(500, 1);}
+                if (value !== null && value !== ``) { $(_this._oppNum).fadeTo(500, 1); }
             });
         }
         this._oppNumValue = value;
@@ -89,13 +77,11 @@ class Scoreboard {
 
     set wsuText(value) {
         var temp = document.querySelector(this._wsuText);
-        if (temp !== null)
-        {
+        if (temp !== null) {
             var _this = this;
             $(this._wsuText).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
-                if (value !== null && value !== ``)
-                    {$(_this._wsuText).fadeTo(500, 1);}
+                if (value !== null && value !== ``) { $(_this._wsuText).fadeTo(500, 1); }
             });
         }
         this._wsuTextValue = value;
@@ -103,13 +89,11 @@ class Scoreboard {
 
     set oppText(value) {
         var temp = document.querySelector(this._oppText);
-        if (temp !== null)
-        {
+        if (temp !== null) {
             var _this = this;
             $(this._oppText).fadeTo(500, 0, () => {
                 temp.innerHTML = value;
-                if (value !== null && value !== ``)
-                    {$(_this._oppText).fadeTo(500, 1);}
+                if (value !== null && value !== ``) { $(_this._oppText).fadeTo(500, 1); }
             });
         }
         this._oppTextValue = value;
@@ -128,7 +112,7 @@ try {
     // Create a new scoreboard class
     var ascoreboard = new Scoreboard('#scoreboard', '#score-wsu', '#score-opp', '#num-wsu', '#num-opp', '#text-wsu', '#text-opp');
 
-// Define hexrgb constants
+    // Define hexrgb constants
     var hexChars = 'a-f\\d';
     var match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`;
     var match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`;
@@ -136,7 +120,7 @@ try {
     var nonHexChars = new RegExp(`[^#${hexChars}]`, 'gi');
     var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i');
 
-// Define HTML elements
+    // Define HTML elements
     var content = document.getElementById('slide');
     var djAlert = document.getElementById('dj-alert');
     var easAlert = document.getElementById('eas-alert');
@@ -148,13 +132,14 @@ try {
     var wrapper = document.getElementById('wrapper');
 
     // Define data sources
-    var Meta = {time: moment().toISOString(true)};
+    var Meta = { time: moment().toISOString(true) };
     var Calendar = new WWSUdb(TAFFY());
     // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
     var calendar = [{}, [{}, {}, {}], [{}, {}, {}]];
     var Announcements = new WWSUdb(TAFFY());
     var Directors = new WWSUdb(TAFFY());
     var Eas = new WWSUdb(TAFFY());
+    var Darksky = new WWSUdb(TAFFY());
     var sportsdb = new WWSUdb(TAFFY());
     var newEas = [];
     var prevEas = [];
@@ -180,8 +165,7 @@ try {
     var isStudio = window.location.search.indexOf('studio=true') !== -1;
     var isLightTheme = window.location.search.indexOf('light=true') !== -1;
 
-    if (isLightTheme)
-    {
+    if (isLightTheme) {
         document.body.style.backgroundColor = `#ffffff`;
         document.body.style.color = `#000000`;
         temp = document.querySelector(`#bg-canvas`);
@@ -358,26 +342,71 @@ try {
         html: `<img src="../images/display/beadj.jpeg" class="shadow-4">`,
     });
 
-    // Weather alerts
+    // Weather
     Slides.newSlide({
-        name: `eas-alerts`,
-        label: `EAS Alerts`,
+        name: `weather`,
+        label: `Weather`,
         weight: -800000,
         isSticky: false,
         color: `danger`,
-        active: false,
+        active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 15,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State University Weather</h1>
+            <div class="container">
+              <div class="row shadow-4 bg-dark-2">
+                <div class="col-4">
+                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
+                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-current-icon"></i>
+                    <div class="card-body">
+                        <h5 class="card-title" id="weather-current-temperature">0</h5>
+                        <p class="card-text" id="weather-current-summary"></p>
+                    </div>
+                </div>
+            </div>
+                <div class="col-8" id="weather-minutely-summary">
+                </div>
+            </div>
+
+            <div class="row shadow-4 bg-dark-3">
+                <div class="col-4">
+                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
+                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-1-icon"></i>
+                    <div class="card-body">
+                        <h5 class="card-title" id="weather-1-summary">Clear</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
+                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-2-icon"></i>
+                    <div class="card-body">
+                        <h5 class="card-title" id="weather-2-summary">Clear</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="card bg-dark-1 shadow-4" style="width: 90%;">
+                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-3-icon"></i>
+                    <div class="card-body">
+                        <h5 class="card-title" id="weather-3-summary">Clear</h5>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+            
+            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
     });
 
     //scoreboard
     var changeData = (data) => {
         console.dir(data);
-        switch (data.name)
-        {
+        switch (data.name) {
             case `wsuScore`:
                 ascoreboard.wsuScore = data.value;
                 break;
@@ -400,7 +429,7 @@ try {
     };
 
 
-// Create restart function to restart the screen after 15 seconds if it does not connect.
+    // Create restart function to restart the screen after 15 seconds if it does not connect.
     var restart = setTimeout(() => {
         window.location.reload(true);
     }, 15000);
@@ -422,7 +451,7 @@ try {
         timeout: 30000
     });
 
-// Burnguard is the line that sweeps across the screen to prevent screen burn-in
+    // Burnguard is the line that sweeps across the screen to prevent screen burn-in
     var $burnGuard = $('<div>').attr('id', 'burnGuard').css({
         'background-color': 'rgba(0, 0, 0, 0)',
         'width': '10px',
@@ -444,8 +473,7 @@ try {
     });
 }
 
-function burnGuardAnimate()
-{
+function burnGuardAnimate() {
     try {
         Scolor = ++Scolor % 3;
         var rColor = colors[Scolor];
@@ -489,8 +517,8 @@ $.fn.extend({
             $(this).removeClass('animated ' + animationName);
 
             if (typeof callback === 'function')
-                // eslint-disable-next-line callback-return
-                {callback();}
+            // eslint-disable-next-line callback-return
+            { callback(); }
         });
 
         return this;
@@ -498,16 +526,14 @@ $.fn.extend({
 });
 
 // Process Director data when received by updating local database and marking if a director is present.
-function processDirectors(db)
-{
+function processDirectors(db) {
     // Run data manipulation process
     try {
         // Check for present directors
         directorpresent = false;
         db.each((director) => {
             try {
-                if (director.present)
-                    {directorpresent = true;}
+                if (director.present) { directorpresent = true; }
             } catch (e) {
                 console.error(e);
                 iziToast.show({
@@ -526,21 +552,16 @@ function processDirectors(db)
 }
 
 // Update the calendar slides
-function processCalendar(db)
-{
+function processCalendar(db) {
     try {
 
         // Define a comparison function that will order calendar events by start time when we run the iteration
         var compare = function (a, b) {
             try {
-                if (moment(a.start).valueOf() < moment(b.start).valueOf())
-                    {return -1;}
-                if (moment(a.start).valueOf() > moment(b.start).valueOf())
-                    {return 1;}
-                if (a.ID < b.ID)
-                    {return -1;}
-                if (a.ID > b.ID)
-                    {return 1;}
+                if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1; }
+                if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1; }
+                if (a.ID < b.ID) { return -1; }
+                if (a.ID > b.ID) { return 1; }
                 return 0;
             } catch (e) {
                 console.error(e);
@@ -563,85 +584,72 @@ function processCalendar(db)
 
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
         db.get()
-                .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(8, 'days')))
-                .sort(compare)
-                .map(event =>
-                {
-                    try {
-                        // null start or end? Use a default to prevent errors.
-                        if (!moment(event.start).isValid())
-                            {event.start = moment(Meta.time).startOf('day');}
-                        if (!moment(event.end).isValid())
-                            {event.end = moment(Meta.time).add(1, 'days').startOf('day');}
+            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(8, 'days')))
+            .sort(compare)
+            .map(event => {
+                try {
+                    // null start or end? Use a default to prevent errors.
+                    if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day'); }
+                    if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day'); }
 
-                        // Determine which day(s) of the week that this event belongs to, and add them in those days. Also, re-format startT and endT if necessary.
-                        for (var i = 0; i < 7; i++) {
-                            var looptime = moment(Meta.time).startOf('day').add(i, 'days');
-                            var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
-                            // LINT LIES: this variable is used!
-                            // eslint-disable-next-line no-unused-vars
-                            var start2;
-                            // LINT LIES: This variable is used!
-                            // eslint-disable-next-line no-unused-vars
-                            var end2;
-                            if (moment(event.start).isBefore(looptime))
-                            {
-                                start2 = moment(looptime);
-                            } else {
-                                start2 = moment(event.start);
+                    // Determine which day(s) of the week that this event belongs to, and add them in those days. Also, re-format startT and endT if necessary.
+                    for (var i = 0; i < 7; i++) {
+                        var looptime = moment(Meta.time).startOf('day').add(i, 'days');
+                        var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
+                        // LINT LIES: this variable is used!
+                        // eslint-disable-next-line no-unused-vars
+                        var start2;
+                        // LINT LIES: This variable is used!
+                        // eslint-disable-next-line no-unused-vars
+                        var end2;
+                        if (moment(event.start).isBefore(looptime)) {
+                            start2 = moment(looptime);
+                        } else {
+                            start2 = moment(event.start);
+                        }
+                        if (moment(event.end).isAfter(looptime2)) {
+                            end2 = moment(looptime2);
+                        } else {
+                            end2 = moment(event.end);
+                        }
+                        if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime))) {
+                            event.startT = moment(event.start).format('hh:mm A');
+                            event.endT = moment(event.end).format('hh:mm A');
+
+                            // Update strings if need be, if say, start time was before this day, or end time is after this day.
+                            if (moment(event.end).isAfter(moment(looptime2))) {
+                                event.endT = moment(event.end).format('MM/DD hh:mm A');
+                                event.startT = moment(event.start).format('MM/DD hh:mm A');
                             }
-                            if (moment(event.end).isAfter(looptime2))
-                            {
-                                end2 = moment(looptime2);
-                            } else {
-                                end2 = moment(event.end);
+                            if (moment(event.start).isBefore(moment(looptime))) {
+                                event.endT = moment(event.end).format('MM/DD hh:mm A');
+                                event.startT = moment(event.start).format('MM/DD hh:mm A');
                             }
-                            if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime)))
-                            {
-                                event.startT = moment(event.start).format('hh:mm A');
-                                event.endT = moment(event.end).format('hh:mm A');
 
-                                // Update strings if need be, if say, start time was before this day, or end time is after this day.
-                                if (moment(event.end).isAfter(moment(looptime2)))
-                                {
-                                    event.endT = moment(event.end).format('MM/DD hh:mm A');
-                                    event.startT = moment(event.start).format('MM/DD hh:mm A');
-                                }
-                                if (moment(event.start).isBefore(moment(looptime)))
-                                {
-                                    event.endT = moment(event.end).format('MM/DD hh:mm A');
-                                    event.startT = moment(event.start).format('MM/DD hh:mm A');
-                                }
-
-                                // Push the final products into our formatted variable
-                                if (i === 0)
-                                {
-                                    calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].push(event);
-                                } else if (i > 0 && i < 4)
-                                {
-                                    calendar[1][i - 1][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
-                                } else if (i < 7)
-                                {
-                                    calendar[2][i - 4][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
-                                }
+                            // Push the final products into our formatted variable
+                            if (i === 0) {
+                                calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].push(event);
+                            } else if (i > 0 && i < 4) {
+                                calendar[1][i - 1][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
+                            } else if (i < 7) {
+                                calendar[2][i - 4][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
                             }
                         }
-                    } catch (e) {
-                        console.error(e);
-                        iziToast.show({
-                            title: 'An error occurred - Please check the logs',
-                            message: `Error occurred during calendar iteration in processCalendar.`
-                        });
                     }
-                });
+                } catch (e) {
+                    console.error(e);
+                    iziToast.show({
+                        title: 'An error occurred - Please check the logs',
+                        message: `Error occurred during calendar iteration in processCalendar.`
+                    });
+                }
+            });
 
         // Process events today slide
         var innercontent = document.getElementById('events-today');
         innercontent.innerHTML = ``;
-        if (typeof calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] !== 'undefined')
-        {
-            if (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length > 0)
-            {
+        if (typeof calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] !== 'undefined') {
+            if (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length > 0) {
                 Slides.slide(`events-today`).displayTime = 5 + (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length * 3);
                 calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].map((dodo, index) => {
                     try {
@@ -652,64 +660,54 @@ function processCalendar(db)
                         var eventType;
                         var image;
                         var temp;
-                        if (dodo.active < 1)
-                            {color = hexRgb(`#161616`);}
+                        if (dodo.active < 1) { color = hexRgb(`#161616`); }
                         color.red = Math.round(color.red / 1.5);
                         color.green = Math.round(color.green / 1.5);
                         color.blue = Math.round(color.blue / 1.5);
                         var badgeInfo;
-                        if (dodo.active === 2)
-                        {
+                        if (dodo.active === 2) {
                             badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">TIME CHANGED</span>`;
                         }
-                        if (dodo.active === -1)
-                        {
+                        if (dodo.active === -1) {
                             badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`;
                         }
-                        if (dodo.title.startsWith('Show: '))
-                        {
+                        if (dodo.title.startsWith('Show: ')) {
                             stripped = dodo.title.replace('Show: ', '');
                             eventType = 'SHOW';
                             image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
                             temp = stripped.split(' - ');
-                            if (temp.length === 2)
-                            {
+                            if (temp.length === 2) {
                                 line1 = temp[0];
                                 line2 = temp[1];
                             } else {
                                 line1 = 'Unknown DJ';
                                 line2 = temp;
                             }
-                        } else if (dodo.title.startsWith('Prerecord: '))
-                        {
+                        } else if (dodo.title.startsWith('Prerecord: ')) {
                             stripped = dodo.title.replace('Prerecord: ', '');
                             eventType = 'PRERECORD';
                             image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 96px;"></i>`;
                             temp = stripped.split(' - ');
-                            if (temp.length === 2)
-                            {
+                            if (temp.length === 2) {
                                 line1 = temp[0];
                                 line2 = temp[1];
                             } else {
                                 line1 = 'Unknown DJ';
                                 line2 = temp;
                             }
-                        } else if (dodo.title.startsWith('Remote: '))
-                        {
+                        } else if (dodo.title.startsWith('Remote: ')) {
                             stripped = dodo.title.replace('Remote: ', '');
                             eventType = 'REMOTE';
                             image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 96px;"></i>`;
                             temp = stripped.split(' - ');
-                            if (temp.length === 2)
-                            {
+                            if (temp.length === 2) {
                                 line1 = temp[0];
                                 line2 = temp[1];
                             } else {
                                 line1 = 'Unknown Host';
                                 line2 = temp;
                             }
-                        } else if (dodo.title.startsWith('Sports: '))
-                        {
+                        } else if (dodo.title.startsWith('Sports: ')) {
                             stripped = dodo.title.replace('Sports: ', '');
                             eventType = 'SPORTS';
                             line1 = 'Raider Sports';
@@ -759,18 +757,15 @@ function processCalendar(db)
              </table>`;
         innercontent = document.getElementById('events-2-4-table-body');
         var displayTime = 7;
-        if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')] !== 'undefined')
-        {
-            if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].length > 0)
-            {
+        if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')] !== 'undefined') {
+            if (calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].length > 0) {
                 displayTime += calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].length;
                 calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')].map((dodo, index) => {
                     try {
                         var color = null;
                         var innercontent2;
                         var temp2 = document.getElementById(`events-2-4-row-${index}`);
-                        if (temp2 === null)
-                        {
+                        if (temp2 === null) {
                             innercontent.innerHTML += `<tr id="events-2-4-row-${index}" style="border-style: none;">
              <td width="32%" id="events-2-4-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row${index}-col2" style="border-style: none;"></td>
@@ -780,8 +775,7 @@ function processCalendar(db)
                         }
                         innercontent2 = document.getElementById(`events-2-4-row${index}-col1`);
                         color = hexRgb(dodo.color);
-                        if (dodo.active < 1)
-                            {color = hexRgb(`#161616`);}
+                        if (dodo.active < 1) { color = hexRgb(`#161616`); }
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -812,8 +806,7 @@ function processCalendar(db)
             } else {
                 temp2 = document.getElementById(`events-2-4-row-0`);
                 var innercontent2;
-                if (temp2 === null)
-                {
+                if (temp2 === null) {
                     innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
              <td width="32%" id="events-2-4-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row0-col2" style="border-style: none;"></td>
@@ -828,8 +821,7 @@ function processCalendar(db)
             }
         } else {
             temp2 = document.getElementById(`events-2-4-row-0`);
-            if (temp2 === null)
-            {
+            if (temp2 === null) {
                 innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
              <td width="32%" id="events-2-4-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row0-col2" style="border-style: none;"></td>
@@ -842,17 +834,14 @@ function processCalendar(db)
              Error loading events for this day.
              </div>`;
         }
-        if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')] !== 'undefined')
-        {
-            if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].length > 0)
-            {
+        if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')] !== 'undefined') {
+            if (calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].length > 0) {
                 displayTime += calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].length;
                 calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')].map((dodo, index) => {
                     try {
                         var color = null;
                         var temp2 = document.getElementById(`events-2-4-row-${index}`);
-                        if (temp2 === null)
-                        {
+                        if (temp2 === null) {
                             innercontent.innerHTML += `<tr id="events-2-4-row-${index}" style="border-style: none;">
              <td width="32%" id="events-2-4-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row${index}-col2" style="border-style: none;"></td>
@@ -862,8 +851,7 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-2-4-row${index}-col2`);
                         color = hexRgb(dodo.color);
-                        if (dodo.active < 1)
-                            {color = hexRgb(`#161616`);}
+                        if (dodo.active < 1) { color = hexRgb(`#161616`); }
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -893,8 +881,7 @@ function processCalendar(db)
                 });
             } else {
                 temp2 = document.getElementById(`events-2-4-row-0`);
-                if (temp2 === null)
-                {
+                if (temp2 === null) {
                     innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
              <td width="32%" id="events-2-4-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row0-col2" style="border-style: none;"></td>
@@ -909,8 +896,7 @@ function processCalendar(db)
             }
         } else {
             temp2 = document.getElementById(`events-2-4-row-0`);
-            if (temp2 === null)
-            {
+            if (temp2 === null) {
                 innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
              <td width="32%" id="events-2-4-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row0-col2" style="border-style: none;"></td>
@@ -923,17 +909,14 @@ function processCalendar(db)
              Error loading events for this day.
              </div>`;
         }
-        if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')] !== 'undefined')
-        {
-            if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].length > 0)
-            {
+        if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')] !== 'undefined') {
+            if (calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].length > 0) {
                 displayTime += calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].length;
                 calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')].map((dodo, index) => {
                     try {
                         var color = null;
                         var temp2 = document.getElementById(`events-2-4-row-${index}`);
-                        if (temp2 === null)
-                        {
+                        if (temp2 === null) {
                             innercontent.innerHTML += `<tr id="events-2-4-row-${index}" style="border-style: none;">
              <td width="32%" id="events-2-4-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row${index}-col2" style="border-style: none;"></td>
@@ -943,8 +926,7 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-2-4-row${index}-col3`);
                         color = hexRgb(dodo.color);
-                        if (dodo.active < 1)
-                            {color = hexRgb(`#161616`);}
+                        if (dodo.active < 1) { color = hexRgb(`#161616`); }
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -974,8 +956,7 @@ function processCalendar(db)
                 });
             } else {
                 temp2 = document.getElementById(`events-2-4-row-0`);
-                if (temp2 === null)
-                {
+                if (temp2 === null) {
                     innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
              <td width="32%" id="events-2-4-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row0-col2" style="border-style: none;"></td>
@@ -990,8 +971,7 @@ function processCalendar(db)
             }
         } else {
             temp2 = document.getElementById(`events-2-4-row-0`);
-            if (temp2 === null)
-            {
+            if (temp2 === null) {
                 innercontent.innerHTML += `<tr id="events-2-4-row-0" style="border-style: none;">
              <td width="32%" id="events-2-4-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-2-4-row0-col2" style="border-style: none;"></td>
@@ -1021,17 +1001,14 @@ function processCalendar(db)
              </table>`;
         innercontent = document.getElementById('events-5-7-table-body');
         displayTime = 7;
-        if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')] !== 'undefined')
-        {
-            if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].length > 0)
-            {
+        if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')] !== 'undefined') {
+            if (calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].length > 0) {
                 displayTime += calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].length;
                 calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')].map((dodo, index) => {
                     try {
                         var color = null;
                         var temp2 = document.getElementById(`events-5-7-row-${index}`);
-                        if (temp2 === null)
-                        {
+                        if (temp2 === null) {
                             innercontent.innerHTML += `<tr id="events-5-7-row-${index}" style="border-style: none;">
              <td width="32%" id="events-5-7-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row${index}-col2" style="border-style: none;"></td>
@@ -1041,8 +1018,7 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-5-7-row${index}-col1`);
                         color = hexRgb(dodo.color);
-                        if (dodo.active < 1)
-                            {color = hexRgb(`#161616`);}
+                        if (dodo.active < 1) { color = hexRgb(`#161616`); }
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -1072,8 +1048,7 @@ function processCalendar(db)
                 });
             } else {
                 temp2 = document.getElementById(`events-5-7-row-0`);
-                if (temp2 === null)
-                {
+                if (temp2 === null) {
                     innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
              <td width="32%" id="events-5-7-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row0-col2" style="border-style: none;"></td>
@@ -1088,8 +1063,7 @@ function processCalendar(db)
             }
         } else {
             temp2 = document.getElementById(`events-5-7-row-0`);
-            if (temp2 === null)
-            {
+            if (temp2 === null) {
                 innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
              <td width="32%" id="events-5-7-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row0-col2" style="border-style: none;"></td>
@@ -1102,17 +1076,14 @@ function processCalendar(db)
              Error loading events for this day.
              </div>`;
         }
-        if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')] !== 'undefined')
-        {
-            if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].length > 0)
-            {
+        if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')] !== 'undefined') {
+            if (calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].length > 0) {
                 displayTime += calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].length;
                 calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')].map((dodo, index) => {
                     try {
                         var color = null;
                         var temp2 = document.getElementById(`events-5-7-row-${index}`);
-                        if (temp2 === null)
-                        {
+                        if (temp2 === null) {
                             innercontent.innerHTML += `<tr id="events-5-7-row-${index}" style="border-style: none;">
              <td width="32%" id="events-5-7-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row${index}-col2" style="border-style: none;"></td>
@@ -1122,8 +1093,7 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-5-7-row${index}-col2`);
                         color = hexRgb(dodo.color);
-                        if (dodo.active < 1)
-                            {color = hexRgb(`#161616`);}
+                        if (dodo.active < 1) { color = hexRgb(`#161616`); }
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -1153,8 +1123,7 @@ function processCalendar(db)
                 });
             } else {
                 temp2 = document.getElementById(`events-5-7-row-0`);
-                if (temp2 === null)
-                {
+                if (temp2 === null) {
                     innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
              <td width="32%" id="events-5-7-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row0-col2" style="border-style: none;"></td>
@@ -1169,8 +1138,7 @@ function processCalendar(db)
             }
         } else {
             temp2 = document.getElementById(`events-5-7-row-0`);
-            if (temp2 === null)
-            {
+            if (temp2 === null) {
                 innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
              <td width="32%" id="events-5-7-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row0-col2" style="border-style: none;"></td>
@@ -1183,17 +1151,14 @@ function processCalendar(db)
              Error loading events for this day.
              </div>`;
         }
-        if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')] !== 'undefined')
-        {
-            if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].length > 0)
-            {
+        if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')] !== 'undefined') {
+            if (calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].length > 0) {
                 displayTime += calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].length;
                 calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')].map((dodo, index) => {
                     try {
                         var color = null;
                         var temp2 = document.getElementById(`events-5-7-row-${index}`);
-                        if (temp2 === null)
-                        {
+                        if (temp2 === null) {
                             innercontent.innerHTML += `<tr id="events-5-7-row-${index}" style="border-style: none;">
              <td width="32%" id="events-5-7-row${index}-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row${index}-col2" style="border-style: none;"></td>
@@ -1203,8 +1168,7 @@ function processCalendar(db)
                         }
                         var innercontent2 = document.getElementById(`events-5-7-row${index}-col3`);
                         color = hexRgb(dodo.color);
-                        if (dodo.active < 1)
-                            {color = hexRgb(`#161616`);}
+                        if (dodo.active < 1) { color = hexRgb(`#161616`); }
                         color.red = Math.round(color.red);
                         color.green = Math.round(color.green);
                         color.blue = Math.round(color.blue);
@@ -1234,8 +1198,7 @@ function processCalendar(db)
                 });
             } else {
                 temp2 = document.getElementById(`events-5-7-row-0`);
-                if (temp2 === null)
-                {
+                if (temp2 === null) {
                     innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
              <td width="32%" id="events-5-7-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row0-col2" style="border-style: none;"></td>
@@ -1250,8 +1213,7 @@ function processCalendar(db)
             }
         } else {
             temp2 = document.getElementById(`events-5-7-row-0`);
-            if (temp2 === null)
-            {
+            if (temp2 === null) {
                 innercontent.innerHTML += `<tr id="events-5-7-row-0" style="border-style: none;">
              <td width="32%" id="events-5-7-row0-col1" style="border-style: none;"></td>
              <td width="32%" id="events-5-7-row0-col2" style="border-style: none;"></td>
@@ -1275,15 +1237,13 @@ function processCalendar(db)
 }
 
 // Check for new Eas alerts and push them out when necessary.
-function processEas(db)
-{
+function processEas(db) {
     // Data processing
     try {
 
         // First, check for new alerts and add them
         db.each((record) => {
-            if (prevEas.indexOf(record.ID) === -1)
-                {newEas.push(record);}
+            if (prevEas.indexOf(record.ID) === -1) { newEas.push(record); }
         });
 
         // Check to see if any alerts are extreme, and update our previous Eas ID array
@@ -1293,7 +1253,9 @@ function processEas(db)
         var innercontent = document.getElementById('eas-alerts');
         innercontent.innerHTML = ``;
 
+        // eslint-disable-next-line no-unused-vars
         var makeActive = false;
+        // eslint-disable-next-line no-unused-vars
         var displayTime = 7;
 
         db.each((dodo) => {
@@ -1303,35 +1265,28 @@ function processEas(db)
                 makeActive = true;
                 displayTime += 4;
 
-                if (dodo.severity === 'Extreme')
-                    {easExtreme = true;}
+                if (dodo.severity === 'Extreme') { easExtreme = true; }
 
                 var color = (typeof dodo.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb('#787878');
                 var borderclass = 'black';
                 color.red = Math.round(color.red / 2);
                 color.green = Math.round(color.green / 2);
                 color.blue = Math.round(color.blue / 2);
-                if (typeof dodo['severity'] !== 'undefined')
-                {
-                    if (dodo['severity'] === 'Extreme')
-                    {
+                if (typeof dodo['severity'] !== 'undefined') {
+                    if (dodo['severity'] === 'Extreme') {
                         borderclass = 'danger';
-                    } else if (dodo['severity'] === 'Severe')
-                    {
+                    } else if (dodo['severity'] === 'Severe') {
                         borderclass = 'warning';
-                    } else if (dodo['severity'] === 'Moderate')
-                    {
+                    } else if (dodo['severity'] === 'Moderate') {
                         borderclass = 'primary';
                     }
                 }
                 // LINT LIES: This variable is used.
                 // eslint-disable-next-line no-unused-vars
                 var timeleft = '';
-                if (moment(Meta.time).isBefore(moment(dodo.starts)))
-                {
+                if (moment(Meta.time).isBefore(moment(dodo.starts))) {
                     timeleft = `Effective ${moment(Meta.time).to(moment(dodo.starts))}`;
-                } else if (moment(Meta.time).isAfter(moment(dodo.expires)))
-                {
+                } else if (moment(Meta.time).isAfter(moment(dodo.expires))) {
                     timeleft = `Expired ${moment(dodo.expires).from(moment(Meta.time))}`;
                 } else {
                     timeleft = `Expires ${moment(Meta.time).to(moment(dodo.expires))}`;
@@ -1356,8 +1311,6 @@ function processEas(db)
             }
         });
 
-        Slides.slide(`eas-alerts`).active = makeActive;
-        Slides.slide(`eas-alerts`).displayTime = displayTime;
         checkSlideCounts();
 
         // Do EAS events
@@ -1372,12 +1325,9 @@ function processEas(db)
     }
 }
 
-function waitFor(check, callback, count = 0)
-{
-    if (!check())
-    {
-        if (count < 10000)
-        {
+function waitFor(check, callback, count = 0) {
+    if (!check()) {
+        if (count < 10000) {
             count++;
             window.requestAnimationFrame(() => {
                 waitFor(check, callback, count);
@@ -1386,7 +1336,7 @@ function waitFor(check, callback, count = 0)
         }
     } else {
         return callback();
-}
+    }
 }
 
 waitFor(() => {
@@ -1399,10 +1349,8 @@ waitFor(() => {
     // When new Meta is received, update it in our memory and then run the process function.
     io.socket.on('meta', (data) => {
         try {
-            for (var key in data)
-            {
-                if (data.hasOwnProperty(key))
-                {
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
                     Meta[key] = data[key];
                 }
             }
@@ -1416,7 +1364,7 @@ waitFor(() => {
         }
     });
 
-// On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
+    // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
     Calendar.assignSocketEvent('calendar', io.socket);
     Calendar.setOnUpdate((data, db) => {
         clearTimeout(processCalendarTimer);
@@ -1443,12 +1391,18 @@ waitFor(() => {
         }, 5000);
     });
 
-// On new directors data, update our directors memory and run the process function.
+    // On new directors data, update our directors memory and run the process function.
     Directors.assignSocketEvent('directors', io.socket);
     Directors.setOnUpdate((data, db) => processDirectors(db));
     Directors.setOnInsert((data, db) => processDirectors(db));
     Directors.setOnRemove((data, db) => processDirectors(db));
     Directors.setOnReplace((db) => processDirectors(db));
+
+    Darksky.assignSocketEvent('darksky', io.socket);
+    Darksky.setOnUpdate((data, db) => processDarksky(db));
+    Darksky.setOnInsert((data, db) => processDarksky(db));
+    Darksky.setOnRemove((data, db) => processDarksky(db));
+    Darksky.setOnReplace((db) => processDarksky(db));
 
     // scoreboard
     sportsdb.assignSocketEvent('sports', io.socket);
@@ -1466,12 +1420,10 @@ waitFor(() => {
         });
     });
 
-// on messages, display message if event is an insert
+    // on messages, display message if event is an insert
     io.socket.on('messages', (data) => {
-        for (var key in data)
-        {
-            if (data.hasOwnProperty(key) && key === 'insert')
-            {
+        for (var key in data) {
+            if (data.hasOwnProperty(key) && key === 'insert') {
                 iziToast.show({
                     title: 'Message',
                     message: data[key].message,
@@ -1486,8 +1438,7 @@ waitFor(() => {
                     balloon: true,
                     zindex: 999,
                 });
-                if (!isStudio)
-                    {responsiveVoice.speak(`Attention guests! There is a new message. ${data[key].message}`);}
+                if (!isStudio) { responsiveVoice.speak(`Attention guests! There is a new message. ${data[key].message}`); }
             }
         }
     });
@@ -1500,8 +1451,8 @@ waitFor(() => {
         directorSocket();
         easSocket();
         announcementsSocket();
-        if (disconnected)
-        {
+        darkskySocket();
+        if (disconnected) {
             //noConnection.style.display = "none";
             disconnected = false;
             clearTimeout(restart);
@@ -1514,8 +1465,8 @@ waitFor(() => {
     directorSocket();
     easSocket();
     announcementsSocket();
-    if (disconnected)
-    {
+    darkskySocket();
+    if (disconnected) {
         //noConnection.style.display = "none";
         disconnected = false;
         clearTimeout(restart);
@@ -1533,8 +1484,7 @@ waitFor(() => {
                 message: 'Error occurred trying to make socket reconnect indefinitely.'
             });
         }
-        if (!disconnected)
-        {
+        if (!disconnected) {
             //noConnection.style.display = "inline";
             disconnected = true;
             // process now playing so that it displays that we are disconnected.
@@ -1547,7 +1497,7 @@ waitFor(() => {
         }
     });
 
-// On new eas data, update our eas memory and run the process function.
+    // On new eas data, update our eas memory and run the process function.
     Eas.assignSocketEvent('eas', io.socket);
     Eas.setOnUpdate((data, db) => processEas(db));
     Eas.setOnInsert((data, db) => processEas(db));
@@ -1578,8 +1528,8 @@ waitFor(() => {
         console.dir(db.get());
         // Remove all announcement slides
         Slides.allSlides()
-                .filter((slide) => slide.name.startsWith(`attn-`))
-                .map((slide) => Slides.removeSlide(slide.name));
+            .filter((slide) => slide.name.startsWith(`attn-`))
+            .map((slide) => Slides.removeSlide(slide.name));
 
         // Add slides for each announcement
         db.each((data) => createAnnouncement(data));
@@ -1587,10 +1537,9 @@ waitFor(() => {
     });
 });
 
-function onlineSocket()
-{
+function onlineSocket() {
     console.log('attempting online socket');
-    noReq.request({method: 'POST', url: '/recipients/add-display', data: {host: 'display-public'}}, () => {
+    noReq.request({ method: 'POST', url: '/recipients/add-display', data: { host: 'display-public' } }, () => {
         try {
         } catch (unusedE) {
             console.log('FAILED ONLINE CONNECTION');
@@ -1599,8 +1548,7 @@ function onlineSocket()
     });
 }
 
-function easSocket()
-{
+function easSocket() {
     console.log('attempting eas socket');
     try {
         Eas.replaceData(noReq, '/eas/get');
@@ -1610,16 +1558,13 @@ function easSocket()
     }
 }
 
-function MetaSocket()
-{
+function MetaSocket() {
     console.log('attempting Meta socket');
-    noReq.request({method: 'POST', url: '/meta/get', data: {}}, (body) => {
+    noReq.request({ method: 'POST', url: '/meta/get', data: {} }, (body) => {
         try {
             temp = body;
-            for (var key in temp)
-            {
-                if (temp.hasOwnProperty(key))
-                {
+            for (var key in temp) {
+                if (temp.hasOwnProperty(key)) {
                     Meta[key] = temp[key];
                 }
             }
@@ -1633,8 +1578,7 @@ function MetaSocket()
     sportsdb.replaceData(noReq, '/sports/get');
 }
 
-function eventSocket()
-{
+function eventSocket() {
     console.log('attempting event socket');
     try {
         Calendar.replaceData(noReq, '/calendar/get');
@@ -1645,8 +1589,7 @@ function eventSocket()
     }
 }
 
-function directorSocket()
-{
+function directorSocket() {
     console.log('attempting director socket');
     try {
         Directors.replaceData(noReq, '/directors/get');
@@ -1656,13 +1599,22 @@ function directorSocket()
     }
 }
 
-function announcementsSocket()
-{
+function darkskySocket() {
+    console.log('attempting darksky socket');
+    try {
+        Darksky.replaceData(noReq, '/darksky/get');
+    } catch (unusedE) {
+        console.log('FAILED CONNECTION');
+        setTimeout(darkskySocket, 10000);
+    }
+}
+
+function announcementsSocket() {
     try {
         var data = [];
-        noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-public'}}, (body) => {
+        noReq.request({ method: 'POST', url: '/announcements/get', data: { type: 'display-public' } }, (body) => {
             data = data.concat(body);
-            noReq.request({method: 'POST', url: '/announcements/get', data: {type: 'display-public-sticky'}}, (body) => {
+            noReq.request({ method: 'POST', url: '/announcements/get', data: { type: 'display-public-sticky' } }, (body) => {
                 data = data.concat(body);
 
                 Announcements.query(data, true);
@@ -1676,16 +1628,13 @@ function announcementsSocket()
 }
 
 // This function is called whenever a change in Eas alerts is detected, or when we are finished displaying an alert. It checks to see if we should display something Eas-related.
-function doEas()
-{
+function doEas() {
     try {
         console.log(`DO EAS called`);
         // Display the new alert if conditions permit
-        if ((newEas.length > 0 && !easActive))
-        {
+        if ((newEas.length > 0 && !easActive)) {
             // Make sure alert is valid. Also, only scroll severe and extreme alerts when there is an extreme alert in effect; ignore moderate and minor alerts.
-            if (typeof newEas[0] !== 'undefined' && (!easExtreme || (easExtreme && (newEas[0]['severity'] === 'Extreme' || newEas[0]['severity'] === 'Severe'))))
-            {
+            if (typeof newEas[0] !== 'undefined' && (!easExtreme || (easExtreme && (newEas[0]['severity'] === 'Extreme' || newEas[0]['severity'] === 'Severe')))) {
                 easActive = true;
 
                 var alert = (typeof newEas[0]['alert'] !== 'undefined') ? newEas[0]['alert'] : 'Unknown Alert';
@@ -1710,68 +1659,65 @@ function doEas()
                     <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`;
-                if (isLightTheme)
-                    {responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format('LLL') : 'UNKNOWN'}.`);}
-                if (easExtreme)
-                {
+                if (isLightTheme) { responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format('LLL') : 'UNKNOWN'}.`); }
+                if (easExtreme) {
                     easAlert.style.display = 'inline';
                     easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`;
                 }
                 $('#alert-marquee')
-                        .bind('finished', () => {
-                            try {
-                                easActive = false;
-                                var temp = document.getElementById('alert-marquee');
-                                temp.innerHTML = '';
-                                clearInterval(flashInterval);
-                                newEas.shift();
-                                doEas();
-                            } catch (e) {
-                                console.error(e);
-                                iziToast.show({
-                                    title: 'An error occurred - Please check the logs',
-                                    message: `Error occurred in the finished bind of #alert-marquee in doEas.`
-                                });
-                            }
-                        })
-                        .marquee({
-                            //duration in milliseconds of the marquee
-                            speed: 180,
-                            //gap in pixels between the tickers
-                            gap: 50,
-                            //time in milliseconds before the marquee will start animating
-                            delayBeforeStart: 2000,
-                            //'left' or 'right'
-                            direction: 'left',
-                            //true or false - should the marquee be duplicated to show an effect of continues flow
-                            duplicated: false
-                        });
-                        /*
-                clearInterval(flashInterval);
-                flashInterval = setInterval(function () {
-                    var temp = document.querySelector(`#eas-alert-text`);
-                    if (temp !== null)
-                        temp.className = "m-3 animated pulse fast";
-                    setTimeout(() => {
-                        var temp = document.querySelector(`#eas-alert-text`);
-                        if (temp !== null)
-                            temp.className = "m-3";
-                    }, 900);
-                    if (easActive && document.getElementById('slide-interrupt-eas') === null)
-                    {
-                        easActive = false;
-                        doEas();
-                    }
-                }, 1000);
-                */
+                    .bind('finished', () => {
+                        try {
+                            easActive = false;
+                            var temp = document.getElementById('alert-marquee');
+                            temp.innerHTML = '';
+                            clearInterval(flashInterval);
+                            newEas.shift();
+                            doEas();
+                        } catch (e) {
+                            console.error(e);
+                            iziToast.show({
+                                title: 'An error occurred - Please check the logs',
+                                message: `Error occurred in the finished bind of #alert-marquee in doEas.`
+                            });
+                        }
+                    })
+                    .marquee({
+                        //duration in milliseconds of the marquee
+                        speed: 180,
+                        //gap in pixels between the tickers
+                        gap: 50,
+                        //time in milliseconds before the marquee will start animating
+                        delayBeforeStart: 2000,
+                        //'left' or 'right'
+                        direction: 'left',
+                        //true or false - should the marquee be duplicated to show an effect of continues flow
+                        duplicated: false
+                    });
+                /*
+        clearInterval(flashInterval);
+        flashInterval = setInterval(function () {
+            var temp = document.querySelector(`#eas-alert-text`);
+            if (temp !== null)
+                temp.className = "m-3 animated pulse fast";
+            setTimeout(() => {
+                var temp = document.querySelector(`#eas-alert-text`);
+                if (temp !== null)
+                    temp.className = "m-3";
+            }, 900);
+            if (easActive && document.getElementById('slide-interrupt-eas') === null)
+            {
+                easActive = false;
+                doEas();
+            }
+        }, 1000);
+        */
             } else {
                 easActive = false;
                 newEas.shift();
                 doEas();
             }
             // If there is an extreme alert in effect, we want it to be permanently on the screen while it is in effect
-        } else if (easExtreme && !easActive)
-        {
+        } else if (easExtreme && !easActive) {
 
             // Make background flash red every second
             clearInterval(flashInterval);
@@ -1781,11 +1727,9 @@ function doEas()
                 setTimeout(() => {
                     $('#eas-alert').css('background-color', !isLightTheme ? `#320000` : `#f6cccc`);
                     voiceCount++;
-                    if (voiceCount > 179)
-                    {
+                    if (voiceCount > 179) {
                         voiceCount = 0;
-                        if (!isStudio)
-                            {responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`);}
+                        if (!isStudio) { responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`); }
                     }
                 }, 250);
             }, 1000);
@@ -1798,7 +1742,7 @@ function doEas()
             <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
             var innercontent = document.getElementById('alerts');
-            Eas.db({severity: 'Extreme'}).each((dodo) => {
+            Eas.db({ severity: 'Extreme' }).each((dodo) => {
                 try {
                     var color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color) ? hexRgb(dodo.color) : hexRgb('#787878');
                     var borderclass = 'black';
@@ -1819,14 +1763,12 @@ function doEas()
                 }
             });
             // Resume regular slides when no extreme alerts are in effect anymore
-        } else if (!easExtreme && !easActive && document.getElementById('slide-interrupt-eas') !== null)
-        {
+        } else if (!easExtreme && !easActive && document.getElementById('slide-interrupt-eas') !== null) {
             clearInterval(flashInterval);
             easAlert.style.display = 'none';
             easAlert.innerHTML = ``;
             // If we are supposed to display an EAS alert, but it is not on the screen, this is an error; put it on the screen.
-        } else if (easActive && document.getElementById('slide-interrupt-eas') === null)
-        {
+        } else if (easActive && document.getElementById('slide-interrupt-eas') === null) {
             easActive = false;
             doEas();
         }
@@ -1840,14 +1782,11 @@ function doEas()
 }
 
 // This function is called whenever meta is changed. The parameter response contains only the meta that has changed / to be updated.
-function processNowPlaying(response)
-{
-    if (response)
-    {
+function processNowPlaying(response) {
+    if (response) {
         try {
             // reset ticker timer on change to queue time
-            if (typeof response.queueFinish !== 'undefined')
-            {
+            if (typeof response.queueFinish !== 'undefined') {
                 clearInterval(nowPlayingTimer);
                 clearTimeout(nowPlayingTimer);
                 nowPlayingTimer = setTimeout(() => {
@@ -1856,16 +1795,14 @@ function processNowPlaying(response)
                 }, moment(Meta.queueFinish).diff(moment(Meta.queueFinish).startOf('second')));
             }
             // Reset ticker when time is provided
-            else if (typeof response.time !== 'undefined')
-            {
+            else if (typeof response.time !== 'undefined') {
                 clearInterval(nowPlayingTimer);
                 clearTimeout(nowPlayingTimer);
                 nowPlayingTimer = setInterval(nowPlayingTick, 1000);
             }
 
             // April Fool's
-            if (typeof response.trackID !== `undefined` && parseInt(response.trackID) >= 74255 && parseInt(response.trackID) <= 74259)
-            {
+            if (typeof response.trackID !== `undefined` && parseInt(response.trackID) >= 74255 && parseInt(response.trackID) <= 74259) {
                 setTimeout(() => {
                     iziToast.show({
                         title: '',
@@ -1914,29 +1851,23 @@ function processNowPlaying(response)
              }
              */
 
-            if (disconnected || typeof Meta.state === 'undefined')
-            {
+            if (disconnected || typeof Meta.state === 'undefined') {
                 statebadge = `<span class="badge badge-secondary shadow-2">OFFLINE</span>`;
                 djAlert.style.display = 'none';
-            } else if (Meta.state.startsWith('automation_'))
-            {
+            } else if (Meta.state.startsWith('automation_')) {
                 statebadge = `<span class="badge badge-info shadow-2">MUSIC</span>`;
                 color = 'rgba(1, 84, 122, 1)';
-            } else if (Meta.state.startsWith('live_'))
-            {
+            } else if (Meta.state.startsWith('live_')) {
                 statebadge = `<span class="badge badge-primary shadow-2">SHOW</span>`;
                 color = 'rgba(115, 6, 23, 1)';
-            } else if (Meta.state.startsWith('remote_'))
-            {
+            } else if (Meta.state.startsWith('remote_')) {
                 statebadge = `<span class="badge badge-purple shadow-2">REMOTE</span>`;
                 color = 'rgba(51, 29, 91, 1)';
-            } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_'))
-            {
+            } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                 statebadge = `<span class="badge badge-success shadow-2">SPORTS</span>`;
                 color = 'rgba(38, 87, 40, 1)';
             }
-            if (typeof response.state !== `undefined` || typeof response.topic !== `undefined` || typeof response.show !== `undefined`)
-            {
+            if (typeof response.state !== `undefined` || typeof response.topic !== `undefined` || typeof response.show !== `undefined`) {
                 /*
                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
                 {
@@ -1965,17 +1896,14 @@ function processNowPlaying(response)
             </div>`
                 }
                 */
-                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_') || Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_'))
-                {
+                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_') || Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
                     Slides.slide(`on-air`).active = true;
                     checkSlideCounts();
                     var innercontent = ``;
-                    if (Meta.topic.length > 2)
-                    {
+                    if (Meta.topic.length > 2) {
                         Slides.slide(`on-air`).displayTime = 20;
                         innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};"><strong>${Meta.show}</strong></h2>`;
-                        if ('webchat' in Meta && Meta.webchat)
-                        {
+                        if ('webchat' in Meta && Meta.webchat) {
                             innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <string>wwsu1069.org</strong></h3>`;
                         } else {
                             innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`;
@@ -1984,111 +1912,101 @@ function processNowPlaying(response)
                     } else {
                         Slides.slide(`on-air`).displayTime = 10;
                         innercontent = `<h2 style="text-align: center; font-size: 3em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};"><strong>${Meta.show}</strong></h2>`;
-                        if ('webchat' in Meta && Meta.webchat)
-                        {
+                        if ('webchat' in Meta && Meta.webchat) {
                             innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <strong>wwsu1069.org</strong></h3>`;
                         } else {
                             innercontent += `<h3 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`;
                         }
                     }
                     temp = document.getElementById(`ontheair`);
-                    if (temp)
-                        {temp.innerHTML = innercontent;}
+                    if (temp) { temp.innerHTML = innercontent; }
                 } else {
                     Slides.slide(`on-air`).active = false;
                     checkSlideCounts();
                 }
             }
             var queuelength = Meta.queueFinish !== null ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), 'seconds')) : 0;
-            if (queuelength < 0)
-                {queuelength = 0;}
-            if (queuelength > 29)
-                {queueReminder = false;}
-            if (typeof response.line1 !== 'undefined')
-            {
+            if (queuelength < 0) { queuelength = 0; }
+            if (queuelength > 29) { queueReminder = false; }
+            if (typeof response.line1 !== 'undefined') {
                 var line1Timer = setTimeout(() => {
                     nowplayingline1.innerHTML = Meta.line1;
                     nowplayingline1.className = ``;
-                    if (Meta.line1.length >= 80)
-                    {
+                    if (Meta.line1.length >= 80) {
                         $('#nowplaying-line1')
-                                .marquee({
-                                    //duration in milliseconds of the marquee
-                                    speed: 100,
-                                    //gap in pixels between the tickers
-                                    gap: 100,
-                                    //time in milliseconds before the marquee will start animating
-                                    delayBeforeStart: 0,
-                                    //'left' or 'right'
-                                    direction: 'left',
-                                    //true or false - should the marquee be duplicated to show an effect of continues flow
-                                    duplicated: true
-                                });
+                            .marquee({
+                                //duration in milliseconds of the marquee
+                                speed: 100,
+                                //gap in pixels between the tickers
+                                gap: 100,
+                                //time in milliseconds before the marquee will start animating
+                                delayBeforeStart: 0,
+                                //'left' or 'right'
+                                direction: 'left',
+                                //true or false - should the marquee be duplicated to show an effect of continues flow
+                                duplicated: true
+                            });
                     }
                 }, 5000);
                 $('#nowplaying-line1').animateCss('fadeOut', () => {
                     clearTimeout(line1Timer);
                     nowplayingline1.innerHTML = Meta.line1;
-                    if (Meta.line1.length >= 80)
-                    {
+                    if (Meta.line1.length >= 80) {
                         $('#nowplaying-line1')
-                                .marquee({
-                                    //duration in milliseconds of the marquee
-                                    speed: 100,
-                                    //gap in pixels between the tickers
-                                    gap: 100,
-                                    //time in milliseconds before the marquee will start animating
-                                    delayBeforeStart: 0,
-                                    //'left' or 'right'
-                                    direction: 'left',
-                                    //true or false - should the marquee be duplicated to show an effect of continues flow
-                                    duplicated: true
-                                });
+                            .marquee({
+                                //duration in milliseconds of the marquee
+                                speed: 100,
+                                //gap in pixels between the tickers
+                                gap: 100,
+                                //time in milliseconds before the marquee will start animating
+                                delayBeforeStart: 0,
+                                //'left' or 'right'
+                                direction: 'left',
+                                //true or false - should the marquee be duplicated to show an effect of continues flow
+                                duplicated: true
+                            });
                     } else {
                         $('#nowplaying-line1').animateCss('fadeIn');
                     }
                 });
             }
-            if (typeof response.line2 !== 'undefined')
-            {
+            if (typeof response.line2 !== 'undefined') {
                 var line2Timer = setTimeout(() => {
                     nowplayingline2.innerHTML = Meta.line2;
                     nowplayingline2.className = ``;
-                    if (Meta.line2.length >= 80)
-                    {
+                    if (Meta.line2.length >= 80) {
                         $('#nowplaying-line2')
-                                .marquee({
-                                    //duration in milliseconds of the marquee
-                                    speed: 100,
-                                    //gap in pixels between the tickers
-                                    gap: 100,
-                                    //time in milliseconds before the marquee will start animating
-                                    delayBeforeStart: 0,
-                                    //'left' or 'right'
-                                    direction: 'left',
-                                    //true or false - should the marquee be duplicated to show an effect of continues flow
-                                    duplicated: true
-                                });
+                            .marquee({
+                                //duration in milliseconds of the marquee
+                                speed: 100,
+                                //gap in pixels between the tickers
+                                gap: 100,
+                                //time in milliseconds before the marquee will start animating
+                                delayBeforeStart: 0,
+                                //'left' or 'right'
+                                direction: 'left',
+                                //true or false - should the marquee be duplicated to show an effect of continues flow
+                                duplicated: true
+                            });
                     }
                 }, 5000);
                 $('#nowplaying-line2').animateCss('fadeOut', () => {
                     clearTimeout(line2Timer);
                     nowplayingline2.innerHTML = Meta.line2;
-                    if (Meta.line2.length >= 80)
-                    {
+                    if (Meta.line2.length >= 80) {
                         $('#nowplaying-line2')
-                                .marquee({
-                                    //duration in milliseconds of the marquee
-                                    speed: 100,
-                                    //gap in pixels between the tickers
-                                    gap: 100,
-                                    //time in milliseconds before the marquee will start animating
-                                    delayBeforeStart: 0,
-                                    //'left' or 'right'
-                                    direction: 'left',
-                                    //true or false - should the marquee be duplicated to show an effect of continues flow
-                                    duplicated: true
-                                });
+                            .marquee({
+                                //duration in milliseconds of the marquee
+                                speed: 100,
+                                //gap in pixels between the tickers
+                                gap: 100,
+                                //time in milliseconds before the marquee will start animating
+                                delayBeforeStart: 0,
+                                //'left' or 'right'
+                                direction: 'left',
+                                //true or false - should the marquee be duplicated to show an effect of continues flow
+                                duplicated: true
+                            });
                     } else {
                         $('#nowplaying-line2').animateCss('fadeIn');
                     }
@@ -2103,14 +2021,12 @@ function processNowPlaying(response)
                         <div class="container-fluid m-1" style="text-align: center; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}</div>
                         <div class="m-1" style="width: 15%;">${statebadge}</div>
                         </div>`;
-            if (Meta.state === 'automation_live' && queuelength < 60 && typeof response.state === 'undefined')
-            {
+            if (Meta.state === 'automation_live' && queuelength < 60 && typeof response.state === 'undefined') {
                 djAlert.style.display = 'inline';
                 countdown = document.getElementById('countdown');
                 countdowntext = document.getElementById('countdown-text');
                 countdownclock = document.getElementById('countdown-clock');
-                if (!countdown || !countdowntext || !countdownclock)
-                {
+                if (!countdown || !countdowntext || !countdownclock) {
 
                     temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
@@ -2121,19 +2037,15 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
-                    if (!isStudio)
-                        {responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);}
+                    if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`); }
                 }
-                if (queuelength >= 15)
-                {
+                if (queuelength >= 15) {
                     countdownclock.innerHTML = queuelength;
                 } else {
-                    if (!queueReminder && isStudio)
-                        {responsiveVoice.speak(`DJ is going live in less than 15 seconds`);}
+                    if (!queueReminder && isStudio) { responsiveVoice.speak(`DJ is going live in less than 15 seconds`); }
                     queueReminder = true;
                     countdownclock.innerHTML = queuelength;
-                    if (!isStudio)
-                    {
+                    if (!isStudio) {
                         $('#dj-alert').css('background-color', '#F44336');
                         setTimeout(() => {
                             $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`);
@@ -2142,14 +2054,12 @@ function processNowPlaying(response)
                 }
 
                 // When a remote broadcast is about to start
-            } else if (Meta.state === 'automation_remote' && queuelength < 60 && typeof response.state === 'undefined')
-            {
+            } else if (Meta.state === 'automation_remote' && queuelength < 60 && typeof response.state === 'undefined') {
                 djAlert.style.display = 'inline';
                 countdown = document.getElementById('countdown');
                 countdowntext = document.getElementById('countdown-text');
                 countdownclock = document.getElementById('countdown-clock');
-                if (!countdown || !countdowntext || !countdownclock)
-                {
+                if (!countdown || !countdowntext || !countdownclock) {
 
                     temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
@@ -2159,19 +2069,15 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = 'Remote Broadcast starting in';
-                    if (!isStudio)
-                        {responsiveVoice.speak(`Attention guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`);}
+                    if (!isStudio) { responsiveVoice.speak(`Attention guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`); }
                 }
-                if (queuelength >= 15)
-                {
+                if (queuelength >= 15) {
                     countdownclock.innerHTML = queuelength;
                 } else {
-                    if (!queueReminder && isStudio)
-                        {responsiveVoice.speak(`Producer is going live in less than 15 seconds`);}
+                    if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is going live in less than 15 seconds`); }
                     queueReminder = true;
                     countdownclock.innerHTML = queuelength;
-                    if (!isStudio)
-                    {
+                    if (!isStudio) {
                         $('#dj-alert').css('background-color', '#9C27B0');
                         setTimeout(() => {
                             $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`);
@@ -2179,14 +2085,12 @@ function processNowPlaying(response)
                     }
                 }
                 // Sports broadcast about to begin
-            } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && typeof response.state === 'undefined')
-            {
+            } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && typeof response.state === 'undefined') {
                 djAlert.style.display = 'inline';
                 countdown = document.getElementById('countdown');
                 countdowntext = document.getElementById('countdown-text');
                 countdownclock = document.getElementById('countdown-clock');
-                if (!countdown || !countdowntext || !countdownclock)
-                {
+                if (!countdown || !countdowntext || !countdownclock) {
 
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
@@ -2195,19 +2099,15 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span><br />about to broadcast in`;
-                    if (!isStudio)
-                        {responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.show}, is about to begin on WWSU radio.`);}
+                    if (!isStudio) { responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.show}, is about to begin on WWSU radio.`); }
                 }
-                if (queuelength >= 15)
-                {
+                if (queuelength >= 15) {
                     countdownclock.innerHTML = queuelength;
                 } else {
-                    if (!queueReminder && isStudio)
-                        {responsiveVoice.speak(`Producer is going live in less than 15 seconds`);}
+                    if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is going live in less than 15 seconds`); }
                     queueReminder = true;
                     countdownclock.innerHTML = queuelength;
-                    if (!isStudio)
-                    {
+                    if (!isStudio) {
                         $('#dj-alert').css('background-color', '#4CAF50');
                         setTimeout(() => {
                             $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`);
@@ -2215,14 +2115,12 @@ function processNowPlaying(response)
                     }
                 }
                 // DJ is returning from a break
-            } else if (Meta.state === 'live_returning' && queuelength < 60 && typeof response.state === 'undefined')
-            {
+            } else if (Meta.state === 'live_returning' && queuelength < 60 && typeof response.state === 'undefined') {
                 djAlert.style.display = 'inline';
                 countdown = document.getElementById('countdown');
                 countdowntext = document.getElementById('countdown-text');
                 countdownclock = document.getElementById('countdown-clock');
-                if (!countdown || !countdowntext || !countdownclock)
-                {
+                if (!countdown || !countdowntext || !countdownclock) {
 
                     temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
@@ -2232,19 +2130,15 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is returning live in`;
-                    if (!isStudio)
-                        {responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);}
+                    if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`); }
                 }
-                if (queuelength >= 15)
-                {
+                if (queuelength >= 15) {
                     countdownclock.innerHTML = queuelength;
                 } else {
-                    if (!queueReminder && isStudio)
-                        {responsiveVoice.speak(`DJ is returning live in less than 15 seconds`);}
+                    if (!queueReminder && isStudio) { responsiveVoice.speak(`DJ is returning live in less than 15 seconds`); }
                     queueReminder = true;
                     countdownclock.innerHTML = queuelength;
-                    if (!isStudio)
-                    {
+                    if (!isStudio) {
                         $('#dj-alert').css('background-color', '#F44336');
                         setTimeout(() => {
                             $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`);
@@ -2252,14 +2146,12 @@ function processNowPlaying(response)
                     }
                 }
                 // Remote broadcast is returning from a break
-            } else if (Meta.state === 'remote_returning' && queuelength < 60 && typeof response.state === 'undefined')
-            {
+            } else if (Meta.state === 'remote_returning' && queuelength < 60 && typeof response.state === 'undefined') {
                 djAlert.style.display = 'inline';
                 countdown = document.getElementById('countdown');
                 countdowntext = document.getElementById('countdown-text');
                 countdownclock = document.getElementById('countdown-clock');
-                if (!countdown || !countdowntext || !countdownclock)
-                {
+                if (!countdown || !countdowntext || !countdownclock) {
 
                     temp = Meta.show.split(' - ');
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
@@ -2269,19 +2161,15 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = 'Returning to remote broadcast in';
-                    if (!isStudio)
-                        {responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`);}
+                    if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`); }
                 }
-                if (queuelength >= 15)
-                {
+                if (queuelength >= 15) {
                     countdownclock.innerHTML = queuelength;
                 } else {
-                    if (!queueReminder && isStudio)
-                        {responsiveVoice.speak(`Producer is returning live in less than 15 seconds`);}
+                    if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is returning live in less than 15 seconds`); }
                     queueReminder = true;
                     countdownclock.innerHTML = queuelength;
-                    if (!isStudio)
-                    {
+                    if (!isStudio) {
                         $('#dj-alert').css('background-color', '#9C27B0');
                         setTimeout(() => {
                             $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`);
@@ -2289,14 +2177,12 @@ function processNowPlaying(response)
                     }
                 }
                 // Returning to a sports broadcast
-            } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && typeof response.state === 'undefined')
-            {
+            } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && typeof response.state === 'undefined') {
                 djAlert.style.display = 'inline';
                 countdown = document.getElementById('countdown');
                 countdowntext = document.getElementById('countdown-text');
                 countdownclock = document.getElementById('countdown-clock');
-                if (!countdown || !countdowntext || !countdownclock)
-                {
+                if (!countdown || !countdowntext || !countdownclock) {
 
                     djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
@@ -2305,19 +2191,15 @@ function processNowPlaying(response)
                     countdowntext = document.getElementById('countdown-text');
                     countdownclock = document.getElementById('countdown-clock');
                     countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span></br>returning in`;
-                    if (!isStudio)
-                        {responsiveVoice.speak(`Raider up! The broadcast of ${Meta.show} is about to resume.`);}
+                    if (!isStudio) { responsiveVoice.speak(`Raider up! The broadcast of ${Meta.show} is about to resume.`); }
                 }
-                if (queuelength >= 15)
-                {
+                if (queuelength >= 15) {
                     countdownclock.innerHTML = queuelength;
                 } else {
-                    if (!queueReminder && isStudio)
-                        {responsiveVoice.speak(`Producer is returning live in less than 15 seconds`);}
+                    if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is returning live in less than 15 seconds`); }
                     queueReminder = true;
                     countdownclock.innerHTML = queuelength;
-                    if (!isStudio)
-                    {
+                    if (!isStudio) {
                         $('#dj-alert').css('background-color', '#4CAF50');
                         setTimeout(() => {
                             $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`);
@@ -2339,8 +2221,7 @@ function processNowPlaying(response)
     }
 }
 
-function nowPlayingTick()
-{
+function nowPlayingTick() {
     Meta.time = moment(Meta.time).add(1, 'seconds');
     processNowPlaying({});
 }
@@ -2374,15 +2255,15 @@ function hexRgb(hex, options = {}) {
         const blue = num & 255;
 
         return options.format === 'array' ?
-                [red, green, blue, alpha] :
-                {red, green, blue, alpha};
+            [red, green, blue, alpha] :
+            { red, green, blue, alpha };
     } catch (e) {
         console.error(e);
         iziToast.show({
             title: 'An error occurred - Please check the logs',
             message: 'Error occurred during hexRgb.'
         });
-}
+    }
 }
 
 // LINT LIES: This function is used.
@@ -2391,14 +2272,10 @@ function processAnnouncements() {
     // Define a comparison function that will order announcements by createdAt
     var compare = function (a, b) {
         try {
-            if (moment(a.createdAt).valueOf() < moment(b.createdAt).valueOf())
-                {return 1;}
-            if (moment(a.createdAt).valueOf() > moment(b.createdAt).valueOf())
-                {return -1;}
-            if (a.ID < b.ID)
-                {return -1;}
-            if (a.ID > b.ID)
-                {return 1;}
+            if (moment(a.createdAt).valueOf() < moment(b.createdAt).valueOf()) { return 1; }
+            if (moment(a.createdAt).valueOf() > moment(b.createdAt).valueOf()) { return -1; }
+            if (a.ID < b.ID) { return -1; }
+            if (a.ID > b.ID) { return 1; }
             return 0;
         } catch (e) {
             console.error(e);
@@ -2413,91 +2290,84 @@ function processAnnouncements() {
     var tempslide = 10;
 
     // Remove all slides with announcements so as to refresh them
-    for (var i = 10; i < 100; i++)
-    {
-        if (typeof slides[i] !== 'undefined')
-            {delete slides[i];}
+    for (var i = 10; i < 100; i++) {
+        if (typeof slides[i] !== 'undefined') { delete slides[i]; }
     }
 
     var anncCount = 0;
-    Announcements({type: 'display-public'}).get().sort(compare)
-            .filter(announcement => moment(Meta.time).isSameOrAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires)))
-            .map(announcement =>
-            {
-                anncCount++;
-                slides[tempslide] = {name: announcement.title, class: announcement.level, do: true, function: function () {
-                        $('#slide').animateCss('slideOutUp', () => {
-                            content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
+    Announcements({ type: 'display-public' }).get().sort(compare)
+        .filter(announcement => moment(Meta.time).isSameOrAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires)))
+        .map(announcement => {
+            anncCount++;
+            slides[tempslide] = {
+                name: announcement.title, class: announcement.level, do: true, function: function () {
+                    $('#slide').animateCss('slideOutUp', () => {
+                        content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
             <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-align: left;" class="container-full p-2 m-1 scale-content ${!isLightTheme ? `text-white` : `text-dark`}" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">${announcement.title}</h1>${announcement.announcement}</div></div>`;
 
-                            var pageWidth; var pageHeight;
+                        var pageWidth; var pageHeight;
 
-                            var basePage = {
-                                width: 1600,
-                                height: 900,
-                                scale: 1,
-                                scaleX: 1,
-                                scaleY: 1
-                            };
+                        var basePage = {
+                            width: 1600,
+                            height: 900,
+                            scale: 1,
+                            scaleX: 1,
+                            scaleY: 1
+                        };
 
-                            $(() => {
-                                var $page = $('.scale-content');
+                        $(() => {
+                            var $page = $('.scale-content');
 
+                            getPageSize();
+                            scalePages($page, pageWidth, pageHeight);
+
+                            window.requestAnimationFrame(() => {
                                 getPageSize();
                                 scalePages($page, pageWidth, pageHeight);
-
-                                window.requestAnimationFrame(() => {
+                                setTimeout(() => {
                                     getPageSize();
                                     scalePages($page, pageWidth, pageHeight);
-                                    setTimeout(() => {
-                                        getPageSize();
-                                        scalePages($page, pageWidth, pageHeight);
-                                    }, 500);
-                                });
-
-                                function getPageSize() {
-                                    pageHeight = $('#scale-wrapper').height();
-                                    pageWidth = $('#scale-wrapper').width();
-                                }
-
-                                function scalePages(page, maxWidth, maxHeight) {
-                                    page.attr('width', `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
-                                    var scaleX = 1; var scaleY = 1;
-                                    scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
-                                    scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
-                                    basePage.scaleX = scaleX;
-                                    basePage.scaleY = scaleY;
-                                    basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
-
-                                    var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
-                                    page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
-                                }
+                                }, 500);
                             });
 
-                        });
-                    }};
+                            function getPageSize() {
+                                pageHeight = $('#scale-wrapper').height();
+                                pageWidth = $('#scale-wrapper').width();
+                            }
 
-                tempslide++;
-            });
+                            function scalePages(page, maxWidth, maxHeight) {
+                                page.attr('width', `${(($('#scaled-content').height() / maxHeight) * 70)}%`);
+                                var scaleX = 1; var scaleY = 1;
+                                scaleX = (maxWidth / $('#scaled-content').width()) * 0.95;
+                                scaleY = (maxHeight / $('#scaled-content').height()) * 0.70;
+                                basePage.scaleX = scaleX;
+                                basePage.scaleY = scaleY;
+                                basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;
+
+                                var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2));
+                                page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;');
+                            }
+                        });
+
+                    });
+                }
+            };
+
+            tempslide++;
+        });
 
     // If there are more than 2 announcement slides, disable the days 2-4 and days 5-7 calendar slides to reduce clutter.
-    if (anncCount > 2)
-    {
-        if (typeof slides[5] !== 'undefined')
-            {slides[5].do = false;}
-        if (typeof slides[6] !== 'undefined')
-            {slides[6].do = false;}
+    if (anncCount > 2) {
+        if (typeof slides[5] !== 'undefined') { slides[5].do = false; }
+        if (typeof slides[6] !== 'undefined') { slides[6].do = false; }
     } else {
-        if (typeof slides[5] !== 'undefined')
-            {slides[5].do = true;}
-        if (typeof slides[6] !== 'undefined')
-            {slides[6].do = true;}
+        if (typeof slides[5] !== 'undefined') { slides[5].do = true; }
+        if (typeof slides[6] !== 'undefined') { slides[6].do = true; }
     }
 }
 
 function createAnnouncement(data) {
-    if (data.type.startsWith(`display-public`))
-    {
+    if (data.type.startsWith(`display-public`)) {
         Slides.newSlide({
             name: `attn-${data.ID}`,
             label: data.title,
@@ -2532,4 +2402,66 @@ function checkSlideCounts() {
      Slides.slide(`events-5-7`).active = true;
      }
      */
+}
+
+function processDarksky(db) {
+    // Run data manipulation process
+    try {
+        db.each((item) => {
+            try {
+                var temp;
+
+                temp = document.querySelector(`#weather-current-icon`);
+                temp.classList = `card-img-top fas ${getConditionIcon(item.currently.icon)} text-white`;
+
+                temp = document.querySelector(`#weather-current-temperature`);
+                temp.innerHTML = `${item.currently.temperature}°F`;
+
+                temp = document.querySelector(`#weather-current-summary`);
+                temp.innerHTML = item.currently.summary;
+
+            } catch (e) {
+                console.error(e);
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: `Error occurred during Directors iteration in processDarksky.`
+                });
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        iziToast.show({
+            title: 'An error occurred - Please check the logs',
+            message: 'Error occurred during the call of processDirectors.'
+        });
+    }
+}
+
+function getConditionIcon(condition) {
+    switch (condition) {
+        case 'clear-day':
+            return 'fa-sun';
+        case 'clear-night':
+            return 'fa-moon';
+        case 'rain':
+            return 'fa-cloud-showers-heavy';
+        case 'snow':
+            return 'fa-snowflake';
+        case 'sleet':
+            return 'fa-cloud-meatball';
+        case 'wind':
+            return 'fa-wind';
+        case 'fog':
+            return 'fa-smog';
+        case 'cloudy':
+            return 'fa-cloud';
+        case 'partly-cloudy-day':
+            return 'fa-cloud-sun';
+        case 'partly-cloudy-night':
+            return 'fa-cloud-moon';
+        case 'thunderstorm':
+            return 'fa-bolt';
+        default:
+            return 'fa-rainbow';
+    }
 }

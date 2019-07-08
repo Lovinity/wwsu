@@ -13,7 +13,7 @@ module.exports = {
 
         try {
             // Get records
-            var records = await Darksky.findOne({ID: 1});
+            var records = await Darksky.find();
             sails.log.verbose(`Retrieved Darksky records: ${records.length}`);
 
             // Subscribe to sockets, if applicable
