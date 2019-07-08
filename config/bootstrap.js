@@ -14,6 +14,7 @@ module.exports.bootstrap = async function (done) {
     var sh = require('shorthash');
     const queryString = require('query-string');
     const DarkSkyApi = require('dark-sky-api');
+    DarkSkyApi.apiKey = sails.config.custom.darksky.api;
 
     // By convention, this is a good place to set up fake data during development.
     //
