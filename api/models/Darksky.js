@@ -8,7 +8,8 @@ module.exports = {
     datastore: 'disk',
     attributes: {
         ID: {
-            type: 'number'
+            type: 'number',
+            required: true
         },
 
         currently: {
