@@ -13,8 +13,8 @@ module.exports.bootstrap = async function (done) {
     var cron = require('node-cron');
     var sh = require('shorthash');
     const queryString = require('query-string');
-    const DarkSkyApi = require('dark-sky-api');
-    DarkSkyApi.apiKey = sails.config.custom.darksky.api;
+    const DarkSkyApi = require('dark-sky');
+    const darksky = new DarkSkyApi(sails.config.custom.darksky.api);
 
     // By convention, this is a good place to set up fake data during development.
     //
@@ -54,7 +54,7 @@ module.exports.bootstrap = async function (done) {
     sails.config.custom.secrets.adminDirectorUab = cryptoRandomString(256);
 
     // Load darksky
-    await Darksky.findOrCreate({ID: 1}, {ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {}});
+    await Darksky.findOrCreate({ ID: 1 }, { ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {} });
 
     // Load blank Meta template
     sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);
@@ -283,8 +283,7 @@ module.exports.bootstrap = async function (done) {
                                 // Also, calculate length of the queue
                                 if (theTracks.indexOf(title) > -1) {
                                     sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`);
-                                    if (track.TrackType !== 'Music')
-                                        {Songs.pending.push(track.ID);}
+                                    if (track.TrackType !== 'Music') { Songs.pending.push(track.ID); }
                                     await sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1);
                                     theTracks = [];
                                     queue = await sails.helpers.rest.getQueue();
@@ -331,15 +330,13 @@ module.exports.bootstrap = async function (done) {
                     } else {
                         //Statemeta.final.queueLength = (Statesystem.errors.prevqueuelength - 1);
                     }
-                    if (queueLength < 0)
-                        {queueLength = 0;}
+                    if (queueLength < 0) { queueLength = 0; }
                 } else { // No error wait time [remaining]? Use actual detected queue time.
                 }
             } else {
                 Status.errorCheck.trueZero = 5; // Wait up to 5 seconds before considering the queue accurate
                 // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
-                if (queueLength < 0)
-                    {queueLength = 0;}
+                if (queueLength < 0) { queueLength = 0; }
             }
 
             Status.errorCheck.prevQueueLength = queueLength;
@@ -523,16 +520,14 @@ module.exports.bootstrap = async function (done) {
                         switch (Meta['A'].state) {
                             case 'live_returning':
                                 await Meta.changeMeta({ state: 'live_on' });
-                                if (!change.queueMusic)
-                                    {await sails.helpers.rest.cmd('EnableAssisted', 1);}
+                                if (!change.queueMusic) { await sails.helpers.rest.cmd('EnableAssisted', 1); }
                                 break;
                             case 'remote_returning':
                                 await Meta.changeMeta({ state: 'remote_on' });
                                 break;
                             case 'sports_returning':
                                 await Meta.changeMeta({ state: 'sports_on' });
-                                if (!change.queueMusic)
-                                    {await sails.helpers.rest.cmd('EnableAssisted', 1);}
+                                if (!change.queueMusic) { await sails.helpers.rest.cmd('EnableAssisted', 1); }
                                 break;
                             case 'sportsremote_returning':
                                 await Meta.changeMeta({ state: 'sportsremote_on' });
@@ -564,8 +559,7 @@ module.exports.bootstrap = async function (done) {
                     }
 
                     // Counter to ensure automation break is not running for too long
-                    if (Meta['A'].state === 'automation_break')
-                        {await sails.helpers.error.count('automationBreak');}
+                    if (Meta['A'].state === 'automation_break') { await sails.helpers.error.count('automationBreak'); }
 
                     // Check if a DJ neglected the required top of the hour break (passes :05 after)
                     var d = new Date();
@@ -619,8 +613,7 @@ module.exports.bootstrap = async function (done) {
                                 var distanceafter;
 
                                 // If the current time is before scheduled break, but the currently playing track will finish after scheduled break, consider queuing the break.
-                                if ((moment().isBefore(moment(breakTime)) && moment(endTime).isAfter(moment(breakTime))) || (moment().isBefore(moment(breakTime2)) && moment(endTime).isAfter(moment(breakTime2))))
-                                    {doBreak = true;}
+                                if ((moment().isBefore(moment(breakTime)) && moment(endTime).isAfter(moment(breakTime))) || (moment().isBefore(moment(breakTime2)) && moment(endTime).isAfter(moment(breakTime2)))) { doBreak = true; }
 
                                 // If the currently playing track will not end after the scheduled break,
                                 // but the following track will end further after the scheduled break than the current track would,
@@ -630,35 +623,28 @@ module.exports.bootstrap = async function (done) {
                                         distancebefore = moment(breakTime).diff(moment(endTime));
                                         endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
                                         distanceafter = endtime2.diff(breakTime);
-                                        if (moment(endtime2).isAfter(moment(breakTime)) && distanceafter > distancebefore)
-                                            {doBreak = true;}
+                                        if (moment(endtime2).isAfter(moment(breakTime)) && distanceafter > distancebefore) { doBreak = true; }
                                     } else {
                                         distancebefore = moment(breakTime2).diff(moment(endTime));
                                         endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
                                         distanceafter = endtime2.diff(breakTime2);
-                                        if (moment(endtime2).isAfter(moment(breakTime2)) && distanceafter > distancebefore)
-                                            {doBreak = true;}
+                                        if (moment(endtime2).isAfter(moment(breakTime2)) && distanceafter > distancebefore) { doBreak = true; }
                                     }
                                 }
 
                                 // Do not queue if we are not in automation, playlist, genre, or prerecord states
-                                if (Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'live_prerecord')
-                                    {doBreak = false;}
+                                if (Meta['A'].state !== 'automation_on' && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre' && Meta['A'].state !== 'live_prerecord') { doBreak = false; }
 
                                 // Do not queue if we queued a break less than the configured failsafe time, and this isn't the 0 break
-                                if (key !== 0 && Status.errorCheck.prevBreak !== null && moment(Status.errorCheck.prevBreak).isAfter(moment().subtract(sails.config.custom.breakCheck, 'minutes')))
-                                    {doBreak = false;}
+                                if (key !== 0 && Status.errorCheck.prevBreak !== null && moment(Status.errorCheck.prevBreak).isAfter(moment().subtract(sails.config.custom.breakCheck, 'minutes'))) { doBreak = false; }
 
                                 // The 0 break has its own hard coded failsafe of 10 minutes, separate from other breaks, since it's a FCC required break
-                                if (key === 0 && Status.errorCheck.prevID !== null && moment(Status.errorCheck.prevID).isAfter(moment().subtract(10, 'minutes')))
-                                    {doBreak = false;}
+                                if (key === 0 && Status.errorCheck.prevID !== null && moment(Status.errorCheck.prevID).isAfter(moment().subtract(10, 'minutes'))) { doBreak = false; }
 
                                 // Do not queue anything yet if the current track has breakCheck minutes or more left (resolves a discrepancy with the previous logic)
-                                if (key !== 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * sails.config.custom.breakCheck))
-                                    {doBreak = false;}
+                                if (key !== 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * sails.config.custom.breakCheck)) { doBreak = false; }
 
-                                if (key === 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * 10))
-                                    {doBreak = false;}
+                                if (key === 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * 10)) { doBreak = false; }
 
                                 // Do the break if we are supposed to
                                 if (doBreak) {
@@ -923,12 +909,12 @@ module.exports.bootstrap = async function (done) {
                                             if (resp.body.name === 'ArrayOfSongData') {
                                                 resp.body.children.map(trackA => {
                                                     var theTrack = {};
-                                                    trackA.children.map(track => {theTrack[track.name] = track.value;});
+                                                    trackA.children.map(track => { theTrack[track.name] = track.value; });
                                                     automation.push(theTrack);
                                                 });
                                             } else {
                                                 var theTrack = {};
-                                                resp.body.children.map(track => {theTrack[track.name] = track.value;});
+                                                resp.body.children.map(track => { theTrack[track.name] = track.value; });
                                                 automation.push(theTrack);
                                             }
 
@@ -947,19 +933,16 @@ module.exports.bootstrap = async function (done) {
                                             }
                                         }
                                     } else {
-                                        if (status && status.status !== 1)
-                                            {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level }]);}
+                                        if (status && status.status !== 1) { Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data.', status: radiodj.level }]); }
                                     }
                                     return resolve2(false);
                                 })
                                 .catch(() => {
-                                    if (status && status.status !== 1)
-                                        {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level }]);}
+                                    if (status && status.status !== 1) { Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level }]); }
                                     return resolve2(false);
                                 });
                         } catch (unusedE) {
-                            if (status && status.status !== 1)
-                                {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding.', status: radiodj.level }]);}
+                            if (status && status.status !== 1) { Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding.', status: radiodj.level }]); }
                             return resolve2(false);
                         }
                     });
@@ -1073,8 +1056,7 @@ module.exports.bootstrap = async function (done) {
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
                             if (typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') {
-                                if (checkStatus.status > 3)
-                                    {checkStatus.status = 3;}
+                                if (checkStatus.status > 3) { checkStatus.status = 3; }
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
@@ -1085,8 +1067,7 @@ module.exports.bootstrap = async function (done) {
                         }
                     });
                 });
-                if (checkStatus.status === 5)
-                    {checkStatus.data = `This datastore is fully operational.`;}
+                if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.`; }
                 Status.changeStatus([{ name: 'db-memory', label: 'DB Memory', data: checkStatus.data, status: checkStatus.status }]);
 
                 // RadioDJ checks
@@ -1102,8 +1083,7 @@ module.exports.bootstrap = async function (done) {
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
                             if (typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') {
-                                if (checkStatus.status > 3)
-                                    {checkStatus.status = 3;}
+                                if (checkStatus.status > 3) { checkStatus.status = 3; }
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
@@ -1114,8 +1094,7 @@ module.exports.bootstrap = async function (done) {
                         }
                     });
                 });
-                if (checkStatus.status === 5)
-                    {checkStatus.data = `This datastore is fully operational.`;}
+                if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.`; }
                 Status.changeStatus([{ name: 'db-radiodj', label: 'DB RadioDJ', data: checkStatus.data, status: checkStatus.status }]);
 
                 // Nodebase checks
@@ -1131,8 +1110,7 @@ module.exports.bootstrap = async function (done) {
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
                             if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') && index > 6) {
-                                if (checkStatus.status > 3)
-                                    {checkStatus.status = 3;}
+                                if (checkStatus.status > 3) { checkStatus.status = 3; }
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
@@ -1143,8 +1121,7 @@ module.exports.bootstrap = async function (done) {
                         }
                     });
                 });
-                if (checkStatus.status === 5)
-                    {checkStatus.data = `This datastore is fully operational.`;}
+                if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.`; }
                 Status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status }]);
 
                 // Disk checks
@@ -1160,8 +1137,7 @@ module.exports.bootstrap = async function (done) {
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
                             if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined')) {
-                                if (checkStatus.status > 3)
-                                    {checkStatus.status = 3;}
+                                if (checkStatus.status > 3) { checkStatus.status = 3; }
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
@@ -1172,8 +1148,7 @@ module.exports.bootstrap = async function (done) {
                         }
                     });
                 });
-                if (checkStatus.status === 5)
-                    {checkStatus.data = `This datastore is fully operational.`;}
+                if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.`; }
                 Status.changeStatus([{ name: 'db-disk', label: 'DB Disk', data: checkStatus.data, status: checkStatus.status }]);
 
                 return true;
@@ -1245,11 +1220,9 @@ module.exports.bootstrap = async function (done) {
                 var destroyIt = [];
                 var searchto = moment().subtract(4, 'hours');
                 records.forEach((record) => {
-                    if (moment(record.time).isBefore(moment(searchto)))
-                        {destroyIt.push(record.ID);}
+                    if (moment(record.time).isBefore(moment(searchto))) { destroyIt.push(record.ID); }
                 });
-                if (destroyIt.length > 0)
-                    {await Recipients.destroy({ ID: destroyIt }).fetch();}
+                if (destroyIt.length > 0) { await Recipients.destroy({ ID: destroyIt }).fetch(); }
 
                 return resolve();
             } catch (e) {
@@ -1259,28 +1232,32 @@ module.exports.bootstrap = async function (done) {
         });
     });
 
-        // Every fifth minute at second 11, refresh Darksky weather information
-        sails.log.verbose(`BOOTSTRAP: scheduling darksky CRON.`);
-        cron.schedule('11 */5 * * * *', () => {
-            new Promise(async (resolve, reject) => {
-                sails.log.debug(`CRON darksky called.`);
-                try {
-                    DarkSkyApi.loadItAll('alerts', sails.config.custom.darksky.position)
-                        .then(async (resp) => {
-                            sails.log.debug(JSON.stringify(resp));
-                            await Darksky.update({ID: 1}, {currently: resp.currently, minutely: resp.minutely, hourly: resp.hourly, daily: resp.daily}).fetch();
-                        })
-                        .catch((err) => {
-                            sails.log.error(err);
-                            reject(err);
-                        });
-                    return resolve();
-                } catch (e) {
-                    sails.log.error(e);
-                    return reject(e);
-                }
-            });
+    // Every fifth minute at second 11, refresh Darksky weather information
+    sails.log.verbose(`BOOTSTRAP: scheduling darksky CRON.`);
+    cron.schedule('11 */5 * * * *', () => {
+        new Promise(async (resolve, reject) => {
+            sails.log.debug(`CRON darksky called.`);
+            try {
+                darksky
+                    .latitude(sails.config.custom.darksky.position.latitude)
+                    .longitude(sails.config.custom.darksky.position.longitude)
+                    .exclude('alerts')
+                    .get()
+                    .then(async (resp) => {
+                        sails.log.debug(JSON.stringify(resp));
+                        await Darksky.update({ ID: 1 }, { currently: resp.currently, minutely: resp.minutely, hourly: resp.hourly, daily: resp.daily }).fetch();
+                    })
+                    .catch(err => {
+                        sails.log.error(err);
+                        reject(err);
+                    });
+                return resolve();
+            } catch (e) {
+                sails.log.error(e);
+                return reject(e);
+            }
         });
+    });
 
     // every hour at second 12, check all noFade tracks and remove any fading.
     sails.log.verbose(`BOOTSTRAP: scheduling checkNoFade CRON.`);
@@ -1292,27 +1269,26 @@ module.exports.bootstrap = async function (done) {
                 var records = await Songs.find();
                 if (records && records.length > 0) {
                     records
-                    .filter((record) => sails.config.custom.subcats.noFade.indexOf(record.id_subcat) !== -1)
-                    .map((record) => {
-                        var cueData = queryString.parse(record.cue_times);
-                        // If fade in and fade out are both 0 (treat when fade in or fade out is not specified as being 0), skip this track; nothing to do.
-                        if ((!cueData.fin || cueData.fin === 0) && (!cueData.fou || cueData.fou === 0))
-                            {return null;}
+                        .filter((record) => sails.config.custom.subcats.noFade.indexOf(record.id_subcat) !== -1)
+                        .map((record) => {
+                            var cueData = queryString.parse(record.cue_times);
+                            // If fade in and fade out are both 0 (treat when fade in or fade out is not specified as being 0), skip this track; nothing to do.
+                            if ((!cueData.fin || cueData.fin === 0) && (!cueData.fou || cueData.fou === 0)) { return null; }
 
-                        // Get rid of any fading, and reset the xta cue point
-                        cueData.fin = 0;
-                        cueData.fou = 0;
-                        cueData.xta = cueData.end || record.duration;
+                            // Get rid of any fading, and reset the xta cue point
+                            cueData.fin = 0;
+                            cueData.fou = 0;
+                            cueData.xta = cueData.end || record.duration;
 
-                        cueData = `&${queryString.stringify(cueData)}`;
+                            cueData = `&${queryString.stringify(cueData)}`;
 
-                        // Update the track with the new cue points
-                        (async(record2, cueData2) => {
-                            // LINT: RadioDJ table
-                            // eslint-disable-next-line camelcase
-                            await Songs.update({ID: record2.ID}, {cue_times: cueData2});
-                        })(record, cueData);
-                    });
+                            // Update the track with the new cue points
+                            (async (record2, cueData2) => {
+                                // LINT: RadioDJ table
+                                // eslint-disable-next-line camelcase
+                                await Songs.update({ ID: record2.ID }, { cue_times: cueData2 });
+                            })(record, cueData);
+                        });
                 }
                 return resolve();
             } catch (e) {
@@ -1388,8 +1364,7 @@ module.exports.bootstrap = async function (done) {
                 // First, get the value of default priority
                 var defaultPriority = await Settings.find({ source: 'settings_general', setting: 'DefaultTrackPriority' }).limit(1);
 
-                if (typeof defaultPriority[0] === 'undefined' || defaultPriority === null || defaultPriority[0] === null)
-                    {throw new Error('Could not find DefaultTrackPriority setting in the RadioDJ database');}
+                if (typeof defaultPriority[0] === 'undefined' || defaultPriority === null || defaultPriority[0] === null) { throw new Error('Could not find DefaultTrackPriority setting in the RadioDJ database'); }
 
                 var songs = await Songs.find();
 
@@ -1401,8 +1376,7 @@ module.exports.bootstrap = async function (done) {
                             var minPriority = song.rating === 0 ? 0 : (defaultPriority[0] * (song.rating / 9));
                             minPriority = Math.round(minPriority * 10) / 10;
 
-                            if (song.weight < minPriority)
-                                {await Songs.update({ ID: song.ID }, { weight: minPriority });}
+                            if (song.weight < minPriority) { await Songs.update({ ID: song.ID }, { weight: minPriority }); }
 
                             return resolve2(false);
 
