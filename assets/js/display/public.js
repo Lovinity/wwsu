@@ -2519,7 +2519,7 @@ function processDarksky(db) {
                 temp = document.querySelector(`#weather-1-temperature-low`);
                 temp.innerHTML = `${temp2.temperatureLow}°F`;
                 temp = document.querySelector(`#weather-1-precip`);
-                temp.innerHTML = `${temp2.precipProbability || 0}`;
+                temp.innerHTML = `${temp2.precipProbability * 100 || 0}`;
                 temp = document.querySelector(`#weather-1-precipType`);
                 temp.innerHTML = `${temp2.precipType || `precipitation`}`;
 
@@ -2536,7 +2536,7 @@ function processDarksky(db) {
                 temp = document.querySelector(`#weather-2-temperature-low`);
                 temp.innerHTML = `${temp2.temperatureLow}°F`;
                 temp = document.querySelector(`#weather-2-precip`);
-                temp.innerHTML = `${temp2.precipProbability || 0}`;
+                temp.innerHTML = `${temp2.precipProbability * 100 || 0}`;
                 temp = document.querySelector(`#weather-2-precipType`);
                 temp.innerHTML = `${temp2.precipType || `precipitation`}`;
 
