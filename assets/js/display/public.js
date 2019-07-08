@@ -359,10 +359,12 @@ try {
               <div class="row shadow-4 bg-dark-2">
                 <div class="col-4">
                 <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-current-icon"></i>
+                    <div class="card-img-top text-white" style="text-align: center;">
+                        <i style="font-size: 64px;" class="fas fa-sun" id="weather-current-icon"></i>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title" id="weather-current-temperature">0</h5>
-                        <p class="card-text" id="weather-current-summary"></p>
+                        <h5 class="card-title text-white" id="weather-current-temperature">0</h5>
+                        <p class="card-text text-white" id="weather-current-summary"></p>
                     </div>
                 </div>
             </div>
@@ -373,7 +375,7 @@ try {
             <div class="row shadow-4 bg-dark-3">
                 <div class="col-4">
                 <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-1-icon"></i>
+                    <i style="font-size: 64px;" class="card-img-top fas fa-sun text-white" id="weather-1-icon"></i>
                     <div class="card-body">
                         <h5 class="card-title" id="weather-1-summary">Clear</h5>
                     </div>
@@ -382,7 +384,7 @@ try {
 
             <div class="col-4">
                 <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-2-icon"></i>
+                    <i style="font-size: 64px;" class="card-img-top fas fa-sun text-white" id="weather-2-icon"></i>
                     <div class="card-body">
                         <h5 class="card-title" id="weather-2-summary">Clear</h5>
                     </div>
@@ -391,7 +393,7 @@ try {
 
             <div class="col-4">
                 <div class="card bg-dark-1 shadow-4" style="width: 90%;">
-                    <i style="font-size: 96px;" class="card-img-top fas fa-sun text-white" id="weather-3-icon"></i>
+                    <i style="font-size: 64px;" class="card-img-top fas fa-sun text-white" id="weather-3-icon"></i>
                     <div class="card-body">
                         <h5 class="card-title" id="weather-3-summary">Clear</h5>
                     </div>
@@ -2412,7 +2414,7 @@ function processDarksky(db) {
                 var temp;
 
                 temp = document.querySelector(`#weather-current-icon`);
-                temp.classList = `card-img-top fas ${getConditionIcon(item.currently.icon)} text-white`;
+                temp.classList = `fas ${getConditionIcon(item.currently.icon)}`;
 
                 temp = document.querySelector(`#weather-current-temperature`);
                 temp.innerHTML = `${item.currently.temperature}°F`;
