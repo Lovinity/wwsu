@@ -1,5 +1,3 @@
-/* global sails, Meta, _, Status, Recipients, Category, Logs, Subcategory, Tasks, Directors, Calendar, Messages, moment, Playlists, Playlists_list, Songs, Requests, Attendance, Xp, needle, Listeners, History, Events, Settings, Genre, Hosts, Nodeusers, Hosts, Discipline, Timesheet, Eas, Announcements, Promise, Uabdirectors, Uabtimesheet, Subscribers, Djs, Sports, Songsliked, Planner */
-
 /**
  * Bootstrap
  * (sails.config.bootstrap)
@@ -15,6 +13,7 @@ module.exports.bootstrap = async function (done) {
     var cron = require('node-cron');
     var sh = require('shorthash');
     const queryString = require('query-string');
+    const DarkSkyApi = require('dark-sky-api');
 
     // By convention, this is a good place to set up fake data during development.
     //
@@ -52,6 +51,9 @@ module.exports.bootstrap = async function (done) {
     sails.config.custom.secrets.adminDirector = cryptoRandomString(256);
     sails.config.custom.secrets.directorUab = cryptoRandomString(256);
     sails.config.custom.secrets.adminDirectorUab = cryptoRandomString(256);
+
+    // Load darksky
+    await Darksky.findOrCreate({ID: 1}, {ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {}});
 
     // Load blank Meta template
     sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`);
@@ -104,7 +106,7 @@ module.exports.bootstrap = async function (done) {
     // Generate recipients based off of messages from the last hour... website only.
     sails.log.verbose(`BOOTSTRAP: Adding recipients from messages sent within the last hour into database.`);
     var records = await Messages.find({ status: 'active', from: { 'startsWith': 'website-' }, createdAt: { '>': moment().subtract(1, 'hours').toDate() } }).sort('createdAt DESC')
-        .tolerate((err) => {
+        .tolerate(() => {
         });
     if (records && records.length > 0) {
         var insertRecords = [];
@@ -138,8 +140,10 @@ module.exports.bootstrap = async function (done) {
         await Meta.changeMeta(meta);
         if (meta.playlist !== null && meta.playlist !== '') {
             var theplaylist = await Playlists.findOne({ name: meta.playlist });
+            // LINT: RadioDJ table; is not camel cased
+            // eslint-disable-next-line camelcase
             var playlistTracks = await Playlists_list.find({ pID: theplaylist.ID })
-                .tolerate((err) => {
+                .tolerate(() => {
                 });
             Playlists.active.tracks = [];
             if (typeof playlistTracks !== 'undefined') {
@@ -148,7 +152,7 @@ module.exports.bootstrap = async function (done) {
                 });
             }
         }
-    } catch (e) {
+    } catch (unusedE) {
     }
 
     // Load directors.
@@ -162,7 +166,7 @@ module.exports.bootstrap = async function (done) {
     try {
         await Calendar.preLoadEvents(true);
         await Meta.changeMeta({ changingState: null });
-    } catch (e) {
+    } catch (unusedE) {
         await Meta.changeMeta({ changingState: null });
     }
 
@@ -173,10 +177,12 @@ module.exports.bootstrap = async function (done) {
     // Automation / queue checks every second
     sails.log.verbose(`BOOTSTRAP: scheduling checks CRON.`);
     cron.schedule('* * * * * *', () => {
-        new Promise(async (resolve, reject) => {
+        new Promise(async (resolve) => {
             sails.log.debug(`CRON checks triggered.`);
 
             var queueLength = 0;
+            var theplaylist;
+            var playlistTracks;
             var change = { queueFinish: null, trackFinish: null }; // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
             //
             // Skip all checks and use default meta template if sails.config.custom.lofi = true
@@ -206,9 +212,11 @@ module.exports.bootstrap = async function (done) {
                     sails.log.silly(meta);
                     await Meta.changeMeta(meta);
                     if (meta.playlist !== null && meta.playlist !== '') {
-                        var theplaylist = await Playlists.findOne({ name: meta.playlist });
-                        var playlistTracks = await Playlists_list.find({ pID: theplaylist.ID })
-                            .tolerate((err) => {
+                        theplaylist = await Playlists.findOne({ name: meta.playlist });
+                        // LINT: RadioDJ table that is not camel case
+                        // eslint-disable-next-line camelcase
+                        playlistTracks = await Playlists_list.find({ pID: theplaylist.ID })
+                            .tolerate(() => {
                             });
                         Playlists.active.tracks = [];
                         if (typeof playlistTracks !== 'undefined') {
@@ -268,7 +276,7 @@ module.exports.bootstrap = async function (done) {
                     if (Meta['A'].changingState === null) {
                         sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`);
                         await sails.helpers.asyncForEach(queue, (track, index) => {
-                            return new Promise(async (resolve2, reject2) => {
+                            return new Promise(async (resolve2) => {
                                 var title = `${track.Artist} - ${track.Title}`;
                                 // If there is a duplicate, remove the track, store for later queuing if necessary.
                                 // Also, calculate length of the queue
@@ -338,12 +346,14 @@ module.exports.bootstrap = async function (done) {
             // If we do not know active playlist, we need to populate the info
             if (Meta['A'].playlist !== null && Meta['A'].playlist !== '' && Playlists.active.tracks.length <= 0 && (Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'live_prerecord')) {
                 try {
-                    var theplaylist = await Playlists.findOne({ name: Meta['A'].playlist })
-                        .tolerate((err) => {
+                    theplaylist = await Playlists.findOne({ name: Meta['A'].playlist })
+                        .tolerate(() => {
                         });
                     if (typeof theplaylist !== 'undefined') {
-                        var playlistTracks = await Playlists_list.find({ pID: Playlists.active.ID })
-                            .tolerate((err) => {
+                        // LINT: RadioDJ table
+                        // eslint-disable-next-line camelcase
+                        playlistTracks = await Playlists_list.find({ pID: Playlists.active.ID })
+                            .tolerate(() => {
                             });
                         Playlists.active.tracks = [];
                         if (typeof playlistTracks !== 'undefined') {
@@ -378,13 +388,11 @@ module.exports.bootstrap = async function (done) {
 
             // Playlist maintenance
             var thePosition = -1;
-            var playlistTrackPlaying = false;
-            var timeToFirstTrack = 0;
             if ((Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_prerecord' || Meta['A'].state === 'live_prerecord')) {
                 // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
                 sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`);
                 await sails.helpers.asyncForEach(queue, (autoTrack, index) => {
-                    return new Promise(async (resolve2, reject2) => {
+                    return new Promise(async (resolve2) => {
                         try {
                             for (var i = 0; i < Playlists.active.tracks.length; i++) {
                                 var name = Playlists.active.tracks[i];
@@ -402,9 +410,7 @@ module.exports.bootstrap = async function (done) {
                                         await sails.helpers.onesignal.sendEvent(`Prerecord: `, Meta['A'].playlist, `Prerecorded Show`, attendance.unique);
                                     }
                                     if (index === 0) {
-                                        playlistTrackPlaying = true;
                                     } else {
-                                        timeToFirstTrack += (parseInt(autoTrack.Duration) - parseInt(autoTrack.Elapsed));
                                     }
                                     if (thePosition === -1 || i < thePosition) {
                                         thePosition = i;
@@ -463,12 +469,13 @@ module.exports.bootstrap = async function (done) {
             }
 
             try {
+                var attendance;
                 if (queue.length > 0) {
                     // If we are preparing for live, so some stuff if queue is done
                     if (Meta['A'].state === 'automation_live' && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
                         await Meta.changeMeta({ state: 'live_on', showStamp: moment().toISOString(true) });
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        var attendance = await Attendance.createRecord(`Show: ${Meta['A'].show}`);
+                        attendance = await Attendance.createRecord(`Show: ${Meta['A'].show}`);
                         await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>DJ is now live.</strong><br />DJ - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic }).fetch()
                             .tolerate((err) => {
                                 // Do not throw for errors, but log it.
@@ -480,7 +487,7 @@ module.exports.bootstrap = async function (done) {
                     if (Meta['A'].state === 'automation_sports' && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
                         await Meta.changeMeta({ state: 'sports_on', showStamp: moment().toISOString(true) });
                         await sails.helpers.rest.cmd('EnableAssisted', 1);
-                        var attendance = await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
+                        attendance = await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
                         await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic }).fetch()
                             .tolerate((err) => {
                                 // Do not throw for errors, but log it.
@@ -491,7 +498,7 @@ module.exports.bootstrap = async function (done) {
                     // If we are preparing for remote, do some stuff
                     if (Meta['A'].state === 'automation_remote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
                         await Meta.changeMeta({ state: 'remote_on', showStamp: moment().toISOString(true) });
-                        var attendance = await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
+                        attendance = await Attendance.createRecord(`Remote: ${Meta['A'].show}`);
                         await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>A remote broadcast is now on the air.</strong><br />Host - Show: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic }).fetch()
                             .tolerate((err) => {
                                 // Do not throw for errors, but log it.
@@ -502,7 +509,7 @@ module.exports.bootstrap = async function (done) {
                     // If we are preparing for sportsremote, do some stuff if we are playing the stream track
                     if (Meta['A'].state === 'automation_sportsremote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
                         await Meta.changeMeta({ state: 'sportsremote_on', showStamp: moment().toISOString(true) });
-                        var attendance = await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
+                        attendance = await Attendance.createRecord(`Sports: ${Meta['A'].show}`);
                         await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + Meta['A'].show + '<br />Topic: ' + Meta['A'].topic }).fetch()
                             .tolerate((err) => {
                                 // Do not throw for errors, but log it.
@@ -606,6 +613,9 @@ module.exports.bootstrap = async function (done) {
                                 var endTime = moment().add((queue[0].Duration - queue[0].Elapsed), 'seconds');
 
                                 var doBreak = false;
+                                var distancebefore;
+                                var endtime2;
+                                var distanceafter;
 
                                 // If the current time is before scheduled break, but the currently playing track will finish after scheduled break, consider queuing the break.
                                 if ((moment().isBefore(moment(breakTime)) && moment(endTime).isAfter(moment(breakTime))) || (moment().isBefore(moment(breakTime2)) && moment(endTime).isAfter(moment(breakTime2))))
@@ -616,15 +626,15 @@ module.exports.bootstrap = async function (done) {
                                 // queue the break early.
                                 if (typeof queue[1] !== 'undefined' && typeof queue[1].Duration !== 'undefined') {
                                     if (moment().isBefore(moment(breakTime))) {
-                                        var distancebefore = moment(breakTime).diff(moment(endTime));
-                                        var endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
-                                        var distanceafter = endtime2.diff(breakTime);
+                                        distancebefore = moment(breakTime).diff(moment(endTime));
+                                        endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
+                                        distanceafter = endtime2.diff(breakTime);
                                         if (moment(endtime2).isAfter(moment(breakTime)) && distanceafter > distancebefore)
                                             {doBreak = true;}
                                     } else {
-                                        var distancebefore = moment(breakTime2).diff(moment(endTime));
-                                        var endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
-                                        var distanceafter = endtime2.diff(breakTime2);
+                                        distancebefore = moment(breakTime2).diff(moment(endTime));
+                                        endtime2 = moment(endTime).add(queue[1].Duration, 'seconds');
+                                        distanceafter = endtime2.diff(breakTime2);
                                         if (moment(endtime2).isAfter(moment(breakTime2)) && distanceafter > distancebefore)
                                             {doBreak = true;}
                                     }
@@ -747,19 +757,16 @@ module.exports.bootstrap = async function (done) {
                 .then(async (resp) => {
                     try {
                         var streams = resp.body.streams;
-                        var publicStream = false;
-                        var remoteStream = false;
 
                         // Check public stream
                         if (typeof streams !== 'undefined' && typeof streams[0] !== 'undefined' && typeof streams[0].streamstatus !== 'undefined' && streams[0].streamstatus !== 0) {
                             // Mark stream as good
                             Status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5 }]);
-                            publicStream = true;
 
                             // Log listeners if there are any changes
                             if (Meta['A'].dj !== Listeners.memory.dj || streams[0].uniquelisteners !== Listeners.memory.listeners) {
                                 await Listeners.create({ dj: Meta['A'].dj, listeners: streams[0].uniquelisteners })
-                                    .tolerate((err) => {
+                                    .tolerate(() => {
                                     });
                             }
                             Listeners.memory = { dj: Meta['A'].dj, listeners: streams[0].uniquelisteners };
@@ -883,7 +890,7 @@ module.exports.bootstrap = async function (done) {
             try {
                 sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`);
                 await sails.helpers.asyncForEach(sails.config.custom.radiodjs, (radiodj) => {
-                    return new Promise(async (resolve2, reject2) => {
+                    return new Promise(async (resolve2) => {
                         var status = await Status.findOne({ name: `radiodj-${radiodj.name}` });
                         try {
                             needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, { headers: { 'Content-Type': 'application/json' } })
@@ -915,23 +922,25 @@ module.exports.bootstrap = async function (done) {
                                             if (resp.body.name === 'ArrayOfSongData') {
                                                 resp.body.children.map(trackA => {
                                                     var theTrack = {};
-                                                    trackA.children.map(track => theTrack[track.name] = track.value);
+                                                    trackA.children.map(track => {theTrack[track.name] = track.value;});
                                                     automation.push(theTrack);
                                                 });
                                             } else {
                                                 var theTrack = {};
-                                                resp.body.children.map(track => theTrack[track.name] = track.value);
+                                                resp.body.children.map(track => {theTrack[track.name] = track.value;});
                                                 automation.push(theTrack);
                                             }
 
                                             // If this if condition passes, the RadioDJ is playing when it shouldn't be. Stop it!
                                             if (typeof automation[0] !== 'undefined' && parseInt(automation[0].ID) !== 0) {
                                                 try {
+                                                    // LINT: Necessary needle parameters
+                                                    // eslint-disable-next-line camelcase
                                                     needle('get', radiodj.rest + '/opt?auth=' + sails.config.custom.rest.auth + '&command=StopPlayer&arg=1', {}, { open_timeout: 10000, response_timeout: 10000, read_timeout: 10000, headers: { 'Content-Type': 'application/json' } })
-                                                        .catch((err) => {
+                                                        .catch(() => {
                                                             // Ignore errors
                                                         });
-                                                } catch (e3) {
+                                                } catch (unusedE3) {
                                                     // Ignore errors
                                                 }
                                             }
@@ -942,12 +951,12 @@ module.exports.bootstrap = async function (done) {
                                     }
                                     return resolve2(false);
                                 })
-                                .catch((err) => {
+                                .catch(() => {
                                     if (status && status.status !== 1)
                                         {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline.', status: radiodj.level }]);}
                                     return resolve2(false);
                                 });
-                        } catch (e) {
+                        } catch (unusedE) {
                             if (status && status.status !== 1)
                                 {Status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding.', status: radiodj.level }]);}
                             return resolve2(false);
@@ -975,7 +984,7 @@ module.exports.bootstrap = async function (done) {
                         Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website did not return body data.', status: 2 }]);
                     }
                 })
-                .catch((err) => {
+                .catch(() => {
                     Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website is offline.', status: 2 }]);
                 });
         } catch (e) {
@@ -999,11 +1008,13 @@ module.exports.bootstrap = async function (done) {
 
                 var asyncLoop = async function (array, callback) {
                     for (let index = 0; index < array.length; index++) {
+                        // LINT: This is a loop; we do not want to return the callback.
+                        // eslint-disable-next-line callback-return
                         await callback(array[index], index, array);
                     }
                 };
 
-                await asyncLoop(sails.config.custom.EAS.NWSX, async (county, index) => {
+                await asyncLoop(sails.config.custom.EAS.NWSX, async (county) => {
                     try {
                         var resp = await needle('get', `https://alerts.weather.gov/cap/wwaatmget.php?x=${county.code}&y=0&t=${moment().valueOf()}`, {}, { headers: { 'Content-Type': 'application/json' } });
                         await sails.helpers.eas.parseCaps(county.name, resp.body);
@@ -1036,25 +1047,27 @@ module.exports.bootstrap = async function (done) {
     // Every minute at second 07, check to see if our databases are active and functional
     sails.log.verbose(`BOOTSTRAP: scheduling checkDB CRON.`);
     cron.schedule('7 * * * * *', () => {
-        new Promise(async (resolve, reject) => {
+        new Promise(async () => {
             // TODO: More accurate way to test database.
             sails.log.debug(`CRON checkDB called`);
             try {
                 // Make sure all models have a record at ID 1, even if it's a dummy.
                 // TODO: Find a way to auto-populate these arrays.
                 var checksMemory = [Recipients, Status];
+                // LINT: RadioDJ tables cannot be changed
+                // eslint-disable-next-line camelcase
                 var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory];
                 var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Planner, Underwritings, Attendance, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp];
-
+                var checksDisk = [Darksky];
                 // Memory checks
                 var checkStatus = { data: ``, status: 5 };
                 sails.log.debug(`CHECK: DB Memory`);
                 sails.log.debug(`Calling asyncForEach in cron checkDB for memory tests`);
                 await sails.helpers.asyncForEach(checksMemory, (check, index) => {
-                    return new Promise(async (resolve, reject) => {
+                    return new Promise(async (resolve) => {
                         try {
                             var record = await check.find().limit(1)
-                                .tolerate((err) => {
+                                .tolerate(() => {
                                     checkStatus.status = 1;
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
@@ -1064,7 +1077,7 @@ module.exports.bootstrap = async function (done) {
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
-                        } catch (e) {
+                        } catch (unusedE) {
                             checkStatus.status = 1;
                             checkStatus.data += `Model failure (internal error): ${index}. `;
                             return resolve(false);
@@ -1077,13 +1090,13 @@ module.exports.bootstrap = async function (done) {
 
                 // RadioDJ checks
                 sails.log.debug(`CHECK: DB RadioDJ`);
-                var checkStatus = { data: ``, status: 5 };
+                checkStatus = { data: ``, status: 5 };
                 sails.log.debug(`Calling asyncForEach in cron checkDB for RadioDJ database checks`);
                 await sails.helpers.asyncForEach(checksRadioDJ, (check, index) => {
-                    return new Promise(async (resolve, reject) => {
+                    return new Promise(async (resolve) => {
                         try {
                             var record = await check.find().limit(1)
-                                .tolerate((err) => {
+                                .tolerate(() => {
                                     checkStatus.status = 1;
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
@@ -1093,7 +1106,7 @@ module.exports.bootstrap = async function (done) {
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
-                        } catch (e) {
+                        } catch (unusedE) {
                             checkStatus.status = 1;
                             checkStatus.data += `Model failure (internal error): ${index}. `;
                             return resolve(false);
@@ -1106,13 +1119,13 @@ module.exports.bootstrap = async function (done) {
 
                 // Nodebase checks
                 sails.log.debug(`CHECK: DB Nodebase`);
-                var checkStatus = { data: ``, status: 5 };
+                checkStatus = { data: ``, status: 5 };
                 sails.log.debug(`Calling asyncForEach in cron checkDB for nodebase database checks`);
                 await sails.helpers.asyncForEach(checksNodebase, (check, index) => {
-                    return new Promise(async (resolve, reject) => {
+                    return new Promise(async (resolve) => {
                         try {
                             var record = await check.find().limit(1)
-                                .tolerate((err) => {
+                                .tolerate(() => {
                                     checkStatus.status = 1;
                                     checkStatus.data += `Model failure (query error): ${index}. `;
                                 });
@@ -1122,7 +1135,7 @@ module.exports.bootstrap = async function (done) {
                                 checkStatus.data += `Model failure (No records returned): ${index}. `;
                             }
                             return resolve(false);
-                        } catch (e) {
+                        } catch (unusedE) {
                             checkStatus.status = 1;
                             checkStatus.data += `Model failure (internal error): ${index}. `;
                             return resolve(false);
@@ -1133,11 +1146,41 @@ module.exports.bootstrap = async function (done) {
                     {checkStatus.data = `This datastore is fully operational.`;}
                 Status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status }]);
 
+                // Disk checks
+                sails.log.debug(`CHECK: DB Disk`);
+                checkStatus = { data: ``, status: 5 };
+                sails.log.debug(`Calling asyncForEach in cron checkDB for disk database checks`);
+                await sails.helpers.asyncForEach(checksDisk, (check, index) => {
+                    return new Promise(async (resolve) => {
+                        try {
+                            var record = await check.find().limit(1)
+                                .tolerate(() => {
+                                    checkStatus.status = 1;
+                                    checkStatus.data += `Model failure (query error): ${index}. `;
+                                });
+                            if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined')) {
+                                if (checkStatus.status > 3)
+                                    {checkStatus.status = 3;}
+                                checkStatus.data += `Model failure (No records returned): ${index}. `;
+                            }
+                            return resolve(false);
+                        } catch (unusedE) {
+                            checkStatus.status = 1;
+                            checkStatus.data += `Model failure (internal error): ${index}. `;
+                            return resolve(false);
+                        }
+                    });
+                });
+                if (checkStatus.status === 5)
+                    {checkStatus.data = `This datastore is fully operational.`;}
+                Status.changeStatus([{ name: 'db-disk', label: 'DB Disk', data: checkStatus.data, status: checkStatus.status }]);
+
                 return true;
             } catch (e) {
                 Status.changeStatus([{ name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed.', status: 1 }]);
                 Status.changeStatus([{ name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed.', status: 1 }]);
                 Status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: 'The CRON checkDB failed.', status: 1 }]);
+                Status.changeStatus([{ name: 'db-disk', label: 'DB Nodebase', data: 'The CRON checkDB failed.', status: 1 }]);
                 sails.log.error(e);
                 return null;
             }
@@ -1171,7 +1214,7 @@ module.exports.bootstrap = async function (done) {
                 // Count the number of -1 enabled tracks
 
                 var found = await Songs.count({ enabled: -1 })
-                    .tolerate((err) => {
+                    .tolerate(() => {
                     });
                 if (found && found >= sails.config.custom.status.musicLibrary.verify.critical) {
                     Status.changeStatus([{ name: `music-library`, status: 1, label: `Music Library`, data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Run the verify tracks utility in RadioDJ.` }]);
@@ -1215,6 +1258,28 @@ module.exports.bootstrap = async function (done) {
         });
     });
 
+        // Every fifth minute at second 11, refresh Darksky weather information
+        sails.log.verbose(`BOOTSTRAP: scheduling darksky CRON.`);
+        cron.schedule('11 */5 * * * *', () => {
+            new Promise(async (resolve, reject) => {
+                sails.log.debug(`CRON darksky called.`);
+                try {
+                    DarkSkyApi.loadItAll('alerts', sails.config.custom.darksky.position)
+                        .then(async (resp) => {
+                            await Darksky.update({ID: 1}, {currently: resp.currently, minutely: resp.minutely, hourly: resp.hourly, daily: resp.daily}).fetch();
+                        })
+                        .catch((err) => {
+                            sails.log.error(err);
+                            reject(err);
+                        });
+                    return resolve();
+                } catch (e) {
+                    sails.log.error(e);
+                    return reject(e);
+                }
+            });
+        });
+
     // every hour at second 12, check all noFade tracks and remove any fading.
     sails.log.verbose(`BOOTSTRAP: scheduling checkNoFade CRON.`);
     cron.schedule('12 0 * * * *', () => {
@@ -1241,6 +1306,8 @@ module.exports.bootstrap = async function (done) {
 
                         // Update the track with the new cue points
                         (async(record2, cueData2) => {
+                            // LINT: RadioDJ table
+                            // eslint-disable-next-line camelcase
                             await Songs.update({ID: record2.ID}, {cue_times: cueData2});
                         })(record, cueData);
                     });
@@ -1293,10 +1360,10 @@ module.exports.bootstrap = async function (done) {
                 await Meta.changeMeta({ time: moment().toISOString(true) });
 
                 await Timesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: false }).fetch()
-                    .tolerate((err) => {
+                    .tolerate(() => {
                     });
                 await Uabtimesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: false }).fetch()
-                    .tolerate((err) => {
+                    .tolerate(() => {
                     });
                 // Force reload all directors based on timesheets
                 await Directors.updateDirectors();
@@ -1326,7 +1393,7 @@ module.exports.bootstrap = async function (done) {
 
                 sails.log.debug(`Calling asyncForEach in cron priorityCheck for every RadioDJ song`);
                 await sails.helpers.asyncForEach(songs, (song) => {
-                    return new Promise(async (resolve2, reject2) => {
+                    return new Promise(async (resolve2) => {
                         try {
 
                             var minPriority = song.rating === 0 ? 0 : (defaultPriority[0] * (song.rating / 9));

@@ -1,4 +1,4 @@
-/* global sails, Status, Logs, moment */
+/* global moment */
 
 /**
  * Custom configuration
@@ -108,8 +108,8 @@ const config = (() => {
             }
         },
         cfgUseMemory: {
-            value: (key) => {
-                config.setOptions({}, (cfg) => {
+            value: () => {
+                config.setOptions({}, () => {
                 });
             }
         }
@@ -176,8 +176,18 @@ var defaultConfig = {
         directorHoursId: ''
     },
 
+    // Used for oneSignal push notifications
     onesignal: {
         rest: ``
+    },
+
+    // Used for Darksky weather API
+    darksky: {
+        api: ``,
+        position: {
+            latitude: 39.7800196,
+            longitude: -84.0599189
+        }
     },
 
     startOfSemester: moment('2019-01-14 00:00:00').toISOString(true),
