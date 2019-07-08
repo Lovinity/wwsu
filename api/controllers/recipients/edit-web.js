@@ -1,5 +1,4 @@
-/* global sails, Recipients */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -21,18 +20,18 @@ module.exports = {
         try {
             // Request must be a socket
             if (!this.req.isSocket)
-                return exits.error(new Error('This controller requires a websocket.'));
+                {return exits.error(new Error('This controller requires a websocket.'));}
 
             // Get the recipient host
-            var from_IP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
-            var host = sh.unique(from_IP + sails.config.custom.hostSecret);
+            var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip;
+            var host = sh.unique(fromIP + sails.config.custom.hostSecret);
 
             // Filter disallowed HTML
             inputs.message = await sails.helpers.sanitize(inputs.message);
 
             // Do not allow profane labels
             inputs.label = await sails.helpers.filterProfane(inputs.label);
-            
+
             // Truncate after 64 characters
             inputs.label = await sails.helpers.truncateText(inputs.label, 64);
 

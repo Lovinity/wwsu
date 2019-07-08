@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / status / server / set-memory',
@@ -29,7 +27,6 @@ module.exports = {
         sails.log.debug('Controller config/status/server/set-memory called.');
 
         try {
-            var returnData = {};
             // Set the new configuration of any and all values provided as input
             for (var key in inputs)
             {

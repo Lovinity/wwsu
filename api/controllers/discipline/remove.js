@@ -1,5 +1,3 @@
-/* global sails, Discipline */
-
 module.exports = {
 
 
@@ -13,7 +11,7 @@ module.exports = {
       ID: {
           type: 'number',
           required: true,
-          description: "The ID of the discipline record to remove."
+          description: 'The ID of the discipline record to remove.'
       }
   },
 
@@ -25,10 +23,10 @@ module.exports = {
 
   fn: async function (inputs, exits) {
       sails.log.debug(`Controller discipline/remove called.`);
-      
+
       try {
           await Discipline.destroy({ID: inputs.ID}).fetch();
-          
+
           return exits.success();
       } catch (e) {
           return exits.error(e);

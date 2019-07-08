@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * Hosts.js
  *
@@ -41,17 +39,17 @@ module.exports = {
             type: 'boolean',
             defaultsTo: false
         },
-        
+
         answerCalls: {
             type: 'boolean',
             defaultsTo: false
         },
-        
+
         silenceDetection: {
             type: 'boolean',
             defaultsTo: false
         },
-        
+
         recordAudio: {
             type: 'boolean',
             defaultsTo: false
@@ -66,7 +64,7 @@ module.exports = {
             type: 'boolean',
             defaultsTo: false
         },
-        
+
         accountability: {
             type: 'boolean',
             defaultsTo: false

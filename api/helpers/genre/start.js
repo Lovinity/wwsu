@@ -1,5 +1,3 @@
-/* global sails, Events, Meta, Logs, Playlists, moment, Calendar, Attendance */
-
 module.exports = {
 
     friendlyName: 'genre.start',
@@ -21,7 +19,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper genre.start called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Do not start a genre if we're not in genre rotation or automation.
             if (Meta['A'].state === 'automation_on' || (Meta['A'].state === 'automation_genre'))
@@ -31,7 +28,7 @@ module.exports = {
                 {
                     // Lock future state changes until we are done if ignoreChangingState is false.
                     if (!inputs.ignoreChangingState)
-                        await Meta.changeMeta({changingState: `Switching to genre`});
+                        {await Meta.changeMeta({changingState: `Switching to genre`});}
 
                     // Find the manual RadioDJ event for Node to trigger
                     var event = await Events.find({type: 3, name: inputs.event, enabled: 'True'});
@@ -42,7 +39,7 @@ module.exports = {
                     if (event.length <= 0)
                     {
                         if (!inputs.ignoreChangingState)
-                            await Meta.changeMeta({changingState: null});
+                            {await Meta.changeMeta({changingState: null});}
                         return exits.error(new Error(`The provided event name was not found as an active manual event in RadioDJ.`));
                     }
 
@@ -74,7 +71,7 @@ module.exports = {
                                 });
                     }
                     if (!inputs.ignoreChangingState)
-                        await Meta.changeMeta({changingState: null});
+                        {await Meta.changeMeta({changingState: null});}
                 } else {
                     sails.log.debug(`Helper SKIPPED.`);
                 }
@@ -82,7 +79,7 @@ module.exports = {
             return exits.success();
         } catch (e) {
             if (!inputs.ignoreChangingState)
-                await Meta.changeMeta({changingState: null});
+                {await Meta.changeMeta({changingState: null});}
             return exits.error(e);
         }
 

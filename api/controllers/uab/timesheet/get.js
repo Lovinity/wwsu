@@ -1,5 +1,3 @@
-/* global moment, sails, Timesheet */
-
 module.exports = {
 
     friendlyName: 'Uab / Timesheet / Get',

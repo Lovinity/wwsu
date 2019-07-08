@@ -1,5 +1,3 @@
-/* global sails, Discipline */
-
 /**
  * isAuthorized
  *
@@ -10,7 +8,7 @@
 module.exports = async function (req, res, next) {
     var moment = require('moment');
     var searchto = moment().subtract(1, 'days').toDate();
-    var sh = require("shorthash");
+    var sh = require('shorthash');
     var theip = req.isSocket ? (typeof req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? req.socket.handshake.headers['x-forwarded-for'] : req.socket.conn.remoteAddress) : req.ip;
     var theid = sh.unique(theip + sails.config.custom.hostSecret);
     /*

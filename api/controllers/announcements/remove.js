@@ -1,5 +1,3 @@
-/* global sails, Announcements */
-
 module.exports = {
 
     friendlyName: 'Announcements / Remove',

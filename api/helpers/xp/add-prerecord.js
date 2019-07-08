@@ -1,5 +1,3 @@
-/* global sails, Meta, moment, Xp, Listeners, Calendar */
-
 module.exports = {
 
     friendlyName: 'xp.addPrerecord',
@@ -33,7 +31,7 @@ module.exports = {
 
                 // Calculate number of listener minutes for the show, and award XP based on configured values.
                 var listenerMinutes = 0;
-                var listeners = await Listeners.find({dj: Meta['A'].dj, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort("createdAt ASC")
+                var listeners = await Listeners.find({dj: Meta['A'].dj, createdAt: {'>=': moment(Meta['A'].showStamp).toISOString(true)}}).sort('createdAt ASC')
                         .tolerate((err) => {
                             // Do not throw for error, but log it
                             sails.log.error(err);
@@ -43,7 +41,7 @@ module.exports = {
                 {
                     var prevTime = moment(Meta['A'].showStamp);
                     var prevListeners = 0;
-                    var listenerMinutes = 0;
+                    listenerMinutes = 0;
                     listeners.map(listener => {
                         listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners;
                         prevListeners = listener.listeners;

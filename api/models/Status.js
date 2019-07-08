@@ -1,5 +1,3 @@
-/* global sails, Status, _, Logs, moment, Meta, inputs, Announcements, Calendar, Promise */
-
 /**
  * Status.js
  *
@@ -98,7 +96,7 @@ module.exports = {
         // Used for telling the system we are waiting for a good RadioDJ to switch to
         waitForGoodRadioDJ: false,
 
-        // Triggered when CRON checks fails to getQueue. 
+        // Triggered when CRON checks fails to getQueue.
         queueFail: {
             count: 0,
             trigger: 30,
@@ -108,7 +106,7 @@ module.exports = {
                     try {
                         // Do not continue if we are in the process of waiting for a status 5 RadioDJ
                         if (Status.errorCheck.waitForGoodRadioDJ)
-                            return resolve(0);
+                            {return resolve(0);}
 
                         await Meta.changeMeta({changingState: `Switching radioDJ instances due to queueFail`});
                         sails.sockets.broadcast('system-error', 'system-error', true);
@@ -116,7 +114,7 @@ module.exports = {
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
-                        await Announcements.findOrCreate({type: 'djcontrols', title: `queueFail (system)`, announcement: "System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: "System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                        await Announcements.findOrCreate({type: 'djcontrols', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.'}, {type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                 .tolerate((err) => {
                                     sails.log.error(err);
                                 });
@@ -125,7 +123,7 @@ module.exports = {
                                 .map(async (instance) => {
                                     var status = await Status.findOne({name: `radiodj-${instance.name}`});
                                     if (status && status.status !== 1)
-                                        await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data.`}]);
+                                        {await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data.`}]);}
                                     return true;
                                 });
                         await Promise.all(maps);
@@ -166,7 +164,7 @@ module.exports = {
                         } else {
                             // Do not continue if we are in the process of waiting for a status 5 RadioDJ
                             if (Status.errorCheck.waitForGoodRadioDJ)
-                                return resolve(0);
+                                {return resolve(0);}
 
                             await Meta.changeMeta({changingState: `Switching automation instances due to frozen`});
                             sails.log.verbose(`Recent error; switching RadioDJs.`);
@@ -174,7 +172,7 @@ module.exports = {
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
-                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozen (system)`, announcement: "System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info."}, {type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: "System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.", starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
+                            await Announcements.findOrCreate({type: 'djcontrols', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.'}, {type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({year: 3000}).toISOString(true)})
                                     .tolerate((err) => {
                                         sails.log.error(err);
                                     });
@@ -183,7 +181,7 @@ module.exports = {
                                     .map(async (instance) => {
                                         var status = await Status.findOne({name: `radiodj-${instance.name}`});
                                         if (status && status.status !== 1)
-                                            await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed.`}]);
+                                            {await Status.changeStatus([{name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed.`}]);}
                                         return true;
                                     });
                             await Promise.all(maps);
@@ -212,8 +210,7 @@ module.exports = {
             trigger: 6,
             active: false,
             condition: function () {
-                var inQueue = false;
-                Meta.automation.map(track => {
+                Meta.automation.map(() => {
                     // WORK ON THIS
                 });
             },
@@ -238,7 +235,7 @@ module.exports = {
                 var inQueue = false;
                 Meta.automation
                         .filter(track => sails.config.custom.subcats.IDs.indexOf(parseInt(track.IDSubcat)) > -1)
-                        .map(track => inQueue = true);
+                        .map(() => {inQueue = true;});
                 return inQueue;
             },
             fn: function () {
@@ -262,7 +259,7 @@ module.exports = {
                 return new Promise(async (resolve, reject) => {
                     try {
                         if (Meta['A'].changingState !== null)
-                            return resolve(295);
+                            {return resolve(295);}
 
                         await Meta.changeMeta({changingState: `Switching to automation via automationBreak`});
                         await Meta.changeMeta({state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString()});
@@ -273,7 +270,7 @@ module.exports = {
                         // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
                         try {
                             await Calendar.preLoadEvents(true);
-                        } catch (e2) {
+                        } catch (unusedE2) {
                             // Couldn't load calendar? Fall back to Default automation
                             await sails.helpers.genre.start('Default', true);
                         }
@@ -321,16 +318,17 @@ module.exports = {
             sails.log.debug(`Status.changeStatus called.`);
             try {
                 var maps = array.map(async status => {
+                    var criteriaB;
                     var criteria = {name: status.name, status: status.status, data: status.data || '', label: status.label || status.name};
                     if (status.status === 5)
-                        criteria.time = moment().toISOString(true);
+                        {criteria.time = moment().toISOString(true);}
 
                     // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                    var criteriaB = _.cloneDeep(criteria);
+                    criteriaB = _.cloneDeep(criteria);
 
                     // Find or create the status record
                     var record = await Status.findOrCreate({name: status.name}, criteriaB)
-                            .tolerate((err) => {
+                            .tolerate(() => {
                                 return true;
                             });
 
@@ -382,7 +380,7 @@ module.exports = {
                     if (updateIt === 1)
                     {
                         // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                        var criteriaB = _.cloneDeep(criteria);
+                        criteriaB = _.cloneDeep(criteria);
                         sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`);
                         await Status.update({name: status.name}, criteriaB)
                                 .tolerate((err) => {
@@ -391,7 +389,7 @@ module.exports = {
                                 .fetch();
                     } else if (updateIt === 2) {
                         // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-                        var criteriaB = _.cloneDeep(criteria);
+                        criteriaB = _.cloneDeep(criteria);
                         sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`);
                         await Status.update({name: status.name}, criteriaB)
                                 .tolerate((err) => {

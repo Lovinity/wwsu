@@ -1,5 +1,3 @@
-/* global sails, Requests, _, Meta */
-
 module.exports = {
 
     friendlyName: 'songs.remove',
@@ -43,7 +41,7 @@ module.exports = {
             // Get rid of all the null entries
             try {
                 inputs.subcategories = inputs.subcategories.filter(subcategory => subcategory && subcategory !== null);
-            } catch (e2) {
+            } catch (unusedE2) {
                 inputs.subcategories = [];
             }
 
@@ -54,10 +52,9 @@ module.exports = {
             if (!inputs.noRequeue)
             {
                 // Remove the entire queue.
-                await sails.helpers.rest.cmd("ClearPlaylist");
+                await sails.helpers.rest.cmd('ClearPlaylist');
 
-                // Filter out all the necessary tracks
-                var skipCurrent = false;
+                // Remove applicable items from our queue snapshot
                 for (var i = queue.length - 1; i >= 0; i -= 1) {
                     if (parseInt(queue[i].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) !== -1)))
                     {
@@ -73,28 +70,28 @@ module.exports = {
                 // Re-queue the remaining tracks
                 if (queue.length > 0)
                 {
-                    var maps = queue.map(async track => await sails.helpers.rest.cmd("LoadTrackToBottom", track.ID));
+                    var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToBottom', track.ID));
                     await Promise.all(maps);
                 }
 
                 // Remove tracks one at a time instead of re-queuing a new playlist
             } else {
-                var skipCurrent = false;
-                for (var i = queue.length - 1; i >= 0; i -= 1) {
-                    if (parseInt(queue[i].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) !== -1)))
+                for (var i2 = queue.length - 1; i2 >= 0; i2 -= 1) {
+                    if (parseInt(queue[i2].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) !== -1)))
                     {
                         // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
-                        if (!inputs.keepRequests || Requests.pending.indexOf(parseInt(queue[i].ID)) === -1)
+                        if (!inputs.keepRequests || Requests.pending.indexOf(parseInt(queue[i2].ID)) === -1)
                         {
                             sails.log.verbose(`REMOVING`);
-                            await sails.helpers.rest.cmd('RemovePlaylistTrack', i - 1);
+                            await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1);
                         }
                     }
                 }
             }
 
             return exits.success();
-        } catch (e) {
+        } catch (unusedE) {
+            // Do not error
             return exits.success();
         }
     }

@@ -1,5 +1,3 @@
-/* global sails, Songsliked, moment */
-
 module.exports = {
 
     friendlyName: 'songs/get-liked',
@@ -17,17 +15,17 @@ module.exports = {
             var returnArray = [];
 
             // Get the hosts's IP address first
-            var from_IP = await sails.helpers.getIp(this.req);
-            var query = {IP: from_IP};
+            var fromIP = await sails.helpers.getIp(this.req);
+            var query = {IP: fromIP};
 
             // If config specifies users can like tracks multiple times, add a date condition to only return liked tracks within the configured days.
             if (sails.config.custom.songsliked.limit > 0)
-                query.createdAt = {'>=': moment().subtract(sails.config.custom.songsliked.limit, 'days').toISOString(true)};
+                {query.createdAt = {'>=': moment().subtract(sails.config.custom.songsliked.limit, 'days').toISOString(true)};}
 
             // Retrieve track IDs liked by this IP
             var records = await Songsliked.find(query);
             if (records.length > 0)
-                records.map(record => returnArray.push(record.trackID));
+                {records.map(record => returnArray.push(record.trackID));}
 
             return exits.success(returnArray);
         } catch (e) {

@@ -45,30 +45,6 @@ module.exports = {
     },
 
     /**
-     * Before creating a new user, we need to bcrypt the password.
-     * @constructor
-     * @param {object} values - Object of values during the create action
-     * @param {function} next - Callback function
-     */
-    beforeCreate: function (values, next) {
-        var bcrypt = require('bcrypt');
-        var salt = bcrypt.genSalt(10)
-                .then(salt => {
-                    bcrypt.hash(values.password, salt)
-                            .then(hash => {
-                                values.encryptedPassword = hash;
-                                return next();
-                            })
-                            .catch(err => {
-                                return next(err);
-                            });
-                })
-                .catch(err => {
-                    return next(err);
-                });
-    },
-
-    /**
      * Check to see if a provided password matches the given password for the user
      * @constructor
      * @param {string} password - The password to check
@@ -86,7 +62,7 @@ module.exports = {
                             return resolve(false);
                         }
                     })
-                    .catch(err => {
+                    .catch(() => {
                         return resolve(false);
                     });
         });

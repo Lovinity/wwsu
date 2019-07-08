@@ -1,5 +1,3 @@
-/* global sails, moment, Logs */
-
 module.exports = {
 
     friendlyName: 'Logs / get',
@@ -49,26 +47,26 @@ module.exports = {
         sails.log.debug('Controller logs/get called.');
 
         try {
-            
+
             // Get date range
             var start = inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
             var end = moment(start).add(1, 'days');
             if (inputs.start !== null)
-                start = moment(inputs.start);
+                {start = moment(inputs.start);}
             if (inputs.end !== null)
-                end = moment(inputs.end);
+                {end = moment(inputs.end);}
 
             // Prepare query
             var query = {createdAt: {'>=': start.toISOString(true), '<': end.toISOString(true)}};
             if (inputs.attendanceID !== null && inputs.attendanceID > 0)
-                query = {attendanceID: inputs.attendanceID};
-            
+                {query = {attendanceID: inputs.attendanceID};}
+
             // Get issue logs if ISSUES was provided as the subtype
-            if (inputs.subtype === "ISSUES")
+            if (inputs.subtype === 'ISSUES')
             {
                 query.or = [];
                 query.or.push({loglevel: ['warning', 'urgent', 'danger']});
-                query.or.push({logtype: ["cancellation", "director-cancellation"]});
+                query.or.push({logtype: ['cancellation', 'director-cancellation']});
             } else if (inputs.subtype !== '' && inputs.subtype !== null)
             {
                 query.logsubtype = inputs.subtype;

@@ -1,4 +1,3 @@
-/* global sails, Directors, Timesheet, moment, Directorhours */
 
 module.exports = {
 
@@ -52,7 +51,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller timesheet/edit called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Update the timesheet record
@@ -65,13 +63,13 @@ module.exports = {
             if (IDs.length > 0)
             {
                 if (inputs.approved === -1)
-                    await Directorhours.update({unique: IDs, active: [1, 2]}, {active: -1}).fetch();
+                    {await Directorhours.update({unique: IDs, active: [1, 2]}, {active: -1}).fetch();}
 
                 if (inputs.approved === 0 || inputs.approved === 1)
-                    await Directorhours.update({unique: IDs, active: [-1, 2]}, {active: 1}).fetch();
+                    {await Directorhours.update({unique: IDs, active: [-1, 2]}, {active: 1}).fetch();}
 
                 if (inputs.approved === 2)
-                    await Directorhours.update({unique: IDs, active: [-1, 1]}, {active: 2}).fetch();
+                    {await Directorhours.update({unique: IDs, active: [-1, 1]}, {active: 2}).fetch();}
             }
 
             // Force a re-load of all directors to update any possible changes in presence

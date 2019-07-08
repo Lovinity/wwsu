@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'difference',
@@ -19,10 +17,12 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper difference called.');
+
+        // Determine the differences between two objects
         var o1 = inputs.o1;
         var o2 = inputs.o2;
-        var k, kDiff,
-                diff = {};
+        var k; var kDiff;
+                var diff = {};
         for (k in o1) {
             if (!o1.hasOwnProperty(k)) {
             } else if (typeof o1[k] !== 'object' || typeof o2[k] !== 'object') {

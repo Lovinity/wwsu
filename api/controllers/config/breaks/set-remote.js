@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / breaks / set-remote',
@@ -42,6 +40,7 @@ module.exports = {
         sails.log.debug('Controller config/breaks/set-remote called.');
 
         try {
+            // Modify config
             for (var key in inputs)
             {
                 if (inputs.hasOwnProperty(key))
@@ -49,7 +48,8 @@ module.exports = {
                     sails.config.custom.specialBreaks.remote[key] = inputs[key];
                 }
             }
-            
+
+            // Send new config through sockets
             sails.sockets.broadcast('config', 'config', {update: {specialBreaks: sails.config.custom.specialBreaks}});
 
             return exits.success();

@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / breaks / set-automation',
@@ -22,6 +20,8 @@ module.exports = {
         sails.log.debug('Controller config/breaks/set-automation called.');
 
         try {
+
+            // Modify configuration
             for (var key in inputs)
             {
                 if (inputs.hasOwnProperty(key))
@@ -29,7 +29,8 @@ module.exports = {
                     sails.config.custom.specialBreaks.automation[key] = inputs[key];
                 }
             }
-            
+
+            // Send new configuration through sockets
             sails.sockets.broadcast('config', 'config', {update: {specialBreaks: sails.config.custom.specialBreaks}});
 
             return exits.success();

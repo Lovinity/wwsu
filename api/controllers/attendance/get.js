@@ -1,5 +1,3 @@
-/* global moment, sails, Attendance, Djs */
-
 module.exports = {
 
     friendlyName: 'attendance / get',
@@ -53,7 +51,7 @@ module.exports = {
                 var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day');
                 var end = moment(start).add(inputs.duration, 'days');
                 query = {or: [{scheduledStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}, {actualStart: {'>=': start.toISOString(true), '<': end.toISOString(true)}}]};
-                
+
             } else {
 
                 if (inputs.dj && inputs.dj !== null)
@@ -62,7 +60,7 @@ module.exports = {
                 }
 
                 if (inputs.event && inputs.event !== null)
-                    query.event = {'contains': inputs.event};
+                    {query.event = {'contains': inputs.event};}
             }
 
             // Get records
@@ -75,13 +73,13 @@ module.exports = {
                     var theDateA = a.actualStart !== null ? a.actualStart : a.scheduledStart;
                     var theDateB = b.actualStart !== null ? b.actualStart : b.scheduledStart;
                     if (moment(theDateA).valueOf() < moment(theDateB).valueOf())
-                        return -1;
+                        {return -1;}
                     if (moment(theDateA).valueOf() > moment(theDateB).valueOf())
-                        return 1;
+                        {return 1;}
                     if (a.ID > b.ID)
-                        return 1;
+                        {return 1;}
                     if (b.ID > a.ID)
-                        return -1;
+                        {return -1;}
                     return 0;
                 };
 

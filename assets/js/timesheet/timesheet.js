@@ -9,10 +9,10 @@ class Director {
 
     constructor(data = {}) {
         this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000));
-        this._name = data.name || "Unknown";
+        this._name = data.name || 'Unknown';
         this._admin = data.admin || false;
         this._avatar = data.avatar || null;
-        this._position = data.position || "Unknown";
+        this._position = data.position || 'Unknown';
         this._present = data.present || false;
         this._since = data.since || moment();
     }
@@ -96,7 +96,7 @@ directorsdb.setOnUpdate((data, db) => {
 
 directorsdb.setOnRemove((data, db) => {
     if (typeof Directors[data] !== `undefined`)
-        delete Directors[data];
+        {delete Directors[data];}
 });
 
 directorsdb.setOnReplace((db) => {
@@ -116,7 +116,7 @@ class Timesheet {
     constructor(data = {}) {
         this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000));
         this._unique = data.unique || null;
-        this._name = data.name || "Unknown";
+        this._name = data.name || 'Unknown';
         this._scheduled_in = data.scheduled_in || null;
         this._scheduled_out = data.scheduled_in || null;
         this._time_in = data.time_in || null;
@@ -213,7 +213,7 @@ timesheetsdb.setOnUpdate((data, db) => {
 
 timesheetsdb.setOnRemove((data, db) => {
     if (typeof Timesheets[data] !== `undefined`)
-        delete Timesheets[data];
+        {delete Timesheets[data];}
     filterDate();
 });
 
@@ -237,7 +237,7 @@ var noReq = new WWSUreq(socket, null);
 var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director', 'Administrator Director');
 
 // Register event handlers
-socket.on('connect', function () {
+socket.on('connect', () => {
     directorsdb.replaceData(noReq, '/directors/get');
     timesheetsdb.replaceData(noReq, '/timesheet/get');
 });
@@ -245,8 +245,8 @@ socket.on('connect', function () {
 directorsdb.assignSocketEvent('directors', socket);
 timesheetsdb.assignSocketEvent('timesheet', socket);
 
-$(document).ready(function () {
-    document.querySelector(`#options-timesheets-records`).addEventListener("click", function (e) {
+$(document).ready(() => {
+    document.querySelector(`#options-timesheets-records`).addEventListener('click', (e) => {
         try {
             if (e.target) {
                 if (e.target.id.startsWith(`timesheet-t`))
@@ -258,7 +258,7 @@ $(document).ready(function () {
         }
     });
 
-    $("#clockModal").iziModal({
+    $('#clockModal').iziModal({
         title: 'Timesheet Record',
         headerColor: '#88A0B9',
         width: 640,
@@ -326,7 +326,7 @@ function editClock(clockID, save = false) {
                     return null;
                 });
         if (!opened)
-            modalBody.innerHTML = 'There was an internal error loading that clock.';
+            {modalBody.innerHTML = 'There was an internal error loading that clock.';}
         // Editing an entry
     } else {
         var bclockin = document.getElementById('clock-in');
@@ -350,7 +350,7 @@ function filterDate()
         var records = document.querySelector('#options-timesheets-records');
         var thedate = document.getElementById('weekly-date-picker');
         records.innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`;
-        noReq.request({method: 'POST', url: '/timesheet/get', data: {date: moment(thedate.value).toISOString(true)}}, function (response) {
+        noReq.request({method: 'POST', url: '/timesheet/get', data: {date: moment(thedate.value).toISOString(true)}}, (response) => {
             records.innerHTML = ``;
             timesheets = response;
             var hours = {};
@@ -891,7 +891,7 @@ function filterDate()
                 // Fill in the timesheet record
                 var cell = document.getElementById(`options-timesheets-director-cell-${clockday}-${record.name.replace(/\W/g, '')}`);
                 if (cell !== null)
-                    cell.innerHTML += timeline;
+                    {cell.innerHTML += timeline;}
 
                 // Iterate through each director and list their hours worked.
                 for (var key in hours)

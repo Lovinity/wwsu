@@ -1,5 +1,3 @@
-/* global sails, moment, Announcements */
-
 module.exports = {
 
     friendlyName: 'Announcements / Add-problem',

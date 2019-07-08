@@ -1,19 +1,19 @@
 // Slide class for managing a single slide
 class Slide {
     constructor(data = {}) {
-        this._name = data.name || "";
-        this._label = data.label || "";
+        this._name = data.name || '';
+        this._label = data.label || '';
         this._weight = data.weight || 0;
         this._isSticky = data.isSticky || false;
-        this._color = data.color || "secondary";
+        this._color = data.color || 'secondary';
         this._active = (typeof data.active !== `undefined`) ? data.active : true;
         this._starts = data.starts || null;
         this._expires = data.expires || null;
         this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`;
         this._innerHtml = data.html || ``;
         this._reset = data.reset || false;
-        this._transitionIn = data.transitionIn || "fadeIn";
-        this._transitionOut = data.transitionOut || "fadeOut";
+        this._transitionIn = data.transitionIn || 'fadeIn';
+        this._transitionOut = data.transitionOut || 'fadeOut';
         this._displayTime = data.displayTime || 14;
         this._fitContent = data.fitContent || false;
         this._fn = data.fn || (() => {
@@ -21,7 +21,7 @@ class Slide {
 
         var temp = document.getElementById(`slides`);
         if (temp !== null)
-            temp.innerHTML += this._html;
+            {temp.innerHTML += this._html;}
     }
 
     get name() {
@@ -69,13 +69,13 @@ class Slide {
 
     get active() {
         if (!this._active)
-            return false;
+            {return false;}
 
         if (this._starts !== null && moment(Meta.time).isBefore(moment(this._starts)))
-            return false;
+            {return false;}
 
         if (this._expires !== null && moment(Meta.time).isAfter(moment(this._expires)))
-            return false;
+            {return false;}
 
         return true;
     }
@@ -113,7 +113,7 @@ class Slide {
         }
         var temp = document.getElementById(`content-slide-${this._name}`);
         if (temp !== null)
-            temp.innerHTML = value;
+            {temp.innerHTML = value;}
     }
 
     get transitionIn() {
@@ -143,7 +143,7 @@ class Slide {
     remove() {
         var temp = document.getElementById(`slide-${this._name}`);
         if (temp !== null)
-            temp.parentNode.removeChild(temp);
+            {temp.parentNode.removeChild(temp);}
     }
 }
 
@@ -186,9 +186,9 @@ var Slides = (() => {
         var compare = function (a, b) {
             try {
                 if (a.weight > b.weight)
-                    return -1;
+                    {return -1;}
                 if (a.weight < b.weight)
-                    return 1;
+                    {return 1;}
                 return 0;
             } catch (e) {
                 console.error(e);
@@ -212,11 +212,11 @@ var Slides = (() => {
             {
                 _slides = slides.filter((_slides) => _slides.active && _slides.isSticky);
                 if (!activeSlide().active || !activeSlide().isSticky)
-                    timeLeft = 0;
+                    {timeLeft = 0;}
             } else {
                 _slides = slides.filter((_slides) => _slides.active);
                 if (!activeSlide().active)
-                    timeLeft = 0;
+                    {timeLeft = 0;}
             }
 
             var html = ``;
@@ -291,24 +291,24 @@ var Slides = (() => {
                 if (temp2 !== null)
                 {
                     if (activeSlide().reset)
-                        temp2.innerHTML = activeSlide().innerHtml;
+                        {temp2.innerHTML = activeSlide().innerHtml;}
                 }
 
                 // Failsafe: iterate through all slides and set display to none to prevent stray slides from remaining visible
                 slides.map((_slide) => {
                     var temp = document.getElementById(`slide-${_slide.name}`);
                     if (temp !== null)
-                        temp.style.display = "none";
+                        {temp.style.display = 'none';}
                 });
 
                 // Display active slide
                 var temp = document.getElementById(`slide-${activeSlide().name}`);
                 if (temp !== null)
-                    temp.style.display = "inline";
+                    {temp.style.display = 'inline';}
 
                 // Reset animation classes
                 if (temp2 !== null)
-                    temp2.className = "";
+                    {temp2.className = '';}
 
                 $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
                 });
@@ -325,9 +325,9 @@ var Slides = (() => {
                 if (activeSlide().fitContent && temp !== null && temp2 !== null)
                 {
                     console.log(`fitting content`);
-                    temp.classList.add("scale-wrapper");
-                    temp2.classList.add("scale-content");
-                    var pageWidth, pageHeight;
+                    temp.classList.add('scale-wrapper');
+                    temp2.classList.add('scale-content');
+                    var pageWidth; var pageHeight;
 
                     var basePage = {
                         width: 1600,
@@ -361,9 +361,9 @@ var Slides = (() => {
                         }
 
                         function scalePages(page, maxWidth, maxHeight) {
-                            page.attr("width", `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
+                            page.attr('width', `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
                             console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
-                            var scaleX = 1, scaleY = 1;
+                            var scaleX = 1; var scaleY = 1;
                             scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95;
                             scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.80;
                             basePage.scaleX = scaleX;
@@ -396,10 +396,10 @@ var Slides = (() => {
                         console.log(`animation failsafe triggered`);
                         var temp = document.getElementById(`slide-${activeSlide().name}`);
                         if (temp !== null)
-                            temp.style.display = "none";
+                            {temp.style.display = 'none';}
                         var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
                         if (temp2 !== null)
-                            temp2.className = "";
+                            {temp2.className = '';}
                         afterFunction();
                     }, 5000);
 
@@ -407,10 +407,10 @@ var Slides = (() => {
                         console.log(`animation complete`);
                         var temp2 = document.getElementById(`content-slide-${activeSlide().name}`);
                         if (temp2 !== null)
-                            temp2.className = "";
+                            {temp2.className = '';}
                         var temp = document.getElementById(`slide-${activeSlide().name}`);
                         if (temp !== null)
-                            temp.style.display = "none";
+                            {temp.style.display = 'none';}
                         clearTimeout(failsafe);
                         afterFunction();
                     });
@@ -431,11 +431,11 @@ var Slides = (() => {
             if (temp2 !== null)
             {
                 if (activeSlide().reset)
-                    temp2.innerHTML = activeSlide().innerHtml;
+                    {temp2.innerHTML = activeSlide().innerHtml;}
             }
             var temp = document.getElementById(`slide-${activeSlide().name}`);
             if (temp !== null)
-                temp.style.display = "inline";
+                {temp.style.display = 'inline';}
 
             activeSlide().fn();
 
@@ -446,7 +446,7 @@ var Slides = (() => {
 
     const generateBG = () => {
 
-        var hexValues = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e"];
+        var hexValues = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e'];
 
         function populate(a) {
             for (var i = 0; i < 6; i++) {
@@ -461,13 +461,13 @@ var Slides = (() => {
         var newColor2 = populate('#');
         var angle = Math.round(Math.random() * 360);
 
-        var gradient = "linear-gradient(" + angle + "deg, " + newColor1 + ", " + newColor2 + ")";
+        var gradient = 'linear-gradient(' + angle + 'deg, ' + newColor1 + ', ' + newColor2 + ')';
 
-        var temp = document.getElementById("bg-canvas");
+        var temp = document.getElementById('bg-canvas');
         if (temp !== null)
-            temp.style.background = gradient;
+            {temp.style.background = gradient;}
 
-    }
+    };
 
     // Timer for controlling transitions between slides
     var timer = setInterval(() => {

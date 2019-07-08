@@ -1,5 +1,3 @@
-/* global sails, Meta, Promise, Status */
-
 module.exports = {
 
     friendlyName: 'helper rest.changeRadioDj',
@@ -16,12 +14,12 @@ module.exports = {
 
             // Determine which inactive RadioDJs are healthy (status 5).
             var healthyRadioDJs = [];
-            var maps = sails.config.custom.radiodjs.map(async (instance, index) => {
+            var maps = sails.config.custom.radiodjs.map(async (instance) => {
                 if (instance.rest === Meta['A'].radiodj)
-                    return false;
+                    {return false;}
                 var status = await Status.findOne({name: `radiodj-${instance.name}`});
                 if (status && status.status === 5)
-                    healthyRadioDJs.push(instance);
+                    {healthyRadioDJs.push(instance);}
                 return true;
             });
             await Promise.all(maps);
@@ -34,7 +32,7 @@ module.exports = {
 
                 // Otherwise, check to see if the active RadioDJ is still status 5
             } else {
-                var maps = sails.config.custom.radiodjs
+                maps = sails.config.custom.radiodjs
                         .filter((instance) => instance.rest === Meta['A'].radiodj)
                         .map(async (instance) => {
                             var status = await Status.findOne({name: `radiodj-${instance.name}`});

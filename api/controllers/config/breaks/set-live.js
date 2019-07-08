@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / breaks / set-live',
@@ -41,6 +39,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller config/breaks/set-live called.');
 
+        // Modify config
         try {
             for (var key in inputs)
             {
@@ -49,7 +48,8 @@ module.exports = {
                     sails.config.custom.specialBreaks.live[key] = inputs[key];
                 }
             }
-            
+
+            // Send new config through sockets
             sails.sockets.broadcast('config', 'config', {update: {specialBreaks: sails.config.custom.specialBreaks}});
 
             return exits.success();

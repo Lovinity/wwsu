@@ -1,5 +1,3 @@
-/* global sails, needle */
-
 module.exports = {
 
     friendlyName: 'Needle',
@@ -20,7 +18,7 @@ module.exports = {
     fn: async function (inputs, exits) {
         try {
             needle('get', inputs.url, {}, {headers: {'Content-Type': 'application/json'}})
-                    .then(async function (resp) {
+                    .then(async (resp) => {
                         return exits.success(resp.body);
                     });
         } catch (e) {

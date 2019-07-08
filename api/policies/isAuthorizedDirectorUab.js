@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * isAuthorized
  *
@@ -15,8 +13,8 @@ module.exports = async function (req, res, next) {
     if (req.headers && req.headers.authorization) {
         var parts = req.headers.authorization.split(' ');
         if (parts.length === 2) {
-            var scheme = parts[0],
-                    credentials = parts[1];
+            var scheme = parts[0];
+                    var credentials = parts[1];
 
             if (/^Bearer$/i.test(scheme)) {
                 token = credentials;
@@ -34,10 +32,10 @@ module.exports = async function (req, res, next) {
 
     try {
         var authorized = jwt.verify(token, sails.config.custom.secrets.directorUab, {subject: 'directorUab'});
-        
+
         // Set the authorization data to req.payload so controllers/actions can use it
         req.payload = authorized;
-        
+
         return next();
     } catch (e) {
         sails.log.error(e);

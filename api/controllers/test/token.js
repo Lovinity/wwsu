@@ -33,7 +33,7 @@ module.exports = {
         } catch (e) {
             var temp5 = 'NOT VALID';
         }
-        
+
         return exits.success({temp1: temp1, temp2: temp2, temp3: temp3, temp4: temp4, temp5: temp5});
 
     }

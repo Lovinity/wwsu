@@ -1,6 +1,4 @@
-/* global Requests, sails, Songs, Subcategory, Category, Settings, moment, Meta */
-
-require("moment-duration-format");
+require('moment-duration-format');
 
 module.exports = {
 
@@ -23,7 +21,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.checkRequestable called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             var d = moment().startOf('day').toISOString(true);
@@ -65,7 +62,7 @@ module.exports = {
             var inQueue = false;
             Meta.automation
                     .filter(track => parseInt(track.ID) === inputs.ID)
-                    .map(track => inQueue = true);
+                    .map(() => {inQueue = true;});
 
             if (inQueue)
             {
@@ -79,7 +76,7 @@ module.exports = {
             var parentcat = await Category.findOne({ID: subcat.parentid});
             sails.log.silly(`Track category: ${parentcat}`);
 
-            // Check if the track exists in any of the sails.config.custom.musicCatsN.
+            // Check if the track exists in any of the sails.config.custom.musicCatsN. If not, it cannot be requested.
             if (sails.config.custom.subcats.music.indexOf(subcat.ID) === -1)
             {
                 sails.log.verbose(`Track cannot be requested: Track is not a music track.`);
@@ -90,7 +87,7 @@ module.exports = {
             var thesettings = await Settings.find({source: 'settings_general', setting: ['RepeatTrackInterval', 'RepeatArtistInteval', 'RepeatAlbumInteval', 'RepeatTitleInteval']});
             sails.log.silly(`Rotation rule records: ${thesettings}`);
             var rotationRules = {};
-            thesettings.map(thesetting => rotationRules[thesetting.setting] = thesetting.value);
+            thesettings.map(thesetting => {rotationRules[thesetting.setting] = thesetting.value;});
 
             // Check if we are past the end date of the track
             if (moment(record.end_date).isBefore() && moment(record.end_date).isAfter('2002-01-01 00:00:01'))

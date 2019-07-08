@@ -1,5 +1,3 @@
-/* global Calendar, sails, Directorhours, _ */
-
 module.exports = {
 
     friendlyName: 'config / categories / set',
@@ -25,14 +23,14 @@ module.exports = {
                     {
                         // The value of every key should be an array.
                         if (!_.isArray(value[key]))
-                            isValid = false;
+                            {isValid = false;}
 
                         if (value[key].length > 0)
                         {
                             // Every item in the array should be a string
                             value[key].map((item) => {
                                 if (!_.isString(item))
-                                    isValid = false;
+                                    {isValid = false;}
                             });
                         }
                     }
@@ -52,8 +50,9 @@ module.exports = {
         sails.log.debug('Controller config/categories/set called.');
 
         try {
+            // Do not modify _doNotRemove category
             if (inputs.name === `_doNotRemove`)
-                return exits.error(new Error(`_doNotRemove is a restricted category and cannot be modified.`));
+                {return exits.error(new Error(`_doNotRemove is a restricted category and cannot be modified.`));}
 
             sails.config.custom.categories[inputs.name] = inputs.config;
 

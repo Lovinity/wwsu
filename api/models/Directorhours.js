@@ -1,16 +1,9 @@
-/* global Directorhours, sails */
-
 /**
  * Directorhours.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
-
-var fs = require('fs');
-var readline = require('readline');
-var {OAuth2Client} = require('google-auth-library');
-var breakdance = require('breakdance');
 
 module.exports = {
     // We do not want this data to be persistent as it is being grabbed from Google Calendar

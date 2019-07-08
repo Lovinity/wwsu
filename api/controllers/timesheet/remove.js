@@ -1,5 +1,3 @@
-/* global sails, Directors, Timesheet, moment, Directorhours */
-
 module.exports = {
 
     friendlyName: 'Timesheet / Remove',
@@ -24,10 +22,12 @@ module.exports = {
 
             // Update the timesheet record
             var records = await Timesheet.destroy({ID: inputs.ID}).fetch();
+
+            // If there are no more timesheet records for this Google Calendar entry, also remove the director hours entry
             var IDs = [];
             records.map((record) => IDs.push(record.unique));
             if (IDs.length > 0)
-                await Directorhours.destroy({unique: IDs}).fetch();
+                {await Directorhours.destroy({unique: IDs}).fetch();}
 
             // Force a re-load of all directors to update any possible changes in presence
             await Directors.updateDirectors();

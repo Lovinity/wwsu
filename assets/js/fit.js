@@ -6,9 +6,9 @@ var fit = (function() {
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         Constants
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
 
@@ -25,9 +25,9 @@ var fit = (function() {
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         Globals
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
 
@@ -49,9 +49,9 @@ var fit = (function() {
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         Utilities
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
 
@@ -84,7 +84,7 @@ var fit = (function() {
 
         for ( var i = 0, n = list.length; i < n; i++ )
 
-            out[ i ] = func( list[ i ] );
+            {out[ i ] = func( list[ i ] );}
 
         return out;
     }
@@ -95,9 +95,9 @@ var fit = (function() {
 
         for ( var key in source )
 
-            if ( !( key in target ) )
+            {if ( !( key in target ) )
 
-                target[ key ] = source[ key ];
+                {target[ key ] = source[ key ];}}
 
         return target;
     }
@@ -108,19 +108,19 @@ var fit = (function() {
 
         if ( !vendor ) {
 
-            var name, style = getStyle( doc.body ), test = TRANSFORM;
+            var name; var style = getStyle( doc.body ); var test = TRANSFORM;
 
             for ( var i = 0, n = VENDORS.length; i < n; i++ ) {
 
                 vendor = VENDORS[i];
                 name = vendor + test;
 
-                if ( name in style ) break;
+                if ( name in style ) {break;}
 
                 vendor = vendor.replace( /^(\w)/, toUpperCase );
                 name = vendor + test;
 
-                if ( name in style ) break;
+                if ( name in style ) {break;}
             }
         }
 
@@ -136,38 +136,38 @@ var fit = (function() {
 
         if ( ctm.length < 6 )
 
-            return [ 1, 0, 0, 1, 0, 0 ];
+            {return [ 1, 0, 0, 1, 0, 0 ];}
 
         for ( var i = 0; i < 16; i++ ){
             if (i < ctm.length)
-                ctm[i] = parseFloat( ctm[i] );
+                {ctm[i] = parseFloat( ctm[i] );}
         }
-      
+
         return ctm;
     }
 
     if( !Array.prototype.indexOf ){
 
         Array.prototype.indexOf = function( object ) {
-            
+
             for( var i = 0; i < this.length; ++i )
 
-                if( this[i] == object ) return i
+                {if( this[i] == object ) {return i;}}
 
             return -1;
-        }
+        };
     }
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         Transform methods
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
 
     function cssTransform( transform, element ) {
-        
+
         var matrix = getMatrix( element );
 
         matrix[0] = transform.scale;
@@ -175,9 +175,9 @@ var fit = (function() {
         matrix[4] += transform.tx;
         matrix[5] += transform.ty;
 
-        var fixed = map( matrix, function( n ) { return n.toFixed( 6 ); }).slice(0,6);
+        var fixed = map( matrix, ( n ) => { return n.toFixed( 6 ); }).slice(0,6);
 
-       
+
         element.style[ prefix( TRANSFORM_ORIGIN ) ] = '0 0';
         element.style[ prefix( TRANSFORM ) ] = 'matrix(' + fixed.join( ',' ) + ')';
     }
@@ -190,24 +190,24 @@ var fit = (function() {
 
         if ( style.position === 'static' )
 
-            element.style.position = 'relative';
-        
+            {element.style.position = 'relative';}
+
         element.style.left = left + transform.tx + PX;
         element.style.top = top + transform.ty + PX;
-        
+
         element.style.height = transform.height + PX;
         element.style.width = transform.width + PX;
     }
 
     function cssMargin( transform, element ) {
-        
+
         var style = getStyle( element );
         var left = parseFloat( style.marginLeft ) || 0;
         var top = parseFloat( style.marginTop ) || 0;
-        
+
         element.style.marginLeft = left + transform.tx + PX;
         element.style.marginTop = top + transform.ty + PX;
-        
+
         element.style.height = transform.height + PX;
         element.style.width = transform.width + PX;
     }
@@ -222,9 +222,9 @@ var fit = (function() {
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         Given an element or object, defines a standard rectangle
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
 
@@ -233,7 +233,7 @@ var fit = (function() {
         if ( target.nodeType && target.nodeType == 1 ) {
 
             var bounds = target.getBoundingClientRect();
-            
+
             target = {
                 height: target.offsetHeight,
                 width: target.offsetWidth,
@@ -244,20 +244,20 @@ var fit = (function() {
 
         if ( !isNumber( target.x ) && isNumber( target.left ) )
 
-            target.x = target.left;
+            {target.x = target.left;}
 
         if ( !isNumber( target.y ) && isNumber( target.top ) )
 
-            target.y = target.top;
+            {target.y = target.top;}
 
         return target;
     }
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         Event Handlers
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
 
@@ -277,7 +277,7 @@ var fit = (function() {
 
             for ( var i = 0, n = watching.length; i < n; i++ )
 
-                watching[ i ]();
+                {watching[ i ]();}
 
             then = now;
         }
@@ -285,19 +285,19 @@ var fit = (function() {
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         Fit
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
-    
-    // Cache last saved value to prevent 'NaN' values 
-    // when calculating transform.scale 
-    
-    var lastSavedRectWidth,
-        lastSavedRectHeight, 
-        lastSavedAreaWidth, 
-        lastSavedAreaHeight;
+
+    // Cache last saved value to prevent 'NaN' values
+    // when calculating transform.scale
+
+    var lastSavedRectWidth;
+        var lastSavedRectHeight;
+        var lastSavedAreaWidth;
+        var lastSavedAreaHeight;
 
     function fit( target, container, options, callback, transform ) {
 
@@ -307,10 +307,10 @@ var fit = (function() {
         var area = toRectangle( container );
 
         // Compute position offset and scale
-        
+
         var wa = rect.width === 0 ? lastSavedRectWidth : rect.width;
         var ha = rect.height === 0 ? lastSavedAreaHeight : rect.height;
-        
+
         var wb = area.width === 0 ? lastSavedAreaWidth : area.width;
         var hb = area.height === 0 ? lastSavedAreaHeight : area.height;
 
@@ -318,16 +318,16 @@ var fit = (function() {
         lastSavedRectHeight = ha;
         lastSavedAreaWidth = wb;
         lastSavedAreaHeight = hb;
-        
+
         var sx = wb / wa;
         var sy = hb / ha;
-        
+
         var ra = wa / ha;
         var rb = wb / hb;
-        
+
         var sH = options.cover ? sy : sx;
         var sV = options.cover ? sx : sy;
-        
+
         var scale = ra >= rb ? sH : sV;
         var w = wa * scale;
         var h = ha * scale;
@@ -338,13 +338,13 @@ var fit = (function() {
         // Build / modify transform object
 
         transform = transform || {};
-                
+
         transform.tx = ( area.x - tx ) - rect.x;
         transform.ty = ( area.y - ty ) - rect.y;
-            
+
         transform.x = ( area.x - tx ) - rect.x * scale;
         transform.y = ( area.y - ty ) - rect.y * scale;
-            
+
         transform.height = rect.height * scale;
         transform.width = rect.width * scale;
 
@@ -354,17 +354,17 @@ var fit = (function() {
 
         if ( callback )
 
-            callback( transform, target );
+            {callback( transform, target );}
 
         else if ( options.apply ) {
 
-            if (typeof(HTMLElement) != 'undefined' && target instanceof HTMLElement )
+            if (typeof(HTMLElement) !== 'undefined' && target instanceof HTMLElement )
 
-                callback = cssTransform;
+                {callback = cssTransform;}
 
             else
 
-                callback = rectangle;
+                {callback = rectangle;}
 
             callback( transform, target );
         }
@@ -378,7 +378,7 @@ var fit = (function() {
 
         if ( !target || !container )
 
-            throw 'You must supply a target and a container';
+            {throw 'You must supply a target and a container';}
 
         if ( typeof options === 'function' ) {
 
@@ -421,11 +421,11 @@ var fit = (function() {
 
                 if ( !~index )
 
-                    watching.push( transform.trigger );
+                    {watching.push( transform.trigger );}
 
                 if ( !suppress )
 
-                    transform.trigger();
+                    {transform.trigger();}
             };
 
             transform.off = function() {
@@ -434,7 +434,7 @@ var fit = (function() {
 
                 if ( !!~index )
 
-                    watching.splice( index, 1 );
+                    {watching.splice( index, 1 );}
             };
 
             transform.on( true );
@@ -445,9 +445,9 @@ var fit = (function() {
 
     /*
     ————————————————————————————————————————————————————————————————————————————————
-    
+
         API
-    
+
     ————————————————————————————————————————————————————————————————————————————————
     */
 

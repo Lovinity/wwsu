@@ -1,6 +1,4 @@
-/* global Songs, History, sails, Logs, moment */
-
-require("moment-duration-format");
+require('moment-duration-format');
 
 module.exports = {
 
@@ -18,14 +16,14 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper songs.getSpins called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            // Get the track
             var song = await Songs.findOne({ ID: inputs.ID });
             sails.log.silly(`Song: ${song}`);
 
             // Reject if no song was returned
             if (!song)
-                return exits.error(new Error("The song was not found."));
+                {return exits.error(new Error('The song was not found.'));}
 
             // Get history from RadioDJ
             var history = await History.find({ artist: song.artist, title: song.title }).sort(`date_played ASC`);
@@ -49,30 +47,30 @@ module.exports = {
                 var automation = [];
                 var logged = [];
                 history.map(record => {
-                    automation.push(moment(record.date_played).format("LLL"));
+                    automation.push(moment(record.date_played).format('LLL'));
                     if (moment(record.date_played).isAfter(lastplayed))
-                        lastplayed = moment(record.date_played);
+                        {lastplayed = moment(record.date_played);}
                     if (moment(record.date_played).isAfter(moment().subtract(1, 'weeks')))
-                        spins7 += 1;
+                        {spins7 += 1;}
                     if (moment(record.date_played).isAfter(moment().subtract(1, 'months')))
-                        spins30 += 1;
+                        {spins30 += 1;}
                     if (moment(record.date_played).isAfter(moment().subtract(1, 'years')))
-                        spins365 += 1;
+                        {spins365 += 1;}
                     if (moment(record.date_played).isAfter(moment().startOf('year')))
-                        spinsYTD += 1;
+                        {spinsYTD += 1;}
                 });
                 history2.map(record => {
-                    logged.push(moment(record.createdAt).format("LLL"));
+                    logged.push(moment(record.createdAt).format('LLL'));
                     if (moment(record.createdAt).isAfter(lastplayed))
-                        lastplayed = moment(record.createdAt);
+                        {lastplayed = moment(record.createdAt);}
                     if (moment(record.createdAt).isAfter(moment().subtract(1, 'weeks')))
-                        spins7 += 1;
+                        {spins7 += 1;}
                     if (moment(record.createdAt).isAfter(moment().subtract(1, 'months')))
-                        spins30 += 1;
+                        {spins30 += 1;}
                     if (moment(record.createdAt).isAfter(moment().subtract(1, 'years')))
-                        spins365 += 1;
+                        {spins365 += 1;}
                     if (moment(record.createdAt).isAfter(moment().startOf('year')))
-                        spinsYTD += 1;
+                        {spinsYTD += 1;}
                 });
 
                 return exits.success({ 7: spins7, 30: spins30, 'YTD': spinsYTD, 365: spins365, automation: automation, logged: logged });

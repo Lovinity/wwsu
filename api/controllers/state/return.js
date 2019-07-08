@@ -1,7 +1,3 @@
-/* global sails, Meta, Logs, moment, Status, Xp */
-const UrlSafeString = require('url-safe-string'),
-        tagGenerator = new UrlSafeString();
-
 module.exports = {
 
     friendlyName: 'State / Return',
@@ -18,7 +14,7 @@ module.exports = {
         try {
             // Block this request if we are already changing states
             if (Meta['A'].changingState !== null)
-                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+                {return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));}
 
             // Lock so that other state changing requests get blocked until we are done
             await Meta.changeMeta({changingState: `Returning from break`});
@@ -53,16 +49,17 @@ module.exports = {
 
                 // Queue a sports liner
                 if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
-                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]["Sports Liners"]], 'Bottom', 1);
+                    {await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]['Sports Liners']], 'Bottom', 1);}
 
                 var queueLength = await sails.helpers.songs.calculateQueueLength();
 
+                // If queue is unacceptably long, try to speed the process up.
                 if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
                 {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
                     //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
                     if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
-                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
+                        {await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);} // Skip currently playing track if it is not a noClearShow track
 
                     queueLength = await sails.helpers.songs.calculateQueueLength();
                 }
@@ -79,9 +76,6 @@ module.exports = {
 
 
             } else {
-                var d = new Date();
-                var num = d.getMinutes();
-
                 Status.errorCheck.prevBreak = moment();
 
                 // Do stuff depending on the state
@@ -94,9 +88,9 @@ module.exports = {
                         // Queue a show return if there is one
                         if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                         {
-                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Returns"]], 'Bottom', 1);
+                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]['Show Returns']], 'Bottom', 1);
                         } else {
-                            await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
+                            await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Returns']], 'Bottom', 1);
                         }
 
                         await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning'});
@@ -105,14 +99,14 @@ module.exports = {
                         // Queue after break
                         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after);
 
-                        var queueLength = await sails.helpers.songs.calculateQueueLength();
+                        queueLength = await sails.helpers.songs.calculateQueueLength();
 
                         if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
                         {
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
                             //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
                             if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
-                                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
+                                {await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);} // Skip currently playing track if it is not a noClearShow track
 
                             queueLength = await sails.helpers.songs.calculateQueueLength();
                         }
@@ -127,9 +121,9 @@ module.exports = {
                         // Queue a show return if there is one
                         if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                         {
-                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Returns"]], 'Bottom', 1);
+                            await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]['Show Returns']], 'Bottom', 1);
                         } else {
-                            await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Returns"]], 'Bottom', 1);
+                            await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Returns']], 'Bottom', 1);
                         }
                         await Meta.changeMeta({queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'remote_returning'});
                         break;
@@ -137,14 +131,14 @@ module.exports = {
                     case 'sportsremote_break_disconnected':
                         // Queue after break
                         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after);
-                        var queueLength = await sails.helpers.songs.calculateQueueLength();
+                        queueLength = await sails.helpers.songs.calculateQueueLength();
 
                         if (queueLength >= sails.config.custom.queueCorrection.sportsReturn)
                         {
                             await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
                             //await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
                             if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(Meta['A'].trackIDSubcat) !== -1))
-                                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
+                                {await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);} // Skip currently playing track if it is not a noClearShow track
 
                             queueLength = await sails.helpers.songs.calculateQueueLength();
                         }

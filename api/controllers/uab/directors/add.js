@@ -1,4 +1,3 @@
-/* global moment, sails, Xp, Djs, Directors */
 const bcrypt = require('bcrypt');
 module.exports = {
 

@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs */
-
 module.exports = {
 
     friendlyName: 'break.execute',
@@ -41,34 +39,34 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper requests.get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             switch (inputs.task)
             {
                 // Log an entry
-                case "log":
+                case 'log':
                     await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: 'automation', event: `<strong>${inputs.event}</strong>`}).fetch()
-                            .tolerate((err) => {
+                            .tolerate(() => {
                             });
                     break;
                     // Add requested tracks
-                case "queueRequests":
+                case 'queueRequests':
                     await sails.helpers.requests.queue(inputs.quantity, true, true);
                     break;
                     // Queue tracks from a configured categories.category
-                case "queue":
+                case 'queue':
                     await sails.helpers.songs.queue(sails.config.custom.subcats[inputs.category], 'Top', inputs.quantity, inputs.rules, null);
                     break;
                     // Re-queue any underwritings etc that were removed due to duplicate track checking
-                case "queueDuplicates":
+                case 'queueDuplicates':
                     await sails.helpers.songs.queuePending();
                     break;
-                case "queueUnderwritings":
+                    // Queue underwritings scheduled to air
+                case 'queueUnderwritings':
                     await sails.helpers.break.addUnderwritings(false, inputs.quantity);
                     break;
             }
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

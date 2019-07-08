@@ -1,6 +1,3 @@
-/* global sails, Logs, Xp, Calendar, Attendance */
-// TODO: Update doc
-
 module.exports = {
 
     friendlyName: 'xp / get',
@@ -21,7 +18,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller xp/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Get XP records
@@ -31,7 +27,7 @@ module.exports = {
 
                 return exits.success(records);
             } else {
-                
+
                 // Join xp socket if applicable
                 if (this.req.isSocket)
                 {

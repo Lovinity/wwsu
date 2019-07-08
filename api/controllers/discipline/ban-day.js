@@ -1,7 +1,4 @@
-/* global sails */
-
 // DEPRECATED
-
 module.exports = {
 
     friendlyName: 'Discipline / banDay',

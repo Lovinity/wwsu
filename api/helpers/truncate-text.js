@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'Truncate text',
@@ -30,7 +28,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper truncateText called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+
         if (inputs.str.length > inputs.strLength) {
             return exits.success(inputs.str.substring(0, inputs.strLength - inputs.ending.length) + inputs.ending);
         } else {

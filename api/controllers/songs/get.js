@@ -1,5 +1,3 @@
-/* global sails, Subcategory, Songs, Category, Logs, History, Genre, Promise */
-
 module.exports = {
 
     friendlyName: 'songs / get',
@@ -18,13 +16,13 @@ module.exports = {
             description: 'Search by provided artist or title.'
         },
         category: {
-            type: "string",
+            type: 'string',
             custom: (value) => {
                 if (typeof sails.config.custom.subcats[value] === `undefined`)
-                    return false;
+                    {return false;}
                 return true;
             },
-            description: "Optionally filter by configured Node music category."
+            description: 'Optionally filter by configured Node music category.'
         },
         subcategory: {
             type: 'number',
@@ -66,37 +64,35 @@ module.exports = {
         try {
 
             // Get the client IP address
-            var from_IP = await sails.helpers.getIp(this.req);
+            var fromIP = await sails.helpers.getIp(this.req);
 
-            var subcatIDs = [];
             var cats = {};
-            var subcats = {};
             var query = {};
             var songs = [];
-            var id_subcat = [];
 
             // No song ID specified?
             if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
+                // LINT: id_subcat and id_genre may indicate as not in camel case but IT CANNOT BE CHANGED; this is how it is in the RadioDJ database.
                 query.id_subcat = sails.config.custom.subcats.music;
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
-                    query.id_subcat = [];
+                    {query.id_subcat = [];}
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
-                    query.id_subcat.push(inputs.subcategory);
+                    {query.id_subcat.push(inputs.subcategory);}
                 if (inputs.category !== 'undefined' && inputs.category !== null && typeof sails.config.custom.subcats[inputs.category] !== `undefined`)
-                    query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats[inputs.category]);
+                    {query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats[inputs.category]);}
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)
-                    query.id_genre = inputs.genre;
+                    {query.id_genre = inputs.genre;}
 
                 // Filter by search string, if provided
-                if (typeof inputs.search !== 'undefined' && inputs.search !== null && inputs.search !== "")
-                    query.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];
+                if (typeof inputs.search !== 'undefined' && inputs.search !== null && inputs.search !== '')
+                    {query.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];}
 
                 songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
 
                 // No songs returned? send "false" to indicate we are at the end of the list.
                 if (songs.length === 0)
-                    return exits.success(false);
+                    {return exits.success(false);}
 
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
 
@@ -110,13 +106,13 @@ module.exports = {
 
                 // No record retrieved? Assume we could not find the song.
                 if (!songs || typeof songs === 'undefined' || songs.length <= 0)
-                    return exits.notFound();
+                    {return exits.notFound();}
 
                 // grab RadioDJ categories and put them in memory.
                 var cats2 = await Category.find();
                 sails.log.verbose(`Categories retrieved: ${cats2.length}`);
                 sails.log.silly(cats2);
-                cats2.map(cat => cats[cat.ID] = cat.name);
+                cats2.map(cat => {cats[cat.ID] = cat.name;});
 
                 // Add additional data to the song(s), such as request ability, category info, and spin counts.
                 var maps = songs.map(async (song, index) => {
@@ -142,14 +138,14 @@ module.exports = {
 
             // If songs is undefined at this point, that is an internal error!
             if (typeof songs === 'undefined')
-                return exits.error(new Error(`Internal error: No songs returned!`));
+                {return exits.error(new Error(`Internal error: No songs returned!`));}
 
             // grab RadioDJ genres and put them in memory.
             var genres = {};
             var genre = await Genre.find();
             sails.log.verbose(`Genres retrieved: ${genre.length}`);
             sails.log.silly(genre);
-            genre.map(genrea => genres[genrea.ID] = genrea.name);
+            genre.map(genrea => {genres[genrea.ID] = genrea.name;});
 
             // Add genre data to the songs
             songs.map((song, index) => {

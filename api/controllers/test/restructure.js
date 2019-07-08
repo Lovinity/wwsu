@@ -1,5 +1,3 @@
-/* global Playlists_list, Songs */
-
 module.exports = {
 
 
@@ -30,7 +28,7 @@ module.exports = {
       });
       var subcats = [];
       genres.forEach(function(genre) {
-         subcats.push(genre.ID); 
+         subcats.push(genre.ID);
          subcatsO[genre.ID] = genre.name;
       });
       console.log(subcats.length);
@@ -45,7 +43,7 @@ module.exports = {
           }
       }
       */
-     
+
      var tracks = await Playlists_list.find({pID: [14,15,16,18,24,26,27]});
      var trackUpdate = [];
      tracks.map(track => trackUpdate.push(track.sID));

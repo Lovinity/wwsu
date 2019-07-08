@@ -1,6 +1,3 @@
-/* global sails, Xp, Djs, Attendance, moment */
-// TODO: Update doc
-
 module.exports = {
 
     friendlyName: 'djs / get',
@@ -22,13 +19,13 @@ module.exports = {
         sails.log.debug('Controller djs/get called.');
 
         try {
-            
+
             if (!inputs.dj)
             {
             // Grab DJs
             var records = await Djs.find();
-            
-            // Remove login information from the records
+
+            // Remove login information from the returned records
             records = records.map(record => {
                 delete record.login;
                 return record;
@@ -50,19 +47,19 @@ module.exports = {
             } else {
                 return exits.success(records);
             }
-            
+
             } else {
-                
+
                 var record = await Djs.findOne({ID: inputs.dj});
                 var returnData = {startOfSemester: moment(sails.config.custom.startOfSemester).toISOString(true)};
-                
+
                 if (!record || record === null)
-                    return exits.success({});
-                
+                    {return exits.success({});}
+
                 returnData.XP = await Xp.find({dj: inputs.dj});
                 returnData.attendance = await Attendance.find({dj: inputs.dj});
                 returnData.stats = await sails.helpers.analytics.showtime(inputs.dj);
-                
+
                 return exits.success(returnData);
             }
 

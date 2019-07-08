@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'Underwritings / Get',
@@ -17,14 +15,14 @@ module.exports = {
             var records = await Underwritings.find();
             sails.log.verbose(`Underwritings records retrieved: ${records.length}.`);
             sails.log.silly(records);
-            
+
             // Subscribe to websocket if applicable
             if (this.req.isSocket)
             {
                 sails.sockets.join(this.req, 'underwritings');
                 sails.log.verbose('Request was a socket. Joining underwritings.');
             }
-            
+
             return exits.success(records);
         } catch (e) {
             return exits.error(e);

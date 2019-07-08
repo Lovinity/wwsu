@@ -1,5 +1,3 @@
-/* global _, sails */
-
 // TODO: Use lodash instead of this
 module.exports = {
 
@@ -20,7 +18,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper shuffle called.');
-        var currentIndex = inputs.array.length, temporaryValue, randomIndex;
+        var currentIndex = inputs.array.length; var temporaryValue; var randomIndex;
 
         // While there remain elements to shuffle...
         while (0 !== currentIndex) {

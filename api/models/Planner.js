@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
     datastore: 'nodebase',
     attributes: {
@@ -12,25 +10,25 @@ module.exports = {
             type: 'string',
             required: true,
         },
-        
+
         show: {
             type: 'string',
             required: true,
         },
-        
+
         priority: {
             type: 'number',
             allowNull: true
         },
-        
+
         proposal: {
             type: 'json',
         },
-        
+
         actual: {
             type: 'json',
         }
-        
+
     },
 
     // Websockets standards

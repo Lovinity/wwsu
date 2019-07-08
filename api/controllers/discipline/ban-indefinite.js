@@ -1,5 +1,3 @@
-/* global sails */
-
 // DEPRECATED
 
 module.exports = {

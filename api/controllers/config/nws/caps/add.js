@@ -1,5 +1,3 @@
-/* global sails */
-
 module.exports = {
 
     friendlyName: 'config / nws / caps / add',
@@ -31,10 +29,10 @@ module.exports = {
             var exists = false;
             sails.config.custom.EAS.NWSX
                     .filter((caps) => caps.code === inputs.code)
-                    .map(() => exists = true);
-            
+                    .map(() => {exists = true;});
+
             if (!exists)
-                sails.config.custom.EAS.NWSX.push(inputs);
+                {sails.config.custom.EAS.NWSX.push(inputs);}
 
             // broadcast changes over websockets
             sails.sockets.broadcast('config', 'config', {update: {EAS: sails.config.custom.EAS}});

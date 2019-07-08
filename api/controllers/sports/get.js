@@ -1,5 +1,3 @@
-/* global Sports, sails */
-
 module.exports = {
 
     friendlyName: 'Sports / Get',
@@ -15,8 +13,6 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
-
-        // All done.
 
         if (this.req.isSocket)
         {

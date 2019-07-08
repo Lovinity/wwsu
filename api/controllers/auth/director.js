@@ -1,4 +1,3 @@
-/* global Hosts, sails, Djs, host, Directors, DJ */
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 module.exports = {
@@ -41,13 +40,13 @@ module.exports = {
             // Verify the Director exists first
             var director = await Directors.findOne({name: inputs.username});
             if (!director)
-                return exits.noToken({errToken: "The provided director either does not exist or is not authorized."});
-            
+                {return exits.noToken({errToken: 'The provided director either does not exist or is not authorized.'});}
+
             // Now check the password
             var match = await bcrypt.compare(inputs.password, director.login);
-            
+
             if (!match)
-                return exits.noToken({errToken: "The provided director either does not exist or is not authorized."});
+                {return exits.noToken({errToken: 'The provided director either does not exist or is not authorized.'});}
 
             // Generate the token valid for 10 minutes
             var token = jwt.sign({name: director.name, exp: Math.floor(Date.now() / 1000) + (60 * 10)}, sails.config.custom.secrets.director, {subject: 'director'});

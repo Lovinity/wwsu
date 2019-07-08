@@ -1,5 +1,3 @@
-/* global sails, Subcategory, songs, Category, Genre */
-
 module.exports = {
 
     friendlyName: 'songs / get-genres',

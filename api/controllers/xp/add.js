@@ -1,5 +1,3 @@
-/* global moment, sails, Xp */
-
 module.exports = {
 
     friendlyName: 'xp / add',
@@ -48,16 +46,15 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller xp/add called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         // No dj nor djArray? Error!
         if ((!inputs.djs || inputs.djs.length <= 0))
-            return exits.error("You are required to provide either a dj parameter, or a djArray array.");
-        
+            {return exits.error('You are required to provide either a dj parameter, or a djArray array.');}
+
         try {
-            
+
             var records = [];
-            
+
             // Process the records depending on whether we have a single dj, or an array in djArray.
             if ((!inputs.djs || inputs.djs.length <= 0))
             {
@@ -65,7 +62,7 @@ module.exports = {
             } else {
                 inputs.djs.map(dj => records.push({dj: dj, type: inputs.type, subtype: inputs.subtype, description: inputs.description, amount: inputs.amount, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true)}));
             }
-            
+
             // Add the records
             await Xp.createEach(records).fetch();
 

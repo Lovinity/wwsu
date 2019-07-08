@@ -28,7 +28,7 @@ module.exports = {
             type: 'ref',
             columnType: 'datetime'
         }
-        
+
     },
 
     // Websockets standards

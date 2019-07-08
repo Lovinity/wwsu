@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs, needle, Songs */
-
 module.exports = {
 
     friendlyName: 'rest.cmd',
@@ -31,11 +29,12 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper rest.cmd called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+
         var endstring = ''; // appends at the end of a REST call, say, if arg was supplied
+
         // arg supplied? Load it in memory.
         if (typeof inputs.arg !== 'undefined' && inputs.arg !== null)
-            endstring = '&arg=' + inputs.arg;
+            {endstring = '&arg=' + inputs.arg;}
 
         // If timeout is 0, resolve the promise but continue execution (so do not return it).
         if (inputs.timeout === 0)
@@ -46,18 +45,20 @@ module.exports = {
 
         try {
             // Query REST
+            // LINT: do NOT camel case; these are needle parameters.
+            // eslint-disable-next-line camelcase
             needle('get', Meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, {open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout, headers: {'Content-Type': 'application/json'}})
-                    .then(async function (resp) {
+                    .then(async () => {
                         try {
                             return exits.success(true);
-                        } catch (e) {
+                        } catch (unusedE) {
                             return exits.success(false);
                         }
                     })
-                    .catch(async function (err) {
+                    .catch(async () => {
                         return exits.success(false);
                     });
-        } catch (e) {
+        } catch (unusedE2) {
             return exits.success(false);
         }
     }

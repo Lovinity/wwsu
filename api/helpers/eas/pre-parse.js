@@ -1,5 +1,3 @@
-/* global Eas, sails */
-
 module.exports = {
 
     friendlyName: 'eas.preParse',

@@ -1,5 +1,3 @@
-/* global _, sails */
-
 module.exports = {
 
     friendlyName: 'asyncForEach',
@@ -28,8 +26,8 @@ module.exports = {
         try {
             // No length? No call!
             if (typeof inputs.array === 'undefined' || typeof inputs.array.length === 'undefined')
-                return exits.success();
-            
+                {return exits.success();}
+
             // Loop through each item in the array
             for (let index = 0; index < inputs.array.length; index++) {
                 sails.log.silly(`Calling iteration ${index}`);

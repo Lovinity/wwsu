@@ -1,5 +1,3 @@
-/* global sails, Recipients */
-
 module.exports = {
 
     friendlyName: 'Recipients / Add-display',
@@ -19,18 +17,18 @@ module.exports = {
         try {
             // Request must be a socket
             if (!this.req.isSocket)
-                return exits.error(new Error('This controller requires a websocket.'));
+                {return exits.error(new Error('This controller requires a websocket.'));}
 
                 var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.host, 'display', inputs.host);
-                
+
                 // Join display-refresh to receive requests to refresh the display signs
                 sails.sockets.join(this.req, 'display-refresh');
-                
+
                 // Join a messages socket to receive messages sent to this display sign
                 sails.sockets.join(this.req, `messages-${inputs.host}`);
-                
+
                 sails.log.verbose('Request was a display host. Joined display-refresh and messages-(host).');
-                
+
                 // Return the nickname for this host as a label object
                 return exits.success({label: label});
         } catch (e) {

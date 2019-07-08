@@ -1,5 +1,3 @@
-/* global sails, moment */
-
 module.exports = {
 
     friendlyName: 'EAS / Send',
@@ -43,14 +41,14 @@ module.exports = {
             allowNull: true,
             description: `moment() parsable string of when the alert expires. Recommended ISO string.`
         },
-        
+
         color: {
             type: 'string',
             regex: /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i,
             description: 'Hex color representing this alert.',
             required: true
         },
-        
+
         information: {
             type: 'string',
             required: true,
@@ -63,14 +61,13 @@ module.exports = {
         sails.log.debug('Controller eas/send called.');
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
-            
+
             // Add the alert to EAS
             await sails.helpers.eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, inputs.starts !== null && typeof inputs.starts !== 'undefined' ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), inputs.expires !== null && typeof inputs.expires !== 'undefined' ? moment(inputs.expires).toISOString(true) : moment().add(15, 'minutes').toISOString(true), inputs.color, inputs.information);
-            
+
             // Process post tasks (this is what actually pushes the new alert out)
             await sails.helpers.eas.postParse();
-            
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

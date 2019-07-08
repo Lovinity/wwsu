@@ -1,5 +1,3 @@
-/* global Calendar, sails, Directorhours, _ */
-
 module.exports = {
 
     friendlyName: 'config / sports / add',

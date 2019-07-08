@@ -1,4 +1,3 @@
-/* global sails, Xp, Attendance, _, Djs, Listeners, Promise, Meta */
 module.exports = {
 
     friendlyName: 'djs / edit',
@@ -52,21 +51,21 @@ module.exports = {
 
                         // Update all listeners records
                         await Listeners.update({dj: record.ID}, {dj: inputs.ID}).fetch();
-                        
+
                         // Remove the original record
                         await Djs.destroy({ID: record.ID}).fetch();
-                        
+
                         // Edit meta if necessary
                         if (Meta['A'].dj === record.ID)
-                            Meta.changeMeta({dj: inputs.ID});
+                            {Meta.changeMeta({dj: inputs.ID});}
                     });
                     await Promise.all(maps);
                 }
             }
-            
+
             // Encrypt login
             if (inputs.login !== null && typeof inputs.login !== 'undefined')
-                criteria.login = bcrypt.hashSync(inputs.login, 10);
+                {criteria.login = bcrypt.hashSync(inputs.login, 10);}
 
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             var criteriaB = _.cloneDeep(criteria);

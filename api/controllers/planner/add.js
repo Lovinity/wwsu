@@ -1,5 +1,3 @@
-/* global _, sails, Planner */
-
 module.exports = {
 
     friendlyName: 'Planner / add',
@@ -26,14 +24,14 @@ module.exports = {
             required: true,
             custom: (value) => {
                 if (!_.isArray(value))
-                    return false;
+                    {return false;}
                 if (value.length < 1)
-                    return true;
+                    {return true;}
 
                 var valid = true;
                 value.map((val) => {
                     if (!valid)
-                        return null;
+                        {return null;}
 
                     if (typeof val !== 'object')
                     {
@@ -61,9 +59,9 @@ module.exports = {
         sails.log.debug('Controller planner/add called.');
 
         try {
-            
+
             await Planner.create({dj: inputs.dj, show: inputs.show, priority: inputs.priority, proposal: inputs.proposal}).fetch();
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

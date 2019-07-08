@@ -1,5 +1,3 @@
-/* global sails, Meta, Logs, Status, moment */
-
 module.exports = {
 
     friendlyName: 'State / Remote',
@@ -17,9 +15,9 @@ module.exports = {
             type: 'string',
             required: true,
             custom: function (value) {
-                var temp2 = value.split(" - ");
+                var temp2 = value.split(' - ');
                 if (temp2.length === 2)
-                    return true;
+                    {return true;}
                 return false;
             },
             description: 'Name of the broadcast beginning. It must follow the format "Show host - show name".'
@@ -38,12 +36,12 @@ module.exports = {
 
         try {
             // Do not continue if not in automation mode; client should request automation before requesting remote
-            if (!Meta['A'].state.startsWith("automation_") && !Meta['A'].state.startsWith("remote_"))
-                return exits.error(new Error(`Cannot execute state/remote unless in automation or remote. Please go to automation first.`));
+            if (!Meta['A'].state.startsWith('automation_') && !Meta['A'].state.startsWith('remote_'))
+                {return exits.error(new Error(`Cannot execute state/remote unless in automation or remote. Please go to automation first.`));}
 
             // Block this request if we are changing states right now
             if (Meta['A'].changingState !== null)
-                return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));
+                {return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`));}
 
             // Lock so that other state changing requests get blocked until we are done.
             await Meta.changeMeta({changingState: `Switching to remote`});
@@ -65,7 +63,7 @@ module.exports = {
             await Meta.changeMeta({show: inputs.showname, topic: inputs.topic, trackStamp: null});
 
             // If we are not already in remote mode, prepare to go live in RadioDJ
-            if (!Meta['A'].state.startsWith("remote_"))
+            if (!Meta['A'].state.startsWith('remote_'))
             {
 
                 //await sails.helpers.error.count('goRemote');
@@ -82,25 +80,26 @@ module.exports = {
                 // Queue a show opener if there is one
                 if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined')
                 {
-                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]["Show Openers"]], 'Bottom', 1);
+                    await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]['Show Openers']], 'Bottom', 1);
                 } else {
-                    await sails.helpers.songs.queue([sails.config.custom.showcats["Default"]["Show Openers"]], 'Bottom', 1);
+                    await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Openers']], 'Bottom', 1);
                 }
 
                 await sails.helpers.rest.cmd('EnableAssisted', 0);
 
                 var queueLength = await sails.helpers.songs.calculateQueueLength();
 
+                // If radioDJ queue is unacceptably long, try to make it shorter.
                 if (queueLength >= sails.config.custom.queueCorrection.remote)
                 {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0); // Try to Disable autoDJ again in case it was mistakenly still active
                     //await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
-                    
+
                     // Add a PSA to give the DJ a little more time
                     await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
-                    
+
                     if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
-                        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
+                        {await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);} // Skip currently playing track if it is not a noClearShow track
 
                     queueLength = await sails.helpers.songs.calculateQueueLength();
                 }

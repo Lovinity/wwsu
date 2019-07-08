@@ -1,5 +1,3 @@
-/* global Directors, sails */
-
 module.exports = {
 
     friendlyName: 'Uab / directors / Get',
@@ -34,7 +32,7 @@ module.exports = {
             // If a username was specified, find only that director. Otherwise, get all directors.
             var query = {};
             if (inputs.username !== null)
-                query = {name: inputs.name};
+                {query = {name: inputs.name};}
 
             // Subscribe to websockets if applicable
             if (this.req.isSocket)
@@ -45,7 +43,7 @@ module.exports = {
 
             // Get records
             var records = await Uabdirectors.find(query);
-            
+
             // Remove the login parameter
             records = records.map(record => {
                 delete record.login;

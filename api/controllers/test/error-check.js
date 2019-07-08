@@ -1,5 +1,3 @@
-/* global Status */
-
 module.exports = {
 
 

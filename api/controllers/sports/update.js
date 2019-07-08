@@ -1,5 +1,3 @@
-/* global Sports */
-
 module.exports = {
 
     friendlyName: 'Update',

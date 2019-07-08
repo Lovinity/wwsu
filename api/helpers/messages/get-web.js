@@ -1,5 +1,3 @@
-/* global Messages, sails, moment */
-
 module.exports = {
 
     friendlyName: 'messages.getWeb',
@@ -16,7 +14,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper messages.getWeb called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             var searchto = moment().subtract(1, 'hours').toDate(); // Do not return messages more than 1 hour old
 
@@ -32,7 +29,6 @@ module.exports = {
                         ]
                     });
             sails.log.verbose(`Messages records retrieved: ${records.length}`);
-            sails.log.silly(records);
 
             // Return an empty array if no records were returned.
             if (typeof records === 'undefined' || records.length === 0)

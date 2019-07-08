@@ -1,5 +1,3 @@
-/* global sails, moment */
-
 module.exports = {
 
     friendlyName: 'config / xp / set',
@@ -57,7 +55,6 @@ module.exports = {
         sails.log.debug('Controller config/xp/set called.');
 
         try {
-            var returnData = {};
             // Set the new configuration of any and all values provided as input
             for (var key in inputs)
             {

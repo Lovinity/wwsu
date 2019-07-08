@@ -1,5 +1,3 @@
-/* global moment, sails, Timesheet */
-
 module.exports = {
 
     friendlyName: 'Timesheet / Get',
@@ -24,7 +22,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller timesheet/get called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             if (!inputs.date || inputs.date === null)
@@ -40,7 +37,7 @@ module.exports = {
             // Get a range of one week
             var start = inputs.date !== null ? moment(inputs.date).startOf('week') : moment().startOf('week');
             var end = moment(start).add(1, 'weeks');
-            
+
             // ...or a range of 14 days if fourteenDays is true
             if (inputs.fourteenDays)
             {

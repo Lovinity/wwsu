@@ -1,5 +1,4 @@
-/* global sails, Recipients, _, moment, Status, Hosts, Promise */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -44,7 +43,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper recipients.add called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
 
             // Determine the status color based off of the group and recipient
@@ -108,7 +106,7 @@ module.exports = {
 
             // Put the socket ID in memory
             if (typeof Recipients.sockets[recipient.ID] === 'undefined')
-                Recipients.sockets[recipient.ID] = [];
+                {Recipients.sockets[recipient.ID] = [];}
 
             // Make sure we do not add the same socket more than once
             if (!_.includes(Recipients.sockets[recipient.ID], inputs.socket))

@@ -1,5 +1,3 @@
-/* global Eas, sails, moment, needle, Promise */
-
 module.exports = {
 
     friendlyName: 'eas.addAlert',
@@ -64,10 +62,11 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper eas.addAlert called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
+            var criteria = {};
 
             // Define a function for processing information into the Eas.pendingAlerts variable.
+            // Notably, this function ensures the same alert from different counties are joined together.
             var processPending = (criteria) => {
                 if (typeof Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined`)
                 {
@@ -83,14 +82,14 @@ module.exports = {
                             } else {
                                 var temp = Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key].split(', ');
                                 if (temp.indexOf(inputs.county) === -1)
-                                    temp.push(inputs.county);
+                                    {temp.push(inputs.county);}
                                 temp = temp.join(', ');
                                 Eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = temp;
                             }
                         }
                     }
                 }
-            }
+            };
 
             // Get the alert if it already exists in the database
             var record = await Eas.findOne({source: inputs.source, reference: inputs.reference})
@@ -103,11 +102,11 @@ module.exports = {
                 // Detect if the county issuing the alert is already in the alert. If not, add the county in.
                 var temp = record.counties.split(', ');
                 if (temp.indexOf(inputs.county) === -1)
-                    temp.push(inputs.county);
+                    {temp.push(inputs.county);}
                 temp = temp.join(', ');
 
                 // Prepare criteria to update
-                var criteria = {
+                criteria = {
                     source: inputs.source,
                     reference: inputs.reference,
                     alert: inputs.alert,
@@ -118,7 +117,7 @@ module.exports = {
                     expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, 'hours').toISOString(true)
                 };
                 if (typeof inputs.information !== 'undefined' && inputs.information !== null)
-                    criteria.information = inputs.information;
+                    {criteria.information = inputs.information;}
 
                 sails.log.silly(`Criteria: ${criteria}`);
 
@@ -146,7 +145,7 @@ module.exports = {
                 sails.log.verbose('Alert does not exist.');
 
                 // Prepare criteria
-                var criteria = {
+                criteria = {
                     source: inputs.source,
                     reference: inputs.reference,
                     alert: inputs.alert,
@@ -175,11 +174,11 @@ module.exports = {
                                             var alert = {};
 
                                             // Parse field information into the alert variable
-                                            entry.children.map(entry2 => alert[entry2.name] = entry2.value);
+                                            entry.children.map(entry2 => {alert[entry2.name] = entry2.value;});
 
                                             // Sometimes, EAS will return "This alert has expired". If so, leave information blank.
-                                            if (!alert.description.includes("This alert has expired"))
-                                                criteria.information = alert.description + ". Precautionary / Preparedness actions: " + alert.instruction;
+                                            if (!alert.description.includes('This alert has expired'))
+                                                {criteria.information = alert.description + '. Precautionary / Preparedness actions: ' + alert.instruction;}
                                             sails.log.silly(`Criteria: ${criteria}`);
                                             criteria._new = true;
                                             processPending(criteria);

@@ -1,4 +1,3 @@
-/* global Hosts, sails, Djs, host */
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 module.exports = {
@@ -41,19 +40,19 @@ module.exports = {
             // Verify the DJ exists first
             var dj = await Djs.findOne({name: inputs.username});
             if (!dj)
-                return exits.noToken({errToken: "The provided DJ either does not exist or is not authorized."});
-            
+                {return exits.noToken({errToken: 'The provided DJ either does not exist or is not authorized.'});}
+
             // Now check the password
             var match = await bcrypt.compare(inputs.password, dj.login);
-            
+
             if (!match)
-                return exits.noToken({errToken: "The provided DJ either does not exist or is not authorized."});
+                {return exits.noToken({errToken: 'The provided DJ either does not exist or is not authorized.'});}
 
             // Generate the token valid for 60 minutes
             var token = jwt.sign({name: dj.name, exp: Math.floor(Date.now() / 1000) + (60 * 60)}, sails.config.custom.secrets.dj, {subject: 'dj'});
 
             // Return the token as an object
-            return exits.success({token: token, expires: (60000 * 10)});
+            return exits.success({token: token, expires: (60000 * 60)});
         } catch (e) {
             return exits.error(e);
         }

@@ -1,5 +1,3 @@
-/* global Status, sails */
-
 module.exports = {
 
     friendlyName: 'error.reset helper',
@@ -12,7 +10,7 @@ module.exports = {
             required: true,
             custom: function (value) {
                 if (typeof Status.errorCheck[value] === 'object' && typeof Status.errorCheck[value].fn === 'function')
-                    return true;
+                    {return true;}
                 return false;
             },
             description: 'Name of the Status.errorCheck key to reset.'
@@ -21,7 +19,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper error.reset called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
             // Reset the error check count to 0.

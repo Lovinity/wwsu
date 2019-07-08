@@ -1,5 +1,3 @@
-/* global sails, Directors, Timesheet, moment, Uabtimesheet, Uabdirectors */
-
 module.exports = {
 
     friendlyName: 'Uab / Timesheet / Add',
@@ -22,24 +20,24 @@ module.exports = {
         sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-
+            var toapprove = false;
             // Get the director
             var record = await Uabdirectors.findOne({name: this.req.payload.name});
             sails.log.silly(record);
 
             // No director? return not found.
             if (typeof record === 'undefined' || record.length <= 0)
-                return exits.notFound();
+                {return exits.notFound();}
 
             // If the director is present, this is a clock-out entry.
             if (record.present)
             {
-                var toapprove = false;
+                toapprove = false;
                 thetime = moment(inputs.timestamp);
 
                 // If the entry is less than 30 minutes off from the current time, approve automatically
                 if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))
-                    toapprove = true;
+                    {toapprove = true;}
 
                 // Add the time_out entry
                 await Uabtimesheet.update({time_in: {'!=': null}, time_out: null, name: record.name}, {time_out: thetime.toISOString(true), approved: toapprove}).fetch();
@@ -49,12 +47,12 @@ module.exports = {
                         .fetch();
 
             } else { // If the director is not present, this is a clock-in entry.
-                var toapprove = false;
+                toapprove = false;
                 thetime = moment(inputs.timestamp);
 
                 // If the entry is less than 30 minutes off from the current time, approve automatically
                 if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))
-                    toapprove = true;
+                    {toapprove = true;}
 
                 // Clock-ins need a new entry
                 await Uabtimesheet.create({name: record.name, time_in: thetime.toISOString(true), approved: toapprove}).fetch();

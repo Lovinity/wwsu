@@ -1,5 +1,3 @@
-/* global sails, moment, Announcements */
-
 module.exports = {
 
     friendlyName: 'Announcements / Add',
@@ -31,7 +29,7 @@ module.exports = {
             required: true,
             description: 'The announcement text.'
         },
-        
+
         displayTime: {
             type: 'number',
             defaultsTo: 15,

@@ -1,5 +1,4 @@
-/* global sails, Recipients, _, moment, Status, Hosts, djcontrols, Promise */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -23,7 +22,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper recipients.remove called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         var where = {};
         try {
 
@@ -60,13 +58,11 @@ module.exports = {
                         sails.log.error(err);
                     });
 
-            sails.log.silly(`Recipients record: ${recipient}`);
-
             if (typeof recipient !== 'undefined' && typeof Recipients.sockets[recipient.ID] !== 'undefined')
             {
 
                 // Remove the socket ID from the array of sockets in memory
-                _.remove(Recipients.sockets[recipient.ID], function (e) {
+                _.remove(Recipients.sockets[recipient.ID], (e) => {
                     return e === inputs.socket;
                 });
 

@@ -1,5 +1,3 @@
-/* global Attendance */
-
 module.exports = {
 
     friendlyName: 'New attendance',
@@ -12,7 +10,7 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         try {
-            await Attendance.createRecord("Genre: Default");
+            await Attendance.createRecord('Genre: Default');
             return exits.success();
         } catch (e) {
             return exits.error(e);

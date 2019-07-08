@@ -1,5 +1,3 @@
-/* global sails */
-
 /**
  * Underwritings.js
  *
@@ -27,7 +25,7 @@ module.exports = {
             type: 'number',
             required: true
         },
-        
+
         mode: {
             type: 'json',
             required: true

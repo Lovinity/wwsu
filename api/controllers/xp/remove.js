@@ -1,5 +1,3 @@
-/* global sails, Xp */
-
 module.exports = {
 
     friendlyName: 'xp / Remove',
@@ -20,13 +18,12 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Controller xp/edit called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
         try {
-            
+
             // Remove this XP record
             await Xp.destroy({ID: inputs.ID}).fetch();
-            
+
             return exits.success();
         } catch (e) {
             return exits.error(e);

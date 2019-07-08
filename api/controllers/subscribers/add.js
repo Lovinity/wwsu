@@ -1,5 +1,4 @@
-/* global sails, Subscribers */
-var sh = require("shorthash");
+var sh = require('shorthash');
 
 module.exports = {
 
@@ -18,13 +17,13 @@ module.exports = {
         type: {
             type: 'string',
             required: true,
-            description: "The main type of the subscription"
+            description: 'The main type of the subscription'
         },
 
         subtype: {
             type: 'string',
             required: true,
-            description: "The subtype of the subscription"
+            description: 'The subtype of the subscription'
         },
     },
 
@@ -33,9 +32,9 @@ module.exports = {
 
         try {
             // Get the client IP address
-            var from_IP = await sails.helpers.getIp(this.req);
-            var host = sh.unique(from_IP + sails.config.custom.hostSecret);
-            
+            var fromIP = await sails.helpers.getIp(this.req);
+            var host = sh.unique(fromIP + sails.config.custom.hostSecret);
+
             // Use find or create so that duplicate subscriptions do not happen (ignore host when checking for duplicates).
             await Subscribers.findOrCreate(inputs, {host: `website-${host}`, device: inputs.device, type: inputs.type, subtype: inputs.subtype});
 

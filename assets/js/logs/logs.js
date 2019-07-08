@@ -1,17 +1,17 @@
 /* global moment */
 
-$(document).ready(function () {
+$(document).ready(() => {
 
     //Initialize the datePicker(I have taken format as mm-dd-yyyy, you can     //have your owh)
-    $("#weekly-date-picker").datetimepicker({
+    $('#weekly-date-picker').datetimepicker({
         format: 'MM-DD-YYYY'
     });
 
     //Get the value of Start and End of Week
-    $('#weekly-date-picker').on('dp.change', function (e) {
-        var value = $("#weekly-date-picker").val();
-        var firstDate = moment(value, "MM-DD-YYYY").format("MM-DD-YYYY");
-        $("#weekly-date-picker").val(firstDate);
+    $('#weekly-date-picker').on('dp.change', (e) => {
+        var value = $('#weekly-date-picker').val();
+        var firstDate = moment(value, 'MM-DD-YYYY').format('MM-DD-YYYY');
+        $('#weekly-date-picker').val(firstDate);
     });
 });
 
@@ -38,7 +38,7 @@ function filterLogs(subtype = null) {
     if (subtype === null)
     {
         $.ajax({
-            type: "POST",
+            type: 'POST',
             url: '/logs/get-subtypes',
             data: {date: datePicker.value}
         })
@@ -68,7 +68,7 @@ function filterLogs(subtype = null) {
         // subtype? Display logs by date and selected subtype
     } else {
         $.ajax({
-            type: "POST",
+            type: 'POST',
             url: '/logs/get',
             data: {date: datePicker.value, subtype: subtype}
         })
@@ -85,11 +85,11 @@ function filterLogs(subtype = null) {
                             cell3.innerHTML = 'Artist';
                             var cell4 = newRow.insertCell(3);
                             cell4.innerHTML = 'Title';
-                            resHTML.forEach(function (thelog) {
+                            resHTML.forEach((thelog) => {
                                 var newRow = tableData.insertRow(tableData.rows.length);
                                 newRow.classList.add(`table-${thelog.loglevel}`);
                                 var cell = newRow.insertCell(0);
-                                cell.innerHTML = moment(thelog.createdAt).format("LL hh:mm:ss A");
+                                cell.innerHTML = moment(thelog.createdAt).format('LL hh:mm:ss A');
                                 var cell2 = newRow.insertCell(1);
                                 thelog.event = thelog.event.replace(/(?:\r\n|\r|\n)/g, '<br />');
                                 cell2.innerHTML = thelog.event;

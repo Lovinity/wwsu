@@ -1,5 +1,3 @@
-/* global Meta, Playlists, Playlists_list, sails, Logs, Statemeta, _, moment, Attendance */
-
 module.exports = {
 
     friendlyName: 'playlists.start',
@@ -38,7 +36,6 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         sails.log.debug('Helper playlists.start called.');
-        sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
         try {
             // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, we're in the middle of changing states and ignoreChangingState is false.
             if (!Playlists.queuing && (((Meta['A'].changingState === null || inputs.ignoreChangingState) && ((Meta['A'].state === 'automation_on' || Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_genre')))))
@@ -48,7 +45,7 @@ module.exports = {
 
                 // Lock state changes when necessary until we are done
                 if (!inputs.ignoreChangingState)
-                    await Meta.changeMeta({changingState: `Switching to playlist`});
+                    {await Meta.changeMeta({changingState: `Switching to playlist`});}
 
                 // Find the playlist
                 var theplaylist = await Playlists.findOne({name: inputs.name});
@@ -58,7 +55,7 @@ module.exports = {
                 if (!theplaylist)
                 {
                     if (!inputs.ignoreChangingState)
-                        await Meta.changeMeta({changingState: null});
+                        {await Meta.changeMeta({changingState: null});}
                     Playlists.queuing = false;
                     return exits.error(new Error('Playlist not found!'));
                 }
@@ -71,16 +68,21 @@ module.exports = {
                             await sails.helpers.rest.cmd('LoadPlaylist', theplaylist.ID); // Queue the playlist
 
                             // Load the playlist tracks into memory so CRON can check when the playlist has finished.
+                            // LINT: Playlists_list must NOT be camel case; this is how it is in the RadioDJ database.
+                            // eslint-disable-next-line camelcase
                             var playlistTracks = await Playlists_list.find({pID: theplaylist.ID}).sort('ord ASC');
                             sails.log.verbose(`Playlists_list records retrieved: ${playlistTracks.length}`);
-                            sails.log.silly(playlistTracks);
+
+                            // Bail if there are no tracks in this playlist
                             if (!playlistTracks)
                             {
                                 if (!inputs.ignoreChangingState)
-                                    await Meta.changeMeta({changingState: null});
+                                    {await Meta.changeMeta({changingState: null});}
                                 Playlists.queuing = false;
                                 return reject2(new Error(`No playlist tracks were returned.`));
                             }
+
+                            // Map all tracks in the playlist into memory.
                             Playlists.active.tracks = [];
                             playlistTracks.map(playlistTrack => Playlists.active.tracks.push(playlistTrack.sID));
 
@@ -97,9 +99,9 @@ module.exports = {
                                     {
                                         Playlists.queuing = false;
                                         if (!inputs.ignoreChangingState)
-                                            Meta.changeMeta({changingState: null});
+                                            {Meta.changeMeta({changingState: null});}
                                         sails.log.verbose(`Failed to queue playlist after 60 seconds.`);
-                                        return reject2(new Error("The playlist was not considered queued after 60 seconds."));
+                                        return reject2(new Error('The playlist was not considered queued after 60 seconds.'));
                                     }
 
                                     var tracks = Meta.automation;
@@ -113,7 +115,7 @@ module.exports = {
                                         {
                                             Playlists.queuing = false;
                                             if (!inputs.ignoreChangingState)
-                                                Meta.changeMeta({changingState: null});
+                                                {Meta.changeMeta({changingState: null});}
                                             sails.log.verbose(`Considered playlist as queued. Proceeding.`);
                                             return resolve2();
                                         } else {
@@ -125,7 +127,7 @@ module.exports = {
                                         setTimeout(theFunction, 1000);
                                     }
                                     prevLength = tracks.length;
-                                } catch (e) {
+                                } catch (unusedE) {
                                     setTimeout(theFunction, 1000);
                                 }
                             };
@@ -135,6 +137,8 @@ module.exports = {
                         }
                     });
                 };
+
+                // Regular playlist
                 if (inputs.type === 0)
                 {
                     await sails.helpers.rest.cmd('EnableAutoDJ', 0);
@@ -156,7 +160,7 @@ module.exports = {
                     await sails.helpers.rest.cmd('EnableAssisted', 0);
                     await Meta.changeMeta({state: 'automation_prerecord', playlist: theplaylist.name, playlist_position: -1, playlist_played: moment().toISOString(true), show: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 256)});
                     await loadPlaylist();
-                    
+
                     // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.
                     var timeToFirstTrack = 0;
                     var queue = await sails.helpers.rest.getQueue();
@@ -172,13 +176,13 @@ module.exports = {
                     if (timeToFirstTrack >= sails.config.custom.queueCorrection.prerecord)
                     {
                         if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(Meta['A'].trackIDSubcat) === -1))
-                            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0); // Skip currently playing track if it is not a noClearShow track
+                            {await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);} // Skip currently playing track if it is not a noClearShow track
                     }
-                    
+
                     await sails.helpers.rest.cmd('EnableAutoDJ', 1);
                 }
                 if (!inputs.ignoreChangingState)
-                    await Meta.changeMeta({changingState: null});
+                    {await Meta.changeMeta({changingState: null});}
                 return exits.success();
             } else {
                 sails.log.verbose('Helper SKIPPED.');
@@ -186,7 +190,7 @@ module.exports = {
             }
         } catch (e) {
             if (!inputs.ignoreChangingState)
-                await Meta.changeMeta({changingState: null});
+                {await Meta.changeMeta({changingState: null});}
             Playlists.queuing = false;
             return exits.error(e);
         }
