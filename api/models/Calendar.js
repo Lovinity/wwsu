@@ -827,7 +827,7 @@ module.exports = {
                     directorRecords.map((record) => directors.push(record.name));
 
                     // Iterate through each returned event from Google Calendar
-                    for (var i2 = 0; i < events.length; i2++) {
+                    for (var i2 = 0; i2 < events.length; i2++) {
                         event = events[i2];
                         eventIds.push(event.id);
 
