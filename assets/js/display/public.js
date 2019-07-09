@@ -2716,20 +2716,26 @@ function processDarksky(db) {
                     switch (countPrecip1) {
                         case 3:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
+                            break;
                         case 2:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-snowflake"></i>`;
+                            break;
                         case 1:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
+                            break;
                     }
                 } else {
                     console.log(`Clouds1 ${countClouds1}`);
                     switch (countClouds1) {
                         case 3:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
+                            break;
                         case 2:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-sun"></i>`;
+                            break;
                         case 1:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-sun"></i>`;
+                            break;
                     }
                 }
 
@@ -2738,20 +2744,26 @@ function processDarksky(db) {
                     switch (countPrecip2) {
                         case 3:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
+                            break;
                         case 2:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-snowflake"></i>`;
+                            break;
                         case 1:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
+                            break;
                     }
                 } else {
                     console.log(`Clouds2 ${countClouds2}`);
                     switch (countClouds2) {
                         case 3:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
+                            break;
                         case 2:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-sun"></i>`;
+                            break;
                         case 1:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-sun"></i>`;
+                            break;
                     }
                 }
 
@@ -2848,6 +2860,9 @@ function getPrecipIndex(string) {
 function getCondition(precipA, intensityA) {
     var returnData = ``;
     switch (intensityA) {
+        case 1:
+            returnData += `Clear`;
+            break;
         case 2:
             returnData += `Partly cloudy`;
             break;
