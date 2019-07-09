@@ -2551,7 +2551,7 @@ function processDarksky(db) {
                 var cloudCover2 = [];
 
                 item.hourly.data.map((data, index) => {
-                    if (index < 24) {
+                    if (index < 25) {
                         cloudCover1[index] = data.cloudCover;
                         if (data.precipProbability > precipChance1) { precipChance1 = data.precipProbability; }
 
@@ -2592,17 +2592,17 @@ function processDarksky(db) {
                             }
                         }
                     } else {
-                        cloudCover2[index - 24] = data.cloudCover;
+                        cloudCover2[index - 25] = data.cloudCover;
                         if (data.precipProbability > precipChance2) { precipChance2 = data.precipProbability; }
 
                         if (data.temperature > high2) {
                             high2 = data.temperature;
-                            highTime2 = moment.unix(data.time).format('h A');
+                            highTime2 = moment.unix(data.time).format('hA');
                         }
 
                         if (data.temperature < low2) {
                             low2 = data.temperature;
-                            lowTime2 = moment.unix(data.time).format('h A');
+                            lowTime2 = moment.unix(data.time).format('hA');
                         }
 
                         if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
@@ -2639,9 +2639,9 @@ function processDarksky(db) {
 
                 // Get preliminary weather data added to the slide
                 temp = document.querySelector(`#weather-1-label`);
-                temp.innerHTML = `Now through ${moment(Meta.time).add(23, 'hours').format('hA dddd')}`;
+                temp.innerHTML = `Now through ${moment(Meta.time).add(24, 'hours').format('hA dddd')}`;
                 temp = document.querySelector(`#weather-2-label`);
-                temp.innerHTML = `${moment(Meta.time).add(24, 'hours').format('hA dddd')} through ${moment(Meta.time).add(47, 'hours').format('hA dddd')}`;
+                temp.innerHTML = `${moment(Meta.time).add(24, 'hours').format('hA dddd')} through ${moment(Meta.time).add(48, 'hours').format('hA dddd')}`;
 
                 temp = document.querySelector(`#weather-1-temperature-high`);
                 temp.innerHTML = `${high1}°F (${highTime1})`;
@@ -2672,7 +2672,7 @@ function processDarksky(db) {
                 var summary1 = ``;
                 var summary2 = ``;
                 conditions.map((condition, index) => {
-                    if (index < 24) {
+                    if (index < 25) {
                         countPrecip1[precip[index]]++;
                         if (condition < 4) {
                             countClouds1[condition]++;
@@ -2695,7 +2695,7 @@ function processDarksky(db) {
                             countClouds2[3]++;
                         }
                         if (precip[index] !== prevPrecip2  || condition !== prevCondition2) {
-                            if (index > 24 && prevPrecip2 !== 0) {
+                            if (index > 25 && prevPrecip2 !== 0) {
                                 summary2 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
                             if (precip[index] !== 0) { summary2 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`; }
@@ -2708,8 +2708,10 @@ function processDarksky(db) {
                 if (prevPrecip1 !== 0) { summary1 += ` onwards.`; }
                 if (prevPrecip2 !== 0) { summary2 += ` onwards.`; }
 
-                cloudCover1 = linearProject(cloudCover1, 48);
+                console.dir(cloudCover1);
+                cloudCover1 = linearProject(cloudCover1, 50);
                 console.log(`cloud trend 1 ${cloudCover1}`);
+                console.dir(cloudCover2);
                 cloudCover2 = linearProject(cloudCover2, 48);
                 console.log(`cloud trend 2 ${cloudCover2}`);
                 countPrecip1[0] = 0;
