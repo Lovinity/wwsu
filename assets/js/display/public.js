@@ -383,7 +383,7 @@ try {
                                 <h5 class="mt-0 text-white" id="weather-1-label"></h5>
                                 <p class="text-white"><span id="weather-1-summary"></span><br />
                                 High <span id="weather-1-temperature-high"></span> / Low <span id="weather-1-temperature-low"></span><br />
-                                <span id="weather-1-precip"></span>% chance of <span id="weather-1-precipType"></span></p>
+                                <span id="weather-1-precip"></span></p>
                             </div>
                         </div>
                     </div>
@@ -396,7 +396,7 @@ try {
                                 <h5 class="mt-0 text-white" id="weather-2-label"></h5>
                                 <p class="text-white"><span id="weather-2-summary"></span><br />
                                 High <span id="weather-2-temperature-high"></span> / Low <span id="weather-2-temperature-low"></span><br />
-                                <span id="weather-2-precip"></span>% chance of <span id="weather-2-precipType"></span></p>
+                                <span id="weather-2-precip"></span></p>
                             </div>
                         </div>
                     </div>
@@ -2652,11 +2652,6 @@ function processDarksky(db) {
                 temp = document.querySelector(`#weather-2-temperature-low`);
                 temp.innerHTML = `${low2}°F (${lowTime2})`;
 
-                temp = document.querySelector(`#weather-1-precip`);
-                temp.innerHTML = `${precipChance1 * 100 || 0}`;
-                temp = document.querySelector(`#weather-2-precip`);
-                temp.innerHTML = `${precipChance2 * 100 || 0}`;
-
                 // Calculate summaries
                 temp = document.querySelector(`#weather-1-summary`);
                 temp.innerHTML = ``;
@@ -2824,30 +2819,26 @@ function processDarksky(db) {
                 }
 
                 // Precip Types
-                temp = document.querySelector(`#weather-1-precipType`);
+                temp = document.querySelector(`#weather-1-precip`);
                 temp.innerHTML = ``;
                 var theFirst = true;
                 for (var precipType in precipTypes1) {
                     if (precipTypes1.hasOwnProperty(precipType) && precipTypes1[precipType]) {
+                        if (theFirst) { temp.innerHTML = `${precipChance1 * 100 || 0}% chance of `; }
                         temp.innerHTML += `${!theFirst ? `/` : ``}${precipType}`;
                         theFirst = false;
                     }
                 }
-                if (theFirst) {
-                    temp.innerHTML = `precipitation`;
-                }
 
-                temp2 = document.querySelector(`#weather-2-precipType`);
+                temp2 = document.querySelector(`#weather-2-precip`);
                 temp2.innerHTML = ``;
                 var theFirst2 = true;
                 for (var precipType2 in precipTypes2) {
                     if (precipTypes2.hasOwnProperty(precipType2) && precipTypes2[precipType2]) {
+                        if (theFirst2) { temp2.innerHTML = `${precipChance2 * 100 || 0}% chance of `; }
                         temp2.innerHTML += `${!theFirst2 ? `/` : ``}${precipType2}`;
                         theFirst2 = false;
                     }
-                }
-                if (theFirst2) {
-                    temp2.innerHTML = `precipitation`;
                 }
 
             } catch (e) {
