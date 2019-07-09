@@ -2435,16 +2435,16 @@ function processDarksky(db) {
                 var precipExpected = false;
                 temp = document.querySelector(`#weather-minutely-summary`);
                 temp.innerHTML = ``;
-                if (item.currently.precipIntensity > 0 && item.currently.precipProbability >= 0.2) {
+                if (item.currently.precipIntensity > 0.01 || item.currently.precipProbability >= 0.2) {
                     precipExpected = true;
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-umbrella"></i>${item.currently.precipType || `precipitation`} is reported now or in the vicinity at a rate of ${item.currently.precipIntensity} inches of liquid water per hour.</div>`;
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-umbrella"></i>${item.currently.precipType || `precipitation`} is reported now or in the vicinity (${item.currently.precipIntensity} fluid inches per hour).</div>`;
                 }
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
-                            if (data.precipProbability >= 0.2) {
+                            if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
                                 precipExpected = true;
-                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is forecast to begin in ${index} minutes.</div>`;
+                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is forecast to begin shortly at about ${moment(Meta.time).add(index, 'minutes').format('LT')}.</div>`;
                             }
                         }
                     });
@@ -2452,9 +2452,9 @@ function processDarksky(db) {
                 if (!precipExpected) {
                     item.hourly.data.map((data, index) => {
                         if (!precipExpected && index < 24) {
-                            if (data.precipProbability >= 0.2) {
+                            if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
                                 precipExpected = true;
-                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is forecast to begin at ${moment(Meta.time).add(index, 'hours').format('LT')}.</div>`;
+                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').format('LT')}.</div>`;
                             }
                         }
                     });
@@ -2679,7 +2679,7 @@ function processDarksky(db) {
                         } else {
                             countClouds1[3]++;
                         }
-                        if (precip[index] !== prevPrecip1) {
+                        if (precip[index] !== prevPrecip1 || condition !== prevCondition1) {
                             if (index > 0 && prevPrecip1 !== 0) {
                                 summary1 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
@@ -2694,7 +2694,7 @@ function processDarksky(db) {
                         } else {
                             countClouds2[3]++;
                         }
-                        if (precip[index] !== prevPrecip2) {
+                        if (precip[index] !== prevPrecip2  || condition !== prevCondition2) {
                             if (index > 24 && prevPrecip2 !== 0) {
                                 summary1 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
