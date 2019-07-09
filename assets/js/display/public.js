@@ -2629,6 +2629,9 @@ function processDarksky(db) {
                     }
                 });
 
+                console.dir(conditions);
+                console.dir(precip);
+
                 // Get preliminary weather data added to the slide
                 temp = document.querySelector(`#weather-1-label`);
                 temp.innerHTML = `Now through ${moment(Meta.time).add(23, 'hours').format('hA dddd')}`;
@@ -2666,15 +2669,17 @@ function processDarksky(db) {
                 var countPrecip2 = [0, 0, 0, 0];
                 var countClouds1 = [0, 0, 0, 0];
                 var countClouds2 = [0, 0, 0, 0];
+                var summary1 = ``;
+                var summary2 = ``;
                 conditions.map((condition, index) => {
                     if (index < 24) {
                         countPrecip1[precip[index]]++;
                         if (condition < 4) { countClouds1[condition]++; }
                         if (condition !== prevCondition1 || precip[index] !== prevPrecip1) {
                             if (index > 0) {
-                                temp.innerHTML += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                                summary1 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
-                            temp.innerHTML += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
+                            summary1 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
                         }
                         prevCondition1 = condition;
                         prevPrecip1 = precip[index];
@@ -2683,14 +2688,17 @@ function processDarksky(db) {
                         if (condition < 4) { countClouds2[condition]++; }
                         if (condition !== prevCondition2 || precip[index] !== prevPrecip2) {
                             if (index > 24) {
-                                temp2.innerHTML += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                                summary2 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
-                            temp2.innerHTML += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
+                            summary2 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
                         }
                         prevCondition2 = condition;
                         prevPrecip2 = precip[index];
                     }
                 });
+
+                temp.innerHTML = summary1;
+                temp2.innerHTML = summary2;
 
                 // Calculate icons
                 countPrecip1 = indexOfMaxReverse(countPrecip1);
@@ -2702,6 +2710,7 @@ function processDarksky(db) {
                 temp2 = document.querySelector(`#weather-2-icon`);
 
                 if (precipChance1 >= 0.2) {
+                    console.log(`Precip1 ${countPrecip1}`);
                     switch (countPrecip1) {
                         case 3:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
@@ -2711,6 +2720,7 @@ function processDarksky(db) {
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
                     }
                 } else {
+                    console.log(`Clouds1 ${countClouds1}`);
                     switch (countClouds1) {
                         case 3:
                             temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
@@ -2722,6 +2732,7 @@ function processDarksky(db) {
                 }
 
                 if (precipChance2 >= 0.2) {
+                    console.log(`Precip2 ${countPrecip2}`);
                     switch (countPrecip2) {
                         case 3:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
@@ -2731,6 +2742,7 @@ function processDarksky(db) {
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
                     }
                 } else {
+                    console.log(`Clouds2 ${countClouds2}`);
                     switch (countClouds2) {
                         case 3:
                             temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
@@ -2744,26 +2756,34 @@ function processDarksky(db) {
                 // Precip Types
                 temp = document.querySelector(`#weather-1-precipType`);
                 temp.innerHTML = ``;
+                var theFirst = true;
                 for (var precipType in precipTypes1)
                 {
-                    var theFirst = true;
                     if (precipTypes1.hasOwnProperty(precipType) && precipTypes1[precipType])
                     {
-                        temp.innerHTML += `${!theFirst ? `, ` : ``}${precipType}`;
+                        temp.innerHTML += `${!theFirst ? `/` : ``}${precipType}`;
                         theFirst = false;
                     }
+                }
+                if (theFirst)
+                {
+                    temp.innerHTML = `precipitation`;
                 }
 
                 temp2 = document.querySelector(`#weather-2-precipType`);
                 temp2.innerHTML = ``;
+                var theFirst2 = true;
                 for (var precipType2 in precipTypes2)
                 {
-                    var theFirst2 = true;
                     if (precipTypes2.hasOwnProperty(precipType2) && precipTypes2[precipType2])
                     {
-                        temp2.innerHTML += `${!theFirst2 ? `, ` : ``}${precipType2}`;
+                        temp2.innerHTML += `${!theFirst2 ? `/` : ``}${precipType2}`;
                         theFirst2 = false;
                     }
+                }
+                if (theFirst2)
+                {
+                    temp2.innerHTML = `precipitation`;
                 }
 
             } catch (e) {
