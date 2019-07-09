@@ -2565,7 +2565,7 @@ function processDarksky(db) {
                             lowTime1 = moment.unix(data.time).format('h A');
                         }
 
-                        if (data.precipProbability >= 0.2) {
+                        if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
                             prevPrecip1 = true;
                             precip[index] = getPrecipIndex(data.precipType);
                             precipTypes1[data.precipType] = true;
@@ -2605,7 +2605,7 @@ function processDarksky(db) {
                             lowTime2 = moment.unix(data.time).format('h A');
                         }
 
-                        if (data.precipProbability >= 0.2) {
+                        if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
                             prevPrecip2 = true;
                             precip[index] = getPrecipIndex(data.precipType);
                             precipTypes2[data.precipType] = true;
