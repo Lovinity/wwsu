@@ -2592,7 +2592,7 @@ function processDarksky(db) {
                             }
                         }
                     } else {
-                        cloudCover2[index] = data.cloudCover;
+                        cloudCover2[index - 24] = data.cloudCover;
                         if (data.precipProbability > precipChance2) { precipChance2 = data.precipProbability; }
 
                         if (data.temperature > high2) {
