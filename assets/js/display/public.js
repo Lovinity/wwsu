@@ -2547,8 +2547,12 @@ function processDarksky(db) {
                 var low2 = 300;
                 var lowTime2 = 0;
 
+                var cloudCover1 = [];
+                var cloudCover2 = [];
+
                 item.hourly.data.map((data, index) => {
                     if (index < 24) {
+                        cloudCover1[index] = data.cloudCover;
                         if (data.precipProbability > precipChance1) { precipChance1 = data.precipProbability; }
 
                         if (data.temperature > high1) {
@@ -2588,6 +2592,7 @@ function processDarksky(db) {
                             }
                         }
                     } else {
+                        cloudCover2[index] = data.cloudCover;
                         if (data.precipProbability > precipChance2) { precipChance2 = data.precipProbability; }
 
                         if (data.temperature > high2) {
@@ -2674,33 +2679,44 @@ function processDarksky(db) {
                 conditions.map((condition, index) => {
                     if (index < 24) {
                         countPrecip1[precip[index]]++;
-                        if (condition < 4) { countClouds1[condition]++; }
-                        if (condition !== prevCondition1 || precip[index] !== prevPrecip1) {
-                            if (index > 0) {
+                        if (condition < 4) {
+                            countClouds1[condition]++;
+                        } else {
+                            countClouds1[3]++;
+                        }
+                        if (precip[index] !== prevPrecip1) {
+                            if (index > 0 && prevPrecip1 !== 0) {
                                 summary1 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
-                            summary1 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
+                            if (precip[index] !== 0) { summary1 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`; }
                         }
                         prevCondition1 = condition;
                         prevPrecip1 = precip[index];
                     } else {
                         countPrecip2[precip[index]]++;
-                        if (condition < 4) { countClouds2[condition]++; }
-                        if (condition !== prevCondition2 || precip[index] !== prevPrecip2) {
-                            if (index > 24) {
-                                summary2 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                        if (condition < 4) {
+                            countClouds2[condition]++;
+                        } else {
+                            countClouds2[3]++;
+                        }
+                        if (precip[index] !== prevPrecip2) {
+                            if (index > 24 && prevPrecip2 !== 0) {
+                                summary1 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
-                            summary2 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
+                            if (precip[index] !== 0) { summary2 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`; }
                         }
                         prevCondition2 = condition;
                         prevPrecip2 = precip[index];
                     }
                 });
 
-                temp.innerHTML = summary1;
-                temp2.innerHTML = summary2;
+                if (prevPrecip1 !== 0) { summary1 += ` onwards.`; }
+                if (prevPrecip2 !== 0) { summary2 += ` onwards.`; }
 
-                // Calculate icons
+                cloudCover1 = linearProject(cloudCover1, 48);
+                console.log(`cloud trend 1 ${cloudCover1}`);
+                cloudCover2 = linearProject(cloudCover2, 48);
+                console.log(`cloud trend 2 ${cloudCover2}`);
                 countPrecip1[0] = 0;
                 countPrecip1 = indexOfMaxReverse(countPrecip1);
                 countPrecip2[0] = 0;
@@ -2708,6 +2724,46 @@ function processDarksky(db) {
                 countClouds1 = indexOfMaxReverse(countClouds1);
                 countClouds2 = indexOfMaxReverse(countClouds2);
 
+                if (cloudCover1 >= 1.5) {
+                    summary1 = `Clouds increasing over time. ${summary1}`;
+                } else if (cloudCover1 <= -0.5) {
+                    summary1 = `Clouds clearing over time. ${summary1}`;
+                } else {
+                    switch (countClouds1) {
+                        case 3:
+                            summary1 = `Cloudy. ${summary1}`;
+                            break;
+                        case 2:
+                            summary1 = `Partly cloudy. ${summary1}`;
+                            break;
+                        case 1:
+                            summary1 = `Mostly clear. ${summary1}`;
+                            break;
+                    }
+                }
+
+                if (cloudCover2 >= 1.5) {
+                    summary2 = `Clear, then increasing clouds. ${summary2}`;
+                } else if (cloudCover2 <= -0.5) {
+                    summary2 = `Cloudy, then clearing. ${summary2}`;
+                } else {
+                    switch (countClouds2) {
+                        case 3:
+                            summary2 = `Cloudy. ${summary2}`;
+                            break;
+                        case 2:
+                            summary2 = `Partly cloudy. ${summary2}`;
+                            break;
+                        case 1:
+                            summary2 = `Mostly clear. ${summary2}`;
+                            break;
+                    }
+                }
+
+                temp.innerHTML = summary1;
+                temp2.innerHTML = summary2;
+
+                // Calculate icons
                 temp = document.querySelector(`#weather-1-icon`);
                 temp2 = document.querySelector(`#weather-2-icon`);
 
@@ -2872,6 +2928,9 @@ function getCondition(precipA, intensityA) {
         case 4:
             returnData += `Light `;
             break;
+        case 5:
+            returnData += `Moderate `;
+            break;
         case 6:
             returnData += `Heavy `;
             break;
@@ -2912,4 +2971,36 @@ function indexOfMaxReverse(arr) {
     }
 
     return maxIndex;
+}
+
+function LineFitter() {
+    this.count = 0;
+    this.sumX = 0;
+    this.sumX2 = 0;
+    this.sumXY = 0;
+    this.sumY = 0;
+}
+
+LineFitter.prototype = {
+    'add': function (x, y) {
+        this.count++;
+        this.sumX += x;
+        this.sumX2 += x * x;
+        this.sumXY += x * y;
+        this.sumY += y;
+    },
+    'project': function (x) {
+        var det = this.count * this.sumX2 - this.sumX * this.sumX;
+        var offset = (this.sumX2 * this.sumY - this.sumX * this.sumXY) / det;
+        var scale = (this.count * this.sumXY - this.sumX * this.sumY) / det;
+        return offset + x * scale;
+    }
+};
+
+function linearProject(data, x) {
+    var fitter = new LineFitter();
+    for (var i = 0; i < data.length; i++) {
+        fitter.add(i, data[i]);
+    }
+    return fitter.project(x);
 }
