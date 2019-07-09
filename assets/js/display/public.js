@@ -357,7 +357,7 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State University Weather</h1>
             <div class="container">
 
-                <div class="row shadow-4 bg-dark-2">
+                <div class="row shadow-4 bg-dark-2 p-1">
                     <div class="col-6">
                         <div class="media">
                             <div class="align-self-center mr-3 text-white" id="weather-current-icon">
@@ -373,16 +373,16 @@ try {
                     </div>
                 </div>
 
-                <div class="row shadow-4 bg-dark-3 p-2">
+                <div class="row shadow-4 bg-dark-3 p-1">
                     <div class="col-6">
                         <div class="media">
                             <div class="align-self-center mr-3 text-white" id="weather-1-icon">
                                 <i style="font-size: 64px;" class="fas fa-sun"></i>
                             </div>
                             <div class="media-body">
-                                <strong><h5 class="mt-0 text-white" id="weather-1-label"></h5></strong>
+                                <h5 class="mt-0 text-white" id="weather-1-label"></h5>
                                 <p class="text-white"><span id="weather-1-summary"></span><br />
-                                High <span id="weather-1-temperature-high"></span>, Low <span id="weather-1-temperature-low"></span><br />
+                                High <span id="weather-1-temperature-high"></span> / Low <span id="weather-1-temperature-low"></span><br />
                                 <span id="weather-1-precip"></span>% chance of <span id="weather-1-precipType"></span></p>
                             </div>
                         </div>
@@ -393,9 +393,9 @@ try {
                                 <i style="font-size: 64px;" class="fas fa-sun"></i>
                             </div>
                             <div class="media-body">
-                                <strong><h5 class="mt-0 text-white" id="weather-2-label"></h5></strong>
+                                <h5 class="mt-0 text-white" id="weather-2-label"></h5>
                                 <p class="text-white"><span id="weather-2-summary"></span><br />
-                                High <span id="weather-2-temperature-high"></span>, Low <span id="weather-2-temperature-low"></span><br />
+                                High <span id="weather-2-temperature-high"></span> / Low <span id="weather-2-temperature-low"></span><br />
                                 <span id="weather-2-precip"></span>% chance of <span id="weather-2-precipType"></span></p>
                             </div>
                         </div>
@@ -1318,8 +1318,7 @@ function processEas(db) {
             }
         });
 
-        if (prevEas.length === 0)
-        {
+        if (prevEas.length === 0) {
             innercontent.HTML = `<strong class="text-white">No active alerts</strong>`;
         }
 
@@ -2422,6 +2421,7 @@ function processDarksky(db) {
         db.each((item) => {
             try {
                 var temp;
+                var temp2;
 
                 // Current conditions
                 temp = document.querySelector(`#weather-current-icon`);
@@ -2510,40 +2510,261 @@ function processDarksky(db) {
                     temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light">High heat index right now. Drink extra water when outside. Heat index is currently ${item.currently.apparentTemperature}°F.</div>`;
                 }
 
+                // 1 = Sunny (<33%), 2 = Partly Cloudy (33-66%), 3 = Cloudy (>66%), 4 = light precipitation (<0.1), 5 = moderate precipitation (0.1-0.5), 6 = heavy precipitation (>0.5).
+                var conditions = [];
 
-                // Day 1 weather
-                var temp2 = item.daily.data[0] || {};
+                // 0 = none, 1 = rain, 2 = snow, 3 = sleet.
+                var precip = [];
+                var precipTypes1 = {
+                    rain: false,
+                    snow: false,
+                    sleet: false
+                };
+                var precipTypes2 = {
+                    rain: false,
+                    snow: false,
+                    sleet: false
+                };
+
+                // Precip chance is peak of the 24 hour period.
+                var precipChance1 = 0;
+                var precipChance2 = 0;
+
+                var precipStart1 = -1;
+                var precipEnd1 = -1;
+                var prevPrecip1 = false;
+                var precipStart2 = -1;
+                var precipEnd2 = -1;
+                var prevPrecip2 = false;
+
+                var high1 = -300;
+                var highTime1 = 0;
+                var low1 = 300;
+                var lowTime1 = 0;
+
+                var high2 = -300;
+                var highTime2 = 0;
+                var low2 = 300;
+                var lowTime2 = 0;
+
+                item.hourly.data.map((data, index) => {
+                    if (index < 24) {
+                        if (data.precipProbability > precipChance1) { precipChance1 = data.precipProbability; }
+
+                        if (data.temperature > high1) {
+                            high1 = data.temperature;
+                            highTime1 = moment.unix(data.time).format('h A');
+                        }
+
+                        if (data.temperature < low1) {
+                            low1 = data.temperature;
+                            lowTime1 = moment.unix(data.time).format('h A');
+                        }
+
+                        if (data.precipProbability >= 0.2) {
+                            prevPrecip1 = true;
+                            precip[index] = getPrecipIndex(data.precipType);
+                            precipTypes1[data.precipType] = true;
+                            if (precipStart1 === -1) { precipStart1 = index; }
+                            if (data.precipIntensity >= 0.5) {
+                                conditions[index] = 6;
+                            } else if (data.precipIntensity >= 0.1) {
+                                conditions[index] = 5;
+                            } else {
+                                conditions[index] = 4;
+                            }
+                        } else {
+                            precip[index] = 0;
+                            if (prevPrecip1) {
+                                prevPrecip1 = false;
+                                precipEnd1 = index;
+                            }
+                            if (data.cloudCover >= 0.67) {
+                                conditions[index] = 3;
+                            } else if (data.cloudCover >= 0.33) {
+                                conditions[index] = 2;
+                            } else {
+                                conditions[index] = 1;
+                            }
+                        }
+                    } else {
+                        if (data.precipProbability > precipChance2) { precipChance2 = data.precipProbability; }
+
+                        if (data.temperature > high2) {
+                            high2 = data.temperature;
+                            highTime2 = moment.unix(data.time).format('h A');
+                        }
+
+                        if (data.temperature < low2) {
+                            low2 = data.temperature;
+                            lowTime2 = moment.unix(data.time).format('h A');
+                        }
+
+                        if (data.precipProbability >= 0.2) {
+                            prevPrecip2 = true;
+                            precip[index] = getPrecipIndex(data.precipType);
+                            precipTypes2[data.precipType] = true;
+                            if (precipStart2 === -1) { precipStart2 = index; }
+                            if (data.precipIntensity >= 0.5) {
+                                conditions[index] = 6;
+                            } else if (data.precipIntensity >= 0.1) {
+                                conditions[index] = 5;
+                            } else {
+                                conditions[index] = 4;
+                            }
+                        } else {
+                            precip[index] = 0;
+                            if (prevPrecip2) {
+                                prevPrecip2 = false;
+                                precipEnd2 = index;
+                            }
+                            if (data.cloudCover >= 0.67) {
+                                conditions[index] = 3;
+                            } else if (data.cloudCover >= 0.33) {
+                                conditions[index] = 2;
+                            } else {
+                                conditions[index] = 1;
+                            }
+                        }
+                    }
+                });
+
+                // Get preliminary weather data added to the slide
                 temp = document.querySelector(`#weather-1-label`);
-                temp.innerHTML = moment.unix(temp2.time).format('dddd');
-                temp = document.querySelector(`#weather-1-icon`);
-                temp.innerHTML = `<i style="font-size: 64px;" class="fas ${getConditionIcon(temp2.icon)}"></i>`;
-                temp = document.querySelector(`#weather-1-summary`);
-                temp.innerHTML = temp2.summary;
-                temp = document.querySelector(`#weather-1-temperature-high`);
-                temp.innerHTML = `${temp2.temperatureHigh}°F`;
-                temp = document.querySelector(`#weather-1-temperature-low`);
-                temp.innerHTML = `${temp2.temperatureLow}°F`;
-                temp = document.querySelector(`#weather-1-precip`);
-                temp.innerHTML = `${temp2.precipProbability * 100 || 0}`;
-                temp = document.querySelector(`#weather-1-precipType`);
-                temp.innerHTML = `${temp2.precipType || `precipitation`}`;
-
-                // Day 2 weather
-                temp2 = item.daily.data[1] || {};
+                temp.innerHTML = `Now through ${moment(Meta.time).add(23, 'hours').format('hA dddd')}`;
                 temp = document.querySelector(`#weather-2-label`);
-                temp.innerHTML = moment.unix(temp2.time).format('dddd');
-                temp = document.querySelector(`#weather-2-icon`);
-                temp.innerHTML = `<i style="font-size: 64px;" class="fas ${getConditionIcon(temp2.icon)}"></i>`;
-                temp = document.querySelector(`#weather-2-summary`);
-                temp.innerHTML = temp2.summary;
+                temp.innerHTML = `${moment(Meta.time).add(24, 'hours').format('hA dddd')} through ${moment(Meta.time).add(47, 'hours').format('hA dddd')}`;
+
+                temp = document.querySelector(`#weather-1-temperature-high`);
+                temp.innerHTML = `${high1}°F (${highTime1})`;
+                temp = document.querySelector(`#weather-1-temperature-low`);
+                temp.innerHTML = `${low1}°F (${lowTime1})`;
                 temp = document.querySelector(`#weather-2-temperature-high`);
-                temp.innerHTML = `${temp2.temperatureHigh}°F`;
+                temp.innerHTML = `${high2}°F (${highTime2})`;
                 temp = document.querySelector(`#weather-2-temperature-low`);
-                temp.innerHTML = `${temp2.temperatureLow}°F`;
+                temp.innerHTML = `${low2}°F (${lowTime2})`;
+
+                temp = document.querySelector(`#weather-1-precip`);
+                temp.innerHTML = `${precipChance1 * 100 || 0}`;
                 temp = document.querySelector(`#weather-2-precip`);
-                temp.innerHTML = `${temp2.precipProbability * 100 || 0}`;
-                temp = document.querySelector(`#weather-2-precipType`);
-                temp.innerHTML = `${temp2.precipType || `precipitation`}`;
+                temp.innerHTML = `${precipChance2 * 100 || 0}`;
+
+                // Calculate summaries
+                temp = document.querySelector(`#weather-1-summary`);
+                temp.innerHTML = ``;
+                temp2 = document.querySelector(`#weather-2-summary`);
+                temp2.innerHTML = ``;
+
+                var prevCondition1 = 0;
+                // eslint-disable-next-line no-redeclare
+                var prevPrecip1 = 0;
+                var prevCondition2 = 0;
+                // eslint-disable-next-line no-redeclare
+                var prevPrecip2 = 0;
+
+                var countPrecip1 = [0, 0, 0, 0];
+                var countPrecip2 = [0, 0, 0, 0];
+                var countClouds1 = [0, 0, 0, 0];
+                var countClouds2 = [0, 0, 0, 0];
+                conditions.map((condition, index) => {
+                    if (index < 24) {
+                        countPrecip1[precip[index]]++;
+                        if (condition < 4) { countClouds1[condition]++; }
+                        if (condition !== prevCondition1 || precip[index] !== prevPrecip1) {
+                            if (index > 0) {
+                                temp.innerHTML += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                            }
+                            temp.innerHTML += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
+                        }
+                        prevCondition1 = condition;
+                        prevPrecip1 = precip[index];
+                    } else {
+                        countPrecip2[precip[index]]++;
+                        if (condition < 4) { countClouds2[condition]++; }
+                        if (condition !== prevCondition2 || precip[index] !== prevPrecip2) {
+                            if (index > 24) {
+                                temp2.innerHTML += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                            }
+                            temp2.innerHTML += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`;
+                        }
+                        prevCondition2 = condition;
+                        prevPrecip2 = precip[index];
+                    }
+                });
+
+                // Calculate icons
+                countPrecip1 = indexOfMaxReverse(countPrecip1);
+                countPrecip2 = indexOfMaxReverse(countPrecip2);
+                countClouds1 = indexOfMaxReverse(countClouds1);
+                countClouds2 = indexOfMaxReverse(countClouds2);
+
+                temp = document.querySelector(`#weather-1-icon`);
+                temp2 = document.querySelector(`#weather-2-icon`);
+
+                if (precipChance1 >= 0.2) {
+                    switch (countPrecip1) {
+                        case 3:
+                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
+                        case 2:
+                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-snowflake"></i>`;
+                        case 1:
+                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
+                    }
+                } else {
+                    switch (countClouds1) {
+                        case 3:
+                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
+                        case 2:
+                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-sun"></i>`;
+                        case 1:
+                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-sun"></i>`;
+                    }
+                }
+
+                if (precipChance2 >= 0.2) {
+                    switch (countPrecip2) {
+                        case 3:
+                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
+                        case 2:
+                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-snowflake"></i>`;
+                        case 1:
+                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
+                    }
+                } else {
+                    switch (countClouds2) {
+                        case 3:
+                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
+                        case 2:
+                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-sun"></i>`;
+                        case 1:
+                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-sun"></i>`;
+                    }
+                }
+
+                // Precip Types
+                temp = document.querySelector(`#weather-1-precipType`);
+                temp.innerHTML = ``;
+                for (var precipType in precipTypes1)
+                {
+                    var theFirst = true;
+                    if (precipTypes1.hasOwnProperty(precipType) && precipTypes1[precipType])
+                    {
+                        temp.innerHTML += `${!theFirst ? `, ` : ``}${precipType}`;
+                        theFirst = false;
+                    }
+                }
+
+                temp2 = document.querySelector(`#weather-2-precipType`);
+                temp2.innerHTML = ``;
+                for (var precipType2 in precipTypes2)
+                {
+                    var theFirst2 = true;
+                    if (precipTypes2.hasOwnProperty(precipType2) && precipTypes2[precipType2])
+                    {
+                        temp2.innerHTML += `${!theFirst2 ? `, ` : ``}${precipType2}`;
+                        theFirst2 = false;
+                    }
+                }
 
             } catch (e) {
                 console.error(e);
@@ -2586,7 +2807,71 @@ function getConditionIcon(condition) {
             return 'fa-cloud-moon';
         case 'thunderstorm':
             return 'fa-bolt';
+        case 'showers-day':
+            return 'fa-cloud-sun-rain';
+        case 'showers-night':
+            return 'fa-cloud-moon-rain';
         default:
             return 'fa-rainbow';
     }
+}
+
+function getPrecipIndex(string) {
+    switch (string) {
+        case 'rain':
+            return 1;
+        case 'sleet':
+            return 3;
+        case 'snow':
+            return 2;
+        default:
+            return 0;
+    }
+}
+
+function getCondition(precip, intensity) {
+    var returnData = ``;
+    switch (intensity) {
+        case 2:
+            returnData += `Partly cloudy`;
+        case 3:
+            returnData += `Cloudy`;
+        case 4:
+            returnData += `Light `;
+        case 6:
+            returnData += `Heavy `;
+    }
+
+    if (intensity >= 4) {
+        switch (precip) {
+            case 1:
+                returnData += `rain`;
+            case 2:
+                returnData += `snow`;
+            case 3:
+                returnData += `sleet`;
+        }
+    }
+
+    return returnData;
+}
+
+function indexOfMaxReverse(arr) {
+    if (arr.length === 0) {
+        return -1;
+    }
+
+    var max = arr[arr.length - 1];
+    var maxIndex = arr.length - 1;
+
+    if (arr.length > 1) {
+        for (var i = arr.length - 2; i >= 0; i--) {
+            if (arr[i] > max) {
+                maxIndex = i;
+                max = arr[i];
+            }
+        }
+    }
+
+    return maxIndex;
 }
