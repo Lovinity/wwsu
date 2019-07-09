@@ -2701,7 +2701,9 @@ function processDarksky(db) {
                 temp2.innerHTML = summary2;
 
                 // Calculate icons
+                countPrecip1[0] = 0;
                 countPrecip1 = indexOfMaxReverse(countPrecip1);
+                countPrecip2[0] = 0;
                 countPrecip2 = indexOfMaxReverse(countPrecip2);
                 countClouds1 = indexOfMaxReverse(countClouds1);
                 countClouds2 = indexOfMaxReverse(countClouds2);
@@ -2757,32 +2759,26 @@ function processDarksky(db) {
                 temp = document.querySelector(`#weather-1-precipType`);
                 temp.innerHTML = ``;
                 var theFirst = true;
-                for (var precipType in precipTypes1)
-                {
-                    if (precipTypes1.hasOwnProperty(precipType) && precipTypes1[precipType])
-                    {
+                for (var precipType in precipTypes1) {
+                    if (precipTypes1.hasOwnProperty(precipType) && precipTypes1[precipType]) {
                         temp.innerHTML += `${!theFirst ? `/` : ``}${precipType}`;
                         theFirst = false;
                     }
                 }
-                if (theFirst)
-                {
+                if (theFirst) {
                     temp.innerHTML = `precipitation`;
                 }
 
                 temp2 = document.querySelector(`#weather-2-precipType`);
                 temp2.innerHTML = ``;
                 var theFirst2 = true;
-                for (var precipType2 in precipTypes2)
-                {
-                    if (precipTypes2.hasOwnProperty(precipType2) && precipTypes2[precipType2])
-                    {
+                for (var precipType2 in precipTypes2) {
+                    if (precipTypes2.hasOwnProperty(precipType2) && precipTypes2[precipType2]) {
                         temp2.innerHTML += `${!theFirst2 ? `/` : ``}${precipType2}`;
                         theFirst2 = false;
                     }
                 }
-                if (theFirst2)
-                {
+                if (theFirst2) {
                     temp2.innerHTML = `precipitation`;
                 }
 
@@ -2854,22 +2850,29 @@ function getCondition(precip, intensity) {
     switch (intensity) {
         case 2:
             returnData += `Partly cloudy`;
+            break;
         case 3:
             returnData += `Cloudy`;
+            break;
         case 4:
             returnData += `Light `;
+            break;
         case 6:
             returnData += `Heavy `;
+            break;
     }
 
     if (intensity >= 4) {
         switch (precip) {
             case 1:
                 returnData += `rain`;
+                break;
             case 2:
                 returnData += `snow`;
+                break;
             case 3:
                 returnData += `sleet`;
+                break;
         }
     }
 
