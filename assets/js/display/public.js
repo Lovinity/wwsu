@@ -2845,9 +2845,9 @@ function getPrecipIndex(string) {
     }
 }
 
-function getCondition(precip, intensity) {
+function getCondition(precipA, intensityA) {
     var returnData = ``;
-    switch (intensity) {
+    switch (intensityA) {
         case 2:
             returnData += `Partly cloudy`;
             break;
@@ -2862,8 +2862,8 @@ function getCondition(precip, intensity) {
             break;
     }
 
-    if (intensity >= 4) {
-        switch (precip) {
+    if (intensityA >= 4) {
+        switch (precipA) {
             case 1:
                 returnData += `rain`;
                 break;
