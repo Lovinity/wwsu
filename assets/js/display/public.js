@@ -2464,18 +2464,18 @@ function processDarksky(db) {
                 }
 
                 // Is it windy?
-                if (item.currently.windSpeed >= 73) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-wind"></i><strong>Hurricane-force wind reported now!</strong> Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
-                } else if (item.currently.windSpeed >= 55) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-wind"></i><strong>Whole gale force wind reported now!</strong> Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
-                } else if (item.currently.windSpeed >= 39) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-wind"></i>Gale force wind reported now! Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
-                } else if (item.currently.windSpeed >= 25) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-wind"></i>It is windy right now. Current speed is ${item.currently.windSpeed}mph, gusting to ${item.currently.windGust}mph.</div>`;
+                if (item.currently.windSpeed >= 73 || item.currently.windGust >= 73) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-wind"></i><strong>Hurricane-force wind reported now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)!</strong></div>`;
+                } else if (item.currently.windSpeed >= 55 || item.currently.windGust >= 55) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-wind"></i><strong>Whole gale force wind reported now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)!</strong></div>`;
+                } else if (item.currently.windSpeed >= 39 || item.currently.windGust >= 39) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-wind"></i>Gale force wind reported now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)!</div>`;
+                } else if (item.currently.windSpeed >= 25 || item.currently.windGust >= 25) {
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-wind"></i>It is windy right now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph).</div>`;
                 }
 
                 // UV index
-                if (item.currently.uvIndex >= 10) {
+                if (item.currently.uvIndex > 10) {
                     temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is extremely high (${item.currently.uvIndex})!</strong> Skin burns in 10 minutes.</div>`;
                 } else if (item.currently.uvIndex >= 8) {
                     temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is very high (${item.currently.uvIndex})!</strong> Skin burns in 15 minutes.</div>`;
