@@ -2696,7 +2696,7 @@ function processDarksky(db) {
                         }
                         if (precip[index] !== prevPrecip2  || condition !== prevCondition2) {
                             if (index > 24 && prevPrecip2 !== 0) {
-                                summary1 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                                summary2 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
                             }
                             if (precip[index] !== 0) { summary2 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`; }
                         }
