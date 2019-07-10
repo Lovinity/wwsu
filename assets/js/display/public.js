@@ -249,21 +249,6 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`,
     });
 
-    // Events Today
-    Slides.newSlide({
-        name: `events-today`,
-        label: `Events Today`,
-        weight: 899999,
-        isSticky: false,
-        color: `success`,
-        active: true,
-        transitionIn: `fadeIn`,
-        transitionOut: `fadeOut`,
-        displayTime: 15,
-        fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Events Today</h1><h2 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Go to wwsu1069.org for the full weekly schedule.</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="events-today"></div>`,
-    });
-
     // Events 2-4
     // Deprecated for now
     Slides.newSlide({
@@ -546,19 +531,12 @@ function processCalendar(db) {
             }
         };
 
-        // Prepare the formatted calendar variable for our formatted events
-        calendar = [{}, [{}, {}, {}], [{}, {}, {}]];
-        calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] = [];
-        calendar[1][0][moment(Meta.time).add(1, 'days').format('dddd MM/DD')] = [];
-        calendar[1][1][moment(Meta.time).add(2, 'days').format('dddd MM/DD')] = [];
-        calendar[1][2][moment(Meta.time).add(3, 'days').format('dddd MM/DD')] = [];
-        calendar[2][0][moment(Meta.time).add(4, 'days').format('dddd MM/DD')] = [];
-        calendar[2][1][moment(Meta.time).add(5, 'days').format('dddd MM/DD')] = [];
-        calendar[2][2][moment(Meta.time).add(6, 'days').format('dddd MM/DD')] = [];
+        var innercontent = document.getElementById('events-today');
+        innercontent.innerHTML = ``;
 
-        // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
+        // Run through the events for the next 24 hours and add them to the coming up panel
         db.get()
-            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(8, 'days')))
+            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(1, 'days')) && moment(event.end).isAfter(moment(Meta.time)))
             .sort(compare)
             .map(event => {
                 try {
@@ -566,50 +544,93 @@ function processCalendar(db) {
                     if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day'); }
                     if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day'); }
 
-                    // Determine which day(s) of the week that this event belongs to, and add them in those days. Also, re-format startT and endT if necessary.
-                    for (var i = 0; i < 7; i++) {
-                        var looptime = moment(Meta.time).startOf('day').add(i, 'days');
-                        var looptime2 = moment(Meta.time).startOf('day').add(i + 1, 'days');
-                        // LINT LIES: this variable is used!
-                        // eslint-disable-next-line no-unused-vars
-                        var start2;
-                        // LINT LIES: This variable is used!
-                        // eslint-disable-next-line no-unused-vars
-                        var end2;
-                        if (moment(event.start).isBefore(looptime)) {
-                            start2 = moment(looptime);
-                        } else {
-                            start2 = moment(event.start);
-                        }
-                        if (moment(event.end).isAfter(looptime2)) {
-                            end2 = moment(looptime2);
-                        } else {
-                            end2 = moment(event.end);
-                        }
-                        if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime))) {
-                            event.startT = moment(event.start).format('hh:mm A');
-                            event.endT = moment(event.end).format('hh:mm A');
+                    event.startT = moment(event.start).format('hh:mm A');
+                    event.endT = moment(event.end).format('hh:mm A');
 
-                            // Update strings if need be, if say, start time was before this day, or end time is after this day.
-                            if (moment(event.end).isAfter(moment(looptime2))) {
-                                event.endT = moment(event.end).format('MM/DD hh:mm A');
-                                event.startT = moment(event.start).format('MM/DD hh:mm A');
-                            }
-                            if (moment(event.start).isBefore(moment(looptime))) {
-                                event.endT = moment(event.end).format('MM/DD hh:mm A');
-                                event.startT = moment(event.start).format('MM/DD hh:mm A');
-                            }
-
-                            // Push the final products into our formatted variable
-                            if (i === 0) {
-                                calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].push(event);
-                            } else if (i > 0 && i < 4) {
-                                calendar[1][i - 1][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
-                            } else if (i < 7) {
-                                calendar[2][i - 4][moment(Meta.time).add(i, 'days').format('dddd MM/DD')].push(event);
-                            }
-                        }
+                    // Update strings if need be, if say, start time was before this day, or end time is after this day.
+                    if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(1, 'days'))) {
+                        event.endT = moment(event.end).format('MM/DD hh:mm A');
+                        event.startT = moment(event.start).format('MM/DD hh:mm A');
                     }
+
+                    if (moment(event.start).isBefore(moment(Meta.time).startOf('day'))) {
+                        event.endT = moment(event.end).format('MM/DD hh:mm A');
+                        event.startT = moment(event.start).format('MM/DD hh:mm A');
+                    }
+
+                    var color = hexRgb(event.color);
+                    var line1;
+                    var line2;
+                    var stripped;
+                    var image;
+                    var temp;
+                    if (event.active < 1) { color = hexRgb(`#161616`); }
+                    color.red = Math.round(color.red / 3);
+                    color.green = Math.round(color.green / 3);
+                    color.blue = Math.round(color.blue / 3);
+                    var badgeInfo;
+                    if (event.active === 2) {
+                        badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TIME UPDATED</strong></span>`;
+                    }
+                    if (event.active === -1) {
+                        badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`;
+                    }
+                    if (event.title.startsWith('Show: ')) {
+                        stripped = event.title.replace('Show: ', '');
+                        image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 48px;"></i>`;
+                        temp = stripped.split(' - ');
+                        if (temp.length === 2) {
+                            line1 = temp[0];
+                            line2 = temp[1];
+                        } else {
+                            line1 = 'Unknown DJ';
+                            line2 = temp;
+                        }
+                    } else if (event.title.startsWith('Prerecord: ')) {
+                        stripped = event.title.replace('Prerecord: ', '');
+                        image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 48px;"></i>`;
+                        temp = stripped.split(' - ');
+                        if (temp.length === 2) {
+                            line1 = temp[0];
+                            line2 = temp[1];
+                        } else {
+                            line1 = 'Unknown DJ';
+                            line2 = temp;
+                        }
+                    } else if (event.title.startsWith('Remote: ')) {
+                        stripped = event.title.replace('Remote: ', '');
+                        image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 48px;"></i>`;
+                        temp = stripped.split(' - ');
+                        if (temp.length === 2) {
+                            line1 = temp[0];
+                            line2 = temp[1];
+                        } else {
+                            line1 = 'Unknown Host';
+                            line2 = temp;
+                        }
+                    } else if (event.title.startsWith('Sports: ')) {
+                        stripped = event.title.replace('Sports: ', '');
+                        line1 = 'Raider Sports';
+                        line2 = stripped;
+                        image = `<i class="fas fa-trophy ${!isLightTheme ? `text-white` : `text-success`}" style="font-size: 48px;"></i>`;
+                    } else {
+                        line1 = '';
+                        line2 = event.title;
+                        image = `<i class="fas fa-calendar ${!isLightTheme ? `text-white` : `text-secondary`}" style="font-size: 48px;"></i>`;
+                    }
+                    color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
+                    innercontent.innerHTML += `
+                        <div class="row shadow-2" style="background: ${color};">
+                            <div class="col-3 text-white">
+                                ${image}
+                            </div>
+                            <div class="col-9 text-white">
+                                <strong>${line1}${line1 !== '' ? ` - ` : ``}${line2}</strong><br />
+                                ${event.startT} - ${event.endT}<br />
+                                ${badgeInfo}
+                            </div>
+                        </div>`;
+
                 } catch (e) {
                     console.error(e);
                     iziToast.show({
@@ -620,8 +641,6 @@ function processCalendar(db) {
             });
 
         // Process events today slide
-        var innercontent = document.getElementById('events-today');
-        innercontent.innerHTML = ``;
         if (typeof calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`] !== 'undefined') {
             if (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length > 0) {
                 Slides.slide(`events-today`).displayTime = 5 + (calendar[0][`Today ${moment(Meta.time).format('MM/DD')}`].length * 3);
@@ -2612,109 +2631,4 @@ function getConditionIcon(condition) {
         default:
             return 'fa-rainbow';
     }
-}
-
-function getPrecipIndex(string) {
-    switch (string) {
-        case 'rain':
-            return 1;
-        case 'sleet':
-            return 3;
-        case 'snow':
-            return 2;
-        default:
-            return 0;
-    }
-}
-
-function getCondition(precipA, intensityA) {
-    var returnData = ``;
-    switch (intensityA) {
-        case 1:
-            returnData += `Clear`;
-            break;
-        case 2:
-            returnData += `Partly cloudy`;
-            break;
-        case 3:
-            returnData += `Cloudy`;
-            break;
-        case 4:
-            returnData += `Light `;
-            break;
-        case 5:
-            returnData += `Moderate `;
-            break;
-        case 6:
-            returnData += `Heavy `;
-            break;
-    }
-
-    if (intensityA >= 4) {
-        switch (precipA) {
-            case 1:
-                returnData += `rain`;
-                break;
-            case 2:
-                returnData += `snow`;
-                break;
-            case 3:
-                returnData += `sleet`;
-                break;
-        }
-    }
-
-    return returnData;
-}
-
-function indexOfMaxReverse(arr) {
-    if (arr.length === 0) {
-        return -1;
-    }
-
-    var max = arr[arr.length - 1];
-    var maxIndex = arr.length - 1;
-
-    if (arr.length > 1) {
-        for (var i = arr.length - 2; i >= 0; i--) {
-            if (arr[i] > max) {
-                maxIndex = i;
-                max = arr[i];
-            }
-        }
-    }
-
-    return maxIndex;
-}
-
-function LineFitter() {
-    this.count = 0;
-    this.sumX = 0;
-    this.sumX2 = 0;
-    this.sumXY = 0;
-    this.sumY = 0;
-}
-
-LineFitter.prototype = {
-    'add': function (x, y) {
-        this.count++;
-        this.sumX += x;
-        this.sumX2 += x * x;
-        this.sumXY += x * y;
-        this.sumY += y;
-    },
-    'project': function (x) {
-        var det = this.count * this.sumX2 - this.sumX * this.sumX;
-        var offset = (this.sumX2 * this.sumY - this.sumX * this.sumXY) / det;
-        var scale = (this.count * this.sumXY - this.sumX * this.sumY) / det;
-        return offset + x * scale;
-    }
-};
-
-function linearProject(data, x) {
-    var fitter = new LineFitter();
-    for (var i = 0; i < data.length; i++) {
-        fitter.add(i, data[i]);
-    }
-    return fitter.project(x);
 }
