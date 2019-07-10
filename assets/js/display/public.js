@@ -765,6 +765,7 @@ waitFor(() => {
         easSocket();
         announcementsSocket();
         darkskySocket();
+        weeklyDJSocket();
         if (disconnected) {
             //noConnection.style.display = "none";
             disconnected = false;
@@ -779,6 +780,7 @@ waitFor(() => {
     easSocket();
     announcementsSocket();
     darkskySocket();
+    weeklyDJSocket();
     if (disconnected) {
         //noConnection.style.display = "none";
         disconnected = false;
