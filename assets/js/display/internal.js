@@ -48,22 +48,6 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
     });
 
-    // Weekly Stats
-    // DEPRECATED; TODO: Move to public sign
-    Slides.newSlide({
-        name: `weekly-stats`,
-        label: `Weekly Stats`,
-        weight: 900000,
-        isSticky: false,
-        color: `success`,
-        active: false,
-        transitionIn: `fadeIn`,
-        transitionOut: `fadeOut`,
-        displayTime: 15,
-        fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
-    });
-
     // System Status
     Slides.newSlide({
         name: `system`,
@@ -389,19 +373,6 @@ waitFor(() => {
         }
     });
 
-    // Update weekly analytics
-    io.socket.on('analytics-weekly-dj', (data) => {
-        try {
-            processWeeklyStats(data);
-        } catch (e) {
-            iziToast.show({
-                title: 'An error occurred - Please check the logs',
-                message: 'Error occurred on analytics-weekly-dj event.'
-            });
-            console.error(e);
-        }
-    });
-
 // When a socket connection is established
     io.socket.on('connect', () => {
         onlineSocket();
@@ -409,7 +380,6 @@ waitFor(() => {
         directorSocket();
         statusSocket();
         announcementsSocket();
-        weeklyDJSocket();
         // Remove the lost connection overlay
         if (disconnected)
         {
@@ -425,7 +395,6 @@ waitFor(() => {
     directorSocket();
     statusSocket();
     announcementsSocket();
-    weeklyDJSocket();
     if (disconnected)
     {
         //noConnection.style.display = "none";
@@ -1120,21 +1089,6 @@ function statusSocket()
     }
 }
 
-// Replace all Status data with that of body request
-function weeklyDJSocket()
-{
-    console.log('attempting weeklyDJ socket');
-    noReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, (body) => {
-        try {
-            processWeeklyStats(body);
-        } catch (e) {
-            console.error(e);
-            console.log('FAILED WEEKLYDJ CONNECTION');
-            setTimeout(weeklyDJSocket, 10000);
-        }
-    });
-}
-
 function announcementsSocket()
 {
     try {
@@ -1152,15 +1106,6 @@ function announcementsSocket()
         console.log('FAILED ANNOUNCEMENTS CONNECTION');
         setTimeout(announcementsSocket, 10000);
     }
-}
-
-function processWeeklyStats(data) {
-    var temp = document.getElementById(`analytics`);
-    if (temp !== null)
-        {temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
-     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
-     <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
-     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;}
 }
 
 function createAnnouncement(data) {

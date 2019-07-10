@@ -135,7 +135,6 @@ try {
     var Meta = { time: moment().toISOString(true) };
     var Calendar = new WWSUdb(TAFFY());
     // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
-    var calendar = [{}, [{}, {}, {}], [{}, {}, {}]];
     var Announcements = new WWSUdb(TAFFY());
     var Directors = new WWSUdb(TAFFY());
     var Eas = new WWSUdb(TAFFY());
@@ -178,46 +177,19 @@ try {
     wrapper.width = window.innerWidth;
     wrapper.height = window.innerHeight;
 
-    // Define slides
-    // WWSU OLD
-    /*
     Slides.newSlide({
-        name: `wwsu`,
-        label: `WWSU`,
+        name: `weekly-stats`,
+        label: `Weekly Stats`,
         weight: 1000000,
         isSticky: false,
-        color: `primary`,
-        active: true,
+        color: `success`,
+        active: false,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
-        displayTime: 14,
-        fitContent: false,
-        html: `<div style="text-align: center; width: 100%;"><img src="../images/display/logo_true.png" style="max-height: 300px; width: auto;"></div>
-                            <div id="slide-wwsu-bottom">
-                            <h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Website: <span class="text-primary">wwsu1069.org</span></h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Line: <span class="text-warning">937-775-5554</span></h1>
-<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Request Line: <span class="text-warning">937-775-5555</span></h1>
-            </div>
-            </div>`,
-        reset: true,
-        fn: ((slide) => {
-            setTimeout((slide) => {
-                $('#slide-wwsu-bottom').animateCss('fadeOut', function () {
-                    var temp = document.getElementById('slide-wwsu-bottom');
-                    if (temp !== null)
-                    {
-                        temp.innerHTML = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Follow Us <span class="text-warning">@wwsu1069</span> On</h1>
-            <div style="width: 100%; align-items: center; justify-content: center;" class="d-flex flex-nowrap p-3 m-3">
-            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/facebook.png"></div>
-            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/twitter.png"></div>
-            <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="../images/display/instagram.png"></div>`;
-                        $('#slide-wwsu-bottom').animateCss('fadeIn');
-                    }
-                });
-            }, 7000);
-        })
+        displayTime: 15,
+        fitContent: true,
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
     });
-    */
 
     // On the Air
     Slides.newSlide({
@@ -692,6 +664,19 @@ waitFor(() => {
         }
     });
 
+        // Update weekly analytics
+        io.socket.on('analytics-weekly-dj', (data) => {
+            try {
+                processWeeklyStats(data);
+            } catch (e) {
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: 'Error occurred on analytics-weekly-dj event.'
+                });
+                console.error(e);
+            }
+        });
+
     // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
     Calendar.assignSocketEvent('calendar', io.socket);
     Calendar.setOnUpdate((data, db) => {
@@ -925,6 +910,21 @@ function directorSocket() {
         console.log('FAILED CONNECTION');
         setTimeout(directorSocket, 10000);
     }
+}
+
+// Replace all Status data with that of body request
+function weeklyDJSocket()
+{
+    console.log('attempting weeklyDJ socket');
+    noReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, (body) => {
+        try {
+            processWeeklyStats(body);
+        } catch (e) {
+            console.error(e);
+            console.log('FAILED WEEKLYDJ CONNECTION');
+            setTimeout(weeklyDJSocket, 10000);
+        }
+    });
 }
 
 function darkskySocket() {
@@ -1544,6 +1544,15 @@ function processNowPlaying(response) {
 function nowPlayingTick() {
     Meta.time = moment(Meta.time).add(1, 'seconds');
     processNowPlaying({});
+
+    // Every 15 minutes, re-process the calendar
+    if (moment(Meta.time).minute() % 15 === 0 && moment(Meta.time).second() < 5)
+    {
+        clearTimeout(processCalendarTimer);
+        processCalendarTimer = setTimeout(() => {
+            processCalendar(Calendar.db());
+        }, 5000);
+    }
 }
 
 function hexRgb(hex, options = {}) {
@@ -1962,4 +1971,13 @@ function getConditionIcon(condition) {
         default:
             return 'fa-rainbow';
     }
+}
+
+function processWeeklyStats(data) {
+    var temp = document.getElementById(`analytics`);
+    if (temp !== null)
+        {temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
+     <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
+     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;}
 }
