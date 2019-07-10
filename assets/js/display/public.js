@@ -2454,7 +2454,7 @@ function processDarksky(db) {
                         if (!precipExpected && index < 25) {
                             if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
                                 precipExpected = true;
-                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').format('LT')}.</div>`;
+                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').startOf('hour').format('hA dddd')}.</div>`;
                             }
                         }
                     });
@@ -2644,13 +2644,13 @@ function processDarksky(db) {
                 temp.innerHTML = `${moment(Meta.time).add(24, 'hours').format('hA dddd')} through ${moment(Meta.time).add(48, 'hours').format('hA dddd')}`;
 
                 temp = document.querySelector(`#weather-1-temperature-high`);
-                temp.innerHTML = `${high1}°F (${highTime1})`;
+                temp.innerHTML = `${Math.round(high1)}°F (${highTime1})`;
                 temp = document.querySelector(`#weather-1-temperature-low`);
-                temp.innerHTML = `${low1}°F (${lowTime1})`;
+                temp.innerHTML = `${Math.round(low1)}°F (${lowTime1})`;
                 temp = document.querySelector(`#weather-2-temperature-high`);
-                temp.innerHTML = `${high2}°F (${highTime2})`;
+                temp.innerHTML = `${Math.round(high2)}°F (${highTime2})`;
                 temp = document.querySelector(`#weather-2-temperature-low`);
-                temp.innerHTML = `${low2}°F (${lowTime2})`;
+                temp.innerHTML = `${Math.round(low2)}°F (${lowTime2})`;
 
                 // Calculate summaries
                 temp = document.querySelector(`#weather-1-summary`);
@@ -2721,9 +2721,9 @@ function processDarksky(db) {
                 countClouds1 = indexOfMaxReverse(countClouds1);
                 countClouds2 = indexOfMaxReverse(countClouds2);
 
-                if (cloudCover1 >= 1.5) {
+                if (cloudCover1 >= 1.25) {
                     summary1 = `Clouds increasing over time. ${summary1}`;
-                } else if (cloudCover1 <= -0.5) {
+                } else if (cloudCover1 <= -0.25) {
                     summary1 = `Clouds clearing over time. ${summary1}`;
                 } else {
                     switch (countClouds1) {
@@ -2739,9 +2739,9 @@ function processDarksky(db) {
                     }
                 }
 
-                if (cloudCover2 >= 1.5) {
+                if (cloudCover2 >= 1.25) {
                     summary2 = `Clouds increasing over time. ${summary2}`;
-                } else if (cloudCover2 <= -0.5) {
+                } else if (cloudCover2 <= -0.25) {
                     summary2 = `Clouds clearing over time. ${summary2}`;
                 } else {
                     switch (countClouds2) {
@@ -2826,9 +2826,23 @@ function processDarksky(db) {
                 var theFirst = true;
                 for (var precipType in precipTypes1) {
                     if (precipTypes1.hasOwnProperty(precipType) && precipTypes1[precipType]) {
-                        if (theFirst) { temp.innerHTML = `${precipChance1 * 100 || 0}% chance of `; }
                         temp.innerHTML += `${!theFirst ? `/` : ``}${precipType}`;
                         theFirst = false;
+                    }
+                }
+                if (!theFirst)
+                {
+                    if (precipChance1 <= 0.25)
+                    {
+                        temp.innerHTML += ` will be isolated (slight chance).`;
+                    } else if (precipChance1 <= 0.5)
+                    {
+                        temp.innerHTML += ` will be scattered (mild chance).`;
+                    } else if (precipChance1 <= 0.75)
+                    {
+                        temp.innerHTML += ` will be widespread (likely chance).`;
+                    } else {
+                        temp.innerHTML += ` will be continuous (very high chance).`;
                     }
                 }
 
@@ -2837,9 +2851,23 @@ function processDarksky(db) {
                 var theFirst2 = true;
                 for (var precipType2 in precipTypes2) {
                     if (precipTypes2.hasOwnProperty(precipType2) && precipTypes2[precipType2]) {
-                        if (theFirst2) { temp2.innerHTML = `${precipChance2 * 100 || 0}% chance of `; }
                         temp2.innerHTML += `${!theFirst2 ? `/` : ``}${precipType2}`;
                         theFirst2 = false;
+                    }
+                }
+                if (!theFirst2)
+                {
+                    if (precipChance2 <= 0.25)
+                    {
+                        temp2.innerHTML += ` will be isolated (slight chance).`;
+                    } else if (precipChance2 <= 0.5)
+                    {
+                        temp2.innerHTML += ` will be scattered (mild chance).`;
+                    } else if (precipChance2 <= 0.75)
+                    {
+                        temp2.innerHTML += ` will be widespread (likely chance).`;
+                    } else {
+                        temp2.innerHTML += ` will be continuous (very high chance).`;
                     }
                 }
 
