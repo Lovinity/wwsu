@@ -30,7 +30,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 5,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Changed office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span></p>`
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
     });
 
     // Assistant Director hours
@@ -45,7 +45,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 5,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Changed office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span></p>`
+        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
     });
 
     // Weekly Stats
@@ -475,6 +475,15 @@ function clockTick() {
         Slides.slide(`director-clockout`).active = false;
         directorNotify = false;
     }
+
+    // Refresh hours every midnight
+    if (moment(Meta.time).hour() === 0 && moment(Meta.time).minute() === 0 && moment(Meta.time).second() < 5)
+    {
+        clearTimeout(officeHoursTimer);
+        officeHoursTimer = setTimeout(() => {
+            processDirectors(Directors.db(), Directorhours.db());
+        }, 5000);
+    }
 }
 
 // Define data-specific functions
@@ -836,6 +845,10 @@ function processDirectors(ddb, hdb)
                             }
 
                             var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`;
+                            if (event.active === 0)
+                            {
+                                endText = `<strike><span class="text-white-50">${event.startT} - ${event.endT}</span></strike>`;
+                            }
                             if (event.active === 2)
                             {
                                 endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`;
