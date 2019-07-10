@@ -375,7 +375,7 @@ try {
 
                 <div class="row shadow-4 bg-dark-3 p-1">
                     <div class="col-12">
-                        <div style="width: 100%; text-align: center;"><h5>Forecast next 48 hours</h5></div>
+                        <div class="text-white" style="width: 100%; text-align: center;"><h4><strong>Forecast next 48 hours</strong></h4></div>
                         <div style="position: relative; width: 100%; height: 5em;" id="forecast-graph">
                         </div>
                         <div class="container p-1">
@@ -2529,10 +2529,10 @@ function processDarksky(db) {
                     theTime = moment(theTime).add(1, 'hours');
 
                     // Add label, vertical line, and temperature at every 3rd hour.
-                    if (i === 1 || i % 3 === 0) {
+                    if (i % 3 === 0) {
                         temp.innerHTML += `
                         <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 20%; height: 4em; width: 5px; color: #000000;"></div>
-                        <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 0%;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA ddd') : moment(theTime).format('hA')}</div>
+                        <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 0%;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA dd') : moment(theTime).format('hA')}</div>
                         <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 66%;">${Math.round(conditions[i].temperature || 0)}°F</div>
                         `;
                     }
@@ -2591,7 +2591,7 @@ function processDarksky(db) {
                             break;
                     }
                     temp.innerHTML += `<div style="position: absolute; background-color: ${shadeColor}; width: ${(1 / 48) * 100}%; height: 2em; left: ${((i - 1) / 48) * 100}%; top: 25%;"></div>
-                    <div style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 40%;">${innerIcon}</div>`;
+                    <div style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 35%;">${innerIcon}</div>`;
                 }
 
             } catch (e) {
