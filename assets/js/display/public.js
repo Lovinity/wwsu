@@ -380,16 +380,16 @@ try {
                         </div>
                         <div class="container p-1">
                             <div class="row bg-dark-1">
-                                <div class="col-3" style="color: #F1C40F;">
+                                <div class="col-3" style="color: #F8E187;">
                                 No precip (darker = cloudier)
                                 </div>
-                                <div class="col-3" style="color: #3498DB;">
+                                <div class="col-3" style="color: #99CBED;">
                                 Rain (darker = heavier)
                                 </div>
                                 <div class="col-3" style="color: #F8F8F8;">
                                 Snow (darker = heavier)
                                 </div>
-                                <div class="col-3" style="color: #FF6289;">
+                                <div class="col-3" style="color: #F78EB4;">
                                 Sleet/Ice (darker = heavier)
                                 </div>
                             </div>
@@ -586,7 +586,7 @@ function processCalendar(db) {
 
         // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
         db.get()
-            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(8, 'days')))
+            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(8, 'days')))
             .sort(compare)
             .map(event => {
                 try {
@@ -2523,14 +2523,15 @@ function processDarksky(db) {
                 temp.innerHTML = ``;
                 var theTime = moment(Meta.time).startOf('hour');
                 var shadeColor = ``;
+                var innerIcon = ``;
                 var conversionRatio = 1;
                 for (var i = 1; i < 49; i++) {
                     theTime = moment(theTime).add(1, 'hours');
 
                     // Add label, vertical line, and temperature at every 3rd hour.
-                    if (i === 1 || i % 3) {
+                    if (i === 1 || i % 3 === 0) {
                         temp.innerHTML += `
-                        <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 20%; height: 60%; width: 3px; color: #ffffff;"></div>
+                        <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 20%; height: 4em; width: 5px; color: #000000;"></div>
                         <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 0%;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA ddd') : moment(theTime).format('hA')}</div>
                         <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 66%;">${Math.round(conditions[i].temperature || 0)}°F</div>
                         `;
@@ -2542,42 +2543,55 @@ function processDarksky(db) {
                         case 'clouds':
                             if (conditions[i].amount > 0.66) {
                                 shadeColor = `#786207`;
+                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud"></i></span>`;
                             } else if (conditions[i].amount >= 0.33) {
-                                shadeColor = `#C09C0C`;
-                            } else {
                                 shadeColor = `#F1C40F`;
+                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-cloud-sun"></i></span>`;
+                            } else {
+                                shadeColor = `#F8E187`;
+                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-sun"></i></span>`;
                             }
                             break;
                         case 'rain':
                             if (conditions[i].amount >= 0.3) {
-                                shadeColor = `#305078`;
+                                shadeColor = `#1A4C6D`;
+                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-rain"></i></span>`;
                             } else if (conditions[i].amount >= 0.1) {
-                                shadeColor = `#4370A8`;
-                            } else {
                                 shadeColor = `#3498DB`;
+                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-showers-heavy"></i></span>`;
+                            } else {
+                                shadeColor = `#99CBED`;
+                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-cloud-sun-rain"></i></span>`;
                             }
                             break;
                         case 'snow':
                             conversionRatio = ((-18 / 11) * conditions[i].temperature) + (722 / 11);
                             if ((conditions[i].amount * conversionRatio) >= 1) {
                                 shadeColor = `#7C7C7C`;
+                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-snowman"></i></span>`;
                             } else if ((conditions[i].amount * conversionRatio) >= 0.33) {
                                 shadeColor = `#C6C6C6`;
+                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-snowflake"></i></span>`;
                             } else {
                                 shadeColor = `#F8F8F8`;
+                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="far fa-snowflake"></i></span>`;
                             }
                             break;
                         case 'sleet':
                             if (conditions[i].amount >= 0.2) {
-                                shadeColor = `#7F3144`;
+                                shadeColor = `#780E35`;
+                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-igloo"></i></span>`;
                             } else if (conditions[i].amount >= 0.05) {
-                                shadeColor = `#B2445F`;
+                                shadeColor = `#F01D6A`;
+                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-icicles"></i></span>`;
                             } else {
-                                shadeColor = `#FF6289`;
+                                shadeColor = `#F78EB4`;
+                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-icicles"></i></span>`;
                             }
                             break;
                     }
-                    temp.innerHTML += `<div style="position: absolute; background-color: ${shadeColor}; width: ${(1 / 48) * 100}%; height: 2em; left: ${((i - 1) / 48) * 100}%; top: 25%;"></div>`;
+                    temp.innerHTML += `<div style="position: absolute; background-color: ${shadeColor}; width: ${(1 / 48) * 100}%; height: 2em; left: ${((i - 1) / 48) * 100}%; top: 25%;"></div>
+                    <div style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 40%;">${innerIcon}</div>`;
                 }
 
             } catch (e) {
