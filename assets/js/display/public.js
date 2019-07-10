@@ -183,7 +183,7 @@ try {
         weight: 1000000,
         isSticky: false,
         color: `success`,
-        active: false,
+        active: true,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 15,
