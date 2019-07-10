@@ -475,7 +475,7 @@ function processCalendar(db) {
                     color.red = Math.round(color.red / 3);
                     color.green = Math.round(color.green / 3);
                     color.blue = Math.round(color.blue / 3);
-                    var badgeInfo;
+                    var badgeInfo = ``;
                     if (event.active === 2) {
                         badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TIME UPDATED</strong></span>`;
                     }
@@ -484,7 +484,7 @@ function processCalendar(db) {
                     }
                     if (event.title.startsWith('Show: ')) {
                         stripped = event.title.replace('Show: ', '');
-                        image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 48px;"></i>`;
+                        image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 36px;"></i>`;
                         temp = stripped.split(' - ');
                         if (temp.length === 2) {
                             line1 = temp[0];
@@ -495,7 +495,7 @@ function processCalendar(db) {
                         }
                     } else if (event.title.startsWith('Prerecord: ')) {
                         stripped = event.title.replace('Prerecord: ', '');
-                        image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 48px;"></i>`;
+                        image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 36px;"></i>`;
                         temp = stripped.split(' - ');
                         if (temp.length === 2) {
                             line1 = temp[0];
@@ -506,7 +506,7 @@ function processCalendar(db) {
                         }
                     } else if (event.title.startsWith('Remote: ')) {
                         stripped = event.title.replace('Remote: ', '');
-                        image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 48px;"></i>`;
+                        image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 36px;"></i>`;
                         temp = stripped.split(' - ');
                         if (temp.length === 2) {
                             line1 = temp[0];
@@ -519,19 +519,19 @@ function processCalendar(db) {
                         stripped = event.title.replace('Sports: ', '');
                         line1 = 'Raider Sports';
                         line2 = stripped;
-                        image = `<i class="fas fa-trophy ${!isLightTheme ? `text-white` : `text-success`}" style="font-size: 48px;"></i>`;
+                        image = `<i class="fas fa-trophy ${!isLightTheme ? `text-white` : `text-success`}" style="font-size: 36px;"></i>`;
                     } else {
                         line1 = '';
                         line2 = event.title;
-                        image = `<i class="fas fa-calendar ${!isLightTheme ? `text-white` : `text-secondary`}" style="font-size: 48px;"></i>`;
+                        image = `<i class="fas fa-calendar ${!isLightTheme ? `text-white` : `text-secondary`}" style="font-size: 36px;"></i>`;
                     }
                     color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
                     innercontent.innerHTML += `
-                        <div class="row shadow-2" style="background: ${color};">
-                            <div class="col-3 text-white">
+                        <div class="row shadow-2" style="background: ${color}; width: 100%; font-size: 1.5vh;">
+                            <div class="col-2 text-white">
                                 ${image}
                             </div>
-                            <div class="col-9 text-white">
+                            <div class="col-10 text-white">
                                 <strong>${line1}${line1 !== '' ? ` - ` : ``}${line2}</strong><br />
                                 ${event.startT} - ${event.endT}<br />
                                 ${badgeInfo}
