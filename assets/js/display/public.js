@@ -2764,7 +2764,7 @@ function processDarksky(db) {
                 temp = document.querySelector(`#weather-1-icon`);
                 temp2 = document.querySelector(`#weather-2-icon`);
 
-                if (precipChance1 >= 0.2) {
+                if (precipChance1 >= 0.1) {
                     console.log(`Precip1 ${countPrecip1}`);
                     switch (countPrecip1) {
                         case 3:
@@ -2792,7 +2792,7 @@ function processDarksky(db) {
                     }
                 }
 
-                if (precipChance2 >= 0.2) {
+                if (precipChance2 >= 0.1) {
                     console.log(`Precip2 ${countPrecip2}`);
                     switch (countPrecip2) {
                         case 3:
