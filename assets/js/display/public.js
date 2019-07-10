@@ -187,8 +187,8 @@ try {
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 15,
-        fitContent: true,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.5em;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
+        fitContent: false,
+        html: `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
     });
 
     // On the Air
