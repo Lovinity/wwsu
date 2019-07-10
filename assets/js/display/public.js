@@ -2451,7 +2451,7 @@ function processDarksky(db) {
                 }
                 if (!precipExpected) {
                     item.hourly.data.map((data, index) => {
-                        if (!precipExpected && index < 24) {
+                        if (!precipExpected && index < 25) {
                             if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
                                 precipExpected = true;
                                 temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').format('LT')}.</div>`;
