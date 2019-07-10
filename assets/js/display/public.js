@@ -241,7 +241,7 @@ try {
         weight: -800000,
         isSticky: false,
         color: `danger`,
-        active: true,
+        active: false,
         transitionIn: `fadeIn`,
         transitionOut: `fadeOut`,
         displayTime: 20,
@@ -261,12 +261,22 @@ try {
                     </div>
                 </div>
             
-            </div>
-            
-            <div class="p-2">
-            <h3 style="text-align: center; font-size: 1.5em; color: #ffffff;">NWS Weather Alerts (Clark, Greene, Montgomery)</h3>
-            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>
             </div>`,
+    });
+
+    // Weather alerts
+    Slides.newSlide({
+        name: `eas-alerts`,
+        label: `EAS Alerts`,
+        weight: -800000,
+        isSticky: false,
+        color: `danger`,
+        active: false,
+        transitionIn: `fadeIn`,
+        transitionOut: `fadeOut`,
+        displayTime: 15,
+        fitContent: true,
+        html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
     });
 
     //scoreboard
@@ -451,18 +461,11 @@ function processCalendar(db) {
                     if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day'); }
                     if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day'); }
 
-                    event.startT = moment(event.start).format('hh:mm A');
+                    event.startT = moment(event.start).format('MM/DD hh:mm A');
                     event.endT = moment(event.end).format('hh:mm A');
 
-                    // Update strings if need be, if say, start time was before this day, or end time is after this day.
-                    if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(1, 'days'))) {
+                    if (moment(event.end).startOf('day').isAfter(moment(event.start).startOf('day'))) {
                         event.endT = moment(event.end).format('MM/DD hh:mm A');
-                        event.startT = moment(event.start).format('MM/DD hh:mm A');
-                    }
-
-                    if (moment(event.start).isBefore(moment(Meta.time).startOf('day'))) {
-                        event.endT = moment(event.end).format('MM/DD hh:mm A');
-                        event.startT = moment(event.start).format('MM/DD hh:mm A');
                     }
 
                     var color = hexRgb(event.color);
@@ -527,7 +530,7 @@ function processCalendar(db) {
                     }
                     color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
                     innercontent.innerHTML += `
-                        <div class="row shadow-2" style="background: ${color}; width: 100%; font-size: 1.5vh;">
+                        <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh;">
                             <div class="col-2 text-white">
                                 ${image}
                             </div>
@@ -634,6 +637,8 @@ function processEas(db) {
             innercontent.HTML = `<strong class="text-white">No active alerts</strong>`;
         }
 
+        Slides.slide(`eas-alerts`).active = makeActive;
+        Slides.slide(`eas-alerts`).displayTime = displayTime;
         checkSlideCounts();
 
         // Do EAS events
