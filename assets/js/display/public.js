@@ -374,29 +374,24 @@ try {
                 </div>
 
                 <div class="row shadow-4 bg-dark-3 p-1">
-                    <div class="col-6">
-                        <div class="media">
-                            <div class="align-self-center mr-3 text-white" id="weather-1-icon">
-                                <i style="font-size: 64px;" class="fas fa-sun"></i>
-                            </div>
-                            <div class="media-body">
-                                <h5 class="mt-0 text-white" id="weather-1-label"></h5>
-                                <p class="text-white"><span id="weather-1-summary"></span><br />
-                                High <span id="weather-1-temperature-high"></span> / Low <span id="weather-1-temperature-low"></span><br />
-                                <span id="weather-1-precip"></span></p>
-                            </div>
+                    <div class="col-12">
+                        <div style="width: 100%; text-align: center;"><h5>Forecast next 48 hours</h5></div>
+                        <div style="position: relative; width: 100%; height: 5em;" id="forecast-graph">
                         </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="media">
-                            <div class="align-self-center mr-3 text-white" id="weather-2-icon">
-                                <i style="font-size: 64px;" class="fas fa-sun"></i>
-                            </div>
-                            <div class="media-body">
-                                <h5 class="mt-0 text-white" id="weather-2-label"></h5>
-                                <p class="text-white"><span id="weather-2-summary"></span><br />
-                                High <span id="weather-2-temperature-high"></span> / Low <span id="weather-2-temperature-low"></span><br />
-                                <span id="weather-2-precip"></span></p>
+                        <div class="container p-1">
+                            <div class="row bg-dark-1">
+                                <div class="col-3" style="color: #F1C40F;">
+                                No precip (darker = cloudier)
+                                </div>
+                                <div class="col-3" style="color: #3498DB;">
+                                Rain (darker = heavier)
+                                </div>
+                                <div class="col-3" style="color: #F8F8F8;">
+                                Snow (darker = heavier)
+                                </div>
+                                <div class="col-3" style="color: #FF6289;">
+                                Sleet/Ice (darker = heavier)
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2423,6 +2418,9 @@ function processDarksky(db) {
                 var temp;
                 var temp2;
 
+                // Array of objects. {type: "clouds" || "rain" || "sleet" || "snow", amount: cloudCover || precipIntensity, temperature: tempreature, visibility: visibility}
+                var conditions = [];
+
                 // Current conditions
                 temp = document.querySelector(`#weather-current-icon`);
                 temp.innerHTML = `<i style="font-size: 64px;" class="fas ${getConditionIcon(item.currently.icon)}"></i>`;
@@ -2449,16 +2447,25 @@ function processDarksky(db) {
                         }
                     });
                 }
-                if (!precipExpected) {
-                    item.hourly.data.map((data, index) => {
-                        if (!precipExpected && index < 25) {
-                            if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
-                                precipExpected = true;
-                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').startOf('hour').format('hA dddd')}.</div>`;
-                            }
+
+                // Determine if it will rain in the next 24 hours.
+                // Also generate 48 hour forecast.
+                item.hourly.data.map((data, index) => {
+                    if (!precipExpected && index < 25) {
+                        if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
+                            precipExpected = true;
+                            temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').startOf('hour').format('hA dddd')}.</div>`;
                         }
-                    });
-                }
+                    }
+
+                    if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
+                        conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
+                    } else {
+                        conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature };
+                    }
+                });
+                console.log(conditions);
+
                 if (!precipExpected) {
                     temp.innerHTML += `<div class="m-1 bs-callout bs-callout-success shadow-4 text-light"><i class="fas fa-umbrella"></i>No precipitation in the forecast for the next 24 hours.</div>`;
                 }
@@ -2510,365 +2517,67 @@ function processDarksky(db) {
                     temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-temperature-high"></i>High heat index right now (${item.currently.apparentTemperature}°F). Drink extra water when outside.</div>`;
                 }
 
-                // 1 = Sunny (<33%), 2 = Partly Cloudy (33-66%), 3 = Cloudy (>66%), 4 = light precipitation (<0.1), 5 = moderate precipitation (0.1-0.5), 6 = heavy precipitation (>0.5).
-                var conditions = [];
 
-                // 0 = none, 1 = rain, 2 = snow, 3 = sleet.
-                var precip = [];
-                var precipTypes1 = {
-                    rain: false,
-                    snow: false,
-                    sleet: false
-                };
-                var precipTypes2 = {
-                    rain: false,
-                    snow: false,
-                    sleet: false
-                };
-
-                // Precip chance is peak of the 24 hour period.
-                var precipChance1 = 0;
-                var precipChance2 = 0;
-
-                var precipStart1 = -1;
-                var precipEnd1 = -1;
-                var prevPrecip1 = false;
-                var precipStart2 = -1;
-                var precipEnd2 = -1;
-                var prevPrecip2 = false;
-
-                var high1 = -300;
-                var highTime1 = 0;
-                var low1 = 300;
-                var lowTime1 = 0;
-
-                var high2 = -300;
-                var highTime2 = 0;
-                var low2 = 300;
-                var lowTime2 = 0;
-
-                var cloudCover1 = [];
-                var cloudCover2 = [];
-
-                item.hourly.data.map((data, index) => {
-                    if (index < 25) {
-                        cloudCover1[index] = data.cloudCover;
-                        if (data.precipProbability > precipChance1) { precipChance1 = data.precipProbability; }
-
-                        if (data.temperature > high1) {
-                            high1 = data.temperature;
-                            highTime1 = moment.unix(data.time).format('h A');
-                        }
-
-                        if (data.temperature < low1) {
-                            low1 = data.temperature;
-                            lowTime1 = moment.unix(data.time).format('h A');
-                        }
-
-                        if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
-                            prevPrecip1 = true;
-                            precip[index] = getPrecipIndex(data.precipType);
-                            precipTypes1[data.precipType] = true;
-                            if (precipStart1 === -1) { precipStart1 = index; }
-                            if (data.precipIntensity >= 0.5) {
-                                conditions[index] = 6;
-                            } else if (data.precipIntensity >= 0.1) {
-                                conditions[index] = 5;
-                            } else {
-                                conditions[index] = 4;
-                            }
-                        } else {
-                            precip[index] = 0;
-                            if (prevPrecip1) {
-                                prevPrecip1 = false;
-                                precipEnd1 = index;
-                            }
-                            if (data.cloudCover >= 0.67) {
-                                conditions[index] = 3;
-                            } else if (data.cloudCover >= 0.33) {
-                                conditions[index] = 2;
-                            } else {
-                                conditions[index] = 1;
-                            }
-                        }
-                    } else {
-                        cloudCover2[index - 25] = data.cloudCover;
-                        if (data.precipProbability > precipChance2) { precipChance2 = data.precipProbability; }
-
-                        if (data.temperature > high2) {
-                            high2 = data.temperature;
-                            highTime2 = moment.unix(data.time).format('hA');
-                        }
-
-                        if (data.temperature < low2) {
-                            low2 = data.temperature;
-                            lowTime2 = moment.unix(data.time).format('hA');
-                        }
-
-                        if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
-                            prevPrecip2 = true;
-                            precip[index] = getPrecipIndex(data.precipType);
-                            precipTypes2[data.precipType] = true;
-                            if (precipStart2 === -1) { precipStart2 = index; }
-                            if (data.precipIntensity >= 0.5) {
-                                conditions[index] = 6;
-                            } else if (data.precipIntensity >= 0.1) {
-                                conditions[index] = 5;
-                            } else {
-                                conditions[index] = 4;
-                            }
-                        } else {
-                            precip[index] = 0;
-                            if (prevPrecip2) {
-                                prevPrecip2 = false;
-                                precipEnd2 = index;
-                            }
-                            if (data.cloudCover >= 0.67) {
-                                conditions[index] = 3;
-                            } else if (data.cloudCover >= 0.33) {
-                                conditions[index] = 2;
-                            } else {
-                                conditions[index] = 1;
-                            }
-                        }
-                    }
-                });
-
-                console.dir(conditions);
-                console.dir(precip);
-
-                // Get preliminary weather data added to the slide
-                temp = document.querySelector(`#weather-1-label`);
-                temp.innerHTML = `Now through ${moment(Meta.time).add(24, 'hours').format('hA dddd')}`;
-                temp = document.querySelector(`#weather-2-label`);
-                temp.innerHTML = `${moment(Meta.time).add(24, 'hours').format('hA dddd')} through ${moment(Meta.time).add(48, 'hours').format('hA dddd')}`;
-
-                temp = document.querySelector(`#weather-1-temperature-high`);
-                temp.innerHTML = `${Math.round(high1)}°F (${highTime1})`;
-                temp = document.querySelector(`#weather-1-temperature-low`);
-                temp.innerHTML = `${Math.round(low1)}°F (${lowTime1})`;
-                temp = document.querySelector(`#weather-2-temperature-high`);
-                temp.innerHTML = `${Math.round(high2)}°F (${highTime2})`;
-                temp = document.querySelector(`#weather-2-temperature-low`);
-                temp.innerHTML = `${Math.round(low2)}°F (${lowTime2})`;
-
-                // Calculate summaries
-                temp = document.querySelector(`#weather-1-summary`);
+                // Generate 48 hour forecast
+                temp = document.querySelector(`#forecast-graph`);
                 temp.innerHTML = ``;
-                temp2 = document.querySelector(`#weather-2-summary`);
-                temp2.innerHTML = ``;
+                var theTime = moment(Meta.time).startOf('hour');
+                var shadeColor = ``;
+                var conversionRatio = 1;
+                for (var i = 1; i < 49; i++) {
+                    theTime = moment(theTime).add(1, 'hours');
 
-                var prevCondition1 = 0;
-                // eslint-disable-next-line no-redeclare
-                var prevPrecip1 = 0;
-                var prevCondition2 = 0;
-                // eslint-disable-next-line no-redeclare
-                var prevPrecip2 = 0;
+                    // Add label, vertical line, and temperature at every 3rd hour.
+                    if (i === 1 || i % 3) {
+                        temp.innerHTML += `
+                        <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 20%; height: 60%; width: 3px; color: #ffffff;"></div>
+                        <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 0%;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA ddd') : moment(theTime).format('hA')}</div>
+                        <div class="text-white" style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 66%;">${Math.round(conditions[i].temperature || 0)}°F</div>
+                        `;
+                    }
 
-                var countPrecip1 = [0, 0, 0, 0];
-                var countPrecip2 = [0, 0, 0, 0];
-                var countClouds1 = [0, 0, 0, 0];
-                var countClouds2 = [0, 0, 0, 0];
-                var summary1 = ``;
-                var summary2 = ``;
-                conditions.map((condition, index) => {
-                    if (index < 25) {
-                        countPrecip1[precip[index]]++;
-                        if (condition < 4) {
-                            countClouds1[condition]++;
-                        } else {
-                            countClouds1[3]++;
-                        }
-                        if (precip[index] !== prevPrecip1 || condition !== prevCondition1) {
-                            if (index > 0 && prevPrecip1 !== 0) {
-                                summary1 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                    // Add shading depending on the condition
+                    shadeColor = ``;
+                    switch (conditions[i].type) {
+                        case 'clouds':
+                            if (conditions[i].amount > 0.66) {
+                                shadeColor = `#786207`;
+                            } else if (conditions[i].amount >= 0.33) {
+                                shadeColor = `#C09C0C`;
+                            } else {
+                                shadeColor = `#F1C40F`;
                             }
-                            if (precip[index] !== 0) { summary1 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`; }
-                        }
-                        prevCondition1 = condition;
-                        prevPrecip1 = precip[index];
-                    } else {
-                        countPrecip2[precip[index]]++;
-                        if (condition < 4) {
-                            countClouds2[condition]++;
-                        } else {
-                            countClouds2[3]++;
-                        }
-                        if (precip[index] !== prevPrecip2  || condition !== prevCondition2) {
-                            if (index > 25 && prevPrecip2 !== 0) {
-                                summary2 += `-${moment(Meta.time).add(index, 'hours').format('hA')}. `;
+                            break;
+                        case 'rain':
+                            if (conditions[i].amount >= 0.3) {
+                                shadeColor = `#305078`;
+                            } else if (conditions[i].amount >= 0.1) {
+                                shadeColor = `#4370A8`;
+                            } else {
+                                shadeColor = `#3498DB`;
                             }
-                            if (precip[index] !== 0) { summary2 += `${getCondition(precip[index], condition)} ${moment(Meta.time).add(index, 'hours').format('hA')}`; }
-                        }
-                        prevCondition2 = condition;
-                        prevPrecip2 = precip[index];
-                    }
-                });
-
-                if (prevPrecip1 !== 0) { summary1 += ` onwards.`; }
-                if (prevPrecip2 !== 0) { summary2 += ` onwards.`; }
-
-                console.dir(cloudCover1);
-                cloudCover1 = linearProject(cloudCover1, 50);
-                console.log(`cloud trend 1 ${cloudCover1}`);
-                console.dir(cloudCover2);
-                cloudCover2 = linearProject(cloudCover2, 48);
-                console.log(`cloud trend 2 ${cloudCover2}`);
-                countPrecip1[0] = 0;
-                countPrecip1 = indexOfMaxReverse(countPrecip1);
-                countPrecip2[0] = 0;
-                countPrecip2 = indexOfMaxReverse(countPrecip2);
-                countClouds1 = indexOfMaxReverse(countClouds1);
-                countClouds2 = indexOfMaxReverse(countClouds2);
-
-                if (cloudCover1 >= 1.25) {
-                    summary1 = `Clouds increasing over time. ${summary1}`;
-                } else if (cloudCover1 <= -0.25) {
-                    summary1 = `Clouds clearing over time. ${summary1}`;
-                } else {
-                    switch (countClouds1) {
-                        case 3:
-                            summary1 = `Overcast. ${summary1}`;
                             break;
-                        case 2:
-                            summary1 = `Partly cloudy. ${summary1}`;
+                        case 'snow':
+                            conversionRatio = ((-18 / 11) * conditions[i].temperature) + (722 / 11);
+                            if ((conditions[i].amount * conversionRatio) >= 1) {
+                                shadeColor = `#7C7C7C`;
+                            } else if ((conditions[i].amount * conversionRatio) >= 0.33) {
+                                shadeColor = `#C6C6C6`;
+                            } else {
+                                shadeColor = `#F8F8F8`;
+                            }
                             break;
-                        case 1:
-                            summary1 = `Mostly clear. ${summary1}`;
+                        case 'sleet':
+                            if (conditions[i].amount >= 0.2) {
+                                shadeColor = `#7F3144`;
+                            } else if (conditions[i].amount >= 0.05) {
+                                shadeColor = `#B2445F`;
+                            } else {
+                                shadeColor = `#FF6289`;
+                            }
                             break;
                     }
-                }
-
-                if (cloudCover2 >= 1.25) {
-                    summary2 = `Clouds increasing over time. ${summary2}`;
-                } else if (cloudCover2 <= -0.25) {
-                    summary2 = `Clouds clearing over time. ${summary2}`;
-                } else {
-                    switch (countClouds2) {
-                        case 3:
-                            summary2 = `Overcast. ${summary2}`;
-                            break;
-                        case 2:
-                            summary2 = `Partly cloudy. ${summary2}`;
-                            break;
-                        case 1:
-                            summary2 = `Mostly clear. ${summary2}`;
-                            break;
-                    }
-                }
-
-                temp.innerHTML = summary1;
-                temp2.innerHTML = summary2;
-
-                // Calculate icons
-                temp = document.querySelector(`#weather-1-icon`);
-                temp2 = document.querySelector(`#weather-2-icon`);
-
-                if (precipChance1 >= 0.1) {
-                    console.log(`Precip1 ${countPrecip1}`);
-                    switch (countPrecip1) {
-                        case 3:
-                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
-                            break;
-                        case 2:
-                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-snowflake"></i>`;
-                            break;
-                        case 1:
-                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
-                            break;
-                    }
-                } else {
-                    console.log(`Clouds1 ${countClouds1}`);
-                    switch (countClouds1) {
-                        case 3:
-                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
-                            break;
-                        case 2:
-                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-sun"></i>`;
-                            break;
-                        case 1:
-                            temp.innerHTML = `<i style="font-size: 64px;" class="fas fa-sun"></i>`;
-                            break;
-                    }
-                }
-
-                if (precipChance2 >= 0.1) {
-                    console.log(`Precip2 ${countPrecip2}`);
-                    switch (countPrecip2) {
-                        case 3:
-                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-meatball"></i>`;
-                            break;
-                        case 2:
-                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-snowflake"></i>`;
-                            break;
-                        case 1:
-                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-showers-heavy"></i>`;
-                            break;
-                    }
-                } else {
-                    console.log(`Clouds2 ${countClouds2}`);
-                    switch (countClouds2) {
-                        case 3:
-                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud"></i>`;
-                            break;
-                        case 2:
-                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-cloud-sun"></i>`;
-                            break;
-                        case 1:
-                            temp2.innerHTML = `<i style="font-size: 64px;" class="fas fa-sun"></i>`;
-                            break;
-                    }
-                }
-
-                // Precip Types
-                temp = document.querySelector(`#weather-1-precip`);
-                temp.innerHTML = ``;
-                var theFirst = true;
-                for (var precipType in precipTypes1) {
-                    if (precipTypes1.hasOwnProperty(precipType) && precipTypes1[precipType]) {
-                        temp.innerHTML += `${!theFirst ? `/` : ``}${precipType}`;
-                        theFirst = false;
-                    }
-                }
-                if (!theFirst)
-                {
-                    if (precipChance1 <= 0.25)
-                    {
-                        temp.innerHTML += ` will be isolated (slight chance).`;
-                    } else if (precipChance1 <= 0.5)
-                    {
-                        temp.innerHTML += ` will be scattered (mild chance).`;
-                    } else if (precipChance1 <= 0.75)
-                    {
-                        temp.innerHTML += ` will be widespread (likely chance).`;
-                    } else {
-                        temp.innerHTML += ` will be continuous (very high chance).`;
-                    }
-                }
-
-                temp2 = document.querySelector(`#weather-2-precip`);
-                temp2.innerHTML = ``;
-                var theFirst2 = true;
-                for (var precipType2 in precipTypes2) {
-                    if (precipTypes2.hasOwnProperty(precipType2) && precipTypes2[precipType2]) {
-                        temp2.innerHTML += `${!theFirst2 ? `/` : ``}${precipType2}`;
-                        theFirst2 = false;
-                    }
-                }
-                if (!theFirst2)
-                {
-                    if (precipChance2 <= 0.25)
-                    {
-                        temp2.innerHTML += ` will be isolated (slight chance).`;
-                    } else if (precipChance2 <= 0.5)
-                    {
-                        temp2.innerHTML += ` will be scattered (mild chance).`;
-                    } else if (precipChance2 <= 0.75)
-                    {
-                        temp2.innerHTML += ` will be widespread (likely chance).`;
-                    } else {
-                        temp2.innerHTML += ` will be continuous (very high chance).`;
-                    }
+                    temp.innerHTML += `<div style="position: absolute; background-color: ${shadeColor}; width: ${(1 / 48) * 100}%; height: 2em; left: ${((i - 1) / 48) * 100}%; top: 25%;"></div>`;
                 }
 
             } catch (e) {
