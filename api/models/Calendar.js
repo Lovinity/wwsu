@@ -86,18 +86,18 @@ module.exports = {
 
             // Load client secrets from a local file.
             var getClientSecret = function () {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve2, reject2) => {
                     fs.readFile('client_secret.json', function processClientSecrets(err, content) {
                         if (err) {
-                            return reject(err);
+                            return reject2(err);
                         }
 
                         if (typeof content === 'undefined' || content === null) {
-                            return reject(new Error('Empty credentials file.'));
+                            return reject2(new Error('Empty credentials file.'));
                         }
                         // Authorize a client with the loaded credentials, then call the
                         // Google Calendar API.
-                        return resolve(JSON.parse(content));
+                        return resolve2(JSON.parse(content));
                     });
                 });
             };
@@ -115,7 +115,7 @@ module.exports = {
             };
 
             var getNewToken = function (oauth2Client) {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve2, reject2) => {
                     var authUrl = oauth2Client.generateAuthUrl({
                         access_type: 'offline',
                         scope: SCOPES
@@ -130,18 +130,18 @@ module.exports = {
                         oauth2Client.getToken(code, (err, token) => {
                             if (err) {
                                 console.log('Error while trying to retrieve access token', err);
-                                return reject();
+                                return reject2();
                             }
                             oauth2Client.credentials = token;
                             storeToken(token);
-                            return resolve(oauth2Client);
+                            return resolve2(oauth2Client);
                         });
                     });
                 });
             };
 
             var authorize = function (credentials) {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve2, reject2) => {
                     try {
                         var clientSecret = credentials.installed.client_secret;
                         var clientId = credentials.installed.client_id;
@@ -149,36 +149,36 @@ module.exports = {
                         var oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUrl);
                         // Check if we have previously stored a token.
                     } catch (e) {
-                        return reject(e);
+                        return reject2(e);
                     }
                     fs.readFile(TOKEN_PATH, (err, token) => {
                         if (err) {
                             getNewToken(oauth2Client).then((oauth2ClientNew) => {
-                                return resolve(oauth2ClientNew);
+                                return resolve2(oauth2ClientNew);
                             }, (err) => {
-                                return reject(err);
+                                return reject2(err);
                             });
                         } else {
                             oauth2Client.credentials = JSON.parse(token);
-                            return resolve(oauth2Client);
+                            return resolve2(oauth2Client);
                         }
                     });
                 });
             };
 
             var authenticate = function () {
-                return new Promise(async (resolve, reject) => {
+                return new Promise(async (resolve2, reject2) => {
                     try {
                         var credentials = await getClientSecret();
                         if (typeof credentials === 'undefined' || credentials === null) {
-                            return reject(new Error('Empty credentials file.'));
+                            return reject2(new Error('Empty credentials file.'));
                         }
                     } catch (e) {
-                        return reject(e);
+                        return reject2(e);
                     }
                     var authorizePromise = authorize(credentials);
-                    authorizePromise.then(resolve);
-                    authorizePromise.catch(reject);
+                    authorizePromise.then(resolve2);
+                    authorizePromise.catch(reject2);
                 });
             };
 
