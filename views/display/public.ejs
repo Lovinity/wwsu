@@ -1,59 +1,114 @@
-    <body style="background-color: #000000; color: FFFFFF; overflow-y: hidden; overflow-x: hidden;">
-<canvas id="wrapper" style="width: 100%; height: 100%; background: #000000; display: none;"></canvas>
-<div id="bg-canvas" style="display: inline; opacity: 0.3;"></div>
-<div class="content" id="dj-alert" style="background: #000000; display: none;"></div>
-<div class="content" id="eas-alert" style="background: #0000ff; display: none;"></div>
-<div id="no-connection" class="overlay" style="display: none;">
-                    <div class="text container-fluid" style="text-align: center;">
-                        <h2 style="text-align: center; font-size: 7em; color: #F44336">Lost Connection to WWSU!</h2></p>
-                        <h2 style="text-align: center; font-size: 3em; color: #F44336">Display sign lost connection. Trying to re-connect...</h2>
-            </div>
-</div>
-
-<div style="position: relative; width: 100vw; height: 100vh; overflow-x: hidden; overflow-y: hidden;">
-
-<div class="shadow-4">
-    <div style="position: absolute; top: 0; left: 0; background: #ffffff; height: 15%; width: 20%;">
-        <img src="../../images/display/logo_true.png" style="width: 100%;">
-    </div>
-    
-    <div style="position: absolute; top: 0; left: 20%; background: #000000; height: 15%; width: 80%; text-align: center;">
-        <div style="color: #FFEB3B; font-size: 3vh;" id="nowplaying-time"></div>
-        <div style="color: #FFFFFF; font-size: 3vh;" id="nowplaying-lines"><div id="nowplaying-line1"></div><div id="nowplaying-line2"></div></div>
-    </div>
-</div>
-    
-    <div class="shadow-4 bg-dark-4" style="position: absolute; top: 15%; left: 0%; height: 70%; width: 30%;">
-        <div class="m-1 text-white" style="width: 100%; text-align: center;">
-            <h3 style="font-size: 3vh;">Events Today</h3>
+<body style="background-color: #000000; color: FFFFFF; overflow-y: hidden; overflow-x: hidden;">
+    <canvas id="wrapper" style="width: 100%; height: 100%; background: #000000; display: none;"></canvas>
+    <div id="bg-canvas" style="display: inline; opacity: 0.3;"></div>
+    <div class="content" id="dj-alert" style="background: #000000; display: none;"></div>
+    <div class="content" id="eas-alert" style="background: #0000ff; display: none;"></div>
+    <div id="no-connection" class="overlay" style="display: none;">
+        <div class="text container-fluid" style="text-align: center;">
+            <h2 style="text-align: center; font-size: 7em; color: #F44336">Lost Connection to WWSU!</h2>
+            </p>
+            <h2 style="text-align: center; font-size: 3em; color: #F44336">Display sign lost connection. Trying to
+                re-connect...</h2>
         </div>
     </div>
-    
-    <div id="slides" style="position: absolute; top: 15%; right: 0%; height: 70%; width: 70%;">
+
+    <div style="position: relative; width: 100vw; height: 100vh; overflow-x: hidden; overflow-y: hidden;">
+
+        <div id="slides" style="position: absolute; top: 15%; right: 0%; height: 70%; width: 70%;">
+        </div>
+
+        <div class="shadow-4 bg-dark-2" style="position: absolute; top: 15%; left: 0%; height: 70%; width: 30%;">
+            <div class="m-1 text-white" style="width: 100%; text-align: center;">
+                <h3 style="font-size: 3vh;">Coming Up</h3>
+            </div>
+        </div>
+
+        <div class="shadow-4"
+            style="position: absolute; top: 0; left: 0; background: #ffffff; height: 15%; width: 20%;">
+            <img src="../../images/display/logo_true.png" style="width: 100%;">
+        </div>
+
+        <div class="shadow-4"
+            style="position: absolute; top: 0; left: 20%; background: #000000; height: 15%; width: 80%; text-align: center;">
+            <div style="color: #FFEB3B; font-size: 3.5vh;" id="nowplaying-time"></div>
+            <div style="color: #FFFFFF; font-size: 3.5vh;" id="nowplaying-lines">
+                <div id="nowplaying-line1"></div>
+                <div id="nowplaying-line2"></div>
+            </div>
+        </div>
+
+        <div class="bg-dark-3 shadow-4 container"
+            style="position: absolute; bottom: 0; left: 0%; height: 15%; width: 100%;">
+            <div class="row">
+                <div class="col-3 bg-dark-4">
+                    <div class="media">
+                        <div class="align-self-center mr-3 text-white" id="weather-current-icon">
+                            <i style="font-size: 64px;" class="fas fa-sun"></i>
+                        </div>
+                        <div class="media-body">
+                            <h3 class="mt-0 text-white" style="font-size: 3vh;"><strong>Current Weather</strong></h3>
+                            <p class="text-white"><span id="weather-current-summary"></span>; <span
+                                    id="weather-current-temperature"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-9">
+                    <div class="text-white" style="width: 100%; text-align: center;">
+                        <h3 style="font-size: 3vh;"><strong>Forecast next 48 hours</strong></h3>
+                    </div>
+                    <div style="position: relative; width: 100%; height: 5em;" id="forecast-graph">
+                    </div>
+                    <div class="container p-1">
+                        <div class="row bg-dark-1">
+                            <div class="col-3" style="color: #F8E187;">
+                                No precip (darker = cloudier)
+                            </div>
+                            <div class="col-3" style="color: #99CBED;">
+                                Rain (darker = heavier)
+                            </div>
+                            <div class="col-3" style="color: #F8F8F8;">
+                                Snow (darker = heavier)
+                            </div>
+                            <div class="col-3" style="color: #F78EB4;">
+                                Sleet/Ice (darker = heavier)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-1 m-1"
+            style="position: absolute; bottom: 15%; right: 0%; height: 5%; width: 70%; text-align: center; font-size: 1.5em; z-index: 1000; -webkit-transform:scale(0.75);"
+            id="slide-badges"></div>
+
     </div>
-    
-    <div style="position: absolute; bottom: 0; left: 0%; background: #787878; height: 15%; width: 100%;">
-    </div>
 
-    <div class="p-1 m-1" style="position: absolute; bottom: 15%; right: 0%; height: 5%; width: 70%; text-align: center; font-size: 1.5em; z-index: 1000;" id="slide-badges"></div>
-    
-</div>
+    <div class="bgoverlay" id="scoreboard"
+        style="background-color: rgba(0, 0, 0, 0); background-image: url(../../images/sports/mcm_womensemifinals.png); background-repeat: no-repeat; background-position: center center; background-attachment: fixed; display: none; opacity: 1;">
+        <div id="score-wsu"
+            style="width: 7vw; text-align: center; position: absolute; top: 84.5vh; left: 0.5vw; font-size: 8vh; color: #ffffff; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">
+            0</div>
+        <div id="score-opp"
+            style="width: 7vw; text-align: center; position: absolute; top: 84.5vh; left: 92.5vw; font-size: 8vh; color: #ffffff; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">
+            0</div>
 
-    <div class="bgoverlay" id="scoreboard" style="background-color: rgba(0, 0, 0, 0); background-image: url(../../images/sports/mcm_womensemifinals.png); background-repeat: no-repeat; background-position: center center; background-attachment: fixed; display: none; opacity: 1;">
-        <div id="score-wsu" style="width: 7vw; text-align: center; position: absolute; top: 84.5vh; left: 0.5vw; font-size: 8vh; color: #ffffff; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">0</div>
-        <div id="score-opp" style="width: 7vw; text-align: center; position: absolute; top: 84.5vh; left: 92.5vw; font-size: 8vh; color: #ffffff; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">0</div>
+        <div id="num-wsu"
+            style="width: 7vw; text-align: center; position: absolute; top: 96vh; left: 0.5vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">
+        </div>
+        <div id="num-opp"
+            style="width: 7vw; text-align: center; position: absolute; top: 96vh; left: 92.5vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">
+        </div>
 
-        <div id="num-wsu" style="width: 7vw; text-align: center; position: absolute; top: 96vh; left: 0.5vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
-        <div id="num-opp" style="width: 7vw; text-align: center; position: absolute; top: 96vh; left: 92.5vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
-
-        <div id="text-wsu" style="width: 33vw; text-align: center; position: absolute; top: 96vh; left: 9.3vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
-        <div id="text-opp" style="width: 33vw; text-align: center; position: absolute; top: 96vh; left: 56vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></div>
+        <div id="text-wsu"
+            style="width: 33vw; text-align: center; position: absolute; top: 96vh; left: 9.3vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">
+        </div>
+        <div id="text-opp"
+            style="width: 33vw; text-align: center; position: absolute; top: 96vh; left: 56vw; font-size: 3vh; color: #000000; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">
+        </div>
     </div>
 
     <script>if (window.module)
-                module = window.module;</script>
-<script src="../../js/display/public.js?t=<%= timestamp %>" defer></script>
+            module = window.module;</script>
+    <script src="../../js/display/public.js?t=<%= timestamp %>" defer></script>
 </body>
-
-
-

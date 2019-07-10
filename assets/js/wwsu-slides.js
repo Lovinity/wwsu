@@ -369,7 +369,7 @@ Slides = (() => {
                             console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
                             var scaleX = 1; var scaleY = 1;
                             scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95;
-                            scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.85;
+                            scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.95;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
                             basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;

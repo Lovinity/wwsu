@@ -359,15 +359,6 @@ try {
 
                 <div class="row shadow-4 bg-dark-2 p-1">
                     <div class="col-6">
-                        <div class="media">
-                            <div class="align-self-center mr-3 text-white" id="weather-current-icon">
-                                <i style="font-size: 64px;" class="fas fa-sun"></i>
-                            </div>
-                            <div class="media-body">
-                                <h5 class="mt-0 text-white"><strong>Current Weather</strong></h5>
-                                <p class="text-white"><span id="weather-current-summary"></span>; <span id="weather-current-temperature"></span></p>
-                            </div>
-                        </div>
                     </div>
                     <div class="col-6" id="weather-minutely-summary">
                     </div>
@@ -375,25 +366,6 @@ try {
 
                 <div class="row shadow-4 bg-dark-3 p-1">
                     <div class="col-12">
-                        <div class="text-white" style="width: 100%; text-align: center;"><h4><strong>Forecast next 48 hours</strong></h4></div>
-                        <div style="position: relative; width: 100%; height: 5em;" id="forecast-graph">
-                        </div>
-                        <div class="container p-1">
-                            <div class="row bg-dark-1">
-                                <div class="col-3" style="color: #F8E187;">
-                                No precip (darker = cloudier)
-                                </div>
-                                <div class="col-3" style="color: #99CBED;">
-                                Rain (darker = heavier)
-                                </div>
-                                <div class="col-3" style="color: #F8F8F8;">
-                                Snow (darker = heavier)
-                                </div>
-                                <div class="col-3" style="color: #F78EB4;">
-                                Sleet/Ice (darker = heavier)
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             
