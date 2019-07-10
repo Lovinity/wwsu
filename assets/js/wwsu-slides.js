@@ -1,3 +1,7 @@
+/* global moment, Meta, iziToast, $ */
+
+var Slides;
+
 // Slide class for managing a single slide
 class Slide {
     constructor(data = {}) {
@@ -148,7 +152,7 @@ class Slide {
 }
 
 // Slides factory function for containing all of the slides for this display sign
-var Slides = (() => {
+Slides = (() => {
 
     // Storage of slides in the system
     var slides = [];
@@ -330,8 +334,8 @@ var Slides = (() => {
                     var pageWidth; var pageHeight;
 
                     var basePage = {
-                        width: 1600,
-                        height: 900,
+                        width: window.innerWidth,
+                        height: window.innerHeight,
                         scale: 1,
                         scaleX: 1,
                         scaleY: 1
@@ -365,7 +369,7 @@ var Slides = (() => {
                             console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`);
                             var scaleX = 1; var scaleY = 1;
                             scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95;
-                            scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.80;
+                            scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.85;
                             basePage.scaleX = scaleX;
                             basePage.scaleY = scaleY;
                             basePage.scale = (scaleX > scaleY) ? scaleY : scaleX;

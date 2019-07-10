@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* global moment, iziToast, responsiveVoice, Slides, $, WWSUdb, TAFFY, WWSUreq */
 
 // Define the scoreboard class
@@ -124,7 +125,6 @@ try {
     var content = document.getElementById('slide');
     var djAlert = document.getElementById('dj-alert');
     var easAlert = document.getElementById('eas-alert');
-    var nowplaying = document.getElementById('nowplaying');
     var nowplayingtime = document.getElementById('nowplaying-time');
     var nowplayinglines = document.getElementById('nowplaying-lines');
     var nowplayingline1 = document.getElementById('nowplaying-line1');
@@ -2018,15 +2018,7 @@ function processNowPlaying(response) {
                     }
                 });
             }
-            nowplaying.style.backgroundColor = color;
-            nowplaying.style.color = 'rgba(255, 255, 255, 1)';
-            nowplayinglines.style.color = 'rgba(255, 255, 255, 1)';
-            nowplayingtime.style.color = 'rgba(255, 235, 59, 1)';
-            nowplayingtime.innerHTML = `<div class="d-flex align-items-stretch">
-                        <div class="m-1" style="width: 15%;">${statebadge}</div>
-                        <div class="container-fluid m-1" style="text-align: center; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}</div>
-                        <div class="m-1" style="width: 15%;">${statebadge}</div>
-                        </div>`;
+            nowplayingtime.innerHTML = `${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}`;
             if (Meta.state === 'automation_live' && queuelength < 60 && typeof response.state === 'undefined') {
                 djAlert.style.display = 'inline';
                 countdown = document.getElementById('countdown');
@@ -2451,17 +2443,24 @@ function processDarksky(db) {
                 // Determine if it will rain in the next 24 hours.
                 // Also generate 48 hour forecast.
                 item.hourly.data.map((data, index) => {
-                    if (!precipExpected && index < 25) {
-                        if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
-                            precipExpected = true;
-                            temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').startOf('hour').format('hA dddd')}.</div>`;
+                    if (!precipExpected) {
+                        if (index === 0) {
+                            if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
+                                precipExpected = true;
+                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast, but none has been reported at this time.</div>`;
+                            }
+                        } else if (index < 25) {
+                            if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
+                                precipExpected = true;
+                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').startOf('hour').format('hA dddd')}.</div>`;
+                            }
                         }
                     }
 
                     if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
                         conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
                     } else {
-                        conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature };
+                        conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility };
                     }
                 });
                 console.log(conditions);
@@ -2483,11 +2482,11 @@ function processDarksky(db) {
 
                 // UV index
                 if (item.currently.uvIndex > 10) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is extremely high (${item.currently.uvIndex})!</strong> Skin burns in 10 minutes.</div>`;
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is extremely high (${item.currently.uvIndex})!</strong> Skin can burn within 10 minutes.</div>`;
                 } else if (item.currently.uvIndex >= 8) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is very high (${item.currently.uvIndex})!</strong> Skin burns in 15 minutes.</div>`;
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is very high (${item.currently.uvIndex})!</strong> Skin can burn within 15 minutes.</div>`;
                 } else if (item.currently.uvIndex >= 6) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-sun"></i>UV index is high (${item.currently.uvIndex}). Skin burns in 30 minutes.</div>`;
+                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-sun"></i>UV index is high (${item.currently.uvIndex}). Skin can burn within 30 minutes.</div>`;
                 }
 
                 // Visibility
@@ -2531,8 +2530,8 @@ function processDarksky(db) {
                     // Add label, vertical line, and temperature at every 3rd hour.
                     if (i % 3 === 0) {
                         temp.innerHTML += `
-                        <div class="text-white" style="position: absolute; left: ${(((i - 1) / 48) - (1/96)) * 100}%; top: 0%;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA dd') : moment(theTime).format('hA')}</div>
-                        <div class="text-white" style="position: absolute; left: ${(((i - 1) / 48) - (1/96)) * 100}%; top: 66%;">${Math.round(conditions[i].temperature || 0)}°F</div>
+                        <div class="text-white" style="position: absolute; left: ${(((i - 1) / 48) - (1 / 96)) * 100}%; top: 0%;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA dd') : moment(theTime).format('hA')}</div>
+                        <div class="text-white" style="position: absolute; left: ${(((i - 1) / 48) - (1 / 96)) * 100}%; top: 66%;">${Math.round(conditions[i].temperature || 0)}°F</div>
                         `;
                     }
 
