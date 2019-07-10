@@ -206,36 +206,6 @@ try {
         html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`,
     });
 
-    // Weather
-    Slides.newSlide({
-        name: `weather`,
-        label: `Weather`,
-        weight: -800000,
-        isSticky: false,
-        color: `danger`,
-        active: false,
-        transitionIn: `fadeIn`,
-        transitionOut: `fadeOut`,
-        displayTime: 20,
-        fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State Weather (via Darksky)</h1>
-            <div class="container">
-
-                <div class="row shadow-4 bg-dark-2 p-1">
-                    <div class="col-6">
-                    </div>
-                    <div class="col-6" id="weather-minutely-summary">
-                    </div>
-                </div>
-
-                <div class="row shadow-4 bg-dark-3 p-1">
-                    <div class="col-12">
-                    </div>
-                </div>
-            
-            </div>`,
-    });
-
     // Weather alerts
     Slides.newSlide({
         name: `eas-alerts`,
@@ -1760,14 +1730,14 @@ function processDarksky(db) {
                 temp.innerHTML = ``;
                 if (item.currently.precipIntensity > 0.01 || item.currently.precipProbability >= 0.2) {
                     precipExpected = true;
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-umbrella"></i>${item.currently.precipType || `precipitation`} is reported now or in the vicinity (${item.currently.precipIntensity} fluid inches per hour).</div>`;
+                    temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${item.currently.precipType || `precipitation`} falling now (${item.currently.precipIntensity} fl. in. / hr.).</span>`;
                 }
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
                             if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
                                 precipExpected = true;
-                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is forecast to begin shortly at about ${moment(Meta.time).add(index, 'minutes').format('LT')}.</div>`;
+                                temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} beginning at about ${moment(Meta.time).add(index, 'minutes').format('LT')}.</span>`;
                             }
                         }
                     });
@@ -1780,12 +1750,11 @@ function processDarksky(db) {
                         if (index === 0) {
                             if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
                                 precipExpected = true;
-                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast, but none has been reported at this time.</div>`;
+                                temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} possible within the hour.</span>`;
                             }
                         } else if (index < 25) {
                             if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
                                 precipExpected = true;
-                                temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-umbrella"></i>${data.precipType || `precipitation`} is in the forecast starting at ${moment(Meta.time).add(index, 'hours').startOf('hour').format('hA dddd')}.</div>`;
                             }
                         }
                     }
@@ -1798,55 +1767,51 @@ function processDarksky(db) {
                 });
                 console.log(conditions);
 
-                if (!precipExpected) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-success shadow-4 text-light"><i class="fas fa-umbrella"></i>No precipitation in the forecast for the next 24 hours.</div>`;
-                }
-
                 // Is it windy?
                 if (item.currently.windSpeed >= 73 || item.currently.windGust >= 73) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-wind"></i><strong>Hurricane-force wind reported now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)!</strong></div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-warning text-flash-fast"><strong>Dangerous winds now!</strong> (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
                 } else if (item.currently.windSpeed >= 55 || item.currently.windGust >= 55) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-wind"></i><strong>Whole gale force wind reported now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)!</strong></div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-warning text-flash-slow"><strong>Damaging winds now!</strong> (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
                 } else if (item.currently.windSpeed >= 39 || item.currently.windGust >= 39) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-wind"></i>Gale force wind reported now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)!</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-white">Windy now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
                 } else if (item.currently.windSpeed >= 25 || item.currently.windGust >= 25) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-wind"></i>It is windy right now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph).</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-white">Breezy now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
                 }
 
                 // UV index
                 if (item.currently.uvIndex > 10) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is extremely high (${item.currently.uvIndex})!</strong> Skin can burn within 10 minutes.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-sun"></i><span class="text-warning text-flash-fast"><strong>Dangerous UV Index</strong> (${item.currently.uvIndex})</span>`;
                 } else if (item.currently.uvIndex >= 8) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-sun"></i><strong>UV index is very high (${item.currently.uvIndex})!</strong> Skin can burn within 15 minutes.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-sun"></i><span class="text-warning text-flash-slow"><strong>Very high UV Index</strong> (${item.currently.uvIndex})!</span>`;
                 } else if (item.currently.uvIndex >= 6) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-sun"></i>UV index is high (${item.currently.uvIndex}). Skin can burn within 30 minutes.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-sun"></i><span class="text-white">High UV index (${item.currently.uvIndex})</strong>`;
                 }
 
                 // Visibility
                 if (item.currently.visibility <= 0.25) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-car"></i><strong>Dangerously low visibility right now (${item.currently.visibility} miles)!</strong> Be very cautious on the roads.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-car"></i><span class="text-warning text-flash-fast"><strong>Dangerous visibility</strong> (${item.currently.visibility} miles)!</span>`;
                 } else if (item.currently.visibility <= 1) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-car"></i><strong>Very low visibility right now (${item.currently.visibility} miles)!</strong> Be cautious on the roads.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-car"></i><span class="text-warning text-flash-slow"><strong>Very low visibility</strong> (${item.currently.visibility} miles)!</span>`;
                 } else if (item.currently.visibility <= 3) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-car"></i>Low visibility right now (${item.currently.visibility} miles). Be careful on the roads.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-car"></i><span class="text-white">Low visibility (${item.currently.visibility} miles)</span>`;
                 }
 
                 // Apparent temperature, cold
                 if (item.currently.apparentTemperature <= -48) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-temperature-low"></i><strong>Extremely dangerous wind chill right now (${item.currently.apparentTemperature}°F)!</strong> Frostbite can occur in 5 minutes exposure.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-temperature-low"></i><span class="text-warning text-flash-fast"><strong>Extremely dangerous wind chill</strong> (${item.currently.apparentTemperature}°F)!</span>`;
                 } else if (item.currently.apparentTemperature <= -32) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-temperature-low"></i><strong>Dangerous wind chill right now (${item.currently.apparentTemperature}°F)!</strong> Frostbite can occur in 10 minutes exposure.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-temperature-low"></i><span class="text-warning text-flash-slow"><strong>Dangerous wind chill</strong> (${item.currently.apparentTemperature}°F)!</span>`;
                 } else if (item.currently.apparentTemperature <= -18) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-temperature-low"></i>Cold wind chill right now (${item.currently.apparentTemperature}°F). Frostbite can occur in 15 minutes exposure.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-temperature-low"></i><span class="text-white">Low wind chill (${item.currently.apparentTemperature}°F)</span>`;
                 }
 
                 // Apparent temperature, hot
                 if (item.currently.apparentTemperature >= 115) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-danger shadow-4 text-light"><i class="fas fa-temperature-high"></i><strong>Extremely dangerous heat index right now (${item.currently.apparentTemperature}°F)!</strong> Postpone outdoor activities if possible.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-temperature-high"></i><span class="text-warning text-flash-fast"><strong>Extremely dangerous heat index</strong> (${item.currently.apparentTemperature}°F)!</span>`;
                 } else if (item.currently.apparentTemperature >= 103) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-urgent shadow-4 text-light"><i class="fas fa-temperature-high"></i><strong>Dangerous heat index right now (${item.currently.apparentTemperature}°F)!</strong> Drink 4 cups water every 2 hours and take breaks every 30 minutes when outside.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-temperature-high"></i><span class="text-warning text-flash-slow"><strong>Dangerous heat index</strong> (${item.currently.apparentTemperature}°F)!</span>`;
                 } else if (item.currently.apparentTemperature >= 91) {
-                    temp.innerHTML += `<div class="m-1 bs-callout bs-callout-warning shadow-4 text-light"><i class="fas fa-temperature-high"></i>High heat index right now (${item.currently.apparentTemperature}°F). Drink extra water when outside.</div>`;
+                    temp.innerHTML += `<br /><i class="fas fa-temperature-high"></i><span class="text-white">High heat index (${item.currently.apparentTemperature}°F).</span>`;
                 }
 
 
