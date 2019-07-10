@@ -443,7 +443,7 @@ function processCalendar(db) {
 
         // Run through the events for the next 24 hours and add them to the coming up panel
         db.get()
-            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(Meta.time).startOf('day').add(1, 'days')) && moment(event.end).isAfter(moment(Meta.time)))
+            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(Meta.time).add(1, 'days')) && moment(event.end).isAfter(moment(Meta.time)))
             .sort(compare)
             .map(event => {
                 try {
