@@ -334,8 +334,8 @@ Slides = (() => {
                     var pageWidth; var pageHeight;
 
                     var basePage = {
-                        width: window.innerWidth,
-                        height: window.innerHeight,
+                        width: temp.offsetWidth,
+                        height: temp.offsetHeight,
                         scale: 1,
                         scaleX: 1,
                         scaleY: 1
