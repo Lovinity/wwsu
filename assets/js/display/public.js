@@ -354,7 +354,7 @@ try {
         transitionOut: `fadeOut`,
         displayTime: 20,
         fitContent: false,
-        html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State University Weather</h1>
+        html: `<h1 style="text-align: center; font-size: 3em; color: #ffffff;">Wright State Weather (via Darksky)</h1>
             <div class="container">
 
                 <div class="row shadow-4 bg-dark-2 p-1">
@@ -400,7 +400,7 @@ try {
             </div>
             
             <div class="p-2">
-            <h3 style="text-align: center; font-size: 1.5em; color: #ffffff;">EAS / Weather Alerts (Clark, Greene, Montgomery)</h3>
+            <h3 style="text-align: center; font-size: 1.5em; color: #ffffff;">NWS Weather Alerts (Clark, Greene, Montgomery)</h3>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>
             </div>`,
     });
