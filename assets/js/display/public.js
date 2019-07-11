@@ -1970,7 +1970,7 @@ function getConditionIcon(condition) {
 function processWeeklyStats(data) {
     var temp = document.getElementById(`analytics`);
     if (temp !== null) {
-    temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+        temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
      <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
      <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
      <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;
@@ -1979,12 +1979,13 @@ function processWeeklyStats(data) {
 
 function setWeatherSlide(id, show, background, header, icon, body) {
     weatherSlide
-        .filter((slide) => slide.id === id)
         .map((slide, index) => {
-            weatherSlide[index].background = background || slide.background;
-            weatherSlide[index].header = header || slide.header;
-            weatherSlide[index].show = show;
-            weatherSlide[index].icon = icon || slide.icon;
-            weatherSlide[index].body = body || slide.body;
+            if (slide.id === id) {
+                weatherSlide[index].background = background || slide.background;
+                weatherSlide[index].header = header || slide.header;
+                weatherSlide[index].show = show;
+                weatherSlide[index].icon = icon || slide.icon;
+                weatherSlide[index].body = body || slide.body;
+            }
         });
 }
