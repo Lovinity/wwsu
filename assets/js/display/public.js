@@ -1871,10 +1871,10 @@ function processDarksky(db) {
                     shadeColor = ``;
                     switch (conditions[i].type) {
                         case 'clouds':
-                            if (conditions[i].amount > 0.66) {
+                            if (conditions[i].amount > 0.75) {
                                 shadeColor = `#786207`;
                                 innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud"></i></span>`;
-                            } else if (conditions[i].amount >= 0.33) {
+                            } else if (conditions[i].amount >= 0.25) {
                                 shadeColor = `#F1C40F`;
                                 innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-cloud-sun"></i></span>`;
                             } else {
