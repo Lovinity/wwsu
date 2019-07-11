@@ -1754,7 +1754,7 @@ function processDarksky(db) {
                         if (!precipExpected) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive around ${moment(Meta.time).add(index, 'minutes').format('LT')}`);
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive around ${moment(Meta.time).add(index, 'minutes').format('h:mmA')}`);
                             }
                         }
                     });
@@ -1767,7 +1767,7 @@ function processDarksky(db) {
                         if (index === 0) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive soon.`);
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive soon.`);
                             }
                         }
                     }
