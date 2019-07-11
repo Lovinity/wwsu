@@ -1230,13 +1230,14 @@ module.exports.bootstrap = async function (done) {
     });
 
     // every hour at second 12, check all noFade tracks and remove any fading.
-    sails.log.verbose(`BOOTSTRAP: scheduling checkNoFade CRON.`);
+    sails.log.verbose(`BOOTSTRAP: scheduling checkNoFadeAndNegativeDuration CRON.`);
     cron.schedule('12 0 * * * *', () => {
         new Promise(async (resolve, reject) => {
-            sails.log.debug(`CRON checkNoFade called.`);
+            sails.log.debug(`CRON checkNoFadeAndNegativeDuration called.`);
             try {
                 // Get all noFade tracks
                 var records = await Songs.find();
+
                 if (records && records.length > 0) {
                     records
                         .filter((record) => sails.config.custom.subcats.noFade.indexOf(record.id_subcat) !== -1)
@@ -1259,6 +1260,9 @@ module.exports.bootstrap = async function (done) {
                                 await Songs.update({ ID: record2.ID }, { cue_times: cueData2 });
                             })(record, cueData);
                         });
+
+                    // Now, update tracks with a duration less than 0 and change their enabled status to -1; these are bad tracks that will crash RadioDJ.
+                    await Songs.update({ duration: { '<': 0 }, enabled: { '!=': -1 } }, { enabled: -1 });
                 }
                 return resolve();
             } catch (e) {
