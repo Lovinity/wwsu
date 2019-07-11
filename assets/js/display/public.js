@@ -1747,14 +1747,14 @@ function processDarksky(db) {
                 var precipExpected = false;
                 if (item.currently.precipType) {
                     precipExpected = true;
-                    setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling now`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour).`);
+                    setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour).`);
                 }
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} on its way!`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive around ${moment(Meta.time).add(index, 'minutes').format('LT')}`);
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive around ${moment(Meta.time).add(index, 'minutes').format('LT')}`);
                             }
                         }
                     });
@@ -1767,7 +1767,7 @@ function processDarksky(db) {
                         if (index === 0) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} on its way!`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive soon.`);
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive soon.`);
                             }
                         }
                     }
@@ -1786,13 +1786,13 @@ function processDarksky(db) {
 
                 // Is it windy?
                 if (item.currently.windSpeed >= 73 || item.currently.windGust >= 73) {
-                    setWeatherSlide(`wind`, true, `#721818`, `Destructive Winds Now!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
+                    setWeatherSlide(`wind`, true, `#721818`, `Destructive Winds!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
                 } else if (item.currently.windSpeed >= 55 || item.currently.windGust >= 55) {
-                    setWeatherSlide(`wind`, true, `#702700`, `Gale-force Winds Now!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
+                    setWeatherSlide(`wind`, true, `#702700`, `Gale-force Winds!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
                 } else if (item.currently.windSpeed >= 39 || item.currently.windGust >= 39) {
-                    setWeatherSlide(`wind`, true, `#4F3C03`, `Windy Now`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
+                    setWeatherSlide(`wind`, true, `#4F3C03`, `Windy`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
                 } else if (item.currently.windSpeed >= 25 || item.currently.windGust >= 25) {
-                    setWeatherSlide(`wind`, true, `#0C3B69`, `Breezy Now`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
+                    setWeatherSlide(`wind`, true, `#0C3B69`, `Breezy`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
                 } else {
                     setWeatherSlide(`wind`, false);
                 }
@@ -1801,7 +1801,7 @@ function processDarksky(db) {
                 if (item.currently.uvIndex > 10) {
                     setWeatherSlide(`uv`, true, `#721818`, `Extreme UV Index!`, `fa-sun`, `Unprotected skin can burn within 10 minutes. Stay indoors if you can.`);
                 } else if (item.currently.uvIndex >= 8) {
-                    setWeatherSlide(`uv`, true, `#702700`, `Very High UV Index!`, `fa-sun`, `Unprotected skin can burn within 20 minutes.`);
+                    setWeatherSlide(`uv`, true, `#702700`, `Severe UV Index!`, `fa-sun`, `Unprotected skin can burn within 20 minutes.`);
                 } else if (item.currently.uvIndex >= 6) {
                     setWeatherSlide(`uv`, true, `#4F3C03`, `High UV Index`, `fa-sun`, `Unprotected skin can burn within 30 minutes.`);
                 } else {
