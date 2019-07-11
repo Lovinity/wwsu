@@ -1866,7 +1866,7 @@ function processDarksky(db) {
                 var innerIcon = ``;
                 var conversionRatio = 1;
                 for (var i = 0; i < 48; i++) {
-                    theTime = moment(theTime).add(1, 'hours');
+                    theTime = moment(Meta.time).add(i, 'hours');
 
                     // Add label, vertical line, and temperature at every 3rd hour.
                     if (i % 3 === 0) {
