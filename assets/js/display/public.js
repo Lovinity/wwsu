@@ -1740,24 +1740,44 @@ function processDarksky(db) {
                 // Array of objects. {type: "clouds" || "rain" || "sleet" || "snow", amount: cloudCover || precipIntensity, temperature: tempreature, visibility: visibility}
                 var conditions = [];
 
+                var precipStart = 61;
+                var precipEnd = -1;
+                var precipType = `precipitation`;
+
                 // Current conditions
                 setWeatherSlide(`weather`, true, `#424242`, `Current Weather`, getConditionIcon(item.currently.icon), `${item.currently.summary}; ${item.currently.temperature}°F`);
 
+
                 // Determine when precipitation is going to fall
                 var precipExpected = false;
-                if (item.currently.precipType) {
-                    precipExpected = true;
-                    setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.`);
-                }
-                if (!precipExpected) {
-                    item.minutely.data.map((data, index) => {
-                        if (!precipExpected) {
-                            if (data.precipType && data.precipIntensity >= 0.005) {
-                                precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} arriving`, `fa-umbrella`, `${data.precipType || `precipitation`} is possible around ${moment(Meta.time).add(index, 'minutes').format('h:mmA')}.`);
-                            }
+
+                item.minutely.data.map((data, index) => {
+                    if (data.precipType && data.precipProbability >= 0.05) {
+                        if (precipStart > index) {
+                            precipStart = index;
+                            precipType = data.precipType;
                         }
-                    });
+                        precipExpected = true;
+                        if (precipEnd < index) { precipEnd = index; }
+                    }
+                });
+
+                if (item.currently.precipType) {
+                    if (precipStart === 0 && precipEnd >= 59) {
+                        setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will continue to fall for the next hour.`);
+                    } else if (precipStart === 0) {
+                        setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will end at about ${moment(Meta.time).add(precipEnd, 'minutes').format('h:mmA')}.`);
+                    } else if (precipStart < 61) {
+                        setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(Meta.time).add(precipStart, 'minutes').format('h:mmA')}.`);
+                    } else {
+                        setWeatherSlide(`precipitation`, false);
+                    }
+                } else {
+                    if (precipStart < 61) {
+                        setWeatherSlide(`precipitation`, true, `#0C3B69`, `${precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(Meta.time).add(precipStart, 'minutes').format('h:mmA')}.`);
+                    } else {
+                        setWeatherSlide(`precipitation`, false);
+                    }
                 }
 
                 // Determine if it will rain in the next 24 hours.
@@ -1765,24 +1785,20 @@ function processDarksky(db) {
                 item.hourly.data.map((data, index) => {
                     if (!precipExpected) {
                         if (index === 0) {
-                            if (data.precipType && data.precipIntensity >= 0.005) {
+                            if (data.precipType && data.precipProbability >= 0.05) {
                                 precipExpected = true;
                                 setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} arriving`, `fa-umbrella`, `${data.precipType || `precipitation`} is possible within the next hour.`);
                             }
                         }
                     }
 
-                    if (data.precipType && data.precipIntensity >= 0.005) {
+                    if (data.precipType && data.precipProbability >= 0.05) {
                         conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
                     } else {
                         conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility };
                     }
                 });
                 console.log(conditions);
-
-                if (!precipExpected) {
-                    setWeatherSlide(`precipitation`, false);
-                }
 
                 // Is it windy?
                 if (item.currently.windSpeed >= 73 || item.currently.windGust >= 73) {
@@ -1849,7 +1865,7 @@ function processDarksky(db) {
                 var shadeColor = ``;
                 var innerIcon = ``;
                 var conversionRatio = 1;
-                for (var i = 1; i < 49; i++) {
+                for (var i = 0; i < 48; i++) {
                     theTime = moment(theTime).add(1, 'hours');
 
                     // Add label, vertical line, and temperature at every 3rd hour.
