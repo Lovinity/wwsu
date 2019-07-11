@@ -1752,7 +1752,7 @@ function processDarksky(db) {
                 var precipExpected = false;
 
                 item.minutely.data.map((data, index) => {
-                    if (data.precipType && data.precipProbability >= 0.05) {
+                    if (data.precipType && data.precipProbability >= 0.1) {
                         if (precipStart > index) {
                             precipStart = index;
                             precipType = data.precipType;
@@ -1783,7 +1783,7 @@ function processDarksky(db) {
                 // Determine if it will rain in the next 24 hours.
                 // Also generate 48 hour forecast.
                 item.hourly.data.map((data, index) => {
-                    if (data.precipType && data.precipProbability >= 0.05) {
+                    if (data.precipType && data.precipProbability >= 0.1) {
                         conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
                     } else {
                         conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility };
