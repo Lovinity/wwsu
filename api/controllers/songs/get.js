@@ -67,7 +67,7 @@ module.exports = {
             var fromIP = await sails.helpers.getIp(this.req);
 
             var cats = {};
-            var query = {};
+            var query = {id_subcat: []};
             var songs = [];
 
             // No song ID specified?
