@@ -1979,7 +1979,7 @@ function processWeeklyStats(data) {
 
 function setWeatherSlide(id, show, background, header, icon, body) {
     weatherSlide
-        .filter((slide) => { slide.id === id; })
+        .filter((slide) => slide.id === id)
         .map((slide, index) => {
             weatherSlide[index].background = background || slide.background;
             weatherSlide[index].header = header || slide.header;
