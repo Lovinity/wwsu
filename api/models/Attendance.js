@@ -195,7 +195,7 @@ module.exports = {
                         updateData.listenerMinutes = listenerMinutes;
 
                         // Update the attendance record with the data
-                        returnData.updatedRecord = await Attendance.updateOne({ ID: currentID }, updateData).fetch();
+                        returnData.updatedRecord = await Attendance.updateOne({ ID: currentID }, updateData);
 
                         // Recalculate weekly analytics
                         await sails.helpers.attendance.calculateStats();
