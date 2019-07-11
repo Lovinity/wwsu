@@ -67,30 +67,30 @@ module.exports = {
             var fromIP = await sails.helpers.getIp(this.req);
 
             var cats = {};
-            var query = {id_subcat: []};
+            var queryString = {id_subcat: []};
             var songs = [];
 
             // No song ID specified?
             if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 // LINT: id_subcat and id_genre may indicate as not in camel case but IT CANNOT BE CHANGED; this is how it is in the RadioDJ database.
-                query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats['music']);
+                queryString.id_subcat = queryString.id_subcat.concat(sails.config.custom.subcats.music);
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
-                    {query.id_subcat = [];}
+                    {queryString.id_subcat = [];}
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
-                    {query.id_subcat.push(inputs.subcategory);}
+                    {queryString.id_subcat.push(inputs.subcategory);}
                 if (inputs.category !== 'undefined' && inputs.category !== null && typeof sails.config.custom.subcats[inputs.category] !== `undefined`)
-                    {query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats[inputs.category]);}
+                    {queryString.id_subcat = queryString.id_subcat.concat(sails.config.custom.subcats[inputs.category]);}
                 if (inputs.genre !== 'undefined' && inputs.genre !== null)
-                    {query.id_genre = inputs.genre;}
+                    {queryString.id_genre = inputs.genre;}
 
                 // Filter by search string, if provided
                 if (typeof inputs.search !== 'undefined' && inputs.search !== null && inputs.search !== '')
-                    {query.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];}
+                    {queryString.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];}
 
-                    return exits.success(query);
+                    return exits.success({query: queryString, cats: sails.config.custom.subcats.music});
 
-                songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
+                songs = await Songs.find(queryString).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
 
                 // No songs returned? send "false" to indicate we are at the end of the list.
                 if (songs.length === 0)
@@ -102,8 +102,8 @@ module.exports = {
                 sails.log.verbose(`Querying single track ID: ${inputs.ID}`);
 
                 // Find the song matching the defined ID
-                query = { ID: inputs.ID };
-                songs = await Songs.find(query);
+                queryString = { ID: inputs.ID };
+                songs = await Songs.find(queryString);
                 sails.log.verbose(`Songs retrieved records: ${songs.length}`);
 
                 // No record retrieved? Assume we could not find the song.
