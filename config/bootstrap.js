@@ -1236,11 +1236,10 @@ module.exports.bootstrap = async function (done) {
             sails.log.debug(`CRON checkNoFadeAndNegativeDuration called.`);
             try {
                 // Get all noFade tracks
-                var records = await Songs.find();
+                var records = await Songs.find({ id_subcat: sails.config.custom.subcats.noFade });
 
                 if (records && records.length > 0) {
                     records
-                        .filter((record) => sails.config.custom.subcats.noFade.indexOf(record.id_subcat) !== -1)
                         .map((record) => {
                             var cueData = queryString.parse(record.cue_times);
                             // If fade in and fade out are both 0 (treat when fade in or fade out is not specified as being 0), skip this track; nothing to do.
@@ -1260,10 +1259,10 @@ module.exports.bootstrap = async function (done) {
                                 await Songs.update({ ID: record2.ID }, { cue_times: cueData2 });
                             })(record, cueData);
                         });
-
-                    // Now, update tracks with a duration less than 0 and change their enabled status to -1; these are bad tracks that will crash RadioDJ.
-                    await Songs.update({ duration: { '<': 0 }, enabled: { '!=': -1 } }, { enabled: -1 });
                 }
+
+                // Now, update tracks with a duration less than 0 and change their enabled status to -1; these are bad tracks that will crash RadioDJ.
+                await Songs.update({ duration: { '<': 0 }, enabled: { '!=': -1 } }, { enabled: -1 });
                 return resolve();
             } catch (e) {
                 sails.log.error(e);
@@ -1343,23 +1342,20 @@ module.exports.bootstrap = async function (done) {
                 var songs = await Songs.find();
 
                 sails.log.debug(`Calling asyncForEach in cron priorityCheck for every RadioDJ song`);
-                await sails.helpers.asyncForEach(songs, (song) => {
-                    return new Promise(async (resolve2) => {
+                songs
+                    .map((song) => {
                         try {
-
                             var minPriority = song.rating === 0 ? 0 : (defaultPriority[0] * (song.rating / 9));
                             minPriority = Math.round(minPriority * 10) / 10;
-
-                            if (song.weight < minPriority) { await Songs.update({ ID: song.ID }, { weight: minPriority }); }
-
-                            return resolve2(false);
-
+                            if (song.weight < minPriority) {
+                                (async(song2, minPriority2) => {
+                                    await Songs.update({ ID: song2.ID }, { weight: minPriority2 });
+                                })(song, minPriority);
+                            }
                         } catch (e) {
                             sails.log.error(e);
-                            return resolve2(false);
                         }
                     });
-                });
 
                 return resolve();
             } catch (e) {
