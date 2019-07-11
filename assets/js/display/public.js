@@ -163,6 +163,35 @@ try {
     var temp;
     var isStudio = window.location.search.indexOf('studio=true') !== -1;
     var isLightTheme = window.location.search.indexOf('light=true') !== -1;
+    var weatherSlide = [
+        { id: `weather`, icon: `fa-sun`, background: `#424242`, header: `Current Weather`, body: `Unknown`, show: true },
+        { id: `precipitation`, icon: `fa-umbrella`, background: `#424242`, header: `Precipitation`, body: ``, show: false },
+        { id: `wind`, icon: `fa-wind`, background: `#424242`, header: `Wind`, body: ``, show: false },
+        { id: `uv`, icon: `fa-sun`, background: `#424242`, header: `UV Index`, body: ``, show: false },
+        { id: `visibility`, icon: `fa-car`, background: `#424242`, header: `Visibility`, body: ``, show: false },
+        { id: `windchill`, icon: `fa-temperature-low`, background: `#424242`, header: `Wind Chill`, body: ``, show: false },
+        { id: `heatindex`, icon: `fa-temperature-high`, background: `#424242`, header: `Heat Index`, body: ``, show: false },
+    ];
+    var weatherSlideSlot = -1;
+
+    setInterval(() => {
+        var done = false;
+
+        if (weatherSlide.length === 0) { return null; }
+
+        while (!done) {
+            weatherSlideSlot++;
+            if (typeof weatherSlide[weatherSlideSlot] === `undefined`) { weatherSlideSlot = 0; }
+
+            if (weatherSlide[weatherSlideSlot].show || weatherSlideSlot === 0) {
+                document.querySelector(`#weather-background`).style.background = weatherSlide[weatherSlideSlot].background;
+                document.querySelector(`#weather-icon`).innerHTML = `<i class="fas ${weatherSlide[weatherSlideSlot].icon}" style="font-size: 64px;"></i>`;
+                document.querySelector(`#weather-header`).innerHTML = `<strong>${weatherSlide[weatherSlideSlot].header}</strong>`;
+                document.querySelector(`#weather-body`).innerHTML = weatherSlide[weatherSlideSlot].body;
+                done = true;
+            }
+        }
+    }, 7000);
 
     if (isLightTheme) {
         document.body.style.backgroundColor = `#ffffff`;
@@ -634,18 +663,18 @@ waitFor(() => {
         }
     });
 
-        // Update weekly analytics
-        io.socket.on('analytics-weekly-dj', (data) => {
-            try {
-                processWeeklyStats(data);
-            } catch (e) {
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: 'Error occurred on analytics-weekly-dj event.'
-                });
-                console.error(e);
-            }
-        });
+    // Update weekly analytics
+    io.socket.on('analytics-weekly-dj', (data) => {
+        try {
+            processWeeklyStats(data);
+        } catch (e) {
+            iziToast.show({
+                title: 'An error occurred - Please check the logs',
+                message: 'Error occurred on analytics-weekly-dj event.'
+            });
+            console.error(e);
+        }
+    });
 
     // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
     Calendar.assignSocketEvent('calendar', io.socket);
@@ -885,10 +914,9 @@ function directorSocket() {
 }
 
 // Replace all Status data with that of body request
-function weeklyDJSocket()
-{
+function weeklyDJSocket() {
     console.log('attempting weeklyDJ socket');
-    noReq.request({method: 'POST', url: '/analytics/weekly-dj', data: {}}, (body) => {
+    noReq.request({ method: 'POST', url: '/analytics/weekly-dj', data: {} }, (body) => {
         try {
             processWeeklyStats(body);
         } catch (e) {
@@ -1518,8 +1546,7 @@ function nowPlayingTick() {
     processNowPlaying({});
 
     // Every 15 minutes, re-process the calendar
-    if (moment(Meta.time).minute() % 15 === 0 && moment(Meta.time).second() < 5)
-    {
+    if (moment(Meta.time).minute() % 15 === 0 && moment(Meta.time).second() < 5) {
         clearTimeout(processCalendarTimer);
         processCalendarTimer = setTimeout(() => {
             processCalendar(Calendar.db());
@@ -1710,34 +1737,24 @@ function processDarksky(db) {
     try {
         db.each((item) => {
             try {
-                var temp;
-                var temp2;
-
                 // Array of objects. {type: "clouds" || "rain" || "sleet" || "snow", amount: cloudCover || precipIntensity, temperature: tempreature, visibility: visibility}
                 var conditions = [];
 
                 // Current conditions
-                temp = document.querySelector(`#weather-current-icon`);
-                temp.innerHTML = `<i style="font-size: 64px;" class="fas ${getConditionIcon(item.currently.icon)}"></i>`;
-                temp = document.querySelector(`#weather-current-temperature`);
-                temp.innerHTML = `${item.currently.temperature}°F`;
-                temp = document.querySelector(`#weather-current-summary`);
-                temp.innerHTML = item.currently.summary;
+                setWeatherSlide(`weather`, true, `#424242`, `Current Weather`, getConditionIcon(item.currently.icon), `${item.currently.summary}; ${item.currently.temperature}°F`);
 
                 // Determine when precipitation is going to fall
                 var precipExpected = false;
-                temp = document.querySelector(`#weather-minutely-summary`);
-                temp.innerHTML = ``;
                 if (item.currently.precipType) {
                     precipExpected = true;
-                    temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${item.currently.precipType || `precipitation`} falling now (${item.currently.precipIntensity} fl. in. / hr.).</span>`;
+                    setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling now`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour).`);
                 }
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} beginning at about ${moment(Meta.time).add(index, 'minutes').format('LT')}.</span>`;
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} on its way!`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive around ${moment(Meta.time).add(index, 'minutes').format('LT')}`);
                             }
                         }
                     });
@@ -1750,11 +1767,7 @@ function processDarksky(db) {
                         if (index === 0) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} possible within the hour.</span>`;
-                            }
-                        } else if (index < 25) {
-                            if (data.precipType && data.precipIntensity >= 0.005) {
-                                precipExpected = true;
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} on its way!`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive soon.`);
                             }
                         }
                     }
@@ -1767,51 +1780,65 @@ function processDarksky(db) {
                 });
                 console.log(conditions);
 
+                if (!precipExpected) {
+                    setWeatherSlide(`precipitation`, false);
+                }
+
                 // Is it windy?
                 if (item.currently.windSpeed >= 73 || item.currently.windGust >= 73) {
-                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-warning text-flash-fast"><strong>Dangerous winds now!</strong> (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
+                    setWeatherSlide(`wind`, true, `#721818`, `Destructive Winds Now!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
                 } else if (item.currently.windSpeed >= 55 || item.currently.windGust >= 55) {
-                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-warning text-flash-slow"><strong>Damaging winds now!</strong> (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
+                    setWeatherSlide(`wind`, true, `#702700`, `Gale-force Winds Now!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
                 } else if (item.currently.windSpeed >= 39 || item.currently.windGust >= 39) {
-                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-white">Windy now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
+                    setWeatherSlide(`wind`, true, `#4F3C03`, `Windy Now`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
                 } else if (item.currently.windSpeed >= 25 || item.currently.windGust >= 25) {
-                    temp.innerHTML += `<br /><i class="fas fa-wind"></i><span class="text-white">Breezy now (${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph)</span>`;
+                    setWeatherSlide(`wind`, true, `#0C3B69`, `Breezy Now`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
+                } else {
+                    setWeatherSlide(`wind`, false);
                 }
 
                 // UV index
                 if (item.currently.uvIndex > 10) {
-                    temp.innerHTML += `<br /><i class="fas fa-sun"></i><span class="text-warning text-flash-fast"><strong>Dangerous UV Index</strong> (${item.currently.uvIndex})</span>`;
+                    setWeatherSlide(`uv`, true, `#721818`, `Extreme UV Index!`, `fa-sun`, `Unprotected skin can burn within 10 minutes. Stay indoors if you can.`);
                 } else if (item.currently.uvIndex >= 8) {
-                    temp.innerHTML += `<br /><i class="fas fa-sun"></i><span class="text-warning text-flash-slow"><strong>Very high UV Index</strong> (${item.currently.uvIndex})!</span>`;
+                    setWeatherSlide(`uv`, true, `#702700`, `Very High UV Index!`, `fa-sun`, `Unprotected skin can burn within 20 minutes.`);
                 } else if (item.currently.uvIndex >= 6) {
-                    temp.innerHTML += `<br /><i class="fas fa-sun"></i><span class="text-white">High UV index (${item.currently.uvIndex})</strong>`;
+                    setWeatherSlide(`uv`, true, `#4F3C03`, `High UV Index`, `fa-sun`, `Unprotected skin can burn within 30 minutes.`);
+                } else {
+                    setWeatherSlide(`uv`, false);
                 }
 
                 // Visibility
                 if (item.currently.visibility <= 0.25) {
-                    temp.innerHTML += `<br /><i class="fas fa-car"></i><span class="text-warning text-flash-fast"><strong>Dangerous visibility</strong> (${item.currently.visibility} miles)!</span>`;
+                    setWeatherSlide(`visibility`, true, `#721818`, `Dangerous Visibility!`, `fa-car`, `Visibility is only ${item.currently.visibility} miles. Do not drive if possible.`);
                 } else if (item.currently.visibility <= 1) {
-                    temp.innerHTML += `<br /><i class="fas fa-car"></i><span class="text-warning text-flash-slow"><strong>Very low visibility</strong> (${item.currently.visibility} miles)!</span>`;
+                    setWeatherSlide(`visibility`, true, `#702700`, `Very Low Visibility!`, `fa-car`, `Visibility is only ${item.currently.visibility} miles. Be careful and drive slowly.`);
                 } else if (item.currently.visibility <= 3) {
-                    temp.innerHTML += `<br /><i class="fas fa-car"></i><span class="text-white">Low visibility (${item.currently.visibility} miles)</span>`;
+                    setWeatherSlide(`visibility`, true, `#4F3C03`, `Low Visibility`, `fa-car`, `Visibility is only ${item.currently.visibility} miles. Be cautious on the roads.`);
+                } else {
+                    setWeatherSlide(`visibility`, false);
                 }
 
                 // Apparent temperature, cold
                 if (item.currently.apparentTemperature <= -48) {
-                    temp.innerHTML += `<br /><i class="fas fa-temperature-low"></i><span class="text-warning text-flash-fast"><strong>Extremely dangerous wind chill</strong> (${item.currently.apparentTemperature}°F)!</span>`;
+                    setWeatherSlide(`windchill`, true, `#721818`, `Dangerous Wind Chill!`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 10 minutes.`);
                 } else if (item.currently.apparentTemperature <= -32) {
-                    temp.innerHTML += `<br /><i class="fas fa-temperature-low"></i><span class="text-warning text-flash-slow"><strong>Dangerous wind chill</strong> (${item.currently.apparentTemperature}°F)!</span>`;
+                    setWeatherSlide(`windchill`, true, `#702700`, `Very Low Wind Chill!`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 20 minutes.`);
                 } else if (item.currently.apparentTemperature <= -18) {
-                    temp.innerHTML += `<br /><i class="fas fa-temperature-low"></i><span class="text-white">Low wind chill (${item.currently.apparentTemperature}°F)</span>`;
+                    setWeatherSlide(`windchill`, true, `#4F3C03`, `Low Wind Chill`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 30 minutes.`);
+                } else {
+                    setWeatherSlide(`windchill`, false);
                 }
 
                 // Apparent temperature, hot
                 if (item.currently.apparentTemperature >= 115) {
-                    temp.innerHTML += `<br /><i class="fas fa-temperature-high"></i><span class="text-warning text-flash-fast"><strong>Extremely dangerous heat index</strong> (${item.currently.apparentTemperature}°F)!</span>`;
+                    setWeatherSlide(`heatindex`, true, `#721818`, `Dangerous Heat Index!`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Heat stroke can occur; stay cool indoors if possible.`);
                 } else if (item.currently.apparentTemperature >= 103) {
-                    temp.innerHTML += `<br /><i class="fas fa-temperature-high"></i><span class="text-warning text-flash-slow"><strong>Dangerous heat index</strong> (${item.currently.apparentTemperature}°F)!</span>`;
+                    setWeatherSlide(`heatindex`, true, `#702700`, `Very High Heat Index!`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Drink lots of water and take a cooling break every 30 minutes.`);
                 } else if (item.currently.apparentTemperature >= 91) {
-                    temp.innerHTML += `<br /><i class="fas fa-temperature-high"></i><span class="text-white">High heat index (${item.currently.apparentTemperature}°F).</span>`;
+                    setWeatherSlide(`heatindex`, true, `#4F3C03`, `High Heat Index`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Drink extra water.`);
+                } else {
+                    setWeatherSlide(`heatindex`, false);
                 }
 
 
@@ -1942,9 +1969,22 @@ function getConditionIcon(condition) {
 
 function processWeeklyStats(data) {
     var temp = document.getElementById(`analytics`);
-    if (temp !== null)
-        {temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
+    if (temp !== null) {
+    temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
      <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
      <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
-     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;}
+     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`;
+    }
+}
+
+function setWeatherSlide(id, show, background, header, icon, body) {
+    weatherSlide
+        .filter((slide) => { slide.id === id; })
+        .map((slide, index) => {
+            weatherSlide[index].background = background || slide.background;
+            weatherSlide[index].header = header || slide.header;
+            weatherSlide[index].show = show;
+            weatherSlide[index].icon = icon || slide.icon;
+            weatherSlide[index].body = body || slide.body;
+        });
 }
