@@ -1929,8 +1929,8 @@ function processDarksky(db) {
                             }
                             break;
                     }
-                    temp.innerHTML += `<div style="position: absolute; background-color: ${shadeColor}; width: ${(1 / 48) * 100}%; height: 2em; left: ${((i - 1) / 48) * 100}%; top: 25%;"></div>
-                    <div style="position: absolute; left: ${((i - 1) / 48) * 100}%; top: 35%;">${innerIcon}</div>`;
+                    temp.innerHTML += `<div style="position: absolute; background-color: ${shadeColor}; width: ${(1 / 48) * 100}%; height: 2em; left: ${((i) / 48) * 100}%; top: 25%;"></div>
+                    <div style="position: absolute; left: ${((i) / 48) * 100}%; top: 35%;">${innerIcon}</div>`;
                 }
 
             } catch (e) {
