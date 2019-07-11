@@ -1747,14 +1747,14 @@ function processDarksky(db) {
                 var precipExpected = false;
                 if (item.currently.precipType) {
                     precipExpected = true;
-                    setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour).`);
+                    setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.`);
                 }
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive around ${moment(Meta.time).add(index, 'minutes').format('h:mmA')}`);
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} arriving`, `fa-umbrella`, `${data.precipType || `precipitation`} is possible around ${moment(Meta.time).add(index, 'minutes').format('h:mmA')}.`);
                             }
                         }
                     });
@@ -1767,7 +1767,7 @@ function processDarksky(db) {
                         if (index === 0) {
                             if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} coming`, `fa-umbrella`, `${data.precipType || `precipitation`} expected to arrive soon.`);
+                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} arriving`, `fa-umbrella`, `${data.precipType || `precipitation`} is possible within the next hour.`);
                             }
                         }
                     }
