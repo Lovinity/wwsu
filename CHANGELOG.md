@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Added parameter "ignoreNonMusic" to songs/get. If true, non-music tracks will not be returned (eg. non-requestable tracks). Ignored if ID is specified.
  - Added parameter "ignoreDisabled" to songs/get. If true, disabled tracks will not be returned. Ignored if ID is specified.
  - Added parameter "ignoreSpins" to songs/get. If true, spin counts will not be returned, speeding up response time. Ignored if ID is not specified.
+ - Attendance.createRecord now accepts undefined as a parameter. If undefined, current attendance record will be closed off, but a new one will not be made.
+ - Attendance.createRecord might return a property of "updatedRecord" in its returned object if the function closed off an active attendance record.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
