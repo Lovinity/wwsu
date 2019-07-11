@@ -1728,14 +1728,14 @@ function processDarksky(db) {
                 var precipExpected = false;
                 temp = document.querySelector(`#weather-minutely-summary`);
                 temp.innerHTML = ``;
-                if (item.currently.precipIntensity > 0.01 || item.currently.precipProbability >= 0.2) {
+                if (item.currently.precipType) {
                     precipExpected = true;
                     temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${item.currently.precipType || `precipitation`} falling now (${item.currently.precipIntensity} fl. in. / hr.).</span>`;
                 }
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
-                            if (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01) {
+                            if (data.precipType) {
                                 precipExpected = true;
                                 temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} beginning at about ${moment(Meta.time).add(index, 'minutes').format('LT')}.</span>`;
                             }
@@ -1748,18 +1748,18 @@ function processDarksky(db) {
                 item.hourly.data.map((data, index) => {
                     if (!precipExpected) {
                         if (index === 0) {
-                            if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
+                            if (data.precipType) {
                                 precipExpected = true;
                                 temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} possible within the hour.</span>`;
                             }
                         } else if (index < 25) {
-                            if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
+                            if (data.precipType) {
                                 precipExpected = true;
                             }
                         }
                     }
 
-                    if (data.precipType && (data.precipProbability >= 0.2 || data.precipIntensity >= 0.01)) {
+                    if (data.precipType) {
                         conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
                     } else {
                         conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility };
