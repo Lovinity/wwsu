@@ -1783,15 +1783,6 @@ function processDarksky(db) {
                 // Determine if it will rain in the next 24 hours.
                 // Also generate 48 hour forecast.
                 item.hourly.data.map((data, index) => {
-                    if (!precipExpected) {
-                        if (index === 0) {
-                            if (data.precipType && data.precipProbability >= 0.05) {
-                                precipExpected = true;
-                                setWeatherSlide(`precipitation`, true, `#0C3B69`, `${data.precipType || `precipitation`} arriving`, `fa-umbrella`, `${data.precipType || `precipitation`} is possible within the next hour.`);
-                            }
-                        }
-                    }
-
                     if (data.precipType && data.precipProbability >= 0.05) {
                         conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
                     } else {
