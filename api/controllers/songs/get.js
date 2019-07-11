@@ -74,7 +74,7 @@ module.exports = {
             if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 // LINT: id_subcat and id_genre may indicate as not in camel case but IT CANNOT BE CHANGED; this is how it is in the RadioDJ database.
-                query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats['music']);
+                //query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats['music']);
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
                     {query.id_subcat = [];}
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
