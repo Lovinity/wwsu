@@ -27,7 +27,6 @@ module.exports = {
 
             // Duplicate current meta dj since it's about to change; we need it for stats calculations
             var dj = Meta['A'].dj;
-            var attendanceID = Meta['A'].attendanceID;
             var showStamp = Meta['A'].showStamp;
             var attendance;
 
@@ -36,77 +35,80 @@ module.exports = {
             }
 
             // Log the request
+            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>Show ended.</strong>' }).fetch()
+                .tolerate((err) => {
+                    // Do not throw for error, but log it
+                    sails.log.error(err);
+                });
+
+            // Close off the current attendance record and calculate statistics.
+            attendance = await Attendance.createRecord();
+
+            // Begin parallel function for sending the system into automation
             (async () => {
-                await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].show, event: '<strong>Show ended.</strong>' }).fetch()
-                    .tolerate((err) => {
-                        // Do not throw for error, but log it
-                        sails.log.error(err);
-                    });
+                // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
+                await sails.helpers.rest.cmd('EnableAssisted', 1);
+
+                // If coming out of a sports broadcast, queue a closer if exists.
+                if (Meta['A'].state.startsWith('sports')) {
+                    if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined') {
+                        await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]['Sports Closers']], 'Bottom', 1);
+                    }
+                } else {
+                    if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]['Show Closers']], 'Bottom', 1); }
+                }
+
+                // Queue a station ID and a PSA
+                await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
+                await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
+
+                // Start playing something
+                await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
+                Status.errorCheck.prevID = moment();
+                await sails.helpers.error.count('stationID');
+
+                // Queue ending stuff
+                if (Meta['A'].state.startsWith('live_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end); }
+
+                if (Meta['A'].state.startsWith('remote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end); }
+
+                if (Meta['A'].state.startsWith('sports_') || Meta['A'].state.startsWith('sportsremote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end); }
+
+                // We are going to automation
+                if (!inputs.transition) {
+                    await Meta.changeMeta({ genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() });
+                    await sails.helpers.error.reset('automationBreak');
+
+                    // Add up to 3 track requests if any are pending
+                    await sails.helpers.requests.queue(3, true, true);
+
+                    // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
+                    try {
+                        await Calendar.preLoadEvents(true);
+                    } catch (unusedE2) {
+                        // Couldn't load calendar? Fall back to Default automation
+                        await sails.helpers.genre.start('Default', true);
+                    }
+
+                    // Enable Auto DJ
+                    await sails.helpers.rest.cmd('EnableAutoDJ', 1);
+
+                    // We are going to break
+                } else {
+                    await Meta.changeMeta({ genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() });
+                    attendance = await Attendance.createRecord(`Genre: Default`);
+                }
+
+                // Finish up
+                await sails.helpers.songs.queuePending();
+                await sails.helpers.rest.cmd('EnableAssisted', 0);
+
+                await Meta.changeMeta({ changingState: null });
+
                 return true;
             })();
 
-            // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
-            await sails.helpers.rest.cmd('EnableAssisted', 1);
-
-            // If coming out of a sports broadcast, queue a closer if exists.
-            if (Meta['A'].state.startsWith('sports')) {
-                if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined') {
-                    await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]['Sports Closers']], 'Bottom', 1);
-                }
-            } else {
-                if (typeof sails.config.custom.showcats[Meta['A'].show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.showcats[Meta['A'].show]['Show Closers']], 'Bottom', 1); }
-            }
-
-            // Queue a station ID and a PSA
-            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1);
-            await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1);
-
-            // Start playing something
-            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-            Status.errorCheck.prevID = moment();
-            await sails.helpers.error.count('stationID');
-
-            // Queue ending stuff
-            if (Meta['A'].state.startsWith('live_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end); }
-
-            if (Meta['A'].state.startsWith('remote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end); }
-
-            if (Meta['A'].state.startsWith('sports_') || Meta['A'].state.startsWith('sportsremote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end); }
-
-            // We are going to automation
-            if (!inputs.transition) {
-                await Meta.changeMeta({ genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() });
-                await sails.helpers.error.reset('automationBreak');
-
-                // Add up to 3 track requests if any are pending
-                await sails.helpers.requests.queue(3, true, true);
-
-                // Close off the current attendance record and calculate statistics.
-                attendance = await Attendance.createRecord();
-
-                // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-                try {
-                    await Calendar.preLoadEvents(true);
-                } catch (unusedE2) {
-                    // Couldn't load calendar? Fall back to Default automation
-                    await sails.helpers.genre.start('Default', true);
-                }
-
-                // Enable Auto DJ
-                await sails.helpers.rest.cmd('EnableAutoDJ', 1);
-
-                // We are going to break
-            } else {
-                await Meta.changeMeta({ genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() });
-                attendance = await Attendance.createRecord(`Genre: Default`);
-            }
-
-            // Finish up
-            await sails.helpers.songs.queuePending();
-            await sails.helpers.rest.cmd('EnableAssisted', 0);
-
-            // Grab show time and listener minutes from attendance record and award XP.
-            // We do this in the same function because it cannot be called until after a new attendance record has been created.
+            // While the parallel is running, grab show time and listener minutes from attendance record and award XP.
             attendance = attendance.updatedRecord || undefined;
             if (typeof attendance !== `undefined`) {
                 returnData.showTime = attendance.showTime || 0;
@@ -140,6 +142,7 @@ module.exports = {
                     // Do not throw for error, but log it
                     sails.log.error(err);
                 });
+
             if (returnData.messagesWeb) {
                 if (dj !== null) {
                     returnData.messagesXP = Math.round(returnData.messagesWeb * sails.config.custom.XP.web);
@@ -154,10 +157,10 @@ module.exports = {
                 }
             }
 
-            // Gather DJ stats
+            // Gather updated DJ stats
             if (dj !== null) { returnData = Object.assign(returnData, await sails.helpers.analytics.showtime(dj)); }
 
-            await Meta.changeMeta({ changingState: null });
+            // Return our stats
             return exits.success(returnData);
         } catch (e) {
             await Meta.changeMeta({ changingState: null });
