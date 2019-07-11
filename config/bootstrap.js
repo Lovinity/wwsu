@@ -584,7 +584,7 @@ module.exports.bootstrap = async function (done) {
 
 
                     // Do automation system error checking and handling
-                    if (queue.length > 0 && queue[0].Duration === Status.errorCheck.prevDuration && queue[0].Elapsed === Status.errorCheck.prevElapsed && (Meta['A'].state.startsWith('automation_') || Meta['A'].state.endsWith('_break') || Meta['A'].state.endsWith('_disconnected') || Meta['A'].state === 'live_prerecord')) {
+                    if (queue.length > 0 && queue[0].Duration === Status.errorCheck.prevDuration && queue[0].Elapsed === Status.errorCheck.prevElapsed && (Meta['A'].state.startsWith('automation_') || Meta['A'].state.endsWith('_break') || Meta['A'].state.endsWith('_disconnected') || Meta['A'].state.endsWith('_returning') || Meta['A'].state === 'live_prerecord')) {
                         await sails.helpers.error.count('frozen');
                     } else {
                         Status.errorCheck.prevDuration = queue[0].Duration;
@@ -697,7 +697,7 @@ module.exports.bootstrap = async function (done) {
                     }
                 } else {
                     // We have no queue... which should never happen because RadioDJ always returns a dummy track in position 0. This is an error.
-                    if (Meta['A'].state.startsWith('automation_') || Meta['A'].state.endsWith('_break') || Meta['A'].state.endsWith('_disconnected') || Meta['A'].state === 'live_prerecord') {
+                    if (Meta['A'].state.startsWith('automation_') || Meta['A'].state.endsWith('_break') || Meta['A'].state.endsWith('_disconnected') || Meta['A'].state.endsWith('_returning') || Meta['A'].state === 'live_prerecord') {
                         await sails.helpers.error.count('frozen');
                     }
                 }
