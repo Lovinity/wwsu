@@ -1871,8 +1871,8 @@ function processDarksky(db) {
                     // Add label, vertical line, and temperature at every 3rd hour.
                     if (i % 3 === 0) {
                         temp.innerHTML += `
-                        <div class="text-white" style="position: absolute; left: ${(((i - 1) / 48) - (1 / 96)) * 100}%; top: 0%; font-size: 1.5vh;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA dd') : moment(theTime).format('hA')}</div>
-                        <div class="text-white" style="position: absolute; left: ${(((i - 1) / 48) - (1 / 96)) * 100}%; top: 66%; font-size: 1.5vh;">${Math.round(conditions[i].temperature || 0)}°F</div>
+                        <div class="text-white" style="position: absolute; left: ${i > 0 ? (((i) / 48) - (1 / 96)) * 100 : 0}%; top: 0%; font-size: 1.5vh;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA dd') : moment(theTime).format('hA')}</div>
+                        <div class="text-white" style="position: absolute; left: ${i > 0 ? (((i) / 48) - (1 / 96)) * 100 : 0}%; top: 66%; font-size: 1.5vh;">${Math.round(conditions[i].temperature || 0)}°F</div>
                         `;
                     }
 
