@@ -1735,7 +1735,7 @@ function processDarksky(db) {
                 if (!precipExpected) {
                     item.minutely.data.map((data, index) => {
                         if (!precipExpected) {
-                            if (data.precipType) {
+                            if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
                                 temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} beginning at about ${moment(Meta.time).add(index, 'minutes').format('LT')}.</span>`;
                             }
@@ -1748,18 +1748,18 @@ function processDarksky(db) {
                 item.hourly.data.map((data, index) => {
                     if (!precipExpected) {
                         if (index === 0) {
-                            if (data.precipType) {
+                            if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
                                 temp.innerHTML += `<i class="fas fa-umbrella"></i><span class="text-warning text-flash-slow">${data.precipType || `precipitation`} possible within the hour.</span>`;
                             }
                         } else if (index < 25) {
-                            if (data.precipType) {
+                            if (data.precipType && data.precipIntensity >= 0.005) {
                                 precipExpected = true;
                             }
                         }
                     }
 
-                    if (data.precipType) {
+                    if (data.precipType && data.precipIntensity >= 0.005) {
                         conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
                     } else {
                         conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility };
