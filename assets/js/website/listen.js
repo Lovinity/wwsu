@@ -1037,7 +1037,7 @@ function clearChat() {
 // Used to get info about a specific track to display as an overlay box
 function loadTrackInfo(trackID) {
     console.log(`getting ${trackID}`);
-    io.socket.post('/songs/get', { ID: trackID }, function serverResponded(response) {
+    io.socket.post('/songs/get', { ID: trackID, ignoreSpins: true }, function serverResponded(response) {
         try {
             //response = JSON.parse(response);
             console.log(`got ${trackID}`);
@@ -1059,10 +1059,6 @@ function loadTrackInfo(trackID) {
             ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ``}
             ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ``}
             </ul>`);
-                $('#track-info-spins7').html(`last 7 days: ${response[0].spins['7']}`);
-                $('#track-info-spins30').html(`last 30 days: ${response[0].spins['30']}`);
-                $('#track-info-spinsytd').html(`since January 1: ${response[0].spins['YTD']}`);
-                $('#track-info-spinsyear').html(`last 365 days: ${response[0].spins['365']}`);
 
                 if (response[0].request.requestable) {
                     $('#track-info-request').html(`<div class="form-group">
@@ -1142,7 +1138,7 @@ function loadTracks(skip = 0) {
         {temp.parentNode.removeChild(temp);}
     var songData = document.getElementById('song-data');
     var search = document.getElementById('searchterm');
-    var query = { search: escapeHTML(search.value), skip: skip, limit: 50 };
+    var query = { search: escapeHTML(search.value), skip: skip, limit: 50, ignoreDisabled: true, ignoreNonMusic: true };
     var genreOptions = document.getElementById('filter-genre');
     var selectedOption = genreOptions.options[genreOptions.selectedIndex].value;
     if (selectedOption !== '0')

@@ -10,6 +10,21 @@ module.exports = {
             allowNull: true,
             description: 'If provided, will only return the provided song ID.'
         },
+        ignoreNonMusic: {
+            type: 'boolean',
+            defaultsTo: false,
+            description: 'If true, tracks that cannot be requested (not in categories.music) will not be returned (ignored if an ID was provided). Defaults to false.'
+        },
+        ignoreDisabled: {
+            type: 'boolean',
+            defaultsTo: false,
+            description: 'If true, no disabled songs will be returned (ignored if an ID was provided). Defaults to false.'
+        },
+        ignoreSpins: {
+            type: 'boolean',
+            defaultsTo: false,
+            description: 'If true, spin data will not be returned (spin data is never returned if ID is not specified). This will increase response time significantly. Defaults to false.'
+        },
         search: {
             type: 'string',
             allowNull: true,
@@ -66,18 +81,19 @@ module.exports = {
             var fromIP = await sails.helpers.getIp(this.req);
 
             var cats = {};
-            var queryString = { id_subcat: [] };
+            var queryString = {};
             var songs = [];
 
             // No song ID specified?
             if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 // LINT: id_subcat and id_genre may indicate as not in camel case but IT CANNOT BE CHANGED; this is how it is in the RadioDJ database.
-                queryString.id_subcat = queryString.id_subcat.concat(sails.config.custom.subcats.music);
+                if (inputs.ignoreNonMusic) { queryString.id_subcat = sails.config.custom.subcats.music; }
                 if ((typeof inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (typeof inputs.category !== 'undefined' && inputs.category !== null)) { queryString.id_subcat = []; }
                 if (typeof inputs.subcategory !== 'undefined' && inputs.subcategory !== null) { queryString.id_subcat.push(inputs.subcategory); }
                 if (typeof inputs.category !== 'undefined' && inputs.category !== null && typeof sails.config.custom.subcats[inputs.category] !== `undefined`) { queryString.id_subcat = queryString.id_subcat.concat(sails.config.custom.subcats[inputs.category]); }
                 if (typeof inputs.genre !== 'undefined' && inputs.genre !== null) { queryString.id_genre = inputs.genre; }
+                if (inputs.ignoreDisabled) { queryString.enabled = 1; }
 
                 // Filter by search string, if provided
                 if (typeof inputs.search !== 'undefined' && inputs.search !== null && inputs.search !== '') { queryString.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }]; }
@@ -118,7 +134,7 @@ module.exports = {
                         songs[index].request = await sails.helpers.requests.checkRequestable(song.ID, fromIP);
 
                         // Get spin counts from both RadioDJ and manually logged entries by DJs
-                        songs[index].spins = await sails.helpers.songs.getSpins(song.ID);
+                        if (!inputs.ignoreSpins) { songs[index].spins = await sails.helpers.songs.getSpins(song.ID); }
                         return true;
                     } catch (e) {
                         sails.log.error(e);
