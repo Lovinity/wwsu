@@ -67,14 +67,14 @@ module.exports = {
             var fromIP = await sails.helpers.getIp(this.req);
 
             var cats = {};
-            var query = {};
+            var query = {id_subcat: []};
             var songs = [];
 
             // No song ID specified?
             if (typeof inputs.ID === 'undefined' || inputs.ID === null) {
                 // Find songs in any of the music subcategories, or in the provided subcategory or genre.
                 // LINT: id_subcat and id_genre may indicate as not in camel case but IT CANNOT BE CHANGED; this is how it is in the RadioDJ database.
-                //query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats['music']);
+                query.id_subcat = query.id_subcat.concat(sails.config.custom.subcats['music']);
                 if ((inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (inputs.category !== 'undefined' && inputs.category !== null))
                     {query.id_subcat = [];}
                 if (inputs.subcategory !== 'undefined' && inputs.subcategory !== null)
@@ -87,6 +87,8 @@ module.exports = {
                 // Filter by search string, if provided
                 if (typeof inputs.search !== 'undefined' && inputs.search !== null && inputs.search !== '')
                     {query.or = [{ artist: { 'contains': inputs.search } }, { title: { 'contains': inputs.search } }];}
+
+                    return exits.success(query);
 
                 songs = await Songs.find(query).sort([{ artist: 'ASC' }, { title: 'ASC' }]).skip(inputs.skip).limit(inputs.limit);
 
