@@ -1619,13 +1619,13 @@ function subscribe(type, subtype) {
             } else {
                 iziToast.show({
                     title: 'Subscribed!',
-                    message: `You successfully subscribed to that event. You will receive a push notification when it goes live. To un-subscribe, find the event under "Events and Shows", click it, and then click "Unsubscribe".`,
+                    message: `You successfully subscribed to that event. You will receive a push notification when it goes live. To un-subscribe, find the event under "Events and Shows", click it, and then click "Unsubscribe". <strong>WWSU may remove notification subscriptions of users who do not visit WWSU for more than a month, at their discretion.</strong>`,
                     color: 'green',
                     zindex: 100,
                     layout: 1,
                     closeOnClick: true,
                     position: 'center',
-                    timeout: 20000
+                    timeout: 30000
                 });
                 Subscriptions.insert({ type: type, subtype: subtype });
                 var temp = document.querySelector(`#show-subscribe`);
