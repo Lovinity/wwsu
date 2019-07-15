@@ -1,6 +1,6 @@
 /* global moment, importScripts */
 
-importScripts(`../../moment.min.js`);
+importScripts(`../../../js/moment.min.js`);
 
 onmessage = function (e) {
     // Define a comparison function that will order calendar events by start time when we run the iteration

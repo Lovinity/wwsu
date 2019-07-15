@@ -1,7 +1,7 @@
 
 /* global moment, importScripts */
 
-importScripts(`../../moment.min.js`);
+importScripts(`../../../js/moment.min.js`);
 
 onmessage = function (e) {
     e.data[0].each((item) => {
