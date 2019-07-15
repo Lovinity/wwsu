@@ -43,9 +43,8 @@ module.exports = {
                 'request': '0aa0e762-ca89-4eef-89a2-82009a58cb1a'
             };
             // LINT: ignore camel casing errors for needle parameters; they must be like this for oneSignal
-            // TODO: Add app ID to configuration
             needle('post', `https://onesignal.com/api/v1/notifications`, {
-                app_id: `150c0123-e224-4e5b-a8b2-fc202d78e2f1`,
+                app_id: sails.config.custom.onesignal.app,
                 include_player_ids: inputs.devices,
                 headings: {'en': inputs.title},
                 contents: {'en': inputs.content},
