@@ -134,13 +134,13 @@ try {
     // Define data sources
     var Meta = { time: moment().toISOString(true) };
     var Calendar = new WWSUdb(TAFFY());
-    var calendarWorker = new Worker('workers/publicCalendar.js');
+    var calendarWorker = new Worker('../../js/workers/publicCalendar.js');
     // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
     var Announcements = new WWSUdb(TAFFY());
     var Directors = new WWSUdb(TAFFY());
     var Eas = new WWSUdb(TAFFY());
     var Darksky = new WWSUdb(TAFFY());
-    var darkskyWorker = new Worker('workers/publicDarksky.js');
+    var darkskyWorker = new Worker('../../js/workers/publicDarksky.js');
     var sportsdb = new WWSUdb(TAFFY());
     var newEas = [];
     var prevEas = [];
