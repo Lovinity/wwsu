@@ -8,7 +8,11 @@ module.exports = {
         rest: {
             type: 'string',
             description: `Specify the new OneSignal REST API to use for this application.`
-        }
+        },
+        app: {
+            type: 'string',
+            description: `Specify the App ID of the app used in OneSignal for push notifications.`
+        },
     },
 
     exits: {
@@ -21,15 +25,14 @@ module.exports = {
         try {
 
             // Set the new configuration of any and all values provided as input
-            for (var key in inputs)
-            {
-                if (inputs.hasOwnProperty(key))
-                {
+            for (var key in inputs) {
+                if (inputs.hasOwnProperty(key)) {
+                    if (key === `rest` && inputs.rest === ``) { continue; }
                     sails.config.custom.onesignal[key] = inputs[key];
+
+                    if (key === `app`) { sails.sockets.broadcast('config', 'config', { update: { onesignal: { app: sails.config.custom.onesignal.app } } }); }
                 }
             }
-
-            // Do NOT broadcast onesignal changes; this is a secret
 
             return exits.success();
         } catch (e) {

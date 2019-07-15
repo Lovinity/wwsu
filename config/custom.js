@@ -178,7 +178,8 @@ var defaultConfig = {
 
     // Used for oneSignal push notifications
     onesignal: {
-        rest: ``
+        rest: ``,
+        app: ``
     },
 
     // Used for Darksky weather API
