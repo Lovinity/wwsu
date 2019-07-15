@@ -403,7 +403,7 @@ function processDirectors(db) {
 // Update the calendar slides
 function processCalendar(db) {
     try {
-        calendarWorker.postMessage([db.get(), Meta.time]);
+        calendarWorker.postMessage([db.get(), moment(Meta.time).toISOString(true)]);
     } catch (e) {
         console.error(e);
         var innercontent = document.getElementById('events-today');
@@ -1627,7 +1627,7 @@ function checkSlideCounts() {
 function processDarksky(db) {
     // Run data manipulation process
     try {
-        darkskyWorker.postMessage([db, Meta.time]);
+        darkskyWorker.postMessage([db.get(), moment(Meta.time).toISOString(true)]);
 
     } catch (e) {
         console.error(e);

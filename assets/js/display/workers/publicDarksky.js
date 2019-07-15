@@ -4,7 +4,7 @@
 importScripts(`../../../js/moment.min.js`);
 
 onmessage = function (e) {
-    e.data[0].each((item) => {
+    e.data[0].map((item) => {
         try {
             // Array of objects. {type: "clouds" || "rain" || "sleet" || "snow", amount: cloudCover || precipIntensity, temperature: tempreature, visibility: visibility}
             var conditions = [];
