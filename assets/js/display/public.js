@@ -134,11 +134,13 @@ try {
     // Define data sources
     var Meta = { time: moment().toISOString(true) };
     var Calendar = new WWSUdb(TAFFY());
+    var calendarWorker = new Worker('workers/publicCalendar.js');
     // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
     var Announcements = new WWSUdb(TAFFY());
     var Directors = new WWSUdb(TAFFY());
     var Eas = new WWSUdb(TAFFY());
     var Darksky = new WWSUdb(TAFFY());
+    var darkskyWorker = new Worker('workers/publicDarksky.js');
     var sportsdb = new WWSUdb(TAFFY());
     var newEas = [];
     var prevEas = [];
@@ -401,133 +403,23 @@ function processDirectors(db) {
 // Update the calendar slides
 function processCalendar(db) {
     try {
-
-        // Define a comparison function that will order calendar events by start time when we run the iteration
-        var compare = function (a, b) {
-            try {
-                if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1; }
-                if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1; }
-                if (a.ID < b.ID) { return -1; }
-                if (a.ID > b.ID) { return 1; }
-                return 0;
-            } catch (e) {
-                console.error(e);
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
-                });
-            }
-        };
-
-        var innercontent = document.getElementById('events-today');
-        innercontent.innerHTML = ``;
-
-        // Run through the events for the next 24 hours and add them to the coming up panel
-        db.get()
-            .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(Meta.time).add(1, 'days')) && moment(event.end).isAfter(moment(Meta.time)))
-            .sort(compare)
-            .map(event => {
-                try {
-                    // null start or end? Use a default to prevent errors.
-                    if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day'); }
-                    if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day'); }
-
-                    event.startT = moment(event.start).format('MM/DD hh:mm A');
-                    event.endT = moment(event.end).format('hh:mm A');
-
-                    if (moment(event.end).startOf('day').isAfter(moment(event.start).startOf('day'))) {
-                        event.endT = moment(event.end).format('MM/DD hh:mm A');
-                    }
-
-                    var color = hexRgb(event.color);
-                    var line1;
-                    var line2;
-                    var stripped;
-                    var image;
-                    var temp;
-                    if (event.active < 1) { color = hexRgb(`#161616`); }
-                    color.red = Math.round(color.red / 3);
-                    color.green = Math.round(color.green / 3);
-                    color.blue = Math.round(color.blue / 3);
-                    var badgeInfo = ``;
-                    if (event.active === 2) {
-                        badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TIME UPDATED</strong></span>`;
-                    }
-                    if (event.active === -1) {
-                        badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`;
-                    }
-                    if (event.title.startsWith('Show: ')) {
-                        stripped = event.title.replace('Show: ', '');
-                        image = `<i class="fas fa-microphone ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 36px;"></i>`;
-                        temp = stripped.split(' - ');
-                        if (temp.length === 2) {
-                            line1 = temp[0];
-                            line2 = temp[1];
-                        } else {
-                            line1 = 'Unknown DJ';
-                            line2 = temp;
-                        }
-                    } else if (event.title.startsWith('Prerecord: ')) {
-                        stripped = event.title.replace('Prerecord: ', '');
-                        image = `<i class="fas fa-play-circle ${!isLightTheme ? `text-white` : `text-primary`}" style="font-size: 36px;"></i>`;
-                        temp = stripped.split(' - ');
-                        if (temp.length === 2) {
-                            line1 = temp[0];
-                            line2 = temp[1];
-                        } else {
-                            line1 = 'Unknown DJ';
-                            line2 = temp;
-                        }
-                    } else if (event.title.startsWith('Remote: ')) {
-                        stripped = event.title.replace('Remote: ', '');
-                        image = `<i class="fas fa-broadcast-tower ${!isLightTheme ? `text-white` : `text-purple`}" style="font-size: 36px;"></i>`;
-                        temp = stripped.split(' - ');
-                        if (temp.length === 2) {
-                            line1 = temp[0];
-                            line2 = temp[1];
-                        } else {
-                            line1 = 'Unknown Host';
-                            line2 = temp;
-                        }
-                    } else if (event.title.startsWith('Sports: ')) {
-                        stripped = event.title.replace('Sports: ', '');
-                        line1 = 'Raider Sports';
-                        line2 = stripped;
-                        image = `<i class="fas fa-trophy ${!isLightTheme ? `text-white` : `text-success`}" style="font-size: 36px;"></i>`;
-                    } else {
-                        line1 = '';
-                        line2 = event.title;
-                        image = `<i class="fas fa-calendar ${!isLightTheme ? `text-white` : `text-secondary`}" style="font-size: 36px;"></i>`;
-                    }
-                    color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-                    innercontent.innerHTML += `
-                        <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh;">
-                            <div class="col-2 text-white">
-                                ${image}
-                            </div>
-                            <div class="col-10 text-white">
-                                <strong>${line1}${line1 !== '' ? ` - ` : ``}${line2}</strong><br />
-                                ${event.startT} - ${event.endT}<br />
-                                ${badgeInfo}
-                            </div>
-                        </div>`;
-
-                } catch (e) {
-                    console.error(e);
-                    iziToast.show({
-                        title: 'An error occurred - Please check the logs',
-                        message: `Error occurred during calendar iteration in processCalendar.`
-                    });
-                }
-            });
+        calendarWorker.postMessage([db.get(), Meta.time]);
     } catch (e) {
         console.error(e);
-        iziToast.show({
-            title: 'An error occurred - Please check the logs',
-            message: 'Error occurred during the call of processCalendar.'
-        });
+        var innercontent = document.getElementById('events-today');
+        innercontent.innerHTML = `
+        <div class="row m-1" style="font-size: 1.5vh;">
+            <div class="col text-white">
+                <strong>Error fetching events!</strong>
+            </div>
+        </div>`;
     }
 }
+
+calendarWorker.onmessage = function (e) {
+    var innercontent = document.getElementById('events-today');
+    innercontent.innerHTML = e.data;
+};
 
 // Check for new Eas alerts and push them out when necessary.
 function processEas(db) {
@@ -1735,203 +1627,8 @@ function checkSlideCounts() {
 function processDarksky(db) {
     // Run data manipulation process
     try {
-        db.each((item) => {
-            try {
-                // Array of objects. {type: "clouds" || "rain" || "sleet" || "snow", amount: cloudCover || precipIntensity, temperature: tempreature, visibility: visibility}
-                var conditions = [];
+        darkskyWorker.postMessage([db, Meta.time]);
 
-                var precipStart = 61;
-                var precipEnd = -1;
-                var precipType = `precipitation`;
-
-                // Current conditions
-                setWeatherSlide(`weather`, true, `#424242`, `Current Weather`, getConditionIcon(item.currently.icon), `${item.currently.summary}; ${item.currently.temperature}°F`);
-
-
-                // Determine when precipitation is going to fall
-                var precipExpected = false;
-
-                item.minutely.data.map((data, index) => {
-                    if (data.precipType && data.precipProbability >= 0.1) {
-                        if (precipStart > index) {
-                            precipStart = index;
-                            precipType = data.precipType;
-                        }
-                        precipExpected = true;
-                        if (precipEnd < index) { precipEnd = index; }
-                    }
-                });
-
-                if (item.currently.precipType) {
-                    if (precipStart === 0 && precipEnd >= 59) {
-                        setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will continue to fall for the next hour.`);
-                    } else if (precipStart === 0) {
-                        setWeatherSlide(`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will end at about ${moment(Meta.time).add(precipEnd, 'minutes').format('h:mmA')}.`);
-                    } else if (precipStart < 61) {
-                        setWeatherSlide(`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(Meta.time).add(precipStart, 'minutes').format('h:mmA')}.`);
-                    } else {
-                        setWeatherSlide(`precipitation`, false);
-                    }
-                } else {
-                    if (precipStart < 61) {
-                        setWeatherSlide(`precipitation`, true, `#0C3B69`, `${precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(Meta.time).add(precipStart, 'minutes').format('h:mmA')}.`);
-                    } else {
-                        setWeatherSlide(`precipitation`, false);
-                    }
-                }
-
-                // Determine if it will rain in the next 24 hours.
-                // Also generate 48 hour forecast.
-                item.hourly.data.map((data, index) => {
-                    if (data.precipType && data.precipProbability >= 0.1) {
-                        conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility };
-                    } else {
-                        conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility };
-                    }
-                });
-                console.log(conditions);
-
-                // Is it windy?
-                if (item.currently.windSpeed >= 73 || item.currently.windGust >= 73) {
-                    setWeatherSlide(`wind`, true, `#721818`, `Destructive Winds!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
-                } else if (item.currently.windSpeed >= 55 || item.currently.windGust >= 55) {
-                    setWeatherSlide(`wind`, true, `#702700`, `Gale-force Winds!`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
-                } else if (item.currently.windSpeed >= 39 || item.currently.windGust >= 39) {
-                    setWeatherSlide(`wind`, true, `#4F3C03`, `Windy`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
-                } else if (item.currently.windSpeed >= 25 || item.currently.windGust >= 25) {
-                    setWeatherSlide(`wind`, true, `#0C3B69`, `Breezy`, `fa-wind`, `Current wind speed: ${item.currently.windSpeed}mph, gusts to ${item.currently.windGust}mph.`);
-                } else {
-                    setWeatherSlide(`wind`, false);
-                }
-
-                // UV index
-                if (item.currently.uvIndex > 10) {
-                    setWeatherSlide(`uv`, true, `#721818`, `Extreme UV Index!`, `fa-sun`, `Unprotected skin can burn within 10 minutes. Stay indoors if you can.`);
-                } else if (item.currently.uvIndex >= 8) {
-                    setWeatherSlide(`uv`, true, `#702700`, `Severe UV Index!`, `fa-sun`, `Unprotected skin can burn within 20 minutes.`);
-                } else if (item.currently.uvIndex >= 6) {
-                    setWeatherSlide(`uv`, true, `#4F3C03`, `High UV Index`, `fa-sun`, `Unprotected skin can burn within 30 minutes.`);
-                } else {
-                    setWeatherSlide(`uv`, false);
-                }
-
-                // Visibility
-                if (item.currently.visibility <= 0.25) {
-                    setWeatherSlide(`visibility`, true, `#721818`, `Dangerous Visibility!`, `fa-car`, `Visibility is only ${item.currently.visibility} miles. Do not drive if possible.`);
-                } else if (item.currently.visibility <= 1) {
-                    setWeatherSlide(`visibility`, true, `#702700`, `Very Low Visibility!`, `fa-car`, `Visibility is only ${item.currently.visibility} miles. Be careful and drive slowly.`);
-                } else if (item.currently.visibility <= 3) {
-                    setWeatherSlide(`visibility`, true, `#4F3C03`, `Low Visibility`, `fa-car`, `Visibility is only ${item.currently.visibility} miles. Be cautious on the roads.`);
-                } else {
-                    setWeatherSlide(`visibility`, false);
-                }
-
-                // Apparent temperature, cold
-                if (item.currently.apparentTemperature <= -48) {
-                    setWeatherSlide(`windchill`, true, `#721818`, `Dangerous Wind Chill!`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 10 minutes.`);
-                } else if (item.currently.apparentTemperature <= -32) {
-                    setWeatherSlide(`windchill`, true, `#702700`, `Very Low Wind Chill!`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 20 minutes.`);
-                } else if (item.currently.apparentTemperature <= -18) {
-                    setWeatherSlide(`windchill`, true, `#4F3C03`, `Low Wind Chill`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 30 minutes.`);
-                } else {
-                    setWeatherSlide(`windchill`, false);
-                }
-
-                // Apparent temperature, hot
-                if (item.currently.apparentTemperature >= 115) {
-                    setWeatherSlide(`heatindex`, true, `#721818`, `Dangerous Heat Index!`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Heat stroke can occur; stay cool indoors if possible.`);
-                } else if (item.currently.apparentTemperature >= 103) {
-                    setWeatherSlide(`heatindex`, true, `#702700`, `Very High Heat Index!`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Drink lots of water and take a cooling break every 30 minutes.`);
-                } else if (item.currently.apparentTemperature >= 91) {
-                    setWeatherSlide(`heatindex`, true, `#4F3C03`, `High Heat Index`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Drink extra water.`);
-                } else {
-                    setWeatherSlide(`heatindex`, false);
-                }
-
-
-                // Generate 48 hour forecast
-                temp = document.querySelector(`#forecast-graph`);
-                temp.innerHTML = ``;
-                var theTime = moment(Meta.time).startOf('hour');
-                var shadeColor = ``;
-                var innerIcon = ``;
-                var conversionRatio = 1;
-                for (var i = 0; i < 48; i++) {
-                    theTime = moment(Meta.time).add(i, 'hours');
-
-                    // Add label, vertical line, and temperature at every 3rd hour.
-                    if (i % 3 === 0) {
-                        temp.innerHTML += `
-                        <div class="text-white" style="position: absolute; left: ${i > 0 ? (((i) / 48) - (1 / 96)) * 100 : 0}%; top: 0%; font-size: 1.5vh;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA dd') : moment(theTime).format('hA')}</div>
-                        <div class="text-white" style="position: absolute; left: ${i > 0 ? (((i) / 48) - (1 / 96)) * 100 : 0}%; top: 66%; font-size: 1.5vh;">${Math.round(conditions[i].temperature || 0)}°F</div>
-                        `;
-                    }
-
-                    // Add shading depending on the condition
-                    shadeColor = ``;
-                    switch (conditions[i].type) {
-                        case 'clouds':
-                            if (conditions[i].amount > 0.75) {
-                                shadeColor = `#786207`;
-                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud"></i></span>`;
-                            } else if (conditions[i].amount >= 0.25) {
-                                shadeColor = `#F1C40F`;
-                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-cloud-sun"></i></span>`;
-                            } else {
-                                shadeColor = `#F8E187`;
-                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-sun"></i></span>`;
-                            }
-                            break;
-                        case 'rain':
-                            if (conditions[i].amount >= 0.3) {
-                                shadeColor = `#1A4C6D`;
-                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-rain"></i></span>`;
-                            } else if (conditions[i].amount >= 0.1) {
-                                shadeColor = `#3498DB`;
-                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-showers-heavy"></i></span>`;
-                            } else {
-                                shadeColor = `#99CBED`;
-                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-cloud-sun-rain"></i></span>`;
-                            }
-                            break;
-                        case 'snow':
-                            conversionRatio = ((-18 / 11) * conditions[i].temperature) + (722 / 11);
-                            if ((conditions[i].amount * conversionRatio) >= 1) {
-                                shadeColor = `#7C7C7C`;
-                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-snowman"></i></span>`;
-                            } else if ((conditions[i].amount * conversionRatio) >= 0.33) {
-                                shadeColor = `#C6C6C6`;
-                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-snowflake"></i></span>`;
-                            } else {
-                                shadeColor = `#F8F8F8`;
-                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="far fa-snowflake"></i></span>`;
-                            }
-                            break;
-                        case 'sleet':
-                            if (conditions[i].amount >= 0.2) {
-                                shadeColor = `#780E35`;
-                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-igloo"></i></span>`;
-                            } else if (conditions[i].amount >= 0.05) {
-                                shadeColor = `#F01D6A`;
-                                innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-icicles"></i></span>`;
-                            } else {
-                                shadeColor = `#F78EB4`;
-                                innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-icicles"></i></span>`;
-                            }
-                            break;
-                    }
-                    temp.innerHTML += `<div style="position: absolute; background-color: ${shadeColor}; width: ${(1 / 48) * 100}%; height: 2em; left: ${((i) / 48) * 100}%; top: 25%;"></div>
-                    <div style="position: absolute; left: ${((i) / 48) * 100}%; top: 35%;">${innerIcon}</div>`;
-                }
-
-            } catch (e) {
-                console.error(e);
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: `Error occurred during Directors iteration in processDarksky.`
-                });
-            }
-        });
     } catch (e) {
         console.error(e);
         iziToast.show({
@@ -1941,38 +1638,17 @@ function processDarksky(db) {
     }
 }
 
-function getConditionIcon(condition) {
-    switch (condition) {
-        case 'clear-day':
-            return 'fa-sun';
-        case 'clear-night':
-            return 'fa-moon';
-        case 'rain':
-            return 'fa-cloud-showers-heavy';
-        case 'snow':
-            return 'fa-snowflake';
-        case 'sleet':
-            return 'fa-cloud-meatball';
-        case 'wind':
-            return 'fa-wind';
-        case 'fog':
-            return 'fa-smog';
-        case 'cloudy':
-            return 'fa-cloud';
-        case 'partly-cloudy-day':
-            return 'fa-cloud-sun';
-        case 'partly-cloudy-night':
-            return 'fa-cloud-moon';
-        case 'thunderstorm':
-            return 'fa-bolt';
-        case 'showers-day':
-            return 'fa-cloud-sun-rain';
-        case 'showers-night':
-            return 'fa-cloud-moon-rain';
-        default:
-            return 'fa-rainbow';
+darkskyWorker.onmessage = function (e) {
+    switch (e.data[0]) {
+        case `setWeatherSlide`:
+            setWeatherSlide(e.data[1][0], e.data[1][1], e.data[1][2], e.data[1][3], e.data[1][4], e.data[1][5]);
+            break;
+        case `forecastGraph`:
+            var temp = document.querySelector(`#forecast-graph`);
+            temp.innerHTML = e.data[1];
+            break;
     }
-}
+};
 
 function processWeeklyStats(data) {
     var temp = document.getElementById(`analytics`);
