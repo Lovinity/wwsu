@@ -544,7 +544,7 @@ function onlineSocket(doOneSignal = false) {
     temp = document.querySelector(`#show-subscribe-button`);
     var temp2 = document.querySelector(`#show-subscribe-instructions`);
     if (temp !== null) {
-        if (notificationsSupported) {
+        if (notificationsSupported || isMobile) {
             if (device === null && !isMobile) {
                 temp.innerHTML = 'Show Prompt';
                 temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
@@ -871,7 +871,7 @@ function doMeta(response) {
                         temp.style.display = 'none';
                     }
                     temp3.innerHTML = Meta.show;
-                    if (notificationsSupported) {
+                    if (notificationsSupported || isMobile) {
                         if (device === null && !isMobile) {
                             temp2.innerHTML = 'Show Prompt';
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
@@ -926,7 +926,7 @@ function doMeta(response) {
                         temp.style.display = 'none';
                     }
                     temp3.innerHTML = Meta.show;
-                    if (notificationsSupported) {
+                    if (notificationsSupported || isMobile) {
                         if (device === null && !isMobile) {
                             temp2.innerHTML = 'Show Prompt';
                             temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`;
@@ -1515,7 +1515,7 @@ function displayEventInfo(showID) {
                         <p>${item.description}</p>`;
 
     // If a device ID was provided from the WWSU mobile app
-    if (!notificationsSupported) {
+    if (!notificationsSupported && !isMobile) {
         message += `<hr><p>Sorry, your web browser does not support push notifications at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!</p>`;
     } else if (device !== null) {
         // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
