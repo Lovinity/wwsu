@@ -81,7 +81,7 @@ module.exports.sockets = {
         }
 
         // Allow requests from origin baseUrl and certain IPs and domains, otherwise require an authorized host header
-        if (handshake.headers && handshake.headers.origin && (handshake.headers.origin.startsWith(sails.config.custom.baseUrl || `http://localhost:${sails.config.port}`) || handshake.headers.origin.startsWith(`http://130.108.128.116`))) {
+        if (handshake.headers && handshake.headers.origin && (handshake.headers.origin.startsWith(sails.config.custom.baseUrl || `http://localhost:${sails.config.port}`) || handshake.headers.origin.startsWith(`http://130.108.128.116`) || handshake.headers.origin.startsWith(`https://wwsu.wolform.me`))) {
             return proceed(undefined, true);
         } else {
             if (typeof handshake._query === 'undefined' || typeof handshake._query.host === 'undefined') {
