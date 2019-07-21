@@ -76,15 +76,24 @@ module.exports = {
                     if (hostRecord)
                     {
                         var offStatus = 4;
+                        var additionalData = ``;
                         if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls)
                         {
                             if (hostRecord.silenceDetection || hostRecord.recordAudio)
                             {
                                 offStatus = 2;
+                                if (hostRecord.silenceDetection)
+                                {
+                                    additionalData += ` This host manages silence detection; you will not receive alerts for silent audio until this host is back online.`;
+                                }
+                                if (hostRecord.recordAudio)
+                                {
+                                    additionalData += ` This host manages recording of on-air programming; current on-air programming will not be recorded until this host is back online.`;
+                                }
                             } else {
                                 offStatus = 3;
                             }
-                            await Status.changeStatus([{name: `host-${sh.unique(recipient.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: 'Host is offline.'}]);
+                            await Status.changeStatus([{name: `host-${sh.unique(recipient.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}`}]);
                         }
                     }
                 }
