@@ -12,22 +12,22 @@
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['moment'], factory);
+    define(['moment'], factory)
   } else if (typeof exports === 'object') {
     // Node. Does not work with strict CommonJS, but only CommonJS-like
     // enviroments that support module.exports, like Node.
     try {
-      module.exports = factory(require('moment'));
+      module.exports = factory(require('moment'))
     } catch (e) {
       // If moment is not available, leave the setup up to the user.
       // Like when using moment-timezone or similar moment-based package.
-      module.exports = factory;
+      module.exports = factory
     }
   }
 
   if (root) {
     // Globals.
-    root.momentDurationFormatSetup = root.moment ? factory(root.moment) : factory;
+    root.momentDurationFormatSetup = root.moment ? factory(root.moment) : factory
   }
 })(this, (moment) => {
   // `Number#tolocaleString` is tested on plugin initialization.
@@ -35,17 +35,17 @@
   // native function will be used to generate formatted output. If the feature
   // test fails, the fallback format function internal to this plugin will be
   // used.
-  var toLocaleStringWorks = false;
+  var toLocaleStringWorks = false
 
   // `Number#toLocaleString` rounds incorrectly for select numbers in Microsoft
   // environments (Edge, IE11, Windows Phone) and possibly other environments.
   // If the rounding test fails and `toLocaleString` will be used for formatting,
   // the plugin will "pre-round" number values using the fallback number format
   // function before passing them to `toLocaleString` for final formatting.
-  var toLocaleStringRoundingWorks = false;
+  var toLocaleStringRoundingWorks = false
 
   // Token type names in order of descending magnitude.
-  var types = 'escape years months weeks days hours minutes seconds milliseconds general'.split(' ');
+  var types = 'escape years months weeks days hours minutes seconds milliseconds general'.split(' ')
 
   var bubbles = [
     {
@@ -92,60 +92,60 @@
         { type: 'years', value: 12 }
       ]
     }
-  ];
+  ]
 
   // stringIncludes
   function stringIncludes (str, search) {
     if (search.length > str.length) {
-      return false;
+      return false
     }
 
-    return str.indexOf(search) !== -1;
+    return str.indexOf(search) !== -1
   }
 
   // repeatZero(qty)
   // Returns "0" repeated `qty` times.
   // `qty` must be a integer >= 0.
   function repeatZero (qty) {
-    var result = '';
+    var result = ''
 
     while (qty) {
-      result += '0';
-      qty -= 1;
+      result += '0'
+      qty -= 1
     }
 
-    return result;
+    return result
   }
 
   function stringRound (digits) {
-    var digitsArray = digits.split('').reverse();
-    var i = 0;
-    var carry = true;
+    var digitsArray = digits.split('').reverse()
+    var i = 0
+    var carry = true
 
     while (carry && i < digitsArray.length) {
       if (i) {
         if (digitsArray[i] === '9') {
-          digitsArray[i] = '0';
+          digitsArray[i] = '0'
         } else {
-          digitsArray[i] = (parseInt(digitsArray[i], 10) + 1).toString();
-          carry = false;
+          digitsArray[i] = (parseInt(digitsArray[i], 10) + 1).toString()
+          carry = false
         }
       } else {
         if (parseInt(digitsArray[i], 10) < 5) {
-          carry = false;
+          carry = false
         }
 
-        digitsArray[i] = '0';
+        digitsArray[i] = '0'
       }
 
-      i += 1;
+      i += 1
     }
 
     if (carry) {
-      digitsArray.push('1');
+      digitsArray.push('1')
     }
 
-    return digitsArray.reverse().join('');
+    return digitsArray.reverse().join('')
   }
 
   // formatNumber
@@ -165,63 +165,63 @@
   // `fractionDigits` is passed through to `maximumFractionDigits` and `minimumFractionDigits`
   // Using `maximumSignificantDigits` will override `minimumIntegerDigits` and `fractionDigits`.
   function formatNumber (number, options, userLocale) {
-    var useToLocaleString = options.useToLocaleString;
-    var useGrouping = options.useGrouping;
-    var grouping = useGrouping && options.grouping.slice();
-    var maximumSignificantDigits = options.maximumSignificantDigits;
-    var minimumIntegerDigits = options.minimumIntegerDigits || 1;
-    var fractionDigits = options.fractionDigits || 0;
-    var groupingSeparator = options.groupingSeparator;
-    var decimalSeparator = options.decimalSeparator;
+    var useToLocaleString = options.useToLocaleString
+    var useGrouping = options.useGrouping
+    var grouping = useGrouping && options.grouping.slice()
+    var maximumSignificantDigits = options.maximumSignificantDigits
+    var minimumIntegerDigits = options.minimumIntegerDigits || 1
+    var fractionDigits = options.fractionDigits || 0
+    var groupingSeparator = options.groupingSeparator
+    var decimalSeparator = options.decimalSeparator
 
     if (useToLocaleString && userLocale) {
       var localeStringOptions = {
         minimumIntegerDigits: minimumIntegerDigits,
         useGrouping: useGrouping
-      };
+      }
 
       if (fractionDigits) {
-        localeStringOptions.maximumFractionDigits = fractionDigits;
-        localeStringOptions.minimumFractionDigits = fractionDigits;
+        localeStringOptions.maximumFractionDigits = fractionDigits
+        localeStringOptions.minimumFractionDigits = fractionDigits
       }
 
       // toLocaleString output is "0.0" instead of "0" for HTC browsers
       // when maximumSignificantDigits is set. See #96.
       if (maximumSignificantDigits && number > 0) {
-        localeStringOptions.maximumSignificantDigits = maximumSignificantDigits;
+        localeStringOptions.maximumSignificantDigits = maximumSignificantDigits
       }
 
       if (!toLocaleStringRoundingWorks) {
-        var roundingOptions = extend({}, options);
-        roundingOptions.useGrouping = false;
-        roundingOptions.decimalSeparator = '.';
-        number = parseFloat(formatNumber(number, roundingOptions), 10);
+        var roundingOptions = extend({}, options)
+        roundingOptions.useGrouping = false
+        roundingOptions.decimalSeparator = '.'
+        number = parseFloat(formatNumber(number, roundingOptions), 10)
       }
 
-      return number.toLocaleString(userLocale, localeStringOptions);
+      return number.toLocaleString(userLocale, localeStringOptions)
     }
 
-    var numberString;
+    var numberString
 
     // Add 1 to digit output length for floating point errors workaround. See below.
     if (maximumSignificantDigits) {
-      numberString = number.toPrecision(maximumSignificantDigits + 1);
+      numberString = number.toPrecision(maximumSignificantDigits + 1)
     } else {
-      numberString = number.toFixed(fractionDigits + 1);
+      numberString = number.toFixed(fractionDigits + 1)
     }
 
-    var integerString;
-    var fractionString;
-    var exponentString;
+    var integerString
+    var fractionString
+    var exponentString
 
-    var temp = numberString.split('e');
+    var temp = numberString.split('e')
 
-    exponentString = temp[1] || '';
+    exponentString = temp[1] || ''
 
-    temp = temp[0].split('.');
+    temp = temp[0].split('.')
 
-    fractionString = temp[1] || '';
-    integerString = temp[0] || '';
+    fractionString = temp[1] || ''
+    integerString = temp[0] || ''
 
     // Workaround for floating point errors in `toFixed` and `toPrecision`.
     // (3.55).toFixed(1); --> "3.5"
@@ -233,125 +233,125 @@
     // *************** Implement String Rounding here ***********************
     // Check integerString + fractionString length of toPrecision before rounding.
     // Check length of fractionString from toFixed output before rounding.
-    var integerLength = integerString.length;
-    var fractionLength = fractionString.length;
-    var digitCount = integerLength + fractionLength;
-    var digits = integerString + fractionString;
+    var integerLength = integerString.length
+    var fractionLength = fractionString.length
+    var digitCount = integerLength + fractionLength
+    var digits = integerString + fractionString
 
     if (maximumSignificantDigits && digitCount === (maximumSignificantDigits + 1) || !maximumSignificantDigits && fractionLength === (fractionDigits + 1)) {
       // Round digits.
-      digits = stringRound(digits);
+      digits = stringRound(digits)
 
       if (digits.length === digitCount + 1) {
-        integerLength = integerLength + 1;
+        integerLength = integerLength + 1
       }
 
       // Discard final fractionDigit.
       if (fractionLength) {
-        digits = digits.slice(0, -1);
+        digits = digits.slice(0, -1)
       }
 
       // Separate integer and fraction.
-      integerString = digits.slice(0, integerLength);
-      fractionString = digits.slice(integerLength);
+      integerString = digits.slice(0, integerLength)
+      fractionString = digits.slice(integerLength)
     }
 
     // Trim trailing zeroes from fractionString because toPrecision outputs
     // precision, not significant digits.
     if (maximumSignificantDigits) {
-      fractionString = fractionString.replace(/0*$/, '');
+      fractionString = fractionString.replace(/0*$/, '')
     }
 
     // Handle exponent.
-    var exponent = parseInt(exponentString, 10);
+    var exponent = parseInt(exponentString, 10)
 
     if (exponent > 0) {
       if (fractionString.length <= exponent) {
-        fractionString = fractionString + repeatZero(exponent - fractionString.length);
+        fractionString = fractionString + repeatZero(exponent - fractionString.length)
 
-        integerString = integerString + fractionString;
-        fractionString = '';
+        integerString = integerString + fractionString
+        fractionString = ''
       } else {
-        integerString = integerString + fractionString.slice(0, exponent);
-        fractionString = fractionString.slice(exponent);
+        integerString = integerString + fractionString.slice(0, exponent)
+        fractionString = fractionString.slice(exponent)
       }
     } else if (exponent < 0) {
-      fractionString = (repeatZero(Math.abs(exponent) - integerString.length) + integerString + fractionString);
+      fractionString = (repeatZero(Math.abs(exponent) - integerString.length) + integerString + fractionString)
 
-      integerString = '0';
+      integerString = '0'
     }
 
     if (!maximumSignificantDigits) {
       // Trim or pad fraction when not using maximumSignificantDigits.
-      fractionString = fractionString.slice(0, fractionDigits);
+      fractionString = fractionString.slice(0, fractionDigits)
 
       if (fractionString.length < fractionDigits) {
-        fractionString = fractionString + repeatZero(fractionDigits - fractionString.length);
+        fractionString = fractionString + repeatZero(fractionDigits - fractionString.length)
       }
 
       // Pad integer when using minimumIntegerDigits
       // and not using maximumSignificantDigits.
       if (integerString.length < minimumIntegerDigits) {
-        integerString = repeatZero(minimumIntegerDigits - integerString.length) + integerString;
+        integerString = repeatZero(minimumIntegerDigits - integerString.length) + integerString
       }
     }
 
-    var formattedString = '';
+    var formattedString = ''
 
     // Handle grouping.
     if (useGrouping) {
-      temp = integerString;
-      var group;
+      temp = integerString
+      var group
 
       while (temp.length) {
         if (grouping.length) {
-          group = grouping.shift();
+          group = grouping.shift()
         }
 
         if (formattedString) {
-          formattedString = groupingSeparator + formattedString;
+          formattedString = groupingSeparator + formattedString
         }
 
-        formattedString = temp.slice(-group) + formattedString;
+        formattedString = temp.slice(-group) + formattedString
 
-        temp = temp.slice(0, -group);
+        temp = temp.slice(0, -group)
       }
     } else {
-      formattedString = integerString;
+      formattedString = integerString
     }
 
     // Add decimalSeparator and fraction.
     if (fractionString) {
-      formattedString = formattedString + decimalSeparator + fractionString;
+      formattedString = formattedString + decimalSeparator + fractionString
     }
 
-    return formattedString;
+    return formattedString
   }
 
   // durationLabelCompare
   function durationLabelCompare (a, b) {
     if (a.label.length > b.label.length) {
-      return -1;
+      return -1
     }
 
     if (a.label.length < b.label.length) {
-      return 1;
+      return 1
     }
 
     // a must be equal to b
-    return 0;
+    return 0
   }
 
   // durationGetLabels
   function durationGetLabels (token, localeData) {
-    var labels = [];
+    var labels = []
 
     each(keys(localeData), (localeDataKey) => {
       if (localeDataKey.slice(0, 15) !== '_durationLabels') {
-        return;
+        return
       }
 
-      var labelType = localeDataKey.slice(15).toLowerCase();
+      var labelType = localeDataKey.slice(15).toLowerCase()
 
       each(keys(localeData[localeDataKey]), (labelKey) => {
         if (labelKey.slice(0, 1) === token) {
@@ -359,22 +359,22 @@
             type: labelType,
             key: labelKey,
             label: localeData[localeDataKey][labelKey]
-          });
+          })
         }
-      });
-    });
+      })
+    })
 
-    return labels;
+    return labels
   }
 
   // durationPluralKey
   function durationPluralKey (token, integerValue, decimalValue) {
     // Singular for a value of `1`, but not for `1.0`.
     if (integerValue === 1 && decimalValue === null) {
-      return token;
+      return token
     }
 
-    return token + token;
+    return token + token
   }
 
   var engLocale = {
@@ -424,194 +424,194 @@
       { type: 'short', string: '_' }
     ],
     durationPluralKey: durationPluralKey
-  };
+  }
 
   // isArray
   function isArray (array) {
-    return Object.prototype.toString.call(array) === '[object Array]';
+    return Object.prototype.toString.call(array) === '[object Array]'
   }
 
   // isObject
   function isObject (obj) {
-    return Object.prototype.toString.call(obj) === '[object Object]';
+    return Object.prototype.toString.call(obj) === '[object Object]'
   }
 
   // findLast
   function findLast (array, callback) {
-    var index = array.length;
+    var index = array.length
 
     while (index -= 1) {
-      if (callback(array[index])) { return array[index]; }
+      if (callback(array[index])) { return array[index] }
     }
   }
 
   // find
   function find (array, callback) {
-    var index = 0;
+    var index = 0
 
-    var max = array && array.length || 0;
+    var max = array && array.length || 0
 
-    var match;
+    var match
 
     if (typeof callback !== 'function') {
-      match = callback;
+      match = callback
       callback = function (item) {
-        return item === match;
-      };
+        return item === match
+      }
     }
 
     while (index < max) {
-      if (callback(array[index])) { return array[index]; }
-      index += 1;
+      if (callback(array[index])) { return array[index] }
+      index += 1
     }
   }
 
   // each
   function each (array, callback) {
-    var index = 0;
-    var max = array.length;
+    var index = 0
+    var max = array.length
 
-    if (!array || !max) { return; }
+    if (!array || !max) { return }
 
     while (index < max) {
-      if (callback(array[index], index) === false) { return; }
-      index += 1;
+      if (callback(array[index], index) === false) { return }
+      index += 1
     }
   }
 
   // map
   function map (array, callback) {
-    var index = 0;
-    var max = array.length;
-    var ret = [];
+    var index = 0
+    var max = array.length
+    var ret = []
 
-    if (!array || !max) { return ret; }
+    if (!array || !max) { return ret }
 
     while (index < max) {
-      ret[index] = callback(array[index], index);
-      index += 1;
+      ret[index] = callback(array[index], index)
+      index += 1
     }
 
-    return ret;
+    return ret
   }
 
   // pluck
   function pluck (array, prop) {
     return map(array, (item) => {
-      return item[prop];
-    });
+      return item[prop]
+    })
   }
 
   // compact
   function compact (array) {
-    var ret = [];
+    var ret = []
 
     each(array, (item) => {
-      if (item) { ret.push(item); }
-    });
+      if (item) { ret.push(item) }
+    })
 
-    return ret;
+    return ret
   }
 
   // unique
   function unique (array) {
-    var ret = [];
+    var ret = []
 
     each(array, (_a) => {
-      if (!find(ret, _a)) { ret.push(_a); }
-    });
+      if (!find(ret, _a)) { ret.push(_a) }
+    })
 
-    return ret;
+    return ret
   }
 
   // intersection
   function intersection (a, b) {
-    var ret = [];
+    var ret = []
 
     each(a, (_a) => {
       each(b, (_b) => {
-        if (_a === _b) { ret.push(_a); }
-      });
-    });
+        if (_a === _b) { ret.push(_a) }
+      })
+    })
 
-    return unique(ret);
+    return unique(ret)
   }
 
   // rest
   function rest (array, callback) {
-    var ret = [];
+    var ret = []
 
     each(array, (item, index) => {
       if (!callback(item)) {
-        ret = array.slice(index);
-        return false;
+        ret = array.slice(index)
+        return false
       }
-    });
+    })
 
-    return ret;
+    return ret
   }
 
   // initial
   function initial (array, callback) {
-    var reversed = array.slice().reverse();
+    var reversed = array.slice().reverse()
 
-    return rest(reversed, callback).reverse();
+    return rest(reversed, callback).reverse()
   }
 
   // extend
   function extend (a, b) {
     for (var key in b) {
-      if (b.hasOwnProperty(key)) { a[key] = b[key]; }
+      if (b.hasOwnProperty(key)) { a[key] = b[key] }
     }
 
-    return a;
+    return a
   }
 
   // keys
   function keys (a) {
-    var ret = [];
+    var ret = []
 
     for (var key in a) {
-      if (a.hasOwnProperty(key)) { ret.push(key); }
+      if (a.hasOwnProperty(key)) { ret.push(key) }
     }
 
-    return ret;
+    return ret
   }
 
   // any
   function any (array, callback) {
-    var index = 0;
-    var max = array.length;
+    var index = 0
+    var max = array.length
 
-    if (!array || !max) { return false; }
+    if (!array || !max) { return false }
 
     while (index < max) {
-      if (callback(array[index], index) === true) { return true; }
-      index += 1;
+      if (callback(array[index], index) === true) { return true }
+      index += 1
     }
 
-    return false;
+    return false
   }
 
   // flatten
   function flatten (array) {
-    var ret = [];
+    var ret = []
 
     each(array, (child) => {
-      ret = ret.concat(child);
-    });
+      ret = ret.concat(child)
+    })
 
-    return ret;
+    return ret
   }
 
   function toLocaleStringSupportsLocales () {
-    var number = 0;
+    var number = 0
     try {
-      number.toLocaleString('i');
+      number.toLocaleString('i')
     } catch (e) {
-      return e.name === 'RangeError';
+      return e.name === 'RangeError'
     }
-    return false;
+    return false
   }
 
   function featureTestToLocaleStringRounding () {
@@ -620,143 +620,143 @@
       minimumIntegerDigits: 1,
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
-    }) === '3.6';
+    }) === '3.6'
   }
 
   function featureTestToLocaleString () {
-    var passed = true;
+    var passed = true
 
     // Test locale.
-    passed = passed && toLocaleStringSupportsLocales();
-    if (!passed) { return false; }
+    passed = passed && toLocaleStringSupportsLocales()
+    if (!passed) { return false }
 
     // Test minimumIntegerDigits.
-    passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 1 }) === '1';
-    passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 2 }) === '01';
-    passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 3 }) === '001';
-    if (!passed) { return false; }
+    passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 1 }) === '1'
+    passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 2 }) === '01'
+    passed = passed && (1).toLocaleString('en', { minimumIntegerDigits: 3 }) === '001'
+    if (!passed) { return false }
 
     // Test maximumFractionDigits and minimumFractionDigits.
-    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) === '100';
-    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) === '100.0';
-    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) === '99.99';
-    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 3, minimumFractionDigits: 3 }) === '99.990';
-    if (!passed) { return false; }
+    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) === '100'
+    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) === '100.0'
+    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) === '99.99'
+    passed = passed && (99.99).toLocaleString('en', { maximumFractionDigits: 3, minimumFractionDigits: 3 }) === '99.990'
+    if (!passed) { return false }
 
     // Test maximumSignificantDigits.
-    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 1 }) === '100';
-    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 2 }) === '100';
-    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 3 }) === '100';
-    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 4 }) === '99.99';
-    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 5 }) === '99.99';
-    if (!passed) { return false; }
+    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 1 }) === '100'
+    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 2 }) === '100'
+    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 3 }) === '100'
+    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 4 }) === '99.99'
+    passed = passed && (99.99).toLocaleString('en', { maximumSignificantDigits: 5 }) === '99.99'
+    if (!passed) { return false }
 
     // Test grouping.
-    passed = passed && (1000).toLocaleString('en', { useGrouping: true }) === '1,000';
-    passed = passed && (1000).toLocaleString('en', { useGrouping: false }) === '1000';
-    if (!passed) { return false; }
+    passed = passed && (1000).toLocaleString('en', { useGrouping: true }) === '1,000'
+    passed = passed && (1000).toLocaleString('en', { useGrouping: false }) === '1000'
+    if (!passed) { return false }
 
-    return true;
+    return true
   }
 
   // durationsFormat(durations [, template] [, precision] [, settings])
   function durationsFormat () {
-    var args = [].slice.call(arguments);
-    var settings = {};
-    var durations;
+    var args = [].slice.call(arguments)
+    var settings = {}
+    var durations
 
     // Parse arguments.
     each(args, (arg, index) => {
       if (!index) {
         if (!isArray(arg)) {
-          throw 'Expected array as the first argument to durationsFormat.';
+          throw 'Expected array as the first argument to durationsFormat.'
         }
 
-        durations = arg;
+        durations = arg
       }
 
       if (typeof arg === 'string' || typeof arg === 'function') {
-        settings.template = arg;
-        return;
+        settings.template = arg
+        return
       }
 
       if (typeof arg === 'number') {
-        settings.precision = arg;
-        return;
+        settings.precision = arg
+        return
       }
 
       if (isObject(arg)) {
-        extend(settings, arg);
+        extend(settings, arg)
       }
-    });
+    })
 
     if (!durations || !durations.length) {
-      return [];
+      return []
     }
 
-    settings.returnMomentTypes = true;
+    settings.returnMomentTypes = true
 
     var formattedDurations = map(durations, (dur) => {
-      return dur.format(settings);
-    });
+      return dur.format(settings)
+    })
 
     // Merge token types from all durations.
-    var outputTypes = intersection(types, unique(pluck(flatten(formattedDurations), 'type')));
+    var outputTypes = intersection(types, unique(pluck(flatten(formattedDurations), 'type')))
 
-    var largest = settings.largest;
+    var largest = settings.largest
 
     if (largest) {
-      outputTypes = outputTypes.slice(0, largest);
+      outputTypes = outputTypes.slice(0, largest)
     }
 
-    settings.returnMomentTypes = false;
-    settings.outputTypes = outputTypes;
+    settings.returnMomentTypes = false
+    settings.outputTypes = outputTypes
 
     return map(durations, (dur) => {
-      return dur.format(settings);
-    });
+      return dur.format(settings)
+    })
   }
 
   // durationFormat([template] [, precision] [, settings])
   function durationFormat () {
-    var args = [].slice.call(arguments);
-    var settings = extend({}, this.format.defaults);
+    var args = [].slice.call(arguments)
+    var settings = extend({}, this.format.defaults)
 
     // Keep a shadow copy of this moment for calculating remainders.
     // Perform all calculations on positive duration value, handle negative
     // sign at the very end.
-    var asMilliseconds = this.asMilliseconds();
-    var asMonths = this.asMonths();
+    var asMilliseconds = this.asMilliseconds()
+    var asMonths = this.asMonths()
 
     // Treat invalid durations as having a value of 0 milliseconds.
     if (typeof this.isValid === 'function' && this.isValid() === false) {
-      asMilliseconds = 0;
-      asMonths = 0;
+      asMilliseconds = 0
+      asMonths = 0
     }
 
-    var isNegative = asMilliseconds < 0;
+    var isNegative = asMilliseconds < 0
 
     // Two shadow copies are needed because of the way moment.js handles
     // duration arithmetic for years/months and for weeks/days/hours/minutes/seconds.
-    var remainder = moment.duration(Math.abs(asMilliseconds), 'milliseconds');
-    var remainderMonths = moment.duration(Math.abs(asMonths), 'months');
+    var remainder = moment.duration(Math.abs(asMilliseconds), 'milliseconds')
+    var remainderMonths = moment.duration(Math.abs(asMonths), 'months')
 
     // Parse arguments.
     each(args, (arg) => {
       if (typeof arg === 'string' || typeof arg === 'function') {
-        settings.template = arg;
-        return;
+        settings.template = arg
+        return
       }
 
       if (typeof arg === 'number') {
-        settings.precision = arg;
-        return;
+        settings.precision = arg
+        return
       }
 
       if (isObject(arg)) {
-        extend(settings, arg);
+        extend(settings, arg)
       }
-    });
+    })
 
     var momentTokens = {
       years: 'y',
@@ -767,7 +767,7 @@
       minutes: 'm',
       seconds: 's',
       milliseconds: 'S'
-    };
+    }
 
     var tokenDefs = {
       escape: /\[(.+?)\]/,
@@ -780,163 +780,163 @@
       seconds: /\*?s+/,
       milliseconds: /\*?S+/,
       general: /.+?/
-    };
+    }
 
     // Types array is available in the template function.
-    settings.types = types;
+    settings.types = types
 
     var typeMap = function (token) {
       return find(types, (type) => {
-        return tokenDefs[type].test(token);
-      });
-    };
+        return tokenDefs[type].test(token)
+      })
+    }
 
     var tokenizer = new RegExp(map(types, (type) => {
-      return tokenDefs[type].source;
-    }).join('|'), 'g');
+      return tokenDefs[type].source
+    }).join('|'), 'g')
 
     // Current duration object is available in the template function.
-    settings.duration = this;
+    settings.duration = this
 
     // Eval template function and cache template string.
-    var template = typeof settings.template === 'function' ? settings.template.apply(settings) : settings.template;
+    var template = typeof settings.template === 'function' ? settings.template.apply(settings) : settings.template
 
     // outputTypes and returnMomentTypes are settings to support durationsFormat().
 
     // outputTypes is an array of moment token types that determines
     // the tokens returned in formatted output. This option overrides
     // trim, largest, stopTrim, etc.
-    var outputTypes = settings.outputTypes;
+    var outputTypes = settings.outputTypes
 
     // returnMomentTypes is a boolean that sets durationFormat to return
     // the processed momentTypes instead of formatted output.
-    var returnMomentTypes = settings.returnMomentTypes;
+    var returnMomentTypes = settings.returnMomentTypes
 
-    var largest = settings.largest;
+    var largest = settings.largest
 
     // Setup stopTrim array of token types.
-    var stopTrim = [];
+    var stopTrim = []
 
     if (!outputTypes) {
       if (isArray(settings.stopTrim)) {
-        settings.stopTrim = settings.stopTrim.join('');
+        settings.stopTrim = settings.stopTrim.join('')
       }
 
       // Parse stopTrim string to create token types array.
       if (settings.stopTrim) {
         each(settings.stopTrim.match(tokenizer), (token) => {
-          var type = typeMap(token);
+          var type = typeMap(token)
 
           if (type === 'escape' || type === 'general') {
-            return;
+            return
           }
 
-          stopTrim.push(type);
-        });
+          stopTrim.push(type)
+        })
       }
     }
 
     // Cache moment's locale data.
-    var localeData = moment.localeData();
+    var localeData = moment.localeData()
 
     if (!localeData) {
-      localeData = {};
+      localeData = {}
     }
 
     // Fall back to this plugin's `eng` extension.
     each(keys(engLocale), (key) => {
       if (typeof engLocale[key] === 'function') {
         if (!localeData[key]) {
-          localeData[key] = engLocale[key];
+          localeData[key] = engLocale[key]
         }
 
-        return;
+        return
       }
 
       if (!localeData['_' + key]) {
-        localeData['_' + key] = engLocale[key];
+        localeData['_' + key] = engLocale[key]
       }
-    });
+    })
 
     // Replace Duration Time Template strings.
     // For locale `eng`: `_HMS_`, `_HM_`, and `_MS_`.
     each(keys(localeData._durationTimeTemplates), (item) => {
-      template = template.replace('_' + item + '_', localeData._durationTimeTemplates[item]);
-    });
+      template = template.replace('_' + item + '_', localeData._durationTimeTemplates[item])
+    })
 
     // Determine user's locale.
-    var userLocale = settings.userLocale || moment.locale();
+    var userLocale = settings.userLocale || moment.locale()
 
-    var useLeftUnits = settings.useLeftUnits;
-    var usePlural = settings.usePlural;
-    var precision = settings.precision;
-    var forceLength = settings.forceLength;
-    var useGrouping = settings.useGrouping;
-    var trunc = settings.trunc;
+    var useLeftUnits = settings.useLeftUnits
+    var usePlural = settings.usePlural
+    var precision = settings.precision
+    var forceLength = settings.forceLength
+    var useGrouping = settings.useGrouping
+    var trunc = settings.trunc
 
     // Use significant digits only when precision is greater than 0.
-    var useSignificantDigits = settings.useSignificantDigits && precision > 0;
-    var significantDigits = useSignificantDigits ? settings.precision : 0;
-    var significantDigitsCache = significantDigits;
+    var useSignificantDigits = settings.useSignificantDigits && precision > 0
+    var significantDigits = useSignificantDigits ? settings.precision : 0
+    var significantDigitsCache = significantDigits
 
-    var minValue = settings.minValue;
-    var isMinValue = false;
+    var minValue = settings.minValue
+    var isMinValue = false
 
-    var maxValue = settings.maxValue;
-    var isMaxValue = false;
+    var maxValue = settings.maxValue
+    var isMaxValue = false
 
     // formatNumber fallback options.
-    var useToLocaleString = settings.useToLocaleString;
-    var groupingSeparator = settings.groupingSeparator;
-    var decimalSeparator = settings.decimalSeparator;
-    var grouping = settings.grouping;
+    var useToLocaleString = settings.useToLocaleString
+    var groupingSeparator = settings.groupingSeparator
+    var decimalSeparator = settings.decimalSeparator
+    var grouping = settings.grouping
 
-    useToLocaleString = useToLocaleString && toLocaleStringWorks;
+    useToLocaleString = useToLocaleString && toLocaleStringWorks
 
     // Trim options.
-    var trim = settings.trim;
+    var trim = settings.trim
 
     if (isArray(trim)) {
-      trim = trim.join(' ');
+      trim = trim.join(' ')
     }
 
     if (trim === null && (largest || maxValue || useSignificantDigits)) {
-      trim = 'all';
+      trim = 'all'
     }
 
     if (trim === null || trim === true || trim === 'left' || trim === 'right') {
-      trim = 'large';
+      trim = 'large'
     }
 
     if (trim === false) {
-      trim = '';
+      trim = ''
     }
 
     var trimIncludes = function (item) {
-      return item.test(trim);
-    };
+      return item.test(trim)
+    }
 
-    var rLarge = /large/;
-    var rSmall = /small/;
-    var rBoth = /both/;
-    var rMid = /mid/;
-    var rAll = /^all|[^sm]all/;
-    var rFinal = /final/;
+    var rLarge = /large/
+    var rSmall = /small/
+    var rBoth = /both/
+    var rMid = /mid/
+    var rAll = /^all|[^sm]all/
+    var rFinal = /final/
 
-    var trimLarge = largest > 0 || any([rLarge, rBoth, rAll], trimIncludes);
-    var trimSmall = any([rSmall, rBoth, rAll], trimIncludes);
-    var trimMid = any([rMid, rAll], trimIncludes);
-    var trimFinal = any([rFinal, rAll], trimIncludes);
+    var trimLarge = largest > 0 || any([rLarge, rBoth, rAll], trimIncludes)
+    var trimSmall = any([rSmall, rBoth, rAll], trimIncludes)
+    var trimMid = any([rMid, rAll], trimIncludes)
+    var trimFinal = any([rFinal, rAll], trimIncludes)
 
     // Parse format string to create raw tokens array.
     var rawTokens = map(template.match(tokenizer), (token, index) => {
-      var type = typeMap(token);
+      var type = typeMap(token)
 
       if (token.slice(0, 1) === '*') {
-        token = token.slice(1);
+        token = token.slice(1)
 
         if (type !== 'escape' && type !== 'general') {
-          stopTrim.push(type);
+          stopTrim.push(type)
         }
       }
 
@@ -950,8 +950,8 @@
 
         // Ignore type on non-moment tokens.
         type: ((type === 'escape' || type === 'general') ? null : type)
-      };
-    });
+      }
+    })
 
     // Associate text tokens with moment tokens.
     var currentToken = {
@@ -960,47 +960,47 @@
       token: '',
       text: '',
       type: null
-    };
+    }
 
-    var tokens = [];
+    var tokens = []
 
     if (useLeftUnits) {
-      rawTokens.reverse();
+      rawTokens.reverse()
     }
 
     each(rawTokens, (token) => {
       if (token.type) {
         if (currentToken.type || currentToken.text) {
-          tokens.push(currentToken);
+          tokens.push(currentToken)
         }
 
-        currentToken = token;
+        currentToken = token
 
-        return;
+        return
       }
 
       if (useLeftUnits) {
-        currentToken.text = token.token + currentToken.text;
+        currentToken.text = token.token + currentToken.text
       } else {
-        currentToken.text += token.token;
+        currentToken.text += token.token
       }
-    });
+    })
 
     if (currentToken.type || currentToken.text) {
-      tokens.push(currentToken);
+      tokens.push(currentToken)
     }
 
     if (useLeftUnits) {
-      tokens.reverse();
+      tokens.reverse()
     }
 
     // Find unique moment token types in the template in order of
     // descending magnitude.
-    var momentTypes = intersection(types, unique(compact(pluck(tokens, 'type'))));
+    var momentTypes = intersection(types, unique(compact(pluck(tokens, 'type'))))
 
     // Exit early if there are no moment token types.
     if (!momentTypes.length) {
-      return pluck(tokens, 'text').join('');
+      return pluck(tokens, 'text').join('')
     }
 
     // Calculate values for each moment type in the template.
@@ -1009,33 +1009,33 @@
     // assume nothing about frequency or order of tokens in the template.
     momentTypes = map(momentTypes, (momentType, index) => {
       // Is this the least-magnitude moment token found?
-      var isSmallest = ((index + 1) === momentTypes.length);
+      var isSmallest = ((index + 1) === momentTypes.length)
 
       // Is this the greatest-magnitude moment token found?
-      var isLargest = (!index);
+      var isLargest = (!index)
 
       // Get the raw value in the current units.
-      var rawValue;
+      var rawValue
 
       if (momentType === 'years' || momentType === 'months') {
-        rawValue = remainderMonths.as(momentType);
+        rawValue = remainderMonths.as(momentType)
       } else {
-        rawValue = remainder.as(momentType);
+        rawValue = remainder.as(momentType)
       }
 
-      var wholeValue = Math.floor(rawValue);
-      var decimalValue = rawValue - wholeValue;
+      var wholeValue = Math.floor(rawValue)
+      var decimalValue = rawValue - wholeValue
 
       var token = find(tokens, (token) => {
-        return momentType === token.type;
-      });
+        return momentType === token.type
+      })
 
       if (isLargest && maxValue && rawValue > maxValue) {
-        isMaxValue = true;
+        isMaxValue = true
       }
 
       if (isSmallest && minValue && Math.abs(settings.duration.as(momentType)) < minValue) {
-        isMinValue = true;
+        isMinValue = true
       }
 
       // Note the length of the largest-magnitude moment token:
@@ -1056,12 +1056,12 @@
       // template "hh:mm:ss" and set `{ trim: false }` to output
       // "00:05:00".
       if (isLargest && forceLength === null && token.length > 1) {
-        forceLength = true;
+        forceLength = true
       }
 
       // Update remainder.
-      remainder.subtract(wholeValue, momentType);
-      remainderMonths.subtract(wholeValue, momentType);
+      remainder.subtract(wholeValue, momentType)
+      remainderMonths.subtract(wholeValue, momentType)
 
       return {
         rawValue: rawValue,
@@ -1075,17 +1075,17 @@
         // Tokens can appear multiple times in a template string,
         // but all instances must share the same length.
         tokenLength: token.length
-      };
-    });
+      }
+    })
 
-    var truncMethod = trunc ? Math.floor : Math.round;
+    var truncMethod = trunc ? Math.floor : Math.round
     var truncate = function (value, places) {
-      var factor = Math.pow(10, places);
-      return truncMethod(value * factor) / factor;
-    };
+      var factor = Math.pow(10, places)
+      return truncMethod(value * factor) / factor
+    }
 
-    var foundFirst = false;
-    var bubbled = false;
+    var foundFirst = false
+    var bubbled = false
 
     var formatValue = function (momentType, index) {
       var formatOptions = {
@@ -1094,167 +1094,167 @@
         decimalSeparator: decimalSeparator,
         grouping: grouping,
         useToLocaleString: useToLocaleString
-      };
+      }
 
       if (useSignificantDigits) {
         if (significantDigits <= 0) {
-          momentType.rawValue = 0;
-          momentType.wholeValue = 0;
-          momentType.decimalValue = 0;
+          momentType.rawValue = 0
+          momentType.wholeValue = 0
+          momentType.decimalValue = 0
         } else {
-          formatOptions.maximumSignificantDigits = significantDigits;
-          momentType.significantDigits = significantDigits;
+          formatOptions.maximumSignificantDigits = significantDigits
+          momentType.significantDigits = significantDigits
         }
       }
 
       if (isMaxValue && !bubbled) {
         if (momentType.isLargest) {
-          momentType.wholeValue = maxValue;
-          momentType.decimalValue = 0;
+          momentType.wholeValue = maxValue
+          momentType.decimalValue = 0
         } else {
-          momentType.wholeValue = 0;
-          momentType.decimalValue = 0;
+          momentType.wholeValue = 0
+          momentType.decimalValue = 0
         }
       }
 
       if (isMinValue && !bubbled) {
         if (momentType.isSmallest) {
-          momentType.wholeValue = minValue;
-          momentType.decimalValue = 0;
+          momentType.wholeValue = minValue
+          momentType.decimalValue = 0
         } else {
-          momentType.wholeValue = 0;
-          momentType.decimalValue = 0;
+          momentType.wholeValue = 0
+          momentType.decimalValue = 0
         }
       }
 
       if (momentType.isSmallest || momentType.significantDigits && momentType.significantDigits - momentType.wholeValue.toString().length <= 0) {
         // Apply precision to least significant token value.
         if (precision < 0) {
-          momentType.value = truncate(momentType.wholeValue, precision);
+          momentType.value = truncate(momentType.wholeValue, precision)
         } else if (precision === 0) {
-          momentType.value = truncMethod(momentType.wholeValue + momentType.decimalValue);
+          momentType.value = truncMethod(momentType.wholeValue + momentType.decimalValue)
         } else { // precision > 0
           if (useSignificantDigits) {
             if (trunc) {
-              momentType.value = truncate(momentType.rawValue, significantDigits - momentType.wholeValue.toString().length);
+              momentType.value = truncate(momentType.rawValue, significantDigits - momentType.wholeValue.toString().length)
             } else {
-              momentType.value = momentType.rawValue;
+              momentType.value = momentType.rawValue
             }
 
             if (momentType.wholeValue) {
-              significantDigits -= momentType.wholeValue.toString().length;
+              significantDigits -= momentType.wholeValue.toString().length
             }
           } else {
-            formatOptions.fractionDigits = precision;
+            formatOptions.fractionDigits = precision
 
             if (trunc) {
-              momentType.value = momentType.wholeValue + truncate(momentType.decimalValue, precision);
+              momentType.value = momentType.wholeValue + truncate(momentType.decimalValue, precision)
             } else {
-              momentType.value = momentType.wholeValue + momentType.decimalValue;
+              momentType.value = momentType.wholeValue + momentType.decimalValue
             }
           }
         }
       } else {
         if (useSignificantDigits && momentType.wholeValue) {
           // Outer Math.round required here to handle floating point errors.
-          momentType.value = Math.round(truncate(momentType.wholeValue, momentType.significantDigits - momentType.wholeValue.toString().length));
+          momentType.value = Math.round(truncate(momentType.wholeValue, momentType.significantDigits - momentType.wholeValue.toString().length))
 
-          significantDigits -= momentType.wholeValue.toString().length;
+          significantDigits -= momentType.wholeValue.toString().length
         } else {
-          momentType.value = momentType.wholeValue;
+          momentType.value = momentType.wholeValue
         }
       }
 
       if (momentType.tokenLength > 1 && (forceLength || foundFirst)) {
-        formatOptions.minimumIntegerDigits = momentType.tokenLength;
+        formatOptions.minimumIntegerDigits = momentType.tokenLength
 
         if (bubbled && formatOptions.maximumSignificantDigits < momentType.tokenLength) {
-          delete formatOptions.maximumSignificantDigits;
+          delete formatOptions.maximumSignificantDigits
         }
       }
 
       if (!foundFirst && (momentType.value > 0 || trim === '' /* trim: false */ || find(stopTrim, momentType.type) || find(outputTypes, momentType.type))) {
-        foundFirst = true;
+        foundFirst = true
       }
 
-      momentType.formattedValue = formatNumber(momentType.value, formatOptions, userLocale);
+      momentType.formattedValue = formatNumber(momentType.value, formatOptions, userLocale)
 
-      formatOptions.useGrouping = false;
-      formatOptions.decimalSeparator = '.';
-      momentType.formattedValueEn = formatNumber(momentType.value, formatOptions, 'en');
+      formatOptions.useGrouping = false
+      formatOptions.decimalSeparator = '.'
+      momentType.formattedValueEn = formatNumber(momentType.value, formatOptions, 'en')
 
       if (momentType.tokenLength === 2 && momentType.type === 'milliseconds') {
         momentType.formattedValueMS = formatNumber(momentType.value, {
           minimumIntegerDigits: 3,
           useGrouping: false
-        }, 'en').slice(0, 2);
+        }, 'en').slice(0, 2)
       }
 
-      return momentType;
-    };
+      return momentType
+    }
 
     // Calculate formatted values.
-    momentTypes = map(momentTypes, formatValue);
-    momentTypes = compact(momentTypes);
+    momentTypes = map(momentTypes, formatValue)
+    momentTypes = compact(momentTypes)
 
     // Bubble rounded values.
     if (momentTypes.length > 1) {
       var findType = function (type) {
         return find(momentTypes, (momentType) => {
-          return momentType.type === type;
-        });
-      };
+          return momentType.type === type
+        })
+      }
 
       var bubbleTypes = function (bubble) {
-        var bubbleMomentType = findType(bubble.type);
+        var bubbleMomentType = findType(bubble.type)
 
         if (!bubbleMomentType) {
-          return;
+          return
         }
 
         each(bubble.targets, (target) => {
-          var targetMomentType = findType(target.type);
+          var targetMomentType = findType(target.type)
 
           if (!targetMomentType) {
-            return;
+            return
           }
 
           if (parseInt(bubbleMomentType.formattedValueEn, 10) === target.value) {
-            bubbleMomentType.rawValue = 0;
-            bubbleMomentType.wholeValue = 0;
-            bubbleMomentType.decimalValue = 0;
-            targetMomentType.rawValue += 1;
-            targetMomentType.wholeValue += 1;
-            targetMomentType.decimalValue = 0;
-            targetMomentType.formattedValueEn = targetMomentType.wholeValue.toString();
-            bubbled = true;
+            bubbleMomentType.rawValue = 0
+            bubbleMomentType.wholeValue = 0
+            bubbleMomentType.decimalValue = 0
+            targetMomentType.rawValue += 1
+            targetMomentType.wholeValue += 1
+            targetMomentType.decimalValue = 0
+            targetMomentType.formattedValueEn = targetMomentType.wholeValue.toString()
+            bubbled = true
           }
-        });
-      };
+        })
+      }
 
-      each(bubbles, bubbleTypes);
+      each(bubbles, bubbleTypes)
     }
 
     // Recalculate formatted values.
     if (bubbled) {
-      foundFirst = false;
-      significantDigits = significantDigitsCache;
-      momentTypes = map(momentTypes, formatValue);
-      momentTypes = compact(momentTypes);
+      foundFirst = false
+      significantDigits = significantDigitsCache
+      momentTypes = map(momentTypes, formatValue)
+      momentTypes = compact(momentTypes)
     }
 
     if (outputTypes && !(isMaxValue && !settings.trim)) {
       momentTypes = map(momentTypes, (momentType) => {
         if (find(outputTypes, (outputType) => {
-          return momentType.type === outputType;
+          return momentType.type === outputType
         })) {
-          return momentType;
+          return momentType
         }
 
-        return null;
-      });
+        return null
+      })
 
-      momentTypes = compact(momentTypes);
+      momentTypes = compact(momentTypes)
     } else {
       // Trim Large.
       if (trimLarge) {
@@ -1263,13 +1263,13 @@
           // - the smallest moment type
           // - a type marked for stopTrim
           // - a type that has a whole value
-          return !momentType.isSmallest && !momentType.wholeValue && !find(stopTrim, momentType.type);
-        });
+          return !momentType.isSmallest && !momentType.wholeValue && !find(stopTrim, momentType.type)
+        })
       }
 
       // Largest.
       if (largest && momentTypes.length) {
-        momentTypes = momentTypes.slice(0, largest);
+        momentTypes = momentTypes.slice(0, largest)
       }
 
       // Trim Small.
@@ -1279,225 +1279,225 @@
           // - a type marked for stopTrim
           // - a type that has a whole value
           // - the largest momentType
-          return !momentType.wholeValue && !find(stopTrim, momentType.type) && !momentType.isLargest;
-        });
+          return !momentType.wholeValue && !find(stopTrim, momentType.type) && !momentType.isLargest
+        })
       }
 
       // Trim Mid.
       if (trimMid) {
         momentTypes = map(momentTypes, (momentType, index) => {
           if (index > 0 && index < momentTypes.length - 1 && !momentType.wholeValue) {
-            return null;
+            return null
           }
 
-          return momentType;
-        });
+          return momentType
+        })
 
-        momentTypes = compact(momentTypes);
+        momentTypes = compact(momentTypes)
       }
 
       // Trim Final.
       if (trimFinal && momentTypes.length === 1 && !momentTypes[0].wholeValue && !(!trunc && momentTypes[0].isSmallest && momentTypes[0].rawValue < minValue)) {
-        momentTypes = [];
+        momentTypes = []
       }
     }
 
     if (returnMomentTypes) {
-      return momentTypes;
+      return momentTypes
     }
 
     // Localize and pluralize unit labels.
     each(tokens, (token) => {
-      var key = momentTokens[token.type];
+      var key = momentTokens[token.type]
 
       var momentType = find(momentTypes, (momentType) => {
-        return momentType.type === token.type;
-      });
+        return momentType.type === token.type
+      })
 
       if (!key || !momentType) {
-        return;
+        return
       }
 
-      var values = momentType.formattedValueEn.split('.');
+      var values = momentType.formattedValueEn.split('.')
 
-      values[0] = parseInt(values[0], 10);
+      values[0] = parseInt(values[0], 10)
 
       if (values[1]) {
-        values[1] = parseFloat('0.' + values[1], 10);
+        values[1] = parseFloat('0.' + values[1], 10)
       } else {
-        values[1] = null;
+        values[1] = null
       }
 
-      var pluralKey = localeData.durationPluralKey(key, values[0], values[1]);
+      var pluralKey = localeData.durationPluralKey(key, values[0], values[1])
 
-      var labels = durationGetLabels(key, localeData);
+      var labels = durationGetLabels(key, localeData)
 
-      var autoLocalized = false;
+      var autoLocalized = false
 
-      var pluralizedLabels = {};
+      var pluralizedLabels = {}
 
       // Auto-Localized unit labels.
       each(localeData._durationLabelTypes, (labelType) => {
         var label = find(labels, (label) => {
-          return label.type === labelType.type && label.key === pluralKey;
-        });
+          return label.type === labelType.type && label.key === pluralKey
+        })
 
         if (label) {
-          pluralizedLabels[label.type] = label.label;
+          pluralizedLabels[label.type] = label.label
 
           if (stringIncludes(token.text, labelType.string)) {
-            token.text = token.text.replace(labelType.string, label.label);
-            autoLocalized = true;
+            token.text = token.text.replace(labelType.string, label.label)
+            autoLocalized = true
           }
         }
-      });
+      })
 
       // Auto-pluralized unit labels.
       if (usePlural && !autoLocalized) {
-        labels.sort(durationLabelCompare);
+        labels.sort(durationLabelCompare)
 
         each(labels, (label) => {
           if (pluralizedLabels[label.type] === label.label) {
             if (stringIncludes(token.text, label.label)) {
               // Stop checking this token if its label is already
               // correctly pluralized.
-              return false;
+              return false
             }
 
             // Skip this label if it is correct, but not present in
             // the token's text.
-            return;
+            return
           }
 
           if (stringIncludes(token.text, label.label)) {
             // Replece this token's label and stop checking.
-            token.text = token.text.replace(label.label, pluralizedLabels[label.type]);
-            return false;
+            token.text = token.text.replace(label.label, pluralizedLabels[label.type])
+            return false
           }
-        });
+        })
       }
-    });
+    })
 
     // Build ouptut.
     tokens = map(tokens, (token) => {
       if (!token.type) {
-        return token.text;
+        return token.text
       }
 
       var momentType = find(momentTypes, (momentType) => {
-        return momentType.type === token.type;
-      });
+        return momentType.type === token.type
+      })
 
       if (!momentType) {
-        return '';
+        return ''
       }
 
-      var out = '';
+      var out = ''
 
       if (useLeftUnits) {
-        out += token.text;
+        out += token.text
       }
 
       if (isNegative && isMaxValue || !isNegative && isMinValue) {
-        out += '< ';
-        isMaxValue = false;
-        isMinValue = false;
+        out += '< '
+        isMaxValue = false
+        isMinValue = false
       }
 
       if (isNegative && isMinValue || !isNegative && isMaxValue) {
-        out += '> ';
-        isMaxValue = false;
-        isMinValue = false;
+        out += '> '
+        isMaxValue = false
+        isMinValue = false
       }
 
       if (isNegative && (momentType.value > 0 || trim === '' || find(stopTrim, momentType.type) || find(outputTypes, momentType.type))) {
-        out += '-';
-        isNegative = false;
+        out += '-'
+        isNegative = false
       }
 
       if (token.type === 'milliseconds' && momentType.formattedValueMS) {
-        out += momentType.formattedValueMS;
+        out += momentType.formattedValueMS
       } else {
-        out += momentType.formattedValue;
+        out += momentType.formattedValue
       }
 
       if (!useLeftUnits) {
-        out += token.text;
+        out += token.text
       }
 
-      return out;
-    });
+      return out
+    })
 
     // Trim leading and trailing comma, space, colon, and dot.
-    return tokens.join('').replace(/(,| |:|\.)*$/, '').replace(/^(,| |:|\.)*/, '');
+    return tokens.join('').replace(/(,| |:|\.)*$/, '').replace(/^(,| |:|\.)*/, '')
   }
 
   // defaultFormatTemplate
   function defaultFormatTemplate () {
-    var dur = this.duration;
+    var dur = this.duration
 
     var findType = function findType (type) {
-      return dur._data[type];
-    };
+      return dur._data[type]
+    }
 
-    var firstType = find(this.types, findType);
+    var firstType = find(this.types, findType)
 
-    var lastType = findLast(this.types, findType);
+    var lastType = findLast(this.types, findType)
 
     // Default template strings for each duration dimension type.
     switch (firstType) {
       case 'milliseconds':
-        return 'S __';
+        return 'S __'
       case 'seconds': // Fallthrough.
       case 'minutes':
-        return '*_MS_';
+        return '*_MS_'
       case 'hours':
-        return '_HMS_';
+        return '_HMS_'
       case 'days': // Possible Fallthrough.
         if (firstType === lastType) {
-          return 'd __';
+          return 'd __'
         }
       case 'weeks':
         if (firstType === lastType) {
-          return 'w __';
+          return 'w __'
         }
 
         if (this.trim === null) {
-          this.trim = 'both';
+          this.trim = 'both'
         }
 
-        return 'w __, d __, h __';
+        return 'w __, d __, h __'
       case 'months': // Possible Fallthrough.
         if (firstType === lastType) {
-          return 'M __';
+          return 'M __'
         }
       case 'years':
         if (firstType === lastType) {
-          return 'y __';
+          return 'y __'
         }
 
         if (this.trim === null) {
-          this.trim = 'both';
+          this.trim = 'both'
         }
 
-        return 'y __, M __, d __';
+        return 'y __, M __, d __'
       default:
         if (this.trim === null) {
-          this.trim = 'both';
+          this.trim = 'both'
         }
 
-        return 'y __, d __, h __, m __, s __';
+        return 'y __, d __, h __, m __, s __'
     }
   }
 
   // init
   function init (context) {
     if (!context) {
-      throw 'Moment Duration Format init cannot find moment instance.';
+      throw 'Moment Duration Format init cannot find moment instance.'
     }
 
-    context.duration.format = durationsFormat;
-    context.duration.fn.format = durationFormat;
+    context.duration.format = durationsFormat
+    context.duration.fn.format = durationFormat
 
     context.duration.fn.format.defaults = {
       // Many options are defaulted to `null` to distinguish between
@@ -1654,19 +1654,19 @@
       // "en" locale. Setting this option to `[3, 2]` would generate the
       // thousand/lakh/crore digit groupings used in the "en-IN" locale.
       grouping: [3]
-    };
+    }
 
-    context.updateLocale('en', engLocale);
+    context.updateLocale('en', engLocale)
   }
 
   // Run feature tests for `Number#toLocaleString`.
-  toLocaleStringWorks = featureTestToLocaleString();
-  toLocaleStringRoundingWorks = toLocaleStringWorks && featureTestToLocaleStringRounding();
+  toLocaleStringWorks = featureTestToLocaleString()
+  toLocaleStringRoundingWorks = toLocaleStringWorks && featureTestToLocaleStringRounding()
 
   // Initialize duration format on the global moment instance.
-  init(moment);
+  init(moment)
 
   // Return the init function so that duration format can be
   // initialized on other moment instances.
-  return init;
-});
+  return init
+})

@@ -11,10 +11,10 @@
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly",
-        "sails": false,
-        "moment": false,
-        "_": false,
-        "needle": false
+		"sails": false,
+		"_": false,
+		"moment": false,
+		"needle": false
     },
     "parserOptions": {
         "ecmaVersion": 2018

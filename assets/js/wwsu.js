@@ -13,16 +13,16 @@ class WWSUdb {
      */
 
   constructor (db) {
-    this._db = db;
+    this._db = db
 
     this.onInsert = () => {
-    };
+    }
     this.onUpdate = () => {
-    };
+    }
     this.onRemove = () => {
-    };
+    }
     this.onReplace = () => {
-    };
+    }
   }
 
   /**
@@ -32,7 +32,7 @@ class WWSUdb {
      * @memberof WWSUdb
      */
   get db () {
-    return this._db;
+    return this._db
   }
 
   /**
@@ -42,7 +42,7 @@ class WWSUdb {
      * @memberof WWSUdb
      */
   setOnInsert (fn) {
-    this.onInsert = fn;
+    this.onInsert = fn
   }
 
   /**
@@ -52,7 +52,7 @@ class WWSUdb {
      * @memberof WWSUdb
      */
   setOnUpdate (fn) {
-    this.onUpdate = fn;
+    this.onUpdate = fn
   }
 
   /**
@@ -62,7 +62,7 @@ class WWSUdb {
      * @memberof WWSUdb
      */
   setOnRemove (fn) {
-    this.onRemove = fn;
+    this.onRemove = fn
   }
 
   /**
@@ -72,7 +72,7 @@ class WWSUdb {
      * @memberof WWSUdb
      */
   setOnReplace (fn) {
-    this.onReplace = fn;
+    this.onReplace = fn
   }
 
   /**
@@ -85,27 +85,27 @@ class WWSUdb {
   query (query, replace = false) {
     if (replace) {
       if (query.constructor === Array) {
-        this._db().remove();
-        this._db.insert(query);
-        this.onReplace(this._db());
+        this._db().remove()
+        this._db.insert(query)
+        this.onReplace(this._db())
       }
-      return null;
+      return null
     } else {
       for (var key in query) {
         if (query.hasOwnProperty(key)) {
           switch (key) {
             case 'insert':
-              this._db.insert(query[key]);
-              this.onInsert(query[key], this._db());
-              break;
+              this._db.insert(query[key])
+              this.onInsert(query[key], this._db())
+              break
             case 'update':
-              this._db({ ID: query[key].ID }).update(query[key]);
-              this.onUpdate(query[key], this._db());
-              break;
+              this._db({ ID: query[key].ID }).update(query[key])
+              this.onUpdate(query[key], this._db())
+              break
             case 'remove':
-              this._db({ ID: query[key] }).remove();
-              this.onRemove(query[key], this._db());
-              break;
+              this._db({ ID: query[key] }).remove()
+              this.onRemove(query[key], this._db())
+              break
           }
         }
       }
@@ -117,10 +117,10 @@ class WWSUdb {
   replaceData (WWSUreq, path, data = {}) {
     try {
       WWSUreq.request({ method: 'POST', url: path, data: data }, (body) => {
-        this.query(body, true);
-      });
+        this.query(body, true)
+      })
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
   }
 
@@ -128,53 +128,53 @@ class WWSUdb {
   // except replaceData should be used instead when replacing the data in the entire database.
   assignSocketEvent (event, socket) {
     socket.on(event, (data) => {
-      this.query(data, false);
-    });
+      this.query(data, false)
+    })
   }
 }
 
 // Class for managing requests and authorization to WWSU's API
 class WWSUreq {
   constructor (socket, host, usernameField = null, authPath = null, authName = null) {
-    this.socket = socket;
-    this.host = host;
-    this.authPath = authPath;
-    this.authName = authName;
-    this.usernameField = usernameField;
+    this.socket = socket
+    this.host = host
+    this.authPath = authPath
+    this.authName = authName
+    this.usernameField = usernameField
 
     // Storing authorization tokens in memory
-    this._token = null;
-    this._time = null;
-    this._expiration = null;
+    this._token = null
+    this._time = null
+    this._expiration = null
   }
 
   get token () {
-    return this._token;
+    return this._token
   }
 
   set token (value) {
-    this._token = value;
+    this._token = value
   }
 
   get time () {
-    return this._time;
+    return this._time
   }
 
   set time (value) {
-    this._time = value;
+    this._time = value
   }
 
   get expiration () {
-    return this._expiration;
+    return this._expiration
   }
 
   set expiration (value) {
-    this._expiration = value;
+    this._expiration = value
   }
 
   // Is the current token expected to be expired?
   expired () {
-    return this._token === null || moment().isAfter(moment(this.time).add(this.expiration - 1000, 'milliseconds'));
+    return this._token === null || moment().isAfter(moment(this.time).add(this.expiration - 1000, 'milliseconds'))
   }
 
   // Request with authorization
@@ -200,7 +200,7 @@ class WWSUreq {
             timeout: 30000,
             title: 'Error authorizing',
             message: 'There was a technical error trying to authorize. Please contact the developers or try again later.'
-          });
+          })
         } else if (typeof token.errToken !== `undefined` || typeof token.token === 'undefined') {
           iziToast.show({
             titleColor: '#000000',
@@ -219,28 +219,28 @@ class WWSUreq {
             timeout: 30000,
             title: 'Access denied',
             message: `${typeof token.errToken !== `undefined` ? `Failed to authenticate; please try again. ${token.errToken}` : `Failed to authenticate; unknown error.`}`
-          });
+          })
         } else {
           this._tryRequest(opts, (body2) => {
-            cb(body2);
-          });
+            cb(body2)
+          })
         }
-      });
-    };
+      })
+    }
 
     // Token expected to be expired?
     if (this.expired()) {
       // If /auth/host, we don't need to prompt for login; authenticate by host
       if (this.authPath === '/auth/host') {
-        step2(this.host, null);
+        step2(this.host, null)
         // If auth path is null, this request doesn't need authentication; proceed with the request immediately
       } else if (this.authPath === null) {
         this._tryRequest(opts, (body2) => {
-          cb(body2);
-        });
+          cb(body2)
+        })
         // Otherwise, prompt for a login
       } else {
-        this._promptLogin(opts, (username, password) => step2(username, password));
+        this._promptLogin(opts, (username, password) => step2(username, password))
       }
 
       // Otherwise, try the request, and for safe measures, prompt for login if we end up getting an auth error
@@ -248,16 +248,16 @@ class WWSUreq {
       this._tryRequest(opts, (body) => {
         if (body === -1) {
           if (this.authPath !== '/auth/host') {
-            this.token = null;
-            this._promptLogin(opts, (username, password) => step2(username, password));
+            this.token = null
+            this._promptLogin(opts, (username, password) => step2(username, password))
           } else {
-            step2(this.host, null);
+            step2(this.host, null)
           }
         } else if (body !== 0) {
           // eslint-disable-next-line callback-return
-          cb(body);
+          cb(body)
         }
-      });
+      })
     }
   }
 
@@ -268,27 +268,27 @@ class WWSUreq {
         if (typeof opts.headers === `undefined`) {
           opts.headers = {
             Authorization: 'Bearer ' + this.token
-          };
+          }
         } else {
-          opts.headers['Authorization'] = 'Bearer ' + this.token;
+          opts.headers['Authorization'] = 'Bearer ' + this.token
         }
       }
 
       this.socket.request(opts, (body) => {
         if (!body) {
           // eslint-disable-next-line callback-return
-          cb(0);
+          cb(0)
         } else if (typeof body.tokenErr !== `undefined`) {
           // eslint-disable-next-line callback-return
-          cb(-1);
+          cb(-1)
         } else {
           // eslint-disable-next-line callback-return
-          cb(body);
+          cb(body)
         }
-      });
+      })
     } catch (unusedE) {
       // eslint-disable-next-line callback-return
-      cb(0);
+      cb(0)
     }
   }
 
@@ -299,40 +299,40 @@ class WWSUreq {
       this.socket.request({ method: 'POST', url: this.authPath, data: { username: username, password: password } }, (body) => {
         if (!body) {
           // eslint-disable-next-line callback-return
-          cb(0);
+          cb(0)
         } else {
           if (typeof body.token !== `undefined`) {
-            this.token = body.token;
-            this.expiration = body.expires || (60000 * 5);
-            this.time = moment();
+            this.token = body.token
+            this.expiration = body.expires || (60000 * 5)
+            this.time = moment()
             // eslint-disable-next-line callback-return
-            cb(body);
+            cb(body)
           } else if (typeof body.errToken !== `undefined`) {
             // eslint-disable-next-line callback-return
-            cb(body);
+            cb(body)
           } else {
             // eslint-disable-next-line callback-return
-            cb(0);
+            cb(0)
           }
         }
-      });
+      })
     } catch (unusedE) {
       // eslint-disable-next-line callback-return
-      cb(0);
+      cb(0)
     }
   }
 
   // We need to log in; display a login window via iziToast. opts.db should have objects of current users (including a key named after this.usernameField) that can be authenticated
   _promptLogin (opts, cb) {
-    var selection = [`<option value="">--SELECT A USER--</option>`];
+    var selection = [`<option value="">--SELECT A USER--</option>`]
     if (opts.db !== null) {
       opts.db.each((user) => {
-        selection.push(`<option value="${user[`${this.usernameField}`]}">${user[`${this.usernameField}`]}</option>`);
-      });
+        selection.push(`<option value="${user[`${this.usernameField}`]}">${user[`${this.usernameField}`]}</option>`)
+      })
     }
 
-    var username = ``;
-    var password = ``;
+    var username = ``
+    var password = ``
 
     iziToast.show({
       timeout: 60000,
@@ -350,32 +350,32 @@ class WWSUreq {
       closeOnClick: false,
       inputs: [
         [`<select>${selection.join('')}</select>`, 'change', function (instance, toast, select, e) {
-          username = select.options[select.selectedIndex].value;
+          username = select.options[select.selectedIndex].value
         }, true],
         [`<input type="password">`, 'keyup', function (instance, toast, input, e) {
-          password = input.value;
+          password = input.value
         }, true]
       ],
       buttons: [
         ['<button><b>Authorize</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          cb(username, password);
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
+          cb(username, password)
         }],
         ['<button><b>Cancel</b></button>', function (instance, toast) {
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
         }]
       ]
-    });
+    })
   }
 }
 
 // Use this function to wait for an element to exist. Calls back the cb when it exists, providing the DOM as a parameter.
 function waitForElement (theelement, cb) {
-  console.log(theelement);
+  console.log(theelement)
   if (!document.querySelector(theelement)) {
-    window.requestAnimationFrame(() => waitForElement(theelement, cb));
+    window.requestAnimationFrame(() => waitForElement(theelement, cb))
   } else {
     // eslint-disable-next-line callback-return
-    cb(document.querySelector(theelement));
+    cb(document.querySelector(theelement))
   }
 }

@@ -1,45 +1,45 @@
 /* global $ */
 
-var Meta = { line1: '', line2: '' };
-var nowPlaying = document.getElementById('nowplaying');
+var Meta = { line1: '', line2: '' }
+var nowPlaying = document.getElementById('nowplaying')
 
 function waitFor (check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
-      count++;
+      count++
       window.requestAnimationFrame(() => {
-        waitFor(check, callback, count);
-      });
+        waitFor(check, callback, count)
+      })
     } else {
     }
   } else {
-    return callback();
+    return callback()
   }
 }
 
 // Register event handlers when the socket connects
 waitFor(() => {
-  return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected());
+  return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected())
 }, () => {
   io.socket.on('connect', () => {
-    doSockets();
-  });
+    doSockets()
+  })
 
-  doSockets();
+  doSockets()
 
   io.socket.on('meta', (data) => {
     try {
       for (var key in data) {
         if (data.hasOwnProperty(key)) {
-          Meta[key] = data[key];
+          Meta[key] = data[key]
         }
       }
-      doMeta(data);
+      doMeta(data)
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  });
-});
+  })
+})
 
 // Load web player
 if (document.querySelector('#nativeflashradio')) {
@@ -75,25 +75,25 @@ if (document.querySelector('#nativeflashradio')) {
     streamtype: 'other',
     streamurl: 'https://server.wwsu1069.org',
     songinformationinterval: '600000'
-  });
+  })
 }
 
 // Change the theme when the player loads
 waitFor(() => {
-  return (document.querySelector(`#nativeflashradioplaystopcontainer`) !== null && document.querySelector(`#nativeflashradioplaybutton`) !== null && document.querySelector(`#nativeflashradioimagecontainer`) !== null && document.querySelector(`#nativeflashradiovolumecontroller`) !== null);
+  return (document.querySelector(`#nativeflashradioplaystopcontainer`) !== null && document.querySelector(`#nativeflashradioplaybutton`) !== null && document.querySelector(`#nativeflashradioimagecontainer`) !== null && document.querySelector(`#nativeflashradiovolumecontroller`) !== null)
 }, () => {
-  $('#nativeflashradioplaystopcontainer').css('background-color', 'rgb(255, 255, 255);');
-  $('#nativeflashradioplaybutton').css('fill', 'rgb(0, 0, 0);');
-  $('#nativeflashradioimagecontainer').css('border', 'rgb(255, 255, 255);');
-  $('#nativeflashradioimagecontainer').css('background-color', 'rgb(255, 255, 255);');
-  $('#nativeflashradiovolumecontroller').css('background-color', 'rgb(255, 255, 255);');
+  $('#nativeflashradioplaystopcontainer').css('background-color', 'rgb(255, 255, 255);')
+  $('#nativeflashradioplaybutton').css('fill', 'rgb(0, 0, 0);')
+  $('#nativeflashradioimagecontainer').css('border', 'rgb(255, 255, 255);')
+  $('#nativeflashradioimagecontainer').css('background-color', 'rgb(255, 255, 255);')
+  $('#nativeflashradiovolumecontroller').css('background-color', 'rgb(255, 255, 255);')
 
-  $('#nativeflashradioplaystopcontainer').attr('tabindex', 0);
-  $('#nativeflashradiovolumegrab').attr('tabindex', 0);
-  $('#nativeflashradiovolumegrab').attr('alt', 'Change Volume');
-  $('#nativeflashradiovolumehit').attr('alt', 'Volume');
-  $('#nativeflashradioimagehit1').attr('alt', 'logo');
-});
+  $('#nativeflashradioplaystopcontainer').attr('tabindex', 0)
+  $('#nativeflashradiovolumegrab').attr('tabindex', 0)
+  $('#nativeflashradiovolumegrab').attr('alt', 'Change Volume')
+  $('#nativeflashradiovolumehit').attr('alt', 'Volume')
+  $('#nativeflashradioimagehit1').attr('alt', 'logo')
+})
 
 // Make a call to the meta/get API endpoint
 function doSockets () {
@@ -101,22 +101,22 @@ function doSockets () {
     try {
       for (var key in body) {
         if (body.hasOwnProperty(key)) {
-          Meta[key] = body[key];
+          Meta[key] = body[key]
         }
       }
-      doMeta(body);
+      doMeta(body)
     } catch (unusedE) {
       // console.error(e);
-      setTimeout(doSockets, 10000);
+      setTimeout(doSockets, 10000)
     }
-  });
+  })
 }
 
 // Display meta as it's received
 function doMeta (response) {
   try {
     if ('line1' in response || 'line2' in response) {
-      nowPlaying.innerHTML = `${Meta.line1}. ${Meta.line2}`;
+      nowPlaying.innerHTML = `${Meta.line1}. ${Meta.line2}`
       $('#nowplaying')
         .marquee({
           // duration in milliseconds of the marquee
@@ -129,9 +129,9 @@ function doMeta (response) {
           direction: 'left',
           // true or false - should the marquee be duplicated to show an effect of continues flow
           duplicated: true
-        });
+        })
     }
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 }
