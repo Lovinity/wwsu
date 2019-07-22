@@ -5,25 +5,25 @@ var Slides
 // Slide class for managing a single slide
 class Slide {
   constructor (data = {}) {
-    this._name = data.name || ''
-    this._label = data.label || ''
+    this._name = data.name || ``
+    this._label = data.label || ``
     this._weight = data.weight || 0
     this._isSticky = data.isSticky || false
-    this._color = data.color || 'secondary'
-    this._active = (typeof data.active !== 'undefined') ? data.active : true
+    this._color = data.color || `secondary`
+    this._active = (typeof data.active !== `undefined`) ? data.active : true
     this._starts = data.starts || null
     this._expires = data.expires || null
-    this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${data.html || ''}</div></div>`
-    this._innerHtml = data.html || ''
+    this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`
+    this._innerHtml = data.html || ``
     this._reset = data.reset || false
-    this._transitionIn = data.transitionIn || 'fadeIn'
-    this._transitionOut = data.transitionOut || 'fadeOut'
+    this._transitionIn = data.transitionIn || `fadeIn`
+    this._transitionOut = data.transitionOut || `fadeOut`
     this._displayTime = data.displayTime || 14
     this._fitContent = data.fitContent || false
     this._fn = data.fn || (() => {
     })
 
-    var temp = document.getElementById('slides')
+    var temp = document.getElementById(`slides`)
     if (temp !== null) { temp.innerHTML += this._html }
   }
 
@@ -186,8 +186,8 @@ Slides = (() => {
       } catch (e) {
         console.error(e)
         iziToast.show({
-          title: 'An error occurred - Please check the logs',
-          message: 'Error occurred in the compare function of Slides.updateBadges'
+          title: `An error occurred - Please check the logs`,
+          message: `Error occurred in the compare function of Slides.updateBadges`
         })
       }
     }
@@ -195,9 +195,9 @@ Slides = (() => {
     slides = slides.sort(compare)
 
     // Update the badges at the bottom of the screen for each slide
-    var temp = document.getElementById('slide-badges')
+    var temp = document.getElementById(`slide-badges`)
     if (temp !== null) {
-      temp.innerHTML = ''
+      temp.innerHTML = ``
       var stickyOnly = slides.filter((_slides) => _slides.isSticky && _slides.active).length > 0
       var _slides = []
       if (stickyOnly) {
@@ -208,9 +208,9 @@ Slides = (() => {
         if (!activeSlide().active) { timeLeft = 0 }
       }
 
-      var html = ''
+      var html = ``
       _slides.map((_slide) => {
-        html += `<span class="m-1 chip shadow-4 ${typeof slides[currentSlide] !== 'undefined' && _slide.name === slides[currentSlide].name ? 'bg-light-1 text-dark' : 'bg-dark-4 text-white'}"><i class="chip-icon bg-${_slide.color} ${_slide.color === 'warning' || _slide.color === 'info' || _slide.color === 'success' || _slide.color === 'urgent' ? 'text-dark' : 'text-white'}">${typeof slides[currentSlide] !== 'undefined' && _slide.name === slides[currentSlide].name && timeLeft !== null && _slides.length > 1 ? timeLeft : ''}</i>${_slide.label}</span>`
+        html += `<span class="m-1 chip shadow-4 ${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name ? `bg-light-1 text-dark` : `bg-dark-4 text-white`}"><i class="chip-icon bg-${_slide.color} ${_slide.color === `warning` || _slide.color === `info` || _slide.color === `success` || _slide.color === `urgent` ? `text-dark` : `text-white`}">${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name && timeLeft !== null && _slides.length > 1 ? timeLeft : ``}</i>${_slide.label}</span>`
       })
 
       temp.innerHTML = html
@@ -242,10 +242,10 @@ Slides = (() => {
   const showSlide = (slideName) => {
     timeLeft = null
     if (slideName !== activeSlide().name) {
-      console.log('Different slide.')
+      console.log(`Different slide.`)
       // Executed when we are ready to show the slide
       var afterFunction = () => {
-        console.log('afterFunction executed')
+        console.log(`afterFunction executed`)
 
         // Find out what index the slide we're about to display is
         var iteration = 0
@@ -260,7 +260,7 @@ Slides = (() => {
 
           // Should never happen, but failsafe to prevent freezes
           if (iteration > slides.length) {
-            console.log('Exceeded iteration count')
+            console.log(`Exceeded iteration count`)
             done = true
             timeLeft = 0
             currentSlide = -1
@@ -269,7 +269,7 @@ Slides = (() => {
         }
 
         // Update inner html to configured value in case fn changed it.
-        console.log('showing slide')
+        console.log(`showing slide`)
         var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
         if (temp2 !== null) {
           if (activeSlide().reset) { temp2.innerHTML = activeSlide().innerHtml }
@@ -278,22 +278,22 @@ Slides = (() => {
         // Failsafe: iterate through all slides and set display to none to prevent stray slides from remaining visible
         slides.map((_slide) => {
           var temp = document.getElementById(`slide-${_slide.name}`)
-          if (temp !== null) { temp.style.display = 'none' }
+          if (temp !== null) { temp.style.display = `none` }
         })
 
         // Display active slide
         var temp = document.getElementById(`slide-${activeSlide().name}`)
-        if (temp !== null) { temp.style.display = 'inline' }
+        if (temp !== null) { temp.style.display = `inline` }
 
         // Reset animation classes
-        if (temp2 !== null) { temp2.className = '' }
+        if (temp2 !== null) { temp2.className = `` }
 
         $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
         })
 
         activeSlide().fn()
 
-        console.log('setting time')
+        console.log(`setting time`)
         timeLeft = activeSlide().displayTime
         updateBadges()
 
@@ -301,9 +301,9 @@ Slides = (() => {
         var temp = document.getElementById(`slide-${activeSlide().name}`)
         var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
         if (activeSlide().fitContent && temp !== null && temp2 !== null) {
-          console.log('fitting content')
-          temp.classList.add('scale-wrapper')
-          temp2.classList.add('scale-content')
+          console.log(`fitting content`)
+          temp.classList.add(`scale-wrapper`)
+          temp2.classList.add(`scale-content`)
           var pageWidth; var pageHeight
 
           var basePage = {
@@ -315,7 +315,7 @@ Slides = (() => {
           }
 
           $(() => {
-            console.log('fitting content self function')
+            console.log(`fitting content self function`)
             var $page = $(`#slide-${activeSlide().name}`)
 
             getPageSize()
@@ -337,7 +337,7 @@ Slides = (() => {
             }
 
             function scalePages (page, maxWidth, maxHeight) {
-              page.attr('width', `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
+              page.attr(`width`, `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
               console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
               var scaleX = 1; var scaleY = 1
               scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95
@@ -352,7 +352,7 @@ Slides = (() => {
 
               console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`)
 
-              $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;')
+              $(`#content-slide-${activeSlide().name}`).attr(`style`, `-webkit-transform:scale(` + basePage.scale + `);left:` + newLeftPos + `px;top:0px;`)
             }
           })
         }
@@ -360,49 +360,49 @@ Slides = (() => {
 
       // Process transitioning out of the current slide
       if (currentSlide > -1) {
-        console.log('transition out')
+        console.log(`transition out`)
         var temp = document.getElementById(`slide-${activeSlide().name}`)
         if (temp !== null) {
-          console.log('slide exists; process animation')
+          console.log(`slide exists; process animation`)
 
           // Sometimes, animation callback will not fire. Add a 10-second failsafe just in case.
           var failsafe = setTimeout(() => {
-            console.log('animation failsafe triggered')
+            console.log(`animation failsafe triggered`)
             var temp = document.getElementById(`slide-${activeSlide().name}`)
-            if (temp !== null) { temp.style.display = 'none' }
+            if (temp !== null) { temp.style.display = `none` }
             var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
-            if (temp2 !== null) { temp2.className = '' }
+            if (temp2 !== null) { temp2.className = `` }
             afterFunction()
           }, 5000)
 
           $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
-            console.log('animation complete')
+            console.log(`animation complete`)
             var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
-            if (temp2 !== null) { temp2.className = '' }
+            if (temp2 !== null) { temp2.className = `` }
             var temp = document.getElementById(`slide-${activeSlide().name}`)
-            if (temp !== null) { temp.style.display = 'none' }
+            if (temp !== null) { temp.style.display = `none` }
             clearTimeout(failsafe)
             afterFunction()
           })
         } else {
-          console.log('slide does not exist; do not animate')
+          console.log(`slide does not exist; do not animate`)
           afterFunction()
         }
       } else {
-        console.log('currentSlide is negative')
+        console.log(`currentSlide is negative`)
         afterFunction()
       }
     } else {
-      console.log('Same slide; resetting clock')
+      console.log(`Same slide; resetting clock`)
 
       // Show the slide. Update inner html to configured value in case fn changed it.
-      console.log('showing slide')
+      console.log(`showing slide`)
       var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
       if (temp2 !== null) {
         if (activeSlide().reset) { temp2.innerHTML = activeSlide().innerHtml }
       }
       var temp = document.getElementById(`slide-${activeSlide().name}`)
-      if (temp !== null) { temp.style.display = 'inline' }
+      if (temp !== null) { temp.style.display = `inline` }
 
       activeSlide().fn()
 
@@ -412,7 +412,7 @@ Slides = (() => {
   }
 
   const generateBG = () => {
-    var hexValues = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e']
+    var hexValues = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `a`, `b`, `c`, `d`, `e`]
 
     function populate (a) {
       for (var i = 0; i < 6; i++) {
@@ -423,13 +423,13 @@ Slides = (() => {
       return a
     }
 
-    var newColor1 = populate('#')
-    var newColor2 = populate('#')
+    var newColor1 = populate(`#`)
+    var newColor2 = populate(`#`)
     var angle = Math.round(Math.random() * 360)
 
-    var gradient = 'linear-gradient(' + angle + 'deg, ' + newColor1 + ', ' + newColor2 + ')'
+    var gradient = `linear-gradient(` + angle + `deg, ` + newColor1 + `, ` + newColor2 + `)`
 
-    var temp = document.getElementById('bg-canvas')
+    var temp = document.getElementById(`bg-canvas`)
     if (temp !== null) { temp.style.background = gradient }
   }
 
@@ -440,7 +440,7 @@ Slides = (() => {
 
       if (timeLeft <= 0) {
         timeLeft = 0
-        console.log('No time')
+        console.log(`No time`)
 
         // Determine which slides qualify to be displayed
         var stickyOnly = slides.filter((_slides) => _slides.isSticky && _slides.active).length > 0
@@ -454,11 +454,11 @@ Slides = (() => {
         // Determine based on the above which slide we should show next
         var qualified = activeIndexes.filter((value, index) => index > currentSlide && value)
         if (qualified.length <= 0) {
-          console.log('No more slides')
+          console.log(`No more slides`)
           generateBG()
           qualified = activeIndexes.filter((value, index) => value)
           if (qualified.length > 0) {
-            console.log('At least 1 qualified slide')
+            console.log(`At least 1 qualified slide`)
             var done = false
             var iteration = 0
             while (!done) {
@@ -471,19 +471,19 @@ Slides = (() => {
 
               // Should never happen, but failsafe to prevent freezes
               if (!done && iteration > slides.length) {
-                console.log('Reached iteration limit')
+                console.log(`Reached iteration limit`)
                 done = true
                 currentSlide = -1
                 timeLeft = 0
               }
             }
           } else {
-            console.log('No qualified slides')
+            console.log(`No qualified slides`)
             currentSlide = -1
             timeLeft = 0
           }
         } else {
-          console.log('Qualified slides after current')
+          console.log(`Qualified slides after current`)
           var done = false
           var iteration = currentSlide + 1
           while (!done) {
@@ -497,7 +497,7 @@ Slides = (() => {
 
             // Should never happen, but failsafe to prevent freezes
             if (!done && iteration > slides.length) {
-              console.log('Reached iteration limit')
+              console.log(`Reached iteration limit`)
               done = true
               currentSlide = -1
               timeLeft = 0

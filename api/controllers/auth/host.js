@@ -1,15 +1,15 @@
-var jwt = require('jsonwebtoken')
+var jwt = require(`jsonwebtoken`)
 
 module.exports = {
 
-  friendlyName: 'Auth / Host',
+  friendlyName: `Auth / Host`,
 
-  description: 'Authorize a host and get a token.',
+  description: `Authorize a host and get a token.`,
 
   inputs: {
     username: {
-      type: 'string',
-      description: 'The host to authorize.',
+      type: `string`,
+      description: `The host to authorize.`,
       required: true
     }
   },
@@ -27,7 +27,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller auth/host called.')
+    sails.log.debug(`Controller auth/host called.`)
 
     try {
       // Verify the host first
@@ -36,7 +36,7 @@ module.exports = {
       if (!host || !host.authorized) { return exits.noToken({ errToken: `The provided host either does not exist or is not authorized. To grant access, please use a DJ Controls with administrator privileges and authorize the host ${inputs.username}` }) }
 
       // Generate the token valid for 10 minutes
-      var token = jwt.sign({ host: host.host, admin: host.admin, exp: Math.floor(Date.now() / 1000) + (60 * 10) }, sails.config.custom.secrets.host, { subject: 'host' })
+      var token = jwt.sign({ host: host.host, admin: host.admin, exp: Math.floor(Date.now() / 1000) + (60 * 10) }, sails.config.custom.secrets.host, { subject: `host` })
 
       // Return the token as an object
       return exits.success({ token: token, expires: (60000 * 10) })

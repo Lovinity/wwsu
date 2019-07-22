@@ -1,13 +1,13 @@
 module.exports = {
 
-  friendlyName: 'config / meta / set',
+  friendlyName: `config / meta / set`,
 
-  description: 'Set basic meta configuration',
+  description: `Set basic meta configuration`,
 
   inputs: {
     clearTime: {
-      type: 'number',
-      description: 'When a live DJ logs a manual track, it will be displayed for this many minutes in metadata before cleared automatically.'
+      type: `number`,
+      description: `When a live DJ logs a manual track, it will be displayed for this many minutes in metadata before cleared automatically.`
     }
   },
 
@@ -16,7 +16,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller config/meta/set called.')
+    sails.log.debug(`Controller config/meta/set called.`)
 
     try {
       var returnData = {}
@@ -29,7 +29,7 @@ module.exports = {
       }
 
       // broadcast changes over websockets
-      sails.sockets.broadcast('config', 'config', { update: { meta: sails.config.custom.meta } })
+      sails.sockets.broadcast(`config`, `config`, { update: { meta: sails.config.custom.meta } })
 
       return exits.success()
     } catch (e) {

@@ -1,17 +1,17 @@
 module.exports = {
 
-  friendlyName: 'config / requests / set',
+  friendlyName: `config / requests / set`,
 
-  description: 'Set configuration regarding the request system.',
+  description: `Set configuration regarding the request system.`,
 
   inputs: {
     dailyLimit: {
-      type: 'number',
-      description: 'Each IP address is limited to making no more than the specified number of requests per day, reset at midnight. 0 disables the ability for anyone to request tracks.'
+      type: `number`,
+      description: `Each IP address is limited to making no more than the specified number of requests per day, reset at midnight. 0 disables the ability for anyone to request tracks.`
     },
     priorityBump: {
-      type: 'number',
-      description: 'When a track is requested, by how much should the track\'s priority be bumped (or lowered, if a negative number) in RadioDJ?'
+      type: `number`,
+      description: `When a track is requested, by how much should the track's priority be bumped (or lowered, if a negative number) in RadioDJ?`
     }
   },
 
@@ -20,7 +20,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller config/requests/set called.')
+    sails.log.debug(`Controller config/requests/set called.`)
 
     try {
       // Set the new configuration of any and all values provided as input
@@ -31,7 +31,7 @@ module.exports = {
       }
 
       // broadcast changes over websockets
-      sails.sockets.broadcast('config', 'config', { update: { requests: sails.config.custom.requests } })
+      sails.sockets.broadcast(`config`, `config`, { update: { requests: sails.config.custom.requests } })
 
       return exits.success()
     } catch (e) {

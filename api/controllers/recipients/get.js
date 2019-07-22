@@ -1,15 +1,15 @@
 module.exports = {
 
-  friendlyName: 'Recipients / get',
+  friendlyName: `Recipients / get`,
 
-  description: 'Get a list of recipients for messages.',
+  description: `Get a list of recipients for messages.`,
 
   inputs: {
 
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller recipients/get called.')
+    sails.log.debug(`Controller recipients/get called.`)
     try {
       // Get recipients
       var records = await sails.models.recipients.find()
@@ -18,8 +18,8 @@ module.exports = {
 
       // Subscribe to web socket if applicable
       if (this.req.isSocket) {
-        sails.sockets.join(this.req, 'recipients')
-        sails.log.verbose('Request was a socket. Joining recipients.')
+        sails.sockets.join(this.req, `recipients`)
+        sails.log.verbose(`Request was a socket. Joining recipients.`)
       }
 
       return exits.success(records)

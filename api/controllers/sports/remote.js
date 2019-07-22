@@ -1,4 +1,4 @@
 module.exports = async function remote (req, res) {
-  sails.log.debug('Controller called.')
-  return res.view('sports/remote', { layout: 'sports/layout', timestamp: moment().valueOf() })
+  sails.log.debug(`Controller called.`)
+  return res.view(`sports/remote`, { layout: `sports/layout`, timestamp: moment().valueOf() })
 }

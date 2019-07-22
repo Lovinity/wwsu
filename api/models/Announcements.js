@@ -6,46 +6,46 @@
  */
 
 module.exports = {
-  datastore: 'nodebase',
+  datastore: `nodebase`,
   attributes: {
 
     ID: {
-      type: 'number',
+      type: `number`,
       autoIncrement: true
     },
 
     type: {
-      type: 'string'
+      type: `string`
     },
 
     level: {
-      type: 'string',
-      isIn: ['danger', 'warning', 'info', 'trivial']
+      type: `string`,
+      isIn: [`danger`, `warning`, `info`, `trivial`]
     },
 
     title: {
-      type: 'string'
+      type: `string`
     },
 
     announcement: {
-      type: 'string'
+      type: `string`
     },
 
     displayTime: {
-      type: 'number',
+      type: `number`,
       defaultsTo: 15,
       min: 5,
       max: 60
     },
 
     starts: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     expires: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     }
   },
 
@@ -53,24 +53,24 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`announcements socket: ${data}`)
-    sails.sockets.broadcast(`announcements-${newlyCreatedRecord.type}`, 'announcements', data)
-    sails.sockets.broadcast('announcements-all', 'announcements', data)
+    sails.sockets.broadcast(`announcements-${newlyCreatedRecord.type}`, `announcements`, data)
+    sails.sockets.broadcast(`announcements-all`, `announcements`, data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`announcements socket: ${data}`)
-    sails.sockets.broadcast(`announcements-${updatedRecord.type}`, 'announcements', data)
-    sails.sockets.broadcast('announcements-all', 'announcements', data)
+    sails.sockets.broadcast(`announcements-${updatedRecord.type}`, `announcements`, data)
+    sails.sockets.broadcast(`announcements-all`, `announcements`, data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`calendar socket: ${data}`)
-    sails.sockets.broadcast(`announcements-${destroyedRecord.type}`, 'announcements', data)
-    sails.sockets.broadcast('announcements-all', 'announcements', data)
+    sails.sockets.broadcast(`announcements-${destroyedRecord.type}`, `announcements`, data)
+    sails.sockets.broadcast(`announcements-all`, `announcements`, data)
     return proceed()
   }
 

@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'filterProfane',
+  friendlyName: `filterProfane`,
 
-  description: 'Filter out any profanity in a string',
+  description: `Filter out any profanity in a string`,
 
   inputs: {
     message: {
-      type: 'string',
-      defaultsTo: '',
-      description: 'The string to be filtered.'
+      type: `string`,
+      defaultsTo: ``,
+      description: `The string to be filtered.`
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper filterProfane called.')
+    sails.log.debug(`Helper filterProfane called.`)
     try {
       // Run through every configured word of profanity to see if it exists in the string
       sails.config.custom.profanity.map(word => {
@@ -26,7 +26,7 @@ module.exports = {
           // Asterisk / censor profanity
           numbers.map(number => {
             for (var i = 0; i < word.length; i++) {
-              if (i !== 0 && i !== (word.length - 1)) { inputs.message = setCharAt(inputs.message, number + i, '*') }
+              if (i !== 0 && i !== (word.length - 1)) { inputs.message = setCharAt(inputs.message, number + i, `*`) }
             }
           })
         }

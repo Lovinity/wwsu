@@ -1,13 +1,13 @@
 module.exports = {
 
-  friendlyName: 'djs / get',
+  friendlyName: `djs / get`,
 
-  description: 'Retrieve a list of DJs in the system, or get information about a single DJ.',
+  description: `Retrieve a list of DJs in the system, or get information about a single DJ.`,
 
   inputs: {
     dj: {
-      type: 'number',
-      description: 'If provided, instead of returning an array of DJs, will return information about the specified DJ.'
+      type: `number`,
+      description: `If provided, instead of returning an array of DJs, will return information about the specified DJ.`
     }
   },
 
@@ -16,7 +16,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller djs/get called.')
+    sails.log.debug(`Controller djs/get called.`)
 
     try {
       if (!inputs.dj) {
@@ -33,8 +33,8 @@ module.exports = {
 
         // Subscribe to sockets if applicable
         if (this.req.isSocket) {
-          sails.sockets.join(this.req, 'djs')
-          sails.log.verbose('Request was a socket. Joining djs.')
+          sails.sockets.join(this.req, `djs`)
+          sails.log.verbose(`Request was a socket. Joining djs.`)
         }
 
         // Return records

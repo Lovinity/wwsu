@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'config / profanity / add',
+  friendlyName: `config / profanity / add`,
 
-  description: 'Add a word into the profanity filter for metadata, messages, and other text that is public.',
+  description: `Add a word into the profanity filter for metadata, messages, and other text that is public.`,
 
   inputs: {
     word: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'The word or phrase that should be filtered out from all metadata and messages.'
+      description: `The word or phrase that should be filtered out from all metadata and messages.`
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller config/profanity/add called.')
+    sails.log.debug(`Controller config/profanity/add called.`)
 
     try {
       // Do not add duplicates
@@ -29,7 +29,7 @@ module.exports = {
       if (!exists) { sails.config.custom.profanity.push(inputs.word) }
 
       // broadcast changes over websockets
-      sails.sockets.broadcast('config', 'config', { update: { profanity: sails.config.custom.profanity } })
+      sails.sockets.broadcast(`config`, `config`, { update: { profanity: sails.config.custom.profanity } })
 
       return exits.success()
     } catch (e) {

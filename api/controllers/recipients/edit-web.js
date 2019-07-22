@@ -1,28 +1,28 @@
-var sh = require('shorthash')
+var sh = require(`shorthash`)
 
 module.exports = {
 
-  friendlyName: 'Recipients / Edit-web',
+  friendlyName: `Recipients / Edit-web`,
 
-  description: 'Changes a label for a public recipient.',
+  description: `Changes a label for a public recipient.`,
 
   inputs: {
     label: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'The new label or nickname for this recipient.'
+      description: `The new label or nickname for this recipient.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller recipients/edit-web called.')
+    sails.log.debug(`Controller recipients/edit-web called.`)
 
     try {
       // Request must be a socket
-      if (!this.req.isSocket) { return exits.error(new Error('This controller requires a websocket.')) }
+      if (!this.req.isSocket) { return exits.error(new Error(`This controller requires a websocket.`)) }
 
       // Get the recipient host
-      var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip
+      var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers[`x-forwarded-for`] !== `undefined` ? this.req.socket.handshake.headers[`x-forwarded-for`] : this.req.socket.conn.remoteAddress) : this.req.ip
       var host = sh.unique(fromIP + sails.config.custom.hostSecret)
 
       // Filter disallowed HTML

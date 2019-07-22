@@ -6,45 +6,45 @@
  */
 
 module.exports = {
-  datastore: 'timesheets',
+  datastore: `timesheets`,
   attributes: {
     ID: {
-      type: 'number',
+      type: `number`,
       autoIncrement: true
     },
 
     unique: {
-      type: 'string',
+      type: `string`,
       allowNull: true
     },
 
     name: {
-      type: 'string',
+      type: `string`,
       required: true
     },
 
     scheduled_in: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     scheduled_out: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     time_in: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     time_out: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     approved: {
-      type: 'number',
+      type: `number`,
       defaultsTo: 1,
       min: -1,
       max: 2
@@ -55,21 +55,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`timesheet socket: ${data}`)
-    sails.sockets.broadcast('timesheet', 'timesheet', data)
+    sails.sockets.broadcast(`timesheet`, `timesheet`, data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`timesheet socket: ${data}`)
-    sails.sockets.broadcast('timesheet', 'timesheet', data)
+    sails.sockets.broadcast(`timesheet`, `timesheet`, data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`timesheet socket: ${data}`)
-    sails.sockets.broadcast('timesheet', 'timesheet', data)
+    sails.sockets.broadcast(`timesheet`, `timesheet`, data)
     return proceed()
   }
 

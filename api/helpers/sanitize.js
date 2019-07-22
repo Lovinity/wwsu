@@ -1,22 +1,22 @@
-const sanitizeHtml = require('sanitize-html')
-const he = require('he')
+const sanitizeHtml = require(`sanitize-html`)
+const he = require(`he`)
 
 module.exports = {
 
-  friendlyName: 'sails.helpers.sanitize',
+  friendlyName: `sails.helpers.sanitize`,
 
-  description: 'Remove prohibited HTML tags, and fix any broken ones.',
+  description: `Remove prohibited HTML tags, and fix any broken ones.`,
 
   inputs: {
     text: {
-      type: 'string',
-      defaultsTo: '',
-      description: 'The string to sanitize.'
+      type: `string`,
+      defaultsTo: ``,
+      description: `The string to sanitize.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('helper sanitize called.')
+    sails.log.debug(`helper sanitize called.`)
 
     try {
       // Only keep safe HTML according to config

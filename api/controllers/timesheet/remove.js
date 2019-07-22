@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'Timesheet / Remove',
+  friendlyName: `Timesheet / Remove`,
 
-  description: 'Remove a timesheet entry. Also removes directorhours if applicable.',
+  description: `Remove a timesheet entry. Also removes directorhours if applicable.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true,
-      description: 'The ID number of the Timesheet to remove.'
+      description: `The ID number of the Timesheet to remove.`
     }
   },
 
@@ -16,7 +16,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller timesheet/remove called.')
+    sails.log.debug(`Controller timesheet/remove called.`)
 
     try {
       // Update the timesheet record

@@ -1,13 +1,13 @@
 module.exports = {
 
-  friendlyName: 'Directors / Get',
+  friendlyName: `Directors / Get`,
 
-  description: 'Retrieve directors from memory.',
+  description: `Retrieve directors from memory.`,
 
   inputs: {
     name: {
-      description: 'Director to search for.',
-      type: 'string',
+      description: `Director to search for.`,
+      type: `string`,
       allowNull: true
     }
   },
@@ -25,7 +25,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller directors/get called.')
+    sails.log.debug(`Controller directors/get called.`)
 
     try {
       // If a username was specified, find only that director. Otherwise, get all directors.
@@ -34,8 +34,8 @@ module.exports = {
 
       // Subscribe to websockets if applicable
       if (this.req.isSocket) {
-        sails.sockets.join(this.req, 'directors')
-        sails.log.verbose('Request was a socket. Joined directors.')
+        sails.sockets.join(this.req, `directors`)
+        sails.log.verbose(`Request was a socket. Joined directors.`)
       }
 
       // Get records

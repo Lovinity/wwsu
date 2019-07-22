@@ -1,16 +1,16 @@
-var sh = require('shorthash')
+var sh = require(`shorthash`)
 
 module.exports = {
 
-  friendlyName: 'Messages / get-web',
+  friendlyName: `Messages / get-web`,
 
-  description: 'Web and mobile clients will use this endpoint to get messages.',
+  description: `Web and mobile clients will use this endpoint to get messages.`,
 
   inputs: {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller messages/get-web called.')
+    sails.log.debug(`Controller messages/get-web called.`)
 
     try {
       // Get the client IP address
@@ -22,7 +22,7 @@ module.exports = {
         sails.log.silly(`Host: ${host}`)
 
         // Subscribe the client to receiving web messages over websockets
-        sails.sockets.join(this.req, 'messages-website') // Public website messages
+        sails.sockets.join(this.req, `messages-website`) // Public website messages
         sails.sockets.join(this.req, `messages-website-${host}`) // Private website messages
         sails.log.verbose(`Request was a socket. Joining messages-website and messages-website-${host}.`)
       }

@@ -7,38 +7,38 @@
 
 module.exports = {
   // We do not want this data to be persistent as it is being grabbed from Google Calendar
-  datastore: 'timesheets',
+  datastore: `timesheets`,
   attributes: {
 
     ID: {
-      type: 'number',
+      type: `number`,
       autoIncrement: true
     },
 
     unique: {
-      type: 'string'
+      type: `string`
     },
 
     active: {
-      type: 'number',
+      type: `number`,
       min: -1,
       max: 2,
       defaultsTo: 1
     },
 
     director: {
-      type: 'string',
-      defaultsTo: 'Unknown Director'
+      type: `string`,
+      defaultsTo: `Unknown Director`
     },
 
     start: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     end: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     }
   },
 
@@ -50,21 +50,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`directorhours socket: ${data}`)
-    sails.sockets.broadcast('directorhours', 'directorhours', data)
+    sails.sockets.broadcast(`directorhours`, `directorhours`, data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`directorhours socket: ${data}`)
-    sails.sockets.broadcast('directorhours', 'directorhours', data)
+    sails.sockets.broadcast(`directorhours`, `directorhours`, data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`directorhours socket: ${data}`)
-    sails.sockets.broadcast('directorhours', 'directorhours', data)
+    sails.sockets.broadcast(`directorhours`, `directorhours`, data)
     return proceed()
   }
 }

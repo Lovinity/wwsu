@@ -6,38 +6,38 @@
  */
 
 module.exports = {
-  datastore: 'radiodj',
+  datastore: `radiodj`,
   attributes: {
 
     ID: {
-      type: 'number',
+      type: `number`,
       autoIncrement: true
     },
 
     songID: {
-      type: 'number'
+      type: `number`
     },
 
     username: {
-      type: 'string'
+      type: `string`
     },
 
     userIP: {
-      type: 'string',
+      type: `string`,
       maxLength: 50
     },
 
     message: {
-      type: 'string'
+      type: `string`
     },
 
     requested: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     played: {
-      type: 'number',
+      type: `number`,
       min: 0,
       max: 1
     }
@@ -50,16 +50,16 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`requests socket: ${data}`)
-    data.insert.trackname = 'Unknown track'
+    data.insert.trackname = `Unknown track`
     Songs.findOne({ ID: newlyCreatedRecord.songID })
       .then((record2) => {
         sails.log.silly(`Song: ${record2}`)
         if (record2) { data.insert.trackname = `${record2.artist} - ${record2.title}` }
-        sails.sockets.broadcast('requests', 'requests', data)
+        sails.sockets.broadcast(`requests`, `requests`, data)
         return proceed()
       })
       .catch(() => {
-        sails.sockets.broadcast('requests', 'requests', data)
+        sails.sockets.broadcast(`requests`, `requests`, data)
         return proceed()
       })
   },
@@ -71,21 +71,21 @@ module.exports = {
     if (updatedRecord.played === 1) {
       data = { remove: updatedRecord.ID }
       sails.log.silly(`requests socket: ${data}`)
-      sails.sockets.broadcast('requests', 'requests', data)
+      sails.sockets.broadcast(`requests`, `requests`, data)
       return proceed()
     } else {
-      data.update.trackname = 'Unknown track'
+      data.update.trackname = `Unknown track`
       Songs.findOne({ ID: updatedRecord.songID })
         .then((record2) => {
           sails.log.silly(`Song: ${record2}`)
           if (record2) { data.update.trackname = `${record2.artist} - ${record2.title}` }
           sails.log.silly(`requests socket: ${data}`)
-          sails.sockets.broadcast('requests', 'requests', data)
+          sails.sockets.broadcast(`requests`, `requests`, data)
           return proceed()
         })
         .catch(() => {
           sails.log.silly(`requests socket: ${data}`)
-          sails.sockets.broadcast('requests', 'requests', data)
+          sails.sockets.broadcast(`requests`, `requests`, data)
           return proceed()
         })
     }
@@ -94,7 +94,7 @@ module.exports = {
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`requests socket: ${data}`)
-    sails.sockets.broadcast('requests', 'requests', data)
+    sails.sockets.broadcast(`requests`, `requests`, data)
     return proceed()
   }
 

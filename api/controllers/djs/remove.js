@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'djs / remove',
+  friendlyName: `djs / remove`,
 
-  description: 'Remove a DJ from the system.',
+  description: `Remove a DJ from the system.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true,
-      description: 'The DJ ID to remove.'
+      description: `The DJ ID to remove.`
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller djs/remove called.')
+    sails.log.debug(`Controller djs/remove called.`)
 
     try {
       // Update all attendance records to null DJ
@@ -33,7 +33,7 @@ module.exports = {
       await sails.models.djs.destroy({ ID: inputs.ID }).fetch()
 
       // Edit meta if necessary
-      if (sails.models.meta['A'].dj === inputs.ID) { sails.models.meta.changeMeta({ dj: null }) }
+      if (sails.models.meta[`A`].dj === inputs.ID) { sails.models.meta.changeMeta({ dj: null }) }
 
       return exits.success()
     } catch (e) {

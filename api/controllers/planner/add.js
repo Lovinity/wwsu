@@ -1,26 +1,26 @@
 module.exports = {
 
-  friendlyName: 'Planner / add',
+  friendlyName: `Planner / add`,
 
-  description: 'Add a proposed show into the planner system.',
+  description: `Add a proposed show into the planner system.`,
 
   inputs: {
     dj: {
-      type: 'string',
+      type: `string`,
       required: true
     },
     show: {
-      type: 'string',
+      type: `string`,
       required: true
     },
     priority: {
-      type: 'number',
+      type: `number`,
       required: true,
       min: 0,
       max: 1000
     },
     proposal: {
-      type: 'json',
+      type: `json`,
       required: true,
       custom: (value) => {
         if (!_.isArray(value)) { return false }
@@ -30,12 +30,12 @@ module.exports = {
         value.map((val) => {
           if (!valid) { return null }
 
-          if (typeof val !== 'object') {
+          if (typeof val !== `object`) {
             valid = false
             return null
           }
 
-          if (typeof val.start === 'undefined' || typeof val.end === 'undefined') {
+          if (typeof val.start === `undefined` || typeof val.end === `undefined`) {
             valid = false
             return null
           }
@@ -51,7 +51,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller planner/add called.')
+    sails.log.debug(`Controller planner/add called.`)
 
     try {
       await sails.models.planner.create({ dj: inputs.dj, show: inputs.show, priority: inputs.priority, proposal: inputs.proposal }).fetch()

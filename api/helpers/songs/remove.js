@@ -1,40 +1,40 @@
 module.exports = {
 
-  friendlyName: 'songs.remove',
+  friendlyName: `songs.remove`,
 
-  description: 'Remove tracks from the automation queue that fall (or do not fall) in the specified subcategories.',
+  description: `Remove tracks from the automation queue that fall (or do not fall) in the specified subcategories.`,
 
   inputs: {
     exclusive: {
-      type: 'boolean',
+      type: `boolean`,
       required: true,
-      description: 'If false, tracks in the specified subcategories will be removed. If true, tracks NOT in the specified subcategories will be removed.'
+      description: `If false, tracks in the specified subcategories will be removed. If true, tracks NOT in the specified subcategories will be removed.`
     },
     subcategories: {
-      type: 'ref',
+      type: `ref`,
       required: true,
-      description: 'An array of subcategory IDs.'
+      description: `An array of subcategory IDs.`
     },
     keepRequests: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false,
-      description: 'If true, we will not delete any tracks that are in the queue that were requested.'
+      description: `If true, we will not delete any tracks that are in the queue that were requested.`
     },
     noRequeue: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false,
-      description: 'If false, system will clear the entire queue and re-queue tracks that meet criteria. If true, system will remove tracks that fail specified criteria one by one instead of clearing the entire queue and re-queuing appropriate tracks.'
+      description: `If false, system will clear the entire queue and re-queue tracks that meet criteria. If true, system will remove tracks that fail specified criteria one by one instead of clearing the entire queue and re-queuing appropriate tracks.`
     },
     includeCurrentTrack: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false,
-      description: 'DEPRECATED'
+      description: `DEPRECATED`
     }
   },
 
   fn: async function (inputs, exits) {
     // API NOTE: This should never throw an error unless we have to stop all execution.
-    sails.log.debug('Helper songs.remove called.')
+    sails.log.debug(`Helper songs.remove called.`)
 
     try {
       // Get rid of all the null entries
@@ -50,14 +50,14 @@ module.exports = {
       // If we want to clear and requeue with the new track list rather than removing matched tracks one by one
       if (!inputs.noRequeue) {
         // Remove the entire queue.
-        await sails.helpers.rest.cmd('ClearPlaylist')
+        await sails.helpers.rest.cmd(`ClearPlaylist`)
 
         // Remove applicable items from our queue snapshot
         for (var i = queue.length - 1; i >= 0; i -= 1) {
           if (parseInt(queue[i].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) !== -1))) {
             // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
             if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[i].ID)) === -1) {
-              sails.log.verbose('REMOVING')
+              sails.log.verbose(`REMOVING`)
               queue.splice(i, 1)
             }
           }
@@ -67,7 +67,7 @@ module.exports = {
         if (queue.length > 0) {
           // LINT: await necessary for Sails.js
           // eslint-disable-next-line no-return-await
-          var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToBottom', track.ID))
+          var maps = queue.map(async track => await sails.helpers.rest.cmd(`LoadTrackToBottom`, track.ID))
           await Promise.all(maps)
         }
 
@@ -77,8 +77,8 @@ module.exports = {
           if (parseInt(queue[i2].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) !== -1))) {
             // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
             if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[i2].ID)) === -1) {
-              sails.log.verbose('REMOVING')
-              await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1)
+              sails.log.verbose(`REMOVING`)
+              await sails.helpers.rest.cmd(`RemovePlaylistTrack`, i2 - 1)
             }
           }
         }

@@ -1,22 +1,22 @@
 module.exports = {
 
-  friendlyName: 'difference',
+  friendlyName: `difference`,
 
-  description: 'Determine the differences between two objects.',
+  description: `Determine the differences between two objects.`,
 
   inputs: {
     o1: {
       required: true,
-      type: 'json'
+      type: `json`
     },
     o2: {
       required: true,
-      type: 'json'
+      type: `json`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper difference called.')
+    sails.log.debug(`Helper difference called.`)
 
     // Determine the differences between two objects
     var o1 = inputs.o1
@@ -25,7 +25,7 @@ module.exports = {
     var diff = {}
     for (k in o1) {
       if (!Object.prototype.hasOwnProperty.call(o1, k)) {
-      } else if (typeof o1[k] !== 'object' || typeof o2[k] !== 'object') {
+      } else if (typeof o1[k] !== `object` || typeof o2[k] !== `object`) {
         if (!(k in o2) || o1[k] !== o2[k]) {
           diff[k] = o2[k]
         }

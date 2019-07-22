@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'planner / remove-all',
+  friendlyName: `planner / remove-all`,
 
-  description: 'Remove all records from the schedule planner.',
+  description: `Remove all records from the schedule planner.`,
 
   inputs: {
   },
@@ -12,7 +12,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller planner/remove-all called.')
+    sails.log.debug(`Controller planner/remove-all called.`)
 
     try {
       await sails.models.planner.destroy({}).fetch()

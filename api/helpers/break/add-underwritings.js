@@ -1,22 +1,22 @@
-var later = require('later')
+var later = require(`later`)
 later.date.localTime()
 
 module.exports = {
 
-  friendlyName: 'break.addUnderwritings',
+  friendlyName: `break.addUnderwritings`,
 
-  description: 'Queue up any underwritings that need to be played.',
+  description: `Queue up any underwritings that need to be played.`,
 
   inputs: {
     fastForwardOnly: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false,
-      description: 'If true, we will only queue underwritings that are way behind schedule.'
+      description: `If true, we will only queue underwritings that are way behind schedule.`
     },
     quantity: {
-      type: 'number',
+      type: `number`,
       defaultsTo: 2,
-      description: 'Maximum number of underwritings to queue. Rule may be ignored if there are more than quantity number of underwritings way behind schedule.'
+      description: `Maximum number of underwritings to queue. Rule may be ignored if there are more than quantity number of underwritings way behind schedule.`
     }
   },
 
@@ -24,7 +24,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper break.addUnderwritings called.')
+    sails.log.debug(`Helper break.addUnderwritings called.`)
 
     try {
       // Initialize variables for storing issues encountered with the underwritings
@@ -37,7 +37,7 @@ module.exports = {
         if (Object.prototype.hasOwnProperty.call(sails.config.custom.breaks, minute)) {
           if (sails.config.custom.breaks[minute].length > 0) {
             sails.config.custom.breaks[minute].map((task) => {
-              if (task.task === 'queueUnderwritings' && task.quantity > 0) { x++ }
+              if (task.task === `queueUnderwritings` && task.quantity > 0) { x++ }
             })
           }
         }
@@ -45,19 +45,19 @@ module.exports = {
 
       // If there are no queueUnderwritings breaks, this is an error! Bail.
       if (x === 0) {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: 'sails.models.underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration.', status: 2 }])
+        await sails.models.status.changeStatus([{ name: `underwritings`, label: `Underwritings`, data: `sails.models.underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration.`, status: 2 }])
         return exits.success()
       }
 
       // Load all underwritings from memory
       var underwritings = await sails.models.underwritings.find()
-      sails.log.debug('Fetched underwritings.')
+      sails.log.debug(`Fetched underwritings.`)
       if (underwritings.length > 0) {
-        sails.log.debug('Received more than 0 underwritings.')
+        sails.log.debug(`Received more than 0 underwritings.`)
         var toQueue = []
 
         // Calculate online listener time statistics
-        var records = await sails.models.attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, createdAt: { '>=': moment().subtract(7, 'days').toISOString(true) } })
+        var records = await sails.models.attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, createdAt: { '>=': moment().subtract(7, `days`).toISOString(true) } })
         var peak = 0
         var showTime = 0
         var listenerMinutes = 0
@@ -79,7 +79,7 @@ module.exports = {
         // Set up other variables that do not need re-loading on each underwriting check
 
         // For "now", add 10 minutes because top of the hour ID breaks may queue up to 10 minutes early.
-        var now = moment().add(10, 'minutes').toISOString(true)
+        var now = moment().add(10, `minutes`).toISOString(true)
 
         sails.log.debug(`Now time: ${now}`)
 
@@ -94,12 +94,12 @@ module.exports = {
             sails.log.debug(`Underwriting ${underwriting.ID}: Found song.`)
 
             // Ignore this underwriting if the associated track is expired or disabled
-            if (song.enabled === 1 && moment(song.start_date).isSameOrBefore(moment()) && (moment(song.end_date).isSameOrBefore(moment('2002-01-02 00:00:02')) || moment().isBefore(moment(song.end_date))) && (song.play_limit === 0 || song.count_played < song.play_limit)) {
+            if (song.enabled === 1 && moment(song.start_date).isSameOrBefore(moment()) && (moment(song.end_date).isSameOrBefore(moment(`2002-01-02 00:00:02`)) || moment().isBefore(moment(song.end_date))) && (song.play_limit === 0 || song.count_played < song.play_limit)) {
               sails.log.debug(`Underwriting ${underwriting.ID}: Track enabled.`)
 
               // The "minute" portion of every underwriting schedule should correspond with the clockwheel breaks
               underwriting.mode.schedule.schedules.map((schedule, index) => {
-                if (typeof underwriting.mode.schedule.schedules[index].m === 'undefined') { underwriting.mode.schedule.schedules[index].m = [] }
+                if (typeof underwriting.mode.schedule.schedules[index].m === `undefined`) { underwriting.mode.schedule.schedules[index].m = [] }
                 for (var minute in sails.config.custom.breaks) {
                   if (Object.prototype.hasOwnProperty.call(sails.config.custom.breaks, minute)) {
                     underwriting.mode.schedule.schedules[index].m.push(minute)
@@ -113,7 +113,7 @@ module.exports = {
               })
 
               // Skip this underwriting if it contains any show filters, and none of them are on the air right now.
-              if (typeof underwriting.mode.show === 'undefined' || underwriting.mode.show.length === 0 || underwriting.mode.show.indexOf(sails.models.meta['A'].show) !== -1) {
+              if (typeof underwriting.mode.show === `undefined` || underwriting.mode.show.length === 0 || underwriting.mode.show.indexOf(sails.models.meta[`A`].show) !== -1) {
                 // Determine the next date/time this underwriting is allowed to queue.
                 var schedule = later.schedule(underwriting.mode.schedule)
                 var start = moment(song.date_played).toISOString(false)
@@ -131,8 +131,8 @@ module.exports = {
                 var nextF
 
                 // If end date and spin counts are set, use advanced algorithms to ensure all airs complete on time.
-                if (moment(song.end_date).isAfter(moment('2002-01-01 00:00:01')) && song.play_limit > 0) {
-                  var y1 = moment(song.start_date).isAfter(moment('2002-01-01 00:00:01')) ? song.start_date : underwriting.createdAt
+                if (moment(song.end_date).isAfter(moment(`2002-01-01 00:00:01`)) && song.play_limit > 0) {
+                  var y1 = moment(song.start_date).isAfter(moment(`2002-01-01 00:00:01`)) ? song.start_date : underwriting.createdAt
                   var y2 = moment(song.end_date).diff(moment(y1))
                   var y = (y2 / 1000 / 60 / 60) * x
                   var z1 = moment(song.end_date).diff(moment())
@@ -213,19 +213,19 @@ module.exports = {
                         var dws = 0
                         var hs = 0
                         var ms = 0
-                        if (typeof schedule.dw === 'undefined' || schedule.dw.length === 0) {
+                        if (typeof schedule.dw === `undefined` || schedule.dw.length === 0) {
                           dws = 7
                         } else {
                           dws = schedule.dw.length
                         }
 
-                        if (typeof schedule.h === 'undefined' || schedule.h.length === 0) {
+                        if (typeof schedule.h === `undefined` || schedule.h.length === 0) {
                           hs = 24
                         } else {
                           hs = schedule.h.length
                         }
 
-                        if (typeof schedule.m === 'undefined' || schedule.m.length === 0) {
+                        if (typeof schedule.m === `undefined` || schedule.m.length === 0) {
                           ms = x
                         } else {
                           ms = schedule.m.length
@@ -241,13 +241,13 @@ module.exports = {
                     total = total / 7
 
                     // Use a different algorithm if show filters are specified; based off of an average show length of 2 hours.
-                    if (typeof underwriting.mode.show !== 'undefined' && underwriting.mode.show.length > 0) {
+                    if (typeof underwriting.mode.show !== `undefined` && underwriting.mode.show.length > 0) {
                       total = (x * 2) * underwriting.mode.show.length
                     }
 
                     sails.log.debug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`)
 
-                    var v = moment(song.end_date).isAfter(moment('2002-01-01 00:00:01'))
+                    var v = moment(song.end_date).isAfter(moment(`2002-01-01 00:00:01`))
 
                     // Initial chance: 2x % of breaks in a day (4x if end date is set) for one break.
                     // We want to average 2 airs per day, 4 if end date is set, for tracks with no spin limit.
@@ -282,7 +282,7 @@ module.exports = {
                   }
                 }
               }
-            } else if (moment(song.end_date).isAfter(moment('2002-01-02 00:00:01')) && moment().isSameOrAfter(moment(song.end_date)) && song.play_limit > 0 && song.count_played < song.play_limit) {
+            } else if (moment(song.end_date).isAfter(moment(`2002-01-02 00:00:01`)) && moment().isSameOrAfter(moment(song.end_date)) && song.play_limit > 0 && song.count_played < song.play_limit) {
               veryBad.push(`The underwriting "${underwriting.name}" expired, but did not meet the required spin counts (this alert will go away on the next break after removing the underwriting).`)
               sails.log.debug(`Underwriting ${underwriting.ID}: Track disabled / expired and failed spin counts.`)
             } else {
@@ -296,7 +296,7 @@ module.exports = {
 
         await Promise.all(maps)
 
-        sails.log.debug('Finished all underwritings.')
+        sails.log.debug(`Finished all underwritings.`)
 
         // Sort toQueue by priority
         var compare = (a, b) => {
@@ -315,28 +315,28 @@ module.exports = {
               sails.log.debug(`Track ${item.ID} is to be queued.`)
               queueLeft--;
               (async (item2) => {
-                await sails.helpers.rest.cmd('LoadTrackToTop', item2.ID)
+                await sails.helpers.rest.cmd(`LoadTrackToTop`, item2.ID)
               })(item)
             }
           })
       }
 
-      sails.log.debug('Changing statuses.')
+      sails.log.debug(`Changing statuses.`)
 
       // Change underwriting statuses
       if (veryBad.length > 0) {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: veryBad.join(' ') + ' ' + bad.join(' '), status: 2 }])
+        await sails.models.status.changeStatus([{ name: `underwritings`, label: `sails.models.underwritings`, data: veryBad.join(` `) + ` ` + bad.join(` `), status: 2 }])
       } else if (bad.length > 0) {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: bad.join(' '), status: 3 }])
+        await sails.models.status.changeStatus([{ name: `underwritings`, label: `sails.models.underwritings`, data: bad.join(` `), status: 3 }])
       } else {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: 'No underwritings are significantly behind schedule.', status: 5 }])
+        await sails.models.status.changeStatus([{ name: `underwritings`, label: `sails.models.underwritings`, data: `No underwritings are significantly behind schedule.`, status: 5 }])
       }
 
-      sails.log.debug('Finished.')
+      sails.log.debug(`Finished.`)
 
       return exits.success()
     } catch (e) {
-      await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: 'Internal Error with the underwritings system.', status: 2 }])
+      await sails.models.status.changeStatus([{ name: `underwritings`, label: `sails.models.underwritings`, data: `Internal Error with the underwritings system.`, status: 2 }])
       return exits.error(e)
     }
   }

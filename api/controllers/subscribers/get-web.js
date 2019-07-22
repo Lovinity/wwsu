@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'subscribers / Get-web',
+  friendlyName: `subscribers / Get-web`,
 
-  description: 'Retrieve an array of the active push notification subscriptions for the specified device.',
+  description: `Retrieve an array of the active push notification subscriptions for the specified device.`,
 
   inputs: {
     device: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'The OneSignal ID of the device to get subscriptions for.'
+      description: `The OneSignal ID of the device to get subscriptions for.`
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller subscribers/get-web called.')
+    sails.log.debug(`Controller subscribers/get-web called.`)
 
     try {
       // Get subscriptions from this host

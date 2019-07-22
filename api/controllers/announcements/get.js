@@ -1,29 +1,29 @@
 module.exports = {
 
-  friendlyName: 'sails.models.announcements / Get',
+  friendlyName: `sails.models.announcements / Get`,
 
-  description: 'Get announcements for the specified type. Subscribe to receive websockets for announcements event.',
+  description: `Get announcements for the specified type. Subscribe to receive websockets for announcements event.`,
 
   inputs: {
     type: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'Return announcements of the specified type; ensure websockets only include announcements of this type. Use "all" to return all announcements, but do not subscribe to a websocket.'
+      description: `Return announcements of the specified type; ensure websockets only include announcements of this type. Use "all" to return all announcements, but do not subscribe to a websocket.`
     },
     ID: {
-      type: 'number',
+      type: `number`,
       allowNull: true,
-      description: 'If provided, will only return the announcement matching this ID. If provided, type is ignored (but still required, so use all), and websockets is not subscribed.'
+      description: `If provided, will only return the announcement matching this ID. If provided, type is ignored (but still required, so use all), and websockets is not subscribed.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller announcements/get called.')
+    sails.log.debug(`Controller announcements/get called.`)
 
     try {
       // Determine which announcements to return based on type or ID; do not subscribe to websockets for "all" type
       var records
-      if (inputs.type !== 'all' && (!inputs.ID || inputs.ID === null)) {
+      if (inputs.type !== `all` && (!inputs.ID || inputs.ID === null)) {
         records = await sails.models.announcements.find({ type: inputs.type })
       } else if (!inputs.ID || inputs.ID === null) {
         records = await sails.models.announcements.find()

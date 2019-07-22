@@ -1,27 +1,27 @@
 module.exports = {
 
-  friendlyName: 'sails.helpers.pickRandom',
+  friendlyName: `sails.helpers.pickRandom`,
 
-  description: 'Pick a random item from an array. Returns an object {item: itempicked, newArray: [array]}.',
+  description: `Pick a random item from an array. Returns an object {item: itempicked, newArray: [array]}.`,
 
   inputs: {
     items: {
-      type: 'ref',
+      type: `ref`,
       required: true,
-      description: 'The array to pick something random from.'
+      description: `The array to pick something random from.`
     },
     remove: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false,
-      description: 'If true, the chosen item from the array will be deleted from the return of newArray.'
+      description: `If true, the chosen item from the array will be deleted from the return of newArray.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper pickRandom called.')
+    sails.log.debug(`Helper pickRandom called.`)
     try {
       // Exit with null item and empty newArray if there was nothing in the input array.
-      if (typeof inputs.items.length === 'undefined' || inputs.items.length <= 0) { return exits.success({ item: null, newArray: [] }) }
+      if (typeof inputs.items.length === `undefined` || inputs.items.length <= 0) { return exits.success({ item: null, newArray: [] }) }
 
       // Choose a random item
       var random = Math.floor(Math.random() * (inputs.items.length || 0))

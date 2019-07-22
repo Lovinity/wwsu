@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'test / add-underwritings',
+  friendlyName: `test / add-underwritings`,
 
-  description: 'test / add-underwritings test.',
+  description: `test / add-underwritings test.`,
 
   inputs: {
 

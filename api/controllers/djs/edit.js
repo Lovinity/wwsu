@@ -1,25 +1,25 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require(`bcrypt`)
 module.exports = {
 
-  friendlyName: 'djs / edit',
+  friendlyName: `djs / edit`,
 
-  description: 'Change the name or login of a DJ. If a DJ with the same name already exists, the two DJs will be merged.',
+  description: `Change the name or login of a DJ. If a DJ with the same name already exists, the two DJs will be merged.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true,
-      description: 'The ID of the dj to edit.'
+      description: `The ID of the dj to edit.`
     },
     name: {
-      type: 'string',
+      type: `string`,
       allowNull: true,
-      description: 'The new name for the DJ.'
+      description: `The new name for the DJ.`
     },
     login: {
-      type: 'string',
+      type: `string`,
       allowNull: true,
-      description: 'The new login for the DJ.'
+      description: `The new login for the DJ.`
     }
   },
 
@@ -28,12 +28,12 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller djs/edit called.')
+    sails.log.debug(`Controller djs/edit called.`)
 
     try {
       // Determine what needs updating
       var criteria = {}
-      if (inputs.name !== null && typeof inputs.name !== 'undefined') {
+      if (inputs.name !== null && typeof inputs.name !== `undefined`) {
         criteria.name = inputs.name
 
         // Merge other DJ entries with the same name with this one
@@ -53,14 +53,14 @@ module.exports = {
             await sails.models.djs.destroy({ ID: record.ID }).fetch()
 
             // Edit meta if necessary
-            if (sails.models.meta['A'].dj === record.ID) { sails.models.meta.changeMeta({ dj: inputs.ID }) }
+            if (sails.models.meta[`A`].dj === record.ID) { sails.models.meta.changeMeta({ dj: inputs.ID }) }
           })
           await Promise.all(maps)
         }
       }
 
       // Encrypt login
-      if (inputs.login !== null && typeof inputs.login !== 'undefined') { criteria.login = bcrypt.hashSync(inputs.login, 10) }
+      if (inputs.login !== null && typeof inputs.login !== `undefined`) { criteria.login = bcrypt.hashSync(inputs.login, 10) }
 
       // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
       var criteriaB = _.cloneDeep(criteria)

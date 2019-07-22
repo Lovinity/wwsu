@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'config / get',
+  friendlyName: `config / get`,
 
-  description: 'Retrieve the current configuration. Also subscribe to receive changes via the config websocket.',
+  description: `Retrieve the current configuration. Also subscribe to receive changes via the config websocket.`,
 
   inputs: {
 
@@ -13,13 +13,13 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller config/get called.')
+    sails.log.debug(`Controller config/get called.`)
 
     try {
       // Subscribe to websockets if applicable
       if (this.req.isSocket) {
-        sails.sockets.join(this.req, 'config')
-        sails.log.verbose('Request was a socket. Joined config.')
+        sails.sockets.join(this.req, `config`)
+        sails.log.verbose(`Request was a socket. Joined config.`)
       }
 
       var returnData = _.cloneDeep(sails.config.custom)

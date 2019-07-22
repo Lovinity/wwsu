@@ -6,43 +6,43 @@
  */
 
 module.exports = {
-  datastore: 'radiodj',
+  datastore: `radiodj`,
   attributes: {
     ID: {
-      type: 'number',
+      type: `number`,
       autoIncrement: true
     },
     type: {
-      type: 'number'
+      type: `number`
     },
     time: {
-      type: 'string'
+      type: `string`
     },
     name: {
-      type: 'string'
+      type: `string`
     },
     date: {
-      type: 'ref',
-      columnType: 'date'
+      type: `ref`,
+      columnType: `date`
     },
     day: {
-      type: 'string'
+      type: `string`
     },
     hours: {
-      type: 'string'
+      type: `string`
     },
     data: {
-      type: 'string'
+      type: `string`
     },
     enabled: {
-      type: 'string',
-      isIn: ['True', 'False']
+      type: `string`,
+      isIn: [`True`, `False`]
     },
     catID: {
-      type: 'number'
+      type: `number`
     },
     smart: {
-      type: 'number'
+      type: `number`
     }
   }
 

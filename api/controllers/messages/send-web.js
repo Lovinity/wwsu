@@ -1,25 +1,25 @@
-var sh = require('shorthash')
+var sh = require(`shorthash`)
 
 module.exports = {
 
-  friendlyName: 'Messages / Sendweb',
+  friendlyName: `Messages / Sendweb`,
 
-  description: 'Web and mobile clients use this endpoint to send messages.',
+  description: `Web and mobile clients use this endpoint to send messages.`,
 
   inputs: {
     nickname: {
-      type: 'string',
-      description: 'Nickname of the client sending the message.'
+      type: `string`,
+      description: `Nickname of the client sending the message.`
     },
 
     private: {
-      type: 'boolean',
+      type: `boolean`,
       required: true,
-      description: 'If this message is only for the DJ, then private will be true, otherwise false.'
+      description: `If this message is only for the DJ, then private will be true, otherwise false.`
     },
 
     message: {
-      type: 'string',
+      type: `string`,
       required: true
     }
   },
@@ -29,10 +29,10 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller messages/send-web called.')
+    sails.log.debug(`Controller messages/send-web called.`)
 
     // Get the client's IP address
-    var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip
+    var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers[`x-forwarded-for`] !== `undefined` ? this.req.socket.handshake.headers[`x-forwarded-for`] : this.req.socket.conn.remoteAddress) : this.req.ip
 
     // Prepare data
     var opts = { message: inputs.message, fromIP: fromIP, nickname: inputs.nickname || null, private: inputs.private }

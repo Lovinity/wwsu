@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'New attendance',
+  friendlyName: `New attendance`,
 
-  description: '',
+  description: ``,
 
   inputs: {
 
@@ -10,7 +10,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     try {
-      await sails.models.attendance.createRecord('Genre: Default')
+      await sails.models.attendance.createRecord(`Genre: Default`)
       return exits.success()
     } catch (e) {
       return exits.error(e)

@@ -1,39 +1,39 @@
 module.exports = {
 
-  friendlyName: 'attendance / get',
+  friendlyName: `attendance / get`,
 
-  description: 'Retrieve attendance records.',
+  description: `Retrieve attendance records.`,
 
   inputs: {
     date: {
-      type: 'string',
+      type: `string`,
       custom: function (value) {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: 'moment() parsable string of a date to get logs.'
+      description: `moment() parsable string of a date to get logs.`
     },
     duration: {
-      type: 'number',
+      type: `number`,
       defaultsTo: 1,
       min: 1,
       max: 14,
-      description: 'Number of days to get records for if date is provided. Defaults to 1.'
+      description: `Number of days to get records for if date is provided. Defaults to 1.`
     },
     dj: {
-      type: 'number',
+      type: `number`,
       allowNull: true,
-      description: 'Retrieve attendance records for the specified DJ. If provided, date is ignored.'
+      description: `Retrieve attendance records for the specified DJ. If provided, date is ignored.`
     },
     event: {
-      type: 'string',
+      type: `string`,
       allowNull: true,
-      description: 'Return attendance records where this string is contained within the record\'s event field. If provided, date is ignored. If DJ is provided, will further filter by the DJ.'
+      description: `Return attendance records where this string is contained within the record's event field. If provided, date is ignored. If DJ is provided, will further filter by the DJ.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller attendance/get called.')
+    sails.log.debug(`Controller attendance/get called.`)
 
     try {
       var query = {}
@@ -42,12 +42,12 @@ module.exports = {
       if ((!inputs.dj || inputs.dj === null) && (!inputs.event || inputs.event === null)) {
         // Subscribe to sockets if applicable
         if (this.req.isSocket) {
-          sails.sockets.join(this.req, 'attendance')
-          sails.log.verbose('Request was a socket. Joining attendance.')
+          sails.sockets.join(this.req, `attendance`)
+          sails.log.verbose(`Request was a socket. Joining attendance.`)
         }
 
-        var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day')
-        var end = moment(start).add(inputs.duration, 'days')
+        var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf(`day`) : moment().startOf(`day`)
+        var end = moment(start).add(inputs.duration, `days`)
         query = { or: [{ scheduledStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } }, { actualStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } }] }
       } else {
         if (inputs.dj && inputs.dj !== null) {

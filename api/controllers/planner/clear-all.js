@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'planner / clear-all',
+  friendlyName: `planner / clear-all`,
 
-  description: 'Remove all actual timeslots all planner records.',
+  description: `Remove all actual timeslots all planner records.`,
 
   inputs: {
   },
@@ -12,7 +12,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller planner/clear-all called.')
+    sails.log.debug(`Controller planner/clear-all called.`)
 
     try {
       await sails.models.planner.update({}, { actual: {} }).fetch()

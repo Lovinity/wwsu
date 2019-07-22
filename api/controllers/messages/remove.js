@@ -1,18 +1,18 @@
 module.exports = {
 
-  friendlyName: 'Messages / Remove',
+  friendlyName: `Messages / Remove`,
 
-  description: 'Delete a message by ID.',
+  description: `Delete a message by ID.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller messages/remove called.')
+    sails.log.debug(`Controller messages/remove called.`)
 
     try {
       // Remove the message

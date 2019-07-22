@@ -1,20 +1,20 @@
 module.exports = {
 
-  friendlyName: 'Update',
+  friendlyName: `Update`,
 
-  description: 'Update sports.',
+  description: `Update sports.`,
 
   inputs: {
     name: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'the name of the sports variable / data to change.'
+      description: `the name of the sports variable / data to change.`
     },
 
     value: {
-      type: 'string',
+      type: `string`,
       allowNull: true,
-      description: 'the new value for the data variable.'
+      description: `the new value for the data variable.`
     }
   },
 

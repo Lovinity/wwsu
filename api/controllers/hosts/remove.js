@@ -1,16 +1,16 @@
-var sh = require('shorthash')
+var sh = require(`shorthash`)
 
 module.exports = {
 
-  friendlyName: 'hosts / remove',
+  friendlyName: `hosts / remove`,
 
-  description: 'Remove a host from the database.',
+  description: `Remove a host from the database.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true,
-      description: 'The ID of the director to edit.'
+      description: `The ID of the director to edit.`
     }
   },
 
@@ -21,7 +21,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller hosts/remove called.')
+    sails.log.debug(`Controller hosts/remove called.`)
 
     try {
       // First, determine if we need to lock out of editing authorized and admin
@@ -30,7 +30,7 @@ module.exports = {
       var toDestroy = await sails.models.hosts.find({ ID: inputs.ID })
 
       // Block requests to remove this host if there are 1 or less authorized admin hosts and this host is an authorized admin.
-      if (lockout <= 1 && toDestroy.authorized && toDestroy.admin) { return exits.conflict('To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing this host.') }
+      if (lockout <= 1 && toDestroy.authorized && toDestroy.admin) { return exits.conflict(`To prevent accidental lockout, this request was denied because there are 1 or less authorized admin hosts. Make another host an authorized admin first before removing this host.`) }
 
       // Destroy it
       var hostRecord = await sails.models.hosts.destroyOne({ ID: inputs.ID })

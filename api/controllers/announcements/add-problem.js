@@ -1,23 +1,23 @@
 module.exports = {
 
-  friendlyName: 'Announcements / Add-problem',
+  friendlyName: `Announcements / Add-problem`,
 
-  description: 'Report a problem with WWSU.',
+  description: `Report a problem with WWSU.`,
 
   inputs: {
     information: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'Information about the problem.'
+      description: `Information about the problem.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller announcements/add-problem called.')
+    sails.log.debug(`Controller announcements/add-problem called.`)
 
     try {
       // Add the reported issue to the database
-      await sails.models.announcements.create({ type: 'djcontrols', level: 'danger', title: 'Reported Problem', announcement: inputs.information, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) }).fetch()
+      await sails.models.announcements.create({ type: `djcontrols`, level: `danger`, title: `Reported Problem`, announcement: inputs.information, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) }).fetch()
 
       return exits.success()
     } catch (e) {

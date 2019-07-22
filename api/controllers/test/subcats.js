@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'Subcats',
+  friendlyName: `Subcats`,
 
-  description: 'Subcats test.',
+  description: `Subcats test.`,
 
   inputs: {
 

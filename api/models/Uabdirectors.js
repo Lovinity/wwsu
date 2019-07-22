@@ -7,47 +7,47 @@
 
 module.exports = {
   // This model is only a container for temporary data. It should not persist. Use memory instead of SQL.
-  datastore: 'timesheets',
+  datastore: `timesheets`,
   attributes: {
     ID: {
-      type: 'number',
+      type: `number`,
       autoIncrement: true
     },
 
     name: {
-      type: 'string',
+      type: `string`,
       required: true,
       unique: true
     },
 
     login: {
-      type: 'string',
+      type: `string`,
       required: true
     },
 
     admin: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false
     },
 
     avatar: { // HTML path relative to assets/images/avatars/
-      type: 'string',
+      type: `string`,
       allowNull: true
     },
 
     position: {
-      type: 'string',
-      defaultsTo: 'Unknown'
+      type: `string`,
+      defaultsTo: `Unknown`
     },
 
     present: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false
     },
 
     since: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     }
   },
 
@@ -56,23 +56,23 @@ module.exports = {
      */
   updateDirectors: function () {
     return new Promise(async (resolve) => {
-      sails.log.debug('updateDirectors called.')
+      sails.log.debug(`updateDirectors called.`)
       var names = {}
 
       // Determine presence by analyzing timesheet records up to 14 days ago
       var records = await Uabtimesheet.find({
         where: {
           or: [
-            { time_out: { '>=': moment().subtract(14, 'days').toDate() } },
+            { time_out: { '>=': moment().subtract(14, `days`).toDate() } },
             { time_out: null }
           ]
         },
-        sort: 'time_in DESC' })
+        sort: `time_in DESC` })
       if (records.length > 0) {
         // Update present and since entries in the Directors database
         var maps = records
           .map(async record => {
-            if (typeof names[record.name] !== 'undefined') { return false }
+            if (typeof names[record.name] !== `undefined`) { return false }
 
             names[record.name] = true
             // If there's an entry with a null time_out, then consider the director clocked in
@@ -100,7 +100,7 @@ module.exports = {
     delete newlyCreatedRecord.login
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`uabdirectors socket: ${data}`)
-    sails.sockets.broadcast('uabdirectors', 'uabdirectors', data)
+    sails.sockets.broadcast(`uabdirectors`, `uabdirectors`, data)
     return proceed()
   },
 
@@ -108,14 +108,14 @@ module.exports = {
     delete updatedRecord.login
     var data = { update: updatedRecord }
     sails.log.silly(`uabdirectors socket: ${data}`)
-    sails.sockets.broadcast('uabdirectors', 'uabdirectors', data)
+    sails.sockets.broadcast(`uabdirectors`, `uabdirectors`, data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`uabdirectors socket: ${data}`)
-    sails.sockets.broadcast('uabdirectors', 'uabdirectors', data)
+    sails.sockets.broadcast(`uabdirectors`, `uabdirectors`, data)
     return proceed()
   }
 }

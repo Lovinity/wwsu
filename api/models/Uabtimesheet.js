@@ -6,30 +6,30 @@
  */
 
 module.exports = {
-  datastore: 'timesheets',
+  datastore: `timesheets`,
   attributes: {
     ID: {
-      type: 'number',
+      type: `number`,
       autoIncrement: true
     },
 
     name: {
-      type: 'string',
+      type: `string`,
       required: true
     },
 
     time_in: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     time_out: {
-      type: 'ref',
-      columnType: 'datetime'
+      type: `ref`,
+      columnType: `datetime`
     },
 
     approved: {
-      type: 'boolean',
+      type: `boolean`,
       defaultsTo: false
     }
   },
@@ -38,21 +38,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`uabtimesheet socket: ${data}`)
-    sails.sockets.broadcast('uabtimesheet', 'uabtimesheet', data)
+    sails.sockets.broadcast(`uabtimesheet`, `uabtimesheet`, data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`uabtimesheet socket: ${data}`)
-    sails.sockets.broadcast('uabtimesheet', 'uabtimesheet', data)
+    sails.sockets.broadcast(`uabtimesheet`, `uabtimesheet`, data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`uabtimesheet socket: ${data}`)
-    sails.sockets.broadcast('uabtimesheet', 'uabtimesheet', data)
+    sails.sockets.broadcast(`uabtimesheet`, `uabtimesheet`, data)
     return proceed()
   }
 

@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'Discipline / Remove',
+  friendlyName: `Discipline / Remove`,
 
-  description: 'Remove a discipline record from the system.',
+  description: `Remove a discipline record from the system.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true,
-      description: 'The ID of the discipline record to remove.'
+      description: `The ID of the discipline record to remove.`
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller discipline/remove called.')
+    sails.log.debug(`Controller discipline/remove called.`)
 
     try {
       await sails.models.discipline.destroy({ ID: inputs.ID }).fetch()

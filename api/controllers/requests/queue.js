@@ -1,19 +1,19 @@
 module.exports = {
 
-  friendlyName: 'Requests / Queue',
+  friendlyName: `Requests / Queue`,
 
-  description: 'Queue or play a request.',
+  description: `Queue or play a request.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true,
-      description: 'The Request ID number.'
+      description: `The Request ID number.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller requests/queue called.')
+    sails.log.debug(`Controller requests/queue called.`)
 
     try {
       // Queue the request

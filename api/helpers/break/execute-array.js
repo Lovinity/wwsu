@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'Execute array',
+  friendlyName: `Execute array`,
 
-  description: '',
+  description: ``,
 
   inputs: {
     array: {
-      type: 'ref',
+      type: `ref`,
       required: true,
-      description: 'An array of break task objects to execute. The order will be reversed.'
+      description: `An array of break task objects to execute. The order will be reversed.`
     }
   },
 

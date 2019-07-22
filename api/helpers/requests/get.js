@@ -1,19 +1,19 @@
 module.exports = {
 
-  friendlyName: 'requests.get',
+  friendlyName: `requests.get`,
 
-  description: 'Get all pending requests.',
+  description: `Get all pending requests.`,
 
   inputs: {
     offset: {
-      type: 'number',
+      type: `number`,
       defaultsTo: 0,
-      description: 'Start searching from this ID number.'
+      description: `Start searching from this ID number.`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper requests.get called.')
+    sails.log.debug(`Helper requests.get called.`)
 
     try {
       // Get the requested tracks that have not yet played
@@ -23,7 +23,7 @@ module.exports = {
       var thereturn = []
 
       // Return an empty array if there are no requested tracks that have not yet aired.
-      if (typeof records === 'undefined' || records.length === 0) {
+      if (typeof records === `undefined` || records.length === 0) {
         return exits.success([])
       } else {
         thereturn = []

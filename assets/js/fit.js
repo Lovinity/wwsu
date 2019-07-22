@@ -12,15 +12,15 @@ var fit = (function () {
     */
 
   var THROTTLE_DURATION = 50
-  var TRANSFORM_ORIGIN = 'TransformOrigin'
-  var TRANSFORM = 'Transform'
-  var VENDORS = 'moz ms o webkit'.split(' ')
-  var CENTER = 'center'
-  var BOTTOM = 'bottom'
-  var RIGHT = 'right'
-  var LEFT = 'left'
-  var TOP = 'top'
-  var PX = 'px'
+  var TRANSFORM_ORIGIN = `TransformOrigin`
+  var TRANSFORM = `Transform`
+  var VENDORS = `moz ms o webkit`.split(` `)
+  var CENTER = `center`
+  var BOTTOM = `bottom`
+  var RIGHT = `right`
+  var LEFT = `left`
+  var TOP = `top`
+  var PX = `px`
 
   /*
     ————————————————————————————————————————————————————————————————————————————————
@@ -63,7 +63,7 @@ var fit = (function () {
   // Returns true if an object is a number and not NaN
 
   function isNumber (value) {
-    return typeof value === 'number' && !isNaN(value)
+    return typeof value === `number` && !isNaN(value)
   }
 
   // Shortcut to get the current time
@@ -118,7 +118,7 @@ var fit = (function () {
 
   function getMatrix (el) {
     var css = getStyle(el)
-    var ctm = css[prefix(TRANSFORM)].replace(/[a-z()]/gi, '').split(',')
+    var ctm = css[prefix(TRANSFORM)].replace(/[a-z()]/gi, ``).split(`,`)
 
     if (ctm.length < 6) { return [1, 0, 0, 1, 0, 0] }
 
@@ -155,8 +155,8 @@ var fit = (function () {
 
     var fixed = map(matrix, (n) => { return n.toFixed(6) }).slice(0, 6)
 
-    element.style[prefix(TRANSFORM_ORIGIN)] = '0 0'
-    element.style[prefix(TRANSFORM)] = 'matrix(' + fixed.join(',') + ')'
+    element.style[prefix(TRANSFORM_ORIGIN)] = `0 0`
+    element.style[prefix(TRANSFORM)] = `matrix(` + fixed.join(`,`) + `)`
   }
 
   function cssPosition (transform, element) {
@@ -164,7 +164,7 @@ var fit = (function () {
     var left = parseFloat(style.left) || 0
     var top = parseFloat(style.top) || 0
 
-    if (style.position === 'static') { element.style.position = 'relative' }
+    if (style.position === `static`) { element.style.position = `relative` }
 
     element.style.left = left + transform.tx + PX
     element.style.top = top + transform.ty + PX
@@ -312,7 +312,7 @@ var fit = (function () {
     // Apply default transform
 
     if (callback) { callback(transform, target) } else if (options.apply) {
-      if (typeof (HTMLElement) !== 'undefined' && target instanceof HTMLElement) { callback = cssTransform } else { callback = rectangle }
+      if (typeof (HTMLElement) !== `undefined` && target instanceof HTMLElement) { callback = cssTransform } else { callback = rectangle }
 
       callback(transform, target)
     }
@@ -323,9 +323,9 @@ var fit = (function () {
   function main (target, container, options, callback) {
     // Parse arguments
 
-    if (!target || !container) { throw 'You must supply a target and a container' }
+    if (!target || !container) { throw `You must supply a target and a container` }
 
-    if (typeof options === 'function') {
+    if (typeof options === `function`) {
       callback = options
       options = {}
     }
@@ -343,11 +343,11 @@ var fit = (function () {
     if (options.watch) {
       if (!watching.length) {
         if (win.addEventListener) {
-          win.addEventListener('resize', onWindowResize)
-          win.addEventListener('orientationchange', onWindowResize)
+          win.addEventListener(`resize`, onWindowResize)
+          win.addEventListener(`orientationchange`, onWindowResize)
         } else {
-          win.attachEvent('onresize', onWindowResize)
-          win.attachEvent('onorientationchange', onWindowResize)
+          win.attachEvent(`onresize`, onWindowResize)
+          win.attachEvent(`onorientationchange`, onWindowResize)
         }
       }
 
@@ -407,8 +407,8 @@ var fit = (function () {
   })
 })()
 
-if (typeof exports !== 'undefined') {
-  if (typeof module !== 'undefined' && module.exports) {
+if (typeof exports !== `undefined`) {
+  if (typeof module !== `undefined` && module.exports) {
     exports = module.exports = fit
   }
   exports.fit = fit

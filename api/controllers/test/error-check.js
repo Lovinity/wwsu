@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'Error check',
+  friendlyName: `Error check`,
 
-  description: '',
+  description: ``,
 
   inputs: {
 

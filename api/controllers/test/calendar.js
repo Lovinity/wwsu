@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'Calendar',
+  friendlyName: `Calendar`,
 
-  description: 'Calendar test.',
+  description: `Calendar test.`,
 
   inputs: {
 

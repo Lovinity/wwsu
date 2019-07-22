@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'config / nws / caps / remove',
+  friendlyName: `config / nws / caps / remove`,
 
-  description: 'Stop monitoring for severe weather alerts for the specified NWS county or zone code.',
+  description: `Stop monitoring for severe weather alerts for the specified NWS county or zone code.`,
 
   inputs: {
     code: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'The county or zone code to remove from the EAS.'
+      description: `The county or zone code to remove from the EAS.`
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller config/nws/caps/remove called.')
+    sails.log.debug(`Controller config/nws/caps/remove called.`)
 
     try {
       sails.config.custom.EAS.NWSX
@@ -25,7 +25,7 @@ module.exports = {
         .map((caps, index) => delete sails.config.custom.EAS.NWSX[index])
 
       // broadcast changes over websockets
-      sails.sockets.broadcast('config', 'config', { update: { EAS: sails.config.custom.EAS } })
+      sails.sockets.broadcast(`config`, `config`, { update: { EAS: sails.config.custom.EAS } })
 
       return exits.success()
     } catch (e) {

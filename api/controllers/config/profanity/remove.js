@@ -2,15 +2,15 @@
 
 module.exports = {
 
-  friendlyName: 'config / profanity / remove',
+  friendlyName: `config / profanity / remove`,
 
-  description: 'Remove a word from the profanity filter for metadata, messages, and other text that is public.',
+  description: `Remove a word from the profanity filter for metadata, messages, and other text that is public.`,
 
   inputs: {
     word: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'The word or phrase that should no longer be filtered.'
+      description: `The word or phrase that should no longer be filtered.`
     }
   },
 
@@ -19,7 +19,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller config/profanity/remove called.')
+    sails.log.debug(`Controller config/profanity/remove called.`)
 
     try {
       sails.config.custom.profanity
@@ -27,7 +27,7 @@ module.exports = {
         .map((word, index) => delete sails.config.custom.profanity[index])
 
       // broadcast changes over websockets
-      sails.sockets.broadcast('config', 'config', { update: { profanity: sails.config.custom.profanity } })
+      sails.sockets.broadcast(`config`, `config`, { update: { profanity: sails.config.custom.profanity } })
 
       return exits.success()
     } catch (e) {

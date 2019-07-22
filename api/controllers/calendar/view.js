@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'Calendar / View',
+  friendlyName: `Calendar / View`,
 
-  description: 'Loads the HTML calendar page',
+  description: `Loads the HTML calendar page`,
 
   inputs: {
 
@@ -10,13 +10,13 @@ module.exports = {
 
   exits: {
     success: {
-      responseType: 'view',
-      viewTemplatePath: 'calendar/home'
+      responseType: `view`,
+      viewTemplatePath: `calendar/home`
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller calendar/view called.')
+    sails.log.debug(`Controller calendar/view called.`)
     return exits.success()
   }
 

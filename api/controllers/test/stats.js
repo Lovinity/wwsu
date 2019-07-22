@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'Stats',
+  friendlyName: `Stats`,
 
-  description: 'Stats test.',
+  description: `Stats test.`,
 
   inputs: {
 
@@ -10,8 +10,8 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     try {
-      var records = await sails.models.attendance.find().sort('createdAt ASC')
-      var listenerRecordsA = await sails.models.listeners.find().sort('createdAt ASC')
+      var records = await sails.models.attendance.find().sort(`createdAt ASC`)
+      var listenerRecordsA = await sails.models.listeners.find().sort(`createdAt ASC`)
       var maps = records
         .filter(record => record.actualStart !== null && record.actualEnd !== null)
         .map(async currentRecord => {
@@ -19,7 +19,7 @@ module.exports = {
           // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
           var listenerRecords = listenerRecordsA
             .filter(record2 => moment(record2.createdAt).isSameOrAfter(moment(currentRecord.actualStart)) && moment(record2.createdAt).isSameOrBefore(moment(currentRecord.actualEnd)))
-          var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort('createdAt DESC').limit(1) || 0
+          var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort(`createdAt DESC`).limit(1) || 0
           if (prevListeners[0]) { prevListeners = prevListeners[0].listeners || 0 }
 
           // Calculate listener minutes
@@ -28,14 +28,14 @@ module.exports = {
 
           if (listenerRecords && listenerRecords.length > 0) {
             listenerRecords.map(listener => {
-              listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners
+              listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), `seconds`) / 60) * prevListeners
               prevListeners = listener.listeners
               prevTime = moment(listener.createdAt)
             })
           }
 
           // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-          listenerMinutes += (moment(currentRecord.actualEnd).diff(moment(prevTime), 'seconds') / 60) * prevListeners
+          listenerMinutes += (moment(currentRecord.actualEnd).diff(moment(prevTime), `seconds`) / 60) * prevListeners
 
           listenerMinutes = Math.round(listenerMinutes)
 

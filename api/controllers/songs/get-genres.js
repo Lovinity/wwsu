@@ -1,20 +1,20 @@
 module.exports = {
 
-  friendlyName: 'songs / get-genres',
+  friendlyName: `songs / get-genres`,
 
-  description: 'Get array of objects of genres. {ID: "genre"}.',
+  description: `Get array of objects of genres. {ID: "genre"}.`,
 
   inputs: {
 
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller songs/get-genres called.')
+    sails.log.debug(`Controller songs/get-genres called.`)
     try {
       var returnData = []
 
       // Retrieve a list of genres.
-      var genres = await sails.models.genre.find({}).sort('name ASC')
+      var genres = await sails.models.genre.find({}).sort(`name ASC`)
       sails.log.verbose(`Genre retrieved: ${genres.length}`)
 
       // Push the genres out

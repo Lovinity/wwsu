@@ -5,10 +5,10 @@ $.fn.extend({
   animateCss: function (animationName, callback) {
     var animationEnd = (function (el) {
       var animations = {
-        animation: 'animationend',
-        OAnimation: 'oAnimationEnd',
-        MozAnimation: 'mozAnimationEnd',
-        WebkitAnimation: 'webkitAnimationEnd'
+        animation: `animationend`,
+        OAnimation: `oAnimationEnd`,
+        MozAnimation: `mozAnimationEnd`,
+        WebkitAnimation: `webkitAnimationEnd`
       }
 
       for (var t in animations) {
@@ -16,12 +16,12 @@ $.fn.extend({
           return animations[t]
         }
       }
-    })(document.createElement('div'))
+    })(document.createElement(`div`))
 
-    this.addClass('animated ' + animationName).one(animationEnd, function () {
-      $(this).removeClass('animated ' + animationName)
+    this.addClass(`animated ` + animationName).one(animationEnd, function () {
+      $(this).removeClass(`animated ` + animationName)
 
-      if (typeof callback === 'function') { return callback() }
+      if (typeof callback === `function`) { return callback() }
     })
 
     return this
@@ -59,9 +59,9 @@ class Scoreboard {
     var temp = document.querySelector(this._wsuScore)
     if (temp !== null) {
       temp.innerHTML = value
-      if (value === null || value === '') { $(this._wsuScore).fadeTo(500, 0) }
-      if (value !== null && value !== '' && (this._wsuScoreValue === null || this._wsuScoreValue === '')) { $(this._wsuScore).fadeTo(500, 1) }
-      if (value > this._wsuScoreValue) { $(this._wsuScore).animateCss('heartBeat slower') }
+      if (value === null || value === ``) { $(this._wsuScore).fadeTo(500, 0) }
+      if (value !== null && value !== `` && (this._wsuScoreValue === null || this._wsuScoreValue === ``)) { $(this._wsuScore).fadeTo(500, 1) }
+      if (value > this._wsuScoreValue) { $(this._wsuScore).animateCss(`heartBeat slower`) }
     }
     this._wsuScoreValue = value
   }
@@ -70,9 +70,9 @@ class Scoreboard {
     var temp = document.querySelector(this._oppScore)
     if (temp !== null) {
       temp.innerHTML = value
-      if (value === null || value === '') { $(this._oppScore).fadeTo(500, 0) }
-      if (value !== null && value !== '' && (this._oppScoreValue === null || this._oppScoreValue === '')) { $(this._oppScore).fadeTo(500, 1) }
-      if (value > this._oppScoreValue) { $(this._oppScore).animateCss('heartBeat slower') }
+      if (value === null || value === ``) { $(this._oppScore).fadeTo(500, 0) }
+      if (value !== null && value !== `` && (this._oppScoreValue === null || this._oppScoreValue === ``)) { $(this._oppScore).fadeTo(500, 1) }
+      if (value > this._oppScoreValue) { $(this._oppScore).animateCss(`heartBeat slower`) }
     }
     this._oppScoreValue = value
   }
@@ -83,7 +83,7 @@ class Scoreboard {
       var _this = this
       $(this._wsuNum).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== '') { $(_this._wsuNum).fadeTo(500, 1) }
+        if (value !== null && value !== ``) { $(_this._wsuNum).fadeTo(500, 1) }
       })
     }
     this._wsuNumValue = value
@@ -95,7 +95,7 @@ class Scoreboard {
       var _this = this
       $(this._oppNum).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== '') { $(_this._oppNum).fadeTo(500, 1) }
+        if (value !== null && value !== ``) { $(_this._oppNum).fadeTo(500, 1) }
       })
     }
     this._oppNumValue = value
@@ -107,7 +107,7 @@ class Scoreboard {
       var _this = this
       $(this._wsuText).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== '') { $(_this._wsuText).fadeTo(500, 1) }
+        if (value !== null && value !== ``) { $(_this._wsuText).fadeTo(500, 1) }
       })
     }
     this._wsuTextValue = value
@@ -119,7 +119,7 @@ class Scoreboard {
       var _this = this
       $(this._oppText).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== '') { $(_this._oppText).fadeTo(500, 1) }
+        if (value !== null && value !== ``) { $(_this._oppText).fadeTo(500, 1) }
       })
     }
     this._oppTextValue = value
@@ -134,7 +134,7 @@ class Scoreboard {
 }
 
 // Create a new scoreboard class
-var scoreboard = new Scoreboard('#scoreboard', '#score-wsu', '#score-opp', '#num-wsu', '#num-opp', '#text-wsu', '#text-opp')
+var scoreboard = new Scoreboard(`#scoreboard`, `#score-wsu`, `#score-opp`, `#num-wsu`, `#num-opp`, `#text-wsu`, `#text-opp`)
 
 // Make a WWSUdb for the sports information
 var sportsdb = new WWSUdb(TAFFY())
@@ -142,25 +142,25 @@ var sportsdb = new WWSUdb(TAFFY())
 var changeData = (data) => {
   console.dir(data)
   switch (data.name) {
-    case 'wsuScore':
+    case `wsuScore`:
       scoreboard.wsuScore = data.value
       break
-    case 'oppScore':
+    case `oppScore`:
       scoreboard.oppScore = data.value
       break
-    case 'wsuNum':
+    case `wsuNum`:
       scoreboard.wsuNum = data.value
       break
-    case 'oppNum':
+    case `oppNum`:
       scoreboard.oppNum = data.value
       break
-    case 'wsuText':
+    case `wsuText`:
       scoreboard.wsuText = data.value
       break
-    case 'oppText':
+    case `oppText`:
       scoreboard.oppText = data.value
       break
-    case 'scoreboardVisible':
+    case `scoreboardVisible`:
       if (data.value && data.value !== 0) {
         scoreboard.show()
       } else {
@@ -188,12 +188,12 @@ var socket = io.sails.connect()
 
 var noReq = new WWSUreq(socket, null)
 
-socket.on('connect', () => {
-  sportsdb.replaceData(noReq, '/sports/get')
+socket.on(`connect`, () => {
+  sportsdb.replaceData(noReq, `/sports/get`)
 })
 
-socket.on('disconnect', () => {
-  console.log('Lost connection')
+socket.on(`disconnect`, () => {
+  console.log(`Lost connection`)
   try {
     socket._raw.io._reconnection = true
     socket._raw.io._reconnectionAttempts = Infinity
@@ -202,4 +202,4 @@ socket.on('disconnect', () => {
   }
 })
 
-sportsdb.assignSocketEvent('sports', socket)
+sportsdb.assignSocketEvent(`sports`, socket)

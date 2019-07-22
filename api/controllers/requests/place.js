@@ -1,32 +1,32 @@
 module.exports = {
 
-  friendlyName: 'Requests / Place',
+  friendlyName: `Requests / Place`,
 
-  description: 'Place a request.',
+  description: `Place a request.`,
 
   inputs: {
     ID: {
       required: true,
-      type: 'number',
-      description: 'ID number of the song to request.'
+      type: `number`,
+      description: `ID number of the song to request.`
     },
 
     name: {
-      type: 'string',
-      defaultsTo: 'anonymous',
-      description: 'Name provided of the person making the request.'
+      type: `string`,
+      defaultsTo: `anonymous`,
+      description: `Name provided of the person making the request.`
     },
 
     message: {
-      type: 'string',
-      defaultsTo: '',
-      description: 'Message provided regarding the request.'
+      type: `string`,
+      defaultsTo: ``,
+      description: `Message provided regarding the request.`
     },
 
     device: {
-      type: 'string',
+      type: `string`,
       allowNull: true,
-      description: 'If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays.'
+      description: `If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays.`
     }
   },
 
@@ -35,11 +35,11 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller requests/place called.')
+    sails.log.debug(`Controller requests/place called.`)
 
     try {
       // Get the client IP address
-      var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip
+      var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers[`x-forwarded-for`] !== `undefined` ? this.req.socket.handshake.headers[`x-forwarded-for`] : this.req.socket.conn.remoteAddress) : this.req.ip
 
       // Place the request
       var response = await sails.helpers.requests.place(inputs.ID, fromIP, inputs.name, inputs.message, inputs.device)

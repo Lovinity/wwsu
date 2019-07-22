@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'config / sports / remove',
+  friendlyName: `config / sports / remove`,
 
-  description: 'Remove a configured sport.',
+  description: `Remove a configured sport.`,
 
   inputs: {
     name: {
-      type: 'string',
+      type: `string`,
       required: true,
-      description: 'The name of the sport to remove.'
+      description: `The name of the sport to remove.`
     }
   },
 
@@ -17,12 +17,12 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller config/sports/remove called.')
+    sails.log.debug(`Controller config/sports/remove called.`)
 
     try {
       if (sails.config.custom.sports.indexOf(inputs.name) !== -1) {
         delete sails.config.custom.sports[sails.config.custom.sports.indexOf(inputs.name)]
-        sails.sockets.broadcast('config', 'config', { update: { sports: sails.config.custom.sports } })
+        sails.sockets.broadcast(`config`, `config`, { update: { sports: sails.config.custom.sports } })
 
         // Reload subcategories in configuration
         await sails.helpers.songs.reloadSubcategories()

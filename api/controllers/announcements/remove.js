@@ -1,18 +1,18 @@
 module.exports = {
 
-  friendlyName: 'Announcements / Remove',
+  friendlyName: `Announcements / Remove`,
 
-  description: 'Remove an announcement.',
+  description: `Remove an announcement.`,
 
   inputs: {
     ID: {
-      type: 'number',
+      type: `number`,
       required: true
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller announcements/remove called.')
+    sails.log.debug(`Controller announcements/remove called.`)
 
     try {
       // Destroy the announcement

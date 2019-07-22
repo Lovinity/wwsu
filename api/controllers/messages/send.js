@@ -1,22 +1,22 @@
 module.exports = {
 
-  friendlyName: 'Messages / Send',
+  friendlyName: `Messages / Send`,
 
-  description: 'Send messages from WWSU internal clients.',
+  description: `Send messages from WWSU internal clients.`,
 
   inputs: {
     to: {
-      type: 'string',
+      type: `string`,
       required: true
     },
 
     to_friendly: {
-      type: 'string',
+      type: `string`,
       required: true
     },
 
     message: {
-      type: 'string',
+      type: `string`,
       required: true
     }
   },
@@ -26,7 +26,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller messages/send called.')
+    sails.log.debug(`Controller messages/send called.`)
 
     try {
       // Send the message

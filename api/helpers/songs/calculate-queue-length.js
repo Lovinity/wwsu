@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: 'sails.helpers.songs.calculateQueueLength',
+  friendlyName: `sails.helpers.songs.calculateQueueLength`,
 
-  description: 'Re-calculates how much audio is in the automation queue and returns the float in seconds. Should NOT be used by the checks CRON (it has a specialized version of this); this is for switching states and getting an accurate queue time after changing stuff in the automation queue.',
+  description: `Re-calculates how much audio is in the automation queue and returns the float in seconds. Should NOT be used by the checks CRON (it has a specialized version of this); this is for switching states and getting an accurate queue time after changing stuff in the automation queue.`,
 
   inputs: {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('helper songs.calculateQueueLength called.')
+    sails.log.debug(`helper songs.calculateQueueLength called.`)
     try {
       // Get current RadioDJ Queue
       var queue = await sails.helpers.rest.getQueue()
@@ -18,7 +18,7 @@ module.exports = {
       // Queue length should only include up to the first track not in config.custom.categories.noMeta.
       var breakQueueLength = -2
       var firstNoMeta = 0
-      if ((sails.models.meta['A'].state.includes('_returning') || sails.models.meta['A'].state === 'automation_live' || sails.models.meta['A'].state === 'automation_remote' || sails.models.meta['A'].state === 'automation_sports' || sails.models.meta['A'].state === 'automation_sportsremote')) {
+      if ((sails.models.meta[`A`].state.includes(`_returning`) || sails.models.meta[`A`].state === `automation_live` || sails.models.meta[`A`].state === `automation_remote` || sails.models.meta[`A`].state === `automation_sports` || sails.models.meta[`A`].state === `automation_sportsremote`)) {
         breakQueueLength = -1
         firstNoMeta = -1
         queue.map((track, index) => {

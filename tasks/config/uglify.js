@@ -10,20 +10,20 @@
  *
  */
 module.exports = function (grunt) {
-  grunt.config.set('uglify', {
+  grunt.config.set(`uglify`, {
     dist: {
-      src: ['.tmp/public/concat/production.js'],
-      dest: '.tmp/public/min/production.min.js'
+      src: [`.tmp/public/concat/production.js`],
+      dest: `.tmp/public/min/production.min.js`
     },
     options: {
       mangle: {
         reserved: [
-          'AsyncFunction',
-          'SailsSocket',
-          'Promise',
-          'File',
-          'Location',
-          'RttcRefPlaceholder'
+          `AsyncFunction`,
+          `SailsSocket`,
+          `Promise`,
+          `File`,
+          `Location`,
+          `RttcRefPlaceholder`
         ],
         keep_fnames: true//eslint-disable-line
       },

@@ -1,23 +1,23 @@
 module.exports = {
 
-  friendlyName: 'sails.models.planner / add-calendar',
+  friendlyName: `sails.models.planner / add-calendar`,
 
-  description: 'Add all of the shows and prerecords that currently exist on the Google sails.models.calendar in the next 7 days.',
+  description: `Add all of the shows and prerecords that currently exist on the Google sails.models.calendar in the next 7 days.`,
 
   inputs: {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller planner/add-calendar called.')
+    sails.log.debug(`Controller planner/add-calendar called.`)
     try {
       // Get calendar records
-      var records = await sails.models.calendar.find({ or: [{ title: { startsWith: 'Show: ' } }, { title: { startsWith: 'Prerecord: ' } }], start: { '<=': moment().add(7, 'days').toISOString(true) } })
+      var records = await sails.models.calendar.find({ or: [{ title: { startsWith: `Show: ` } }, { title: { startsWith: `Prerecord: ` } }], start: { '<=': moment().add(7, `days`).toISOString(true) } })
       var maps = records.map(async (record) => {
         // Determine DJ and show name
-        var dj = 'Unknown'
+        var dj = `Unknown`
         var show = record.title
-        if (record.title !== null && record.title.includes(' - ')) {
-          var temp = record.title.replace('Show: ', '').replace('Prerecord: ', '').split(' - ')
+        if (record.title !== null && record.title.includes(` - `)) {
+          var temp = record.title.replace(`Show: `, ``).replace(`Prerecord: `, ``).split(` - `)
           dj = temp[0]
           show = temp[1]
         }
