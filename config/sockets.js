@@ -49,28 +49,28 @@ module.exports.sockets = {
     // console.dir(handshake);
 
     // Reject immediately if this is a disciplined host
-    var moment = require(`moment`)
-    var searchto = moment().subtract(1, `days`).toDate()
-    var sh = require(`shorthash`)
-    var theip = typeof handshake.headers[`x-forwarded-for`] !== `undefined` ? handshake.headers[`x-forwarded-for`] : handshake.address
+    var moment = require('moment')
+    var searchto = moment().subtract(1, 'days').toDate()
+    var sh = require('shorthash')
+    var theip = typeof handshake.headers['x-forwarded-for'] !== 'undefined' ? handshake.headers['x-forwarded-for'] : handshake.address
     var theid = sh.unique(theip + sails.config.custom.hostSecret)
     try {
       var record = await Discipline.find({
         where: {
           active: 1,
           or: [
-            { action: `permaban` },
-            { action: `dayban`, createdAt: { '>': searchto } },
-            { action: `showban` }
+            { action: 'permaban' },
+            { action: 'dayban', createdAt: { '>': searchto } },
+            { action: 'showban' }
           ],
           IP: [theip, `website-${theid}`]
         }
       }).sort(`createdAt DESC`).limit(1)
-      if (typeof record !== `undefined` && typeof record[0] !== `undefined`) {
+      if (typeof record !== 'undefined' && typeof record[0] !== 'undefined') {
         record = record[0]
         var references = record.ID
         if (record.active === 1) {
-          if (record.action === `permaban` || record.action === `dayban` || record.action === `showban`) {
+          if (record.action === 'permaban' || record.action === 'dayban' || record.action === 'showban') {
             return proceed(new Error(`Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${references}`), false)
           }
         }
@@ -84,7 +84,7 @@ module.exports.sockets = {
     if (handshake.headers && handshake.headers.origin && (handshake.headers.origin.startsWith(sails.config.custom.baseUrl || `http://localhost:${sails.config.port}`) || handshake.headers.origin.startsWith(`http://130.108.128.116`) || handshake.headers.origin.startsWith(`https://wwsu.wolform.me`))) {
       return proceed(undefined, true)
     } else {
-      if (typeof handshake._query === `undefined` || typeof handshake._query.host === `undefined`) {
+      if (typeof handshake._query === 'undefined' || typeof handshake._query.host === 'undefined') {
         return proceed(new Error(`You must provide a host query parameter to authorize this websocket connection.`), false)
       }
 

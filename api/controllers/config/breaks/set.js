@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `config / breaks / set`,
+  friendlyName: 'config / breaks / set',
 
-  description: `Set basic break configuration`,
+  description: 'Set basic break configuration',
 
   inputs: {
     breakCheck: {
-      type: `number`,
+      type: 'number',
       description: `When considering when to queue breaks, if a break was queued less than this many minutes ago, hold off on queuing any other breaks until this many minutes have passed since. You MUST NOT have any intervals between breaks that are less than this. For example, if this is 10, and you have a break at 25 and another at 30 (5 minute difference), this will cause problems. The "0" break ignores this setting since it is required by the FCC. It has its own hard-coded check of 10 minutes that cannot be configured.`
     },
 
@@ -21,7 +21,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/breaks/set called.`)
+    sails.log.debug('Controller config/breaks/set called.')
 
     try {
       // Set the new configuration of any and all values provided as input
@@ -32,7 +32,7 @@ module.exports = {
       }
 
       // broadcast changes over websockets
-      sails.sockets.broadcast(`config`, `config`, { update: inputs })
+      sails.sockets.broadcast('config', 'config', { update: inputs })
 
       return exits.success()
     } catch (e) {

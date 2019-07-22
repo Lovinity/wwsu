@@ -7,78 +7,78 @@
 
 module.exports = {
 
-  datastore: `nodebase`,
+  datastore: 'nodebase',
   attributes: {
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     unique: {
-      type: `string`
+      type: 'string'
     },
 
     dj: {
-      type: `number`,
+      type: 'number',
       allowNull: true
     },
 
     event: {
-      type: `string`
+      type: 'string'
     },
 
     happened: {
-      type: `number`,
+      type: 'number',
       defaultsTo: 1,
       min: -1,
       max: 1
     },
 
     happenedReason: {
-      type: `string`,
+      type: 'string',
       allowNull: true
     },
 
     ignore: {
-      type: `number`,
+      type: 'number',
       defaultsTo: 0,
       min: 0,
       max: 2
     },
 
     showTime: {
-      type: `number`,
+      type: 'number',
       allowNull: true
     },
 
     listenerMinutes: {
-      type: `number`,
+      type: 'number',
       allowNull: true
     },
 
     missedIDs: {
-      type: `number`,
+      type: 'number',
       defaultsTo: 0
     },
 
     scheduledStart: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     scheduledEnd: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     actualStart: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     actualEnd: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     }
 
   },
@@ -87,28 +87,28 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`attendance socket: ${data}`)
-    sails.sockets.broadcast(`attendance`, `attendance`, data)
+    sails.sockets.broadcast('attendance', 'attendance', data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`attendance socket: ${data}`)
-    sails.sockets.broadcast(`attendance`, `attendance`, data)
+    sails.sockets.broadcast('attendance', 'attendance', data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`attendance socket: ${data}`)
-    sails.sockets.broadcast(`attendance`, `attendance`, data)
+    sails.sockets.broadcast('attendance', 'attendance', data)
     return proceed()
   },
 
   weeklyAnalytics: {
     topShows: [],
-    topGenre: `None`,
-    topPlaylist: `None`,
+    topGenre: 'None',
+    topPlaylist: 'None',
     onAir: 0,
     onAirListeners: 0,
     tracksLiked: 0,
@@ -130,12 +130,12 @@ module.exports = {
         var returnData = { newID: null, unique: null }
 
         // Store the current ID in a variable; we want to start a new record before processing the old one
-        var currentID = sails.models.meta[`A`].attendanceID
+        var currentID = sails.models.meta['A'].attendanceID
 
         // Add a new attendance record if event is specified.
         if (event) {
           // Find a calendar record with the provided event name. Allow up to 10 grace minutes before start time
-          var record = await sails.models.calendar.find({ title: event, active: { '>=': 1 }, start: { '<=': moment().add(10, `minutes`).toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
+          var record = await sails.models.calendar.find({ title: event, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
           sails.log.debug(`sails.models.calendar records found: ${record.length || 0}`)
 
           // Create the new attendance record
@@ -143,13 +143,13 @@ module.exports = {
 
           if (record.length > 0) {
             returnData.unique = record[0].unique
-            created = await sails.models.attendance.create({ unique: record[0].unique, dj: sails.models.meta[`A`].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
+            created = await sails.models.attendance.create({ unique: record[0].unique, dj: sails.models.meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
           } else {
-            created = await sails.models.attendance.create({ dj: sails.models.meta[`A`].dj, event: event, actualStart: moment().toISOString(true) }).fetch()
+            created = await sails.models.attendance.create({ dj: sails.models.meta['A'].dj, event: event, actualStart: moment().toISOString(true) }).fetch()
 
             // Broadcasts without a calendar ID are unauthorized. Log them!
-            if (event.startsWith(`Show: `) || event.startsWith(`Remote: `) || event.startsWith(`Sports: `)) {
-              await sails.models.logs.create({ attendanceID: created.ID, logtype: `unauthorized`, loglevel: `warning`, logsubtype: event.replace(`Show: `, ``).replace(`Remote: `, ``).replace(`Sports: `, ``), event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${event}`, createdAt: moment().toISOString(true) }).fetch()
+            if (event.startsWith('Show: ') || event.startsWith('Remote: ') || event.startsWith('Sports: ')) {
+              await sails.models.logs.create({ attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: event.replace('Show: ', '').replace('Remote: ', '').replace('Sports: ', ''), event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${event}`, createdAt: moment().toISOString(true) }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -171,11 +171,11 @@ module.exports = {
 
           if (currentRecord) {
             // Pre-load update data
-            var updateData = { showTime: moment().diff(moment(currentRecord.actualStart), `minutes`), listenerMinutes: 0, actualEnd: moment().toISOString(true) }
+            var updateData = { showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true) }
 
             // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
-            var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': currentRecord.actualStart } }).sort(`createdAt ASC`)
-            var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort(`createdAt DESC`).limit(1) || 0
+            var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': currentRecord.actualStart } }).sort('createdAt ASC')
+            var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort('createdAt DESC').limit(1) || 0
             if (prevListeners[0]) { prevListeners = prevListeners[0].listeners || 0 }
 
             // Calculate listener minutes
@@ -184,14 +184,14 @@ module.exports = {
 
             if (listenerRecords && listenerRecords.length > 0) {
               listenerRecords.map(listener => {
-                listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), `seconds`) / 60) * prevListeners
+                listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners
                 prevListeners = listener.listeners
                 prevTime = moment(listener.createdAt)
               })
             }
 
             // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-            listenerMinutes += (moment().diff(moment(prevTime), `seconds`) / 60) * prevListeners
+            listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners
 
             listenerMinutes = Math.round(listenerMinutes)
             updateData.listenerMinutes = listenerMinutes

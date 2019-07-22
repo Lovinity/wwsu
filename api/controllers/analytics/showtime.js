@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `analytics / showtime`,
+  friendlyName: 'analytics / showtime',
 
-  description: `Get analytics about the amount of show time and listenership every DJ had since the beginning of startOfSemester.`,
+  description: 'Get analytics about the amount of show time and listenership every DJ had since the beginning of startOfSemester.',
 
   inputs: {
     dj: {
-      type: `number`,
+      type: 'number',
       required: false,
       description: `Provide the ID of a dj if you only want showtime records for a specific DJ.`
     }

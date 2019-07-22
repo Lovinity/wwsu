@@ -1,31 +1,31 @@
 module.exports = {
 
-  friendlyName: `asyncForEach`,
+  friendlyName: 'asyncForEach',
 
-  description: `This helper should be used instead of Array.prototype.forEach() when you need to perform an async function for each item in an array.`,
+  description: 'This helper should be used instead of Array.prototype.forEach() when you need to perform an async function for each item in an array.',
 
   inputs: {
     array: {
-      type: `ref`,
+      type: 'ref',
       custom: function (value) {
         return _.isArray(value)
       },
-      description: `The array to be iterated.`
+      description: 'The array to be iterated.'
     },
     callback: {
-      type: `ref`,
+      type: 'ref',
       custom: function (value) {
         return _.isFunction(value)
       },
-      description: `A function that should be called with each item in the array. Passes in parameters (array[index], index, array).`
+      description: 'A function that should be called with each item in the array. Passes in parameters (array[index], index, array).'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper asyncForEach called.`)
+    sails.log.debug('Helper asyncForEach called.')
     try {
       // No length? No call!
-      if (typeof inputs.array === `undefined` || typeof inputs.array.length === `undefined`) { return exits.success() }
+      if (typeof inputs.array === 'undefined' || typeof inputs.array.length === 'undefined') { return exits.success() }
 
       // Loop through each item in the array
       for (let index = 0; index < inputs.array.length; index++) {

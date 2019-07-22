@@ -1,34 +1,34 @@
-var sh = require(`shorthash`)
+var sh = require('shorthash')
 
 module.exports = {
 
-  friendlyName: `subscribers / Add`,
+  friendlyName: 'subscribers / Add',
 
-  description: `Add a push notification subscription.`,
+  description: 'Add a push notification subscription.',
 
   inputs: {
 
     device: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The OneSignal device ID of the subscriber.`
+      description: 'The OneSignal device ID of the subscriber.'
     },
 
     type: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The main type of the subscription`
+      description: 'The main type of the subscription'
     },
 
     subtype: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The subtype of the subscription`
+      description: 'The subtype of the subscription'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller subscribers/add called.`)
+    sails.log.debug('Controller subscribers/add called.')
 
     try {
       // Get the client IP address

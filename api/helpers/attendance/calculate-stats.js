@@ -1,25 +1,25 @@
 module.exports = {
 
-  friendlyName: `attendance.calculateStats`,
+  friendlyName: 'attendance.calculateStats',
 
-  description: `Re-calculate weekly analytics and broadcast them through the `,
+  description: 'Re-calculate weekly analytics and broadcast them through the ',
 
   inputs: {
 
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper attendance.calculateStats called.`)
+    sails.log.debug('Helper attendance.calculateStats called.')
 
     try {
       // Get stats for the last 7 days
-      var earliest = moment().subtract(1, `weeks`)
+      var earliest = moment().subtract(1, 'weeks')
 
       // Prepare with a clean template
       sails.models.attendance.weeklyAnalytics = {
         topShows: [],
-        topGenre: `None`,
-        topPlaylist: `None`,
+        topGenre: 'None',
+        topPlaylist: 'None',
         onAir: 0,
         onAirListeners: 0,
         tracksLiked: 0,
@@ -52,36 +52,36 @@ module.exports = {
         sails.models.attendance.weeklyAnalytics.tracksRequested = await sails.models.requests.count({ createdAt: { '>=': earliest.toISOString(true) } })
 
         // Grab count of webMessagesExchanged
-        sails.models.attendance.weeklyAnalytics.webMessagesExchanged = await sails.models.messages.count({ status: `active`, or: [{ from: { startsWith: `website` } }, { to: { startsWith: `website` } }], createdAt: { '>=': earliest.toISOString(true) } })
+        sails.models.attendance.weeklyAnalytics.webMessagesExchanged = await sails.models.messages.count({ status: 'active', or: [{ from: { startsWith: 'website' } }, { to: { startsWith: 'website' } }], createdAt: { '>=': earliest.toISOString(true) } })
       }
 
       // Prepare parallel function 2
       var f2 = async () => {
         // Go through each record of attendance and populate topShows, onAir, and onAirListeners
         records
-          .filter(attendance => attendance.event.startsWith(`Sports:`) || attendance.event.startsWith(`Show:`) || attendance.event.startsWith(`Remote:`) || attendance.event.startsWith(`Prerecord:`) || attendance.event.startsWith(`Genre:`) || attendance.event.startsWith(`Playlist:`))
+          .filter(attendance => attendance.event.startsWith('Sports:') || attendance.event.startsWith('Show:') || attendance.event.startsWith('Remote:') || attendance.event.startsWith('Prerecord:') || attendance.event.startsWith('Genre:') || attendance.event.startsWith('Playlist:'))
           .map(attendance => {
             var show = attendance.event
-            show = show.substring(show.indexOf(`: `) + 2)
+            show = show.substring(show.indexOf(': ') + 2)
 
             // OnAir programming of Sports, Show, Remote, or Prerecord counts as show time.
-            if (attendance.event.startsWith(`Sports:`) || attendance.event.startsWith(`Show:`) || attendance.event.startsWith(`Remote:`) || attendance.event.startsWith(`Prerecord:`)) {
+            if (attendance.event.startsWith('Sports:') || attendance.event.startsWith('Show:') || attendance.event.startsWith('Remote:') || attendance.event.startsWith('Prerecord:')) {
               sails.models.attendance.weeklyAnalytics.onAir += attendance.showTime
               sails.models.attendance.weeklyAnalytics.onAirListeners += attendance.listenerMinutes
 
               // Sports broadcasts should not count towards the top 3 shows
-              if (!attendance.event.startsWith(`Sports:`)) {
+              if (!attendance.event.startsWith('Sports:')) {
                 // Group showTime and listenerMinutes by show; we only want one record per show to use when comparing top shows
-                if (typeof totals[show] === `undefined`) { totals[show] = { showTime: 0, listenerMinutes: 0 } }
+                if (typeof totals[show] === 'undefined') { totals[show] = { showTime: 0, listenerMinutes: 0 } }
                 totals[show].showTime += attendance.showTime
                 totals[show].listenerMinutes += attendance.listenerMinutes
               }
-            } else if (attendance.event.startsWith(`Genre:`)) {
-              if (typeof totalsG[show] === `undefined`) { totalsG[show] = { showTime: 0, listenerMinutes: 0 } }
+            } else if (attendance.event.startsWith('Genre:')) {
+              if (typeof totalsG[show] === 'undefined') { totalsG[show] = { showTime: 0, listenerMinutes: 0 } }
               totalsG[show].showTime += attendance.showTime
               totalsG[show].listenerMinutes += attendance.listenerMinutes
-            } else if (attendance.event.startsWith(`Playlist:`)) {
-              if (typeof totalsP[show] === `undefined`) { totalsP[show] = { showTime: 0, listenerMinutes: 0 } }
+            } else if (attendance.event.startsWith('Playlist:')) {
+              if (typeof totalsP[show] === 'undefined') { totalsP[show] = { showTime: 0, listenerMinutes: 0 } }
               totalsP[show].showTime += attendance.showTime
               totalsP[show].listenerMinutes += attendance.listenerMinutes
             }
@@ -131,7 +131,7 @@ module.exports = {
       await Promise.all([f1(), f2()])
 
       // Broadcast socket
-      sails.sockets.broadcast(`analytics-weekly-dj`, `analytics-weekly-dj`, sails.models.attendance.weeklyAnalytics)
+      sails.sockets.broadcast('analytics-weekly-dj', 'analytics-weekly-dj', sails.models.attendance.weeklyAnalytics)
 
       return exits.success()
     } catch (e) {

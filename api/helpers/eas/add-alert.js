@@ -1,38 +1,38 @@
 module.exports = {
 
-  friendlyName: `eas.addAlert`,
+  friendlyName: 'eas.addAlert',
 
-  description: `Prepares an alert to be pushed by the eas/postParse helper.`,
+  description: 'Prepares an alert to be pushed by the eas/postParse helper.',
 
   inputs: {
     reference: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `A unique ID for the alert provided by the source.`
+      description: 'A unique ID for the alert provided by the source.'
     },
     source: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `This alert originates from the provided source. Use NWS for NWS sources so that this helper can retrieve alert information.`
+      description: 'This alert originates from the provided source. Use NWS for NWS sources so that this helper can retrieve alert information.'
     },
     county: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `This alert applies to the specified county.`
+      description: 'This alert applies to the specified county.'
     },
     alert: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The alert name/event. Eg. "Severe Thunderstorm Warning".`
+      description: 'The alert name/event. Eg. "Severe Thunderstorm Warning".'
     },
     severity: {
-      type: `string`,
+      type: 'string',
       required: true,
-      isIn: [`Extreme`, `Severe`, `Moderate`, `Minor`],
+      isIn: ['Extreme', 'Severe', 'Moderate', 'Minor'],
       description: `Severity of alert: One of the following in order from highest to lowest ['Extreme', 'Severe', 'Moderate', 'Minor']`
     },
     starts: {
-      type: `string`,
+      type: 'string',
       custom: function (value) {
         return moment(value).isValid()
       },
@@ -40,7 +40,7 @@ module.exports = {
       description: `moment() parsable string of when the alert starts. Recommended ISO string.`
     },
     expires: {
-      type: `string`,
+      type: 'string',
       custom: function (value) {
         return moment(value).isValid()
       },
@@ -48,20 +48,20 @@ module.exports = {
       description: `moment() parsable string of when the alert expires. Recommended ISO string.`
     },
     color: {
-      type: `string`,
+      type: 'string',
       regex: /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i,
-      description: `Hex color representing this alert.`,
+      description: 'Hex color representing this alert.',
       required: true
     },
     information: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
-      description: `Detailed information about this alert for the public.`
+      description: 'Detailed information about this alert for the public.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper eas.addAlert called.`)
+    sails.log.debug('Helper eas.addAlert called.')
     try {
       var criteria = {}
 
@@ -76,9 +76,9 @@ module.exports = {
               if (key !== `counties`) {
                 sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = criteria[key]
               } else {
-                var temp = sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key].split(`, `)
+                var temp = sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key].split(', ')
                 if (temp.indexOf(inputs.county) === -1) { temp.push(inputs.county) }
-                temp = temp.join(`, `)
+                temp = temp.join(', ')
                 sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = temp
               }
             }
@@ -93,11 +93,11 @@ module.exports = {
         })
       // exists
       if (record) {
-        sails.log.verbose(`Alert already exists.`)
+        sails.log.verbose('Alert already exists.')
         // Detect if the county issuing the alert is already in the alert. If not, add the county in.
-        var temp = record.counties.split(`, `)
+        var temp = record.counties.split(', ')
         if (temp.indexOf(inputs.county) === -1) { temp.push(inputs.county) }
-        temp = temp.join(`, `)
+        temp = temp.join(', ')
 
         // Prepare criteria to update
         criteria = {
@@ -108,9 +108,9 @@ module.exports = {
           color: inputs.color,
           counties: temp,
           starts: inputs.starts !== null ? moment(inputs.starts).toISOString(true) : moment().toISOString(true),
-          expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, `hours`).toISOString(true)
+          expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, 'hours').toISOString(true)
         }
-        if (typeof inputs.information !== `undefined` && inputs.information !== null) { criteria.information = inputs.information }
+        if (typeof inputs.information !== 'undefined' && inputs.information !== null) { criteria.information = inputs.information }
 
         sails.log.silly(`Criteria: ${criteria}`)
 
@@ -130,7 +130,7 @@ module.exports = {
         }
         return exits.success()
       } else { // Does not exist; new alert
-        sails.log.verbose(`Alert does not exist.`)
+        sails.log.verbose('Alert does not exist.')
 
         // Prepare criteria
         criteria = {
@@ -141,19 +141,19 @@ module.exports = {
           color: inputs.color,
           counties: inputs.county,
           starts: inputs.starts !== null ? moment(inputs.starts).toISOString(true) : moment().toISOString(true),
-          expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, `hours`).toISOString(true),
-          information: inputs.information || ``
+          expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, 'hours').toISOString(true),
+          information: inputs.information || ''
         }
 
         // If this alert came from NWS, we need to GET a separate URL for alert information before we create the record.
-        if (inputs.source === `NWS` && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === `` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
-          sails.log.verbose(`Alert is from NWS source. Retrieving alert information.`)
-          var resp = await needle(`get`, inputs.reference)
+        if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
+          sails.log.verbose('Alert is from NWS source. Retrieving alert information.')
+          var resp = await needle('get', inputs.reference)
           sails.log.silly(resp.body)
 
           // Go through each child
           var maps = resp.body.children
-            .filter(entry => typeof entry.name !== `undefined` && entry.name === `info`)
+            .filter(entry => typeof entry.name !== 'undefined' && entry.name === 'info')
             .map(async entry => {
               var alert = {}
 
@@ -161,7 +161,7 @@ module.exports = {
               entry.children.map(entry2 => { alert[entry2.name] = entry2.value })
 
               // Sometimes, EAS will return "This alert has expired". If so, leave information blank.
-              if (!alert.description.includes(`This alert has expired`)) { criteria.information = alert.description + `. Precautionary / Preparedness actions: ` + alert.instruction }
+              if (!alert.description.includes('This alert has expired')) { criteria.information = alert.description + '. Precautionary / Preparedness actions: ' + alert.instruction }
               sails.log.silly(`Criteria: ${criteria}`)
               criteria._new = true
               processPending(criteria)

@@ -7,20 +7,20 @@
 
 module.exports = {
 
-  datastore: `radiodj`,
+  datastore: 'radiodj',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     parentid: {
-      type: `number`
+      type: 'number'
     },
 
     name: {
-      type: `string`
+      type: 'string'
     }
 
   }

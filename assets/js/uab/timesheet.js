@@ -8,10 +8,10 @@
 class Director {
   constructor (data = {}) {
     this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000))
-    this._name = data.name || `Unknown`
+    this._name = data.name || 'Unknown'
     this._admin = data.admin || false
     this._avatar = data.avatar || null
-    this._position = data.position || `Unknown`
+    this._position = data.position || 'Unknown'
     this._present = data.present || false
     this._since = data.since || moment()
   }
@@ -109,7 +109,7 @@ directorsdb.setOnReplace((db) => {
 class Timesheet {
   constructor (data = {}) {
     this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000))
-    this._name = data.name || `Unknown`
+    this._name = data.name || 'Unknown'
     this._time_in = data.time_in || null
     this._time_out = data.time_out || null
     this._approved = data.approved || false
@@ -195,20 +195,20 @@ var timesheets = []
 var socket = io.sails.connect()
 
 // Create request objects
-var hostReq = new WWSUreq(socket, null, `host`, `/auth/host`, `Host`)
-var adminDirectorReq = new WWSUreq(socket, null, `name`, `/auth/admin-director-uab`, `Administrator UAB Director`)
+var hostReq = new WWSUreq(socket, null, 'host', '/auth/host', 'Host')
+var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director-uab', 'Administrator UAB Director')
 
 // Register event handlers
-socket.on(`connect`, () => {
-  directorsdb.replaceData(hostReq, `/uab/directors/get`)
-  timesheetsdb.replaceData(hostReq, `/uab/timesheet/get`)
+socket.on('connect', () => {
+  directorsdb.replaceData(hostReq, '/uab/directors/get')
+  timesheetsdb.replaceData(hostReq, '/uab/timesheet/get')
 })
 
-directorsdb.assignSocketEvent(`uabdirectors`, socket)
-timesheetsdb.assignSocketEvent(`uabtimesheet`, socket)
+directorsdb.assignSocketEvent('uabdirectors', socket)
+timesheetsdb.assignSocketEvent('uabtimesheet', socket)
 
 $(document).ready(() => {
-  document.querySelector(`#timesheet-records`).addEventListener(`click`, (e) => {
+  document.querySelector(`#timesheet-records`).addEventListener('click', (e) => {
     try {
       if (e.target) {
         if (e.target.id.startsWith(`timesheet-t`)) {
@@ -221,11 +221,11 @@ $(document).ready(() => {
 })
 
 function closeModal () {
-  $(`#clockModal`).modal(`hide`)
+  $('#clockModal').modal('hide')
 }
 
 function escapeHTML (str) {
-  var div = document.createElement(`div`)
+  var div = document.createElement('div')
   div.appendChild(document.createTextNode(str))
   return div.innerHTML
 }
@@ -233,10 +233,10 @@ function escapeHTML (str) {
 // Edit a timesheet entry, or view a single entry
 function editClock (clockID, save = false) {
   console.log(`editClock called.`)
-  var modalBody = document.getElementById(`clock-body`)
+  var modalBody = document.getElementById('clock-body')
   if (!save) {
-    $(`#clockModal`).modal(`show`)
-    modalBody.innerHTML = `Loading clock...`
+    $('#clockModal').modal('show')
+    modalBody.innerHTML = 'Loading clock...'
   }
 
   // View an entry
@@ -247,11 +247,11 @@ function editClock (clockID, save = false) {
       .map(timesheet => {
         modalBody.innerHTML = `<form action="javascript:editClock(${clockID}, true)"><div class="form-group">
         <label for="clock-in">Clock In:</label>
-        <input type="text" class="form-control" id="clock-in" value="${moment(timesheet.time_in).format(`YYYY-MM-DD HH:mm:ss`)}">
+        <input type="text" class="form-control" id="clock-in" value="${moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss')}">
         <label for="clock-out">Clock Out:</label>
-        <input type="text" class="form-control" id="clock-out" value="${moment(timesheet.time_out).format(`YYYY-MM-DD HH:mm:ss`)}">
+        <input type="text" class="form-control" id="clock-out" value="${moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss')}">
                 <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="clock-approved" ${(timesheet.approved) ? `checked` : ``}>
+                            <input class="form-check-input" type="checkbox" value="" id="clock-approved" ${(timesheet.approved) ? 'checked' : ''}>
                             <label class="form-check-label" for="clock-approved">
                                 Approved Record
                             </label>
@@ -261,29 +261,29 @@ function editClock (clockID, save = false) {
         opened = true
         return null
       })
-    if (!opened) { modalBody.innerHTML = `There was an internal error loading that clock.` }
-    $(`#clockModal`).modal(`handleUpdate`)
+    if (!opened) { modalBody.innerHTML = 'There was an internal error loading that clock.' }
+    $('#clockModal').modal('handleUpdate')
     // Editing an entry
   } else {
-    var bclockin = document.getElementById(`clock-in`)
-    var bclockout = document.getElementById(`clock-out`)
-    var bapproved = document.getElementById(`clock-approved`)
-    adminDirectorReq.request({ db: directorsdb.db({ admin: true }), method: `POST`, url: `/timesheet/edit`, data: { ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: (bapproved.checked) } }, (resHTML) => {
-      $(`#clockModal`).modal(`handleUpdate`)
+    var bclockin = document.getElementById('clock-in')
+    var bclockout = document.getElementById('clock-out')
+    var bapproved = document.getElementById('clock-approved')
+    adminDirectorReq.request({ db: directorsdb.db({ admin: true }), method: 'POST', url: '/timesheet/edit', data: { ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: (bapproved.checked) } }, (resHTML) => {
+      $('#clockModal').modal('handleUpdate')
     })
   }
 }
 
 function filterDate () {
-  var thedate = document.getElementById(`weekly-date-picker`)
-  var tableRef = document.getElementById(`timesheet-table`).getElementsByTagName(`tbody`)[0]
+  var thedate = document.getElementById('weekly-date-picker')
+  var tableRef = document.getElementById('timesheet-table').getElementsByTagName('tbody')[0]
   // Delete all table rows except the first (header) one
   for (var i = tableRef.rows.length; i > 0; i--) {
     tableRef.deleteRow(i - 1)
   }
 
   // Get timesheet records
-  hostReq.request({ method: `POST`, url: `/uab/timesheet/get`, data: { date: moment(thedate.value).toISOString(true) } }, (resHTML) => {
+  hostReq.request({ method: 'POST', url: '/uab/timesheet/get', data: { date: moment(thedate.value).toISOString(true) } }, (resHTML) => {
     try {
       // Reset our timesheets array
       if (resHTML.length <= 0) {
@@ -297,17 +297,17 @@ function filterDate () {
       // iterate through each timesheet record
       var hours = {}
       timesheets.map((record, index) => {
-        var newRow = document.getElementById(`director-${record.name.replace(/\W/g, ``)}`)
+        var newRow = document.getElementById(`director-${record.name.replace(/\W/g, '')}`)
         // If there is not a row for this director yet, create one
         if (!newRow || newRow === null) {
           var newRow = tableRef.insertRow(tableRef.rows.length)
           newRow.classList.add(`table-info`)
           hours[record.name] = moment.duration()
-          newRow.setAttribute(`id`, `director-${record.name.replace(/\W/g, ``)}`)
+          newRow.setAttribute('id', `director-${record.name.replace(/\W/g, '')}`)
           // Create applicable cells
           for (var i = 0; i < 16; i++) {
             var cell = newRow.insertCell(i)
-            cell.setAttribute(`id`, `cell${i}-${record.name.replace(/\W/g, ``)}`)
+            cell.setAttribute('id', `cell${i}-${record.name.replace(/\W/g, '')}`)
             // Cell 0 should be director name
             if (i === 0) { cell.innerHTML = record.name }
           }
@@ -317,8 +317,8 @@ function filterDate () {
         var clockin = moment(record.time_in)
         var clockout = moment(record.time_out)
         var clocknow = moment()
-        var clocknext = moment(thedate.value).add(1, `weeks`)
-        var clockday = moment(clockin).format(`e`)
+        var clocknext = moment(thedate.value).add(1, 'weeks')
+        var clockday = moment(clockin).format('e')
 
         // Determine status. 1 = approved, 2 = no time_out (clocked in), 0 = not approved.
         var status = 1
@@ -330,25 +330,25 @@ function filterDate () {
         if (status === 2) { hours[record.name].add(clocknow.diff(clockin)) }
 
         var inT = moment(clockin).format(`h:mm A`)
-        var outT = moment(clockout).format(`h:mm A`) || `IN`
+        var outT = moment(clockout).format(`h:mm A`) || 'IN'
 
         // For certain clock-ins and clock-outs, we may need to display the date as well, not just the time.
         // If clock-in happened last week, show its date
-        if (moment(clockin).isBefore(moment(clockout).startOf(`week`))) {
+        if (moment(clockin).isBefore(moment(clockout).startOf('week'))) {
           inT = moment(clockin).format(`YYYY-MM-DD h:mm A`)
-          clockday = moment(clockout).format(`e`)
+          clockday = moment(clockout).format('e')
         }
         // If clock-out happened next week, show its date
-        if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf(`week`).add(1, `weeks`))) {
+        if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks'))) {
           outT = moment(clockout).format(`YYYY-MM-DD h:mm A`)
         }
         // If clock-out was not on the same day as clock-in, show date for clock-out.
-        if (clockout !== null && !moment(clockout).isSame(moment(clockin), `day`)) {
+        if (clockout !== null && !moment(clockout).isSame(moment(clockin), 'day')) {
           outT = moment(clockout).format(`YYYY-MM-DD h:mm A`)
         }
 
         // Fill in the timesheet records for clock-ins
-        var cell = document.getElementById(`cell${(clockday * 2) + 1}-${record.name.replace(/\W/g, ``)}`)
+        var cell = document.getElementById(`cell${(clockday * 2) + 1}-${record.name.replace(/\W/g, '')}`)
         if (cell !== null) {
           switch (status) {
             case 0:
@@ -364,7 +364,7 @@ function filterDate () {
         }
 
         // Fill in the timesheet records for clock-outs
-        var cell = document.getElementById(`cell${(clockday * 2) + 2}-${record.name.replace(/\W/g, ``)}`)
+        var cell = document.getElementById(`cell${(clockday * 2) + 2}-${record.name.replace(/\W/g, '')}`)
         if (cell !== null) {
           switch (status) {
             case 0:
@@ -383,9 +383,9 @@ function filterDate () {
       // Iterate through each director and list their hours worked.
       for (var key in hours) {
         if (hours.hasOwnProperty(key)) {
-          var cell = document.getElementById(`cell15-${key.replace(/\W/g, ``)}`)
+          var cell = document.getElementById(`cell15-${key.replace(/\W/g, '')}`)
           if (cell) {
-            cell.innerHTML = `${hours[key].format(`h`, 1)}`
+            cell.innerHTML = `${hours[key].format('h', 1)}`
           }
         }
       }
@@ -393,7 +393,7 @@ function filterDate () {
       var newRow = tableRef.insertRow(tableRef.rows.length)
       newRow.classList.add(`table-danger`)
       var cell = newRow.insertCell(0)
-      cell.innerHTML = `ERROR fetching timesheets`
+      cell.innerHTML = 'ERROR fetching timesheets'
     }
   }
   )

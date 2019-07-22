@@ -5,19 +5,19 @@ var Slides
 // Slide class for managing a single slide
 class Slide {
   constructor (data = {}) {
-    this._name = data.name || ``
-    this._label = data.label || ``
+    this._name = data.name || ''
+    this._label = data.label || ''
     this._weight = data.weight || 0
     this._isSticky = data.isSticky || false
-    this._color = data.color || `secondary`
+    this._color = data.color || 'secondary'
     this._active = (typeof data.active !== `undefined`) ? data.active : true
     this._starts = data.starts || null
     this._expires = data.expires || null
     this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${data.html || ``}</div></div>`
     this._innerHtml = data.html || ``
     this._reset = data.reset || false
-    this._transitionIn = data.transitionIn || `fadeIn`
-    this._transitionOut = data.transitionOut || `fadeOut`
+    this._transitionIn = data.transitionIn || 'fadeIn'
+    this._transitionOut = data.transitionOut || 'fadeOut'
     this._displayTime = data.displayTime || 14
     this._fitContent = data.fitContent || false
     this._fn = data.fn || (() => {
@@ -186,7 +186,7 @@ Slides = (() => {
       } catch (e) {
         console.error(e)
         iziToast.show({
-          title: `An error occurred - Please check the logs`,
+          title: 'An error occurred - Please check the logs',
           message: `Error occurred in the compare function of Slides.updateBadges`
         })
       }
@@ -278,15 +278,15 @@ Slides = (() => {
         // Failsafe: iterate through all slides and set display to none to prevent stray slides from remaining visible
         slides.map((_slide) => {
           var temp = document.getElementById(`slide-${_slide.name}`)
-          if (temp !== null) { temp.style.display = `none` }
+          if (temp !== null) { temp.style.display = 'none' }
         })
 
         // Display active slide
         var temp = document.getElementById(`slide-${activeSlide().name}`)
-        if (temp !== null) { temp.style.display = `inline` }
+        if (temp !== null) { temp.style.display = 'inline' }
 
         // Reset animation classes
-        if (temp2 !== null) { temp2.className = `` }
+        if (temp2 !== null) { temp2.className = '' }
 
         $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
         })
@@ -302,8 +302,8 @@ Slides = (() => {
         var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
         if (activeSlide().fitContent && temp !== null && temp2 !== null) {
           console.log(`fitting content`)
-          temp.classList.add(`scale-wrapper`)
-          temp2.classList.add(`scale-content`)
+          temp.classList.add('scale-wrapper')
+          temp2.classList.add('scale-content')
           var pageWidth; var pageHeight
 
           var basePage = {
@@ -337,7 +337,7 @@ Slides = (() => {
             }
 
             function scalePages (page, maxWidth, maxHeight) {
-              page.attr(`width`, `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
+              page.attr('width', `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
               console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
               var scaleX = 1; var scaleY = 1
               scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95
@@ -352,7 +352,7 @@ Slides = (() => {
 
               console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`)
 
-              $(`#content-slide-${activeSlide().name}`).attr(`style`, `-webkit-transform:scale(` + basePage.scale + `);left:` + newLeftPos + `px;top:0px;`)
+              $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;')
             }
           })
         }
@@ -369,18 +369,18 @@ Slides = (() => {
           var failsafe = setTimeout(() => {
             console.log(`animation failsafe triggered`)
             var temp = document.getElementById(`slide-${activeSlide().name}`)
-            if (temp !== null) { temp.style.display = `none` }
+            if (temp !== null) { temp.style.display = 'none' }
             var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
-            if (temp2 !== null) { temp2.className = `` }
+            if (temp2 !== null) { temp2.className = '' }
             afterFunction()
           }, 5000)
 
           $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionOut, () => {
             console.log(`animation complete`)
             var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
-            if (temp2 !== null) { temp2.className = `` }
+            if (temp2 !== null) { temp2.className = '' }
             var temp = document.getElementById(`slide-${activeSlide().name}`)
-            if (temp !== null) { temp.style.display = `none` }
+            if (temp !== null) { temp.style.display = 'none' }
             clearTimeout(failsafe)
             afterFunction()
           })
@@ -402,7 +402,7 @@ Slides = (() => {
         if (activeSlide().reset) { temp2.innerHTML = activeSlide().innerHtml }
       }
       var temp = document.getElementById(`slide-${activeSlide().name}`)
-      if (temp !== null) { temp.style.display = `inline` }
+      if (temp !== null) { temp.style.display = 'inline' }
 
       activeSlide().fn()
 
@@ -412,7 +412,7 @@ Slides = (() => {
   }
 
   const generateBG = () => {
-    var hexValues = [`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `a`, `b`, `c`, `d`, `e`]
+    var hexValues = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e']
 
     function populate (a) {
       for (var i = 0; i < 6; i++) {
@@ -423,13 +423,13 @@ Slides = (() => {
       return a
     }
 
-    var newColor1 = populate(`#`)
-    var newColor2 = populate(`#`)
+    var newColor1 = populate('#')
+    var newColor2 = populate('#')
     var angle = Math.round(Math.random() * 360)
 
-    var gradient = `linear-gradient(` + angle + `deg, ` + newColor1 + `, ` + newColor2 + `)`
+    var gradient = 'linear-gradient(' + angle + 'deg, ' + newColor1 + ', ' + newColor2 + ')'
 
-    var temp = document.getElementById(`bg-canvas`)
+    var temp = document.getElementById('bg-canvas')
     if (temp !== null) { temp.style.background = gradient }
   }
 

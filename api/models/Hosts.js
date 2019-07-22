@@ -6,72 +6,72 @@
  */
 
 module.exports = {
-  datastore: `nodebase`,
+  datastore: 'nodebase',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     host: {
-      type: `string`,
+      type: 'string',
       required: true,
       unique: true
     },
 
     friendlyname: {
-      type: `string`,
-      defaultsTo: `Unknown Host`
+      type: 'string',
+      defaultsTo: 'Unknown Host'
     },
 
     authorized: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     admin: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     makeCalls: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     answerCalls: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     silenceDetection: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     recordAudio: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     requests: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     emergencies: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     accountability: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     },
 
     webmessages: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     }
 
@@ -81,21 +81,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`hosts socket: ${data}`)
-    sails.sockets.broadcast(`hosts`, `hosts`, data)
+    sails.sockets.broadcast('hosts', 'hosts', data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`hosts socket: ${data}`)
-    sails.sockets.broadcast(`hosts`, `hosts`, data)
+    sails.sockets.broadcast('hosts', 'hosts', data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`hosts socket: ${data}`)
-    sails.sockets.broadcast(`hosts`, `hosts`, data)
+    sails.sockets.broadcast('hosts', 'hosts', data)
     return proceed()
   }
 

@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: `xp / get`,
+  friendlyName: 'xp / get',
 
-  description: `Get the XP earned by a specific DJ.`,
+  description: 'Get the XP earned by a specific DJ.',
 
   inputs: {
     dj: {
-      type: `number`,
+      type: 'number',
       allowNull: true,
-      description: `The DJ ID which to view XP information.`
+      description: 'The DJ ID which to view XP information.'
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller xp/get called.`)
+    sails.log.debug('Controller xp/get called.')
 
     try {
       // Get XP records
@@ -28,8 +28,8 @@ module.exports = {
       } else {
         // Join xp socket if applicable
         if (this.req.isSocket) {
-          sails.sockets.join(this.req, `xp`)
-          sails.log.verbose(`Request was a socket. Joining xp.`)
+          sails.sockets.join(this.req, 'xp')
+          sails.log.verbose('Request was a socket. Joining xp.')
         }
 
         return exits.success()

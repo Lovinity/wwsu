@@ -6,29 +6,29 @@
  */
 
 module.exports = {
-  datastore: `nodebase`,
+  datastore: 'nodebase',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     active: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: true
     },
 
     IP: {
-      type: `string`
+      type: 'string'
     },
 
     action: {
-      type: `string`
+      type: 'string'
     },
 
     message: {
-      type: `string`
+      type: 'string'
     }
   },
 
@@ -36,21 +36,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`discipline socket: ${data}`)
-    sails.sockets.broadcast(`discipline`, `discipline`, data)
+    sails.sockets.broadcast('discipline', 'discipline', data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`discipline socket: ${data}`)
-    sails.sockets.broadcast(`discipline`, `discipline`, data)
+    sails.sockets.broadcast('discipline', 'discipline', data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`discipline socket: ${data}`)
-    sails.sockets.broadcast(`discipline`, `discipline`, data)
+    sails.sockets.broadcast('discipline', 'discipline', data)
     return proceed()
   }
 }

@@ -6,16 +6,16 @@
  */
 
 module.exports = {
-  datastore: `radiodj`,
+  datastore: 'radiodj',
   attributes: {
     ID: {
-      columnName: `id`,
-      type: `number`,
+      columnName: 'id',
+      type: 'number',
       autoIncrement: true
     },
 
     name: {
-      type: `string`,
+      type: 'string',
       maxLength: 50
     }
 

@@ -1,15 +1,15 @@
 module.exports = {
 
-  friendlyName: `sails.helpers.songs.reloadSubcategories`,
+  friendlyName: 'sails.helpers.songs.reloadSubcategories',
 
-  description: `Re-generate sails.config.custom.subcats, sails.config.custom.sportscats, and sails.config.custom.showcats`,
+  description: 'Re-generate sails.config.custom.subcats, sails.config.custom.sportscats, and sails.config.custom.showcats',
 
   inputs: {
 
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper songs.reloadSubcategories called.`)
+    sails.log.debug('Helper songs.reloadSubcategories called.')
 
     try {
       var categories
@@ -58,7 +58,7 @@ module.exports = {
         sails.config.custom.sportscats[sport] = { 'Sports Openers': null, 'Sports Liners': null, 'Sports Closers': null }
       })
 
-      categories = await sails.models.category.find({ name: [`Sports Openers`, `Sports Liners`, `Sports Closers`] })
+      categories = await sails.models.category.find({ name: ['Sports Openers', 'Sports Liners', 'Sports Closers'] })
         .tolerate(() => {
         })
 
@@ -78,7 +78,7 @@ module.exports = {
 
       if (subcategories.length > 0) {
         subcategories.forEach((subcategory) => {
-          if (typeof sails.config.custom.sportscats[subcategory.name] !== `undefined`) {
+          if (typeof sails.config.custom.sportscats[subcategory.name] !== 'undefined') {
             sails.config.custom.sportscats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID
           }
         })
@@ -87,7 +87,7 @@ module.exports = {
       // Load subcats IDs for each show
       sails.log.verbose(`BOOTSTRAP: Loading showcats into configuration.`)
 
-      categories = await sails.models.category.find({ name: [`Show Openers`, `Show Returns`, `Show Closers`] })
+      categories = await sails.models.category.find({ name: ['Show Openers', 'Show Returns', 'Show Closers'] })
         .tolerate(() => {
         })
 
@@ -108,7 +108,7 @@ module.exports = {
       if (subcategories.length > 0) {
         sails.config.custom.showcats = {}
         subcategories.forEach((subcategory) => {
-          if (typeof sails.config.custom.showcats[subcategory.name] === `undefined`) { sails.config.custom.showcats[subcategory.name] = { 'Show Openers': null, 'Show Returns': null, 'Show Closers': null } }
+          if (typeof sails.config.custom.showcats[subcategory.name] === 'undefined') { sails.config.custom.showcats[subcategory.name] = { 'Show Openers': null, 'Show Returns': null, 'Show Closers': null } }
           sails.config.custom.showcats[subcategory.name][cats[subcategory.parentid]] = subcategory.ID
         })
       }

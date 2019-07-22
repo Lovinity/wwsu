@@ -1,19 +1,19 @@
 module.exports = {
 
-  friendlyName: `Directors / remove-hours`,
+  friendlyName: 'Directors / remove-hours',
 
-  description: `Remove an event for the director hours calendar; should only be used to remove cancellations.`,
+  description: 'Remove an event for the director hours calendar; should only be used to remove cancellations.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `The ID number of the calendar event to remove.`
+      description: 'The ID number of the calendar event to remove.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller directors/remove-hours called.`)
+    sails.log.debug('Controller directors/remove-hours called.')
     try {
       // Delete records from director calendar
       var records = await sails.models.directorhours.destroy({ ID: inputs.ID }).fetch()

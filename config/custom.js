@@ -11,9 +11,9 @@
  */
 
 // Declare global variables for a couple common libraries.
-global[`moment`] = require(`moment`)
-require(`moment-duration-format`)
-global[`needle`] = require(`needle`)
+global['moment'] = require('moment')
+require('moment-duration-format')
+global['needle'] = require('needle')
 
 // Create a config factory store; we are not using easy-config-store directly because it does not have a deleteProperty handler.
 const config = (() => {
@@ -29,7 +29,7 @@ const config = (() => {
       return result
     },
     set: function (oTarget, sKey, vValue) {
-      if (vValue && typeof vValue === `object`) {
+      if (vValue && typeof vValue === 'object') {
         proxyObject(vValue, [])
         vValue = new Proxy(vValue, handle)
       } else {
@@ -82,15 +82,15 @@ const config = (() => {
     },
     cfgUseFile: {
       value: (cfgPath) => {
-        const fs = require(`fs`)
+        const fs = require('fs')
         if (!fs.existsSync(cfgPath)) {
-          fs.writeFileSync(cfgPath, `{}`, `utf-8`)
+          fs.writeFileSync(cfgPath, '{}', 'utf-8')
         }
-        const cfg = JSON.parse(fs.readFileSync(cfgPath, `utf-8`))
+        const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf-8'))
         config.setOptions(cfg, (cfg) => {
           clearTimeout(timer)
           timer = setTimeout(() => {
-            fs.writeFileSync(cfgPath, JSON.stringify(cfg), `utf-8`)
+            fs.writeFileSync(cfgPath, JSON.stringify(cfg), 'utf-8')
           }, 300)
         })
       }
@@ -122,7 +122,7 @@ const config = (() => {
     for (var k in obj) {
       if (obj.hasOwnProperty(k)) {
         const v = obj[k]
-        if (v && typeof v === `object`) {
+        if (v && typeof v === 'object') {
           proxyObject(v, proxys)
           obj[k] = new Proxy(v, handle)
         } else {
@@ -132,12 +132,12 @@ const config = (() => {
   }
 
   function build () {
-    if (typeof (localStorage) === `object`) {
-      config.cfgUseLocalStorage(`easy-config-store`)
-    } else if (typeof (require(`os`)) === `object`) {
-      const os = require(`os`)
-      const path = require(`path`)
-      config.cfgUseFile(path.join(os.tmpdir(), `easy-config-store.cfg`))
+    if (typeof (localStorage) === 'object') {
+      config.cfgUseLocalStorage('easy-config-store')
+    } else if (typeof (require('os')) === 'object') {
+      const os = require('os')
+      const path = require('path')
+      config.cfgUseFile(path.join(os.tmpdir(), 'easy-config-store.cfg'))
     } else {
       config.cfgUseMemory()
     }
@@ -159,20 +159,20 @@ var defaultConfig = {
      * BASIC CONFIGURATION
      */
 
-  website: `https://wwsu1069.org`, // WWSU website URL
+  website: 'https://wwsu1069.org', // WWSU website URL
 
-  stream: `http://54.39.145.182:8000`, // URL to the internet stream server for WWSU.
+  stream: 'http://54.39.145.182:8000', // URL to the internet stream server for WWSU.
 
-  hostSecret: ``, // A random secret key used for generating hashes for public hosts / web mobile visitors. CHANGING THIS WILL INVALIDATE ACTIVE DISCIPLINE.
+  hostSecret: '', // A random secret key used for generating hashes for public hosts / web mobile visitors. CHANGING THIS WILL INVALIDATE ACTIVE DISCIPLINE.
 
   GoogleAPI: {
     // ID of the Google Calendar used for show programming and WWSU events. Must have API access.
-    calendarId: ``,
+    calendarId: '',
 
     // ID of the Google Calendar containing the office hours for directors. Must have API access.
     // NOTE: Every event in this calendar should have its title as the name of the director the hours are for, as used on the system.
     // For example, if George Carlin works Fridays 4pm-8pm, an event for Friday 4pm-8pm should be created on the calendar with the title "George Carlin".
-    directorHoursId: ``
+    directorHoursId: ''
   },
 
   // Used for oneSignal push notifications
@@ -190,7 +190,7 @@ var defaultConfig = {
     }
   },
 
-  startOfSemester: moment(`2019-01-14 00:00:00`).toISOString(true),
+  startOfSemester: moment('2019-01-14 00:00:00').toISOString(true),
 
   /*
      * TRACK CATEGORIES AND META
@@ -236,7 +236,7 @@ var defaultConfig = {
     // Legal Station IDs
     // DEFINITION: Required FCC ID at the top of every hour that includes call sign, frequency, and coverage area
     IDs: {
-      'Station IDs': [`Standard IDs`]
+      'Station IDs': ['Standard IDs']
     },
 
     // Public Service Announcements
@@ -248,7 +248,7 @@ var defaultConfig = {
     // Station Sweepers
     // DEFINITION: Fun audio clips, generally 15-30 seconds, identifying the station, played as defined in break configuration.
     sweepers: {
-      Sweepers: [`Break Sweepers`]
+      Sweepers: ['Break Sweepers']
     },
 
     // Station underwritings and commercials
@@ -261,29 +261,29 @@ var defaultConfig = {
     // DEFINITION: Short (usually <6 seconds) station identification that plays in between music tracks during non-break times in automation.
     // NOTE: When a break is queued, any liners in the queue will be removed; it would be unprofessional for a liner to play right before or after a break.
     liners: {
-      Liners: [`Standard Liners`]
+      Liners: ['Standard Liners']
     },
 
     // Request liners
     // DEFINITION: Short (usually <6 seconds) audio clips that play before the system plays requested tracks (if in automation).
     requestLiners: {
-      Liners: [`Request Liners`]
+      Liners: ['Request Liners']
     },
 
     // radio show promos
     // DEFINITION: An audio clip (usually 30-60 seconds) promoting a radio show or broadcast, played as defined in break configuration.
     promos: {
-      Promos: [`Radio Show Promos`]
+      Promos: ['Radio Show Promos']
     },
 
     // Music used for sports haltime and other extended sports breaks
     halftime: {
-      'Sports Music': [`Halftime and Break Music`]
+      'Sports Music': ['Halftime and Break Music']
     },
 
     // Liners played when the system is sent to break because of a technical issue (remote broadcasts)
     technicalIssues: {
-      Liners: [`Technical Issues Liners`]
+      Liners: ['Technical Issues Liners']
     },
 
     // When the system changes to a new playlist or genre, all tracks will be removed from the current queue EXCEPT tracks that are in these defined categories / subcategories.
@@ -324,7 +324,7 @@ var defaultConfig = {
     // When a DJ or producer requests to exit break, all tracks in these defined categories and subcategories will be removed from the queue
     clearBreak: {
       PSAs: [],
-      'Sports Music': [`Halftime and Break Music`]
+      'Sports Music': ['Halftime and Break Music']
     },
 
     // Hide Meta Data for these categories, and instead display the corresponding meta.alt metadata. See meta.alt below.
@@ -528,33 +528,33 @@ var defaultConfig = {
   breaks: {
     // This break will be triggered around the :00 of every hour. You MUST ALWAYS have a 0 break.
     0: [
-      { task: `log`, event: `Queued :00 top of the hour ID break.` },
-      { task: `queue`, category: `PSAs`, quantity: 1 },
-      { task: `queueDuplicates` },
-      { task: `queueUnderwritings`, quantity: 1 },
-      { task: `queue`, category: `promos`, quantity: 1 },
-      { task: `queue`, category: `IDs`, quantity: 1 },
-      { task: `queueRequests`, quantity: 3 }
+      { task: 'log', event: 'Queued :00 top of the hour ID break.' },
+      { task: 'queue', category: 'PSAs', quantity: 1 },
+      { task: 'queueDuplicates' },
+      { task: 'queueUnderwritings', quantity: 1 },
+      { task: 'queue', category: 'promos', quantity: 1 },
+      { task: 'queue', category: 'IDs', quantity: 1 },
+      { task: 'queueRequests', quantity: 3 }
     ],
 
     // This break will be triggered around the :20 of every hour.
     20: [
-      { task: `log`, event: `Queued :20 PSA break.` },
-      { task: `queue`, category: `PSAs`, quantity: 1 },
-      { task: `queueDuplicates` },
-      { task: `queueUnderwritings`, quantity: 2 },
-      { task: `queue`, category: `sweepers`, quantity: 1 },
-      { task: `queueRequests`, quantity: 3 }
+      { task: 'log', event: 'Queued :20 PSA break.' },
+      { task: 'queue', category: 'PSAs', quantity: 1 },
+      { task: 'queueDuplicates' },
+      { task: 'queueUnderwritings', quantity: 2 },
+      { task: 'queue', category: 'sweepers', quantity: 1 },
+      { task: 'queueRequests', quantity: 3 }
     ],
 
     // This break will be triggered around the :40 of every hour.
     40: [
-      { task: `log`, event: `Queued :40 PSA break.` },
-      { task: `queue`, category: `PSAs`, quantity: 1 },
-      { task: `queueDuplicates` },
-      { task: `queueUnderwritings`, quantity: 2 },
-      { task: `queue`, category: `sweepers`, quantity: 1 },
-      { task: `queueRequests`, quantity: 3 }
+      { task: 'log', event: 'Queued :40 PSA break.' },
+      { task: 'queue', category: 'PSAs', quantity: 1 },
+      { task: 'queueDuplicates' },
+      { task: 'queueUnderwritings', quantity: 2 },
+      { task: 'queue', category: 'sweepers', quantity: 1 },
+      { task: 'queueRequests', quantity: 3 }
     ]
   },
 
@@ -585,7 +585,7 @@ var defaultConfig = {
     // break times out, or another show begins.
     automation: {
       during: [
-        { task: `queue`, category: `PSAs`, quantity: 1 }
+        { task: 'queue', category: 'PSAs', quantity: 1 }
       ]
     },
 
@@ -595,23 +595,23 @@ var defaultConfig = {
 
       // These are queued/executed just before a live show begins.
       start: [
-        { task: `queueUnderwritings`, quantity: 1 }
+        { task: 'queueUnderwritings', quantity: 1 }
       ],
 
       // These are queued/executed once, right when the break is started.
       before: [
-        { task: `queueDuplicates` },
-        { task: `queueUnderwritings`, quantity: 2 }
+        { task: 'queueDuplicates' },
+        { task: 'queueUnderwritings', quantity: 2 }
       ],
 
       // These are executed/queued repeatedly every time RadioDJ's queue gets empty until the DJ returns from their break.
       during: [
-        { task: `queue`, category: `PSAs`, quantity: 1 }
+        { task: 'queue', category: 'PSAs', quantity: 1 }
       ],
 
       // These are queued/executed when the DJ returns from their break.
       after: [
-        { task: `queue`, category: `sweepers`, quantity: 1 }
+        { task: 'queue', category: 'sweepers', quantity: 1 }
       ],
 
       // These are queued/executed when the live show ends.
@@ -627,23 +627,23 @@ var defaultConfig = {
 
       // These are queued/executed just before a remote broadcast begins.
       start: [
-        { task: `queueUnderwritings`, quantity: 1 }
+        { task: 'queueUnderwritings', quantity: 1 }
       ],
 
       // These are queued/executed once, right when the break is started.
       before: [
-        { task: `queueDuplicates` },
-        { task: `queueUnderwritings`, quantity: 2 }
+        { task: 'queueDuplicates' },
+        { task: 'queueUnderwritings', quantity: 2 }
       ],
 
       // These are executed/queued repeatedly every time RadioDJ's queue gets empty until the DJ returns from their break.
       during: [
-        { task: `queue`, category: `PSAs`, quantity: 1 }
+        { task: 'queue', category: 'PSAs', quantity: 1 }
       ],
 
       // These are queued/executed when the DJ returns from their break.
       after: [
-        { task: `queue`, category: `sweepers`, quantity: 1 }
+        { task: 'queue', category: 'sweepers', quantity: 1 }
       ],
 
       // These are queued/executed after a remote broadcast ends.
@@ -662,23 +662,23 @@ var defaultConfig = {
 
       // These are queued/executed once, right when the break is started.
       before: [
-        { task: `queueDuplicates` },
-        { task: `queueUnderwritings`, quantity: 2 }
+        { task: 'queueDuplicates' },
+        { task: 'queueUnderwritings', quantity: 2 }
       ],
 
       // During standard breaks, these are executed/queued repeatedly every time RadioDJ's queue gets empty until the producer returns from their break.
       during: [
-        { task: `queue`, category: `PSAs`, quantity: 1 }
+        { task: 'queue', category: 'PSAs', quantity: 1 }
       ],
 
       // During extended breaks / halftime, these are executed/queued repeatedly every time RadioDJ's queue gets empty until the producer returns from their break.
       duringHalftime: [
-        { task: `queue`, category: `halftime`, quantity: 1 }
+        { task: 'queue', category: 'halftime', quantity: 1 }
       ],
 
       // These are queued/executed when the producer returns from their break.
       after: [
-        { task: `queue`, category: `sweepers`, quantity: 1 }
+        { task: 'queue', category: 'sweepers', quantity: 1 }
       ],
 
       // These are queued/executed after a sports broadcast ends.
@@ -732,13 +732,13 @@ var defaultConfig = {
   // {name: 'alphaname' ("display-" prepends this), label: 'Friendly name' ("Display " will prepend this), level: 1 (1=critical, 2=significant, 3=minor), instances: 1 (number of display signs to expect to be connected)}
   // All other display signs will either give a status of 4 (online no-issue) if they are reported offline, or will not show up in the recipients table.
   displaysigns: [
-    { name: `public`, label: `Public`, level: 3, instances: 2 }, // We have two display signs that show the public page
-    { name: `internal`, label: `Internal`, level: 3, instances: 1 }
+    { name: 'public', label: 'Public', level: 3, instances: 2 }, // We have two display signs that show the public page
+    { name: 'internal', label: 'Internal', level: 3, instances: 1 }
   ],
 
   // RadioDJ REST server configuration
   rest: {
-    auth: `` // Enter the REST authentication password for RadioDJ here. Must be the same on all RadioDJ instances
+    auth: '' // Enter the REST authentication password for RadioDJ here. Must be the same on all RadioDJ instances
   },
 
   // Object of configuration regarding XP
@@ -887,193 +887,193 @@ var defaultConfig = {
      */
 
   profanity: [
-    `5h1t`,
-    `5hit`,
-    `assfukka`,
-    `asshole`,
-    `asswhole`,
-    `b!tch`,
-    `b17ch`,
-    `b1tch`,
-    `ballbag`,
-    `ballsack`,
-    `beastiality`,
-    `bestiality`,
-    `bi+ch`,
-    `biatch`,
-    `bitch`,
-    `blow job`,
-    `blowjob`,
-    `boiolas`,
-    `boner`,
-    `bunny fucker`,
-    `butthole`,
-    `buttmuch`,
-    `buttplug`,
-    `carpet muncher`,
-    `chink`,
-    `cl1t`,
-    `clit`,
-    `cnut`,
-    `cock-sucker`,
-    `cockface`,
-    `cockhead`,
-    `cockmunch`,
-    `cocksuck`,
-    `cocksuka`,
-    `cocksukka`,
-    `cokmuncher`,
-    `coksucka`,
-    `cummer`,
-    `cumming`,
-    `cumshot`,
-    `cunilingus`,
-    `cunillingus`,
-    `cunnilingus`,
-    `cunt`,
-    `cyberfuc`,
-    `dickhead`,
-    `dildo`,
-    `dog-fucker`,
-    `doggin`,
-    `dogging`,
-    `donkeyribber`,
-    `doosh`,
-    `duche`,
-    `dyke`,
-    `ejaculate`,
-    `ejaculating`,
-    `ejaculation`,
-    `ejakulate`,
-    `f u c k`,
-    `fag`,
-    `fannyflaps`,
-    `fannyfucker`,
-    `fatass`,
-    `fcuk`,
-    `felching`,
-    `fellate`,
-    `fellatio`,
-    `flange`,
-    `fuck`,
-    `fudge packer`,
-    `fudgepacker`,
-    `fuk`,
-    `fux`,
-    `fux0r`,
-    `f_u_c_k`,
-    `gangbang`,
-    `gaylord`,
-    `gaysex`,
-    `goatse`,
-    `god-dam`,
-    `goddamn`,
-    `hardcoresex`,
-    `heshe`,
-    `homosex`,
-    `horniest`,
-    `horny`,
-    `hotsex`,
-    `jack-off`,
-    `jackoff`,
-    `jerk-off`,
-    `jism`,
-    `jiz`,
-    `jizm`,
-    `kawk`,
-    `kunilingus`,
-    `l3i+ch`,
-    `l3itch`,
-    `labia`,
-    `m0f0`,
-    `m0fo`,
-    `m45terbate`,
-    `ma5terb8`,
-    `ma5terbate`,
-    `master-bate`,
-    `masterb8`,
-    `masterbat*`,
-    `masterbat3`,
-    `masterbate`,
-    `masterbation`,
-    `masturbate`,
-    `mo-fo`,
-    `mof0`,
-    `mofo`,
-    `muthafecker`,
-    `muthafuckker`,
-    `mutherfucker`,
-    `n1gga`,
-    `n1gger`,
-    `nigg3r`,
-    `nigg4h`,
-    `nigga`,
-    `nigger`,
-    `nob jokey`,
-    `nobhead`,
-    `nobjocky`,
-    `nobjokey`,
-    `numbnuts`,
-    `nutsack`,
-    `pecker`,
-    `penis`,
-    `phonesex`,
-    `phuck`,
-    `phuk`,
-    `phuq`,
-    `pimpis`,
-    `piss`,
-    `prick`,
-    `pusse`,
-    `pussi`,
-    `pussies`,
-    `pussy`,
-    `rectum`,
-    `retard`,
-    `rimjaw`,
-    `rimming`,
-    `s hit`,
-    `schlong`,
-    `scroat`,
-    `scrote`,
-    `scrotum`,
-    `semen`,
-    `sh!+`,
-    `sh!t`,
-    `sh1t`,
-    `shag`,
-    `shagger`,
-    `shaggin`,
-    `shagging`,
-    `shemale`,
-    `shi+`,
-    `shit`,
-    `skank`,
-    `slut`,
-    `sluts`,
-    `smegma`,
-    `spunk`,
-    `s_h_i_t`,
-    `t1tt1e5`,
-    `t1tties`,
-    `teets`,
-    `testical`,
-    `testicle`,
-    `titfuck`,
-    `tits`,
-    `tittie5`,
-    `tittiefucker`,
-    `titties`,
-    `tw4t`,
-    `twat`,
-    `twunt`,
-    `vagina`,
-    `vulva`,
-    `w00se`,
-    `wang`,
-    `wanker`,
-    `wanky`,
-    `whore`
+    '5h1t',
+    '5hit',
+    'assfukka',
+    'asshole',
+    'asswhole',
+    'b!tch',
+    'b17ch',
+    'b1tch',
+    'ballbag',
+    'ballsack',
+    'beastiality',
+    'bestiality',
+    'bi+ch',
+    'biatch',
+    'bitch',
+    'blow job',
+    'blowjob',
+    'boiolas',
+    'boner',
+    'bunny fucker',
+    'butthole',
+    'buttmuch',
+    'buttplug',
+    'carpet muncher',
+    'chink',
+    'cl1t',
+    'clit',
+    'cnut',
+    'cock-sucker',
+    'cockface',
+    'cockhead',
+    'cockmunch',
+    'cocksuck',
+    'cocksuka',
+    'cocksukka',
+    'cokmuncher',
+    'coksucka',
+    'cummer',
+    'cumming',
+    'cumshot',
+    'cunilingus',
+    'cunillingus',
+    'cunnilingus',
+    'cunt',
+    'cyberfuc',
+    'dickhead',
+    'dildo',
+    'dog-fucker',
+    'doggin',
+    'dogging',
+    'donkeyribber',
+    'doosh',
+    'duche',
+    'dyke',
+    'ejaculate',
+    'ejaculating',
+    'ejaculation',
+    'ejakulate',
+    'f u c k',
+    'fag',
+    'fannyflaps',
+    'fannyfucker',
+    'fatass',
+    'fcuk',
+    'felching',
+    'fellate',
+    'fellatio',
+    'flange',
+    'fuck',
+    'fudge packer',
+    'fudgepacker',
+    'fuk',
+    'fux',
+    'fux0r',
+    'f_u_c_k',
+    'gangbang',
+    'gaylord',
+    'gaysex',
+    'goatse',
+    'god-dam',
+    'goddamn',
+    'hardcoresex',
+    'heshe',
+    'homosex',
+    'horniest',
+    'horny',
+    'hotsex',
+    'jack-off',
+    'jackoff',
+    'jerk-off',
+    'jism',
+    'jiz',
+    'jizm',
+    'kawk',
+    'kunilingus',
+    'l3i+ch',
+    'l3itch',
+    'labia',
+    'm0f0',
+    'm0fo',
+    'm45terbate',
+    'ma5terb8',
+    'ma5terbate',
+    'master-bate',
+    'masterb8',
+    'masterbat*',
+    'masterbat3',
+    'masterbate',
+    'masterbation',
+    'masturbate',
+    'mo-fo',
+    'mof0',
+    'mofo',
+    'muthafecker',
+    'muthafuckker',
+    'mutherfucker',
+    'n1gga',
+    'n1gger',
+    'nigg3r',
+    'nigg4h',
+    'nigga',
+    'nigger',
+    'nob jokey',
+    'nobhead',
+    'nobjocky',
+    'nobjokey',
+    'numbnuts',
+    'nutsack',
+    'pecker',
+    'penis',
+    'phonesex',
+    'phuck',
+    'phuk',
+    'phuq',
+    'pimpis',
+    'piss',
+    'prick',
+    'pusse',
+    'pussi',
+    'pussies',
+    'pussy',
+    'rectum',
+    'retard',
+    'rimjaw',
+    'rimming',
+    's hit',
+    'schlong',
+    'scroat',
+    'scrote',
+    'scrotum',
+    'semen',
+    'sh!+',
+    'sh!t',
+    'sh1t',
+    'shag',
+    'shagger',
+    'shaggin',
+    'shagging',
+    'shemale',
+    'shi+',
+    'shit',
+    'skank',
+    'slut',
+    'sluts',
+    'smegma',
+    'spunk',
+    's_h_i_t',
+    't1tt1e5',
+    't1tties',
+    'teets',
+    'testical',
+    'testicle',
+    'titfuck',
+    'tits',
+    'tittie5',
+    'tittiefucker',
+    'titties',
+    'tw4t',
+    'twat',
+    'twunt',
+    'vagina',
+    'vulva',
+    'w00se',
+    'wang',
+    'wanker',
+    'wanky',
+    'whore'
   ],
 
   /*
@@ -1081,11 +1081,11 @@ var defaultConfig = {
      */
 
   sanitize: {
-    allowedTags: [`h5`, `h6`, `blockquote`, `p`, `a`, `ul`, `ol`,
-      `nl`, `li`, `b`, `i`, `strong`, `em`, `strike`, `code`, `hr`, `br`, `u`, `s`, `span`],
+    allowedTags: ['h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+      'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'u', 's', 'span'],
     allowedAttributes: {
-      a: [`href`, `name`, `target`],
-      span: [`style`]
+      a: ['href', 'name', 'target'],
+      span: ['style']
     },
     allowedStyles: {
       span: {
@@ -1094,11 +1094,11 @@ var defaultConfig = {
       }
     },
     // Lots of these won't come up by default because we don't allow them
-    selfClosing: [`br`, `hr`, `area`, `base`, `basefont`, `input`, `link`, `meta`],
+    selfClosing: ['br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
     // URL schemes we permit
-    allowedSchemes: [`http`, `https`],
+    allowedSchemes: ['http', 'https'],
     allowedSchemesByTag: {},
-    allowedSchemesAppliedToAttributes: [`href`, `src`, `cite`],
+    allowedSchemesAppliedToAttributes: ['href', 'src', 'cite'],
     allowProtocolRelative: true
   },
 
@@ -1114,113 +1114,113 @@ var defaultConfig = {
     // This object contains all of the NWS alerts we will process. Key is the alert event name from NWS, value is the hex color used for this alert.
     // Any alerts from NWS that contain an event name that does not exist in this object will not be processed and sent out.
     alerts: {
-      '911 Telephone Outage': `#C0C0C0`,
-      'Administrative Message': `#FFFFFF`,
-      'Air Quality Alert': `#808080`,
-      'Air Stagnation Advisory': `#808080`,
-      'Arroyo and Small Stream Flood Advisory': `#00FF7F`,
-      'Ashfall Advisory': `#696969`,
-      'Ashfall Warning': `#A9A9A9`,
-      'Avalanche Advisory': `#CD853F`,
-      'Avalanche Warning': `#1E90FF`,
-      'Avalanche Watch': `#F4A460`,
-      'Blizzard Warning': `#FF4500`,
-      'Blizzard Watch': `#ADFF2F`,
-      'Blowing Dust Advisory': `#BDB76B`,
-      'Brisk Wind Advisory': `#D8BFD8`,
-      'Child Abduction Emergency': `#FFD700`,
-      'Civil Danger Warning': `#FFB6C1`,
-      'Civil Emergency Message': `#FFB6C1`,
-      'Coastal Flood Advisory': `#7CFC00`,
-      'Coastal Flood Warning': `#228B22`,
-      'Coastal Flood Watch': `#66CDAA`,
-      'Dense Fog Advisory': `#708090`,
-      'Dense Smoke Advisory': `#F0E68C`,
-      'Dust Storm Warning': `#FFE4C4`,
-      'Earthquake Warning': `#8B4513`,
-      'Evacuation - Immediate': `#7FFF00`,
-      'Excessive Heat Warning': `#C71585`,
-      'Excessive Heat Watch': `#800000`,
-      'Extreme Cold Warning': `#0000FF`,
-      'Extreme Cold Watch': `#0000FF`,
-      'Extreme Fire Danger': `#E9967A`,
-      'Extreme Wind Warning': `#FF8C00`,
-      'Fire Warning': `#A0522D`,
-      'Fire Weather Watch': `#FFDEAD`,
-      'Flash Flood Warning': `#8B0000`,
-      'Flash Flood Watch': `#2E8B57`,
-      'Flood Advisory': `#00FF7F`,
-      'Flood Warning': `#00FF00`,
-      'Flood Watch': `#2E8B57`,
-      'Freeze Warning': `#483D8B`,
-      'Freeze Watch': `#00FFFF`,
-      'Freezing Fog Advisory': `#008080`,
-      'Freezing Rain Advisory': `#DA70D6`,
-      'Freezing Spray Advisory': `#00BFFF`,
-      'Frost Advisory': `#6495ED`,
-      'Gale Warning': `#DDA0DD`,
-      'Gale Watch': `#FFC0CB`,
-      'Hard Freeze Warning': `#9400D3`,
-      'Hard Freeze Watch': `#4169E1`,
-      'Hazardous Materials Warning': `#4B0082`,
-      'Hazardous Seas Warning': `#D8BFD8`,
-      'Hazardous Seas Watch': `#483D8B`,
-      'Heat Advisory': `#FF7F50`,
-      'Heavy Freezing Spray Warning': `#00BFFF`,
-      'Heavy Freezing Spray Watch': `#BC8F8F`,
-      'High Surf Advisory': `#BA55D3`,
-      'High Surf Warning': `#228B22`,
-      'High Wind Warning': `#DAA520`,
-      'High Wind Watch': `#B8860B`,
-      'Hurricane Force Wind Warning': `#CD5C5C`,
-      'Hurricane Force Wind Watch': `#9932CC`,
-      'Hurricane Warning': `#DC143C`,
-      'Hurricane Watch': `#FF00FF`,
-      'Hydrologic Advisory': `#00FF7F`,
-      'Ice Storm Warning': `#8B008B`,
-      'Lake Effect Snow Advisory': `#48D1CC`,
-      'Lake Effect Snow Warning': `#008B8B`,
-      'Lake Effect Snow Watch': `#87CEFA`,
-      'Lake Wind Advisory': `#D2B48C`,
-      'Lakeshore Flood Advisory': `#7CFC00`,
-      'Lakeshore Flood Warning': `#228B22`,
-      'Lakeshore Flood Watch': `#66CDAA`,
-      'Law Enforcement Warning': `#C0C0C0`,
-      'Local Area Emergency': `#C0C0C0`,
-      'Low Water Advisory': `#A52A2A`,
-      'Nuclear Power Plant Warning': `#4B0082`,
-      'Radiological Hazard Warning': `#4B0082`,
-      'Red Flag Warning': `#FF1493`,
-      'Severe Thunderstorm Warning': `#FFA500`,
-      'Severe Thunderstorm Watch': `#DB7093`,
-      'Shelter In Place Warning': `#FA8072`,
-      'Small Craft Advisory': `#D8BFD8`,
-      'Small Craft Advisory For Hazardous Seas': `#D8BFD8`,
-      'Small Craft Advisory For Rough Bar': `#D8BFD8`,
-      'Small Craft Advisory For Winds': `#D8BFD8`,
-      'Small Stream Flood Advisory': `#00FF7F`,
-      'Special Marine Warning': `#FFA500`,
-      'Storm Warning': `#9400D3`,
-      'Storm Watch': `#FFE4B5`,
-      Test: `#F0FFFF`,
-      'Tornado Warning': `#FF0000`,
-      'Tornado Watch': `#FFFF00`,
-      'Tropical Storm Warning': `#B22222`,
-      'Tropical Storm Watch': `#F08080`,
-      'Tsunami Advisory': `#D2691E`,
-      'Tsunami Warning': `#FD6347`,
-      'Tsunami Watch': `#FF00FF`,
-      'Typhoon Warning': `#DC143C`,
-      'Typhoon Watch': `#FF00FF`,
-      'Urban and Small Stream Flood Advisory': `#00FF7F`,
-      'Volcano Warning': `#2F4F4F`,
-      'Wind Advisory': `#D2B48C`,
-      'Wind Chill Advisory': `#AFEEEE`,
-      'Wind Chill Warning': `#B0C4DE`,
-      'Wind Chill Watch': `#5F9EA0`,
-      'Winter Storm Warning': `#FF69B4`,
-      'Winter Storm Watch': `#4682B4`,
-      'Winter Weather Advisory': `#7B68EE`
+      '911 Telephone Outage': '#C0C0C0',
+      'Administrative Message': '#FFFFFF',
+      'Air Quality Alert': '#808080',
+      'Air Stagnation Advisory': '#808080',
+      'Arroyo and Small Stream Flood Advisory': '#00FF7F',
+      'Ashfall Advisory': '#696969',
+      'Ashfall Warning': '#A9A9A9',
+      'Avalanche Advisory': '#CD853F',
+      'Avalanche Warning': '#1E90FF',
+      'Avalanche Watch': '#F4A460',
+      'Blizzard Warning': '#FF4500',
+      'Blizzard Watch': '#ADFF2F',
+      'Blowing Dust Advisory': '#BDB76B',
+      'Brisk Wind Advisory': '#D8BFD8',
+      'Child Abduction Emergency': '#FFD700',
+      'Civil Danger Warning': '#FFB6C1',
+      'Civil Emergency Message': '#FFB6C1',
+      'Coastal Flood Advisory': '#7CFC00',
+      'Coastal Flood Warning': '#228B22',
+      'Coastal Flood Watch': '#66CDAA',
+      'Dense Fog Advisory': '#708090',
+      'Dense Smoke Advisory': '#F0E68C',
+      'Dust Storm Warning': '#FFE4C4',
+      'Earthquake Warning': '#8B4513',
+      'Evacuation - Immediate': '#7FFF00',
+      'Excessive Heat Warning': '#C71585',
+      'Excessive Heat Watch': '#800000',
+      'Extreme Cold Warning': '#0000FF',
+      'Extreme Cold Watch': '#0000FF',
+      'Extreme Fire Danger': '#E9967A',
+      'Extreme Wind Warning': '#FF8C00',
+      'Fire Warning': '#A0522D',
+      'Fire Weather Watch': '#FFDEAD',
+      'Flash Flood Warning': '#8B0000',
+      'Flash Flood Watch': '#2E8B57',
+      'Flood Advisory': '#00FF7F',
+      'Flood Warning': '#00FF00',
+      'Flood Watch': '#2E8B57',
+      'Freeze Warning': '#483D8B',
+      'Freeze Watch': '#00FFFF',
+      'Freezing Fog Advisory': '#008080',
+      'Freezing Rain Advisory': '#DA70D6',
+      'Freezing Spray Advisory': '#00BFFF',
+      'Frost Advisory': '#6495ED',
+      'Gale Warning': '#DDA0DD',
+      'Gale Watch': '#FFC0CB',
+      'Hard Freeze Warning': '#9400D3',
+      'Hard Freeze Watch': '#4169E1',
+      'Hazardous Materials Warning': '#4B0082',
+      'Hazardous Seas Warning': '#D8BFD8',
+      'Hazardous Seas Watch': '#483D8B',
+      'Heat Advisory': '#FF7F50',
+      'Heavy Freezing Spray Warning': '#00BFFF',
+      'Heavy Freezing Spray Watch': '#BC8F8F',
+      'High Surf Advisory': '#BA55D3',
+      'High Surf Warning': '#228B22',
+      'High Wind Warning': '#DAA520',
+      'High Wind Watch': '#B8860B',
+      'Hurricane Force Wind Warning': '#CD5C5C',
+      'Hurricane Force Wind Watch': '#9932CC',
+      'Hurricane Warning': '#DC143C',
+      'Hurricane Watch': '#FF00FF',
+      'Hydrologic Advisory': '#00FF7F',
+      'Ice Storm Warning': '#8B008B',
+      'Lake Effect Snow Advisory': '#48D1CC',
+      'Lake Effect Snow Warning': '#008B8B',
+      'Lake Effect Snow Watch': '#87CEFA',
+      'Lake Wind Advisory': '#D2B48C',
+      'Lakeshore Flood Advisory': '#7CFC00',
+      'Lakeshore Flood Warning': '#228B22',
+      'Lakeshore Flood Watch': '#66CDAA',
+      'Law Enforcement Warning': '#C0C0C0',
+      'Local Area Emergency': '#C0C0C0',
+      'Low Water Advisory': '#A52A2A',
+      'Nuclear Power Plant Warning': '#4B0082',
+      'Radiological Hazard Warning': '#4B0082',
+      'Red Flag Warning': '#FF1493',
+      'Severe Thunderstorm Warning': '#FFA500',
+      'Severe Thunderstorm Watch': '#DB7093',
+      'Shelter In Place Warning': '#FA8072',
+      'Small Craft Advisory': '#D8BFD8',
+      'Small Craft Advisory For Hazardous Seas': '#D8BFD8',
+      'Small Craft Advisory For Rough Bar': '#D8BFD8',
+      'Small Craft Advisory For Winds': '#D8BFD8',
+      'Small Stream Flood Advisory': '#00FF7F',
+      'Special Marine Warning': '#FFA500',
+      'Storm Warning': '#9400D3',
+      'Storm Watch': '#FFE4B5',
+      Test: '#F0FFFF',
+      'Tornado Warning': '#FF0000',
+      'Tornado Watch': '#FFFF00',
+      'Tropical Storm Warning': '#B22222',
+      'Tropical Storm Watch': '#F08080',
+      'Tsunami Advisory': '#D2691E',
+      'Tsunami Warning': '#FD6347',
+      'Tsunami Watch': '#FF00FF',
+      'Typhoon Warning': '#DC143C',
+      'Typhoon Watch': '#FF00FF',
+      'Urban and Small Stream Flood Advisory': '#00FF7F',
+      'Volcano Warning': '#2F4F4F',
+      'Wind Advisory': '#D2B48C',
+      'Wind Chill Advisory': '#AFEEEE',
+      'Wind Chill Warning': '#B0C4DE',
+      'Wind Chill Watch': '#5F9EA0',
+      'Winter Storm Warning': '#FF69B4',
+      'Winter Storm Watch': '#4682B4',
+      'Winter Weather Advisory': '#7B68EE'
     }
   },
 
@@ -1249,7 +1249,7 @@ var defaultConfig = {
 config.setOptions(defaultConfig)
 
 // Then replace default configuration with anything in the config.cfg file. Also save all changes to config.cfg.
-config.cfgUseFile(`config.cfg`)
+config.cfgUseFile('config.cfg')
 
 // Export the module for use in the Sails application
 module.exports.custom = config

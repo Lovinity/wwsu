@@ -8,242 +8,242 @@
  */
 
 module.exports = {
-  datastore: `radiodj`,
+  datastore: 'radiodj',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     path: {
-      type: `string`
+      type: 'string'
     },
 
     enabled: {
-      type: `number`
+      type: 'number'
     },
 
     date_added: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     date_modified: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     date_played: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     artist_played: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     album_played: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     title_played: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     count_played: {
-      type: `number`
+      type: 'number'
     },
 
     play_limit: {
-      type: `number`
+      type: 'number'
     },
 
     limit_action: {
-      type: `number`
+      type: 'number'
     },
 
     start_date: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     end_date: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     startEvent: {
-      type: `number`
+      type: 'number'
     },
 
     endEvent: {
-      type: `number`
+      type: 'number'
     },
 
     song_type: {
-      type: `number`
+      type: 'number'
     },
 
     id_subcat: {
-      type: `number`
+      type: 'number'
     },
 
     id_genre: {
-      type: `number`
+      type: 'number'
     },
 
     weight: {
-      type: `number`
+      type: 'number'
     },
 
     duration: {
-      type: `number`
+      type: 'number'
     },
 
     original_duration: {
-      type: `number`
+      type: 'number'
     },
 
     cue_times: {
-      type: `string`
+      type: 'string'
     },
 
     precise_cue: {
-      type: `number`
+      type: 'number'
     },
 
     fade_type: {
-      type: `number`
+      type: 'number'
     },
 
     start_type: {
-      type: `number`
+      type: 'number'
     },
 
     end_type: {
-      type: `number`
+      type: 'number'
     },
 
     mix_type: {
-      type: `number`
+      type: 'number'
     },
 
     mood: {
-      type: `string`
+      type: 'string'
     },
 
     gender: {
-      type: `string`
+      type: 'string'
     },
 
     lang: {
-      type: `string`
+      type: 'string'
     },
 
     rating: {
-      type: `number`
+      type: 'number'
     },
 
     loudness: {
-      type: `number`
+      type: 'number'
     },
 
     overlay: {
-      type: `number`
+      type: 'number'
     },
 
     artist: {
-      type: `string`
+      type: 'string'
     },
 
     original_artist: {
-      type: `string`
+      type: 'string'
     },
 
     title: {
-      type: `string`
+      type: 'string'
     },
 
     album: {
-      type: `string`
+      type: 'string'
     },
 
     composer: {
-      type: `string`
+      type: 'string'
     },
 
     label: {
-      type: `string`
+      type: 'string'
     },
 
     year: {
-      type: `string`
+      type: 'string'
     },
 
     track_no: {
-      type: `number`
+      type: 'number'
     },
 
     disc_no: {
-      type: `number`
+      type: 'number'
     },
 
     publisher: {
-      type: `string`
+      type: 'string'
     },
 
     copyright: {
-      type: `string`
+      type: 'string'
     },
 
     isrc: {
-      type: `string`
+      type: 'string'
     },
 
     bpm: {
-      type: `number`
+      type: 'number'
     },
 
     comments: {
-      type: `string`
+      type: 'string'
     },
 
     sweepers: {
-      type: `string`
+      type: 'string'
     },
 
     image: {
-      type: `string`
+      type: 'string'
     },
 
     buy_link: {
-      type: `string`
+      type: 'string'
     },
 
     url1: {
-      type: `string`
+      type: 'string'
     },
 
     url2: {
-      type: `string`
+      type: 'string'
     },
 
     tdate_played: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     tartist_played: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     originalmetadata: {
-      type: `number`
+      type: 'number'
     }
     /*
         spins_7: {

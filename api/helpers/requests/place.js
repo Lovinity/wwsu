@@ -1,41 +1,41 @@
-var sh = require(`shorthash`)
+var sh = require('shorthash')
 
 module.exports = {
 
-  friendlyName: `requests.place`,
+  friendlyName: 'requests.place',
 
-  description: `Place a request.`,
+  description: 'Place a request.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `The ID of the song being requested.`
+      description: 'The ID of the song being requested.'
     },
     IP: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `IP address of the client making the request.`
+      description: 'IP address of the client making the request.'
     },
     name: {
-      type: `string`,
-      defaultsTo: `Anonymous`,
-      description: `Name of the person making the request.`
+      type: 'string',
+      defaultsTo: 'Anonymous',
+      description: 'Name of the person making the request.'
     },
     message: {
-      type: `string`,
-      defaultsTo: ``,
-      description: `A message to be included with the request.`
+      type: 'string',
+      defaultsTo: '',
+      description: 'A message to be included with the request.'
     },
     device: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
-      description: `If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays.`
+      description: 'If requested from the mobile app, provide the device ID so they can receive a push notification when the request plays.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper requests.place called.`)
+    sails.log.debug('Helper requests.place called.')
     try {
       // First, confirm the track can actually be requested.
       var requestable = await sails.helpers.requests.checkRequestable(inputs.ID, inputs.IP)
@@ -58,7 +58,7 @@ module.exports = {
 
         // Get the song data
         var record2 = await sails.models.songs.findOne({ ID: inputs.ID })
-        if (!record2) { return exits.error(new Error(`The provided track ID does not exist.`)) }
+        if (!record2) { return exits.error(new Error('The provided track ID does not exist.')) }
         sails.log.silly(`Song: ${record2}`)
 
         // Create the request
@@ -69,7 +69,7 @@ module.exports = {
         if (sails.config.custom.requests.priorityBump !== 0) { await sails.models.songs.update({ ID: inputs.ID }, { weight: record2.weight + sails.config.custom.requests.priorityBump }) }
 
         // Log the request
-        await sails.models.logs.create({ attendanceID: null, logtype: `website`, loglevel: `info`, logsubtype: `track-request`, event: `<strong>A track was requested!</strong><br />Track: ${record2.artist} - ${record2.title} (ID ${inputs.ID})<br />Requested By: ${inputs.name}<br />Message: ${inputs.message}`, createdAt: moment().toISOString(true) }).fetch()
+        await sails.models.logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: `track-request`, event: `<strong>A track was requested!</strong><br />Track: ${record2.artist} - ${record2.title} (ID ${inputs.ID})<br />Requested By: ${inputs.name}<br />Message: ${inputs.message}`, createdAt: moment().toISOString(true) }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })

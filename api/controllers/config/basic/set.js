@@ -1,30 +1,30 @@
 module.exports = {
 
-  friendlyName: `config / basic / set`,
+  friendlyName: 'config / basic / set',
 
-  description: `Set new basic configuration`,
+  description: 'Set new basic configuration',
 
   inputs: {
 
     website: {
-      type: `string`,
+      type: 'string',
       isURL: true,
       description: `URL to WWSU's website; used by Status to check if the website goes offline.`
     },
 
     stream: {
-      type: `string`,
+      type: 'string',
       isURL: true,
       description: `URL to the Shoutcast v2.6 radio stream server. Used to monitor status and record listener counts.`
     },
 
     hostSecret: {
-      type: `string`,
+      type: 'string',
       description: `A random secret key used for generating hashes for public hosts / web mobile visitors. CHANGING THIS WILL INVALIDATE ACTIVE DISCIPLINE.`
     },
 
     startOfSemester: {
-      type: `string`,
+      type: 'string',
       custom: function (value) {
         return moment(value).isValid()
       },
@@ -32,7 +32,7 @@ module.exports = {
     },
 
     lofi: {
-      type: `boolean`,
+      type: 'boolean',
       description: `If true, backend will skip the checks CRON. This will also disable some subsystems like metadata. Recommended only change by a developer.`
     }
   },
@@ -42,7 +42,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/basic/set called.`)
+    sails.log.debug('Controller config/basic/set called.')
 
     try {
       var returnData = {}
@@ -57,7 +57,7 @@ module.exports = {
       }
 
       // broadcast changes over websockets
-      sails.sockets.broadcast(`config`, `config`, { update: inputs })
+      sails.sockets.broadcast('config', 'config', { update: inputs })
 
       return exits.success()
     } catch (e) {

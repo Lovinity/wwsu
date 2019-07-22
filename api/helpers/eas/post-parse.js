@@ -1,15 +1,15 @@
 module.exports = {
 
-  friendlyName: `eas.postParse`,
+  friendlyName: 'eas.postParse',
 
-  description: `Finalize and push out new/updated alerts.`,
+  description: 'Finalize and push out new/updated alerts.',
 
   inputs: {
 
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper eas.postParse called.`)
+    sails.log.debug('Helper eas.postParse called.')
 
     try {
       var sendit = []
@@ -20,7 +20,7 @@ module.exports = {
           sails.log.verbose(`Processing EAS`, sails.models.eas.pendingAlerts[key])
 
           // Do not process alerts containing no information
-          if (sails.models.eas.pendingAlerts[key].information === `` || sails.models.eas.pendingAlerts[key].information === null) {
+          if (sails.models.eas.pendingAlerts[key].information === '' || sails.models.eas.pendingAlerts[key].information === null) {
             delete sails.models.eas.pendingAlerts[key]
             continue
           }
@@ -47,7 +47,7 @@ module.exports = {
 
       var maps = records.map(async record => {
         // Trigger a non-fetched update of all NWS records still active so that the updatedAt is updated, and therefore the record isn't removed.
-        if (record.source === `NWS` && sails.models.eas.activeCAPS.indexOf(record.reference) !== -1) {
+        if (record.source === 'NWS' && sails.models.eas.activeCAPS.indexOf(record.reference) !== -1) {
           await sails.models.eas.update({ ID: record.ID }, { updatedAt: moment().toISOString(true) })
             .tolerate((err) => {
               sails.log.error(err)
@@ -56,7 +56,7 @@ module.exports = {
         }
 
         // Remove expired alerts. Also, NWS alerts not reported by CAPS in 5 or more minutes (via updatedAt checking) should also be considered expired or canceled.
-        if ((record.source === `NWS` && moment().isAfter(moment(record.updatedAt).add(5, `minutes`))) || moment().isAfter(moment(record.expires))) {
+        if ((record.source === 'NWS' && moment().isAfter(moment(record.updatedAt).add(5, 'minutes'))) || moment().isAfter(moment(record.expires))) {
           sails.log.verbose(`Record ${record.ID} is to be deleted. It has expired.`)
           await sails.models.eas.destroy({ ID: record.ID }).fetch()
             .tolerate((err) => {

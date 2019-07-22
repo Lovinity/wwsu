@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `sails.helpers.onesignal.sendEvent`,
+  friendlyName: 'sails.helpers.onesignal.sendEvent',
 
-  description: `Send push notifications out for a new show/programming that just went out on the air.`,
+  description: 'Send push notifications out for a new show/programming that just went out on the air.',
 
   inputs: {
     prefix: {
-      type: `string`,
+      type: 'string',
       required: true,
       description: `The event prefix that determines the type of event.`
     },
@@ -18,7 +18,7 @@ module.exports = {
     },
 
     type: {
-      type: `string`,
+      type: 'string',
       required: true,
       description: `The type of event this is, such as a live show, prerecord, or sports broadcast`
     },
@@ -30,13 +30,13 @@ module.exports = {
     },
 
     date: {
-      type: `string`,
+      type: 'string',
       description: `If specified, this notification is a cancellation notice, and this is the date which the event was cancelled for.`
     },
 
     cancelled: {
-      type: `boolean`,
-      description: `If true, and date was provided, consider event as cancelled. If false and date provided, consider event as changed date/time.`
+      type: 'boolean',
+      description: 'If true, and date was provided, consider event as cancelled. If false and date provided, consider event as changed date/time.'
     }
   },
 

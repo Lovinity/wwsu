@@ -1,17 +1,17 @@
 module.exports = {
 
-  friendlyName: `Messages / Get`,
+  friendlyName: 'Messages / Get',
 
-  description: `A WWSU client, such as DJ Controls, will use this endpoint to read messages, including reported emergencies.`,
+  description: 'A WWSU client, such as DJ Controls, will use this endpoint to read messages, including reported emergencies.',
 
   inputs: {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller messages/get called.`)
+    sails.log.debug('Controller messages/get called.')
 
     // Get client IP address
-    var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers[`x-forwarded-for`] !== `undefined` ? this.req.socket.handshake.headers[`x-forwarded-for`] : this.req.socket.conn.remoteAddress) : this.req.ip
+    var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip
 
     try {
       // Get messages
@@ -19,8 +19,8 @@ module.exports = {
 
       // Subscribe to web socket if applicable
       if (this.req.isSocket) {
-        sails.sockets.join(this.req, `messages`)
-        sails.log.verbose(`Request was a socket. Joining messages.`)
+        sails.sockets.join(this.req, 'messages')
+        sails.log.verbose('Request was a socket. Joining messages.')
       }
 
       return exits.success(records)

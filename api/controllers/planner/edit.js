@@ -1,27 +1,27 @@
 module.exports = {
 
-  friendlyName: `Planner / edit`,
+  friendlyName: 'Planner / edit',
 
-  description: `edit a proposed show in the planner system.`,
+  description: 'edit a proposed show in the planner system.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true
     },
     dj: {
-      type: `string`
+      type: 'string'
     },
     show: {
-      type: `string`
+      type: 'string'
     },
     priority: {
-      type: `number`,
+      type: 'number',
       min: 0,
       max: 100
     },
     proposal: {
-      type: `json`,
+      type: 'json',
       custom: (value) => {
         if (!_.isArray(value)) { return false }
         if (value.length < 1) { return true }
@@ -30,7 +30,7 @@ module.exports = {
         value.map((val) => {
           if (!valid) { return null }
 
-          if (typeof val !== `object`) {
+          if (typeof val !== 'object') {
             valid = false
             return null
           }
@@ -45,7 +45,7 @@ module.exports = {
       }
     },
     clearActual: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false
     }
   },
@@ -55,7 +55,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller planner/edit called.`)
+    sails.log.debug('Controller planner/edit called.')
 
     try {
       var criteria = {}

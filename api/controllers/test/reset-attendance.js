@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `reset attendance`,
+  friendlyName: 'reset attendance',
 
-  description: `attendance reset.`,
+  description: 'attendance reset.',
 
   inputs: {
   },

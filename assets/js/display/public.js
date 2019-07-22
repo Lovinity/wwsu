@@ -34,7 +34,7 @@ class Scoreboard {
       temp.innerHTML = value
       if (value === null || value === ``) { $(this._wsuScore).fadeTo(500, 0) }
       if (value !== null && value !== `` && (this._wsuScoreValue === null || this._wsuScoreValue === ``)) { $(this._wsuScore).fadeTo(500, 1) }
-      if (value > this._wsuScoreValue) { $(this._wsuScore).animateCss(`heartBeat slower`) }
+      if (value > this._wsuScoreValue) { $(this._wsuScore).animateCss('heartBeat slower') }
     }
     this._wsuScoreValue = value
   }
@@ -45,7 +45,7 @@ class Scoreboard {
       temp.innerHTML = value
       if (value === null || value === ``) { $(this._oppScore).fadeTo(500, 0) }
       if (value !== null && value !== `` && (this._oppScoreValue === null || this._oppScoreValue === ``)) { $(this._oppScore).fadeTo(500, 1) }
-      if (value > this._oppScoreValue) { $(this._oppScore).animateCss(`heartBeat slower`) }
+      if (value > this._oppScoreValue) { $(this._oppScore).animateCss('heartBeat slower') }
     }
     this._oppScoreValue = value
   }
@@ -108,36 +108,36 @@ class Scoreboard {
 
 try {
   // Create a new scoreboard class
-  var ascoreboard = new Scoreboard(`#scoreboard`, `#score-wsu`, `#score-opp`, `#num-wsu`, `#num-opp`, `#text-wsu`, `#text-opp`)
+  var ascoreboard = new Scoreboard('#scoreboard', '#score-wsu', '#score-opp', '#num-wsu', '#num-opp', '#text-wsu', '#text-opp')
 
   // Define hexrgb constants
-  var hexChars = `a-f\\d`
+  var hexChars = 'a-f\\d'
   var match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`
   var match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`
 
-  var nonHexChars = new RegExp(`[^#${hexChars}]`, `gi`)
-  var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, `i`)
+  var nonHexChars = new RegExp(`[^#${hexChars}]`, 'gi')
+  var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i')
 
   // Define HTML elements
-  var content = document.getElementById(`slide`)
-  var djAlert = document.getElementById(`dj-alert`)
-  var easAlert = document.getElementById(`eas-alert`)
-  var nowplayingtime = document.getElementById(`nowplaying-time`)
-  var nowplayinglines = document.getElementById(`nowplaying-lines`)
-  var nowplayingline1 = document.getElementById(`nowplaying-line1`)
-  var nowplayingline2 = document.getElementById(`nowplaying-line2`)
-  var wrapper = document.getElementById(`wrapper`)
+  var content = document.getElementById('slide')
+  var djAlert = document.getElementById('dj-alert')
+  var easAlert = document.getElementById('eas-alert')
+  var nowplayingtime = document.getElementById('nowplaying-time')
+  var nowplayinglines = document.getElementById('nowplaying-lines')
+  var nowplayingline1 = document.getElementById('nowplaying-line1')
+  var nowplayingline2 = document.getElementById('nowplaying-line2')
+  var wrapper = document.getElementById('wrapper')
 
   // Define data sources
   var Meta = { time: moment().toISOString(true) }
   var Calendar = new WWSUdb(TAFFY())
-  var calendarWorker = new Worker(`../../js/display/workers/publicCalendar.js`)
+  var calendarWorker = new Worker('../../js/display/workers/publicCalendar.js')
   // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
   var Announcements = new WWSUdb(TAFFY())
   var Directors = new WWSUdb(TAFFY())
   var Eas = new WWSUdb(TAFFY())
   var Darksky = new WWSUdb(TAFFY())
-  var darkskyWorker = new Worker(`../../js/display/workers/publicDarksky.js`)
+  var darkskyWorker = new Worker('../../js/display/workers/publicDarksky.js')
   var sportsdb = new WWSUdb(TAFFY())
   var newEas = []
   var prevEas = []
@@ -160,8 +160,8 @@ try {
   var directorpresent = false
   var nowPlayingTimer
   var temp
-  var isStudio = window.location.search.indexOf(`studio=true`) !== -1
-  var isLightTheme = window.location.search.indexOf(`light=true`) !== -1
+  var isStudio = window.location.search.indexOf('studio=true') !== -1
+  var isLightTheme = window.location.search.indexOf('light=true') !== -1
   var weatherSlide = [
     { id: `weather`, icon: `fa-sun`, background: `#424242`, header: `Current Weather`, body: `Unknown`, show: true },
     { id: `precipitation`, icon: `fa-umbrella`, background: `#424242`, header: `Precipitation`, body: ``, show: false },
@@ -281,39 +281,39 @@ try {
 
   // Define default settings for iziToast (overlaying messages)
   iziToast.settings({
-    titleColor: `#000000`,
-    messageColor: `#000000`,
-    backgroundColor: `rgba(244, 67, 54, 0.8);`,
-    color: `rgba(244, 67, 54);`,
+    titleColor: '#000000',
+    messageColor: '#000000',
+    backgroundColor: 'rgba(244, 67, 54, 0.8);',
+    color: 'rgba(244, 67, 54);',
     close: false,
-    progressBarColor: `rgba(244, 67, 54, 1)`,
+    progressBarColor: 'rgba(244, 67, 54, 1)',
     overlay: true,
-    overlayColor: `rgba(244, 67, 54, 0.1)`,
+    overlayColor: 'rgba(244, 67, 54, 0.1)',
     zindex: 1000,
     layout: 1,
     closeOnClick: true,
-    position: `center`,
+    position: 'center',
     timeout: 30000
   })
 
   // Burnguard is the line that sweeps across the screen to prevent screen burn-in
-  var $burnGuard = $(`<div>`).attr(`id`, `burnGuard`).css({
-    'background-color': `rgba(0, 0, 0, 0)`,
-    width: `10px`,
-    height: $(document).height() + `px`,
-    position: `absolute`,
-    top: `0px`,
-    left: `0px`,
-    display: `none`,
+  var $burnGuard = $('<div>').attr('id', 'burnGuard').css({
+    'background-color': 'rgba(0, 0, 0, 0)',
+    width: '10px',
+    height: $(document).height() + 'px',
+    position: 'absolute',
+    top: '0px',
+    left: '0px',
+    display: 'none',
     'z-index': 9999
-  }).appendTo(`body`)
+  }).appendTo('body')
 
-  var colors = [`#FF0000`, `#00FF00`, `#0000FF`]; var Scolor = 0; var delay = 300000; var scrollDelay = 15000
+  var colors = ['#FF0000', '#00FF00', '#0000FF']; var Scolor = 0; var delay = 300000; var scrollDelay = 15000
 } catch (e) {
   console.error(e)
   iziToast.show({
-    title: `An error occurred - Please check the logs`,
-    message: `Error occurred when setting up initial variables and/or burnguard.`
+    title: 'An error occurred - Please check the logs',
+    message: 'Error occurred when setting up initial variables and/or burnguard.'
   })
 }
 
@@ -322,19 +322,19 @@ function burnGuardAnimate () {
     Scolor = ++Scolor % 3
     var rColor = colors[Scolor]
     $burnGuard.css({
-      left: `0px`,
+      left: '0px',
       'background-color': rColor
     }).show().animate({
-      left: $(window).width() + `px`
-    }, scrollDelay, `linear`, function () {
+      left: $(window).width() + 'px'
+    }, scrollDelay, 'linear', function () {
       $(this).hide()
     })
     setTimeout(burnGuardAnimate, delay)
   } catch (e) {
     console.error(e)
     iziToast.show({
-      title: `An error occurred - Please check the logs`,
-      message: `Error occurred during burnGuardAnimate.`
+      title: 'An error occurred - Please check the logs',
+      message: 'Error occurred during burnGuardAnimate.'
     })
   }
 }
@@ -344,10 +344,10 @@ $.fn.extend({
   animateCss: function (animationName, callback) {
     var animationEnd = (function (el) {
       var animations = {
-        animation: `animationend`,
-        OAnimation: `oAnimationEnd`,
-        MozAnimation: `mozAnimationEnd`,
-        WebkitAnimation: `webkitAnimationEnd`
+        animation: 'animationend',
+        OAnimation: 'oAnimationEnd',
+        MozAnimation: 'mozAnimationEnd',
+        WebkitAnimation: 'webkitAnimationEnd'
       }
 
       for (var t in animations) {
@@ -355,12 +355,12 @@ $.fn.extend({
           return animations[t]
         }
       }
-    })(document.createElement(`div`))
+    })(document.createElement('div'))
 
-    this.addClass(`animated ` + animationName).one(animationEnd, function () {
-      $(this).removeClass(`animated ` + animationName)
+    this.addClass('animated ' + animationName).one(animationEnd, function () {
+      $(this).removeClass('animated ' + animationName)
 
-      if (typeof callback === `function`)
+      if (typeof callback === 'function')
       // eslint-disable-next-line callback-return
       { callback() }
     })
@@ -381,7 +381,7 @@ function processDirectors (db) {
       } catch (e) {
         console.error(e)
         iziToast.show({
-          title: `An error occurred - Please check the logs`,
+          title: 'An error occurred - Please check the logs',
           message: `Error occurred during Directors iteration in processDirectors.`
         })
       }
@@ -389,8 +389,8 @@ function processDirectors (db) {
   } catch (e) {
     console.error(e)
     iziToast.show({
-      title: `An error occurred - Please check the logs`,
-      message: `Error occurred during the call of processDirectors.`
+      title: 'An error occurred - Please check the logs',
+      message: 'Error occurred during the call of processDirectors.'
     })
   }
 }
@@ -401,7 +401,7 @@ function processCalendar (db) {
     calendarWorker.postMessage([db.get(), moment(Meta.time).toISOString(true)])
   } catch (e) {
     console.error(e)
-    var innercontent = document.getElementById(`events-today`)
+    var innercontent = document.getElementById('events-today')
     innercontent.innerHTML = `
         <div class="row m-1" style="font-size: 1.5vh;">
             <div class="col text-white">
@@ -412,7 +412,7 @@ function processCalendar (db) {
 }
 
 calendarWorker.onmessage = function (e) {
-  var innercontent = document.getElementById(`events-today`)
+  var innercontent = document.getElementById('events-today')
   innercontent.innerHTML = e.data
 }
 
@@ -429,7 +429,7 @@ function processEas (db) {
     easExtreme = false
 
     prevEas = []
-    var innercontent = document.getElementById(`eas-alerts`)
+    var innercontent = document.getElementById('eas-alerts')
     innercontent.innerHTML = ``
 
     // eslint-disable-next-line no-unused-vars
@@ -444,25 +444,25 @@ function processEas (db) {
         makeActive = true
         displayTime += 4
 
-        if (dodo.severity === `Extreme`) { easExtreme = true }
+        if (dodo.severity === 'Extreme') { easExtreme = true }
 
-        var color = (typeof dodo.color !== `undefined` && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb(`#787878`)
-        var borderclass = `black`
+        var color = (typeof dodo.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)) ? hexRgb(dodo.color) : hexRgb('#787878')
+        var borderclass = 'black'
         color.red = Math.round(color.red / 2)
         color.green = Math.round(color.green / 2)
         color.blue = Math.round(color.blue / 2)
-        if (typeof dodo[`severity`] !== `undefined`) {
-          if (dodo[`severity`] === `Extreme`) {
-            borderclass = `danger`
-          } else if (dodo[`severity`] === `Severe`) {
-            borderclass = `warning`
-          } else if (dodo[`severity`] === `Moderate`) {
-            borderclass = `primary`
+        if (typeof dodo['severity'] !== 'undefined') {
+          if (dodo['severity'] === 'Extreme') {
+            borderclass = 'danger'
+          } else if (dodo['severity'] === 'Severe') {
+            borderclass = 'warning'
+          } else if (dodo['severity'] === 'Moderate') {
+            borderclass = 'primary'
           }
         }
         // LINT LIES: This variable is used.
         // eslint-disable-next-line no-unused-vars
-        var timeleft = ``
+        var timeleft = ''
         if (moment(Meta.time).isBefore(moment(dodo.starts))) {
           timeleft = `Effective ${moment(Meta.time).to(moment(dodo.starts))}`
         } else if (moment(Meta.time).isAfter(moment(dodo.expires))) {
@@ -475,15 +475,15 @@ function processEas (db) {
           color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`
         }
         innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${!isLightTheme ? `bg-dark-4` : `bg-light-1`}">
-                        <div class="m-1" style="text-align: center; width: 100%"><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo[`alert`] !== `undefined`) ? dodo[`alert`] : `Unknown Alert`}</span><br />
-                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo[`starts`]).isValid() ? moment(dodo[`starts`]).format(`MM/DD h:mmA`) : `UNKNOWN`} - ${moment(dodo[`expires`]).isValid() ? moment(dodo[`expires`]).format(`MM/DD h:mmA`) : `UNKNOWN`}</span><br />
-<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo[`counties`] !== `undefined`) ? dodo[`counties`] : `Unknown Counties`}</span><br /></div>
+                        <div class="m-1" style="text-align: center; width: 100%"><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
                         </div>
                         `
       } catch (e) {
         console.error(e)
         iziToast.show({
-          title: `An error occurred - Please check the logs`,
+          title: 'An error occurred - Please check the logs',
           message: `Error occurred during Eas iteration in processEas.`
         })
       }
@@ -502,8 +502,8 @@ function processEas (db) {
   } catch (e) {
     console.error(e)
     iziToast.show({
-      title: `An error occurred - Please check the logs`,
-      message: `Error occurred during the call of Eas[0].`
+      title: 'An error occurred - Please check the logs',
+      message: 'Error occurred during the call of Eas[0].'
     })
   }
 }
@@ -523,13 +523,13 @@ function waitFor (check, callback, count = 0) {
 }
 
 waitFor(() => {
-  return (typeof io !== `undefined` && typeof io.socket !== `undefined` && io.socket.isConnected())
+  return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected())
 }, () => {
   // Define hostReq object
   noReq = new WWSUreq(io.socket, `display-public`)
 
   // When new Meta is received, update it in our memory and then run the process function.
-  io.socket.on(`meta`, (data) => {
+  io.socket.on('meta', (data) => {
     try {
       for (var key in data) {
         if (data.hasOwnProperty(key)) {
@@ -540,27 +540,27 @@ waitFor(() => {
     } catch (e) {
       console.error(e)
       iziToast.show({
-        title: `An error occurred - Please check the logs`,
-        message: `Error occurred during the meta event.`
+        title: 'An error occurred - Please check the logs',
+        message: 'Error occurred during the meta event.'
       })
     }
   })
 
   // Update weekly analytics
-  io.socket.on(`analytics-weekly-dj`, (data) => {
+  io.socket.on('analytics-weekly-dj', (data) => {
     try {
       processWeeklyStats(data)
     } catch (e) {
       iziToast.show({
-        title: `An error occurred - Please check the logs`,
-        message: `Error occurred on analytics-weekly-dj event.`
+        title: 'An error occurred - Please check the logs',
+        message: 'Error occurred on analytics-weekly-dj event.'
       })
       console.error(e)
     }
   })
 
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
-  Calendar.assignSocketEvent(`calendar`, io.socket)
+  Calendar.assignSocketEvent('calendar', io.socket)
   Calendar.setOnUpdate((data, db) => {
     clearTimeout(processCalendarTimer)
     processCalendarTimer = setTimeout(() => {
@@ -587,20 +587,20 @@ waitFor(() => {
   })
 
   // On new directors data, update our directors memory and run the process function.
-  Directors.assignSocketEvent(`directors`, io.socket)
+  Directors.assignSocketEvent('directors', io.socket)
   Directors.setOnUpdate((data, db) => processDirectors(db))
   Directors.setOnInsert((data, db) => processDirectors(db))
   Directors.setOnRemove((data, db) => processDirectors(db))
   Directors.setOnReplace((db) => processDirectors(db))
 
-  Darksky.assignSocketEvent(`darksky`, io.socket)
+  Darksky.assignSocketEvent('darksky', io.socket)
   Darksky.setOnUpdate((data, db) => processDarksky(db))
   Darksky.setOnInsert((data, db) => processDarksky(db))
   Darksky.setOnRemove((data, db) => processDarksky(db))
   Darksky.setOnReplace((db) => processDarksky(db))
 
   // scoreboard
-  sportsdb.assignSocketEvent(`sports`, io.socket)
+  sportsdb.assignSocketEvent('sports', io.socket)
   sportsdb.setOnInsert((data) => {
     changeData(data)
   })
@@ -616,20 +616,20 @@ waitFor(() => {
   })
 
   // on messages, display message if event is an insert
-  io.socket.on(`messages`, (data) => {
+  io.socket.on('messages', (data) => {
     for (var key in data) {
-      if (data.hasOwnProperty(key) && key === `insert`) {
+      if (data.hasOwnProperty(key) && key === 'insert') {
         iziToast.show({
-          title: `Message`,
+          title: 'Message',
           message: data[key].message,
           timeout: 60000,
-          backgroundColor: `#FFF59D`,
-          color: `#FFF59D`,
-          progressBarColor: `#FFF59D`,
-          overlayColor: `rgba(255, 255, 54, 0.1)`,
+          backgroundColor: '#FFF59D',
+          color: '#FFF59D',
+          progressBarColor: '#FFF59D',
+          overlayColor: 'rgba(255, 255, 54, 0.1)',
           closeOnClick: true,
-          titleSize: `2em`,
-          messageSize: `1.5em`,
+          titleSize: '2em',
+          messageSize: '1.5em',
           balloon: true,
           zindex: 999
         })
@@ -638,7 +638,7 @@ waitFor(() => {
     }
   })
 
-  io.socket.on(`connect`, () => {
+  io.socket.on('connect', () => {
     onlineSocket()
     MetaSocket()
     eventSocket()
@@ -668,16 +668,16 @@ waitFor(() => {
     clearTimeout(restart)
   }
 
-  io.socket.on(`disconnect`, () => {
-    console.log(`Lost connection`)
+  io.socket.on('disconnect', () => {
+    console.log('Lost connection')
     try {
       io.socket._raw.io._reconnection = true
       io.socket._raw.io._reconnectionAttempts = Infinity
     } catch (e) {
       console.error(e)
       iziToast.show({
-        title: `An error occurred - Please check the logs`,
-        message: `Error occurred trying to make socket reconnect indefinitely.`
+        title: 'An error occurred - Please check the logs',
+        message: 'Error occurred trying to make socket reconnect indefinitely.'
       })
     }
     if (!disconnected) {
@@ -694,18 +694,18 @@ waitFor(() => {
   })
 
   // On new eas data, update our eas memory and run the process function.
-  Eas.assignSocketEvent(`eas`, io.socket)
+  Eas.assignSocketEvent('eas', io.socket)
   Eas.setOnUpdate((data, db) => processEas(db))
   Eas.setOnInsert((data, db) => processEas(db))
   Eas.setOnRemove((data, db) => processEas(db))
   Eas.setOnReplace((db) => processEas(db))
 
-  io.socket.on(`display-refresh`, () => {
+  io.socket.on('display-refresh', () => {
     window.location.reload(true)
   })
 
   // When an announcement comes through
-  Announcements.assignSocketEvent(`announcements`, io.socket)
+  Announcements.assignSocketEvent('announcements', io.socket)
   // Do stuff when announcements changes are made
   Announcements.setOnUpdate((data) => {
     Slides.removeSlide(`attn-${data.ID}`)
@@ -734,29 +734,29 @@ waitFor(() => {
 })
 
 function onlineSocket () {
-  console.log(`attempting online socket`)
-  noReq.request({ method: `POST`, url: `/recipients/add-display`, data: { host: `display-public` } }, () => {
+  console.log('attempting online socket')
+  noReq.request({ method: 'POST', url: '/recipients/add-display', data: { host: 'display-public' } }, () => {
     try {
     } catch (unusedE) {
-      console.log(`FAILED ONLINE CONNECTION`)
+      console.log('FAILED ONLINE CONNECTION')
       setTimeout(onlineSocket, 10000)
     }
   })
 }
 
 function easSocket () {
-  console.log(`attempting eas socket`)
+  console.log('attempting eas socket')
   try {
-    Eas.replaceData(noReq, `/eas/get`)
+    Eas.replaceData(noReq, '/eas/get')
   } catch (unusedE) {
-    console.log(`FAILED CONNECTION`)
+    console.log('FAILED CONNECTION')
     setTimeout(easSocket, 10000)
   }
 }
 
 function MetaSocket () {
-  console.log(`attempting Meta socket`)
-  noReq.request({ method: `POST`, url: `/meta/get`, data: {} }, (body) => {
+  console.log('attempting Meta socket')
+  noReq.request({ method: 'POST', url: '/meta/get', data: {} }, (body) => {
     try {
       temp = body
       for (var key in temp) {
@@ -766,55 +766,55 @@ function MetaSocket () {
       }
       processNowPlaying(temp)
     } catch (unusedE) {
-      console.log(`FAILED CONNECTION`)
+      console.log('FAILED CONNECTION')
       setTimeout(MetaSocket, 10000)
     }
   })
   // scoreboard
-  sportsdb.replaceData(noReq, `/sports/get`)
+  sportsdb.replaceData(noReq, '/sports/get')
 }
 
 function eventSocket () {
-  console.log(`attempting event socket`)
+  console.log('attempting event socket')
   try {
-    Calendar.replaceData(noReq, `/calendar/get`)
+    Calendar.replaceData(noReq, '/calendar/get')
   } catch (e) {
     console.log(e)
-    console.log(`FAILED CONNECTION`)
+    console.log('FAILED CONNECTION')
     setTimeout(eventSocket, 10000)
   }
 }
 
 function directorSocket () {
-  console.log(`attempting director socket`)
+  console.log('attempting director socket')
   try {
-    Directors.replaceData(noReq, `/directors/get`)
+    Directors.replaceData(noReq, '/directors/get')
   } catch (unusedE) {
-    console.log(`FAILED CONNECTION`)
+    console.log('FAILED CONNECTION')
     setTimeout(directorSocket, 10000)
   }
 }
 
 // Replace all Status data with that of body request
 function weeklyDJSocket () {
-  console.log(`attempting weeklyDJ socket`)
-  noReq.request({ method: `POST`, url: `/analytics/weekly-dj`, data: {} }, (body) => {
+  console.log('attempting weeklyDJ socket')
+  noReq.request({ method: 'POST', url: '/analytics/weekly-dj', data: {} }, (body) => {
     try {
       processWeeklyStats(body)
     } catch (e) {
       console.error(e)
-      console.log(`FAILED WEEKLYDJ CONNECTION`)
+      console.log('FAILED WEEKLYDJ CONNECTION')
       setTimeout(weeklyDJSocket, 10000)
     }
   })
 }
 
 function darkskySocket () {
-  console.log(`attempting darksky socket`)
+  console.log('attempting darksky socket')
   try {
-    Darksky.replaceData(noReq, `/darksky/get`)
+    Darksky.replaceData(noReq, '/darksky/get')
   } catch (unusedE) {
-    console.log(`FAILED CONNECTION`)
+    console.log('FAILED CONNECTION')
     setTimeout(darkskySocket, 10000)
   }
 }
@@ -822,9 +822,9 @@ function darkskySocket () {
 function announcementsSocket () {
   try {
     var data = []
-    noReq.request({ method: `POST`, url: `/announcements/get`, data: { type: `display-public` } }, (body) => {
+    noReq.request({ method: 'POST', url: '/announcements/get', data: { type: 'display-public' } }, (body) => {
       data = data.concat(body)
-      noReq.request({ method: `POST`, url: `/announcements/get`, data: { type: `display-public-sticky` } }, (body) => {
+      noReq.request({ method: 'POST', url: '/announcements/get', data: { type: 'display-public-sticky' } }, (body) => {
         data = data.concat(body)
 
         Announcements.query(data, true)
@@ -832,7 +832,7 @@ function announcementsSocket () {
     })
   } catch (e) {
     console.error(e)
-    console.log(`FAILED ANNOUNCEMENTS CONNECTION`)
+    console.log('FAILED ANNOUNCEMENTS CONNECTION')
     setTimeout(announcementsSocket, 10000)
   }
 }
@@ -844,49 +844,49 @@ function doEas () {
     // Display the new alert if conditions permit
     if ((newEas.length > 0 && !easActive)) {
       // Make sure alert is valid. Also, only scroll severe and extreme alerts when there is an extreme alert in effect; ignore moderate and minor alerts.
-      if (typeof newEas[0] !== `undefined` && (!easExtreme || (easExtreme && (newEas[0][`severity`] === `Extreme` || newEas[0][`severity`] === `Severe`)))) {
+      if (typeof newEas[0] !== 'undefined' && (!easExtreme || (easExtreme && (newEas[0]['severity'] === 'Extreme' || newEas[0]['severity'] === 'Severe')))) {
         easActive = true
 
-        var alert = (typeof newEas[0][`alert`] !== `undefined`) ? newEas[0][`alert`] : `Unknown Alert`
-        var text = (typeof newEas[0][`information`] !== `undefined`) ? newEas[0][`information`].replace(/[\r\n]+/g, ` `) : `There was an error attempting to retrieve information about this alert. Please check the National Weather Service or your local civil authorities for details about this alert.`
-        var color2 = (typeof newEas[0][`color`] !== `undefined` && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0][`color`])) ? hexRgb(newEas[0][`color`]) : hexRgb(`#787878`)
-        var color3 = (typeof newEas[0][`color`] !== `undefined` && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0][`color`])) ? hexRgb(newEas[0][`color`]) : hexRgb(`#787878`)
+        var alert = (typeof newEas[0]['alert'] !== 'undefined') ? newEas[0]['alert'] : 'Unknown Alert'
+        var text = (typeof newEas[0]['information'] !== 'undefined') ? newEas[0]['information'].replace(/[\r\n]+/g, ' ') : 'There was an error attempting to retrieve information about this alert. Please check the National Weather Service or your local civil authorities for details about this alert.'
+        var color2 = (typeof newEas[0]['color'] !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0]['color'])) ? hexRgb(newEas[0]['color']) : hexRgb('#787878')
+        var color3 = (typeof newEas[0]['color'] !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0]['color'])) ? hexRgb(newEas[0]['color']) : hexRgb('#787878')
         color3.red = Math.round(color3.red / 2)
         color3.green = Math.round(color3.green / 2)
         color3.blue = Math.round(color3.blue / 2)
         color3 = `rgb(${color3.red}, ${color3.green}, ${color3.blue})`
-        var color4 = (typeof newEas[0][`color`] !== `undefined` && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0][`color`])) ? hexRgb(newEas[0][`color`]) : hexRgb(`#787878`)
+        var color4 = (typeof newEas[0]['color'] !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0]['color'])) ? hexRgb(newEas[0]['color']) : hexRgb('#787878')
         color4.red = Math.round((color4.red / 2) + 127)
         color4.green = Math.round((color4.green / 2) + 127)
         color4.blue = Math.round((color4.blue / 2) + 127)
         color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`
-        easAlert.style.display = `inline`
+        easAlert.style.display = 'inline'
         easAlert.style.backgroundColor = `#0000ff`
         easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em;">WWSU Emergency Alert System</h1>
                     <div id="eas-alert-text" class="m-3 text-white" style="font-size: 6em;">${alert}</div>
-                    <div class="m-1 text-white" style="font-size: 2em;">Effective ${moment(newEas[0][`starts`]).isValid() ? moment(newEas[0][`starts`]).format(`MM/DD h:mmA`) : `UNKNOWN`} - ${moment(newEas[0][`expires`]).isValid() ? moment(newEas[0][`expires`]).format(`MM/DD h:mmA`) : `UNKNOWN`}</div>
-                    <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[0][`counties`] !== `undefined`) ? newEas[0][`counties`] : `Unknown Counties`}</div>
+                    <div class="m-1 text-white" style="font-size: 2em;">Effective ${moment(newEas[0]['starts']).isValid() ? moment(newEas[0]['starts']).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format('MM/DD h:mmA') : 'UNKNOWN'}</div>
+                    <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`
-        if (isLightTheme) { responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0][`counties`] !== `undefined`) ? newEas[0][`counties`] : `Unknown Counties`}. This is in effect until ${moment(newEas[0][`expires`]).isValid() ? moment(newEas[0][`expires`]).format(`LLL`) : `UNKNOWN`}.`) }
+        if (isLightTheme) { responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format('LLL') : 'UNKNOWN'}.`) }
         if (easExtreme) {
-          easAlert.style.display = `inline`
+          easAlert.style.display = 'inline'
           easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`
         }
-        $(`#alert-marquee`)
-          .bind(`finished`, () => {
+        $('#alert-marquee')
+          .bind('finished', () => {
             try {
               easActive = false
-              var temp = document.getElementById(`alert-marquee`)
-              temp.innerHTML = ``
+              var temp = document.getElementById('alert-marquee')
+              temp.innerHTML = ''
               clearInterval(flashInterval)
               newEas.shift()
               doEas()
             } catch (e) {
               console.error(e)
               iziToast.show({
-                title: `An error occurred - Please check the logs`,
+                title: 'An error occurred - Please check the logs',
                 message: `Error occurred in the finished bind of #alert-marquee in doEas.`
               })
             }
@@ -899,7 +899,7 @@ function doEas () {
             // time in milliseconds before the marquee will start animating
             delayBeforeStart: 2000,
             // 'left' or 'right'
-            direction: `left`,
+            direction: 'left',
             // true or false - should the marquee be duplicated to show an effect of continues flow
             duplicated: false
           })
@@ -932,9 +932,9 @@ function doEas () {
       clearInterval(flashInterval)
       var voiceCount = 180
       flashInterval = setInterval(() => {
-        $(`#eas-alert`).css(`background-color`, `#D50000`)
+        $('#eas-alert').css('background-color', '#D50000')
         setTimeout(() => {
-          $(`#eas-alert`).css(`background-color`, !isLightTheme ? `#320000` : `#f6cccc`)
+          $('#eas-alert').css('background-color', !isLightTheme ? `#320000` : `#f6cccc`)
           voiceCount++
           if (voiceCount > 179) {
             voiceCount = 0
@@ -944,48 +944,48 @@ function doEas () {
       }, 1000)
 
       // Display the extreme alerts
-      easAlert.style.display = `inline`
+      easAlert.style.display = 'inline'
       easAlert.innerHTML = `<div id="slide-interrupt-eas">
             <h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`};">WWSU Emergency Alert System</h1>
             <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">Extreme Alerts in effect</h2>
             <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`
-      var innercontent = document.getElementById(`alerts`)
-      Eas.db({ severity: `Extreme` }).each((dodo) => {
+      var innercontent = document.getElementById('alerts')
+      Eas.db({ severity: 'Extreme' }).each((dodo) => {
         try {
-          var color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color) ? hexRgb(dodo.color) : hexRgb(`#787878`)
-          var borderclass = `black`
-          borderclass = `danger`
+          var color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color) ? hexRgb(dodo.color) : hexRgb('#787878')
+          var borderclass = 'black'
+          borderclass = 'danger'
           color = `rgb(${Math.round(color.red / 4)}, ${Math.round(color.green / 4)}, ${Math.round(color.blue / 4)});`
           innercontent.innerHTML += `<div style="width: 32%;${!isLightTheme ? `background-color: ${color}` : ``}" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark bg-light-1`} border border-${borderclass} rounded shadow-4">
-                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo[`alert`] !== `undefined`) ? dodo[`alert`] : `Unknown Alert`}</span><br />
-                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo[`starts`]).isValid() ? moment(dodo[`starts`]).format(`MM/DD h:mmA`) : `UNKNOWN`} - ${moment(dodo[`expires`]).isValid() ? moment(dodo[`expires`]).format(`MM/DD h:mmA`) : `UNKNOWN`}</span><br />
-<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo[`counties`] !== `undefined`) ? dodo[`counties`] : `Unknown Counties`}</span><br />
+                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
                         </div>
                         `
         } catch (e) {
           console.error(e)
           iziToast.show({
-            title: `An error occurred - Please check the logs`,
+            title: 'An error occurred - Please check the logs',
             message: `Error occurred during Eas iteration in doEas.`
           })
         }
       })
       // Resume regular slides when no extreme alerts are in effect anymore
-    } else if (!easExtreme && !easActive && document.getElementById(`slide-interrupt-eas`) !== null) {
+    } else if (!easExtreme && !easActive && document.getElementById('slide-interrupt-eas') !== null) {
       clearInterval(flashInterval)
-      easAlert.style.display = `none`
+      easAlert.style.display = 'none'
       easAlert.innerHTML = ``
       // If we are supposed to display an EAS alert, but it is not on the screen, this is an error; put it on the screen.
-    } else if (easActive && document.getElementById(`slide-interrupt-eas`) === null) {
+    } else if (easActive && document.getElementById('slide-interrupt-eas') === null) {
       easActive = false
       doEas()
     }
   } catch (e) {
     console.error(e)
     iziToast.show({
-      title: `An error occurred - Please check the logs`,
-      message: `Error occurred during doEas.`
+      title: 'An error occurred - Please check the logs',
+      message: 'Error occurred during doEas.'
     })
   }
 }
@@ -995,16 +995,16 @@ function processNowPlaying (response) {
   if (response) {
     try {
       // reset ticker timer on change to queue time
-      if (typeof response.queueFinish !== `undefined`) {
+      if (typeof response.queueFinish !== 'undefined') {
         clearInterval(nowPlayingTimer)
         clearTimeout(nowPlayingTimer)
         nowPlayingTimer = setTimeout(() => {
           nowPlayingTick()
           nowPlayingTimer = setInterval(nowPlayingTick, 1000)
-        }, moment(Meta.queueFinish).diff(moment(Meta.queueFinish).startOf(`second`)))
+        }, moment(Meta.queueFinish).diff(moment(Meta.queueFinish).startOf('second')))
       }
       // Reset ticker when time is provided
-      else if (typeof response.time !== `undefined`) {
+      else if (typeof response.time !== 'undefined') {
         clearInterval(nowPlayingTimer)
         clearTimeout(nowPlayingTimer)
         nowPlayingTimer = setInterval(nowPlayingTick, 1000)
@@ -1014,13 +1014,13 @@ function processNowPlaying (response) {
       if (typeof response.trackID !== `undefined` && parseInt(response.trackID) >= 74255 && parseInt(response.trackID) <= 74259) {
         setTimeout(() => {
           iziToast.show({
-            title: ``,
+            title: '',
             message: `<img src="../../images/giphy.gif">`,
             timeout: 25000,
             close: true,
-            color: `blue`,
+            color: 'blue',
             drag: false,
-            position: `center`,
+            position: 'center',
             closeOnClick: true,
             pauseOnHover: false,
             overlay: true,
@@ -1033,8 +1033,8 @@ function processNowPlaying (response) {
       }
 
       // First, process now playing information
-      var color = `rgba(72, 51, 43, 1)`
-      var statebadge = ``
+      var color = 'rgba(72, 51, 43, 1)'
+      var statebadge = ''
       easDelay -= 1
       var temp
       var countdown
@@ -1060,21 +1060,21 @@ function processNowPlaying (response) {
              }
              */
 
-      if (disconnected || typeof Meta.state === `undefined`) {
+      if (disconnected || typeof Meta.state === 'undefined') {
         statebadge = `<span class="badge badge-secondary shadow-2">OFFLINE</span>`
-        djAlert.style.display = `none`
-      } else if (Meta.state.startsWith(`automation_`)) {
+        djAlert.style.display = 'none'
+      } else if (Meta.state.startsWith('automation_')) {
         statebadge = `<span class="badge badge-info shadow-2">MUSIC</span>`
-        color = `rgba(1, 84, 122, 1)`
-      } else if (Meta.state.startsWith(`live_`)) {
+        color = 'rgba(1, 84, 122, 1)'
+      } else if (Meta.state.startsWith('live_')) {
         statebadge = `<span class="badge badge-primary shadow-2">SHOW</span>`
-        color = `rgba(115, 6, 23, 1)`
-      } else if (Meta.state.startsWith(`remote_`)) {
+        color = 'rgba(115, 6, 23, 1)'
+      } else if (Meta.state.startsWith('remote_')) {
         statebadge = `<span class="badge badge-purple shadow-2">REMOTE</span>`
-        color = `rgba(51, 29, 91, 1)`
-      } else if (Meta.state.startsWith(`sports_`) || Meta.state.startsWith(`sportsremote_`)) {
+        color = 'rgba(51, 29, 91, 1)'
+      } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
         statebadge = `<span class="badge badge-success shadow-2">SPORTS</span>`
-        color = `rgba(38, 87, 40, 1)`
+        color = 'rgba(38, 87, 40, 1)'
       }
       if (typeof response.state !== `undefined` || typeof response.topic !== `undefined` || typeof response.show !== `undefined`) {
         /*
@@ -1105,14 +1105,14 @@ function processNowPlaying (response) {
             </div>`
                 }
                 */
-        if (Meta.state.startsWith(`live_`) || Meta.state.startsWith(`remote_`) || Meta.state.startsWith(`sports_`) || Meta.state.startsWith(`sportsremote_`)) {
+        if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_') || Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
           Slides.slide(`on-air`).active = true
           checkSlideCounts()
           var innercontent = ``
           if (Meta.topic.length > 2) {
             Slides.slide(`on-air`).displayTime = 20
             innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};"><strong>${Meta.show}</strong></h2>`
-            if (`webchat` in Meta && Meta.webchat) {
+            if ('webchat' in Meta && Meta.webchat) {
               innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <string>wwsu1069.org</strong></h3>`
             } else {
               innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`
@@ -1121,7 +1121,7 @@ function processNowPlaying (response) {
           } else {
             Slides.slide(`on-air`).displayTime = 10
             innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};"><strong>${Meta.show}</strong></h2>`
-            if (`webchat` in Meta && Meta.webchat) {
+            if ('webchat' in Meta && Meta.webchat) {
               innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <strong>wwsu1069.org</strong></h3>`
             } else {
               innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`
@@ -1134,15 +1134,15 @@ function processNowPlaying (response) {
           checkSlideCounts()
         }
       }
-      var queuelength = Meta.queueFinish !== null ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), `seconds`)) : 0
+      var queuelength = Meta.queueFinish !== null ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), 'seconds')) : 0
       if (queuelength < 0) { queuelength = 0 }
       if (queuelength > 29) { queueReminder = false }
-      if (typeof response.line1 !== `undefined`) {
+      if (typeof response.line1 !== 'undefined') {
         var line1Timer = setTimeout(() => {
           nowplayingline1.innerHTML = Meta.line1
           nowplayingline1.className = ``
           if (Meta.line1.length >= 80) {
-            $(`#nowplaying-line1`)
+            $('#nowplaying-line1')
               .marquee({
                 // duration in milliseconds of the marquee
                 speed: 100,
@@ -1151,17 +1151,17 @@ function processNowPlaying (response) {
                 // time in milliseconds before the marquee will start animating
                 delayBeforeStart: 0,
                 // 'left' or 'right'
-                direction: `left`,
+                direction: 'left',
                 // true or false - should the marquee be duplicated to show an effect of continues flow
                 duplicated: true
               })
           }
         }, 5000)
-        $(`#nowplaying-line1`).animateCss(`fadeOut`, () => {
+        $('#nowplaying-line1').animateCss('fadeOut', () => {
           clearTimeout(line1Timer)
           nowplayingline1.innerHTML = Meta.line1
           if (Meta.line1.length >= 80) {
-            $(`#nowplaying-line1`)
+            $('#nowplaying-line1')
               .marquee({
                 // duration in milliseconds of the marquee
                 speed: 100,
@@ -1170,21 +1170,21 @@ function processNowPlaying (response) {
                 // time in milliseconds before the marquee will start animating
                 delayBeforeStart: 0,
                 // 'left' or 'right'
-                direction: `left`,
+                direction: 'left',
                 // true or false - should the marquee be duplicated to show an effect of continues flow
                 duplicated: true
               })
           } else {
-            $(`#nowplaying-line1`).animateCss(`fadeIn`)
+            $('#nowplaying-line1').animateCss('fadeIn')
           }
         })
       }
-      if (typeof response.line2 !== `undefined`) {
+      if (typeof response.line2 !== 'undefined') {
         var line2Timer = setTimeout(() => {
           nowplayingline2.innerHTML = Meta.line2
           nowplayingline2.className = ``
           if (Meta.line2.length >= 80) {
-            $(`#nowplaying-line2`)
+            $('#nowplaying-line2')
               .marquee({
                 // duration in milliseconds of the marquee
                 speed: 100,
@@ -1193,17 +1193,17 @@ function processNowPlaying (response) {
                 // time in milliseconds before the marquee will start animating
                 delayBeforeStart: 0,
                 // 'left' or 'right'
-                direction: `left`,
+                direction: 'left',
                 // true or false - should the marquee be duplicated to show an effect of continues flow
                 duplicated: true
               })
           }
         }, 5000)
-        $(`#nowplaying-line2`).animateCss(`fadeOut`, () => {
+        $('#nowplaying-line2').animateCss('fadeOut', () => {
           clearTimeout(line2Timer)
           nowplayingline2.innerHTML = Meta.line2
           if (Meta.line2.length >= 80) {
-            $(`#nowplaying-line2`)
+            $('#nowplaying-line2')
               .marquee({
                 // duration in milliseconds of the marquee
                 speed: 100,
@@ -1212,30 +1212,30 @@ function processNowPlaying (response) {
                 // time in milliseconds before the marquee will start animating
                 delayBeforeStart: 0,
                 // 'left' or 'right'
-                direction: `left`,
+                direction: 'left',
                 // true or false - should the marquee be duplicated to show an effect of continues flow
                 duplicated: true
               })
           } else {
-            $(`#nowplaying-line2`).animateCss(`fadeIn`)
+            $('#nowplaying-line2').animateCss('fadeIn')
           }
         })
       }
-      nowplayingtime.innerHTML = `${disconnected ? `DISPLAY DISCONNECTED FROM WWSU` : moment(Meta.time).format(`LLLL`) || `Unknown WWSU Time`}`
-      if (Meta.state === `automation_live` && queuelength < 60 && typeof response.state === `undefined`) {
-        djAlert.style.display = `inline`
-        countdown = document.getElementById(`countdown`)
-        countdowntext = document.getElementById(`countdown-text`)
-        countdownclock = document.getElementById(`countdown-clock`)
+      nowplayingtime.innerHTML = `${disconnected ? 'DISPLAY DISCONNECTED FROM WWSU' : moment(Meta.time).format('LLLL') || 'Unknown WWSU Time'}`
+      if (Meta.state === 'automation_live' && queuelength < 60 && typeof response.state === 'undefined') {
+        djAlert.style.display = 'inline'
+        countdown = document.getElementById('countdown')
+        countdowntext = document.getElementById('countdown-text')
+        countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.show.split(` - `)
+          temp = Meta.show.split(' - ')
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
                     <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
                     </div></div>`
-          countdown = document.getElementById(`countdown`)
-          countdowntext = document.getElementById(`countdown-text`)
-          countdownclock = document.getElementById(`countdown-clock`)
+          countdown = document.getElementById('countdown')
+          countdowntext = document.getElementById('countdown-text')
+          countdownclock = document.getElementById('countdown-clock')
           countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`
           if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`) }
         }
@@ -1246,28 +1246,28 @@ function processNowPlaying (response) {
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
-            $(`#dj-alert`).css(`background-color`, `#F44336`)
+            $('#dj-alert').css('background-color', '#F44336')
             setTimeout(() => {
-              $(`#dj-alert`).css(`background-color`, !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
             }, 250)
           }
         }
 
         // When a remote broadcast is about to start
-      } else if (Meta.state === `automation_remote` && queuelength < 60 && typeof response.state === `undefined`) {
-        djAlert.style.display = `inline`
-        countdown = document.getElementById(`countdown`)
-        countdowntext = document.getElementById(`countdown-text`)
-        countdownclock = document.getElementById(`countdown-clock`)
+      } else if (Meta.state === 'automation_remote' && queuelength < 60 && typeof response.state === 'undefined') {
+        djAlert.style.display = 'inline'
+        countdown = document.getElementById('countdown')
+        countdowntext = document.getElementById('countdown-text')
+        countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.show.split(` - `)
+          temp = Meta.show.split(' - ')
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
-          countdown = document.getElementById(`countdown`)
-          countdowntext = document.getElementById(`countdown-text`)
-          countdownclock = document.getElementById(`countdown-clock`)
-          countdowntext.innerHTML = `Remote Broadcast starting in`
+          countdown = document.getElementById('countdown')
+          countdowntext = document.getElementById('countdown-text')
+          countdownclock = document.getElementById('countdown-clock')
+          countdowntext.innerHTML = 'Remote Broadcast starting in'
           if (!isStudio) { responsiveVoice.speak(`Attention guests! A remote broadcast hosted by ${temp[0]} is about to go on the air on WWSU radio: ${temp[1]}.`) }
         }
         if (queuelength >= 15) {
@@ -1277,25 +1277,25 @@ function processNowPlaying (response) {
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
-            $(`#dj-alert`).css(`background-color`, `#9C27B0`)
+            $('#dj-alert').css('background-color', '#9C27B0')
             setTimeout(() => {
-              $(`#dj-alert`).css(`background-color`, !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
             }, 250)
           }
         }
         // Sports broadcast about to begin
-      } else if ((Meta.state === `automation_sports` || Meta.state === `automation_sportsremote`) && queuelength < 60 && typeof response.state === `undefined`) {
-        djAlert.style.display = `inline`
-        countdown = document.getElementById(`countdown`)
-        countdowntext = document.getElementById(`countdown-text`)
-        countdownclock = document.getElementById(`countdown-clock`)
+      } else if ((Meta.state === 'automation_sports' || Meta.state === 'automation_sportsremote') && queuelength < 60 && typeof response.state === 'undefined') {
+        djAlert.style.display = 'inline'
+        countdown = document.getElementById('countdown')
+        countdowntext = document.getElementById('countdown-text')
+        countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
-          countdown = document.getElementById(`countdown`)
-          countdowntext = document.getElementById(`countdown-text`)
-          countdownclock = document.getElementById(`countdown-clock`)
+          countdown = document.getElementById('countdown')
+          countdowntext = document.getElementById('countdown-text')
+          countdownclock = document.getElementById('countdown-clock')
           countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span><br />about to broadcast in`
           if (!isStudio) { responsiveVoice.speak(`Raider up! Wright State sports, ${Meta.show}, is about to begin on WWSU radio.`) }
         }
@@ -1306,26 +1306,26 @@ function processNowPlaying (response) {
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
-            $(`#dj-alert`).css(`background-color`, `#4CAF50`)
+            $('#dj-alert').css('background-color', '#4CAF50')
             setTimeout(() => {
-              $(`#dj-alert`).css(`background-color`, !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
             }, 250)
           }
         }
         // DJ is returning from a break
-      } else if (Meta.state === `live_returning` && queuelength < 60 && typeof response.state === `undefined`) {
-        djAlert.style.display = `inline`
-        countdown = document.getElementById(`countdown`)
-        countdowntext = document.getElementById(`countdown-text`)
-        countdownclock = document.getElementById(`countdown-clock`)
+      } else if (Meta.state === 'live_returning' && queuelength < 60 && typeof response.state === 'undefined') {
+        djAlert.style.display = 'inline'
+        countdown = document.getElementById('countdown')
+        countdowntext = document.getElementById('countdown-text')
+        countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.show.split(` - `)
+          temp = Meta.show.split(' - ')
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
-          countdown = document.getElementById(`countdown`)
-          countdowntext = document.getElementById(`countdown-text`)
-          countdownclock = document.getElementById(`countdown-clock`)
+          countdown = document.getElementById('countdown')
+          countdowntext = document.getElementById('countdown-text')
+          countdownclock = document.getElementById('countdown-clock')
           countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is returning live in`
           if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`) }
         }
@@ -1336,27 +1336,27 @@ function processNowPlaying (response) {
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
-            $(`#dj-alert`).css(`background-color`, `#F44336`)
+            $('#dj-alert').css('background-color', '#F44336')
             setTimeout(() => {
-              $(`#dj-alert`).css(`background-color`, !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
             }, 250)
           }
         }
         // Remote broadcast is returning from a break
-      } else if (Meta.state === `remote_returning` && queuelength < 60 && typeof response.state === `undefined`) {
-        djAlert.style.display = `inline`
-        countdown = document.getElementById(`countdown`)
-        countdowntext = document.getElementById(`countdown-text`)
-        countdownclock = document.getElementById(`countdown-clock`)
+      } else if (Meta.state === 'remote_returning' && queuelength < 60 && typeof response.state === 'undefined') {
+        djAlert.style.display = 'inline'
+        countdown = document.getElementById('countdown')
+        countdowntext = document.getElementById('countdown-text')
+        countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.show.split(` - `)
+          temp = Meta.show.split(' - ')
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
-          countdown = document.getElementById(`countdown`)
-          countdowntext = document.getElementById(`countdown-text`)
-          countdownclock = document.getElementById(`countdown-clock`)
-          countdowntext.innerHTML = `Returning to remote broadcast in`
+          countdown = document.getElementById('countdown')
+          countdowntext = document.getElementById('countdown-text')
+          countdownclock = document.getElementById('countdown-clock')
+          countdowntext.innerHTML = 'Returning to remote broadcast in'
           if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[0]} is about to go back on the air.`) }
         }
         if (queuelength >= 15) {
@@ -1366,25 +1366,25 @@ function processNowPlaying (response) {
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
-            $(`#dj-alert`).css(`background-color`, `#9C27B0`)
+            $('#dj-alert').css('background-color', '#9C27B0')
             setTimeout(() => {
-              $(`#dj-alert`).css(`background-color`, !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
             }, 250)
           }
         }
         // Returning to a sports broadcast
-      } else if ((Meta.state === `sports_returning` || Meta.state === `sportsremote_returning`) && queuelength < 60 && typeof response.state === `undefined`) {
-        djAlert.style.display = `inline`
-        countdown = document.getElementById(`countdown`)
-        countdowntext = document.getElementById(`countdown-text`)
-        countdownclock = document.getElementById(`countdown-clock`)
+      } else if ((Meta.state === 'sports_returning' || Meta.state === 'sportsremote_returning') && queuelength < 60 && typeof response.state === 'undefined') {
+        djAlert.style.display = 'inline'
+        countdown = document.getElementById('countdown')
+        countdowntext = document.getElementById('countdown-text')
+        countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
-          countdown = document.getElementById(`countdown`)
-          countdowntext = document.getElementById(`countdown-text`)
-          countdownclock = document.getElementById(`countdown-clock`)
+          countdown = document.getElementById('countdown')
+          countdowntext = document.getElementById('countdown-text')
+          countdownclock = document.getElementById('countdown-clock')
           countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span></br>returning in`
           if (!isStudio) { responsiveVoice.speak(`Raider up! The broadcast of ${Meta.show} is about to resume.`) }
         }
@@ -1395,29 +1395,29 @@ function processNowPlaying (response) {
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
-            $(`#dj-alert`).css(`background-color`, `#4CAF50`)
+            $('#dj-alert').css('background-color', '#4CAF50')
             setTimeout(() => {
-              $(`#dj-alert`).css(`background-color`, !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
             }, 250)
           }
         }
         // Nothing special to show
       } else {
-        djAlert.style.display = `none`
+        djAlert.style.display = 'none'
         djAlert.innerHTML = ``
       }
     } catch (e) {
       console.error(e)
       iziToast.show({
-        title: `An error occurred - Please check the logs`,
-        message: `Error occurred during processNowPlaying.`
+        title: 'An error occurred - Please check the logs',
+        message: 'Error occurred during processNowPlaying.'
       })
     }
   }
 }
 
 function nowPlayingTick () {
-  Meta.time = moment(Meta.time).add(1, `seconds`)
+  Meta.time = moment(Meta.time).add(1, 'seconds')
   processNowPlaying({})
 
   // Every 15 minutes, re-process the calendar
@@ -1431,11 +1431,11 @@ function nowPlayingTick () {
 
 function hexRgb (hex, options = {}) {
   try {
-    if (typeof hex !== `string` || nonHexChars.test(hex) || !validHexSize.test(hex)) {
-      throw new TypeError(`Expected a valid hex string`)
+    if (typeof hex !== 'string' || nonHexChars.test(hex) || !validHexSize.test(hex)) {
+      throw new TypeError('Expected a valid hex string')
     }
 
-    hex = hex.replace(/^#/, ``)
+    hex = hex.replace(/^#/, '')
     let alpha = 255
 
     if (hex.length === 8) {
@@ -1457,14 +1457,14 @@ function hexRgb (hex, options = {}) {
     const green = (num >> 8) & 255
     const blue = num & 255
 
-    return options.format === `array`
+    return options.format === 'array'
       ? [red, green, blue, alpha]
       : { red, green, blue, alpha }
   } catch (e) {
     console.error(e)
     iziToast.show({
-      title: `An error occurred - Please check the logs`,
-      message: `Error occurred during hexRgb.`
+      title: 'An error occurred - Please check the logs',
+      message: 'Error occurred during hexRgb.'
     })
   }
 }
@@ -1483,7 +1483,7 @@ function processAnnouncements () {
     } catch (e) {
       console.error(e)
       iziToast.show({
-        title: `An error occurred - Please check the logs`,
+        title: 'An error occurred - Please check the logs',
         message: `Error occurred in the compare function of processAnnouncements call.`
       })
     }
@@ -1494,11 +1494,11 @@ function processAnnouncements () {
 
   // Remove all slides with announcements so as to refresh them
   for (var i = 10; i < 100; i++) {
-    if (typeof slides[i] !== `undefined`) { delete slides[i] }
+    if (typeof slides[i] !== 'undefined') { delete slides[i] }
   }
 
   var anncCount = 0
-  Announcements({ type: `display-public` }).get().sort(compare)
+  Announcements({ type: 'display-public' }).get().sort(compare)
     .filter(announcement => moment(Meta.time).isSameOrAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires)))
     .map(announcement => {
       anncCount++
@@ -1507,7 +1507,7 @@ function processAnnouncements () {
         class: announcement.level,
         do: true,
         function: function () {
-          $(`#slide`).animateCss(`slideOutUp`, () => {
+          $('#slide').animateCss('slideOutUp', () => {
             content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
             <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-align: left;" class="container-full p-2 m-1 scale-content ${!isLightTheme ? `text-white` : `text-dark`}" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">${announcement.title}</h1>${announcement.announcement}</div></div>`
 
@@ -1522,7 +1522,7 @@ function processAnnouncements () {
             }
 
             $(() => {
-              var $page = $(`.scale-content`)
+              var $page = $('.scale-content')
 
               getPageSize()
               scalePages($page, pageWidth, pageHeight)
@@ -1537,21 +1537,21 @@ function processAnnouncements () {
               })
 
               function getPageSize () {
-                pageHeight = $(`#scale-wrapper`).height()
-                pageWidth = $(`#scale-wrapper`).width()
+                pageHeight = $('#scale-wrapper').height()
+                pageWidth = $('#scale-wrapper').width()
               }
 
               function scalePages (page, maxWidth, maxHeight) {
-                page.attr(`width`, `${(($(`#scaled-content`).height() / maxHeight) * 70)}%`)
+                page.attr('width', `${(($('#scaled-content').height() / maxHeight) * 70)}%`)
                 var scaleX = 1; var scaleY = 1
-                scaleX = (maxWidth / $(`#scaled-content`).width()) * 0.95
-                scaleY = (maxHeight / $(`#scaled-content`).height()) * 0.70
+                scaleX = (maxWidth / $('#scaled-content').width()) * 0.95
+                scaleY = (maxHeight / $('#scaled-content').height()) * 0.70
                 basePage.scaleX = scaleX
                 basePage.scaleY = scaleY
                 basePage.scale = (scaleX > scaleY) ? scaleY : scaleX
 
-                var newLeftPos = Math.abs(Math.floor((($(`#scaled-content`).width() * basePage.scale) - maxWidth) / 2))
-                page.attr(`style`, `-webkit-transform:scale(` + basePage.scale + `);left:` + newLeftPos + `px;top:0px;`)
+                var newLeftPos = Math.abs(Math.floor((($('#scaled-content').width() * basePage.scale) - maxWidth) / 2))
+                page.attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;')
               }
             })
           })
@@ -1563,11 +1563,11 @@ function processAnnouncements () {
 
   // If there are more than 2 announcement slides, disable the days 2-4 and days 5-7 calendar slides to reduce clutter.
   if (anncCount > 2) {
-    if (typeof slides[5] !== `undefined`) { slides[5].do = false }
-    if (typeof slides[6] !== `undefined`) { slides[6].do = false }
+    if (typeof slides[5] !== 'undefined') { slides[5].do = false }
+    if (typeof slides[6] !== 'undefined') { slides[6].do = false }
   } else {
-    if (typeof slides[5] !== `undefined`) { slides[5].do = true }
-    if (typeof slides[6] !== `undefined`) { slides[6].do = true }
+    if (typeof slides[5] !== 'undefined') { slides[5].do = true }
+    if (typeof slides[6] !== 'undefined') { slides[6].do = true }
   }
 }
 
@@ -1616,8 +1616,8 @@ function processDarksky (db) {
   } catch (e) {
     console.error(e)
     iziToast.show({
-      title: `An error occurred - Please check the logs`,
-      message: `Error occurred during the call of processDirectors.`
+      title: 'An error occurred - Please check the logs',
+      message: 'Error occurred during the call of processDirectors.'
     })
   }
 }
@@ -1638,7 +1638,7 @@ function processWeeklyStats (data) {
   var temp = document.getElementById(`analytics`)
   if (temp !== null) {
     temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
-     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : `Unknown`}</strong></li><li>${data.topShows[1] ? data.topShows[1] : `Unknown`}</li><li>${data.topShows[2] ? data.topShows[2] : `Unknown`}</li></ol>
+     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>
      <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
      <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages sent to/from website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`
   }

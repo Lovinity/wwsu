@@ -1,23 +1,23 @@
 module.exports = {
 
-  friendlyName: `error.reset helper`,
+  friendlyName: 'error.reset helper',
 
-  description: `Resets an errorCheck counter to 0.`,
+  description: 'Resets an errorCheck counter to 0.',
 
   inputs: {
     name: {
-      type: `string`,
+      type: 'string',
       required: true,
       custom: function (value) {
-        if (typeof sails.models.status.errorCheck[value] === `object` && typeof sails.models.status.errorCheck[value].fn === `function`) { return true }
+        if (typeof sails.models.status.errorCheck[value] === 'object' && typeof sails.models.status.errorCheck[value].fn === 'function') { return true }
         return false
       },
-      description: `Name of the sails.models.status.errorCheck key to reset.`
+      description: 'Name of the sails.models.status.errorCheck key to reset.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper error.reset called.`)
+    sails.log.debug('Helper error.reset called.')
 
     try {
       // Reset the error check count to 0.

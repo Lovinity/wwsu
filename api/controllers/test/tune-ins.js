@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `tune-in`,
+  friendlyName: 'tune-in',
 
-  description: `tune-in test.`,
+  description: 'tune-in test.',
 
   inputs: {
 

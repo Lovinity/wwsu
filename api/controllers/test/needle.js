@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `Needle`,
+  friendlyName: 'Needle',
 
-  description: `Needle test.`,
+  description: 'Needle test.',
 
   inputs: {
     url: {
-      type: `string`,
+      type: 'string',
       required: true
     }
   },
@@ -17,7 +17,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     try {
-      needle(`get`, inputs.url, {}, { headers: { 'Content-Type': `application/json` } })
+      needle('get', inputs.url, {}, { headers: { 'Content-Type': 'application/json' } })
         .then(async (resp) => {
           return exits.success(resp.body)
         })

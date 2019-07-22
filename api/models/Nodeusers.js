@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-  datastore: `nodebase`,
+  datastore: 'nodebase',
   attributes: {
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
@@ -19,19 +19,19 @@ module.exports = {
     //  ╠═╣╚═╗╚═╗║ ║║  ║╠═╣ ║ ║║ ║║║║╚═╗
     //  ╩ ╩╚═╝╚═╝╚═╝╚═╝╩╩ ╩ ╩ ╩╚═╝╝╚╝╚═╝
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     email: {
-      type: `string`,
+      type: 'string',
       isEmail: true,
       required: true,
       unique: true // Yes unique one
     },
 
     encryptedPassword: {
-      type: `string`
+      type: 'string'
     }
   },
 
@@ -40,7 +40,7 @@ module.exports = {
      */
 
   customToJSON: function () {
-    return _.omit(this, [`encryptedPassword`])
+    return _.omit(this, ['encryptedPassword'])
   },
 
   /**
@@ -52,7 +52,7 @@ module.exports = {
 
   comparePassword: function (password, user) {
     return new Promise((resolve) => {
-      var bcrypt = require(`bcrypt`)
+      var bcrypt = require('bcrypt')
       bcrypt.compare(password, user.encryptedPassword)
         .then(match => {
           if (match) {

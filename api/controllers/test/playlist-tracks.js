@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `Playlist tracks`,
+  friendlyName: 'Playlist tracks',
 
-  description: ``,
+  description: '',
 
   inputs: {
 

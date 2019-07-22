@@ -2,22 +2,22 @@
 
 $(document).ready(() => {
   // Initialize the datePicker(I have taken format as mm-dd-yyyy, you can     //have your owh)
-  $(`#weekly-date-picker`).datetimepicker({
-    format: `MM-DD-YYYY`
+  $('#weekly-date-picker').datetimepicker({
+    format: 'MM-DD-YYYY'
   })
 
   // Get the value of Start and End of Week
-  $(`#weekly-date-picker`).on(`dp.change`, () => {
-    var value = $(`#weekly-date-picker`).val()
-    var firstDate = moment(value, `MM-DD-YYYY`).format(`MM-DD-YYYY`)
-    $(`#weekly-date-picker`).val(firstDate)
+  $('#weekly-date-picker').on('dp.change', () => {
+    var value = $('#weekly-date-picker').val()
+    var firstDate = moment(value, 'MM-DD-YYYY').format('MM-DD-YYYY')
+    $('#weekly-date-picker').val(firstDate)
   })
 })
 
 // Show logs
 function filterLogs (subtype = null) {
-  var datePicker = document.getElementById(`weekly-date-picker`)
-  var tableData = document.getElementById(`results-table`)
+  var datePicker = document.getElementById('weekly-date-picker')
+  var tableData = document.getElementById('results-table')
 
   // Remove all but the first table row
   for (var i = tableData.rows.length; i > 0; i--) {
@@ -27,8 +27,8 @@ function filterLogs (subtype = null) {
   // No subtype? get the groups to display
   if (subtype === null) {
     $.ajax({
-      type: `POST`,
-      url: `/logs/get-subtypes`,
+      type: 'POST',
+      url: '/logs/get-subtypes',
       data: { date: datePicker.value }
     })
       .then(
@@ -37,7 +37,7 @@ function filterLogs (subtype = null) {
           header.classList.add(`thead-dark`)
           var newRow = header.insertRow(0)
           var cell = newRow.insertCell(0)
-          cell.innerHTML = `Choose a log for this day`
+          cell.innerHTML = 'Choose a log for this day'
           newRow = tableData.insertRow(tableData.rows.length)
           cell = newRow.insertCell(0)
           cell.innerHTML = `<a href="javascript:filterLogs(\`\`)" title="Show the log" role="button" class="btn btn-success">View all logs for this day</a>`
@@ -57,8 +57,8 @@ function filterLogs (subtype = null) {
     // subtype? Display logs by date and selected subtype
   } else {
     $.ajax({
-      type: `POST`,
-      url: `/logs/get`,
+      type: 'POST',
+      url: '/logs/get',
       data: { date: datePicker.value, subtype: subtype }
     })
       .then(
@@ -67,20 +67,20 @@ function filterLogs (subtype = null) {
           header.classList.add(`thead-dark`)
           var newRow = header.insertRow(0)
           var cell = newRow.insertCell(0)
-          cell.innerHTML = `Date/Time`
+          cell.innerHTML = 'Date/Time'
           var cell2 = newRow.insertCell(1)
-          cell2.innerHTML = `Event`
+          cell2.innerHTML = 'Event'
           var cell3 = newRow.insertCell(2)
-          cell3.innerHTML = `Artist`
+          cell3.innerHTML = 'Artist'
           var cell4 = newRow.insertCell(3)
-          cell4.innerHTML = `Title`
+          cell4.innerHTML = 'Title'
           resHTML.forEach((thelog) => {
             var newRow = tableData.insertRow(tableData.rows.length)
             newRow.classList.add(`table-${thelog.loglevel}`)
             var cell = newRow.insertCell(0)
-            cell.innerHTML = moment(thelog.createdAt).format(`LL hh:mm:ss A`)
+            cell.innerHTML = moment(thelog.createdAt).format('LL hh:mm:ss A')
             var cell2 = newRow.insertCell(1)
-            thelog.event = thelog.event.replace(/(?:\r\n|\r|\n)/g, `<br />`)
+            thelog.event = thelog.event.replace(/(?:\r\n|\r|\n)/g, '<br />')
             cell2.innerHTML = thelog.event
             var cell3 = newRow.insertCell(2)
             cell3.innerHTML = thelog.trackArtist

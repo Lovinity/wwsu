@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: `planner / remove`,
+  friendlyName: 'planner / remove',
 
-  description: `Remove a record from the schedule planner.`,
+  description: 'Remove a record from the schedule planner.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `The ID of the dj to edit.`
+      description: 'The ID of the dj to edit.'
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller planner/remove called.`)
+    sails.log.debug('Controller planner/remove called.')
 
     try {
       // Edit it

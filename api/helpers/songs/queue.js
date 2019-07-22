@@ -1,50 +1,50 @@
 module.exports = {
 
-  friendlyName: `songs.queue`,
+  friendlyName: 'songs.queue',
 
-  description: `Queue a track or tracks from a specified array of subcategories. This is designed to be used with sails.config.custom.subcats .`,
+  description: 'Queue a track or tracks from a specified array of subcategories. This is designed to be used with sails.config.custom.subcats .',
 
   inputs: {
     subcategories: {
-      type: `ref`,
+      type: 'ref',
       required: true,
-      description: `Array of subcategories to queue from.`
+      description: 'Array of subcategories to queue from.'
     },
 
     position: {
-      type: `string`,
+      type: 'string',
       required: true,
-      isIn: [`Top`, `Bottom`],
-      description: `The track will be queued in this position in the queue: Top / Bottom`
+      isIn: ['Top', 'Bottom'],
+      description: 'The track will be queued in this position in the queue: Top / Bottom'
     },
 
     quantity: {
-      type: `number`,
+      type: 'number',
       defaultsTo: 1,
-      description: `Number of tracks to queue from this subcategory. Defaults to 1.`
+      description: 'Number of tracks to queue from this subcategory. Defaults to 1.'
     },
 
     rules: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: true,
-      description: `If true (default), will check for rotation rules before queuing tracks (unless there is not enough tracks to queue given rotation rules).`
+      description: 'If true (default), will check for rotation rules before queuing tracks (unless there is not enough tracks to queue given rotation rules).'
     },
 
     duration: {
-      type: `number`,
+      type: 'number',
       allowNull: true,
-      description: `The tracks queued should be of this duration in seconds, plus or minus 5 seconds, if provided.`
+      description: 'The tracks queued should be of this duration in seconds, plus or minus 5 seconds, if provided.'
     },
 
     queue: {
-      type: `boolean`,
+      type: 'boolean',
       defaultsTo: false,
-      description: `If true, this helper will not resolve until sails.helpers.rest.getQueue has confirmed this track was indeed queued.`
+      description: 'If true, this helper will not resolve until sails.helpers.rest.getQueue has confirmed this track was indeed queued.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper songs.queueFromSubcategory called.`)
+    sails.log.debug('Helper songs.queueFromSubcategory called.')
     try {
       // Get rid of all the null entries in our array
       try {
@@ -60,7 +60,7 @@ module.exports = {
       sails.log.verbose(`Songs records retrieved: ${thesongs.length}`)
 
       // Remove songs that are expired
-      if (thesongs.length > 0) { thesongs = thesongs.filter(thesong => moment(thesong.start_date).isSameOrBefore(moment()) && (moment(thesong.end_date).isSameOrBefore(moment(`2002-01-02 00:00:02`)) || moment().isBefore(moment(thesong.end_date))) && (thesong.play_limit === 0 || thesong.count_played < thesong.play_limit)) }
+      if (thesongs.length > 0) { thesongs = thesongs.filter(thesong => moment(thesong.start_date).isSameOrBefore(moment()) && (moment(thesong.end_date).isSameOrBefore(moment('2002-01-02 00:00:02')) || moment().isBefore(moment(thesong.end_date))) && (thesong.play_limit === 0 || thesong.count_played < thesong.play_limit)) }
 
       // If duration is provided, remove songs that fail the duration check
       if (inputs.duration && inputs.duration !== null && thesongs.length > 0) { thesongs = thesongs.filter(thesong => thesong.duration <= (inputs.duration + 5) && thesong.duration >= (inputs.duration - 5)) }
@@ -78,15 +78,15 @@ module.exports = {
 
         // Queue up the chosen tracks if they pass rotation rules, and if rules is not set to false
         if (inputs.rules) {
-          thesongs2 = thesongs.filter(thesong => thesong !== `undefined` && queuedtracksa.indexOf(thesong.ID) === -1)
+          thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1)
           while (queuedtracks < inputs.quantity && thesongs2.length > 0) {
             temp = await sails.helpers.pickRandom(thesongs2, true)
             thesongs2 = temp.newArray
             thesong = temp.item
-            if (typeof thesong.ID !== `undefined` && await sails.helpers.songs.checkRotationRules(thesong.ID)) {
+            if (typeof thesong.ID !== 'undefined' && await sails.helpers.songs.checkRotationRules(thesong.ID)) {
               queuedtracks++
               sails.log.verbose(`Queued ${thesong.ID}`)
-              await sails.helpers.rest.cmd(`LoadTrackTo` + inputs.position, thesong.ID)
+              await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID)
               if (inputs.queue) { await sails.helpers.rest.checkQueue(thesong.ID) }
             }
           }
@@ -94,7 +94,7 @@ module.exports = {
 
         // Not enough tracks, or rules was set to false? Let's try queuing [more] tracks without rotation rules
         if (queuedtracks < inputs.quantity) {
-          sails.log.verbose(`Not enough tracks to queue when considering rotation rules.`)
+          sails.log.verbose('Not enough tracks to queue when considering rotation rules.')
 
           // We want to be sure we don't queue any tracks that are already in the queue. Let's get the queue again.
           tracks = await sails.helpers.rest.getQueue()
@@ -102,15 +102,15 @@ module.exports = {
           tracks.map(track => queuedtracksa.push(track.ID))
 
           // Go through all the songs again without checking for rotation rules
-          thesongs2 = thesongs.filter(thesong => thesong !== `undefined` && queuedtracksa.indexOf(thesong.ID) === -1)
+          thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1)
           while (queuedtracks < inputs.quantity && thesongs2.length > 0) {
             temp = await sails.helpers.pickRandom(thesongs2, true)
             thesongs2 = temp.newArray
             thesong = temp.item
-            if (typeof thesong.ID !== `undefined`) {
+            if (typeof thesong.ID !== 'undefined') {
               queuedtracks++
               sails.log.verbose(`Queued ${thesong.ID}`)
-              await sails.helpers.rest.cmd(`LoadTrackTo` + inputs.position, thesong.ID)
+              await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID)
               if (inputs.queue) { await sails.helpers.rest.checkQueue(thesong.ID) }
             }
           }

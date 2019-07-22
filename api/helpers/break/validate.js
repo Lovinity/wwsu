@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: `break.validate`,
+  friendlyName: 'break.validate',
 
-  description: `Check for, and validate, an array of break tasks.`,
+  description: 'Check for, and validate, an array of break tasks.',
 
   inputs: {
     tasks: {
-      type: `ref`,
+      type: 'ref',
       required: true,
-      description: `The array of tasks to validate for.`
+      description: 'The array of tasks to validate for.'
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper break.validate called.`)
+    sails.log.debug('Helper break.validate called.')
 
     try {
       // Reject non-arrays
@@ -36,16 +36,16 @@ module.exports = {
 
         // Enforce required properties depending on the task
         switch (obj.task) {
-          case `log`:
+          case 'log':
             if (typeof obj.event === `undefined`) { rejectIt = true }
             break
-          case `queue`:
+          case 'queue':
             if (typeof obj.category === `undefined`) { rejectIt = true }
             break
             // No enforcements for these tasks
-          case `queueRequests`:
-          case `queueDuplicates`:
-          case `queueUnderwritings`:
+          case 'queueRequests':
+          case 'queueDuplicates':
+          case 'queueUnderwritings':
             break
             // If the task name is not satisfied by the switch, it is an invalid task.
           default:

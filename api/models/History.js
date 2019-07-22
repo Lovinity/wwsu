@@ -8,97 +8,97 @@
  */
 
 module.exports = {
-  datastore: `radiodj`,
+  datastore: 'radiodj',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     trackID: {
-      type: `number`
+      type: 'number'
     },
 
     date_played: {
-      type: `ref`,
-      columnType: `datetime`,
-      defaultsTo: `2002-01-01 00:00:01`
+      type: 'ref',
+      columnType: 'datetime',
+      defaultsTo: '2002-01-01 00:00:01'
     },
 
     song_type: {
-      type: `number`,
+      type: 'number',
       max: 99,
       min: 0
     },
 
     id_subcat: {
-      type: `number`
+      type: 'number'
     },
 
     id_genre: {
-      type: `number`
+      type: 'number'
     },
 
     duration: {
-      type: `number`
+      type: 'number'
     },
 
     artist: {
-      type: `string`
+      type: 'string'
     },
 
     original_artist: {
-      type: `string`
+      type: 'string'
     },
 
     title: {
-      type: `string`
+      type: 'string'
     },
 
     album: {
-      type: `string`
+      type: 'string'
     },
 
     composer: {
-      type: `string`
+      type: 'string'
     },
 
     label: {
-      type: `string`
+      type: 'string'
     },
 
     year: {
-      type: `string`,
+      type: 'string',
       maxLength: 4
     },
 
     track_no: {
-      type: `number`,
+      type: 'number',
       max: 999999,
       min: 0
     },
 
     disc_no: {
-      type: `number`,
+      type: 'number',
       max: 999999,
       min: 0
     },
 
     publisher: {
-      type: `string`
+      type: 'string'
     },
 
     copyright: {
-      type: `string`
+      type: 'string'
     },
 
     isrc: {
-      type: `string`
+      type: 'string'
     },
 
     listeners: {
-      type: `number`
+      type: 'number'
     }
   }
 

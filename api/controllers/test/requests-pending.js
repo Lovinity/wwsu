@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `Requests pending`,
+  friendlyName: 'Requests pending',
 
-  description: ``,
+  description: '',
 
   inputs: {
 

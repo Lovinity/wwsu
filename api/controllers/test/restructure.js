@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `Restructure`,
+  friendlyName: 'Restructure',
 
-  description: `Restructure test.`,
+  description: 'Restructure test.',
 
   inputs: {
 

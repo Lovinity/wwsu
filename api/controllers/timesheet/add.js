@@ -1,22 +1,22 @@
 module.exports = {
 
-  friendlyName: `sails.models.timesheet / Add`,
+  friendlyName: 'sails.models.timesheet / Add',
 
-  description: `Add a timesheet entry for a director.`,
+  description: 'Add a timesheet entry for a director.',
 
   inputs: {
     timestamp: {
-      type: `string`,
+      type: 'string',
       required: true,
       custom: function (value) {
         return moment(value).isValid()
       },
-      description: `A moment.js compatible timestamp for the timesheet entry.`
+      description: 'A moment.js compatible timestamp for the timesheet entry.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller timesheet/add called.`)
+    sails.log.debug('Controller timesheet/add called.')
 
     try {
       var toapprove = 0
@@ -26,7 +26,7 @@ module.exports = {
       sails.log.silly(record)
 
       // No director? return not found.
-      if (typeof record === `undefined` || record.length <= 0) { return exits.notFound() }
+      if (typeof record === 'undefined' || record.length <= 0) { return exits.notFound() }
 
       // If the director is present, this is a clock-out entry.
       if (record.present) {
@@ -34,7 +34,7 @@ module.exports = {
         thetime = moment(inputs.timestamp)
 
         // If the entry is less than 30 minutes off from the current time, approve automatically
-        if (thetime.isAfter(moment().subtract(30, `minutes`)) && thetime.isBefore(moment().add(30, `minutes`))) { toapprove = 1 }
+        if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
 
         // Add the time_out entry
         await sails.models.timesheet.update({ time_in: { '!=': null }, time_out: null, name: record.name }, { time_out: thetime.toISOString(true), approved: toapprove }).fetch()
@@ -50,7 +50,7 @@ module.exports = {
         var calendar = await sails.models.directorhours.find({ director: record.name, active: { '>=': 1 }, start: { '<=': moment().toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
 
         // If the entry is less than 30 minutes off from the current time, approve automatically
-        if (thetime.isAfter(moment().subtract(30, `minutes`)) && thetime.isBefore(moment().add(30, `minutes`))) { toapprove = 1 }
+        if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
 
         // Clock-ins need a new entry
         if (calendar.length > 0) {

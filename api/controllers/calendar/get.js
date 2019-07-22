@@ -1,15 +1,15 @@
 module.exports = {
 
-  friendlyName: `Calendar / Get`,
+  friendlyName: 'Calendar / Get',
 
-  description: `Get the events from WWSU Google Calendar.`,
+  description: 'Get the events from WWSU Google Calendar.',
 
   inputs: {
 
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller calendar/get called.`)
+    sails.log.debug('Controller calendar/get called.')
     try {
       // Grab events
       var records = await sails.models.calendar.find()
@@ -17,8 +17,8 @@ module.exports = {
 
       // Subscribe to sockets if applicable
       if (this.req.isSocket) {
-        sails.sockets.join(this.req, `calendar`)
-        sails.log.verbose(`Request was a socket. Joining calendar.`)
+        sails.sockets.join(this.req, 'calendar')
+        sails.log.verbose('Request was a socket. Joining calendar.')
       }
 
       // Return records

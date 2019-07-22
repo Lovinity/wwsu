@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `Sportscats`,
+  friendlyName: 'Sportscats',
 
-  description: `Sportscats test.`,
+  description: 'Sportscats test.',
 
   inputs: {
 

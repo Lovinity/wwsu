@@ -2,9 +2,9 @@
 
 module.exports = {
 
-  friendlyName: `Automation`,
+  friendlyName: 'Automation',
 
-  description: `Automation test.`,
+  description: 'Automation test.',
 
   inputs: {
 

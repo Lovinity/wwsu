@@ -1,31 +1,31 @@
 module.exports = {
 
-  friendlyName: `Subscribers / Remove`,
+  friendlyName: 'Subscribers / Remove',
 
-  description: `Remove push notification subscriptions.`,
+  description: 'Remove push notification subscriptions.',
 
   inputs: {
     device: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The OneSignal device ID of the subscriber.`
+      description: 'The OneSignal device ID of the subscriber.'
     },
 
     type: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The main type of the subscription`
+      description: 'The main type of the subscription'
     },
 
     subtype: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The subtype of the subscription`
+      description: 'The subtype of the subscription'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller subscribers/remove called.`)
+    sails.log.debug('Controller subscribers/remove called.')
 
     try {
       // Use find or create so that duplicate subscriptions do not happen (ignore host when checking for duplicates).

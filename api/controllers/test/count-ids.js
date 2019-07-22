@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `Count IDs`,
+  friendlyName: 'Count IDs',
 
-  description: ``,
+  description: '',
 
   inputs: {
 
@@ -10,7 +10,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     try {
-      var records3 = await sails.models.logs.find({ logtype: `id` })
+      var records3 = await sails.models.logs.find({ logtype: 'id' })
       var records4 = {}
       records3
         .filter((record) => record.attendanceID !== null)

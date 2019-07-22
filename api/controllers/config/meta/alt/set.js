@@ -1,36 +1,36 @@
 module.exports = {
 
-  friendlyName: `config / meta / alt / set`,
+  friendlyName: 'config / meta / alt / set',
 
-  description: `Set what text is displayed in metadata depending on state when a categories.noMeta track is playing.`,
+  description: 'Set what text is displayed in metadata depending on state when a categories.noMeta track is playing.',
 
   inputs: {
     automation: {
-      type: `string`,
+      type: 'string',
       description: `Meta text to use when playing a noMeta track in regular automation`
     },
     playlist: {
-      type: `string`,
+      type: 'string',
       description: `Meta text to use when playing a noMeta track in playlist mode`
     },
     genre: {
-      type: `string`,
+      type: 'string',
       description: `Meta text to use when playing a noMeta track in genre automation`
     },
     live: {
-      type: `string`,
+      type: 'string',
       description: `Meta text to use when playing a noMeta track during a live show`
     },
     prerecord: {
-      type: `string`,
+      type: 'string',
       description: `Meta text to use when playing a noMeta track during a prerecord`
     },
     remote: {
-      type: `string`,
+      type: 'string',
       description: `Meta text to use when playing a noMeta track, or when the remote stream disconnected, during a remote broadcast`
     },
     sports: {
-      type: `string`,
+      type: 'string',
       description: `Meta text to use when playing something in automation during a sports broadcast (live or remote)`
     }
   },
@@ -39,7 +39,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/meta/alt/set called.`)
+    sails.log.debug('Controller config/meta/alt/set called.')
 
     try {
       var returnData = {}
@@ -52,7 +52,7 @@ module.exports = {
       }
 
       // broadcast changes over websockets
-      sails.sockets.broadcast(`config`, `config`, { update: { meta: sails.config.custom.meta } })
+      sails.sockets.broadcast('config', 'config', { update: { meta: sails.config.custom.meta } })
 
       return exits.success()
     } catch (e) {

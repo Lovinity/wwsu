@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: `Discipline / Remove`,
+  friendlyName: 'Discipline / Remove',
 
-  description: `Remove a discipline record from the system.`,
+  description: 'Remove a discipline record from the system.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `The ID of the discipline record to remove.`
+      description: 'The ID of the discipline record to remove.'
     }
   },
 

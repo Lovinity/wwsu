@@ -10,53 +10,53 @@
 module.exports = {
 
   // This model's data is only temporary and should not persist. Use memory instead of SQL.
-  datastore: `ram`,
+  datastore: 'ram',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     name: {
-      type: `string`
+      type: 'string'
     },
 
     label: {
-      type: `string`
+      type: 'string'
     },
 
     status: {
-      type: `number`,
+      type: 'number',
       min: 1,
       max: 5,
       defaultsTo: 4
     },
 
     data: {
-      type: `string`
+      type: 'string'
     },
 
     // websocket API note: Do not use time in client code; changes to time will not be pushed in sockets to avoid unnecessary data transfer.
     time: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     }
   },
 
   // The template are subsystems that should be added into memory upon lifting of the Sails app via bootstrap().
   template: [
-    { name: `db-nodebase`, label: `DB Nodebase`, status: 4, data: `Successful database test has not been run yet since initialization.`, time: null },
-    { name: `db-radiodj`, label: `DB RadioDJ`, status: 4, data: `Successful database test has not been run yet since initialization.`, time: null },
-    { name: `db-memory`, label: `DB Memory`, status: 4, data: `Successful database test has not been run yet since initialization.`, time: null },
-    { name: `website`, label: `Website`, data: `No connection to wwsu1069.org could be made yet since initialization.`, status: 4, time: null },
-    { name: `stream-public`, label: `Radio Stream`, data: `Public radio stream has not reported online since initialization.`, status: 4, time: null },
-    { name: `silence`, label: `Silence`, data: `The silence detection system has not reported silence since initialization.`, status: 5, time: null },
-    { name: `EAS-internal`, label: `EAS NWS CAPS`, data: `No successful connection to all EAS NWS CAPS has been made yet since initialization.`, status: 4, time: null },
-    { name: `server`, label: `Server`, data: `No server data has been returned yet since initialization.`, status: 4, time: null },
-    { name: `music-library`, label: `Music Library`, data: `Music library tests have not yet executed since initialization.`, status: 4, time: null },
-    { name: `google-calendar`, label: `Google Calendar`, data: `Google Calendar has not been loaded since initialization.`, status: 4, time: null },
-    { name: `underwritings`, label: `Underwritings`, data: `Underwritings were not yet checked since initialization.`, status: 4, time: null }
+    { name: 'db-nodebase', label: 'DB Nodebase', status: 4, data: 'Successful database test has not been run yet since initialization.', time: null },
+    { name: 'db-radiodj', label: 'DB RadioDJ', status: 4, data: 'Successful database test has not been run yet since initialization.', time: null },
+    { name: 'db-memory', label: 'DB Memory', status: 4, data: 'Successful database test has not been run yet since initialization.', time: null },
+    { name: 'website', label: 'Website', data: 'No connection to wwsu1069.org could be made yet since initialization.', status: 4, time: null },
+    { name: 'stream-public', label: 'Radio Stream', data: 'Public radio stream has not reported online since initialization.', status: 4, time: null },
+    { name: 'silence', label: 'Silence', data: 'The silence detection system has not reported silence since initialization.', status: 5, time: null },
+    { name: 'EAS-internal', label: 'EAS NWS CAPS', data: 'No successful connection to all EAS NWS CAPS has been made yet since initialization.', status: 4, time: null },
+    { name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 4, time: null },
+    { name: 'music-library', label: 'Music Library', data: 'Music library tests have not yet executed since initialization.', status: 4, time: null },
+    { name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar has not been loaded since initialization.', status: 4, time: null },
+    { name: 'underwritings', label: 'Underwritings', data: 'Underwritings were not yet checked since initialization.', status: 4, time: null }
   ],
 
   /* Object used internally to check for errors.
@@ -108,29 +108,29 @@ module.exports = {
             if (Status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
 
             await Meta.changeMeta({ changingState: `Switching radioDJ instances due to queueFail` })
-            sails.sockets.broadcast(`system-error`, `system-error`, true)
-            await Logs.create({ attendanceID: Meta[`A`].attendanceID, logtype: `system`, loglevel: `danger`, logsubtype: ``, event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.` }).fetch()
+            sails.sockets.broadcast('system-error', 'system-error', true)
+            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await Announcements.findOrCreate({ type: `djcontrols`, title: `queueFail (system)`, announcement: `System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.` }, { type: `djcontrols`, level: `urgent`, title: `queueFail (system)`, announcement: `System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+            await Announcements.findOrCreate({ type: 'djcontrols', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
               .tolerate((err) => {
                 sails.log.error(err)
               })
             var maps = sails.config.custom.radiodjs
-              .filter((instance) => instance.rest === Meta[`A`].radiodj)
+              .filter((instance) => instance.rest === Meta['A'].radiodj)
               .map(async (instance) => {
                 var status = await Status.findOne({ name: `radiodj-${instance.name}` })
                 if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data.` }]) }
                 return true
               })
             await Promise.all(maps)
-            await sails.helpers.rest.cmd(`EnableAssisted`, 1, 0)
-            await sails.helpers.rest.cmd(`EnableAutoDJ`, 1, 0)
-            await sails.helpers.rest.cmd(`StopPlayer`, 1, 0)
+            await sails.helpers.rest.cmd('EnableAssisted', 1, 0)
+            await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0)
+            await sails.helpers.rest.cmd('StopPlayer', 1, 0)
             var queue = Meta.automation
             await sails.helpers.rest.changeRadioDj()
-            await sails.helpers.rest.cmd(`ClearPlaylist`, 1)
+            await sails.helpers.rest.cmd('ClearPlaylist', 1)
             await sails.helpers.error.post(queue)
             await Meta.changeMeta({ changingState: null })
             return resolve(0)
@@ -151,9 +151,9 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
           try {
             // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
-            if (!moment().isBefore(moment(Status.errorCheck.prevError).add(1, `minutes`))) {
+            if (!moment().isBefore(moment(Status.errorCheck.prevError).add(1, 'minutes'))) {
               sails.log.verbose(`No recent error; attempting standard recovery.`)
-              await Logs.create({ attendanceID: Meta[`A`].attendanceID, logtype: `system`, loglevel: `danger`, logsubtype: ``, event: `<strong>Queue recovery attempted; queue was frozen.</strong>` }).fetch()
+              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Queue recovery attempted; queue was frozen.</strong>` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -164,29 +164,29 @@ module.exports = {
 
               await Meta.changeMeta({ changingState: `Switching automation instances due to frozen` })
               sails.log.verbose(`Recent error; switching RadioDJs.`)
-              await Logs.create({ attendanceID: Meta[`A`].attendanceID, logtype: `system`, loglevel: `danger`, logsubtype: ``, event: `<strong>Switched automation instances;</strong> queue was frozen.` }).fetch()
+              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> queue was frozen.` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await Announcements.findOrCreate({ type: `djcontrols`, title: `frozen (system)`, announcement: `System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.` }, { type: `djcontrols`, level: `urgent`, title: `frozen (system)`, announcement: `System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+              await Announcements.findOrCreate({ type: 'djcontrols', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
               var maps = sails.config.custom.radiodjs
-                .filter((instance) => instance.rest === Meta[`A`].radiodj)
+                .filter((instance) => instance.rest === Meta['A'].radiodj)
                 .map(async (instance) => {
                   var status = await Status.findOne({ name: `radiodj-${instance.name}` })
                   if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed.` }]) }
                   return true
                 })
               await Promise.all(maps)
-              sails.sockets.broadcast(`system-error`, `system-error`, true)
-              await sails.helpers.rest.cmd(`EnableAutoDJ`, 0, 0)
-              await sails.helpers.rest.cmd(`EnableAssisted`, 1, 0)
-              await sails.helpers.rest.cmd(`StopPlayer`, 0, 0)
+              sails.sockets.broadcast('system-error', 'system-error', true)
+              await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0)
+              await sails.helpers.rest.cmd('EnableAssisted', 1, 0)
+              await sails.helpers.rest.cmd('StopPlayer', 0, 0)
               var queue = Meta.automation
               await sails.helpers.rest.changeRadioDj()
-              await sails.helpers.rest.cmd(`ClearPlaylist`, 1)
+              await sails.helpers.rest.cmd('ClearPlaylist', 1)
               await sails.helpers.error.post(queue)
               await Meta.changeMeta({ changingState: null })
             }
@@ -236,7 +236,7 @@ module.exports = {
       fn: function () {
         return new Promise(async (resolve, reject) => {
           try {
-            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, `Top`, 1)
+            await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1)
           } catch (e) {
             return reject(e)
           }
@@ -253,10 +253,10 @@ module.exports = {
       fn: function () {
         return new Promise(async (resolve, reject) => {
           try {
-            if (Meta[`A`].changingState !== null) { return resolve(295) }
+            if (Meta['A'].changingState !== null) { return resolve(295) }
 
             await Meta.changeMeta({ changingState: `Switching to automation via automationBreak` })
-            await Meta.changeMeta({ state: `automation_on`, genre: ``, show: ``, trackStamp: null, djcontrols: ``, topic: ``, webchat: true, playlist: null, playlist_position: -1, playlist_played: moment(`2002-01-01`).toISOString() })
+            await Meta.changeMeta({ state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() })
 
             // Add up to 3 track requests if any are pending
             await sails.helpers.requests.queue(3, true, true)
@@ -266,7 +266,7 @@ module.exports = {
               await Calendar.preLoadEvents(true)
             } catch (unusedE2) {
               // Couldn't load calendar? Fall back to Default automation
-              await sails.helpers.genre.start(`Default`, true)
+              await sails.helpers.genre.start('Default', true)
             }
 
             await Meta.changeMeta({ changingState: null })
@@ -288,7 +288,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
           try {
             await Meta.changeMeta({ changingState: `Switching to automation via genreEmpty` })
-            await sails.helpers.genre.start(`Default`, true)
+            await sails.helpers.genre.start('Default', true)
             await Meta.changeMeta({ changingState: null })
             return resolve(0)
           } catch (e) {
@@ -313,7 +313,7 @@ module.exports = {
       try {
         var maps = array.map(async status => {
           var criteriaB
-          var criteria = { name: status.name, status: status.status, data: status.data || ``, label: status.label || status.name }
+          var criteria = { name: status.name, status: status.status, data: status.data || '', label: status.label || status.name }
           if (status.status === 5) { criteria.time = moment().toISOString(true) }
 
           // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
@@ -331,7 +331,7 @@ module.exports = {
             if (criteria.hasOwnProperty(key)) {
               if (criteria[key] !== record[key]) {
                 // We don't want to fetch() on time-only updates; this will flood websockets
-                if (!updateIt && key === `time`) {
+                if (!updateIt && key === 'time') {
                   updateIt = 2
                 } else {
                   updateIt = 1
@@ -339,7 +339,7 @@ module.exports = {
               }
             }
           }
-          if (updateIt === 1 && typeof criteria.status !== `undefined` && criteria.status <= 3 && (!record.status || (record.status !== criteria.status))) {
+          if (updateIt === 1 && typeof criteria.status !== 'undefined' && criteria.status <= 3 && (!record.status || (record.status !== criteria.status))) {
             var loglevel = `warning`
             if (criteria.status < 2) {
               loglevel = `danger`
@@ -348,7 +348,7 @@ module.exports = {
             }
 
             // Log changes in status
-            await Logs.create({ attendanceID: Meta[`A`].attendanceID, logtype: `status`, loglevel: loglevel, logsubtype: Meta[`A`].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
+            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)
@@ -356,7 +356,7 @@ module.exports = {
           }
           if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3) {
             // Log when bad statuses are now good.
-            await Logs.create({ attendanceID: Meta[`A`].attendanceID, logtype: `status`, loglevel: `success`, logsubtype: Meta[`A`].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
+            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)
@@ -394,21 +394,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`status socket: ${data}`)
-    sails.sockets.broadcast(`status`, `status`, data)
+    sails.sockets.broadcast('status', 'status', data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`status socket: ${data}`)
-    sails.sockets.broadcast(`status`, `status`, data)
+    sails.sockets.broadcast('status', 'status', data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`status socket: ${data}`)
-    sails.sockets.broadcast(`status`, `status`, data)
+    sails.sockets.broadcast('status', 'status', data)
     return proceed()
   }
 }

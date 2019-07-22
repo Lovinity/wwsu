@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: `underwritings / remove`,
+  friendlyName: 'underwritings / remove',
 
-  description: `Remove an underwriting from the system.`,
+  description: 'Remove an underwriting from the system.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `The ID of the underwriting entry to remove.`
+      description: 'The ID of the underwriting entry to remove.'
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller underwritings/remove called.`)
+    sails.log.debug('Controller underwritings/remove called.')
 
     try {
       // Remove underwritings record

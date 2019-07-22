@@ -94,15 +94,15 @@ class WWSUdb {
       for (var key in query) {
         if (query.hasOwnProperty(key)) {
           switch (key) {
-            case `insert`:
+            case 'insert':
               this._db.insert(query[key])
               this.onInsert(query[key], this._db())
               break
-            case `update`:
+            case 'update':
               this._db({ ID: query[key].ID }).update(query[key])
               this.onUpdate(query[key], this._db())
               break
-            case `remove`:
+            case 'remove':
               this._db({ ID: query[key] }).remove()
               this.onRemove(query[key], this._db())
               break
@@ -116,7 +116,7 @@ class WWSUdb {
   // WWSUreq is a WWSUreq class to use to make the request. path is the URL to call. Data is an optional object of parameters to pass to the API request.
   replaceData (WWSUreq, path, data = {}) {
     try {
-      WWSUreq.request({ method: `POST`, url: path, data: data }, (body) => {
+      WWSUreq.request({ method: 'POST', url: path, data: data }, (body) => {
         this.query(body, true)
       })
     } catch (e) {
@@ -174,7 +174,7 @@ class WWSUreq {
 
   // Is the current token expected to be expired?
   expired () {
-    return this._token === null || moment().isAfter(moment(this.time).add(this.expiration - 1000, `milliseconds`))
+    return this._token === null || moment().isAfter(moment(this.time).add(this.expiration - 1000, 'milliseconds'))
   }
 
   // Request with authorization
@@ -184,40 +184,40 @@ class WWSUreq {
       this._authorize(username, password, (token) => {
         if (token === 0) {
           iziToast.show({
-            titleColor: `#000000`,
-            messageColor: `#000000`,
-            color: `red`,
+            titleColor: '#000000',
+            messageColor: '#000000',
+            color: 'red',
             close: true,
             overlay: true,
-            overlayColor: `rgba(0, 0, 0, 0.75)`,
+            overlayColor: 'rgba(0, 0, 0, 0.75)',
             zindex: 100,
             layout: 1,
             imageWidth: 100,
             image: ``,
             progressBarColor: `rgba(255, 0, 0, 0.5)`,
             closeOnClick: true,
-            position: `center`,
+            position: 'center',
             timeout: 30000,
-            title: `Error authorizing`,
-            message: `There was a technical error trying to authorize. Please contact the developers or try again later.`
+            title: 'Error authorizing',
+            message: 'There was a technical error trying to authorize. Please contact the developers or try again later.'
           })
-        } else if (typeof token.errToken !== `undefined` || typeof token.token === `undefined`) {
+        } else if (typeof token.errToken !== `undefined` || typeof token.token === 'undefined') {
           iziToast.show({
-            titleColor: `#000000`,
-            messageColor: `#000000`,
-            color: `red`,
+            titleColor: '#000000',
+            messageColor: '#000000',
+            color: 'red',
             close: true,
             overlay: true,
-            overlayColor: `rgba(0, 0, 0, 0.75)`,
+            overlayColor: 'rgba(0, 0, 0, 0.75)',
             zindex: 100,
             layout: 1,
             imageWidth: 100,
             image: ``,
             progressBarColor: `rgba(255, 0, 0, 0.5)`,
             closeOnClick: true,
-            position: `center`,
+            position: 'center',
             timeout: 30000,
-            title: `Access denied`,
+            title: 'Access denied',
             message: `${typeof token.errToken !== `undefined` ? `Failed to authenticate; please try again. ${token.errToken}` : `Failed to authenticate; unknown error.`}`
           })
         } else {
@@ -231,7 +231,7 @@ class WWSUreq {
     // Token expected to be expired?
     if (this.expired()) {
       // If /auth/host, we don't need to prompt for login; authenticate by host
-      if (this.authPath === `/auth/host`) {
+      if (this.authPath === '/auth/host') {
         step2(this.host, null)
         // If auth path is null, this request doesn't need authentication; proceed with the request immediately
       } else if (this.authPath === null) {
@@ -247,7 +247,7 @@ class WWSUreq {
     } else {
       this._tryRequest(opts, (body) => {
         if (body === -1) {
-          if (this.authPath !== `/auth/host`) {
+          if (this.authPath !== '/auth/host') {
             this.token = null
             this._promptLogin(opts, (username, password) => step2(username, password))
           } else {
@@ -267,10 +267,10 @@ class WWSUreq {
       if (this.authPath !== null) {
         if (typeof opts.headers === `undefined`) {
           opts.headers = {
-            Authorization: `Bearer ` + this.token
+            Authorization: 'Bearer ' + this.token
           }
         } else {
-          opts.headers[`Authorization`] = `Bearer ` + this.token
+          opts.headers['Authorization'] = 'Bearer ' + this.token
         }
       }
 
@@ -296,7 +296,7 @@ class WWSUreq {
   // authorize again until the token expires.
   _authorize (username, password, cb) {
     try {
-      this.socket.request({ method: `POST`, url: this.authPath, data: { username: username, password: password } }, (body) => {
+      this.socket.request({ method: 'POST', url: this.authPath, data: { username: username, password: password } }, (body) => {
         if (!body) {
           // eslint-disable-next-line callback-return
           cb(0)
@@ -337,32 +337,32 @@ class WWSUreq {
     iziToast.show({
       timeout: 60000,
       overlay: true,
-      displayMode: `once`,
-      color: `red`,
-      id: `login-for-authorization`,
+      displayMode: 'once',
+      color: 'red',
+      id: 'login-for-authorization',
       zindex: 999,
       layout: 2,
       maxWidth: 480,
       title: `${this.authName} Authorization required`,
       message: `To perform this action, you must login with ${this.authName} credentials. Please choose a user, and then type in your password.`,
-      position: `center`,
+      position: 'center',
       drag: false,
       closeOnClick: false,
       inputs: [
-        [`<select>${selection.join(``)}</select>`, `change`, function (instance, toast, select, e) {
+        [`<select>${selection.join('')}</select>`, 'change', function (instance, toast, select, e) {
           username = select.options[select.selectedIndex].value
         }, true],
-        [`<input type="password">`, `keyup`, function (instance, toast, input, e) {
+        [`<input type="password">`, 'keyup', function (instance, toast, input, e) {
           password = input.value
         }, true]
       ],
       buttons: [
-        [`<button><b>Authorize</b></button>`, function (instance, toast) {
-          instance.hide({ transitionOut: `fadeOut` }, toast, `button`)
+        ['<button><b>Authorize</b></button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
           cb(username, password)
         }],
-        [`<button><b>Cancel</b></button>`, function (instance, toast) {
-          instance.hide({ transitionOut: `fadeOut` }, toast, `button`)
+        ['<button><b>Cancel</b></button>', function (instance, toast) {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
         }]
       ]
     })

@@ -1,31 +1,31 @@
-var sh = require(`shorthash`)
+var sh = require('shorthash')
 
 module.exports = {
 
-  friendlyName: `recipients.remove`,
+  friendlyName: 'recipients.remove',
 
-  description: `Remove a recipient socket from memory, and set recipient to offline if no sockets no longer active. Certain recipients should be actually removed after one hour of offline via cron.`,
+  description: 'Remove a recipient socket from memory, and set recipient to offline if no sockets no longer active. Certain recipients should be actually removed after one hour of offline via cron.',
 
   inputs: {
     socket: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The socket ID of the recipient that was removed / disconnected.`
+      description: 'The socket ID of the recipient that was removed / disconnected.'
     },
 
     host: {
-      type: `string`,
-      description: `The alphanumeric host / name of the recipient.`,
+      type: 'string',
+      description: 'The alphanumeric host / name of the recipient.',
       allowNull: true
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper recipients.remove called.`)
+    sails.log.debug('Helper recipients.remove called.')
     var where = {}
     try {
       // No host name? Try to find it based on provided socket.
-      if (typeof inputs.host === `undefined` || inputs.host === null) {
+      if (typeof inputs.host === 'undefined' || inputs.host === null) {
         sails.log.verbose(`No host specified. Trying to find recipient ID instead.`)
         for (var key in sails.models.recipients.sockets) {
           if (Object.prototype.hasOwnProperty.call(sails.models.recipients.sockets, key)) {
@@ -41,7 +41,7 @@ module.exports = {
       }
 
       // If we could not find the recipient, exit the helper.
-      if (typeof where.ID === `undefined` && typeof where.host === `undefined`) {
+      if (typeof where.ID === 'undefined' && typeof where.host === 'undefined') {
         sails.log.verbose(`Could not find recipient. Assuming they do not exist. Terminating helper.`)
         return exits.success()
       }
@@ -52,7 +52,7 @@ module.exports = {
           sails.log.error(err)
         })
 
-      if (typeof recipient !== `undefined` && typeof sails.models.recipients.sockets[recipient.ID] !== `undefined`) {
+      if (typeof recipient !== 'undefined' && typeof sails.models.recipients.sockets[recipient.ID] !== 'undefined') {
         // Remove the socket ID from the array of sockets in memory
         _.remove(sails.models.recipients.sockets[recipient.ID], (e) => {
           return e === inputs.socket

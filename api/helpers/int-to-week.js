@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `int to week`,
+  friendlyName: 'int to week',
 
-  description: `Convert an integer into an object of dayOfWeek, hour, and minute.`,
+  description: 'Convert an integer into an object of dayOfWeek, hour, and minute.',
 
   inputs: {
     integer: {
-      type: `number`,
+      type: 'number',
       required: true
     }
   },

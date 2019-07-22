@@ -34,15 +34,15 @@ onmessage = function (e) {
         if (precipStart === 0 && precipEnd >= 59) {
           this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will continue to fall for the next hour.`]])
         } else if (precipStart === 0) {
-          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will end at about ${moment(e.data[1]).add(precipEnd, `minutes`).format(`h:mmA`)}.`]])
+          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will end at about ${moment(e.data[1]).add(precipEnd, 'minutes').format('h:mmA')}.`]])
         } else if (precipStart < 61) {
-          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(e.data[1]).add(precipStart, `minutes`).format(`h:mmA`)}.`]])
+          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#0C3B69`, `${item.currently.precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(e.data[1]).add(precipStart, 'minutes').format('h:mmA')}.`]])
         } else {
           this.postMessage([`setWeatherSlide`, [`precipitation`, false]])
         }
       } else {
         if (precipStart < 61) {
-          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#0C3B69`, `${precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(e.data[1]).add(precipStart, `minutes`).format(`h:mmA`)}.`]])
+          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#0C3B69`, `${precipType || `precipitation`} arriving`, `fa-umbrella`, `${precipType || `precipitation`} is possible around ${moment(e.data[1]).add(precipStart, 'minutes').format('h:mmA')}.`]])
         } else {
           this.postMessage([`setWeatherSlide`, [`precipitation`, false]])
         }
@@ -54,7 +54,7 @@ onmessage = function (e) {
         if (data.precipType && data.precipProbability >= 0.1) {
           conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility }
         } else {
-          conditions[index] = { type: `clouds`, amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility }
+          conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility }
         }
       })
       console.log(conditions)
@@ -118,17 +118,17 @@ onmessage = function (e) {
 
       // Generate 48 hour forecast
       var temp = ``
-      var theTime = moment(e.data[1]).startOf(`hour`)
+      var theTime = moment(e.data[1]).startOf('hour')
       var shadeColor = ``
       var innerIcon = ``
       var conversionRatio = 1
       for (var i = 0; i < 48; i++) {
-        theTime = moment(e.data[1]).add(i, `hours`)
+        theTime = moment(e.data[1]).add(i, 'hours')
 
         // Add label, vertical line, and temperature at every 3rd hour.
         if (i % 3 === 0) {
           temp += `
-                    <div class="text-white" style="position: absolute; left: ${i > 0 ? (((i) / 48) - (1 / 96)) * 100 : 0}%; top: 0%; font-size: 1.5vh;">${moment(theTime).hours() < 3 ? moment(theTime).format(`hA dd`) : moment(theTime).format(`hA`)}</div>
+                    <div class="text-white" style="position: absolute; left: ${i > 0 ? (((i) / 48) - (1 / 96)) * 100 : 0}%; top: 0%; font-size: 1.5vh;">${moment(theTime).hours() < 3 ? moment(theTime).format('hA dd') : moment(theTime).format('hA')}</div>
                     <div class="text-white" style="position: absolute; left: ${i > 0 ? (((i) / 48) - (1 / 96)) * 100 : 0}%; top: 66%; font-size: 1.5vh;">${Math.round(conditions[i].temperature || 0)}°F</div>
                     `
         }
@@ -136,7 +136,7 @@ onmessage = function (e) {
         // Add shading depending on the condition
         shadeColor = ``
         switch (conditions[i].type) {
-          case `clouds`:
+          case 'clouds':
             if (conditions[i].amount > 0.75) {
               shadeColor = `#786207`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud"></i></span>`
@@ -148,7 +148,7 @@ onmessage = function (e) {
               innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-sun"></i></span>`
             }
             break
-          case `rain`:
+          case 'rain':
             if (conditions[i].amount >= 0.3) {
               shadeColor = `#1A4C6D`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-rain"></i></span>`
@@ -160,7 +160,7 @@ onmessage = function (e) {
               innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-cloud-sun-rain"></i></span>`
             }
             break
-          case `snow`:
+          case 'snow':
             conversionRatio = ((-18 / 11) * conditions[i].temperature) + (722 / 11)
             if ((conditions[i].amount * conversionRatio) >= 1) {
               shadeColor = `#7C7C7C`
@@ -173,7 +173,7 @@ onmessage = function (e) {
               innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="far fa-snowflake"></i></span>`
             }
             break
-          case `sleet`:
+          case 'sleet':
             if (conditions[i].amount >= 0.2) {
               shadeColor = `#780E35`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-igloo"></i></span>`
@@ -199,33 +199,33 @@ onmessage = function (e) {
 
 function getConditionIcon (condition) {
   switch (condition) {
-    case `clear-day`:
-      return `fa-sun`
-    case `clear-night`:
-      return `fa-moon`
-    case `rain`:
-      return `fa-cloud-showers-heavy`
-    case `snow`:
-      return `fa-snowflake`
-    case `sleet`:
-      return `fa-cloud-meatball`
-    case `wind`:
-      return `fa-wind`
-    case `fog`:
-      return `fa-smog`
-    case `cloudy`:
-      return `fa-cloud`
-    case `partly-cloudy-day`:
-      return `fa-cloud-sun`
-    case `partly-cloudy-night`:
-      return `fa-cloud-moon`
-    case `thunderstorm`:
-      return `fa-bolt`
-    case `showers-day`:
-      return `fa-cloud-sun-rain`
-    case `showers-night`:
-      return `fa-cloud-moon-rain`
+    case 'clear-day':
+      return 'fa-sun'
+    case 'clear-night':
+      return 'fa-moon'
+    case 'rain':
+      return 'fa-cloud-showers-heavy'
+    case 'snow':
+      return 'fa-snowflake'
+    case 'sleet':
+      return 'fa-cloud-meatball'
+    case 'wind':
+      return 'fa-wind'
+    case 'fog':
+      return 'fa-smog'
+    case 'cloudy':
+      return 'fa-cloud'
+    case 'partly-cloudy-day':
+      return 'fa-cloud-sun'
+    case 'partly-cloudy-night':
+      return 'fa-cloud-moon'
+    case 'thunderstorm':
+      return 'fa-bolt'
+    case 'showers-day':
+      return 'fa-cloud-sun-rain'
+    case 'showers-night':
+      return 'fa-cloud-moon-rain'
     default:
-      return `fa-rainbow`
+      return 'fa-rainbow'
   }
 }

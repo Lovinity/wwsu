@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `config / radiodjs / set-rest`,
+  friendlyName: 'config / radiodjs / set-rest',
 
-  description: `Change the password that every RadioDJ REST server is using.`,
+  description: 'Change the password that every RadioDJ REST server is using.',
 
   inputs: {
     auth: {
-      type: `string`,
+      type: 'string',
       required: true,
       description: `The new REST auth password that should be used for all configured RadioDJs.`
     }
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/radiodjs/set-rest called.`)
+    sails.log.debug('Controller config/radiodjs/set-rest called.')
 
     try {
       sails.config.custom.rest.auth = inputs.auth

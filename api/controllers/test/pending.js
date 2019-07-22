@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `Pending`,
+  friendlyName: 'Pending',
 
-  description: `Pending test.`,
+  description: 'Pending test.',
 
   inputs: {
 

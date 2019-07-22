@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `Queue request`,
+  friendlyName: 'Queue request',
 
-  description: ``,
+  description: '',
 
   inputs: {
 

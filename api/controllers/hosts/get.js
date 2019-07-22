@@ -1,14 +1,14 @@
 module.exports = {
 
-  friendlyName: `hosts / get`,
+  friendlyName: 'hosts / get',
 
-  description: `Retrieve data about a specified host. Also provides an array of otherHosts, and subscribes to the hosts socket, if the host parameter is an admin host.`,
+  description: 'Retrieve data about a specified host. Also provides an array of otherHosts, and subscribes to the hosts socket, if the host parameter is an admin host.',
 
   inputs: {
     host: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The host name to search for or authorize.`
+      description: 'The host name to search for or authorize.'
     }
   },
 
@@ -25,7 +25,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller hosts/get called.`)
+    sails.log.debug('Controller hosts/get called.')
 
     try {
       // Find the hosts record
@@ -36,8 +36,8 @@ module.exports = {
 
       // Subscribe to websockets if applicable
       if (record.authorized && this.req.isSocket && record.admin) {
-        sails.sockets.join(this.req, `hosts`)
-        sails.log.verbose(`Request was a socket on an authorized admin. Joined hosts.`)
+        sails.sockets.join(this.req, 'hosts')
+        sails.log.verbose('Request was a socket on an authorized admin. Joined hosts.')
 
         // Push the current hosts through the output
         var records = await sails.models.hosts.find()

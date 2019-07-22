@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `config / breaks / set-automation`,
+  friendlyName: 'config / breaks / set-automation',
 
-  description: `Set what is queued during breaks in automation.`,
+  description: 'Set what is queued during breaks in automation.',
 
   inputs: {
     during: {
-      type: `json`,
+      type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
       description: `Automation / during is executed when a DJ "Switches show" and goes to automation_break. It is repeatedly executed whenever the queue empties until either the break times out, or another show begins.`
     }
@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/breaks/set-automation called.`)
+    sails.log.debug('Controller config/breaks/set-automation called.')
 
     try {
       // Modify configuration
@@ -28,7 +28,7 @@ module.exports = {
       }
 
       // Send new configuration through sockets
-      sails.sockets.broadcast(`config`, `config`, { update: { specialBreaks: sails.config.custom.specialBreaks } })
+      sails.sockets.broadcast('config', 'config', { update: { specialBreaks: sails.config.custom.specialBreaks } })
 
       return exits.success()
     } catch (e) {

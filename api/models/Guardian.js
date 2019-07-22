@@ -6,32 +6,32 @@
  */
 
 module.exports = {
-  datastore: `ram`,
+  datastore: 'ram',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     date: {
-      type: `string`
+      type: 'string'
     },
 
     title: {
-      type: `string`
+      type: 'string'
     },
 
     link: {
-      type: `string`
+      type: 'string'
     },
 
     author: {
-      type: `string`
+      type: 'string'
     },
 
     description: {
-      type: `string`
+      type: 'string'
     }
 
   }

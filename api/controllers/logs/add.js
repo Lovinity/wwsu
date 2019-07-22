@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `logs / add`,
+  friendlyName: 'logs / add',
 
-  description: `Add a log entry into the system.`,
+  description: 'Add a log entry into the system.',
 
   inputs: {
     date: {
-      type: `string`,
+      type: 'string',
       custom: function (value) {
         return moment(value).isValid()
       },
@@ -14,65 +14,65 @@ module.exports = {
       description: `moment() parsable string of a date in which this log took place. Defaults to now.`
     },
     logtype: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `Category of log.`
+      description: 'Category of log.'
     },
     loglevel: {
-      type: `string`,
+      type: 'string',
       required: true,
-      isIn: [`danger`, `urgent`, `warning`, `info`, `success`, `primary`, `secondary`],
-      description: `Log severity: danger, urgent, warning, info, success, primary, or secondary.`
+      isIn: ['danger', 'urgent', 'warning', 'info', 'success', 'primary', 'secondary'],
+      description: 'Log severity: danger, urgent, warning, info, success, primary, or secondary.'
     },
 
     logsubtype: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
-      description: `Log subcategory / subtype, such as a radio show name.`
+      description: 'Log subcategory / subtype, such as a radio show name.'
     },
 
     event: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The log event / what happened, plus any data (other than track information).`
+      description: 'The log event / what happened, plus any data (other than track information).'
     },
 
     trackArtist: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
-      description: `If a track was played, the artist of the track, used for spin counts.`
+      description: 'If a track was played, the artist of the track, used for spin counts.'
     },
 
     trackTitle: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
-      description: `If a track was played, the title of the track, used for spin counts.`
+      description: 'If a track was played, the title of the track, used for spin counts.'
     },
 
     trackAlbum: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
-      description: `If a track was played, the album of the track.`
+      description: 'If a track was played, the album of the track.'
     },
 
     trackLabel: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
-      description: `If a track was played, the record label of the track.`
+      description: 'If a track was played, the record label of the track.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller logs/add called.`)
+    sails.log.debug('Controller logs/add called.')
 
     try {
       // Create the log entry
-      await sails.models.logs.create({ attendanceID: sails.models.meta[`A`].attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== `undefined` ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }).fetch()
 
       // Set manual meta if criteria matches
-      if (inputs.logtype === `manual` && inputs.trackArtist.length > 0 && inputs.trackTitle.length > 0) {
-        await sails.models.meta.changeMeta({ trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, trackStamp: inputs.date !== null && typeof inputs.date !== `undefined` ? moment(inputs.date).toISOString(true) : moment().toISOString(true) })
-      } else if (inputs.logtype === `manual`) {
+      if (inputs.logtype === 'manual' && inputs.trackArtist.length > 0 && inputs.trackTitle.length > 0) {
+        await sails.models.meta.changeMeta({ trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, trackStamp: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) })
+      } else if (inputs.logtype === 'manual') {
         await sails.models.meta.changeMeta({ trackArtist: null, trackTitle: null, trackAlbum: null, trackLabel: null, trackStamp: null })
       }
 

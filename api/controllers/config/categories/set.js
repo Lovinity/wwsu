@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `config / categories / set`,
+  friendlyName: 'config / categories / set',
 
-  description: `Add or update a RadioDJ category item.`,
+  description: 'Add or update a RadioDJ category item.',
 
   inputs: {
     name: {
-      type: `string`,
+      type: 'string',
       required: true,
       regex: /^[a-z0-9]+$/i,
       isNotIn: [`_doNotRemove`],
@@ -14,7 +14,7 @@ module.exports = {
     },
 
     config: {
-      type: `json`,
+      type: 'json',
       custom: (value) => {
         var isValid = true
         for (var key in value) {
@@ -42,7 +42,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/categories/set called.`)
+    sails.log.debug('Controller config/categories/set called.')
 
     try {
       // Do not modify _doNotRemove category
@@ -50,7 +50,7 @@ module.exports = {
 
       sails.config.custom.categories[inputs.name] = inputs.config
 
-      sails.sockets.broadcast(`config`, `config`, { update: { categories: sails.config.custom.categories } })
+      sails.sockets.broadcast('config', 'config', { update: { categories: sails.config.custom.categories } })
 
       // Reload subcategories in configuration
       await sails.helpers.songs.reloadSubcategories()

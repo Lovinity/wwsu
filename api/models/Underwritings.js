@@ -6,28 +6,28 @@
  */
 
 module.exports = {
-  datastore: `nodebase`,
+  datastore: 'nodebase',
 
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     name: {
-      type: `string`,
+      type: 'string',
       maxLength: 255,
       required: true
     },
 
     trackID: {
-      type: `number`,
+      type: 'number',
       required: true
     },
 
     mode: {
-      type: `json`,
+      type: 'json',
       required: true
     }
 
@@ -37,21 +37,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`underwritings socket: ${data}`)
-    sails.sockets.broadcast(`underwritings`, `underwritings`, data)
+    sails.sockets.broadcast('underwritings', 'underwritings', data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`underwritings socket: ${data}`)
-    sails.sockets.broadcast(`underwritings`, `underwritings`, data)
+    sails.sockets.broadcast('underwritings', 'underwritings', data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`underwritings socket: ${data}`)
-    sails.sockets.broadcast(`underwritings`, `underwritings`, data)
+    sails.sockets.broadcast('underwritings', 'underwritings', data)
     return proceed()
   }
 

@@ -1,17 +1,17 @@
 module.exports = {
 
-  friendlyName: `config / nws / caps / add`,
+  friendlyName: 'config / nws / caps / add',
 
-  description: `Add a new county or zone to check for severe weather alerts via the NWS CAPS website.`,
+  description: 'Add a new county or zone to check for severe weather alerts via the NWS CAPS website.',
 
   inputs: {
     code: {
-      type: `string`,
+      type: 'string',
       required: true,
       description: `The NWS county or zone code.`
     },
     name: {
-      type: `string`,
+      type: 'string',
       required: true,
       description: `The human-readable name of this location, such as the county.`
     }
@@ -22,7 +22,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/nws/caps/add called.`)
+    sails.log.debug('Controller config/nws/caps/add called.')
 
     try {
       // Do not add duplicates
@@ -34,7 +34,7 @@ module.exports = {
       if (!exists) { sails.config.custom.EAS.NWSX.push(inputs) }
 
       // broadcast changes over websockets
-      sails.sockets.broadcast(`config`, `config`, { update: { EAS: sails.config.custom.EAS } })
+      sails.sockets.broadcast('config', 'config', { update: { EAS: sails.config.custom.EAS } })
 
       return exits.success()
     } catch (e) {

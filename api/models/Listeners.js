@@ -7,21 +7,21 @@
 
 module.exports = {
 
-  datastore: `nodebase`,
+  datastore: 'nodebase',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     dj: {
-      type: `number`,
+      type: 'number',
       allowNull: true
     },
 
     listeners: {
-      type: `number`
+      type: 'number'
     }
 
   },

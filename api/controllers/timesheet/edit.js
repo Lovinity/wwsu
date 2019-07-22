@@ -1,39 +1,39 @@
 
 module.exports = {
 
-  friendlyName: `Timesheet / Edit`,
+  friendlyName: 'Timesheet / Edit',
 
-  description: `Edit a timesheet entry.`,
+  description: 'Edit a timesheet entry.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `The ID number of the Timesheet being edited.`
+      description: 'The ID number of the Timesheet being edited.'
     },
 
     time_in: {
-      type: `string`,
+      type: 'string',
       required: true,
       custom: function (value) {
         return moment(value).isValid()
       },
-      description: `A moment.js compatible timestamp for when the director clocked in.`
+      description: 'A moment.js compatible timestamp for when the director clocked in.'
     },
 
     time_out: {
-      type: `string`,
+      type: 'string',
       allowNull: true,
       custom: function (value) {
-        return value === null || value === `` || moment(value).isValid()
+        return value === null || value === '' || moment(value).isValid()
       },
-      description: `A moment.js compatible timestamp for when the director clocked out. Use null or blank string to indicate the director is still clocked in.`
+      description: 'A moment.js compatible timestamp for when the director clocked out. Use null or blank string to indicate the director is still clocked in.'
     },
 
     approved: {
-      type: `boolean`,
+      type: 'boolean',
       required: true,
-      description: `If true, this timesheet is approved. If false, this timesheet is flagged for approval.`
+      description: 'If true, this timesheet is approved. If false, this timesheet is flagged for approval.'
     }
   },
 
@@ -50,7 +50,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller timesheet/edit called.`)
+    sails.log.debug('Controller timesheet/edit called.')
 
     try {
       // Update the timesheet record

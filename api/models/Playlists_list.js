@@ -6,51 +6,51 @@
  */
 
 module.exports = {
-  datastore: `radiodj`,
+  datastore: 'radiodj',
   attributes: {
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     pID: {
-      type: `number`
+      type: 'number'
     },
     sID: {
-      type: `number`
+      type: 'number'
     },
     cstart: {
-      type: `number`
+      type: 'number'
     },
     cnext: {
-      type: `number`
+      type: 'number'
     },
     cend: {
-      type: `number`
+      type: 'number'
     },
     fin: {
-      type: `number`
+      type: 'number'
     },
     fout: {
-      type: `number`
+      type: 'number'
     },
     swID: {
-      type: `number`
+      type: 'number'
     },
     swplay: {
-      type: `number`
+      type: 'number'
     },
     vtID: {
-      type: `number`
+      type: 'number'
     },
     vtplay: {
-      type: `number`
+      type: 'number'
     },
     swfirst: {
-      type: `string`
+      type: 'string'
     },
     ord: {
-      type: `number`
+      type: 'number'
     }
 
   }

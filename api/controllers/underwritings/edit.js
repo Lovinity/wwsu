@@ -1,25 +1,25 @@
 module.exports = {
 
-  friendlyName: `Underwritings / Edit`,
+  friendlyName: 'Underwritings / Edit',
 
-  description: `Edit an underwriting record.`,
+  description: 'Edit an underwriting record.',
 
   inputs: {
     ID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `The ID of the underwriting record to edit.`
+      description: 'The ID of the underwriting record to edit.'
     },
     name: {
-      type: `string`,
-      description: `New name for the underwriting entry.`
+      type: 'string',
+      description: 'New name for the underwriting entry.'
     },
     trackID: {
-      type: `number`,
-      description: `Updated ID of the track in RadioDJ that this underwriting is associated with.`
+      type: 'number',
+      description: 'Updated ID of the track in RadioDJ that this underwriting is associated with.'
     },
     mode: {
-      type: `json`,
+      type: 'json',
       custom: (value) => {
         if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1)) { return false }
 
@@ -33,7 +33,7 @@ module.exports = {
 
         return true
       },
-      description: `Mode data for this underwriting.`
+      description: 'Mode data for this underwriting.'
     }
   },
 
@@ -42,7 +42,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller underwritings/edit called.`)
+    sails.log.debug('Controller underwritings/edit called.')
 
     try {
       // Determine what needs updating

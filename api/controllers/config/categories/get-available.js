@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: `config / categories / get-available`,
+  friendlyName: 'config / categories / get-available',
 
-  description: `Return an array of available RadioDJ categories and subcategories.`,
+  description: 'Return an array of available RadioDJ categories and subcategories.',
 
   inputs: {
 
@@ -13,7 +13,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/categories/get-available called.`)
+    sails.log.debug('Controller config/categories/get-available called.')
 
     try {
       var returnData = {}

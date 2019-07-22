@@ -1,15 +1,15 @@
 module.exports = {
 
-  friendlyName: `Planner / schedule`,
+  friendlyName: 'Planner / schedule',
 
-  description: `Create a schedule`,
+  description: 'Create a schedule',
 
   inputs: {
 
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller planner/schedule called.`)
+    sails.log.debug('Controller planner/schedule called.')
     try {
       // Get all planner records
       var records = await sails.models.planner.find()
@@ -71,7 +71,7 @@ module.exports = {
         .filter((record) => record.actual === null || typeof record.actual.start === `undefined` || typeof record.actual.end === `undefined`)
         .map((record) => {
           if (record.priority === null) {
-            record.badReason = `Record does not have a scheduling priority set.`
+            record.badReason = 'Record does not have a scheduling priority set.'
             badRecords.push(record)
             return null
           }
@@ -110,11 +110,11 @@ module.exports = {
               }
               // If the while loop exited without a schedule, then this show could not be scheduled with the proposals.
               if (!scheduled) {
-                show.badReason = `None of the proposed show times are available; please have the DJ provide alternative show times.`
+                show.badReason = 'None of the proposed show times are available; please have the DJ provide alternative show times.'
                 badRecords.push(show)
               }
             } else {
-              show.badReason = `Show has no proposed show times added.`
+              show.badReason = 'Show has no proposed show times added.'
               badRecords.push(show)
             }
 

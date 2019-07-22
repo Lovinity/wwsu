@@ -7,50 +7,50 @@
 
 module.exports = {
   // Eas data should persist. Use MySQL.
-  datastore: `nodebase`,
+  datastore: 'nodebase',
   attributes: {
 
     ID: {
-      type: `number`,
+      type: 'number',
       autoIncrement: true
     },
 
     source: {
-      type: `string`
+      type: 'string'
     },
 
     reference: {
-      type: `string`
+      type: 'string'
     },
 
     alert: {
-      type: `string`
+      type: 'string'
     },
 
     information: {
-      type: `string`
+      type: 'string'
     },
 
     severity: {
-      type: `string`
+      type: 'string'
     },
 
     color: {
-      type: `string`
+      type: 'string'
     },
 
     counties: {
-      type: `string`
+      type: 'string'
     },
 
     starts: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     },
 
     expires: {
-      type: `ref`,
-      columnType: `datetime`
+      type: 'ref',
+      columnType: 'datetime'
     }
   },
 
@@ -62,21 +62,21 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`eas socket: ${data}`)
-    sails.sockets.broadcast(`eas`, `eas`, data)
+    sails.sockets.broadcast('eas', 'eas', data)
     return proceed()
   },
 
   afterUpdate: function (updatedRecord, proceed) {
     var data = { update: updatedRecord }
     sails.log.silly(`eas socket: ${data}`)
-    sails.sockets.broadcast(`eas`, `eas`, data)
+    sails.sockets.broadcast('eas', 'eas', data)
     return proceed()
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`eas socket: ${data}`)
-    sails.sockets.broadcast(`eas`, `eas`, data)
+    sails.sockets.broadcast('eas', 'eas', data)
     return proceed()
   }
 }

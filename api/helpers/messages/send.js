@@ -1,36 +1,36 @@
 module.exports = {
 
-  friendlyName: `messages.send`,
+  friendlyName: 'messages.send',
 
-  description: `Send out client messages`,
+  description: 'Send out client messages',
 
   inputs: {
     from: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `ID of the client sending the message.`
+      description: 'ID of the client sending the message.'
     },
     to: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `ID of the client to receive the message.`
+      description: 'ID of the client to receive the message.'
     },
 
     to_friendly: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `Friendly name of the client to receive the message.`
+      description: 'Friendly name of the client to receive the message.'
     },
 
     message: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `The message.`
+      description: 'The message.'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper messages.send called.`)
+    sails.log.debug('Helper messages.send called.')
     sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`)
     try {
       // Filter disallowed HTML
@@ -47,7 +47,7 @@ module.exports = {
       // Create the message
       var records = await sails.models.messages.create(inputs).fetch()
       if (!records) {
-        return exits.error(new Error(`Internal error: Could not save message in database.`))
+        return exits.error(new Error('Internal error: Could not save message in database.'))
       } else {
         // Broadcast the message over web sockets
         return exits.success()

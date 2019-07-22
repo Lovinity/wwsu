@@ -1,12 +1,12 @@
 module.exports = {
 
-  friendlyName: `config / radiodjs / remove`,
+  friendlyName: 'config / radiodjs / remove',
 
-  description: `Remove a RadioDJ from the system and stop using it.`,
+  description: 'Remove a RadioDJ from the system and stop using it.',
 
   inputs: {
     name: {
-      type: `string`,
+      type: 'string',
       required: true,
       regex: /^[a-z0-9]+$/i,
       description: `The name of the RadioDJ to remove from the system.`
@@ -18,13 +18,13 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/radiodjs/remove called.`)
+    sails.log.debug('Controller config/radiodjs/remove called.')
 
     try {
       // If the currently active radioDJ has been removed from the system, we need to trigger a radiodj instance change (after the new configuration is saved).
       var changeRadioDj = false
       sails.config.custom.radiodjs
-        .filter((radiodj) => radiodj.rest === sails.models.meta[`A`].radiodj && radiodj.name === inputs.name)
+        .filter((radiodj) => radiodj.rest === sails.models.meta['A'].radiodj && radiodj.name === inputs.name)
         .map(() => { changeRadioDj = true })
 
       // Delete the RadioDJ
@@ -44,7 +44,7 @@ module.exports = {
       }
 
       // Transmit new config over websockets
-      sails.sockets.broadcast(`config`, `config`, { update: { radiodjs: sails.config.custom.radiodjs } })
+      sails.sockets.broadcast('config', 'config', { update: { radiodjs: sails.config.custom.radiodjs } })
 
       return exits.success()
     } catch (e) {

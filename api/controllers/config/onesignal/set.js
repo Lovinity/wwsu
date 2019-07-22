@@ -1,16 +1,16 @@
 module.exports = {
 
-  friendlyName: `config / onesignal / set`,
+  friendlyName: 'config / onesignal / set',
 
-  description: `Set onesignal configuration`,
+  description: 'Set onesignal configuration',
 
   inputs: {
     rest: {
-      type: `string`,
+      type: 'string',
       description: `Specify the new OneSignal REST API to use for this application.`
     },
     app: {
-      type: `string`,
+      type: 'string',
       description: `Specify the App ID of the app used in OneSignal for push notifications.`
     }
   },
@@ -20,7 +20,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller config/onesignal/set called.`)
+    sails.log.debug('Controller config/onesignal/set called.')
 
     try {
       // Set the new configuration of any and all values provided as input
@@ -29,7 +29,7 @@ module.exports = {
           if (key === `rest` && inputs.rest === ``) { continue }
           sails.config.custom.onesignal[key] = inputs[key]
 
-          if (key === `app`) { sails.sockets.broadcast(`config`, `config`, { update: { onesignal: { app: sails.config.custom.onesignal.app } } }) }
+          if (key === `app`) { sails.sockets.broadcast('config', 'config', { update: { onesignal: { app: sails.config.custom.onesignal.app } } }) }
         }
       }
 

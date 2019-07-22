@@ -1,22 +1,22 @@
 module.exports = {
 
-  friendlyName: `Underwritings / Add`,
+  friendlyName: 'Underwritings / Add',
 
-  description: `Add an underwriting record.`,
+  description: 'Add an underwriting record.',
 
   inputs: {
     name: {
-      type: `string`,
+      type: 'string',
       required: true,
-      description: `Name for the underwriting entry.`
+      description: 'Name for the underwriting entry.'
     },
     trackID: {
-      type: `number`,
+      type: 'number',
       required: true,
-      description: `ID of the track in RadioDJ that this underwriting is associated with.`
+      description: 'ID of the track in RadioDJ that this underwriting is associated with.'
     },
     mode: {
-      type: `json`,
+      type: 'json',
       required: true,
       custom: (value) => {
         // Underwritings mode parameter must have a mode property with a value of 0 or 1
@@ -36,7 +36,7 @@ module.exports = {
 
         return true
       },
-      description: `Mode data for this underwriting.`
+      description: 'Mode data for this underwriting.'
     }
   },
 
@@ -45,7 +45,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller underwritings/add called.`)
+    sails.log.debug('Controller underwritings/add called.')
 
     try {
       // Add the underwriting to the database

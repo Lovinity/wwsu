@@ -87,7 +87,7 @@ module.exports = {
     * https://sailsjs.com/docs/concepts/models-and-orm/model-settings#?migrate *
     *                                                                          *
     ***************************************************************************/
-    migrate: `safe`
+    migrate: 'safe'
 
     /***************************************************************************
     *                                                                          *
@@ -276,7 +276,7 @@ module.exports = {
   *                                                                         *
   ***************************************************************************/
   log: {
-    level: `warn`
+    level: 'warn'
   },
 
   http: {
@@ -347,8 +347,8 @@ module.exports = {
   *                                                                         *
   ***************************************************************************/
   custom: {
-    baseUrl: `https://server.wwsu1069.org`,
-    internalEmailAddress: `wwsu4@wright.edu`
+    baseUrl: 'https://server.wwsu1069.org',
+    internalEmailAddress: 'wwsu4@wright.edu'
 
     // mailgunDomain: 'mg.example.com',
     // mailgunSecret: 'key-prod_fake_bd32301385130a0bafe030c',
