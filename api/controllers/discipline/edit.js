@@ -39,10 +39,10 @@ module.exports = {
     try {
       // Determine what needs editing
       var criteria = {}
-      if (typeof inputs.active !== `undefined`) { criteria.active = inputs.active }
-      if (typeof inputs.IP !== `undefined`) { criteria.IP = inputs.IP }
-      if (typeof inputs.action !== `undefined`) { criteria.action = inputs.action }
-      if (typeof inputs.message !== `undefined`) { criteria.message = inputs.message }
+      if (typeof inputs.active !== 'undefined') { criteria.active = inputs.active }
+      if (typeof inputs.IP !== 'undefined') { criteria.IP = inputs.IP }
+      if (typeof inputs.action !== 'undefined') { criteria.action = inputs.action }
+      if (typeof inputs.message !== 'undefined') { criteria.message = inputs.message }
 
       var criteriaB = _.cloneDeep(criteria)
 

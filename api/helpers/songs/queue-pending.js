@@ -13,7 +13,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper songs.queuePending called.`)
+    sails.log.debug('Helper songs.queuePending called.')
 
     // Load in any duplicate non-music tracks that were removed prior, to ensure underwritings etc get proper play counts.
     if (sails.models.songs.pending.length > 0) {

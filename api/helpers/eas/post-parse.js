@@ -17,7 +17,7 @@ module.exports = {
       // Process sails.models.eas.pendingAlerts
       for (var key in sails.models.eas.pendingAlerts) {
         if (Object.prototype.hasOwnProperty.call(sails.models.eas.pendingAlerts, key)) {
-          sails.log.verbose(`Processing EAS`, sails.models.eas.pendingAlerts[key])
+          sails.log.verbose('Processing EAS', sails.models.eas.pendingAlerts[key])
 
           // Do not process alerts containing no information
           if (sails.models.eas.pendingAlerts[key].information === '' || sails.models.eas.pendingAlerts[key].information === null) {

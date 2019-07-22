@@ -16,7 +16,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`helper sanitize called.`)
+    sails.log.debug('helper sanitize called.')
 
     try {
       // Only keep safe HTML according to config

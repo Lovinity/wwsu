@@ -45,7 +45,7 @@ module.exports = {
           sails.models.songs.queueCheck.map((check, index) => {
             sails.log.verbose(`queueCheck ${check.ID}`)
             if (inQueue.indexOf(check.ID) !== -1) {
-              sails.log.verbose(`IN QUEUE. Resolving success.`)
+              sails.log.verbose('IN QUEUE. Resolving success.')
               check.success()
               delete sails.models.songs.queueCheck[index]
             } else if (moment().diff(moment(check.time), 'seconds') >= 10) {
@@ -60,7 +60,7 @@ module.exports = {
           return exits.error(err)
         })
     } catch (e) {
-      sails.log.debug(`CAUGHT2`)
+      sails.log.debug('CAUGHT2')
       return exits.error(e)
     }
   }

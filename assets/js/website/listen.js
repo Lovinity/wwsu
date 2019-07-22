@@ -35,7 +35,7 @@ var calendar = []
 var likedTracks = []
 var clockTimer
 var onlineSocketDone = false
-var device = getUrlParameter(`device`)
+var device = getUrlParameter('device')
 var isMobile = device !== null
 var notificationsSupported = false
 var OneSignal
@@ -96,7 +96,7 @@ if (document.querySelector('#themessage')) {
   })
 }
 
-if (document.querySelector(`#trackModal`)) {
+if (document.querySelector('#trackModal')) {
   $('#trackModal').iziModal({
     title: 'Track Information',
     headerColor: '#88A0B9',
@@ -114,7 +114,7 @@ if (document.querySelector(`#trackModal`)) {
   })
 }
 
-if (document.querySelector(`#dialog`)) {
+if (document.querySelector('#dialog')) {
   $('#dialog').iziModal({
     width: 640,
     focusInput: true,
@@ -221,16 +221,16 @@ function setFocusToFirstItemInModal (obj) {
   o.filter(focusableElementsString).filter(':visible').first().focus()
 }
 if (document.querySelector('#song-data')) {
-  document.querySelector(`#song-data`).addEventListener('click', (e) => {
+  document.querySelector('#song-data').addEventListener('click', (e) => {
     try {
       if (e.target) {
-        if (e.target.id === `track-load` || e.target.id === `track-l-load`) {
+        if (e.target.id === 'track-load' || e.target.id === 'track-l-load') {
           loadTracks(skipIt)
         } else {
-          if (e.target.id.startsWith(`track-l-`)) {
-            loadTrackInfo(parseInt(e.target.id.replace(`track-l-`, ``)))
-          } else if (e.target.id.startsWith(`track-`)) {
-            loadTrackInfo(parseInt(e.target.id.replace(`track-`, ``)))
+          if (e.target.id.startsWith('track-l-')) {
+            loadTrackInfo(parseInt(e.target.id.replace('track-l-', '')))
+          } else if (e.target.id.startsWith('track-')) {
+            loadTrackInfo(parseInt(e.target.id.replace('track-', '')))
           }
         }
       }
@@ -241,7 +241,7 @@ if (document.querySelector('#song-data')) {
 }
 
 if (document.querySelector('#track-info-request')) {
-  document.querySelector(`#track-info-request`).addEventListener('click', (e) => {
+  document.querySelector('#track-info-request').addEventListener('click', (e) => {
     try {
       if (e.target) {
         if (e.target.id === 'track-request-submit') {
@@ -255,7 +255,7 @@ if (document.querySelector('#track-info-request')) {
 }
 
 if (document.querySelector('#filter-submit')) {
-  document.querySelector(`#filter-submit`).addEventListener('click', () => {
+  document.querySelector('#filter-submit').addEventListener('click', () => {
     loadTracks(0)
   })
 }
@@ -282,7 +282,7 @@ waitFor(() => {
 })
 
 waitFor(() => {
-  return (document.querySelector(`#nativeflashradioplaystopcontainer`) !== null && document.querySelector(`#nativeflashradioplaybutton`) !== null && document.querySelector(`#nativeflashradioimagecontainer`) !== null && document.querySelector(`#nativeflashradiovolumecontroller`) !== null)
+  return (document.querySelector('#nativeflashradioplaystopcontainer') !== null && document.querySelector('#nativeflashradioplaybutton') !== null && document.querySelector('#nativeflashradioimagecontainer') !== null && document.querySelector('#nativeflashradiovolumecontroller') !== null)
 }, () => {
   $('#nativeflashradioplaystopcontainer').attr('tabindex', 0)
   $('#nativeflashradiovolumegrab').attr('tabindex', 0)
@@ -292,7 +292,7 @@ waitFor(() => {
 })
 
 waitFor(() => {
-  return (document.querySelector(`.ql-bold`) !== null)
+  return (document.querySelector('.ql-bold') !== null)
 }, () => {
   $('.ql-bold').each(function () { $(this).attr('value', 'bold') })
   $('.ql-italic').each(function () { $(this).attr('value', 'italics') })
@@ -339,7 +339,7 @@ waitFor(() => {
   // On socket disconnect, notify the user.
   io.socket.on('disconnect', () => {
     try {
-      if (nowPlaying) { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">Connecting...</div>` }
+      if (nowPlaying) { nowPlaying.innerHTML = '<div class="p-3 mb-2 shadow-4 bg-light-1">Connecting...</div>' }
       iziToast.show({
         title: 'Lost connection to WWSU',
         message: 'You will not receive new metadata, nor can send or receive messages or requests, until re-connected.',
@@ -404,7 +404,7 @@ waitFor(() => {
   io.socket.on('discipline', (data) => {
     io.socket.disconnect()
     iziToast.show({
-      title: `Disciplinary notice - Disconnected from WWSU`,
+      title: 'Disciplinary notice - Disconnected from WWSU',
       message: data.discipline,
       color: 'red',
       zindex: 1000,
@@ -451,7 +451,7 @@ function onlineSocket (doOneSignal = false) {
         nickname.value = nickname.value.match(/\(([^)]+)\)/)[1]
       }
       onlineSocketDone = true
-      automationpost = ``
+      automationpost = ''
       doMeta({ webchat: Meta.webchat, state: Meta.state })
       if (doOneSignal) {
         OneSignal.push(() => {
@@ -518,7 +518,7 @@ function onlineSocket (doOneSignal = false) {
     })
   }
 
-  var temp = document.querySelector(`#track-info-subscribe`)
+  var temp = document.querySelector('#track-info-subscribe')
   if (temp !== null) {
     if (device === null && !isMobile) {
       temp.style.display = 'block'
@@ -527,7 +527,7 @@ function onlineSocket (doOneSignal = false) {
     }
   }
 
-  temp = document.querySelector(`#chat-subscribe`)
+  temp = document.querySelector('#chat-subscribe')
   if (temp !== null) {
     if (device === null && !isMobile) {
       temp.style.display = 'block'
@@ -536,36 +536,36 @@ function onlineSocket (doOneSignal = false) {
     }
   }
 
-  temp = document.querySelector(`#show-subscribe-button`)
-  var temp2 = document.querySelector(`#show-subscribe-instructions`)
+  temp = document.querySelector('#show-subscribe-button')
+  var temp2 = document.querySelector('#show-subscribe-instructions')
   if (temp !== null) {
     if (notificationsSupported || isMobile) {
       if (device === null && !isMobile) {
         temp.innerHTML = 'Show Prompt'
-        temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`
+        temp2.innerHTML = 'First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.'
         temp.onclick = () => OneSignal.showNativePrompt()
         temp.onkeydown = () => OneSignal.showNativePrompt()
       } else {
         temp.innerHTML = 'Subscribe'
-        temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
+        temp2.innerHTML = 'Click "Subscribe" to receive notifications when this show goes on the air.'
         temp.onclick = () => {
           if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-            subscribe(`calendar-all`, Meta.show)
+            subscribe('calendar-all', Meta.show)
           } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-            subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+            subscribe('calendar-all', `Sports: ${Meta.show}`)
           }
         }
         temp.onkeydown = () => {
           if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-            subscribe(`calendar-all`, Meta.show)
+            subscribe('calendar-all', Meta.show)
           } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-            subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+            subscribe('calendar-all', `Sports: ${Meta.show}`)
           }
         }
       }
     } else {
       temp.innerHTML = 'Not Supported'
-      temp2.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU Mobile app in the future!`
+      temp2.innerHTML = 'Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU Mobile app in the future!'
       temp.onclick = () => { }
       temp.onkeydown = () => { }
     }
@@ -817,7 +817,7 @@ function doMeta (response) {
       messageText.style.display = 'none'
       sendButton.disabled = true
       sendButtonP.disabled = true
-      if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>` }
+      if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = '<div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>' }
       if (shouldScroll && document.querySelector('#messages')) {
         $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
       }
@@ -829,30 +829,30 @@ function doMeta (response) {
         if (automationpost !== 'automation') {
           temp = document.getElementById('msg-state')
           if (temp) { temp.remove() }
-          if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-default shadow-4 text-light"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>` }
+          if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = '<div class="p-3 bs-callout bs-callout-default shadow-4 text-light"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>' }
           if (shouldScroll && document.querySelector('#messages')) {
             $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
           }
           automationpost = 'automation'
         }
-        temp = document.querySelector(`#show-subscribe`)
+        temp = document.querySelector('#show-subscribe')
         if (temp !== null) { temp.style.display = 'none' }
       } else if (response.state === 'live_prerecord') {
         if (automationpost !== response.live) {
           temp = document.getElementById('msg-state')
           if (temp) { temp.remove() }
-          if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>` }
+          if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = '<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>' }
           automationpost = response.live
           if (shouldScroll && document.querySelector('#messages')) {
             $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
           }
         }
-        temp = document.querySelector(`#show-subscribe`)
-        temp2 = document.querySelector(`#show-subscribe-button`)
-        temp3 = document.querySelector(`#show-subscribe-name`)
-        temp4 = document.querySelector(`#show-subscribe-instructions`)
+        temp = document.querySelector('#show-subscribe')
+        temp2 = document.querySelector('#show-subscribe-button')
+        temp3 = document.querySelector('#show-subscribe-name')
+        temp4 = document.querySelector('#show-subscribe-instructions')
         if (temp !== null) {
-          subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length
+          subscribed = Subscriptions({ type: 'calendar-all', subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length
           if (subscribed === 0) {
             temp.style.display = 'block'
           } else {
@@ -862,30 +862,30 @@ function doMeta (response) {
           if (notificationsSupported || isMobile) {
             if (device === null && !isMobile) {
               temp2.innerHTML = 'Show Prompt'
-              temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`
+              temp4.innerHTML = 'First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.'
               temp2.onclick = () => OneSignal.showNativePrompt()
               temp2.onkeydown = () => OneSignal.showNativePrompt()
             } else {
               temp2.innerHTML = 'Subscribe'
-              temp4.innerHTML = `Click "Subscribe" to receive notifications when this show is on the air.`
+              temp4.innerHTML = 'Click "Subscribe" to receive notifications when this show is on the air.'
               temp2.onclick = () => {
                 if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                  subscribe(`calendar-all`, Meta.show)
+                  subscribe('calendar-all', Meta.show)
                 } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                  subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                  subscribe('calendar-all', `Sports: ${Meta.show}`)
                 }
               }
               temp2.onkeydown = () => {
                 if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                  subscribe(`calendar-all`, Meta.show)
+                  subscribe('calendar-all', Meta.show)
                 } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                  subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                  subscribe('calendar-all', `Sports: ${Meta.show}`)
                 }
               }
             }
           } else {
             temp2.innerHTML = 'Not Supported'
-            temp4.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!`
+            temp4.innerHTML = 'Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!'
             temp2.onclick = () => { }
             temp2.onkeydown = () => { }
           }
@@ -894,18 +894,18 @@ function doMeta (response) {
         if (automationpost !== response.live) {
           temp = document.getElementById('msg-state')
           if (temp) { temp.remove() }
-          if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>` }
+          if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = '<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>' }
           automationpost = response.live
           if (shouldScroll && document.querySelector('#messages')) {
             $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
           }
         }
-        temp = document.querySelector(`#show-subscribe`)
-        temp2 = document.querySelector(`#show-subscribe-button`)
-        temp3 = document.querySelector(`#show-subscribe-name`)
-        temp4 = document.querySelector(`#show-subscribe-instructions`)
+        temp = document.querySelector('#show-subscribe')
+        temp2 = document.querySelector('#show-subscribe-button')
+        temp3 = document.querySelector('#show-subscribe-name')
+        temp4 = document.querySelector('#show-subscribe-instructions')
         if (temp !== null) {
-          subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length
+          subscribed = Subscriptions({ type: 'calendar-all', subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length
           if (subscribed === 0) {
             temp.style.display = 'block'
           } else {
@@ -915,30 +915,30 @@ function doMeta (response) {
           if (notificationsSupported || isMobile) {
             if (device === null && !isMobile) {
               temp2.innerHTML = 'Show Prompt'
-              temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`
+              temp4.innerHTML = 'First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.'
               temp2.onclick = () => OneSignal.showNativePrompt()
               temp2.onkeydown = () => OneSignal.showNativePrompt()
             } else {
               temp2.innerHTML = 'Subscribe'
-              temp4.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
+              temp4.innerHTML = 'Click "Subscribe" to receive notifications when this show goes on the air.'
               temp2.onclick = () => {
                 if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                  subscribe(`calendar-all`, Meta.show)
+                  subscribe('calendar-all', Meta.show)
                 } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                  subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                  subscribe('calendar-all', `Sports: ${Meta.show}`)
                 }
               }
               temp2.onkeydown = () => {
                 if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                  subscribe(`calendar-all`, Meta.show)
+                  subscribe('calendar-all', Meta.show)
                 } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                  subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                  subscribe('calendar-all', `Sports: ${Meta.show}`)
                 }
               }
             }
           } else {
             temp2.innerHTML = 'Not Supported'
-            temp4.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!`
+            temp4.innerHTML = 'Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!'
             temp2.onclick = () => { }
             temp2.onkeydown = () => { }
           }
@@ -960,7 +960,7 @@ function doMeta (response) {
     // If a track ID change was passed, do some stuff in recent tracks
     if (typeof response.history !== 'undefined') {
       // reset recent tracks
-      if (recentTracks) { recentTracks.innerHTML = `` }
+      if (recentTracks) { recentTracks.innerHTML = '' }
       response.history.map(track => {
         console.dir(track)
         if (recentTracks) {
@@ -969,7 +969,7 @@ function doMeta (response) {
                 ${track.track}
                 </td>
                 <td>
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ''}
                 </td>
                 </tr>`
         }
@@ -1033,10 +1033,10 @@ function loadTrackInfo (trackID) {
         $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format('HH:mm:ss'))
         $('#track-info-lastplayed').html(moment(response[0].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[0].date_played).format('LLLL') : 'Unknown')
         $('#track-info-limits').html(`<ul>
-            ${response[0].limit_action > 0 && response[0].count_played < response[0].play_limit ? `<li>Track has ${response[0].play_limit - response[0].count_played} spins left</li>` : ``}
-            ${response[0].limit_action > 0 && response[0].count_played >= response[0].play_limit ? `<li>Track expired (reached spin limit)</li>` : ``}
-            ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ``}
-            ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ``}
+            ${response[0].limit_action > 0 && response[0].count_played < response[0].play_limit ? `<li>Track has ${response[0].play_limit - response[0].count_played} spins left</li>` : ''}
+            ${response[0].limit_action > 0 && response[0].count_played >= response[0].play_limit ? '<li>Track expired (reached spin limit)</li>' : ''}
+            ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ''}
+            ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ''}
             </ul>`)
 
         if (response[0].request.requestable) {
@@ -1072,7 +1072,7 @@ function requestTrack (trackID) {
       if (response.requested) {
         iziToast.show({
           title: 'Request system success',
-          message: `Your request was placed. In automation, requests are played during breaks. During shows, it is up to DJ discretion.${device !== null ? `<br /><strong>You will receive a ${isMobile ? `push` : ``} notification when your request begins playing.</strong>` : ``}`,
+          message: `Your request was placed. In automation, requests are played during breaks. During shows, it is up to DJ discretion.${device !== null ? `<br /><strong>You will receive a ${isMobile ? 'push' : ''} notification when your request begins playing.</strong>` : ''}`,
           color: 'green',
           zindex: 100,
           layout: 1,
@@ -1110,7 +1110,7 @@ function requestTrack (trackID) {
 
 // Used to load a list of tracks for the track request system
 function loadTracks (skip = 0) {
-  var temp = document.getElementById(`track-load`)
+  var temp = document.getElementById('track-load')
   if (temp) { temp.parentNode.removeChild(temp) }
   var songData = document.getElementById('song-data')
   var search = document.getElementById('searchterm')
@@ -1118,13 +1118,13 @@ function loadTracks (skip = 0) {
   var genreOptions = document.getElementById('filter-genre')
   var selectedOption = genreOptions.options[genreOptions.selectedIndex].value
   if (selectedOption !== '0') { query.genre = parseInt(selectedOption) }
-  if (skip === 0) { songData.innerHTML = `` }
+  if (skip === 0) { songData.innerHTML = '' }
   io.socket.post('/songs/get', query, function serverResponded (response) {
     try {
       // response = JSON.parse(response);
       if (response === 'false' || !response) {
         skipIt = -1
-        songData.innerHTML += `<div class="text-align: center;">There are no more tracks to display</div>`
+        songData.innerHTML += '<div class="text-align: center;">There are no more tracks to display</div>'
       } else if (response.length > 0) {
         skipIt += 50
 
@@ -1132,7 +1132,7 @@ function loadTracks (skip = 0) {
           songData.innerHTML += `<div id="track-${track.ID}" class="p-1 m-1 shadow-2 bg-${(track.enabled === 1) ? 'primary' : 'secondary'} text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-${track.ID}">${track.artist} - ${track.title}</span></div>`
         })
 
-        songData.innerHTML += `<div id="track-load" class="p-1 m-1 shadow-2 bg-success text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-load">Load more tracks</span></div>`
+        songData.innerHTML += '<div id="track-load" class="p-1 m-1 shadow-2 bg-success text-white" style="cursor: pointer;" tabindex="0"><span id="track-l-load">Load more tracks</span></div>'
       } else if (response.length === 0) {
         loadTracks(skip + 50)
       }
@@ -1155,7 +1155,7 @@ function loadGenres () {
   if (document.getElementById('filter-genre')) {
     io.socket.post('/songs/get-genres', {}, function serverResponded (response) {
       try {
-        document.getElementById('filter-genre').innerHTML = `<option value="0">Filter by genre</option>`
+        document.getElementById('filter-genre').innerHTML = '<option value="0">Filter by genre</option>'
         var x = document.getElementById('filter-genre')
         response.reverse().map(subcat => {
           var c = document.createElement('option')
@@ -1198,7 +1198,7 @@ function likeTrack (trackID) {
       } else {
         likedTracks.push(trackID)
         // reset recent tracks
-        if (recentTracks) { recentTracks.innerHTML = `` }
+        if (recentTracks) { recentTracks.innerHTML = '' }
         Meta.history.map(track => {
           console.dir(track)
           if (recentTracks) {
@@ -1207,7 +1207,7 @@ function likeTrack (trackID) {
                     ${track.track}
                     </td>
                     <td>
-                    ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ``}
+                    ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-primary m-1" id="track-like-${track.ID}" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0">Like</button>` : `<button type="button" class="btn btn-flat-success m-1" id="track-like-${track.ID}">Liked</button>`}` : ''}
                     </td>
                     </tr>`
           }
@@ -1297,7 +1297,7 @@ function processCalendar (data, replace = false) {
 function updateCalendar () {
   if (document.querySelector('#calendar')) {
     var caldata = document.querySelector('#calendar')
-    caldata.innerHTML = ``
+    caldata.innerHTML = ''
 
     // Prepare the formatted calendar variable for our formatted events
     calendar = []
@@ -1320,7 +1320,7 @@ function updateCalendar () {
 
     // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
     Calendar().get().sort(compare)
-      .filter(event => (event.title.startsWith('Show:') || event.title.startsWith('Genre:') || event.title.startsWith('Playlist:') || event.title.startsWith('Prerecord:') || event.title.startsWith('Remote:') || event.title.startsWith('Sports:') || event.title.startsWith('Podcast:')) && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
+      .filter(event => (event.title.startsWith('Show:') || event.title.startsWith('Genre:') || event.title.startsWith('Playlist:') || event.title.startsWith('Prerecord:') || event.title.startsWith('Remote:') || event.title.startsWith('Sports:') || event.title.startsWith('Podcast:')) && moment(event.start).isSameOrBefore(moment(Meta.time).startOf('day').add(selectedOption + 1, 'days')) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf('day').add(selectedOption, 'days')))
       .map(event => {
         try {
           var line1
@@ -1336,15 +1336,15 @@ function updateCalendar () {
           finalColor.blue = Math.round(finalColor.blue / 2)
           var badgeInfo
           if (event.active === 2) {
-            badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">TIME CHANGED</span>`
+            badgeInfo = '<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">TIME CHANGED</span>'
           }
           if (event.active === -1) {
-            badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`
+            badgeInfo = '<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>'
           }
           if (event.title.startsWith('Show: ')) {
             stripped = event.title.replace('Show: ', '')
             eventType = 'SHOW'
-            image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`
+            image = '<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>'
             temp = stripped.split(' - ')
             if (temp.length === 2) {
               line1 = temp[0]
@@ -1356,7 +1356,7 @@ function updateCalendar () {
           } else if (event.title.startsWith('Prerecord: ')) {
             stripped = event.title.replace('Prerecord: ', '')
             eventType = 'PRERECORD'
-            image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`
+            image = '<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>'
             temp = stripped.split(' - ')
             if (temp.length === 2) {
               line1 = temp[0]
@@ -1368,7 +1368,7 @@ function updateCalendar () {
           } else if (event.title.startsWith('Remote: ')) {
             stripped = event.title.replace('Remote: ', '')
             eventType = 'REMOTE'
-            image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`
+            image = '<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>'
             temp = stripped.split(' - ')
             if (temp.length === 2) {
               line1 = temp[0]
@@ -1382,11 +1382,11 @@ function updateCalendar () {
             eventType = 'SPORTS'
             line1 = 'Raider Sports'
             line2 = stripped
-            image = `<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>`
+            image = '<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>'
           } else if (event.title.startsWith('Playlist: ')) {
             stripped = event.title.replace('Playlist: ', '')
-            eventType = event.active > -1 ? 'PLAYLIST' : `CANCELED`
-            image = `<i class="fas fa-list text-info" style="font-size: 96px;"></i>`
+            eventType = event.active > -1 ? 'PLAYLIST' : 'CANCELED'
+            image = '<i class="fas fa-list text-info" style="font-size: 96px;"></i>'
             temp = stripped.split(' - ')
             if (temp.length === 2) {
               line1 = temp[0]
@@ -1400,29 +1400,29 @@ function updateCalendar () {
             eventType = 'GENRE'
             line1 = ''
             line2 = stripped
-            image = `<i class="fas fa-music text-info" style="font-size: 96px;"></i>`
+            image = '<i class="fas fa-music text-info" style="font-size: 96px;"></i>'
           } else {
             eventType = 'EVENT'
             line1 = ''
             line2 = event.title
-            image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`
+            image = '<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>'
           }
-          caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${event.active < 1 ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
+          caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ' background-color: #969696;' : ''}" class="m-2 text-dark rounded shadow-8${event.active < 1 ? '' : ' bg-light-1'}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
-             ${badgeInfo || ``}
+             ${badgeInfo || ''}
              <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em;">${line1}</span><br><span class="text-dark" style="font-size: 1.25em;">${line2}</span><br /><span class="text-dark" style="font-size: 1em;">${moment(event.start).format('hh:mm A')} - ${moment(event.end).format('hh:mm A')}</span></div>`
         } catch (e) {
           console.error(e)
           iziToast.show({
             title: 'An error occurred - Please check the logs',
-            message: `Error occurred during calendar iteration in processCalendar.`
+            message: 'Error occurred during calendar iteration in processCalendar.'
           })
         }
       })
 
     for (var i = 1; i < 28; i++) {
       var temp0 = document.querySelector(`#calendar-select-${i}`)
-      if (temp0 !== null) { temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`) }
+      if (temp0 !== null) { temp0.innerHTML = moment(Meta.time).startOf('day').add(i, 'days').format('dddd MM/DD') }
     }
   }
 }
@@ -1479,7 +1479,7 @@ function displayEventInfo (showID) {
 
   // If a device ID was provided from the WWSU mobile app
   if (!notificationsSupported && !isMobile) {
-    message += `<hr><p>Sorry, your web browser does not support push notifications at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!</p>`
+    message += '<hr><p>Sorry, your web browser does not support push notifications at this time. Stay tuned as we will be releasing a WWSU mobile app in the future!</p>'
   } else if (device !== null) {
     // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
 
@@ -1494,16 +1494,16 @@ function displayEventInfo (showID) {
     }
 
     // Check the number of subscriptions
-    var subscribed = Subscriptions([{ type: `calendar-once`, subtype: item.unique }, { type: `calendar-all`, subtype: subtypefilter }]).get().length
+    var subscribed = Subscriptions([{ type: 'calendar-once', subtype: item.unique }, { type: 'calendar-all', subtype: subtypefilter }]).get().length
 
     if (subscribed === 0) {
-      message += `<hr><p>To receive a ${isMobile ? `push` : ``} notification when this event goes on the air for this specific date/time, click "Subscribe One-Time".</p>
-<p>To receive a ${isMobile ? `push` : ``} notification every time this event goes on the air, click "Subscribe All Times".</p>
-<p>You can always come back to this screen to unsubscribe from ${isMobile ? `push` : ``} notifications.</p>`
+      message += `<hr><p>To receive a ${isMobile ? 'push' : ''} notification when this event goes on the air for this specific date/time, click "Subscribe One-Time".</p>
+<p>To receive a ${isMobile ? 'push' : ''} notification every time this event goes on the air, click "Subscribe All Times".</p>
+<p>You can always come back to this screen to unsubscribe from ${isMobile ? 'push' : ''} notifications.</p>`
       buttons = [
         ['<button><b>Subscribe One-Time</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
-          subscribe(`calendar-once`, item.unique)
+          subscribe('calendar-once', item.unique)
         }, true],
         ['<button><b>Subscribe All Times</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
@@ -1511,14 +1511,14 @@ function displayEventInfo (showID) {
           // For shows, remotes, and prerecords... subscribe to events regardless of prefix
           if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
             var temp = item.title.replace('Show: ', '').replace('Prerecord: ', '').replace('Remote: ', '')
-            subscribe(`calendar-all`, temp)
+            subscribe('calendar-all', temp)
           } else {
-            subscribe(`calendar-all`, item.title)
+            subscribe('calendar-all', item.title)
           }
         }]
       ]
     } else {
-      message += `<hr><p>You are currently subscribed to receive ${isMobile ? `push` : ``} notifications for this event. To unsubscribe from ALL ${isMobile ? `push` : ``} notifications for this event now and in the future, click "unsubscribe".</p>`
+      message += `<hr><p>You are currently subscribed to receive ${isMobile ? 'push' : ''} notifications for this event. To unsubscribe from ALL ${isMobile ? 'push' : ''} notifications for this event now and in the future, click "unsubscribe".</p>`
       buttons = [
         ['<button><b>Unsubscribe</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
@@ -1533,7 +1533,7 @@ function displayEventInfo (showID) {
       ]
     }
   } else if (!isMobile) {
-    message += `<hr><p>If you want to receive notifications for when events go on the air, you first need to grant permission in your web browser for us to show notifications. Click "Show Prompt". After allowing notifications, wait about 10 seconds and then click the event again to re-open this screen.</p>`
+    message += '<hr><p>If you want to receive notifications for when events go on the air, you first need to grant permission in your web browser for us to show notifications. Click "Show Prompt". After allowing notifications, wait about 10 seconds and then click the event again to re-open this screen.</p>'
     buttons = [
       ['<button><b>Show Prompt</b></button>', function (instance, toast) {
         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
@@ -1580,7 +1580,7 @@ function subscribe (type, subtype) {
       } else {
         iziToast.show({
           title: 'Subscribed!',
-          message: `You successfully subscribed to that event. You will receive a push notification when it goes live. To un-subscribe, find the event under "Events and Shows", click it, and then click "Unsubscribe". <strong>WWSU may remove notification subscriptions of users who do not visit WWSU for more than a month, at their discretion.</strong>`,
+          message: 'You successfully subscribed to that event. You will receive a push notification when it goes live. To un-subscribe, find the event under "Events and Shows", click it, and then click "Unsubscribe". <strong>WWSU may remove notification subscriptions of users who do not visit WWSU for more than a month, at their discretion.</strong>',
           color: 'green',
           zindex: 100,
           layout: 1,
@@ -1589,7 +1589,7 @@ function subscribe (type, subtype) {
           timeout: 30000
         })
         Subscriptions.insert({ type: type, subtype: subtype })
-        var temp = document.querySelector(`#show-subscribe`)
+        var temp = document.querySelector('#show-subscribe')
         if (temp !== null && (subtype === Meta.show || subtype === `Sports: ${Meta.show}`)) { temp.style.display = 'none' }
       }
     } catch (unusedE) {
@@ -1608,7 +1608,7 @@ function subscribe (type, subtype) {
 }
 
 function unsubscribe (ID, event) {
-  io.socket.post('/subscribers/remove', { device: device, type: `calendar-once`, subtype: ID }, function serverResponded (response) {
+  io.socket.post('/subscribers/remove', { device: device, type: 'calendar-once', subtype: ID }, function serverResponded (response) {
     try {
       if (response !== 'OK') {
         iziToast.show({
@@ -1622,7 +1622,7 @@ function unsubscribe (ID, event) {
           timeout: 10000
         })
       } else {
-        io.socket.post('/subscribers/remove', { device: device, type: `calendar-all`, subtype: event }, function serverResponded (response) {
+        io.socket.post('/subscribers/remove', { device: device, type: 'calendar-all', subtype: event }, function serverResponded (response) {
           try {
             if (response !== 'OK') {
               iziToast.show({
@@ -1646,8 +1646,8 @@ function unsubscribe (ID, event) {
                 position: 'center',
                 timeout: 10000
               })
-              Subscriptions({ type: `calendar-once`, subtype: ID }).remove()
-              Subscriptions({ type: `calendar-all`, subtype: event }).remove()
+              Subscriptions({ type: 'calendar-once', subtype: ID }).remove()
+              Subscriptions({ type: 'calendar-all', subtype: event }).remove()
             }
           } catch (unusedE) {
             iziToast.show({

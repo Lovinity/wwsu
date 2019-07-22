@@ -10,7 +10,7 @@ module.exports = {
     word: {
       type: 'string',
       required: true,
-      description: `The word or phrase that should no longer be filtered.`
+      description: 'The word or phrase that should no longer be filtered.'
     }
   },
 

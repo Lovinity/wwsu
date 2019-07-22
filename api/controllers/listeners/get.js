@@ -11,7 +11,7 @@ module.exports = {
         return moment(value).isValid()
       },
       required: true,
-      description: `moment() parsable string of the earliest point in time to get listener counts (system may return one record before this time as a baseline). Recommended ISO string.`
+      description: 'moment() parsable string of the earliest point in time to get listener counts (system may return one record before this time as a baseline). Recommended ISO string.'
     },
 
     end: {
@@ -20,7 +20,7 @@ module.exports = {
         return moment(value).isValid()
       },
       required: true,
-      description: `moment() parsable string of the latest point in time to get listener counts. Recommended ISO string.`
+      description: 'moment() parsable string of the latest point in time to get listener counts. Recommended ISO string.'
     }
   },
 

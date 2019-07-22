@@ -113,9 +113,9 @@ module.exports = {
             } else if (hostRecord.answerCalls) {
               status = 3
             }
-            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host is offline.` }])
+            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: 'Host is offline.' }])
           } else {
-            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: `Host is online.` }])
+            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: 'Host is online.' }])
           }
         } else {
           await sails.models.status.destroy({ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}` }).fetch()

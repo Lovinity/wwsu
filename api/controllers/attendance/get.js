@@ -11,24 +11,24 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of a date to get logs.`
+      description: 'moment() parsable string of a date to get logs.'
     },
     duration: {
       type: 'number',
       defaultsTo: 1,
       min: 1,
       max: 14,
-      description: `Number of days to get records for if date is provided. Defaults to 1.`
+      description: 'Number of days to get records for if date is provided. Defaults to 1.'
     },
     dj: {
       type: 'number',
       allowNull: true,
-      description: `Retrieve attendance records for the specified DJ. If provided, date is ignored.`
+      description: 'Retrieve attendance records for the specified DJ. If provided, date is ignored.'
     },
     event: {
       type: 'string',
       allowNull: true,
-      description: `Return attendance records where this string is contained within the record's event field. If provided, date is ignored. If DJ is provided, will further filter by the DJ.`
+      description: 'Return attendance records where this string is contained within the record\'s event field. If provided, date is ignored. If DJ is provided, will further filter by the DJ.'
     }
   },
 

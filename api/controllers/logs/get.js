@@ -23,7 +23,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of a date to get logs.`
+      description: 'moment() parsable string of a date to get logs.'
     },
     start: {
       type: 'string',
@@ -31,7 +31,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of a date which the returned logs should start from.`
+      description: 'moment() parsable string of a date which the returned logs should start from.'
     },
     end: {
       type: 'string',
@@ -39,7 +39,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of a date which the returned logs should end at.`
+      description: 'moment() parsable string of a date which the returned logs should end at.'
     }
   },
 

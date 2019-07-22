@@ -7,15 +7,15 @@ module.exports = {
   inputs: {
     warn: {
       type: 'number',
-      description: `When the number of bad music tracks in RadioDJ exceeds the specified number, status 3 (minor) will be triggered for the music library.`
+      description: 'When the number of bad music tracks in RadioDJ exceeds the specified number, status 3 (minor) will be triggered for the music library.'
     },
     error: {
-      type: `number`,
-      description: `When the number of bad music tracks in RadioDJ exceeds the specified number, status 2 (significant) will be triggered for the music library.`
+      type: 'number',
+      description: 'When the number of bad music tracks in RadioDJ exceeds the specified number, status 2 (significant) will be triggered for the music library.'
     },
     critical: {
-      type: `number`,
-      description: `When the number of bad music tracks in RadioDJ exceeds the specified number, status 1 (critical) will be triggered for the music library.`
+      type: 'number',
+      description: 'When the number of bad music tracks in RadioDJ exceeds the specified number, status 1 (critical) will be triggered for the music library.'
     }
   },
 

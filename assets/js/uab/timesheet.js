@@ -79,7 +79,7 @@ directorsdb.setOnInsert((data, db) => {
 })
 
 directorsdb.setOnUpdate((data, db) => {
-  if (typeof Directors[data.ID] === `undefined`) {
+  if (typeof Directors[data.ID] === 'undefined') {
     Directors[data.ID] = new Director(data)
   } else {
     for (var key in data) {
@@ -91,7 +91,7 @@ directorsdb.setOnUpdate((data, db) => {
 })
 
 directorsdb.setOnRemove((data, db) => {
-  if (typeof Directors[data] !== `undefined`) { delete Directors[data] }
+  if (typeof Directors[data] !== 'undefined') { delete Directors[data] }
 })
 
 directorsdb.setOnReplace((db) => {
@@ -163,7 +163,7 @@ timesheetsdb.setOnInsert((data, db) => {
 })
 
 timesheetsdb.setOnUpdate((data, db) => {
-  if (typeof Timesheets[data.ID] === `undefined`) {
+  if (typeof Timesheets[data.ID] === 'undefined') {
     Timesheets[data.ID] = new Timesheet(data)
   } else {
     for (var key in data) {
@@ -176,7 +176,7 @@ timesheetsdb.setOnUpdate((data, db) => {
 })
 
 timesheetsdb.setOnRemove((data, db) => {
-  if (typeof Timesheets[data] !== `undefined`) { delete Timesheets[data] }
+  if (typeof Timesheets[data] !== 'undefined') { delete Timesheets[data] }
   filterDate()
 })
 
@@ -208,11 +208,11 @@ directorsdb.assignSocketEvent('uabdirectors', socket)
 timesheetsdb.assignSocketEvent('uabtimesheet', socket)
 
 $(document).ready(() => {
-  document.querySelector(`#timesheet-records`).addEventListener('click', (e) => {
+  document.querySelector('#timesheet-records').addEventListener('click', (e) => {
     try {
       if (e.target) {
-        if (e.target.id.startsWith(`timesheet-t`)) {
-          editClock(parseInt(e.target.id.replace(`timesheet-t-`, ``)))
+        if (e.target.id.startsWith('timesheet-t')) {
+          editClock(parseInt(e.target.id.replace('timesheet-t-', '')))
         }
       }
     } catch (err) {
@@ -232,7 +232,7 @@ function escapeHTML (str) {
 
 // Edit a timesheet entry, or view a single entry
 function editClock (clockID, save = false) {
-  console.log(`editClock called.`)
+  console.log('editClock called.')
   var modalBody = document.getElementById('clock-body')
   if (!save) {
     $('#clockModal').modal('show')
@@ -301,7 +301,7 @@ function filterDate () {
         // If there is not a row for this director yet, create one
         if (!newRow || newRow === null) {
           var newRow = tableRef.insertRow(tableRef.rows.length)
-          newRow.classList.add(`table-info`)
+          newRow.classList.add('table-info')
           hours[record.name] = moment.duration()
           newRow.setAttribute('id', `director-${record.name.replace(/\W/g, '')}`)
           // Create applicable cells
@@ -329,22 +329,22 @@ function filterDate () {
         if (status === 1) { hours[record.name].add(clockout.diff(clockin)) }
         if (status === 2) { hours[record.name].add(clocknow.diff(clockin)) }
 
-        var inT = moment(clockin).format(`h:mm A`)
-        var outT = moment(clockout).format(`h:mm A`) || 'IN'
+        var inT = moment(clockin).format('h:mm A')
+        var outT = moment(clockout).format('h:mm A') || 'IN'
 
         // For certain clock-ins and clock-outs, we may need to display the date as well, not just the time.
         // If clock-in happened last week, show its date
         if (moment(clockin).isBefore(moment(clockout).startOf('week'))) {
-          inT = moment(clockin).format(`YYYY-MM-DD h:mm A`)
+          inT = moment(clockin).format('YYYY-MM-DD h:mm A')
           clockday = moment(clockout).format('e')
         }
         // If clock-out happened next week, show its date
         if (clockout !== null && moment(clockout).isAfter(moment(clockin).startOf('week').add(1, 'weeks'))) {
-          outT = moment(clockout).format(`YYYY-MM-DD h:mm A`)
+          outT = moment(clockout).format('YYYY-MM-DD h:mm A')
         }
         // If clock-out was not on the same day as clock-in, show date for clock-out.
         if (clockout !== null && !moment(clockout).isSame(moment(clockin), 'day')) {
-          outT = moment(clockout).format(`YYYY-MM-DD h:mm A`)
+          outT = moment(clockout).format('YYYY-MM-DD h:mm A')
         }
 
         // Fill in the timesheet records for clock-ins
@@ -391,7 +391,7 @@ function filterDate () {
       }
     } catch (e) {
       var newRow = tableRef.insertRow(tableRef.rows.length)
-      newRow.classList.add(`table-danger`)
+      newRow.classList.add('table-danger')
       var cell = newRow.insertCell(0)
       cell.innerHTML = 'ERROR fetching timesheets'
     }

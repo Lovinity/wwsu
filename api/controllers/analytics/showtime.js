@@ -8,7 +8,7 @@ module.exports = {
     dj: {
       type: 'number',
       required: false,
-      description: `Provide the ID of a dj if you only want showtime records for a specific DJ.`
+      description: 'Provide the ID of a dj if you only want showtime records for a specific DJ.'
     }
   },
 

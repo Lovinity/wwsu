@@ -7,7 +7,7 @@ module.exports = {
   inputs: {
     clearTime: {
       type: 'number',
-      description: `When a live DJ logs a manual track, it will be displayed for this many minutes in metadata before cleared automatically.`
+      description: 'When a live DJ logs a manual track, it will be displayed for this many minutes in metadata before cleared automatically.'
     }
   },
 

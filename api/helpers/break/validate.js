@@ -29,18 +29,18 @@ module.exports = {
       var rejectIt = false
       inputs.tasks.map((obj) => {
         // Every item in the array should be an object.
-        if (typeof obj !== `object`) { rejectIt = true }
+        if (typeof obj !== 'object') { rejectIt = true }
 
         // Every object should have a task property.
-        if (typeof obj.task === `undefined`) { rejectIt = true }
+        if (typeof obj.task === 'undefined') { rejectIt = true }
 
         // Enforce required properties depending on the task
         switch (obj.task) {
           case 'log':
-            if (typeof obj.event === `undefined`) { rejectIt = true }
+            if (typeof obj.event === 'undefined') { rejectIt = true }
             break
           case 'queue':
-            if (typeof obj.category === `undefined`) { rejectIt = true }
+            if (typeof obj.category === 'undefined') { rejectIt = true }
             break
             // No enforcements for these tasks
           case 'queueRequests':

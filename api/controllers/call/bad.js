@@ -8,7 +8,7 @@ module.exports = {
     bitRate: {
       type: 'number',
       required: false,
-      description: `If provided, request a new bitrate to use in kbps.`
+      description: 'If provided, request a new bitrate to use in kbps.'
     }
   },
 

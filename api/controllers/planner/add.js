@@ -35,7 +35,7 @@ module.exports = {
             return null
           }
 
-          if (typeof val.start === `undefined` || typeof val.end === `undefined`) {
+          if (typeof val.start === 'undefined' || typeof val.end === 'undefined') {
             valid = false
             return null
           }

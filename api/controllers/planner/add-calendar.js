@@ -14,10 +14,10 @@ module.exports = {
       var records = await sails.models.calendar.find({ or: [{ title: { startsWith: 'Show: ' } }, { title: { startsWith: 'Prerecord: ' } }], start: { '<=': moment().add(7, 'days').toISOString(true) } })
       var maps = records.map(async (record) => {
         // Determine DJ and show name
-        var dj = `Unknown`
+        var dj = 'Unknown'
         var show = record.title
         if (record.title !== null && record.title.includes(' - ')) {
-          var temp = record.title.replace(`Show: `, ``).replace(`Prerecord: `, ``).split(` - `)
+          var temp = record.title.replace('Show: ', '').replace('Prerecord: ', '').split(' - ')
           dj = temp[0]
           show = temp[1]
         }

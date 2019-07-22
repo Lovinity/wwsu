@@ -16,7 +16,7 @@ module.exports = {
   fn: async function (inputs, exits) {
     sails.log.debug('Controller discipline/ban-day called.')
     try {
-      await sails.helpers.discipline.banDay(inputs.host, `Unspecified reason`, true)
+      await sails.helpers.discipline.banDay(inputs.host, 'Unspecified reason', true)
       return exits.success()
     } catch (e) {
       return exits.error(e)

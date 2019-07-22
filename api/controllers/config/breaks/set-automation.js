@@ -8,7 +8,7 @@ module.exports = {
     during: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `Automation / during is executed when a DJ "Switches show" and goes to automation_break. It is repeatedly executed whenever the queue empties until either the break times out, or another show begins.`
+      description: 'Automation / during is executed when a DJ "Switches show" and goes to automation_break. It is repeatedly executed whenever the queue empties until either the break times out, or another show begins.'
     }
   },
 

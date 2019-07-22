@@ -17,7 +17,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller discipline/remove called.`)
+    sails.log.debug('Controller discipline/remove called.')
 
     try {
       await sails.models.discipline.destroy({ ID: inputs.ID }).fetch()

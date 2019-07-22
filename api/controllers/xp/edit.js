@@ -40,7 +40,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `If provided, the moment() parsable string of a date in which the XP was earned will be modified to this.`
+      description: 'If provided, the moment() parsable string of a date in which the XP was earned will be modified to this.'
     }
   },
 

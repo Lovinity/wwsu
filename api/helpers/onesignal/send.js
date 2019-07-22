@@ -8,28 +8,28 @@ module.exports = {
     devices: {
       type: 'ref',
       required: true,
-      description: `A list of OneSignal IDs to send this notification to.`
+      description: 'A list of OneSignal IDs to send this notification to.'
     },
     category: {
       type: 'string',
       isIn: ['message', 'event', 'announcement', 'request'],
       required: true,
-      description: `The category of the notification.`
+      description: 'The category of the notification.'
     },
     title: {
       type: 'string',
       required: true,
-      description: `The title of the notification`
+      description: 'The title of the notification'
     },
     content: {
       type: 'string',
       required: true,
-      description: `The content of the notification`
+      description: 'The content of the notification'
     },
     ttl: {
-      type: `number`,
+      type: 'number',
       defaultsTo: (60 * 60 * 24),
-      description: `The amount of time the notification persists for mobile users.`
+      description: 'The amount of time the notification persists for mobile users.'
     }
   },
 
@@ -43,12 +43,12 @@ module.exports = {
         request: '0aa0e762-ca89-4eef-89a2-82009a58cb1a'
       }
       // LINT: ignore camel casing errors for needle parameters; they must be like this for oneSignal
-      needle('post', `https://onesignal.com/api/v1/notifications`, {
+      needle('post', 'https://onesignal.com/api/v1/notifications', {
         app_id: sails.config.custom.onesignal.app,
         include_player_ids: inputs.devices,
         headings: { en: inputs.title },
         contents: { en: inputs.content },
-        url: `https://server.wwsu1069.org/listen`,
+        url: 'https://server.wwsu1069.org/listen',
         android_channel_id: categories[inputs.category],
         android_group: categories[inputs.category],
         android_group_message: `$[notif_count] new ${inputs.category}s`,
@@ -58,8 +58,8 @@ module.exports = {
       }, { headers: { 'Content-Type': 'application/json', Authorization: `Basic ${sails.config.custom.onesignal.rest}` } })
         .then(async (resp) => {
           // Remove any subscriptions made by devices that were returned as invalid from oneSignal
-          if (typeof resp.body.errors !== `undefined`) {
-            if (typeof resp.body.errors['invalid_player_ids'] !== `undefined`) {
+          if (typeof resp.body.errors !== 'undefined') {
+            if (typeof resp.body.errors['invalid_player_ids'] !== 'undefined') {
               resp.body.errors['invalid_player_ids'].map((invalid) => {
                 (async (invalid2) => {
                   await sails.models.subscribers.destroy({ device: invalid2 })

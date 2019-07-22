@@ -23,7 +23,7 @@ module.exports = {
       var reference = await sails.models.discipline.create({ active: true, IP: inputs.host, action: 'showban', message: `The website user was show-banned by ${sails.models.meta['A'].show}` }).fetch()
 
       // Broadcast the ban to the client
-      sails.sockets.broadcast(`discipline-${inputs.host.replace('website-', '')}`, `discipline`, { discipline: `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}` })
+      sails.sockets.broadcast(`discipline-${inputs.host.replace('website-', '')}`, 'discipline', { discipline: `Your interactions with WWSU have been placed under review. Please email engineer@wwsu1069.org for further assistance. Please include the following reference number(s) in your email: ${reference.ID}` })
       return exits.success()
     } catch (e) {
       return exits.error(e)

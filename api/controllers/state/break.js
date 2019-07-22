@@ -22,10 +22,10 @@ module.exports = {
     sails.log.debug('Controller state/break called.')
     try {
       // Block this request if we are already trying to change states
-      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error('The system is in the process of changing states. The request was blocked to prevent clashes.')) }
 
       // Lock so that other state changing requests get blocked until we are done
-      await sails.models.meta.changeMeta({ changingState: `Going into break` })
+      await sails.models.meta.changeMeta({ changingState: 'Going into break' })
 
       // Do not allow a halftime break if not in a sports broadcast
       if (!sails.models.meta['A'].state.startsWith('sports') && inputs.halftime) { inputs.halftime = false }

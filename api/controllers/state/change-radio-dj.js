@@ -13,7 +13,7 @@ module.exports = {
 
     try {
       // Lock state change
-      await sails.models.meta.changeMeta({ changingState: `Switching radioDJ instances` })
+      await sails.models.meta.changeMeta({ changingState: 'Switching radioDJ instances' })
 
       // Try to stop the current automation, then switch to another and execute post error tasks to get it going
       await sails.helpers.rest.cmd('EnableAssisted', 1, 0)

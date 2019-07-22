@@ -24,7 +24,7 @@ module.exports = async function (req, res, next) {
         { action: 'dayban', createdAt: { '>': searchto } },
         { action: 'showban' }
       ],
-      IP: [theip, `website-${theid}`] } }).sort(`createdAt DESC`).limit(1)
+      IP: [theip, `website-${theid}`] } }).sort('createdAt DESC').limit(1)
     if (typeof record !== 'undefined' && typeof record[0] !== 'undefined') {
       record = record[0]
       var references = record.ID

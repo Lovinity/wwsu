@@ -9,7 +9,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper sails.helpers.rest.changeRadioDj called.`)
+    sails.log.debug('Helper sails.helpers.rest.changeRadioDj called.')
     try {
       // Determine which inactive RadioDJs are healthy (status 5).
       var healthyRadioDJs = []
@@ -35,9 +35,9 @@ module.exports = {
             // If the current RadioDJ is also not status 5, we have a huge problem! Trigger critical status, and wait for a good RadioDJ to report
             if (!status || status.status !== 5) {
               sails.models.status.errorCheck.waitForGoodRadioDJ = true
-              await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 1, data: `None of the configured RadioDJ instances are reporting operational! Waiting for one to report operational to switch to.` }])
+              await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 1, data: 'None of the configured RadioDJ instances are reporting operational! Waiting for one to report operational to switch to.' }])
               // Throw an error so that error.post does not get called, which is sometimes called after this helper finishes.
-              throw new Error(`There are no healthy RadioDJ instances to switch to at this time.`)
+              throw new Error('There are no healthy RadioDJ instances to switch to at this time.')
             }
             return true
           })

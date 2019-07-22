@@ -193,15 +193,15 @@ class WWSUreq {
             zindex: 100,
             layout: 1,
             imageWidth: 100,
-            image: ``,
-            progressBarColor: `rgba(255, 0, 0, 0.5)`,
+            image: '',
+            progressBarColor: 'rgba(255, 0, 0, 0.5)',
             closeOnClick: true,
             position: 'center',
             timeout: 30000,
             title: 'Error authorizing',
             message: 'There was a technical error trying to authorize. Please contact the developers or try again later.'
           })
-        } else if (typeof token.errToken !== `undefined` || typeof token.token === 'undefined') {
+        } else if (typeof token.errToken !== 'undefined' || typeof token.token === 'undefined') {
           iziToast.show({
             titleColor: '#000000',
             messageColor: '#000000',
@@ -212,13 +212,13 @@ class WWSUreq {
             zindex: 100,
             layout: 1,
             imageWidth: 100,
-            image: ``,
-            progressBarColor: `rgba(255, 0, 0, 0.5)`,
+            image: '',
+            progressBarColor: 'rgba(255, 0, 0, 0.5)',
             closeOnClick: true,
             position: 'center',
             timeout: 30000,
             title: 'Access denied',
-            message: `${typeof token.errToken !== `undefined` ? `Failed to authenticate; please try again. ${token.errToken}` : `Failed to authenticate; unknown error.`}`
+            message: `${typeof token.errToken !== 'undefined' ? `Failed to authenticate; please try again. ${token.errToken}` : 'Failed to authenticate; unknown error.'}`
           })
         } else {
           this._tryRequest(opts, (body2) => {
@@ -265,7 +265,7 @@ class WWSUreq {
   _tryRequest (opts, cb) {
     try {
       if (this.authPath !== null) {
-        if (typeof opts.headers === `undefined`) {
+        if (typeof opts.headers === 'undefined') {
           opts.headers = {
             Authorization: 'Bearer ' + this.token
           }
@@ -278,7 +278,7 @@ class WWSUreq {
         if (!body) {
           // eslint-disable-next-line callback-return
           cb(0)
-        } else if (typeof body.tokenErr !== `undefined`) {
+        } else if (typeof body.tokenErr !== 'undefined') {
           // eslint-disable-next-line callback-return
           cb(-1)
         } else {
@@ -301,13 +301,13 @@ class WWSUreq {
           // eslint-disable-next-line callback-return
           cb(0)
         } else {
-          if (typeof body.token !== `undefined`) {
+          if (typeof body.token !== 'undefined') {
             this.token = body.token
             this.expiration = body.expires || (60000 * 5)
             this.time = moment()
             // eslint-disable-next-line callback-return
             cb(body)
-          } else if (typeof body.errToken !== `undefined`) {
+          } else if (typeof body.errToken !== 'undefined') {
             // eslint-disable-next-line callback-return
             cb(body)
           } else {
@@ -324,15 +324,15 @@ class WWSUreq {
 
   // We need to log in; display a login window via iziToast. opts.db should have objects of current users (including a key named after this.usernameField) that can be authenticated
   _promptLogin (opts, cb) {
-    var selection = [`<option value="">--SELECT A USER--</option>`]
+    var selection = ['<option value="">--SELECT A USER--</option>']
     if (opts.db !== null) {
       opts.db.each((user) => {
         selection.push(`<option value="${user[`${this.usernameField}`]}">${user[`${this.usernameField}`]}</option>`)
       })
     }
 
-    var username = ``
-    var password = ``
+    var username = ''
+    var password = ''
 
     iziToast.show({
       timeout: 60000,
@@ -352,7 +352,7 @@ class WWSUreq {
         [`<select>${selection.join('')}</select>`, 'change', function (instance, toast, select, e) {
           username = select.options[select.selectedIndex].value
         }, true],
-        [`<input type="password">`, 'keyup', function (instance, toast, input, e) {
+        ['<input type="password">', 'keyup', function (instance, toast, input, e) {
           password = input.value
         }, true]
       ],

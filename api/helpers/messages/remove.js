@@ -19,7 +19,7 @@ module.exports = {
       var records = await sails.models.messages.update({ ID: inputs.ID }, { status: 'deleted' })
         .fetch()
       if (!records || records.length === 0) {
-        return exits.error(new Error(`The message does not exist.`))
+        return exits.error(new Error('The message does not exist.'))
       } else {
         return exits.success()
       }

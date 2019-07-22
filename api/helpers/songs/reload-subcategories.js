@@ -19,9 +19,9 @@ module.exports = {
       var cats = {}
 
       // Load subcats IDs for each consigured categories
-      sails.log.verbose(`BOOTSTRAP: loading subcats into configuration.`)
+      sails.log.verbose('BOOTSTRAP: loading subcats into configuration.')
       for (var config in sails.config.custom.categories) {
-        if (Object.prototype.hasOwnProperty.call(sails.config.custom.categories, config) && config !== `_doNotRemove`) {
+        if (Object.prototype.hasOwnProperty.call(sails.config.custom.categories, config) && config !== '_doNotRemove') {
           sails.config.custom.subcats[config] = []
           for (var cat in sails.config.custom.categories[config]) {
             if (Object.prototype.hasOwnProperty.call(sails.config.custom.categories[config], cat)) {
@@ -52,7 +52,7 @@ module.exports = {
       }
 
       // Load subcats IDs for each consigured sport
-      sails.log.verbose(`BOOTSTRAP: Loading sportscats into configuration.`)
+      sails.log.verbose('BOOTSTRAP: Loading sportscats into configuration.')
       sails.config.custom.sportscats = {}
       sails.config.custom.sports.forEach((sport) => {
         sails.config.custom.sportscats[sport] = { 'Sports Openers': null, 'Sports Liners': null, 'Sports Closers': null }
@@ -85,7 +85,7 @@ module.exports = {
       }
 
       // Load subcats IDs for each show
-      sails.log.verbose(`BOOTSTRAP: Loading showcats into configuration.`)
+      sails.log.verbose('BOOTSTRAP: Loading showcats into configuration.')
 
       categories = await sails.models.category.find({ name: ['Show Openers', 'Show Returns', 'Show Closers'] })
         .tolerate(() => {

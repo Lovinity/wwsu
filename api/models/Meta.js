@@ -152,7 +152,7 @@ module.exports = {
   changeMeta: function (obj) {
     return new Promise(async (resolve, reject) => {
       try {
-        sails.log.debug(`Meta.changeMeta called.`)
+        sails.log.debug('Meta.changeMeta called.')
         var push = {}
         var db = {}
         var push2 = {}
@@ -252,7 +252,7 @@ module.exports = {
               } else {
                 push2.line1 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.automation}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`)
                 push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'}`) : ''
-                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
+                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
               }
 
               // Playlist automation
@@ -266,7 +266,7 @@ module.exports = {
               } else {
                 push2.line1 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.automation}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`)
                 push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'}`) : `${sails.config.custom.meta.prefix.playlist}${Meta['A'].playlist}`
-                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
+                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
               }
 
               // Genre automation
@@ -280,7 +280,7 @@ module.exports = {
               } else {
                 push2.line1 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.automation}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`)
                 push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'}`) : `${sails.config.custom.meta.prefix.genre}${Meta['A'].genre}`
-                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.genre}${push2.requestedBy || 'Anonymous'})` : ``}`)
+                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.genre}${push2.requestedBy || 'Anonymous'})` : ''}`)
               }
 
               // Live shows
@@ -293,8 +293,8 @@ module.exports = {
                 push2.percent = 0
               } else {
                 push2.line1 = `${sails.config.custom.meta.prefix.live}${Meta['A'].show}`
-                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
-                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
+                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
+                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
               }
 
               // Prerecorded shows
@@ -307,8 +307,8 @@ module.exports = {
                 push2.percent = 0
               } else {
                 push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${Meta['A'].playlist}`
-                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
-                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
+                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
+                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
               }
 
               // Remote broadcasts
@@ -321,8 +321,8 @@ module.exports = {
                 push2.percent = 0
               } else {
                 push2.line1 = `${sails.config.custom.meta.prefix.remote}${Meta['A'].show}`
-                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
-                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
+                push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
+                push2.stream = await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ''}`)
               }
 
               // Sports broadcasts
@@ -348,7 +348,7 @@ module.exports = {
 
             // Log the new track playing if the track was new
             if (typeof push.trackID !== 'undefined') {
-              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: `<strong>Track played in automation.</strong>${push2.requested ? `<br />Requested by: ${push2.requestedBy || `Unknown User`}` : ``}`, trackArtist: Meta['A'].trackArtist || null, trackTitle: Meta['A'].trackTitle || null, trackAlbum: Meta['A'].trackAlbum || null, trackLabel: Meta['A'].trackLabel || null }).fetch()
+              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: `<strong>Track played in automation.</strong>${push2.requested ? `<br />Requested by: ${push2.requestedBy || 'Unknown User'}` : ''}`, trackArtist: Meta['A'].trackArtist || null, trackTitle: Meta['A'].trackTitle || null, trackAlbum: Meta['A'].trackAlbum || null, trackLabel: Meta['A'].trackLabel || null }).fetch()
                 .tolerate(() => {
                 })
 
@@ -384,50 +384,50 @@ module.exports = {
             // Live shows
             if (Meta['A'].state.startsWith('live_') && Meta['A'].state !== 'live_prerecord') {
               push2.line1 = `${sails.config.custom.meta.prefix.live}${Meta['A'].show}`
-              push2.line2 = manual ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`) : ``
+              push2.line2 = manual ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`) : ''
               push2.stream = manual ? await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`) : await sails.helpers.filterProfane(`${Meta['A'].show} (LIVE)`)
 
               // Prerecorded shows (should never happen; this is an error!)
             } else if (Meta['A'].state === 'live_prerecord') {
               push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${Meta['A'].playlist}`
-              push2.line2 = ``
+              push2.line2 = ''
               push2.stream = await sails.helpers.filterProfane(`${Meta['A'].show} (PRERECORD)`)
 
               // Remote Broadcasts
             } else if (Meta['A'].state.startsWith('remote_')) {
               push2.line1 = `${sails.config.custom.meta.prefix.remote}${Meta['A'].show}`
-              push2.line2 = manual ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`) : ``
+              push2.line2 = manual ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`) : ''
               push2.stream = manual ? await sails.helpers.filterProfane(`${Meta['A'].trackArtist || 'Unknown Artist'} - ${Meta['A'].trackTitle || 'Unknown Title'}`) : await sails.helpers.filterProfane(`${Meta['A'].show} (LIVE)`)
 
               // Sports; we don't want to ever display what we are playing
             } else if (Meta['A'].state.startsWith('sports_') || Meta['A'].state.startsWith('sportsremote_')) {
               push2.line1 = `${sails.config.custom.meta.prefix.sports}${Meta['A'].show}`
-              push2.line2 = ``
+              push2.line2 = ''
               push2.stream = `WWSU 106.9FM - ${Meta['A'].show} (LIVE)`
 
               // Regular automation (should never happen; this is an error!)
             } else if (Meta['A'].state.startsWith('automation_') && Meta['A'].state !== 'automation_playlist' && Meta['A'].state !== 'automation_genre') {
-              push2.line1 = ``
-              push2.line2 = ``
+              push2.line1 = ''
+              push2.line2 = ''
 
               // Playlists (should never happen; this is an error!)
             } else if (Meta['A'].state === 'automation_playlist') {
-              push2.line1 = ``
+              push2.line1 = ''
               push2.line2 = `${sails.config.custom.meta.prefix.playlist}${Meta['A'].playlist}`
 
               // Genre automation (should never happen; this is an error!)
             } else if (Meta['A'].state === 'automation_genre') {
-              push2.line1 = ``
+              push2.line1 = ''
               push2.line2 = `${sails.config.custom.meta.prefix.genre}${Meta['A'].genre}`
             }
           }
 
           // Now, push notifications if this is a track request
-          if (push2.requested && typeof requested[0] !== `undefined`) {
-            var subscriptions = await Subscribers.destroy({ type: `request`, subtype: requested[0].ID }).fetch()
+          if (push2.requested && typeof requested[0] !== 'undefined') {
+            var subscriptions = await Subscribers.destroy({ type: 'request', subtype: requested[0].ID }).fetch()
             var devices = []
             subscriptions.map((subscription) => devices.push(subscription.device))
-            if (devices.length > 0) { await sails.helpers.onesignal.send(devices, `request`, `WWSU - Your Request is Playing!`, `The track you requested is now playing on WWSU: ` + await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle}`), (60 * 15)) }
+            if (devices.length > 0) { await sails.helpers.onesignal.send(devices, 'request', 'WWSU - Your Request is Playing!', 'The track you requested is now playing on WWSU: ' + await sails.helpers.filterProfane(`${Meta['A'].trackArtist} - ${Meta['A'].trackTitle}`), (60 * 15)) }
           }
         }
 

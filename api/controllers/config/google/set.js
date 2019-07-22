@@ -14,7 +14,7 @@ module.exports = {
 
     directorHoursId: {
       type: 'string',
-      description: `ID of the Google Calendar containing the office hours for directors. Must have API access. NOTE: Every event in this calendar should have its title as the name of the director the hours are for, as used on the system. WARNING: Changing this value will destroy all existing office hours in memory and replace it with what is in the new calendar.`
+      description: 'ID of the Google Calendar containing the office hours for directors. Must have API access. NOTE: Every event in this calendar should have its title as the name of the director the hours are for, as used on the system. WARNING: Changing this value will destroy all existing office hours in memory and replace it with what is in the new calendar.'
     }
   },
 
@@ -32,8 +32,8 @@ module.exports = {
           sails.config.custom.GoogleAPI[key] = inputs[key]
 
           // Destroy existing data whenever API keys are changed
-          if (key === `calendarId`) { await Calendar.destroy({}).fetch() }
-          if (key === `directorHoursId`) { await Directorhours.destroy({}).fetch() }
+          if (key === 'calendarId') { await Calendar.destroy({}).fetch() }
+          if (key === 'directorHoursId') { await Directorhours.destroy({}).fetch() }
         }
       }
 

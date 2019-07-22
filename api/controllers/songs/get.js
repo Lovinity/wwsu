@@ -33,7 +33,7 @@ module.exports = {
     category: {
       type: 'string',
       custom: (value) => {
-        if (typeof sails.config.custom.subcats[value] === `undefined`) { return false }
+        if (typeof sails.config.custom.subcats[value] === 'undefined') { return false }
         return true
       },
       description: 'Optionally filter by configured Node music category.'
@@ -90,7 +90,7 @@ module.exports = {
         if (inputs.ignoreNonMusic) { queryString.id_subcat = sails.config.custom.subcats.music }
         if ((typeof inputs.subcategory !== 'undefined' && inputs.subcategory !== null) || (typeof inputs.category !== 'undefined' && inputs.category !== null)) { queryString.id_subcat = [] }
         if (typeof inputs.subcategory !== 'undefined' && inputs.subcategory !== null) { queryString.id_subcat.push(inputs.subcategory) }
-        if (typeof inputs.category !== 'undefined' && inputs.category !== null && typeof sails.config.custom.subcats[inputs.category] !== `undefined`) { queryString.id_subcat = queryString.id_subcat.concat(sails.config.custom.subcats[inputs.category]) }
+        if (typeof inputs.category !== 'undefined' && inputs.category !== null && typeof sails.config.custom.subcats[inputs.category] !== 'undefined') { queryString.id_subcat = queryString.id_subcat.concat(sails.config.custom.subcats[inputs.category]) }
         if (typeof inputs.genre !== 'undefined' && inputs.genre !== null) { queryString.id_genre = inputs.genre }
         if (inputs.ignoreDisabled) { queryString.enabled = 1 }
 
@@ -143,7 +143,7 @@ module.exports = {
       }
 
       // If songs is undefined at this point, that is an internal error!
-      if (typeof songs === 'undefined') { return exits.error(new Error(`Internal error: No songs returned!`)) }
+      if (typeof songs === 'undefined') { return exits.error(new Error('Internal error: No songs returned!')) }
 
       // grab RadioDJ genres and put them in memory.
       var genres = {}

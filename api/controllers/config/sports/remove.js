@@ -8,7 +8,7 @@ module.exports = {
     name: {
       type: 'string',
       required: true,
-      description: `The name of the sport to remove.`
+      description: 'The name of the sport to remove.'
     }
   },
 

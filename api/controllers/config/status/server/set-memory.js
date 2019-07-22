@@ -7,15 +7,15 @@ module.exports = {
   inputs: {
     warn: {
       type: 'number',
-      description: `When free memory drops below this value in bytes, status 3 (minor) will be triggered for the server.`
+      description: 'When free memory drops below this value in bytes, status 3 (minor) will be triggered for the server.'
     },
     error: {
-      type: `number`,
-      description: `When free memory drops below this value in bytes, status 2 (significant) will be triggered for the server.`
+      type: 'number',
+      description: 'When free memory drops below this value in bytes, status 2 (significant) will be triggered for the server.'
     },
     critical: {
-      type: `number`,
-      description: `When free memory drops below this value in bytes, status 1 (critical) will be triggered for the server.`
+      type: 'number',
+      description: 'When free memory drops below this value in bytes, status 1 (critical) will be triggered for the server.'
     }
   },
 

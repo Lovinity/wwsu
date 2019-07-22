@@ -8,12 +8,12 @@ module.exports = {
     exclusive: {
       type: 'boolean',
       required: true,
-      description: `If false, tracks in the specified subcategories will be removed. If true, tracks NOT in the specified subcategories will be removed.`
+      description: 'If false, tracks in the specified subcategories will be removed. If true, tracks NOT in the specified subcategories will be removed.'
     },
     subcategories: {
       type: 'ref',
       required: true,
-      description: `An array of subcategory IDs.`
+      description: 'An array of subcategory IDs.'
     },
     keepRequests: {
       type: 'boolean',
@@ -57,7 +57,7 @@ module.exports = {
           if (parseInt(queue[i].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) !== -1))) {
             // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
             if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[i].ID)) === -1) {
-              sails.log.verbose(`REMOVING`)
+              sails.log.verbose('REMOVING')
               queue.splice(i, 1)
             }
           }
@@ -77,7 +77,7 @@ module.exports = {
           if (parseInt(queue[i2].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) !== -1))) {
             // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
             if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[i2].ID)) === -1) {
-              sails.log.verbose(`REMOVING`)
+              sails.log.verbose('REMOVING')
               await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1)
             }
           }

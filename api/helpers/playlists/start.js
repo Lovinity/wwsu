@@ -39,11 +39,11 @@ module.exports = {
     try {
       // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, we're in the middle of changing states and ignoreChangingState is false.
       if (!sails.models.playlists.queuing && (((sails.models.meta['A'].changingState === null || inputs.ignoreChangingState) && ((sails.models.meta['A'].state === 'automation_on' || sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'automation_genre'))))) {
-        sails.log.verbose(`Processing helper.`)
+        sails.log.verbose('Processing helper.')
         sails.models.playlists.queuing = true // Mark that the playlist is being queued, to avoid app conflicts.
 
         // Lock state changes when necessary until we are done
-        if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: `Switching to playlist` }) }
+        if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: 'Switching to playlist' }) }
 
         // Find the playlist
         var theplaylist = await sails.models.playlists.findOne({ name: inputs.name })
@@ -74,7 +74,7 @@ module.exports = {
               if (!playlistTracks) {
                 if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: null }) }
                 sails.models.playlists.queuing = false
-                return reject(new Error(`No playlist tracks were returned.`))
+                return reject(new Error('No playlist tracks were returned.'))
               }
 
               // Map all tracks in the playlist into memory.
@@ -83,7 +83,7 @@ module.exports = {
 
               var slot = 10
               var prevLength = 0
-              sails.log.verbose(`Waiting for playlist queue...`)
+              sails.log.verbose('Waiting for playlist queue...')
               var bail = 60
               var theFunction = function () {
                 try {
@@ -92,7 +92,7 @@ module.exports = {
                   if (bail < 1) {
                     sails.models.playlists.queuing = false
                     if (!inputs.ignoreChangingState) { sails.models.meta.changeMeta({ changingState: null }) }
-                    sails.log.verbose(`Failed to queue playlist after 60 seconds.`)
+                    sails.log.verbose('Failed to queue playlist after 60 seconds.')
                     return reject(new Error('The playlist was not considered queued after 60 seconds.'))
                   }
 
@@ -105,7 +105,7 @@ module.exports = {
                     if (slot <= 0) {
                       sails.models.playlists.queuing = false
                       if (!inputs.ignoreChangingState) { sails.models.meta.changeMeta({ changingState: null }) }
-                      sails.log.verbose(`Considered playlist as queued. Proceeding.`)
+                      sails.log.verbose('Considered playlist as queued. Proceeding.')
                       return resolve()
                     } else {
                       setTimeout(theFunction, 1000)
@@ -140,7 +140,7 @@ module.exports = {
             })
           await loadPlaylist()
           await sails.helpers.rest.cmd('EnableAutoDJ', 1)
-          await sails.helpers.onesignal.sendEvent(`Playlist: `, theplaylist.name, `Playlist`, attendance.unique)
+          await sails.helpers.onesignal.sendEvent('Playlist: ', theplaylist.name, 'Playlist', attendance.unique)
           // Prerecords
         } else if (inputs.type === 1) {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)

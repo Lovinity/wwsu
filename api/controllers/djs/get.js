@@ -7,7 +7,7 @@ module.exports = {
   inputs: {
     dj: {
       type: 'number',
-      description: `If provided, instead of returning an array of DJs, will return information about the specified DJ.`
+      description: 'If provided, instead of returning an array of DJs, will return information about the specified DJ.'
     }
   },
 

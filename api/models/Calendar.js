@@ -210,7 +210,7 @@ module.exports = {
     // LINT: must be async because of Sails.js await
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-      sails.log.verbose(`Calendar.loadEvents called`)
+      sails.log.verbose('Calendar.loadEvents called')
       try {
         var status = 5
         var issues = []
@@ -253,7 +253,7 @@ module.exports = {
         // Alert if no events returned; this may be a problem. Also exit.
         if (events.length === 0) {
           if (status > 3) { status = 3 }
-          issues.push(`WWSU Events Google Calendar returned no events. Is this normal?`)
+          issues.push('WWSU Events Google Calendar returned no events. Is this normal?')
         } else {
           // Iterate through each returned event from Google Calendar
 
@@ -368,13 +368,13 @@ module.exports = {
               if (temp2.length === 2) {
                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
                 criteria.verify = 'Valid'
-                criteria.verify_message = `Valid. DJ in yellow, show in green.`
+                criteria.verify_message = 'Valid. DJ in yellow, show in green.'
               } else {
                 if (status > 3) { status = 3 }
                 issues.push(`The formatting of the live show "${summary}" is invalid; must have a " - " to separate DJ/handle from show name.`)
                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
                 criteria.verify = 'Invalid'
-                criteria.verify_message = `Invalid; cannot determine DJ and show. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>.`
+                criteria.verify_message = 'Invalid; cannot determine DJ and show. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>.'
               }
 
               // Remote broadcasts
@@ -386,13 +386,13 @@ module.exports = {
               if (temp2.length === 2) {
                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
                 criteria.verify = 'Valid'
-                criteria.verify_message = `Valid. Host / org in yellow, show name in green.`
+                criteria.verify_message = 'Valid. Host / org in yellow, show name in green.'
               } else {
                 if (status > 3) { status = 3 }
                 issues.push(`The formatting of the remote event "${summary}" is invalid; must have a " - " to separate DJ/host from show name.`)
                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
                 criteria.verify = 'Invalid'
-                criteria.verify_message = `Invalid; cannot determine host and show. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>.`
+                criteria.verify_message = 'Invalid; cannot determine host and show. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>.'
               }
 
               // Sports broadcast
@@ -403,13 +403,13 @@ module.exports = {
               if (sails.config.custom.sports.indexOf(summary) > -1) {
                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
                 criteria.verify = 'Valid'
-                criteria.verify_message = `Valid. Sport in green.`
+                criteria.verify_message = 'Valid. Sport in green.'
               } else {
                 if (status > 3) { status = 3 }
                 issues.push(`A sport event "${summary}" is invalid; the specified sport does not exist in the system.`)
                 criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
                 criteria.verify = 'Invalid'
-                criteria.verify_message = `Invalid; sport is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.`
+                criteria.verify_message = 'Invalid; sport is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.'
               }
 
               // Prerecord (via RadioDJ Playlists)
@@ -418,7 +418,7 @@ module.exports = {
               eventLength = (moment(criteria.end).diff(moment(criteria.start)) / 1000)
               criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
-              criteria.verify_message = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
+              criteria.verify_message = 'Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.'
 
               // Check to see a playlist exists
               if (typeof playlists[summary] !== 'undefined') {
@@ -438,7 +438,7 @@ module.exports = {
                   criteria.verify_message = `Valid, but duplicates detected. <strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.`
                 } else {
                   criteria.verify = 'Valid'
-                  criteria.verify_message = `Valid; playlist in green.`
+                  criteria.verify_message = 'Valid; playlist in green.'
                 }
               }
 
@@ -453,7 +453,7 @@ module.exports = {
               eventLength = (moment(criteria.end).diff(moment(criteria.start)) / 1000)
               criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
-              criteria.verify_message = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
+              criteria.verify_message = 'Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.'
 
               // Check to see that playlist exists
               if (typeof playlists[summary] !== 'undefined') {
@@ -462,7 +462,7 @@ module.exports = {
                 // Check to see if the playlist duration is shorter than the event duration
                 if (eventLength <= (playlists[summary].duration * 1.05) && playlists[summary].duplicates === 0) {
                   criteria.verify = 'Valid'
-                  criteria.verify_message = `Valid; playlist in green.`
+                  criteria.verify_message = 'Valid; playlist in green.'
                 } else if (playlists[summary].duplicates === 0) {
                   criteria.verify = 'Check'
                   criteria.verify_message = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`
@@ -485,7 +485,7 @@ module.exports = {
               summary = criteria.title.replace('Genre: ', '')
               criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Genre</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
-              criteria.verify_message = `Invalid; event with same name does not exist in RadioDJ. <strong>Please ensure there is an event with the same name in RadioDJ.</strong>. The event should trigger a rotation change in RadioDJ when executed.`
+              criteria.verify_message = 'Invalid; event with same name does not exist in RadioDJ. <strong>Please ensure there is an event with the same name in RadioDJ.</strong>. The event should trigger a rotation change in RadioDJ when executed.'
 
               // Check to see if the manual event exists in RadioDJ
               if (typeof djevents[summary] !== 'undefined') {
@@ -493,19 +493,19 @@ module.exports = {
 
                 // Check to see the event is active, and there is a "Load Rotation" action in the event
                 if (djevents[summary].data.includes('Load Rotation') && djevents[summary].enabled === 'True') {
-                  criteria.verify = `Valid`
-                  criteria.verify_message = `Valid; genre in green.`
+                  criteria.verify = 'Valid'
+                  criteria.verify_message = 'Valid; genre in green.'
 
                   // Event is enabled, but does not have a Load Rotation event
                 } else if (djevents[summary].enabled === 'True') {
                   criteria.verify = 'Invalid'
-                  criteria.verify_message = `Invalid; a "Load Rotation" action does not exist in the RadioDJ event. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`
+                  criteria.verify_message = 'Invalid; a "Load Rotation" action does not exist in the RadioDJ event. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>'
                   if (status > 3) { status = 3 }
                   issues.push(`Genre "${summary}" is invalid; the event for this genre in RadioDJ does not contain a "Load Rotation" action.`)
                   // Event is not enabled
                 } else {
                   criteria.verify = 'Invalid'
-                  criteria.verify_message = `Invalid; the event in RadioDJ is disabled. <strong>Please enable the manual event in RadioDJ</strong>.`
+                  criteria.verify_message = 'Invalid; the event in RadioDJ is disabled. <strong>Please enable the manual event in RadioDJ</strong>.'
                   if (status > 3) { status = 3 }
                   issues.push(`Genre "${summary}" is invalid; the event for this genre in RadioDJ is disabled.`)
                 }
@@ -533,12 +533,12 @@ module.exports = {
             isChanged = false
             for (var key in theEvent) {
               if (Object.prototype.hasOwnProperty.call(theEvent, key)) {
-                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`) {
+                if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== 'updatedAt') {
                   // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
-                  if (key === `start` && moment(theEvent[key]).isSame(moment(criteria[key]))) { continue }
-                  if (key === `end` && moment(theEvent[key]).isSame(moment(criteria[key]))) { continue }
-                  if (key === `start` && !moment(theEvent[key]).isSame(moment(criteria[key]))) { isChanged = true }
-                  if (key === `end` && !moment(theEvent[key]).isSame(moment(criteria[key]))) { isChanged = true }
+                  if (key === 'start' && moment(theEvent[key]).isSame(moment(criteria[key]))) { continue }
+                  if (key === 'end' && moment(theEvent[key]).isSame(moment(criteria[key]))) { continue }
+                  if (key === 'start' && !moment(theEvent[key]).isSame(moment(criteria[key]))) { isChanged = true }
+                  if (key === 'end' && !moment(theEvent[key]).isSame(moment(criteria[key]))) { isChanged = true }
 
                   needsUpdate = true
                   break
@@ -558,27 +558,27 @@ module.exports = {
                 }
                 if (criteria.title.startsWith('Show: ')) {
                   temp = criteria.title.replace('Show: ', '')
-                  await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, criteria.unique, moment(criteria.start).format('LLL'), false)
+                  await sails.helpers.onesignal.sendEvent('Show: ', temp, 'Live Show', criteria.unique, moment(criteria.start).format('LLL'), false)
                 }
                 if (criteria.title.startsWith('Remote: ')) {
                   temp = criteria.title.replace('Remote: ', '')
-                  await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, criteria.unique, moment(criteria.start).format('LLL'), false)
+                  await sails.helpers.onesignal.sendEvent('Remote: ', temp, 'Remote Broadcast', criteria.unique, moment(criteria.start).format('LLL'), false)
                 }
                 if (criteria.title.startsWith('Sports: ')) {
                   temp = criteria.title.replace('Sports: ', '')
-                  await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, criteria.unique, moment(criteria.start).format('LLL'), false)
+                  await sails.helpers.onesignal.sendEvent('Sports: ', temp, 'Sports Broadcast', criteria.unique, moment(criteria.start).format('LLL'), false)
                 }
                 if (criteria.title.startsWith('Prerecord: ')) {
                   temp = criteria.title.replace('Prerecord: ', '')
-                  await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, criteria.unique, moment(criteria.start).format('LLL'), false)
+                  await sails.helpers.onesignal.sendEvent('Prerecord: ', temp, 'Prerecorded Show', criteria.unique, moment(criteria.start).format('LLL'), false)
                 }
                 if (criteria.title.startsWith('Genre: ')) {
                   temp = criteria.title.replace('Genre: ', '')
-                  await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, criteria.unique, moment(criteria.start).format('LLL'), false)
+                  await sails.helpers.onesignal.sendEvent('Genre: ', temp, 'Genre', criteria.unique, moment(criteria.start).format('LLL'), false)
                 }
                 if (criteria.title.startsWith('Playlist: ')) {
                   temp = criteria.title.replace('Playlist: ', '')
-                  await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, criteria.unique, moment(criteria.start).format('LLL'), false)
+                  await sails.helpers.onesignal.sendEvent('Playlist: ', temp, 'Playlist', criteria.unique, moment(criteria.start).format('LLL'), false)
                 }
               }
               await sails.models.calendar.update({ unique: event.id }, criteriaC).fetch()
@@ -608,7 +608,7 @@ module.exports = {
 
                 // Check if the event started over 10 minutes prior to start time, and if so, update the attendance record accordingly.
                 if (sails.models.meta['A'].attendanceID !== null) {
-                  if (attendanceRecord.event === event.summary && event.active >= 1 && (attendanceRecord.unique === null || attendanceRecord.unique === ``)) {
+                  if (attendanceRecord.event === event.summary && event.active >= 1 && (attendanceRecord.unique === null || attendanceRecord.unique === '')) {
                     await sails.models.attendance.update({ ID: sails.models.meta['A'].attendanceID }, { unique: event.id, scheduledStart: moment(criteria.start).toISOString(true), scheduledEnd: moment(criteria.end).toISOString(true) }).fetch()
                   }
                 }
@@ -627,7 +627,7 @@ module.exports = {
             try {
               await sails.helpers.genre.start(toTrigger.event, ignoreChangingState)
             } catch (unusedE) {
-              if (sails.models.meta['A'].state === `automation_genre`) { await sails.helpers.genre.start('Default', ignoreChangingState) }
+              if (sails.models.meta['A'].state === 'automation_genre') { await sails.helpers.genre.start('Default', ignoreChangingState) }
             }
           }
 
@@ -666,7 +666,7 @@ module.exports = {
                   dj = null
                 }
                 if (dj !== null) { dj = await sails.models.djs.findOrCreate({ name: dj }, { name: dj, lastSeen: moment('2002-01-01').toISOString(true) }) }
-                sails.models.attendance.findOrCreate({ unique: cEvent.unique }, { unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: cEvent.title, happened: -1, happenedReason: `Removed from Google Calendar`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true) })
+                sails.models.attendance.findOrCreate({ unique: cEvent.unique }, { unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: cEvent.title, happened: -1, happenedReason: 'Removed from Google Calendar', scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true) })
                   .exec(async (err, attendance, wasCreated) => {
                     var temp
                     if (err) {
@@ -675,11 +675,11 @@ module.exports = {
                     }
 
                     if (!wasCreated) {
-                      attendance = await sails.models.attendance.update({ ID: attendance.ID, happened: 1 }, { unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: cEvent.title, happened: -1, happenedReason: `Removed from Google Calendar`, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true) })
+                      attendance = await sails.models.attendance.update({ ID: attendance.ID, happened: 1 }, { unique: cEvent.unique, dj: dj !== null && typeof dj.ID !== 'undefined' ? dj.ID : null, event: cEvent.title, happened: -1, happenedReason: 'Removed from Google Calendar', scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true) })
                     }
                     if (cEvent.title.startsWith('Show: ')) {
                       temp = cEvent.title.replace('Show: ', '')
-                      await sails.helpers.onesignal.sendEvent(`Show: `, temp, `Live Show`, cEvent.unique, moment(cEvent.start).format('LLL'), true)
+                      await sails.helpers.onesignal.sendEvent('Show: ', temp, 'Live Show', cEvent.unique, moment(cEvent.start).format('LLL'), true)
                       await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Show was canceled!</strong><br />Show: ${temp}<br />Scheduled time: ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}<br />Reason: Removed from Google Calendar`, createdAt: moment().toISOString(true) }).fetch()
                         .tolerate((err) => {
                           sails.log.error(err)
@@ -687,7 +687,7 @@ module.exports = {
                     }
                     if (cEvent.title.startsWith('Remote: ')) {
                       temp = cEvent.title.replace('Remote: ', '')
-                      await sails.helpers.onesignal.sendEvent(`Remote: `, temp, `Remote Broadcast`, cEvent.unique, moment(cEvent.start).format('LLL'), true)
+                      await sails.helpers.onesignal.sendEvent('Remote: ', temp, 'Remote Broadcast', cEvent.unique, moment(cEvent.start).format('LLL'), true)
                       await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Remote broadcast was canceled!</strong><br />Remote: ${temp}<br />Scheduled time: ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}<br />Reason: Removed from Google Calendar`, createdAt: moment().toISOString(true) }).fetch()
                         .tolerate((err) => {
                           sails.log.error(err)
@@ -695,7 +695,7 @@ module.exports = {
                     }
                     if (cEvent.title.startsWith('Sports: ')) {
                       temp = cEvent.title.replace('Sports: ', '')
-                      await sails.helpers.onesignal.sendEvent(`Sports: `, temp, `Sports Broadcast`, cEvent.unique, moment(cEvent.start).format('LLL'), true)
+                      await sails.helpers.onesignal.sendEvent('Sports: ', temp, 'Sports Broadcast', cEvent.unique, moment(cEvent.start).format('LLL'), true)
                       await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Sports broadcast was canceled!</strong><br />Sports: ${temp}<br />Scheduled time: ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}<br />Reason: Removed from Google Calendar`, createdAt: moment().toISOString(true) }).fetch()
                         .tolerate((err) => {
                           sails.log.error(err)
@@ -703,7 +703,7 @@ module.exports = {
                     }
                     if (cEvent.title.startsWith('Prerecord: ')) {
                       temp = cEvent.title.replace('Prerecord: ', '')
-                      await sails.helpers.onesignal.sendEvent(`Prerecord: `, temp, `Prerecorded Show`, cEvent.unique, moment(cEvent.start).format('LLL'), true)
+                      await sails.helpers.onesignal.sendEvent('Prerecord: ', temp, 'Prerecorded Show', cEvent.unique, moment(cEvent.start).format('LLL'), true)
                       await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: temp, event: `<strong>Prerecorded show was canceled!</strong><br />Prerecord: ${temp}<br />Scheduled time: ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}<br />Reason: Removed from Google Calendar`, createdAt: moment().toISOString(true) }).fetch()
                         .tolerate((err) => {
                           sails.log.error(err)
@@ -712,7 +712,7 @@ module.exports = {
                     // We don't care about logging cancelled genres nor playlists, but we still want to send notifications out.
                     if (cEvent.title.startsWith('Genre: ')) {
                       temp = cEvent.title.replace('Genre: ', '')
-                      await sails.helpers.onesignal.sendEvent(`Genre: `, temp, `Genre`, cEvent.unique, moment(cEvent.start).format('LLL'), true)
+                      await sails.helpers.onesignal.sendEvent('Genre: ', temp, 'Genre', cEvent.unique, moment(cEvent.start).format('LLL'), true)
 
                       // We do not want to maintain cancellation records of genres in the system.
                       await sails.models.calendar.destroy({ ID: cEvent.ID }).fetch()
@@ -722,7 +722,7 @@ module.exports = {
                     }
                     if (cEvent.title.startsWith('Playlist: ')) {
                       temp = cEvent.title.replace('Playlist: ', '')
-                      await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, cEvent.unique, moment(cEvent.start).format('LLL'), true)
+                      await sails.helpers.onesignal.sendEvent('Playlist: ', temp, 'Playlist', cEvent.unique, moment(cEvent.start).format('LLL'), true)
                     }
                   })
               })
@@ -818,7 +818,7 @@ module.exports = {
         // Should have at least one event.
         if (events.length === 0) {
           if (status > 3) { status = 3 }
-          issues.push(`Google Calendar Office Hours returned no events. Is this normal?`)
+          issues.push('Google Calendar Office Hours returned no events. Is this normal?')
         } else {
           eventIds = [] // Used for determining which events in memory no longer exist, and therefore should be destroyed
 
@@ -867,14 +867,14 @@ module.exports = {
               isChanged = false
               for (var key2 in theEvent) {
                 if (Object.prototype.hasOwnProperty.call(theEvent, key)) {
-                  if (typeof criteria[key2] !== 'undefined' && theEvent[key2] !== criteria[key2] && key2 !== 'ID' && key2 !== 'createdAt' && key2 !== `updatedAt`) {
+                  if (typeof criteria[key2] !== 'undefined' && theEvent[key2] !== criteria[key2] && key2 !== 'ID' && key2 !== 'createdAt' && key2 !== 'updatedAt') {
                     // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
-                    if (key2 === `start` && moment(theEvent[key2]).isSame(moment(criteria[key2]))) { continue }
-                    if (key2 === `end` && moment(theEvent[key2]).isSame(moment(criteria[key2]))) { continue }
+                    if (key2 === 'start' && moment(theEvent[key2]).isSame(moment(criteria[key2]))) { continue }
+                    if (key2 === 'end' && moment(theEvent[key2]).isSame(moment(criteria[key2]))) { continue }
 
-                    if (key2 === `director` && theEvent[key2] !== criteria[key2]) { isChanged = true }
-                    if (key2 === `start` && !moment(theEvent[key2]).isSame(moment(criteria[key2]))) { isChanged = true }
-                    if (key2 === `end` && !moment(theEvent[key2]).isSame(moment(criteria[key2]))) { isChanged = true }
+                    if (key2 === 'director' && theEvent[key2] !== criteria[key2]) { isChanged = true }
+                    if (key2 === 'start' && !moment(theEvent[key2]).isSame(moment(criteria[key2]))) { isChanged = true }
+                    if (key2 === 'end' && !moment(theEvent[key2]).isSame(moment(criteria[key2]))) { isChanged = true }
 
                     needsUpdate = true
                     break
@@ -981,11 +981,11 @@ module.exports = {
             await Promise.all(maps)
           }
           if (issues.length === 0) {
-            sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar is operational and all events are valid.`, status: 5 }])
+            sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar is operational and all events are valid.', status: 5 }])
           } else {
             // Remove duplicates
             issues = issues.filter((v, i, a) => a.indexOf(v) === i)
-            sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: issues.join(` `), status: status }])
+            sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: issues.join(' '), status: status }])
           }
           return resolve()
         }

@@ -32,8 +32,8 @@ class Scoreboard {
     var temp = document.querySelector(this._wsuScore)
     if (temp !== null) {
       temp.innerHTML = value
-      if (value === null || value === ``) { $(this._wsuScore).fadeTo(500, 0) }
-      if (value !== null && value !== `` && (this._wsuScoreValue === null || this._wsuScoreValue === ``)) { $(this._wsuScore).fadeTo(500, 1) }
+      if (value === null || value === '') { $(this._wsuScore).fadeTo(500, 0) }
+      if (value !== null && value !== '' && (this._wsuScoreValue === null || this._wsuScoreValue === '')) { $(this._wsuScore).fadeTo(500, 1) }
       if (value > this._wsuScoreValue) { $(this._wsuScore).animateCss('heartBeat slower') }
     }
     this._wsuScoreValue = value
@@ -43,8 +43,8 @@ class Scoreboard {
     var temp = document.querySelector(this._oppScore)
     if (temp !== null) {
       temp.innerHTML = value
-      if (value === null || value === ``) { $(this._oppScore).fadeTo(500, 0) }
-      if (value !== null && value !== `` && (this._oppScoreValue === null || this._oppScoreValue === ``)) { $(this._oppScore).fadeTo(500, 1) }
+      if (value === null || value === '') { $(this._oppScore).fadeTo(500, 0) }
+      if (value !== null && value !== '' && (this._oppScoreValue === null || this._oppScoreValue === '')) { $(this._oppScore).fadeTo(500, 1) }
       if (value > this._oppScoreValue) { $(this._oppScore).animateCss('heartBeat slower') }
     }
     this._oppScoreValue = value
@@ -56,7 +56,7 @@ class Scoreboard {
       var _this = this
       $(this._wsuNum).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._wsuNum).fadeTo(500, 1) }
+        if (value !== null && value !== '') { $(_this._wsuNum).fadeTo(500, 1) }
       })
     }
     this._wsuNumValue = value
@@ -68,7 +68,7 @@ class Scoreboard {
       var _this = this
       $(this._oppNum).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._oppNum).fadeTo(500, 1) }
+        if (value !== null && value !== '') { $(_this._oppNum).fadeTo(500, 1) }
       })
     }
     this._oppNumValue = value
@@ -80,7 +80,7 @@ class Scoreboard {
       var _this = this
       $(this._wsuText).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._wsuText).fadeTo(500, 1) }
+        if (value !== null && value !== '') { $(_this._wsuText).fadeTo(500, 1) }
       })
     }
     this._wsuTextValue = value
@@ -92,7 +92,7 @@ class Scoreboard {
       var _this = this
       $(this._oppText).fadeTo(500, 0, () => {
         temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._oppText).fadeTo(500, 1) }
+        if (value !== null && value !== '') { $(_this._oppText).fadeTo(500, 1) }
       })
     }
     this._oppTextValue = value
@@ -163,13 +163,13 @@ try {
   var isStudio = window.location.search.indexOf('studio=true') !== -1
   var isLightTheme = window.location.search.indexOf('light=true') !== -1
   var weatherSlide = [
-    { id: `weather`, icon: `fa-sun`, background: `#424242`, header: `Current Weather`, body: `Unknown`, show: true },
-    { id: `precipitation`, icon: `fa-umbrella`, background: `#424242`, header: `Precipitation`, body: ``, show: false },
-    { id: `wind`, icon: `fa-wind`, background: `#424242`, header: `Wind`, body: ``, show: false },
-    { id: `uv`, icon: `fa-sun`, background: `#424242`, header: `UV Index`, body: ``, show: false },
-    { id: `visibility`, icon: `fa-car`, background: `#424242`, header: `Visibility`, body: ``, show: false },
-    { id: `windchill`, icon: `fa-temperature-low`, background: `#424242`, header: `Wind Chill`, body: ``, show: false },
-    { id: `heatindex`, icon: `fa-temperature-high`, background: `#424242`, header: `Heat Index`, body: ``, show: false }
+    { id: 'weather', icon: 'fa-sun', background: '#424242', header: 'Current Weather', body: 'Unknown', show: true },
+    { id: 'precipitation', icon: 'fa-umbrella', background: '#424242', header: 'Precipitation', body: '', show: false },
+    { id: 'wind', icon: 'fa-wind', background: '#424242', header: 'Wind', body: '', show: false },
+    { id: 'uv', icon: 'fa-sun', background: '#424242', header: 'UV Index', body: '', show: false },
+    { id: 'visibility', icon: 'fa-car', background: '#424242', header: 'Visibility', body: '', show: false },
+    { id: 'windchill', icon: 'fa-temperature-low', background: '#424242', header: 'Wind Chill', body: '', show: false },
+    { id: 'heatindex', icon: 'fa-temperature-high', background: '#424242', header: 'Heat Index', body: '', show: false }
   ]
   var weatherSlideSlot = -1
 
@@ -180,25 +180,25 @@ try {
 
     while (!done) {
       weatherSlideSlot++
-      if (typeof weatherSlide[weatherSlideSlot] === `undefined`) { weatherSlideSlot = 0 }
+      if (typeof weatherSlide[weatherSlideSlot] === 'undefined') { weatherSlideSlot = 0 }
 
       if (weatherSlide[weatherSlideSlot].show || weatherSlideSlot === 0) {
-        document.querySelector(`#weather-background`).style.background = weatherSlide[weatherSlideSlot].background
-        document.querySelector(`#weather-icon`).innerHTML = `<i class="fas ${weatherSlide[weatherSlideSlot].icon}" style="font-size: 64px;"></i>`
-        document.querySelector(`#weather-header`).innerHTML = `<strong>${weatherSlide[weatherSlideSlot].header}</strong>`
-        document.querySelector(`#weather-body`).innerHTML = weatherSlide[weatherSlideSlot].body
+        document.querySelector('#weather-background').style.background = weatherSlide[weatherSlideSlot].background
+        document.querySelector('#weather-icon').innerHTML = `<i class="fas ${weatherSlide[weatherSlideSlot].icon}" style="font-size: 64px;"></i>`
+        document.querySelector('#weather-header').innerHTML = `<strong>${weatherSlide[weatherSlideSlot].header}</strong>`
+        document.querySelector('#weather-body').innerHTML = weatherSlide[weatherSlideSlot].body
         done = true
       }
     }
   }, 7000)
 
   if (isLightTheme) {
-    document.body.style.backgroundColor = `#ffffff`
-    document.body.style.color = `#000000`
-    temp = document.querySelector(`#bg-canvas`)
+    document.body.style.backgroundColor = '#ffffff'
+    document.body.style.color = '#000000'
+    temp = document.querySelector('#bg-canvas')
     temp.style.opacity = 0.5
-    temp = document.querySelector(`#dj-alert`)
-    temp.style.backgroundColor = `#ffffff`
+    temp = document.querySelector('#dj-alert')
+    temp.style.backgroundColor = '#ffffff'
   }
   var queueReminder = false
 
@@ -206,69 +206,69 @@ try {
   wrapper.height = window.innerHeight
 
   Slides.newSlide({
-    name: `weekly-stats`,
-    label: `Weekly Stats`,
+    name: 'weekly-stats',
+    label: 'Weekly Stats',
     weight: 1000000,
     isSticky: false,
-    color: `success`,
+    color: 'success',
     active: true,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 15,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
+    html: '<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>'
   })
 
   // On the Air
   Slides.newSlide({
-    name: `on-air`,
-    label: `On the Air`,
+    name: 'on-air',
+    label: 'On the Air',
     weight: 999999,
     isSticky: false,
-    color: `primary`,
+    color: 'primary',
     active: false,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 10,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`
+    html: `<h1 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? '#ffffff' : '#000000'}">On the Air Right Now</h1><div id="ontheair"></div>`
   })
 
   // Weather alerts
   Slides.newSlide({
-    name: `eas-alerts`,
-    label: `EAS Alerts`,
+    name: 'eas-alerts',
+    label: 'EAS Alerts',
     weight: -800000,
     isSticky: false,
-    color: `danger`,
+    color: 'danger',
     active: false,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 15,
     fitContent: true,
-    html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`
+    html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? '#ffffff' : '#000000'}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? '#ffffff' : '#000000'}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`
   })
 
   // scoreboard
   var changeData = (data) => {
     console.dir(data)
     switch (data.name) {
-      case `wsuScore`:
+      case 'wsuScore':
         ascoreboard.wsuScore = data.value
         break
-      case `oppScore`:
+      case 'oppScore':
         ascoreboard.oppScore = data.value
         break
-      case `wsuNum`:
+      case 'wsuNum':
         ascoreboard.wsuNum = data.value
         break
-      case `oppNum`:
+      case 'oppNum':
         ascoreboard.oppNum = data.value
         break
-      case `wsuText`:
+      case 'wsuText':
         ascoreboard.wsuText = data.value
         break
-      case `oppText`:
+      case 'oppText':
         ascoreboard.oppText = data.value
         break
     }
@@ -382,7 +382,7 @@ function processDirectors (db) {
         console.error(e)
         iziToast.show({
           title: 'An error occurred - Please check the logs',
-          message: `Error occurred during Directors iteration in processDirectors.`
+          message: 'Error occurred during Directors iteration in processDirectors.'
         })
       }
     })
@@ -430,7 +430,7 @@ function processEas (db) {
 
     prevEas = []
     var innercontent = document.getElementById('eas-alerts')
-    innercontent.innerHTML = ``
+    innercontent.innerHTML = ''
 
     // eslint-disable-next-line no-unused-vars
     var makeActive = false
@@ -474,27 +474,27 @@ function processEas (db) {
         if (isLightTheme) {
           color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`
         }
-        innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${!isLightTheme ? `bg-dark-4` : `bg-light-1`}">
-                        <div class="m-1" style="text-align: center; width: 100%"><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
+        innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${!isLightTheme ? 'text-white' : 'text-dark'} border border-${borderclass} rounded shadow-4 ${!isLightTheme ? 'bg-dark-4' : 'bg-light-1'}">
+                        <div class="m-1" style="text-align: center; width: 100%"><span class="${!isLightTheme ? 'text-white' : 'text-dark'}" style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? 'text-white' : 'text-dark'}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${!isLightTheme ? 'text-white' : 'text-dark'}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br /></div>
                         </div>
                         `
       } catch (e) {
         console.error(e)
         iziToast.show({
           title: 'An error occurred - Please check the logs',
-          message: `Error occurred during Eas iteration in processEas.`
+          message: 'Error occurred during Eas iteration in processEas.'
         })
       }
     })
 
     if (prevEas.length === 0) {
-      innercontent.HTML = `<strong class="text-white">No active alerts</strong>`
+      innercontent.HTML = '<strong class="text-white">No active alerts</strong>'
     }
 
-    Slides.slide(`eas-alerts`).active = makeActive
-    Slides.slide(`eas-alerts`).displayTime = displayTime
+    Slides.slide('eas-alerts').active = makeActive
+    Slides.slide('eas-alerts').displayTime = displayTime
     checkSlideCounts()
 
     // Do EAS events
@@ -526,7 +526,7 @@ waitFor(() => {
   return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected())
 }, () => {
   // Define hostReq object
-  noReq = new WWSUreq(io.socket, `display-public`)
+  noReq = new WWSUreq(io.socket, 'display-public')
 
   // When new Meta is received, update it in our memory and then run the process function.
   io.socket.on('meta', (data) => {
@@ -724,7 +724,7 @@ waitFor(() => {
     console.dir(db.get())
     // Remove all announcement slides
     Slides.allSlides()
-      .filter((slide) => slide.name.startsWith(`attn-`))
+      .filter((slide) => slide.name.startsWith('attn-'))
       .map((slide) => Slides.removeSlide(slide.name))
 
     // Add slides for each announcement
@@ -840,7 +840,7 @@ function announcementsSocket () {
 // This function is called whenever a change in Eas alerts is detected, or when we are finished displaying an alert. It checks to see if we should display something Eas-related.
 function doEas () {
   try {
-    console.log(`DO EAS called`)
+    console.log('DO EAS called')
     // Display the new alert if conditions permit
     if ((newEas.length > 0 && !easActive)) {
       // Make sure alert is valid. Also, only scroll severe and extreme alerts when there is an extreme alert in effect; ignore moderate and minor alerts.
@@ -861,7 +861,7 @@ function doEas () {
         color4.blue = Math.round((color4.blue / 2) + 127)
         color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`
         easAlert.style.display = 'inline'
-        easAlert.style.backgroundColor = `#0000ff`
+        easAlert.style.backgroundColor = '#0000ff'
         easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em;">WWSU Emergency Alert System</h1>
                     <div id="eas-alert-text" class="m-3 text-white" style="font-size: 6em;">${alert}</div>
@@ -872,7 +872,7 @@ function doEas () {
         if (isLightTheme) { responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[0]['counties'] !== 'undefined') ? newEas[0]['counties'] : 'Unknown Counties'}. This is in effect until ${moment(newEas[0]['expires']).isValid() ? moment(newEas[0]['expires']).format('LLL') : 'UNKNOWN'}.`) }
         if (easExtreme) {
           easAlert.style.display = 'inline'
-          easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`
+          easAlert.innerHTML += '<h2 style="text-align: center; font-size: 2em;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>'
         }
         $('#alert-marquee')
           .bind('finished', () => {
@@ -887,7 +887,7 @@ function doEas () {
               console.error(e)
               iziToast.show({
                 title: 'An error occurred - Please check the logs',
-                message: `Error occurred in the finished bind of #alert-marquee in doEas.`
+                message: 'Error occurred in the finished bind of #alert-marquee in doEas.'
               })
             }
           })
@@ -934,11 +934,11 @@ function doEas () {
       flashInterval = setInterval(() => {
         $('#eas-alert').css('background-color', '#D50000')
         setTimeout(() => {
-          $('#eas-alert').css('background-color', !isLightTheme ? `#320000` : `#f6cccc`)
+          $('#eas-alert').css('background-color', !isLightTheme ? '#320000' : '#f6cccc')
           voiceCount++
           if (voiceCount > 179) {
             voiceCount = 0
-            if (!isStudio) { responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`) }
+            if (!isStudio) { responsiveVoice.speak('Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.') }
           }
         }, 250)
       }, 1000)
@@ -946,9 +946,9 @@ function doEas () {
       // Display the extreme alerts
       easAlert.style.display = 'inline'
       easAlert.innerHTML = `<div id="slide-interrupt-eas">
-            <h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`};">WWSU Emergency Alert System</h1>
-            <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">Extreme Alerts in effect</h2>
-            <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
+            <h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? '#ffffff' : '#000000'};">WWSU Emergency Alert System</h1>
+            <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? 'text-white' : 'text-dark'}">Extreme Alerts in effect</h2>
+            <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? 'text-white' : 'text-dark'}">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`
       var innercontent = document.getElementById('alerts')
       Eas.db({ severity: 'Extreme' }).each((dodo) => {
@@ -957,17 +957,17 @@ function doEas () {
           var borderclass = 'black'
           borderclass = 'danger'
           color = `rgb(${Math.round(color.red / 4)}, ${Math.round(color.green / 4)}, ${Math.round(color.blue / 4)});`
-          innercontent.innerHTML += `<div style="width: 32%;${!isLightTheme ? `background-color: ${color}` : ``}" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark bg-light-1`} border border-${borderclass} rounded shadow-4">
+          innercontent.innerHTML += `<div style="width: 32%;${!isLightTheme ? `background-color: ${color}` : ''}" class="d-flex align-items-stretch m-1 ${!isLightTheme ? 'text-white' : 'text-dark bg-light-1'} border border-${borderclass} rounded shadow-4">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo['alert'] !== 'undefined') ? dodo['alert'] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
-<span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? 'text-white' : 'text-dark'}">${moment(dodo['starts']).isValid() ? moment(dodo['starts']).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo['expires']).isValid() ? moment(dodo['expires']).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
+<span style="font-size: 1em;" class="${!isLightTheme ? 'text-white' : 'text-dark'}">${(typeof dodo['counties'] !== 'undefined') ? dodo['counties'] : 'Unknown Counties'}</span><br />
                         </div>
                         `
         } catch (e) {
           console.error(e)
           iziToast.show({
             title: 'An error occurred - Please check the logs',
-            message: `Error occurred during Eas iteration in doEas.`
+            message: 'Error occurred during Eas iteration in doEas.'
           })
         }
       })
@@ -975,7 +975,7 @@ function doEas () {
     } else if (!easExtreme && !easActive && document.getElementById('slide-interrupt-eas') !== null) {
       clearInterval(flashInterval)
       easAlert.style.display = 'none'
-      easAlert.innerHTML = ``
+      easAlert.innerHTML = ''
       // If we are supposed to display an EAS alert, but it is not on the screen, this is an error; put it on the screen.
     } else if (easActive && document.getElementById('slide-interrupt-eas') === null) {
       easActive = false
@@ -1011,11 +1011,11 @@ function processNowPlaying (response) {
       }
 
       // April Fool's
-      if (typeof response.trackID !== `undefined` && parseInt(response.trackID) >= 74255 && parseInt(response.trackID) <= 74259) {
+      if (typeof response.trackID !== 'undefined' && parseInt(response.trackID) >= 74255 && parseInt(response.trackID) <= 74259) {
         setTimeout(() => {
           iziToast.show({
             title: '',
-            message: `<img src="../../images/giphy.gif">`,
+            message: '<img src="../../images/giphy.gif">',
             timeout: 25000,
             close: true,
             color: 'blue',
@@ -1026,7 +1026,7 @@ function processNowPlaying (response) {
             overlay: true,
             zindex: 250,
             layout: 2,
-            image: ``,
+            image: '',
             maxWidth: 480
           })
         }, 9500)
@@ -1061,22 +1061,22 @@ function processNowPlaying (response) {
              */
 
       if (disconnected || typeof Meta.state === 'undefined') {
-        statebadge = `<span class="badge badge-secondary shadow-2">OFFLINE</span>`
+        statebadge = '<span class="badge badge-secondary shadow-2">OFFLINE</span>'
         djAlert.style.display = 'none'
       } else if (Meta.state.startsWith('automation_')) {
-        statebadge = `<span class="badge badge-info shadow-2">MUSIC</span>`
+        statebadge = '<span class="badge badge-info shadow-2">MUSIC</span>'
         color = 'rgba(1, 84, 122, 1)'
       } else if (Meta.state.startsWith('live_')) {
-        statebadge = `<span class="badge badge-primary shadow-2">SHOW</span>`
+        statebadge = '<span class="badge badge-primary shadow-2">SHOW</span>'
         color = 'rgba(115, 6, 23, 1)'
       } else if (Meta.state.startsWith('remote_')) {
-        statebadge = `<span class="badge badge-purple shadow-2">REMOTE</span>`
+        statebadge = '<span class="badge badge-purple shadow-2">REMOTE</span>'
         color = 'rgba(51, 29, 91, 1)'
       } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-        statebadge = `<span class="badge badge-success shadow-2">SPORTS</span>`
+        statebadge = '<span class="badge badge-success shadow-2">SPORTS</span>'
         color = 'rgba(38, 87, 40, 1)'
       }
-      if (typeof response.state !== `undefined` || typeof response.topic !== `undefined` || typeof response.show !== `undefined`) {
+      if (typeof response.state !== 'undefined' || typeof response.topic !== 'undefined' || typeof response.show !== 'undefined') {
         /*
                 if (Meta.state.startsWith("live_") || Meta.state.startsWith("remote_"))
                 {
@@ -1106,31 +1106,31 @@ function processNowPlaying (response) {
                 }
                 */
         if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_') || Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-          Slides.slide(`on-air`).active = true
+          Slides.slide('on-air').active = true
           checkSlideCounts()
-          var innercontent = ``
+          var innercontent = ''
           if (Meta.topic.length > 2) {
-            Slides.slide(`on-air`).displayTime = 20
-            innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};"><strong>${Meta.show}</strong></h2>`
+            Slides.slide('on-air').displayTime = 20
+            innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? '#ffffff' : '#000000'};"><strong>${Meta.show}</strong></h2>`
             if ('webchat' in Meta && Meta.webchat) {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <string>wwsu1069.org</strong></h3>`
+              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? '#ffffff' : '#000000'}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <string>wwsu1069.org</strong></h3>`
             } else {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`
+              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? '#ffffff' : '#000000'}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`
             }
-            innercontent += `<div style="overflow-y: hidden; font-size: 4.5vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; height: 45vh;" class="${!isLightTheme ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8">${Meta.topic}</div>`
+            innercontent += `<div style="overflow-y: hidden; font-size: 4.5vh; color: ${!isLightTheme ? '#ffffff' : '#000000'}; height: 45vh;" class="${!isLightTheme ? 'bg-dark-4 text-white' : 'bg-light-1 text-dark'} p-1 m-1 shadow-8">${Meta.topic}</div>`
           } else {
-            Slides.slide(`on-air`).displayTime = 10
-            innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};"><strong>${Meta.show}</strong></h2>`
+            Slides.slide('on-air').displayTime = 10
+            innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? '#ffffff' : '#000000'};"><strong>${Meta.show}</strong></h2>`
             if ('webchat' in Meta && Meta.webchat) {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <strong>wwsu1069.org</strong></h3>`
+              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? '#ffffff' : '#000000'}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <strong>wwsu1069.org</strong></h3>`
             } else {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`
+              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? '#ffffff' : '#000000'}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`
             }
           }
-          temp = document.getElementById(`ontheair`)
+          temp = document.getElementById('ontheair')
           if (temp) { temp.innerHTML = innercontent }
         } else {
-          Slides.slide(`on-air`).active = false
+          Slides.slide('on-air').active = false
           checkSlideCounts()
         }
       }
@@ -1140,7 +1140,7 @@ function processNowPlaying (response) {
       if (typeof response.line1 !== 'undefined') {
         var line1Timer = setTimeout(() => {
           nowplayingline1.innerHTML = Meta.line1
-          nowplayingline1.className = ``
+          nowplayingline1.className = ''
           if (Meta.line1.length >= 80) {
             $('#nowplaying-line1')
               .marquee({
@@ -1182,7 +1182,7 @@ function processNowPlaying (response) {
       if (typeof response.line2 !== 'undefined') {
         var line2Timer = setTimeout(() => {
           nowplayingline2.innerHTML = Meta.line2
-          nowplayingline2.className = ``
+          nowplayingline2.className = ''
           if (Meta.line2.length >= 80) {
             $('#nowplaying-line2')
               .marquee({
@@ -1229,7 +1229,7 @@ function processNowPlaying (response) {
         countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
           temp = Meta.show.split(' - ')
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? '#ffffff' : '#000000'};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
                     <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
                     </div></div>`
@@ -1242,13 +1242,13 @@ function processNowPlaying (response) {
         if (queuelength >= 15) {
           countdownclock.innerHTML = queuelength
         } else {
-          if (!queueReminder && isStudio) { responsiveVoice.speak(`DJ is going live in less than 15 seconds`) }
+          if (!queueReminder && isStudio) { responsiveVoice.speak('DJ is going live in less than 15 seconds') }
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
             $('#dj-alert').css('background-color', '#F44336')
             setTimeout(() => {
-              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? '#000000' : '#ffffff')
             }, 250)
           }
         }
@@ -1261,7 +1261,7 @@ function processNowPlaying (response) {
         countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
           temp = Meta.show.split(' - ')
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? '#ffffff' : '#000000'};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
           countdown = document.getElementById('countdown')
@@ -1273,13 +1273,13 @@ function processNowPlaying (response) {
         if (queuelength >= 15) {
           countdownclock.innerHTML = queuelength
         } else {
-          if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is going live in less than 15 seconds`) }
+          if (!queueReminder && isStudio) { responsiveVoice.speak('Producer is going live in less than 15 seconds') }
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
             $('#dj-alert').css('background-color', '#9C27B0')
             setTimeout(() => {
-              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? '#000000' : '#ffffff')
             }, 250)
           }
         }
@@ -1290,7 +1290,7 @@ function processNowPlaying (response) {
         countdowntext = document.getElementById('countdown-text')
         countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? '#ffffff' : '#000000'};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
           countdown = document.getElementById('countdown')
@@ -1302,13 +1302,13 @@ function processNowPlaying (response) {
         if (queuelength >= 15) {
           countdownclock.innerHTML = queuelength
         } else {
-          if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is going live in less than 15 seconds`) }
+          if (!queueReminder && isStudio) { responsiveVoice.speak('Producer is going live in less than 15 seconds') }
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
             $('#dj-alert').css('background-color', '#4CAF50')
             setTimeout(() => {
-              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? '#000000' : '#ffffff')
             }, 250)
           }
         }
@@ -1320,7 +1320,7 @@ function processNowPlaying (response) {
         countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
           temp = Meta.show.split(' - ')
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? '#ffffff' : '#000000'};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
           countdown = document.getElementById('countdown')
@@ -1332,13 +1332,13 @@ function processNowPlaying (response) {
         if (queuelength >= 15) {
           countdownclock.innerHTML = queuelength
         } else {
-          if (!queueReminder && isStudio) { responsiveVoice.speak(`DJ is returning live in less than 15 seconds`) }
+          if (!queueReminder && isStudio) { responsiveVoice.speak('DJ is returning live in less than 15 seconds') }
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
             $('#dj-alert').css('background-color', '#F44336')
             setTimeout(() => {
-              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? '#000000' : '#ffffff')
             }, 250)
           }
         }
@@ -1350,7 +1350,7 @@ function processNowPlaying (response) {
         countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
           temp = Meta.show.split(' - ')
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? '#ffffff' : '#000000'};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
           countdown = document.getElementById('countdown')
@@ -1362,13 +1362,13 @@ function processNowPlaying (response) {
         if (queuelength >= 15) {
           countdownclock.innerHTML = queuelength
         } else {
-          if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is returning live in less than 15 seconds`) }
+          if (!queueReminder && isStudio) { responsiveVoice.speak('Producer is returning live in less than 15 seconds') }
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
             $('#dj-alert').css('background-color', '#9C27B0')
             setTimeout(() => {
-              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? '#000000' : '#ffffff')
             }, 250)
           }
         }
@@ -1379,7 +1379,7 @@ function processNowPlaying (response) {
         countdowntext = document.getElementById('countdown-text')
         countdownclock = document.getElementById('countdown-clock')
         if (!countdown || !countdowntext || !countdownclock) {
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? '#ffffff' : '#000000'};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
 <div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`
           countdown = document.getElementById('countdown')
@@ -1391,20 +1391,20 @@ function processNowPlaying (response) {
         if (queuelength >= 15) {
           countdownclock.innerHTML = queuelength
         } else {
-          if (!queueReminder && isStudio) { responsiveVoice.speak(`Producer is returning live in less than 15 seconds`) }
+          if (!queueReminder && isStudio) { responsiveVoice.speak('Producer is returning live in less than 15 seconds') }
           queueReminder = true
           countdownclock.innerHTML = queuelength
           if (!isStudio) {
             $('#dj-alert').css('background-color', '#4CAF50')
             setTimeout(() => {
-              $('#dj-alert').css('background-color', !isLightTheme ? `#000000` : `#ffffff`)
+              $('#dj-alert').css('background-color', !isLightTheme ? '#000000' : '#ffffff')
             }, 250)
           }
         }
         // Nothing special to show
       } else {
         djAlert.style.display = 'none'
-        djAlert.innerHTML = ``
+        djAlert.innerHTML = ''
       }
     } catch (e) {
       console.error(e)
@@ -1484,7 +1484,7 @@ function processAnnouncements () {
       console.error(e)
       iziToast.show({
         title: 'An error occurred - Please check the logs',
-        message: `Error occurred in the compare function of processAnnouncements call.`
+        message: 'Error occurred in the compare function of processAnnouncements call.'
       })
     }
   }
@@ -1509,7 +1509,7 @@ function processAnnouncements () {
         function: function () {
           $('#slide').animateCss('slideOutUp', () => {
             content.innerHTML = `<div class="animated fadeIn scale-wrapper" id="scale-wrapper">
-            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-align: left;" class="container-full p-2 m-1 scale-content ${!isLightTheme ? `text-white` : `text-dark`}" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">${announcement.title}</h1>${announcement.announcement}</div></div>`
+            <div style="overflow-y: hidden; overflow-x: hidden; font-size: 4em; color: ${!isLightTheme ? '#ffffff' : '#000000'}; text-align: left;" class="container-full p-2 m-1 scale-content ${!isLightTheme ? 'text-white' : 'text-dark'}" id="scaled-content"><h1 style="text-align: center; font-size: 2em; color: ${!isLightTheme ? '#ffffff' : '#000000'}">${announcement.title}</h1>${announcement.announcement}</div></div>`
 
             var pageWidth; var pageHeight
 
@@ -1572,21 +1572,21 @@ function processAnnouncements () {
 }
 
 function createAnnouncement (data) {
-  if (data.type.startsWith(`display-public`)) {
+  if (data.type.startsWith('display-public')) {
     Slides.newSlide({
       name: `attn-${data.ID}`,
       label: data.title,
       weight: 0,
-      isSticky: data.type === `display-public-sticky`,
+      isSticky: data.type === 'display-public-sticky',
       color: data.level,
       active: true,
       starts: moment(data.starts),
       expires: moment(data.expires),
-      transitionIn: `fadeIn`,
-      transitionOut: `fadeOut`,
+      transitionIn: 'fadeIn',
+      transitionOut: 'fadeOut',
       displayTime: data.displayTime || 15,
       fitContent: true,
-      html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${!isLightTheme ? `text-white bg-dark-2` : `text-dark bg-light-3`}" id="content-attn-${data.ID}">${data.announcement}</div>`
+      html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${!isLightTheme ? 'text-white bg-dark-2' : 'text-dark bg-light-3'}" id="content-attn-${data.ID}">${data.announcement}</div>`
     })
   }
 }
@@ -1624,18 +1624,18 @@ function processDarksky (db) {
 
 darkskyWorker.onmessage = function (e) {
   switch (e.data[0]) {
-    case `setWeatherSlide`:
+    case 'setWeatherSlide':
       setWeatherSlide(e.data[1][0], e.data[1][1], e.data[1][2], e.data[1][3], e.data[1][4], e.data[1][5])
       break
-    case `forecastGraph`:
-      var temp = document.querySelector(`#forecast-graph`)
+    case 'forecastGraph':
+      var temp = document.querySelector('#forecast-graph')
       temp.innerHTML = e.data[1]
       break
   }
 }
 
 function processWeeklyStats (data) {
-  var temp = document.getElementById(`analytics`)
+  var temp = document.getElementById('analytics')
   if (temp !== null) {
     temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Highest online listener to showtime ratio:</strong></p>
      <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[0] ? data.topShows[0] : 'Unknown'}</strong></li><li>${data.topShows[1] ? data.topShows[1] : 'Unknown'}</li><li>${data.topShows[2] ? data.topShows[2] : 'Unknown'}</li></ol>

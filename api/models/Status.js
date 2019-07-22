@@ -107,13 +107,13 @@ module.exports = {
             // Do not continue if we are in the process of waiting for a status 5 RadioDJ
             if (Status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
 
-            await Meta.changeMeta({ changingState: `Switching radioDJ instances due to queueFail` })
+            await Meta.changeMeta({ changingState: 'Switching radioDJ instances due to queueFail' })
             sails.sockets.broadcast('system-error', 'system-error', true)
-            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.` }).fetch()
+            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: '<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.' }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await Announcements.findOrCreate({ type: 'djcontrols', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+            await Announcements.findOrCreate({ type: 'djcontrols', title: 'queueFail (system)', announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: 'queueFail (system)', announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
               .tolerate((err) => {
                 sails.log.error(err)
               })
@@ -121,7 +121,7 @@ module.exports = {
               .filter((instance) => instance.rest === Meta['A'].radiodj)
               .map(async (instance) => {
                 var status = await Status.findOne({ name: `radiodj-${instance.name}` })
-                if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data.` }]) }
+                if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: 'RadioDJ triggered queueFail for failing to report queue data.' }]) }
                 return true
               })
             await Promise.all(maps)
@@ -152,8 +152,8 @@ module.exports = {
           try {
             // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
             if (!moment().isBefore(moment(Status.errorCheck.prevError).add(1, 'minutes'))) {
-              sails.log.verbose(`No recent error; attempting standard recovery.`)
-              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Queue recovery attempted; queue was frozen.</strong>` }).fetch()
+              sails.log.verbose('No recent error; attempting standard recovery.')
+              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: '<strong>Queue recovery attempted; queue was frozen.</strong>' }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -162,13 +162,13 @@ module.exports = {
               // Do not continue if we are in the process of waiting for a status 5 RadioDJ
               if (Status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
 
-              await Meta.changeMeta({ changingState: `Switching automation instances due to frozen` })
-              sails.log.verbose(`Recent error; switching RadioDJs.`)
-              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> queue was frozen.` }).fetch()
+              await Meta.changeMeta({ changingState: 'Switching automation instances due to frozen' })
+              sails.log.verbose('Recent error; switching RadioDJs.')
+              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: '<strong>Switched automation instances;</strong> queue was frozen.' }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await Announcements.findOrCreate({ type: 'djcontrols', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+              await Announcements.findOrCreate({ type: 'djcontrols', title: 'frozen (system)', announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: 'frozen (system)', announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -176,7 +176,7 @@ module.exports = {
                 .filter((instance) => instance.rest === Meta['A'].radiodj)
                 .map(async (instance) => {
                   var status = await Status.findOne({ name: `radiodj-${instance.name}` })
-                  if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed.` }]) }
+                  if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: 'RadioDJ triggered queueFrozen multiple times; it has probably crashed.' }]) }
                   return true
                 })
               await Promise.all(maps)
@@ -255,7 +255,7 @@ module.exports = {
           try {
             if (Meta['A'].changingState !== null) { return resolve(295) }
 
-            await Meta.changeMeta({ changingState: `Switching to automation via automationBreak` })
+            await Meta.changeMeta({ changingState: 'Switching to automation via automationBreak' })
             await Meta.changeMeta({ state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() })
 
             // Add up to 3 track requests if any are pending
@@ -287,7 +287,7 @@ module.exports = {
       fn: function () {
         return new Promise(async (resolve, reject) => {
           try {
-            await Meta.changeMeta({ changingState: `Switching to automation via genreEmpty` })
+            await Meta.changeMeta({ changingState: 'Switching to automation via genreEmpty' })
             await sails.helpers.genre.start('Default', true)
             await Meta.changeMeta({ changingState: null })
             return resolve(0)
@@ -309,7 +309,7 @@ module.exports = {
 
   changeStatus: function (array) {
     return new Promise(async (resolve, reject) => {
-      sails.log.debug(`Status.changeStatus called.`)
+      sails.log.debug('Status.changeStatus called.')
       try {
         var maps = array.map(async status => {
           var criteriaB
@@ -340,15 +340,15 @@ module.exports = {
             }
           }
           if (updateIt === 1 && typeof criteria.status !== 'undefined' && criteria.status <= 3 && (!record.status || (record.status !== criteria.status))) {
-            var loglevel = `warning`
+            var loglevel = 'warning'
             if (criteria.status < 2) {
-              loglevel = `danger`
+              loglevel = 'danger'
             } else if (criteria.status < 3) {
-              loglevel = `urgent`
+              loglevel = 'urgent'
             }
 
             // Log changes in status
-            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
+            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || 'Unknown System'}</strong>:<br />${criteria.data ? criteria.data : 'Unknown Issue'}` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)
@@ -356,7 +356,7 @@ module.exports = {
           }
           if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3) {
             // Log when bad statuses are now good.
-            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
+            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || 'Unknown System'}</strong>:<br />Now Operational.` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)

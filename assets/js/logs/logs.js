@@ -34,16 +34,16 @@ function filterLogs (subtype = null) {
       .then(
         function success (resHTML) {
           var header = tableData.createTHead()
-          header.classList.add(`thead-dark`)
+          header.classList.add('thead-dark')
           var newRow = header.insertRow(0)
           var cell = newRow.insertCell(0)
           cell.innerHTML = 'Choose a log for this day'
           newRow = tableData.insertRow(tableData.rows.length)
           cell = newRow.insertCell(0)
-          cell.innerHTML = `<a href="javascript:filterLogs(\`\`)" title="Show the log" role="button" class="btn btn-success">View all logs for this day</a>`
+          cell.innerHTML = '<a href="javascript:filterLogs(``)" title="Show the log" role="button" class="btn btn-success">View all logs for this day</a>'
           newRow = tableData.insertRow(tableData.rows.length)
           cell = newRow.insertCell(0)
-          cell.innerHTML = `<a href="javascript:filterLogs(\`ISSUES\`)" title="Show the log" role="button" class="btn btn-warning">View logged problems/issues for this day</a>`
+          cell.innerHTML = '<a href="javascript:filterLogs(`ISSUES`)" title="Show the log" role="button" class="btn btn-warning">View logged problems/issues for this day</a>'
           resHTML.map(logtype => {
             var newRow = tableData.insertRow(tableData.rows.length)
             var cell = newRow.insertCell(0)
@@ -64,7 +64,7 @@ function filterLogs (subtype = null) {
       .then(
         function success (resHTML) {
           var header = tableData.createTHead()
-          header.classList.add(`thead-dark`)
+          header.classList.add('thead-dark')
           var newRow = header.insertRow(0)
           var cell = newRow.insertCell(0)
           cell.innerHTML = 'Date/Time'

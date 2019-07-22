@@ -11,7 +11,7 @@ module.exports = {
   fn: async function (inputs, exits) {
     var months = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-    var records = await sails.models.listeners.find().sort(`createdAt ASC`)
+    var records = await sails.models.listeners.find().sort('createdAt ASC')
     var prevAmount = 0
 
     records.map((record) => {

@@ -45,7 +45,7 @@ module.exports = {
         return value === null || moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of when the announcement starts. Recommended ISO string.`
+      description: 'moment() parsable string of when the announcement starts. Recommended ISO string.'
     },
 
     expires: {
@@ -54,7 +54,7 @@ module.exports = {
         return value === null || moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of when the announcement expires. Defaults to the year 3000. Recommended ISO string.`
+      description: 'moment() parsable string of when the announcement expires. Defaults to the year 3000. Recommended ISO string.'
     }
 
   },

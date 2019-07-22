@@ -29,7 +29,7 @@ module.exports = {
       type: 'string',
       required: true,
       isIn: ['Extreme', 'Severe', 'Moderate', 'Minor'],
-      description: `Severity of alert: One of the following in order from highest to lowest ['Extreme', 'Severe', 'Moderate', 'Minor']`
+      description: 'Severity of alert: One of the following in order from highest to lowest [\'Extreme\', \'Severe\', \'Moderate\', \'Minor\']'
     },
     starts: {
       type: 'string',
@@ -37,7 +37,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert starts. Recommended ISO string.`
+      description: 'moment() parsable string of when the alert starts. Recommended ISO string.'
     },
     expires: {
       type: 'string',
@@ -45,7 +45,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert expires. Recommended ISO string.`
+      description: 'moment() parsable string of when the alert expires. Recommended ISO string.'
     },
     color: {
       type: 'string',
@@ -68,12 +68,12 @@ module.exports = {
       // Define a function for processing information into the sails.models.eas.pendingAlerts variable.
       // Notably, this function ensures the same alert from different counties are joined together.
       var processPending = (criteria) => {
-        if (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined`) {
+        if (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === 'undefined') {
           sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] = criteria
         } else {
           for (var key in criteria) {
             if (Object.prototype.hasOwnProperty.call(criteria, key)) {
-              if (key !== `counties`) {
+              if (key !== 'counties') {
                 sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = criteria[key]
               } else {
                 var temp = sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key].split(', ')
@@ -146,7 +146,7 @@ module.exports = {
         }
 
         // If this alert came from NWS, we need to GET a separate URL for alert information before we create the record.
-        if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
+        if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === 'undefined' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
           sails.log.verbose('Alert is from NWS source. Retrieving alert information.')
           var resp = await needle('get', inputs.reference)
           sails.log.silly(resp.body)

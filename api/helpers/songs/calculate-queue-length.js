@@ -8,7 +8,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`helper songs.calculateQueueLength called.`)
+    sails.log.debug('helper songs.calculateQueueLength called.')
     try {
       // Get current RadioDJ Queue
       var queue = await sails.helpers.rest.getQueue()

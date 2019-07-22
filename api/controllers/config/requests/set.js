@@ -7,11 +7,11 @@ module.exports = {
   inputs: {
     dailyLimit: {
       type: 'number',
-      description: `Each IP address is limited to making no more than the specified number of requests per day, reset at midnight. 0 disables the ability for anyone to request tracks.`
+      description: 'Each IP address is limited to making no more than the specified number of requests per day, reset at midnight. 0 disables the ability for anyone to request tracks.'
     },
     priorityBump: {
       type: 'number',
-      description: `When a track is requested, by how much should the track's priority be bumped (or lowered, if a negative number) in RadioDJ?`
+      description: 'When a track is requested, by how much should the track\'s priority be bumped (or lowered, if a negative number) in RadioDJ?'
     }
   },
 

@@ -13,10 +13,10 @@ module.exports = {
 
     try {
       // Block this request if we are already changing states
-      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error('The system is in the process of changing states. The request was blocked to prevent clashes.')) }
 
       // Lock so that other state changing requests get blocked until we are done
-      await sails.models.meta.changeMeta({ changingState: `Returning from break` });
+      await sails.models.meta.changeMeta({ changingState: 'Returning from break' });
 
       // log it
       (async () => {

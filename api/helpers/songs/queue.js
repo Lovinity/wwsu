@@ -117,14 +117,14 @@ module.exports = {
         }
 
         if (queuedtracks < inputs.quantity) {
-          sails.log.verbose(`Did not have enough tracks to queue.`)
+          sails.log.verbose('Did not have enough tracks to queue.')
           return exits.success(false) // We could not queue the specified number of tracks when this function was called... so return false.
         } else {
-          sails.log.verbose(`Finished: Had enough tracks to queue.`)
+          sails.log.verbose('Finished: Had enough tracks to queue.')
           return exits.success(true) // We queued the specified number of tracks, so return true.
         }
       } else {
-        sails.log.verbose(`No tracks available to queue`)
+        sails.log.verbose('No tracks available to queue')
         return exits.success(false)
       }
     } catch (e) {

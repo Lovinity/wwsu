@@ -50,7 +50,7 @@ module.exports = {
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`requests socket: ${data}`)
-    data.insert.trackname = `Unknown track`
+    data.insert.trackname = 'Unknown track'
     Songs.findOne({ ID: newlyCreatedRecord.songID })
       .then((record2) => {
         sails.log.silly(`Song: ${record2}`)
@@ -74,7 +74,7 @@ module.exports = {
       sails.sockets.broadcast('requests', 'requests', data)
       return proceed()
     } else {
-      data.update.trackname = `Unknown track`
+      data.update.trackname = 'Unknown track'
       Songs.findOne({ ID: updatedRecord.songID })
         .then((record2) => {
           sails.log.silly(`Song: ${record2}`)

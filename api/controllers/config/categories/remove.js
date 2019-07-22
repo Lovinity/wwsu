@@ -9,7 +9,7 @@ module.exports = {
       type: 'string',
       required: true,
       isNotIn: sails.config.custom.categories._doNotRemove,
-      description: `The name of the category to remove.`
+      description: 'The name of the category to remove.'
     }
   },
 

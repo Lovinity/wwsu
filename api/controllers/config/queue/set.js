@@ -7,23 +7,23 @@ module.exports = {
   inputs: {
     live: {
       type: 'number',
-      description: `If trying to begin a live show, and the total queue time is greater than this in seconds, skip currently playing track and try clearing necessary tracks from the queue again.`
+      description: 'If trying to begin a live show, and the total queue time is greater than this in seconds, skip currently playing track and try clearing necessary tracks from the queue again.'
     },
     prerecord: {
       type: 'number',
-      description: `If the amount of time between now and the first prerecord playlist track is greater than this many seconds, try clearing/skipping some tracks to get the prerecord on the air sooner.`
+      description: 'If the amount of time between now and the first prerecord playlist track is greater than this many seconds, try clearing/skipping some tracks to get the prerecord on the air sooner.'
     },
     sports: {
       type: 'number',
-      description: `If trying to begin a sports broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get sports on sooner.`
+      description: 'If trying to begin a sports broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get sports on sooner.'
     },
     sportsReturn: {
       type: 'number',
-      description: `When first returning from a break in a sports broadcast, if the queue is greater than this in seconds, clear out some tracks.`
+      description: 'When first returning from a break in a sports broadcast, if the queue is greater than this in seconds, clear out some tracks.'
     },
     remote: {
       type: 'number',
-      description: `If trying to begin a remote broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get remote on sooner.`
+      description: 'If trying to begin a remote broadcast, if the total queue is greater than this many seconds, skip current track, clear necessary tracks to try and get remote on sooner.'
     }
   },
 

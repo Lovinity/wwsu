@@ -35,7 +35,7 @@ module.exports = {
             return null
           }
 
-          if (typeof val.start === `undefined` || typeof val.end === `undefined`) {
+          if (typeof val.start === 'undefined' || typeof val.end === 'undefined') {
             valid = false
             return null
           }
@@ -62,7 +62,7 @@ module.exports = {
 
       // Determine what needs editing and edit it
       for (var key in inputs) {
-        if (Object.prototype.hasOwnProperty.call(inputs, key) && key !== `ID`) {
+        if (Object.prototype.hasOwnProperty.call(inputs, key) && key !== 'ID') {
           criteria[key] = inputs[key]
         }
       }

@@ -35,13 +35,13 @@ module.exports = {
 
     try {
       // Do not continue if not in live or automation mode; client should request automation before requesting live
-      if (!sails.models.meta['A'].state.startsWith('live_') && !sails.models.meta['A'].state.startsWith('automation_')) { return exits.error(new Error(`Cannot execute state/live unless in automation or live mode. Please go to automation first.`)) }
+      if (!sails.models.meta['A'].state.startsWith('live_') && !sails.models.meta['A'].state.startsWith('automation_')) { return exits.error(new Error('Cannot execute state/live unless in automation or live mode. Please go to automation first.')) }
 
       // Block the request if we are changing states right now
-      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error('The system is in the process of changing states. The request was blocked to prevent clashes.')) }
 
       // Lock so other state changing requests get blocked until we are done
-      await sails.models.meta.changeMeta({ changingState: `Switching to live` })
+      await sails.models.meta.changeMeta({ changingState: 'Switching to live' })
 
       // Filter profanity and sanitize
       if (inputs.topic !== '') {

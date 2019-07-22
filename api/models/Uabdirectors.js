@@ -56,7 +56,7 @@ module.exports = {
      */
   updateDirectors: function () {
     return new Promise(async (resolve) => {
-      sails.log.debug(`updateDirectors called.`)
+      sails.log.debug('updateDirectors called.')
       var names = {}
 
       // Determine presence by analyzing timesheet records up to 14 days ago

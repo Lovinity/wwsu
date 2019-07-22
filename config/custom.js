@@ -177,13 +177,13 @@ var defaultConfig = {
 
   // Used for oneSignal push notifications
   onesignal: {
-    rest: ``,
-    app: ``
+    rest: '',
+    app: ''
   },
 
   // Used for Darksky weather API
   darksky: {
-    api: ``,
+    api: '',
     position: {
       latitude: 39.7800196,
       longitude: -84.0599189
@@ -212,7 +212,7 @@ var defaultConfig = {
   categories: {
 
     // Restrict removal of the provided category keys by the config system.
-    _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `underwritings`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`, `noFade`],
+    _doNotRemove: ['music', 'adds', 'IDs', 'PSAs', 'sweepers', 'underwritings', 'liners', 'requestLiners', 'promos', 'halftime', 'technicalIssues', 'noClearGeneral', 'noClearShow', 'clearBreak', 'noMeta', 'noFade'],
 
     /*
          * REQUIRED CATEGORIES
@@ -362,18 +362,18 @@ var defaultConfig = {
   // in order to operate properly.
   // NOTE: DJ Controls code will need to be modified to include the new list of sports whenever this list is changed. It is advised not to change this except by a developer.
   sports: [
-    `Men's Basketball`,
-    `Women's Basketball`,
-    `Men's Baseball`,
-    `Women's Softball`,
-    `Men's Soccer`,
-    `Women's Soccer`,
-    `Men's Tennis`,
-    `Women's Tennis`,
-    `Men's Volleyball`,
-    `Women's Volleyball`,
-    `Men's Football`,
-    `Women's Football`
+    'Men\'s Basketball',
+    'Women\'s Basketball',
+    'Men\'s Baseball',
+    'Women\'s Softball',
+    'Men\'s Soccer',
+    'Women\'s Soccer',
+    'Men\'s Tennis',
+    'Women\'s Tennis',
+    'Men\'s Volleyball',
+    'Women\'s Volleyball',
+    'Men\'s Football',
+    'Women\'s Football'
   ],
 
   meta: {
@@ -383,25 +383,25 @@ var defaultConfig = {
     // This is a collection of alternative text to use in metadata for various things
     alt: {
       // Meta text to use when playing a noMeta track in regular automation
-      automation: `We'll get back to the music shortly...`,
+      automation: 'We\'ll get back to the music shortly...',
 
       // Meta text to use when playing a noMeta track in playlist mode
-      playlist: `We'll get back to the playlist shortly...`,
+      playlist: 'We\'ll get back to the playlist shortly...',
 
       // Meta text to use when playing a noMeta track in genre automation
-      genre: `We'll get back to the music shortly...`,
+      genre: 'We\'ll get back to the music shortly...',
 
       // Meta text to use when playing a noMeta track during a live show
-      live: `We'll get back to the show shortly...`,
+      live: 'We\'ll get back to the show shortly...',
 
       // Meta text to use when playing a noMeta track during a prerecord
-      prerecord: `We'll get back to the show shortly...`,
+      prerecord: 'We\'ll get back to the show shortly...',
 
       // Meta text to use when playing a noMeta track, or when the remote stream disconnected, during a remote broadcast
-      remote: `We'll get back to the broadcast shortly...`,
+      remote: 'We\'ll get back to the broadcast shortly...',
 
       // Meta text to use when playing something in automation during a sports broadcast (live or remote)
-      sports: `We'll get back to the sports broadcast shortly...`
+      sports: 'We\'ll get back to the sports broadcast shortly...'
     },
 
     // This is a collection of prefixes to add to metadata for various types of programming.
@@ -409,43 +409,43 @@ var defaultConfig = {
     prefix: {
 
       // During automation, this prefix will appear before the currently playing track on line 1 of metadata.
-      automation: `Playing: `,
+      automation: 'Playing: ',
 
       // During genre, this will appear before the genre currently airing on line 2 of metadata.
-      genre: `Genre: `,
+      genre: 'Genre: ',
 
       // During a playlist, this will appear before the playlist currently airing on line 2 of metadata
-      playlist: `Playlist: `,
+      playlist: 'Playlist: ',
 
       // When playing a track request in automation, genre, or playlist... this will appear before the name of the person requesting the track on line 2 of metadata.
-      request: `Requested By: `,
+      request: 'Requested By: ',
 
       // When a live show is about to begin, this will appear before the host - show on line 2 of metadata.
-      pendLive: `Coming Up: `,
+      pendLive: 'Coming Up: ',
 
       // When a prerecorded show is about to begin, this will appear before the prerecord name on line 2 of metadata.
-      pendPrerecord: `Coming Up: `,
+      pendPrerecord: 'Coming Up: ',
 
       // When a remote broadcast is about to begin, this will appear before the host - show on line 2 of metadata.
-      pendRemote: `Coming Up: `,
+      pendRemote: 'Coming Up: ',
 
       // When a sports broadcast is about to begin, this will appear before the sport on line 2 of metadata.
-      pendSports: `Coming Up: Raider Sports - `,
+      pendSports: 'Coming Up: Raider Sports - ',
 
       // During a prerecorded show, this will appear before the name of the prerecord on line 1 of metadata.
-      prerecord: `On the Air: `,
+      prerecord: 'On the Air: ',
 
       // During a live show, this will appear before the host - show on line 1 of metadata.
-      live: `On the Air: `,
+      live: 'On the Air: ',
 
       // During a remote broadcast, this will appear before the host - show on line 1 of metadata
-      remote: `Broadcasting: `,
+      remote: 'Broadcasting: ',
 
       // During a sports broadcast, this will appear before the sport being aired on line 1 of metadata
-      sports: `Raider Sports: `,
+      sports: 'Raider Sports: ',
 
       // In a live, remote, sports, or prerecorded show... this will appear before the track name on line 2 of metadata when something is being played
-      playing: `Playing: `
+      playing: 'Playing: '
 
     }
   },

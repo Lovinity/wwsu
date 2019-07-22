@@ -13,7 +13,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Helper xp.addPrerecord called!`)
+    sails.log.debug('Helper xp.addPrerecord called!')
 
     try {
       // Calculate XP if exiting prerecord

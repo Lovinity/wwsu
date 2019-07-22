@@ -8,7 +8,7 @@ module.exports = {
     dj: {
       type: 'number',
       required: false,
-      description: `Provide the ID of a dj if you only want showtime records for a specific DJ.`
+      description: 'Provide the ID of a dj if you only want showtime records for a specific DJ.'
     }
   },
 
@@ -109,7 +109,7 @@ module.exports = {
       var records = await sails.models.xp.find({ dj: inputs.dj ? inputs.dj : { '!=': null } })
       records.map((record) => {
         if (typeof DJs[record.dj] === 'undefined') { return }
-        if (record.type === `xp`) {
+        if (record.type === 'xp') {
           DJs[record.dj].overall.xp += record.amount
           DJs[0].overall.xp += record.amount
           if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
@@ -117,7 +117,7 @@ module.exports = {
             DJs[0].semester.xp += record.amount
           }
         }
-        if (record.type === `remote`) {
+        if (record.type === 'remote') {
           DJs[record.dj].overall.remoteCredits += record.amount
           DJs[0].overall.remoteCredits += record.amount
           DJs[record.dj].overall.xp += (record.amount * sails.config.custom.XP.remoteCredit)
@@ -188,7 +188,7 @@ module.exports = {
           }
 
           // Now, combine records in case of accidental end show / start a new show within the same scheduled time block
-          if (record.unique !== null && record.unique !== ``) {
+          if (record.unique !== null && record.unique !== '') {
             // Combine records with the same Google Calendar unique ID
             if (record.unique in unique) {
               if (record.actualStart !== null && (moment(record.actualStart).isBefore(moment(unique[record.unique].actualStart)) || unique[record.unique].actualStart === null)) { unique[record.unique].actualStart = record.actualStart }

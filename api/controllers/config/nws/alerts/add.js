@@ -8,13 +8,13 @@ module.exports = {
     alert: {
       type: 'string',
       required: true,
-      description: `The name of the alert as provided by the NWS, case sensitive. Example: "Tornado Warning".`
+      description: 'The name of the alert as provided by the NWS, case sensitive. Example: "Tornado Warning".'
     },
     color: {
       type: 'string',
       isHexColor: true,
       required: true,
-      description: `A hexadecimal color that should be used, especially on the display signs, to visually indicate this alert. It is advised to use the same colors that the NWS uses.`
+      description: 'A hexadecimal color that should be used, especially on the display signs, to visually indicate this alert. It is advised to use the same colors that the NWS uses.'
     }
   },
 

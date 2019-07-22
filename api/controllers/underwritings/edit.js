@@ -21,15 +21,15 @@ module.exports = {
     mode: {
       type: 'json',
       custom: (value) => {
-        if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1)) { return false }
+        if (typeof value.mode === 'undefined' || (value.mode !== 0 && value.mode !== 1)) { return false }
 
-        if (typeof value.schedule === `undefined`) { return false }
+        if (typeof value.schedule === 'undefined') { return false }
 
-        if (typeof value.schedule.schedules === `undefined`) { return false }
+        if (typeof value.schedule.schedules === 'undefined') { return false }
 
-        if (typeof value.scheduleForced === `undefined`) { return false }
+        if (typeof value.scheduleForced === 'undefined') { return false }
 
-        if (typeof value.scheduleForced.schedules === `undefined`) { return false }
+        if (typeof value.scheduleForced.schedules === 'undefined') { return false }
 
         return true
       },
@@ -47,9 +47,9 @@ module.exports = {
     try {
       // Determine what needs updating
       var criteria = {}
-      if (typeof inputs.name !== `undefined`) { criteria.name = inputs.name }
-      if (typeof inputs.trackID !== `undefined`) { criteria.trackID = inputs.trackID }
-      if (typeof inputs.mode !== `undefined`) { criteria.mode = inputs.mode }
+      if (typeof inputs.name !== 'undefined') { criteria.name = inputs.name }
+      if (typeof inputs.trackID !== 'undefined') { criteria.trackID = inputs.trackID }
+      if (typeof inputs.mode !== 'undefined') { criteria.mode = inputs.mode }
 
       var criteriaB = _.cloneDeep(criteria)
 

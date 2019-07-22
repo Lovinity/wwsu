@@ -17,10 +17,10 @@ module.exports = {
 
     try {
       // Block if we are in the process of changing states
-      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error('The system is in the process of changing states. The request was blocked to prevent clashes.')) }
 
       // Lock system from any other state changing requests until we are done.
-      await sails.models.meta.changeMeta({ changingState: `Changing to automation / calculating show stats` })
+      await sails.models.meta.changeMeta({ changingState: 'Changing to automation / calculating show stats' })
 
       // What to return for DJ Controls show stats, if applicable
       var returnData = { showTime: 0, subtotalXP: 0 }
@@ -96,7 +96,7 @@ module.exports = {
           // We are going to break
         } else {
           await sails.models.meta.changeMeta({ genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() })
-          attendance = await sails.models.attendance.createRecord(`Genre: Default`)
+          attendance = await sails.models.attendance.createRecord('Genre: Default')
         }
 
         // Finish up
@@ -110,7 +110,7 @@ module.exports = {
 
       // While the parallel is running, grab show time and listener minutes from attendance record and award XP.
       attendance = attendance.updatedRecord || undefined
-      if (typeof attendance !== `undefined`) {
+      if (typeof attendance !== 'undefined') {
         returnData.showTime = attendance.showTime || 0
         returnData.listenerMinutes = attendance.listenerMinutes || 0
         if (dj !== null) {

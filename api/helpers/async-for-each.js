@@ -32,7 +32,7 @@ module.exports = {
         sails.log.silly(`Calling iteration ${index}`)
         var breakIt = await inputs.callback(inputs.array[index], index, inputs.array)
         if (breakIt) {
-          sails.log.silly(`BREAKING as per resolve(true).`)
+          sails.log.silly('BREAKING as per resolve(true).')
           break
         }
       }

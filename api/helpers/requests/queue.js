@@ -37,7 +37,7 @@ module.exports = {
 
       // End if consider_playlist and we are not in automation mode.
       if (inputs.consider_playlist && sails.models.meta['A'].state !== 'automation_on' && sails.models.meta['A'].state !== 'automation_genre' && sails.models.meta['A'].state !== 'automation_playlist') {
-        sails.log.verbose(`Helper abandoned: consider_playlist is true, and we are airing a playlist.`)
+        sails.log.verbose('Helper abandoned: consider_playlist is true, and we are airing a playlist.')
         return exits.success(false)
       }
 
@@ -51,7 +51,7 @@ module.exports = {
         // LINT: async required because await necessary for Sails.js
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve) => {
-          sails.log.verbose(`prepareRequests called.`)
+          sails.log.verbose('prepareRequests called.')
           switch (sails.models.meta['A'].state) {
             case 'live_on':
               await sails.helpers.rest.cmd('EnableAssisted', 1)
@@ -81,7 +81,7 @@ module.exports = {
         // LINT: async required because await necessary for Sails.js
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve) => {
-          sails.log.verbose(`finalizeRequests called.`)
+          sails.log.verbose('finalizeRequests called.')
           switch (sails.models.meta['A'].state) {
             case 'live_on':
             case 'remote_on':
@@ -112,7 +112,7 @@ module.exports = {
             .filter(track => record.songID === parseInt(track.ID))
             .map(() => { inQueue = true })
           if (inQueue) {
-            sails.log.verbose(`Track already in queue. Abandoning queueRequest.`)
+            sails.log.verbose('Track already in queue. Abandoning queueRequest.')
             return resolve(false)
           }
 
@@ -144,7 +144,7 @@ module.exports = {
               .map(() => { inQueue = true })
             // Skip it if so
             if (inQueue) {
-              sails.log.verbose(`getRequest abandoned: the track was already queued.`)
+              sails.log.verbose('getRequest abandoned: the track was already queued.')
               checked.push(record[0].ID)
               await getRequest(quantity)
               return resolve()
@@ -163,7 +163,7 @@ module.exports = {
               }
             }
           } else {
-            sails.log.verbose(`No more request records to process; exiting.`)
+            sails.log.verbose('No more request records to process; exiting.')
             await finalizeRequests()
             return resolve()
           }

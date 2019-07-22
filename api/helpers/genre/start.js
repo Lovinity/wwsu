@@ -27,7 +27,7 @@ module.exports = {
         // Do not start a genre if we are in the middle of changing states, unless ignoreChangingState was provided true.
         if (sails.models.meta['A'].changingState === null || inputs.ignoreChangingState) {
           // Lock future state changes until we are done if ignoreChangingState is false.
-          if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: `Switching to genre` }) }
+          if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: 'Switching to genre' }) }
 
           // Find the manual RadioDJ event for Node to trigger
           var event = await sails.models.events.find({ type: 3, name: inputs.event, enabled: 'True' })
@@ -37,7 +37,7 @@ module.exports = {
           // We cannot find the event. Throw an error.
           if (event.length <= 0) {
             if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: null }) }
-            return exits.error(new Error(`The provided event name was not found as an active manual event in RadioDJ.`))
+            return exits.error(new Error('The provided event name was not found as an active manual event in RadioDJ.'))
           }
 
           await sails.helpers.rest.cmd('RefreshEvents', 0, 10000) // Reload events in RadioDJ just in case
@@ -57,9 +57,9 @@ module.exports = {
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Genre: `, inputs.event, `Genre`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent('Genre: ', inputs.event, 'Genre', attendance.unique)
           } else {
-            attendance = await sails.models.attendance.createRecord(`Genre: Default`)
+            attendance = await sails.models.attendance.createRecord('Genre: Default')
             await sails.models.meta.changeMeta({ state: 'automation_on', genre: 'Default' })
             await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Default rotation started.</strong>' }).fetch()
               .tolerate((err) => {
@@ -68,7 +68,7 @@ module.exports = {
           }
           if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: null }) }
         } else {
-          sails.log.debug(`Helper SKIPPED.`)
+          sails.log.debug('Helper SKIPPED.')
         }
       }
       return exits.success()

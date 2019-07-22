@@ -9,7 +9,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller songs/get-genres called.`)
+    sails.log.debug('Controller songs/get-genres called.')
     try {
       var returnData = []
 

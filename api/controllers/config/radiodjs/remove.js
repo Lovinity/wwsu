@@ -9,7 +9,7 @@ module.exports = {
       type: 'string',
       required: true,
       regex: /^[a-z0-9]+$/i,
-      description: `The name of the RadioDJ to remove from the system.`
+      description: 'The name of the RadioDJ to remove from the system.'
     }
   },
 
@@ -38,7 +38,7 @@ module.exports = {
 
       if (changeRadioDj) {
         // Forcefully clear the current active radioDJ since it no longer exists in configuration.
-        await sails.models.meta.changeMeta({ radiodj: `` })
+        await sails.models.meta.changeMeta({ radiodj: '' })
 
         await sails.helpers.rest.changeRadioDj()
       }

@@ -20,7 +20,7 @@ module.exports = {
       // First, log all of the already-final (actual) times.
       var final = []
       records
-        .filter((record) => record.actual !== null && typeof record.actual.start !== `undefined` && typeof record.actual.end !== `undefined`)
+        .filter((record) => record.actual !== null && typeof record.actual.start !== 'undefined' && typeof record.actual.end !== 'undefined')
         .map((record) => {
           final.push(record.actual)
         })
@@ -68,14 +68,14 @@ module.exports = {
       // Group the Planner by priority
       var byPriority = []
       records
-        .filter((record) => record.actual === null || typeof record.actual.start === `undefined` || typeof record.actual.end === `undefined`)
+        .filter((record) => record.actual === null || typeof record.actual.start === 'undefined' || typeof record.actual.end === 'undefined')
         .map((record) => {
           if (record.priority === null) {
             record.badReason = 'Record does not have a scheduling priority set.'
             badRecords.push(record)
             return null
           }
-          if (typeof byPriority[record.priority] === `undefined`) { byPriority[record.priority] = [] }
+          if (typeof byPriority[record.priority] === 'undefined') { byPriority[record.priority] = [] }
           byPriority[record.priority].push(record)
         })
 
@@ -86,7 +86,7 @@ module.exports = {
 
       if (byPriority.length > 0) {
         byPriority.map((shows) => {
-          while (typeof shows[0] !== `undefined` && typeof shows[0].proposal !== `undefined`) {
+          while (typeof shows[0] !== 'undefined' && typeof shows[0].proposal !== 'undefined') {
             // Choose a random show among the priority
             var index = Math.floor(Math.random() * Math.floor(shows.length - 1))
             var show = shows[index]
@@ -96,7 +96,7 @@ module.exports = {
               var scheduled = false
 
               // Try to schedule one of the proposed show times by while looping until we do, or until we run out of options.
-              while (typeof show.proposal[0] !== `undefined` && typeof show.proposal[0].start !== `undefined`) {
+              while (typeof show.proposal[0] !== 'undefined' && typeof show.proposal[0].start !== 'undefined') {
                 var proposal = show.proposal[0]
                 if (isAvailable(proposal.start, proposal.end)) {
                   // The scheduling is available, so schedule it and make it final

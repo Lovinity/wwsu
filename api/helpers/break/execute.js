@@ -12,7 +12,7 @@ module.exports = {
     },
     event: {
       type: 'string',
-      defaultsTo: ``,
+      defaultsTo: '',
       description: 'For log tasks, the event to log.'
     },
     category: {

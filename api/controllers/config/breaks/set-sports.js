@@ -8,32 +8,32 @@ module.exports = {
     start: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `These break tasks are queued/executed just before a sports broadcast begins.`
+      description: 'These break tasks are queued/executed just before a sports broadcast begins.'
     },
     before: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `These break tasks are queued/executed once, right when the break is started.`
+      description: 'These break tasks are queued/executed once, right when the break is started.'
     },
     during: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `These break tasks are executed/queued repeatedly every time RadioDJ's queue gets empty until the DJ returns from their break.`
+      description: 'These break tasks are executed/queued repeatedly every time RadioDJ\'s queue gets empty until the DJ returns from their break.'
     },
     duringHalftime: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `During extended breaks / halftime, these are executed/queued repeatedly every time RadioDJ's queue gets empty until the producer returns from their break.`
+      description: 'During extended breaks / halftime, these are executed/queued repeatedly every time RadioDJ\'s queue gets empty until the producer returns from their break.'
     },
     after: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `These break tasks are queued/executed when the DJ returns from their break.`
+      description: 'These break tasks are queued/executed when the DJ returns from their break.'
     },
     end: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `These break tasks are queued/executed when the sports broadcast ends.`
+      description: 'These break tasks are queued/executed when the sports broadcast ends.'
     }
   },
 

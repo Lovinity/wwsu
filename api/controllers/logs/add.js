@@ -11,7 +11,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of a date in which this log took place. Defaults to now.`
+      description: 'moment() parsable string of a date in which this log took place. Defaults to now.'
     },
     logtype: {
       type: 'string',

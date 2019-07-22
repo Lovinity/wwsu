@@ -68,7 +68,7 @@ module.exports = {
       sails.sockets.broadcast(`messages-${newlyCreatedRecord.to}`, 'messages', data);
       (async () => {
         var recipient = await Recipients.findOne({ host: newlyCreatedRecord.to, device: { '!=': null } })
-        if (recipient) { await sails.helpers.onesignal.send([recipient.device], `message`, `WWSU New Message From DJ`, await sails.helpers.truncateText(newlyCreatedRecord.message, 128), (60 * 60)) }
+        if (recipient) { await sails.helpers.onesignal.send([recipient.device], 'message', 'WWSU New Message From DJ', await sails.helpers.truncateText(newlyCreatedRecord.message, 128), (60 * 60)) }
       })()
     }
 

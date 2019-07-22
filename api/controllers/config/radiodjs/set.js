@@ -9,20 +9,20 @@ module.exports = {
       type: 'string',
       required: true,
       regex: /^[a-z0-9]+$/i,
-      description: `An alpha-numeric name for this RadioDJ, which will be used to update/remove its configuration. If this name already exists, the provided configuration will replace the configuration of the given RadioDJ.`
+      description: 'An alpha-numeric name for this RadioDJ, which will be used to update/remove its configuration. If this name already exists, the provided configuration will replace the configuration of the given RadioDJ.'
     },
 
     label: {
       type: 'string',
       required: true,
-      description: `A human friendly label to identify this RadioDJ (such as a room number). The word "RadioDJ " will automatically be prefixed to what is provided here.`
+      description: 'A human friendly label to identify this RadioDJ (such as a room number). The word "RadioDJ " will automatically be prefixed to what is provided here.'
     },
 
     rest: {
       type: 'string',
       required: true,
       isURL: true,
-      description: `The URL to the RadioDJ's active REST server. This needs to be accessible by the application. Also be aware the authentication password for the REST server must be what is configured for rest.auth.`
+      description: 'The URL to the RadioDJ\'s active REST server. This needs to be accessible by the application. Also be aware the authentication password for the REST server must be what is configured for rest.auth.'
     },
 
     level: {
@@ -30,7 +30,7 @@ module.exports = {
       required: true,
       min: 1,
       max: 5,
-      description: `When this RadioDJ reports a problem, how severe should the system consider it? 5 = no issue, 4 = offline / no issue, 3 = minor, 2 = significant, 1 = critical.`
+      description: 'When this RadioDJ reports a problem, how severe should the system consider it? 5 = no issue, 4 = offline / no issue, 3 = minor, 2 = significant, 1 = critical.'
     }
   },
 
@@ -65,7 +65,7 @@ module.exports = {
 
       if (changeRadioDj) {
         // Forcefully clear the current active radioDJ since it no longer exists in configuration.
-        await sails.models.meta.changeMeta({ radiodj: `` })
+        await sails.models.meta.changeMeta({ radiodj: '' })
 
         await sails.helpers.rest.changeRadioDj()
       }

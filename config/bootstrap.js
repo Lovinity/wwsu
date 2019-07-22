@@ -43,7 +43,7 @@ module.exports.bootstrap = async function (done) {
     })
 
   // Generate token secrets
-  sails.log.verbose(`BOOTSTRAP: generating token secrets`)
+  sails.log.verbose('BOOTSTRAP: generating token secrets')
   var cryptoRandomString = require('crypto-random-string')
   sails.config.custom.secrets = {}
   sails.config.custom.secrets.host = cryptoRandomString(256)
@@ -57,15 +57,15 @@ module.exports.bootstrap = async function (done) {
   await Darksky.findOrCreate({ ID: 1 }, { ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {} })
 
   // Load blank Meta template
-  sails.log.verbose(`BOOTSTRAP: Cloning Meta.A to Meta.template`)
+  sails.log.verbose('BOOTSTRAP: Cloning Meta.A to Meta.template')
   Meta.template = _.cloneDeep(Meta['A'])
 
   // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
-  sails.log.verbose(`BOOTSTRAP: Loading RadioDJ instances into template`)
+  sails.log.verbose('BOOTSTRAP: Loading RadioDJ instances into template')
   sails.config.custom.radiodjs.forEach((radiodj) => {
     Status.template.push({ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, status: radiodj.level, data: 'This RadioDJ has not reported online since initialization.', time: null })
   })
-  sails.log.verbose(`BOOTSTRAP: Loading Client instances into template`)
+  sails.log.verbose('BOOTSTRAP: Loading Client instances into template')
   var clients = await Hosts.find({ authorized: true })
     .tolerate((err) => {
       // Don't throw errors, but log them
@@ -85,26 +85,26 @@ module.exports.bootstrap = async function (done) {
     })
   }
 
-  sails.log.verbose(`BOOTSTRAP: Loading Display Sign instances into template`)
+  sails.log.verbose('BOOTSTRAP: Loading Display Sign instances into template')
   sails.config.custom.displaysigns.forEach((display) => {
     Status.template.push({ name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: 'This display sign has not reported online since initialization.', time: null })
   })
 
-  sails.log.verbose(`BOOTSTRAP: Adding Status template to database.`)
+  sails.log.verbose('BOOTSTRAP: Adding Status template to database.')
   await Status.createEach(Status.template)
     .tolerate((err) => {
       return done(err)
     })
 
   // Load internal recipients into memory
-  sails.log.verbose(`BOOTSTRAP: Adding recipients template to database.`)
+  sails.log.verbose('BOOTSTRAP: Adding recipients template to database.')
   await Recipients.createEach(Recipients.template)
     .tolerate((err) => {
       return done(err)
     })
 
   // Generate recipients based off of messages from the last hour... website only.
-  sails.log.verbose(`BOOTSTRAP: Adding recipients from messages sent within the last hour into database.`)
+  sails.log.verbose('BOOTSTRAP: Adding recipients from messages sent within the last hour into database.')
   var records = await Messages.find({ status: 'active', from: { startsWith: 'website-' }, createdAt: { '>': moment().subtract(1, 'hours').toDate() } }).sort('createdAt DESC')
     .tolerate(() => {
     })
@@ -129,7 +129,7 @@ module.exports.bootstrap = async function (done) {
     await sails.helpers.songs.reloadSubcategories()
 
     // Load metadata into memory
-    sails.log.verbose(`BOOTSTRAP: Loading metadata.`)
+    sails.log.verbose('BOOTSTRAP: Loading metadata.')
     var meta = await Meta.find().limit(1)
       .tolerate((err) => {
         sails.log.error(err)
@@ -156,13 +156,13 @@ module.exports.bootstrap = async function (done) {
   }
 
   // Load directors.
-  sails.log.verbose(`BOOTSTRAP: Refreshing directors.`)
+  sails.log.verbose('BOOTSTRAP: Refreshing directors.')
   await Directors.updateDirectors()
   await Uabdirectors.updateDirectors()
 
   // Load Google Calendar.
-  sails.log.verbose(`BOOTSTRAP: Loading calendar events.`)
-  await Meta.changeMeta({ changingState: `Initializing program calendar` })
+  sails.log.verbose('BOOTSTRAP: Loading calendar events.')
+  await Meta.changeMeta({ changingState: 'Initializing program calendar' })
   try {
     await Calendar.preLoadEvents(true)
     await Meta.changeMeta({ changingState: null })
@@ -173,10 +173,10 @@ module.exports.bootstrap = async function (done) {
   // CRON JOBS
 
   // Automation / queue checks every second
-  sails.log.verbose(`BOOTSTRAP: scheduling checks CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling checks CRON.')
   cron.schedule('* * * * * *', () => {
     new Promise(async (resolve) => {
-      sails.log.debug(`CRON checks triggered.`)
+      sails.log.debug('CRON checks triggered.')
 
       var queueLength = 0
       var theplaylist
@@ -199,7 +199,7 @@ module.exports.bootstrap = async function (done) {
       // If we do not know current state, we may need to populate the info from the database.
       if (Meta['A'].state === '' || Meta['A'].state === 'unknown') {
         try {
-          sails.log.verbose(`Unknown meta. Retrieving from database.`)
+          sails.log.verbose('Unknown meta. Retrieving from database.')
           var meta = await Meta.find().limit(1)
             .tolerate((err) => {
               sails.log.error(err)
@@ -233,7 +233,7 @@ module.exports.bootstrap = async function (done) {
         var queue = await sails.helpers.rest.getQueue()
 
         try {
-          sails.log.silly(`queueCheck executed.`)
+          sails.log.silly('queueCheck executed.')
           var theTracks = []
           change.trackID = parseInt(queue[0].ID)
           change.trackIDSubcat = parseInt(queue[0].IDSubcat) || 0
@@ -272,7 +272,7 @@ module.exports.bootstrap = async function (done) {
 
           // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
           if (Meta['A'].changingState === null) {
-            sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`)
+            sails.log.debug('Calling asyncForEach in cron checks for removing duplicate tracks')
             await sails.helpers.asyncForEach(queue, (track, index) => {
               return new Promise(async (resolve2) => {
                 var title = `${track.Artist} - ${track.Title}`
@@ -385,7 +385,7 @@ module.exports.bootstrap = async function (done) {
       var thePosition = -1
       if ((Meta['A'].state === 'automation_playlist' || Meta['A'].state === 'automation_prerecord' || Meta['A'].state === 'live_prerecord')) {
         // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
-        sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`)
+        sails.log.debug('Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist')
         await sails.helpers.asyncForEach(queue, (autoTrack, index) => {
           return new Promise(async (resolve2) => {
             try {
@@ -402,7 +402,7 @@ module.exports.bootstrap = async function (done) {
                         // Do not throw for errors, but log it.
                         sails.log.error(err)
                       })
-                    await sails.helpers.onesignal.sendEvent(`Prerecord: `, Meta['A'].playlist, `Prerecorded Show`, attendance.unique)
+                    await sails.helpers.onesignal.sendEvent('Prerecord: ', Meta['A'].playlist, 'Prerecorded Show', attendance.unique)
                   }
                   if (index === 0) {
                   } else {
@@ -424,17 +424,17 @@ module.exports.bootstrap = async function (done) {
         try {
           // Finished the playlist? Go back to automation.
           if (thePosition === -1 && Status.errorCheck.trueZero <= 0 && !Playlists.queuing && Meta['A'].changingState === null) {
-            await Meta.changeMeta({ changingState: `Ending playlist` })
+            await Meta.changeMeta({ changingState: 'Ending playlist' })
             switch (Meta['A'].state) {
               case 'automation_playlist':
-                await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `<strong>A playlist finished airing.</strong>` }).fetch()
+                await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: '<strong>A playlist finished airing.</strong>' }).fetch()
                   .tolerate((err) => {
                     // Do not throw for errors, but log it.
                     sails.log.error(err)
                   })
                 break
               case 'live_prerecord':
-                await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
+                await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: Meta['A'].playlist, event: '<strong>A prerecord finished airing.</strong>' }).fetch()
                   .tolerate((err) => {
                     // Do not throw for errors, but log it.
                     sails.log.error(err)
@@ -476,7 +476,7 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Show: `, Meta['A'].show, `Live Show`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent('Show: ', Meta['A'].show, 'Live Show', attendance.unique)
           }
           // If we are preparing for sports, do some stuff if queue is done
           if (Meta['A'].state === 'automation_sports' && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
@@ -488,7 +488,7 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Sports: `, Meta['A'].show, `Sports Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent('Sports: ', Meta['A'].show, 'Sports Broadcast', attendance.unique)
           }
           // If we are preparing for remote, do some stuff
           if (Meta['A'].state === 'automation_remote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
@@ -499,7 +499,7 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Remote: `, Meta['A'].show, `Remote Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent('Remote: ', Meta['A'].show, 'Remote Broadcast', attendance.unique)
           }
           // If we are preparing for sportsremote, do some stuff if we are playing the stream track
           if (Meta['A'].state === 'automation_sportsremote' && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
@@ -510,7 +510,7 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Sports: `, Meta['A'].show, `Sports Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent('Sports: ', Meta['A'].show, 'Sports Broadcast', attendance.unique)
           }
           // If returning from break, do stuff once queue is empty
           if (Meta['A'].state.includes('_returning') && queueLength <= 0 && Status.errorCheck.trueZero <= 0) {
@@ -561,7 +561,7 @@ module.exports.bootstrap = async function (done) {
           // Check if a DJ neglected the required top of the hour break (passes :05 after)
           var d = new Date()
           var n = d.getMinutes()
-          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(Meta['A'].lastID)) && !Meta['A'].state.startsWith('automation_') && Meta['A'].state !== `live_prerecord`) {
+          if (n > 5 && moment().startOf('hour').subtract(5, 'minutes').isAfter(moment(Meta['A'].lastID)) && !Meta['A'].state.startsWith('automation_') && Meta['A'].state !== 'live_prerecord') {
             await Meta.changeMeta({ lastID: moment().toISOString(true) })
             await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: Meta['A'].show, event: `<strong>Required top of the hour break was not taken!</strong><br />Show: ${Meta['A'].show}` }).fetch()
               .tolerate((err) => {
@@ -658,7 +658,7 @@ module.exports.bootstrap = async function (done) {
 
                   // Add XP for prerecords
                   if (Meta['A'].state === 'live_prerecorded') {
-                    await Xp.create({ dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.` })
+                    await Xp.create({ dj: Meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: 'A break was able to be queued during the prerecord.' })
                       .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err)
@@ -718,9 +718,9 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every 5 minutes on second 02, update Calendar.
-  sails.log.verbose(`BOOTSTRAP: scheduling updateCalendar CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling updateCalendar CRON.')
   cron.schedule('2 */5 * * * *', () => {
-    sails.log.debug(`CRON updateCalendar triggered.`)
+    sails.log.debug('CRON updateCalendar triggered.')
     try {
       Calendar.preLoadEvents()
     } catch (e) {
@@ -729,12 +729,12 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Four times per minute, at 03, 18, 33, and 48 past the minute, check the online status of the radio streams, and log listener count
-  sails.log.verbose(`BOOTSTRAP: scheduling checkRadioStreams CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling checkRadioStreams CRON.')
   cron.schedule('3,18,33,48 * * * * *', () => {
-    sails.log.debug(`CRON checkRadioStreams triggered.`)
+    sails.log.debug('CRON checkRadioStreams triggered.')
     try {
       // SHOUTCAST 2.6
-      needle('get', sails.config.custom.stream + `/statistics?json=1`, {}, { headers: { 'Content-Type': 'application/json' } })
+      needle('get', sails.config.custom.stream + '/statistics?json=1', {}, { headers: { 'Content-Type': 'application/json' } })
         .then(async (resp) => {
           try {
             var streams = resp.body.streams
@@ -863,12 +863,12 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Twice per minute at 04 and 34 seconds, check all RadioDJs for connectivity.
-  sails.log.verbose(`BOOTSTRAP: scheduling checkRadioDJs CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling checkRadioDJs CRON.')
   cron.schedule('4,34 * * * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON checkRadioDJs triggered.`)
+      sails.log.debug('CRON checkRadioDJs triggered.')
       try {
-        sails.log.debug(`Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST`)
+        sails.log.debug('Calling asyncForEach in cron checkRadioDJs for every radiodj in config to hit via REST')
         await sails.helpers.asyncForEach(sails.config.custom.radiodjs, (radiodj) => {
           return new Promise(async (resolve2) => {
             var status = await Status.findOne({ name: `radiodj-${radiodj.name}` })
@@ -886,7 +886,7 @@ module.exports.bootstrap = async function (done) {
                       var maps = sails.config.custom.radiodjs
                         .filter((instance) => instance.rest === Meta['A'].radiodj && instance.name !== radiodj.name)
                         .map(async (instance) => {
-                          await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: instance.level, data: `RadioDJ is not operational.` }])
+                          await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: instance.level, data: 'RadioDJ is not operational.' }])
                           return true
                         })
                       await Promise.all(maps)
@@ -949,29 +949,29 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Twice per minute at 05 and 35 seconds, check for connectivity to the website.
-  sails.log.verbose(`BOOTSTRAP: scheduling checkWebsite CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling checkWebsite CRON.')
   cron.schedule('5,35 * * * * *', () => {
-    sails.log.debug(`CRON checkWebsite triggered.`)
+    sails.log.debug('CRON checkWebsite triggered.')
     try {
       needle('get', sails.config.custom.website, {}, { headers: { 'Content-Type': 'application/json' } })
         .then(async (resp) => {
           if (typeof resp.body !== 'undefined') {
-            Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website is online.', status: 5 }])
+            Status.changeStatus([{ name: 'website', label: 'Website', data: 'Website is online.', status: 5 }])
           } else {
-            Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website did not return body data.', status: 2 }])
+            Status.changeStatus([{ name: 'website', label: 'Website', data: 'Website did not return body data.', status: 2 }])
           }
         })
         .catch(() => {
-          Status.changeStatus([{ name: `website`, label: `Website`, data: 'Website is offline.', status: 2 }])
+          Status.changeStatus([{ name: 'website', label: 'Website', data: 'Website is offline.', status: 2 }])
         })
     } catch (e) {
-      Status.changeStatus([{ name: `website`, label: `Website`, data: 'Error checking website.', status: 2 }])
+      Status.changeStatus([{ name: 'website', label: 'Website', data: 'Error checking website.', status: 2 }])
       sails.log.error(e)
     }
   })
 
   // Every minute on second 06, get NWS alerts for configured counties.
-  sails.log.verbose(`BOOTSTRAP: scheduling EAS CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling EAS CRON.')
   cron.schedule('6 * * * * *', () => {
     new Promise(async (resolve, reject) => {
       try {
@@ -981,7 +981,7 @@ module.exports.bootstrap = async function (done) {
         // Iterate through every configured county and get their weather alerts
         var complete = 0
         var bad = []
-        sails.log.debug(`Calling asyncLoop in cron EAS for checking every EAS source`)
+        sails.log.debug('Calling asyncLoop in cron EAS for checking every EAS source')
 
         var asyncLoop = async function (array, callback) {
           for (let index = 0; index < array.length; index++) {
@@ -1021,11 +1021,11 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every minute at second 07, check to see if our databases are active and functional
-  sails.log.verbose(`BOOTSTRAP: scheduling checkDB CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling checkDB CRON.')
   cron.schedule('7 * * * * *', () => {
     new Promise(async () => {
       // TODO: More accurate way to test database.
-      sails.log.debug(`CRON checkDB called`)
+      sails.log.debug('CRON checkDB called')
       try {
         // Make sure all models have a record at ID 1, even if it's a dummy.
         // TODO: Find a way to auto-populate these arrays.
@@ -1035,9 +1035,9 @@ module.exports.bootstrap = async function (done) {
         var checksRadioDJ = [Category, Events, Genre, History, Playlists, Playlists_list, Requests, Settings, Subcategory]
         var checksNodebase = [Announcements, Calendar, Discipline, Eas, Subscribers, Planner, Underwritings, Attendance, Darksky, Listeners, Djs, Hosts, Logs, Messages, Meta, Nodeusers, Timesheet, Directors, Songsliked, Sports, Xp]
         // Memory checks
-        var checkStatus = { data: ``, status: 5 }
-        sails.log.debug(`CHECK: DB Memory`)
-        sails.log.debug(`Calling asyncForEach in cron checkDB for memory tests`)
+        var checkStatus = { data: '', status: 5 }
+        sails.log.debug('CHECK: DB Memory')
+        sails.log.debug('Calling asyncForEach in cron checkDB for memory tests')
         await sails.helpers.asyncForEach(checksMemory, (check, index) => {
           return new Promise(async (resolve) => {
             try {
@@ -1058,13 +1058,13 @@ module.exports.bootstrap = async function (done) {
             }
           })
         })
-        if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.` }
+        if (checkStatus.status === 5) { checkStatus.data = 'This datastore is fully operational.' }
         Status.changeStatus([{ name: 'db-memory', label: 'DB Memory', data: checkStatus.data, status: checkStatus.status }])
 
         // RadioDJ checks
-        sails.log.debug(`CHECK: DB RadioDJ`)
-        checkStatus = { data: ``, status: 5 }
-        sails.log.debug(`Calling asyncForEach in cron checkDB for RadioDJ database checks`)
+        sails.log.debug('CHECK: DB RadioDJ')
+        checkStatus = { data: '', status: 5 }
+        sails.log.debug('Calling asyncForEach in cron checkDB for RadioDJ database checks')
         await sails.helpers.asyncForEach(checksRadioDJ, (check, index) => {
           return new Promise(async (resolve) => {
             try {
@@ -1085,13 +1085,13 @@ module.exports.bootstrap = async function (done) {
             }
           })
         })
-        if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.` }
+        if (checkStatus.status === 5) { checkStatus.data = 'This datastore is fully operational.' }
         Status.changeStatus([{ name: 'db-radiodj', label: 'DB RadioDJ', data: checkStatus.data, status: checkStatus.status }])
 
         // Nodebase checks
-        sails.log.debug(`CHECK: DB Nodebase`)
-        checkStatus = { data: ``, status: 5 }
-        sails.log.debug(`Calling asyncForEach in cron checkDB for nodebase database checks`)
+        sails.log.debug('CHECK: DB Nodebase')
+        checkStatus = { data: '', status: 5 }
+        sails.log.debug('Calling asyncForEach in cron checkDB for nodebase database checks')
         await sails.helpers.asyncForEach(checksNodebase, (check, index) => {
           return new Promise(async (resolve) => {
             try {
@@ -1112,7 +1112,7 @@ module.exports.bootstrap = async function (done) {
             }
           })
         })
-        if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.` }
+        if (checkStatus.status === 5) { checkStatus.data = 'This datastore is fully operational.' }
         Status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status }])
 
         return true
@@ -1127,10 +1127,10 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every 5 minutes at second 08, reload the subcategory IDs in configuration, in case changes were made in RadioDJ
-  sails.log.verbose(`BOOTSTRAP: scheduling reloadSubcats CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling reloadSubcats CRON.')
   cron.schedule('8 */5 * * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON reloadSubcats called.`)
+      sails.log.debug('CRON reloadSubcats called.')
       try {
         // Load subcategories into config
         await sails.helpers.songs.reloadSubcategories()
@@ -1144,10 +1144,10 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every minute at second 9, count the number of tracks disabled because they are invalid / corrupt / not accessible, and update Music Library status.
-  sails.log.verbose(`BOOTSTRAP: scheduling disabledTracks CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling disabledTracks CRON.')
   cron.schedule('9 * * * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON disabledTracks called.`)
+      sails.log.debug('CRON disabledTracks called.')
 
       try {
         // Count the number of -1 enabled tracks
@@ -1156,13 +1156,13 @@ module.exports.bootstrap = async function (done) {
           .tolerate(() => {
           })
         if (found && found >= sails.config.custom.status.musicLibrary.verify.critical) {
-          Status.changeStatus([{ name: `music-library`, status: 1, label: `Music Library`, data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Run the verify tracks utility in RadioDJ.` }])
+          Status.changeStatus([{ name: 'music-library', status: 1, label: 'Music Library', data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Run the verify tracks utility in RadioDJ.` }])
         } else if (found && found >= sails.config.custom.status.musicLibrary.verify.error) {
-          Status.changeStatus([{ name: `music-library`, status: 2, label: `Music Library`, data: `Music library has ${found} bad tracks. This is quite high. Run the verify tracks utility in RadioDJ.` }])
+          Status.changeStatus([{ name: 'music-library', status: 2, label: 'Music Library', data: `Music library has ${found} bad tracks. This is quite high. Run the verify tracks utility in RadioDJ.` }])
         } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn) {
-          Status.changeStatus([{ name: `music-library`, status: 3, label: `Music Library`, data: `Music library has ${found} bad tracks. Run the verify tracks utility in RadioDJ.` }])
+          Status.changeStatus([{ name: 'music-library', status: 3, label: 'Music Library', data: `Music library has ${found} bad tracks. Run the verify tracks utility in RadioDJ.` }])
         } else {
-          Status.changeStatus([{ name: `music-library`, status: 5, label: `Music Library`, data: `Music library has ${found} bad tracks.` }])
+          Status.changeStatus([{ name: 'music-library', status: 5, label: 'Music Library', data: `Music library has ${found} bad tracks.` }])
         }
 
         return resolve()
@@ -1174,10 +1174,10 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every minute at second 10, prune out recipients that have been offline for 4 or more hours.
-  sails.log.verbose(`BOOTSTRAP: scheduling recipientsCheck CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling recipientsCheck CRON.')
   cron.schedule('10 * * * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON recipientsCheck called.`)
+      sails.log.debug('CRON recipientsCheck called.')
       try {
         var records = await Recipients.find({ host: { '!=': ['website'] }, status: 0 })
         var destroyIt = []
@@ -1196,10 +1196,10 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every fifth minute at second 11, refresh Darksky weather information
-  sails.log.verbose(`BOOTSTRAP: scheduling darksky CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling darksky CRON.')
   cron.schedule('11 */5 * * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON darksky called.`)
+      sails.log.debug('CRON darksky called.')
       try {
         darksky
           .latitude(sails.config.custom.darksky.position.latitude)
@@ -1222,10 +1222,10 @@ module.exports.bootstrap = async function (done) {
   })
 
   // every hour at second 12, check all noFade tracks and remove any fading.
-  sails.log.verbose(`BOOTSTRAP: scheduling checkNoFadeAndNegativeDuration CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling checkNoFadeAndNegativeDuration CRON.')
   cron.schedule('12 0 * * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON checkNoFadeAndNegativeDuration called.`)
+      sails.log.debug('CRON checkNoFadeAndNegativeDuration called.')
       try {
         // Get all noFade tracks
         var records = await Songs.find({ id_subcat: sails.config.custom.subcats.noFade })
@@ -1265,10 +1265,10 @@ module.exports.bootstrap = async function (done) {
 
   // Every minute at second 13, check server memory and CPU use.
   // ADVICE: It is advised that serverCheck is the last cron executed at the top of the minute. That way, the 1-minute CPU load will more likely detect issues.
-  sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling serverCheck CRON.')
   cron.schedule('13 * * * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON serverCheck called.`)
+      sails.log.debug('CRON serverCheck called.')
       try {
         var os = require('os')
 
@@ -1277,13 +1277,13 @@ module.exports.bootstrap = async function (done) {
         var mem = os.freemem()
 
         if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical) {
-          Status.changeStatus([{ name: `server`, label: `Server`, status: 1, data: `Server resource use is dangerously high!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          Status.changeStatus([{ name: 'server', label: 'Server', status: 1, data: `Server resource use is dangerously high!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
         } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error) {
-          Status.changeStatus([{ name: `server`, label: `Server`, status: 2, data: `Server resource use is very high! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          Status.changeStatus([{ name: 'server', label: 'Server', status: 2, data: `Server resource use is very high! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
         } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn) {
-          Status.changeStatus([{ name: `server`, label: `Server`, status: 3, data: `Server resource use is mildly high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          Status.changeStatus([{ name: 'server', label: 'Server', status: 3, data: `Server resource use is mildly high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
         } else {
-          Status.changeStatus([{ name: `server`, label: `Server`, status: 5, data: `Server resource use is good. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          Status.changeStatus([{ name: 'server', label: 'Server', status: 5, data: `Server resource use is good. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
         }
 
         return resolve()
@@ -1295,10 +1295,10 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every day at 11:59:50pm, clock out any directors still clocked in, and re-sync station time to all clients
-  sails.log.verbose(`BOOTSTRAP: scheduling clockOutDirectors CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling clockOutDirectors CRON.')
   cron.schedule('50 59 23 * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON clockOutDirectors called`)
+      sails.log.debug('CRON clockOutDirectors called')
       try {
         await Meta.changeMeta({ time: moment().toISOString(true) })
 
@@ -1321,10 +1321,10 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Every day at 11:59:51pm, check for minimum priorities on tracks and fix them as necessary
-  sails.log.verbose(`BOOTSTRAP: scheduling priorityCheck CRON.`)
+  sails.log.verbose('BOOTSTRAP: scheduling priorityCheck CRON.')
   cron.schedule('51 59 23 * * *', () => {
     new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON priorityCheck called`)
+      sails.log.debug('CRON priorityCheck called')
       try {
         // First, get the value of default priority
         var defaultPriority = await Settings.find({ source: 'settings_general', setting: 'DefaultTrackPriority' }).limit(1)
@@ -1333,7 +1333,7 @@ module.exports.bootstrap = async function (done) {
 
         var songs = await Songs.find()
 
-        sails.log.debug(`Calling asyncForEach in cron priorityCheck for every RadioDJ song`)
+        sails.log.debug('Calling asyncForEach in cron priorityCheck for every RadioDJ song')
         songs
           .map((song) => {
             try {
@@ -1357,15 +1357,15 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  sails.log.verbose(`BOOTSTRAP: calculate weekly analytics.`)
+  sails.log.verbose('BOOTSTRAP: calculate weekly analytics.')
   await sails.helpers.attendance.calculateStats()
 
-  sails.log.verbose(`Set a 30 second timer for display-refresh.`)
+  sails.log.verbose('Set a 30 second timer for display-refresh.')
   setTimeout(() => {
     sails.sockets.broadcast('display-refresh', 'display-refresh', true)
   }, 30000)
 
-  sails.log.verbose(`BOOTSTRAP: Done.`)
+  sails.log.verbose('BOOTSTRAP: Done.')
 
   return done()
 }

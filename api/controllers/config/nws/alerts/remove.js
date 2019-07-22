@@ -8,7 +8,7 @@ module.exports = {
     alert: {
       type: 'string',
       required: true,
-      description: `The name of the alert as provided by the NWS to remove from configuration, case sensitive. Example: "Tornado Warning".`
+      description: 'The name of the alert as provided by the NWS to remove from configuration, case sensitive. Example: "Tornado Warning".'
     }
   },
 

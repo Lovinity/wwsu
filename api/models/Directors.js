@@ -63,7 +63,7 @@ module.exports = {
     // LINT: async necessary for Sails.js await
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
-      sails.log.debug(`updateDirectors called.`)
+      sails.log.debug('updateDirectors called.')
       var names = {}
 
       // Determine presence by analyzing timesheet records up to 14 days ago

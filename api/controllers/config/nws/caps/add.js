@@ -8,12 +8,12 @@ module.exports = {
     code: {
       type: 'string',
       required: true,
-      description: `The NWS county or zone code.`
+      description: 'The NWS county or zone code.'
     },
     name: {
       type: 'string',
       required: true,
-      description: `The human-readable name of this location, such as the county.`
+      description: 'The human-readable name of this location, such as the county.'
     }
   },
 

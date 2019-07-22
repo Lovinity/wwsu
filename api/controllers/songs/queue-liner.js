@@ -13,7 +13,7 @@ module.exports = {
 
     try {
       // Error if we are not in a sports state
-      if (sails.models.meta['A'].state.startsWith('sports')) { return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`)) }
+      if (sails.models.meta['A'].state.startsWith('sports')) { return exits.error(new Error('A Liner cannot be queued when not in a sports broadcast.')) }
 
       // Log it
       await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: sails.models.meta['A'].show, event: '<strong>Sports Liner requested.</strong>' }).fetch()

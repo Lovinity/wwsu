@@ -33,7 +33,7 @@ module.exports = {
 
       // If the condition function exists and returns true, reset the error count to 0 and exit.
       if (typeof sails.models.status.errorCheck[inputs.name].condition === 'function' && await sails.models.status.errorCheck[inputs.name].condition()) {
-        sails.log.verbose(`Condition met. Error check reset to zero.`)
+        sails.log.verbose('Condition met. Error check reset to zero.')
         await sails.helpers.error.reset(inputs.name)
         return exits.success()
       }

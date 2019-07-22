@@ -9,8 +9,8 @@ module.exports = {
       type: 'string',
       required: true,
       regex: /^[a-z0-9]+$/i,
-      isNotIn: [`_doNotRemove`],
-      description: `The name of the category to add or edit. Alphanumeric names only are allowed.`
+      isNotIn: ['_doNotRemove'],
+      description: 'The name of the category to add or edit. Alphanumeric names only are allowed.'
     },
 
     config: {
@@ -32,7 +32,7 @@ module.exports = {
         }
         return isValid
       },
-      description: `JSON configuration of RadioDJ categories/subcategories to use for this category. Each key is a RadioDJ main category. Each value is an array of subcategories in the main category; use an empty array to use all subcategories.`,
+      description: 'JSON configuration of RadioDJ categories/subcategories to use for this category. Each key is a RadioDJ main category. Each value is an array of subcategories in the main category; use an empty array to use all subcategories.',
       defaultsTo: {}
     }
   },
@@ -46,7 +46,7 @@ module.exports = {
 
     try {
       // Do not modify _doNotRemove category
-      if (inputs.name === `_doNotRemove`) { return exits.error(new Error(`_doNotRemove is a restricted category and cannot be modified.`)) }
+      if (inputs.name === '_doNotRemove') { return exits.error(new Error('_doNotRemove is a restricted category and cannot be modified.')) }
 
       sails.config.custom.categories[inputs.name] = inputs.config
 

@@ -126,7 +126,7 @@ module.exports = {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
-        sails.log.debug(`sails.models.attendance.createRecord called.`)
+        sails.log.debug('sails.models.attendance.createRecord called.')
         var returnData = { newID: null, unique: null }
 
         // Store the current ID in a variable; we want to start a new record before processing the old one

@@ -8,7 +8,7 @@ module.exports = {
     peer: {
       type: 'string',
       allowNull: true,
-      description: `The PeerJS ID assigned to this recipient. Use null if a peer was removed.`
+      description: 'The PeerJS ID assigned to this recipient. Use null if a peer was removed.'
     }
   },
 

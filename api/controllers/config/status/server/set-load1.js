@@ -7,15 +7,15 @@ module.exports = {
   inputs: {
     warn: {
       type: 'number',
-      description: `When the 1-minute CPU load exceeds this value, status 3 (minor) will be triggered for the server. Generally, this number should be the number of CPU cores * 4.`
+      description: 'When the 1-minute CPU load exceeds this value, status 3 (minor) will be triggered for the server. Generally, this number should be the number of CPU cores * 4.'
     },
     error: {
-      type: `number`,
-      description: `When the 1-minute CPU load exceeds this value, status 2 (significant) will be triggered for the server. Generally, this number should be the number of CPU cores * 8.`
+      type: 'number',
+      description: 'When the 1-minute CPU load exceeds this value, status 2 (significant) will be triggered for the server. Generally, this number should be the number of CPU cores * 8.'
     },
     critical: {
-      type: `number`,
-      description: `When the 1-minute CPU load exceeds this value, status 1 (critical) will be triggered for the server. Generally, this number should be the number of CPU cores * 16.`
+      type: 'number',
+      description: 'When the 1-minute CPU load exceeds this value, status 1 (critical) will be triggered for the server. Generally, this number should be the number of CPU cores * 16.'
     }
   },
 

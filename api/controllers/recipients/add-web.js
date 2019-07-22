@@ -10,7 +10,7 @@ module.exports = {
     device: {
       type: 'string',
       allowNull: true,
-      description: `If this recipient comes from the WWSU mobile app, provide their OneSignal ID here.`
+      description: 'If this recipient comes from the WWSU mobile app, provide their OneSignal ID here.'
     }
   },
 

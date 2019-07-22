@@ -28,7 +28,7 @@ module.exports = {
       }
       // When in automation, but not playlist, queue an ID and re-queue oldQueue
       if (sails.models.meta['A'].state.startsWith('automation_') && sails.models.meta['A'].state !== 'automation_playlist') {
-        sails.log.verbose(`Automation recovery triggered.`)
+        sails.log.verbose('Automation recovery triggered.')
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.rest.cmd('ClearPlaylist', 1)
         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1)
@@ -47,7 +47,7 @@ module.exports = {
         await sails.helpers.rest.cmd('EnableAutoDJ', 1)
         // When in playlist or prerecord, queue an ID and restart the playlist/prerecord
       } else if (sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'live_prerecord') {
-        sails.log.verbose(`Playlist recovery triggered.`)
+        sails.log.verbose('Playlist recovery triggered.')
         await sails.helpers.rest.cmd('EnableAutoDJ', 0)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.rest.cmd('ClearPlaylist', 1)
@@ -60,7 +60,7 @@ module.exports = {
         await Promise.all(maps)
         // When in break, queue PSAs
       } else if (sails.models.meta['A'].state.includes('_break') || sails.models.meta['A'].state.includes('_returning') || sails.models.meta['A'].state.includes('_disconnected')) {
-        sails.log.verbose(`Break recovery triggered.`)
+        sails.log.verbose('Break recovery triggered.')
         await sails.helpers.rest.cmd('EnableAutoDJ', 0)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.rest.cmd('ClearPlaylist', 1)

@@ -10,13 +10,13 @@ module.exports = {
       min: 0,
       max: 59,
       required: true,
-      description: `The minute number to add or update breaks for`
+      description: 'The minute number to add or update breaks for'
     },
 
     tasks: {
       type: 'json',
       custom: (value) => sails.helpers.break.validate(value),
-      description: `An array of properly formatted break task objects to set for the provided break minute. If an ampty array is provided, or no array is provided, the break will be removed.`,
+      description: 'An array of properly formatted break task objects to set for the provided break minute. If an ampty array is provided, or no array is provided, the break will be removed.',
       defaultsTo: []
     }
   },

@@ -69,16 +69,16 @@ module.exports = {
         if (sails.config.custom.requests.priorityBump !== 0) { await sails.models.songs.update({ ID: inputs.ID }, { weight: record2.weight + sails.config.custom.requests.priorityBump }) }
 
         // Log the request
-        await sails.models.logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: `track-request`, event: `<strong>A track was requested!</strong><br />Track: ${record2.artist} - ${record2.title} (ID ${inputs.ID})<br />Requested By: ${inputs.name}<br />Message: ${inputs.message}`, createdAt: moment().toISOString(true) }).fetch()
+        await sails.models.logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: 'track-request', event: `<strong>A track was requested!</strong><br />Track: ${record2.artist} - ${record2.title} (ID ${inputs.ID})<br />Requested By: ${inputs.name}<br />Message: ${inputs.message}`, createdAt: moment().toISOString(true) }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })
 
-        var returndata = { requested: true, message: `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.` }
+        var returndata = { requested: true, message: 'Request placed! Requests are queued at every break. If a show is live, it is up to the host\'s discretion.' }
 
         // Add a push notification subscription if a device was provided
         if (inputs.device && inputs.device !== null) {
-          await sails.models.subscribers.findOrCreate({ device: inputs.device, type: `request`, subtype: request.ID }, { host: `website-${host}`, device: inputs.device, type: `request`, subtype: request.ID })
+          await sails.models.subscribers.findOrCreate({ device: inputs.device, type: 'request', subtype: request.ID }, { host: `website-${host}`, device: inputs.device, type: 'request', subtype: request.ID })
           returndata.message = `Request placed! Requests are queued at every break. If a show is live, it is up to the host's discretion.<br />
                                             <strong>You will receive a push notification when your request begins playing.</strong>`
         }

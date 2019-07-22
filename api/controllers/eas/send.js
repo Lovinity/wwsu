@@ -21,7 +21,7 @@ module.exports = {
       type: 'string',
       required: true,
       isIn: ['Extreme', 'Severe', 'Moderate', 'Minor'],
-      description: `Severity of alert: One of the following in order from highest to lowest ['Extreme', 'Severe', 'Moderate', 'Minor']`
+      description: 'Severity of alert: One of the following in order from highest to lowest [\'Extreme\', \'Severe\', \'Moderate\', \'Minor\']'
     },
 
     starts: {
@@ -30,7 +30,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert starts. Recommended ISO string.`
+      description: 'moment() parsable string of when the alert starts. Recommended ISO string.'
     },
 
     expires: {
@@ -39,7 +39,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert expires. Recommended ISO string.`
+      description: 'moment() parsable string of when the alert expires. Recommended ISO string.'
     },
 
     color: {

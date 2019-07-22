@@ -54,7 +54,7 @@ module.exports = {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`announcements socket: ${data}`)
     sails.sockets.broadcast(`announcements-${newlyCreatedRecord.type}`, 'announcements', data)
-    sails.sockets.broadcast(`announcements-all`, 'announcements', data)
+    sails.sockets.broadcast('announcements-all', 'announcements', data)
     return proceed()
   },
 
@@ -62,7 +62,7 @@ module.exports = {
     var data = { update: updatedRecord }
     sails.log.silly(`announcements socket: ${data}`)
     sails.sockets.broadcast(`announcements-${updatedRecord.type}`, 'announcements', data)
-    sails.sockets.broadcast(`announcements-all`, 'announcements', data)
+    sails.sockets.broadcast('announcements-all', 'announcements', data)
     return proceed()
   },
 
@@ -70,7 +70,7 @@ module.exports = {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`calendar socket: ${data}`)
     sails.sockets.broadcast(`announcements-${destroyedRecord.type}`, 'announcements', data)
-    sails.sockets.broadcast(`announcements-all`, 'announcements', data)
+    sails.sockets.broadcast('announcements-all', 'announcements', data)
     return proceed()
   }
 

@@ -7,31 +7,31 @@ module.exports = {
   inputs: {
     automation: {
       type: 'string',
-      description: `Meta text to use when playing a noMeta track in regular automation`
+      description: 'Meta text to use when playing a noMeta track in regular automation'
     },
     playlist: {
       type: 'string',
-      description: `Meta text to use when playing a noMeta track in playlist mode`
+      description: 'Meta text to use when playing a noMeta track in playlist mode'
     },
     genre: {
       type: 'string',
-      description: `Meta text to use when playing a noMeta track in genre automation`
+      description: 'Meta text to use when playing a noMeta track in genre automation'
     },
     live: {
       type: 'string',
-      description: `Meta text to use when playing a noMeta track during a live show`
+      description: 'Meta text to use when playing a noMeta track during a live show'
     },
     prerecord: {
       type: 'string',
-      description: `Meta text to use when playing a noMeta track during a prerecord`
+      description: 'Meta text to use when playing a noMeta track during a prerecord'
     },
     remote: {
       type: 'string',
-      description: `Meta text to use when playing a noMeta track, or when the remote stream disconnected, during a remote broadcast`
+      description: 'Meta text to use when playing a noMeta track, or when the remote stream disconnected, during a remote broadcast'
     },
     sports: {
       type: 'string',
-      description: `Meta text to use when playing something in automation during a sports broadcast (live or remote)`
+      description: 'Meta text to use when playing something in automation during a sports broadcast (live or remote)'
     }
   },
 

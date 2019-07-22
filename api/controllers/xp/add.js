@@ -36,7 +36,7 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of a date in which the XP was earned. Defaults to now.`
+      description: 'moment() parsable string of a date in which the XP was earned. Defaults to now.'
     }
   },
 

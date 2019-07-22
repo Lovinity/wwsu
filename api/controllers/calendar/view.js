@@ -16,7 +16,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`Controller calendar/view called.`)
+    sails.log.debug('Controller calendar/view called.')
     return exits.success()
   }
 

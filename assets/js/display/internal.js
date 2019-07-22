@@ -5,76 +5,76 @@ try {
   // Directors
   // DEPRECATED
   Slides.newSlide({
-    name: `directors`,
-    label: `Directors`,
+    name: 'directors',
+    label: 'Directors',
     weight: 1000000,
     isSticky: false,
-    color: `primary`,
+    color: 'primary',
     active: false,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div>`
+    html: '<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div>'
   })
 
   // Director hours
   Slides.newSlide({
-    name: `hours-directors`,
-    label: `Directors`,
+    name: 'hours-directors',
+    label: 'Directors',
     weight: 999999,
     isSticky: false,
-    color: `success`,
+    color: 'success',
     active: true,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    html: '<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>'
   })
 
   // Assistant Director hours
   Slides.newSlide({
-    name: `hours-assistants`,
-    label: `Assistants`,
+    name: 'hours-assistants',
+    label: 'Assistants',
     weight: 999998,
     isSticky: false,
-    color: `success`,
+    color: 'success',
     active: true,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    html: '<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>'
   })
 
   // System Status
   Slides.newSlide({
-    name: `system`,
-    label: `System`,
+    name: 'system',
+    label: 'System',
     weight: -1000000,
     isSticky: false,
-    color: `danger`,
+    color: 'danger',
     active: false,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 15,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status"></div>`
+    html: '<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status"></div>'
   })
 
   Slides.newSlide({
-    name: `director-clockout`,
-    label: `Director Auto Clock Out`,
+    name: 'director-clockout',
+    label: 'Director Auto Clock Out',
     weight: 800000,
     isSticky: true,
-    color: `danger`,
+    color: 'danger',
     active: false,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: 'fadeIn',
+    transitionOut: 'fadeOut',
     displayTime: 60,
     fitContent: true,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
+    html: '<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>'
   })
 
   // Define data variables
@@ -90,7 +90,7 @@ try {
   wrapper.width = window.innerWidth
   wrapper.height = window.innerHeight
   var flashInterval = null
-  var statusMarquee = ``
+  var statusMarquee = ''
 
   // Define other variables
   // LINT says directorpresent is never used. That is a lie.
@@ -223,7 +223,7 @@ waitFor(() => {
   return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected())
 }, () => {
   // Define a host requester
-  noReq = new WWSUreq(io.socket, `display-internal`)
+  noReq = new WWSUreq(io.socket, 'display-internal')
 
   // Assign socket events to data classes
   Directors.assignSocketEvent('directors', io.socket)
@@ -298,7 +298,7 @@ waitFor(() => {
     console.dir(db.get())
     // Remove all announcement slides
     Slides.allSlides()
-      .filter((slide) => slide.name.startsWith(`attn-`))
+      .filter((slide) => slide.name.startsWith('attn-'))
       .map((slide) => Slides.removeSlide(slide.name))
 
     // Add slides for each announcement
@@ -333,7 +333,7 @@ waitFor(() => {
               setTimeout(() => {
                 iziToast.show({
                   title: '',
-                  message: `<img src="../../images/giphy.gif">`,
+                  message: '<img src="../../images/giphy.gif">',
                   timeout: 25000,
                   close: true,
                   color: 'blue',
@@ -344,7 +344,7 @@ waitFor(() => {
                   overlay: true,
                   zindex: 250,
                   layout: 2,
-                  image: ``,
+                  image: '',
                   maxWidth: 480
                 })
               }, 9500)
@@ -420,11 +420,11 @@ function clockTick () {
       Directors.db({ present: true }).each((director) => {
         directorMentions.push(director.name)
       })
-      Slides.slide(`director-clockout`).active = true
+      Slides.slide('director-clockout').active = true
       responsiveVoice.speak(`Attention all directors! Attention all directors! It is almost midnight. Any director who is still clocked in needs to clock out before midnight, and re-clock in after midnight. Guests in the lobby, please inform any directors still in the office about this. The following directors, if any, are still clocked in and need to clock out now: ${directorMentions.join(', ')}.`)
     }
   } else if (directorNotify) {
-    Slides.slide(`director-clockout`).active = false
+    Slides.slide('director-clockout').active = false
     directorNotify = false
   }
 
@@ -457,7 +457,7 @@ function processStatus (db) {
                       <div class="col text-white">
                   	<strong>Status</strong>
                       </div>
-                    </div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`
+                    </div><div class="row ${secondRow ? 'bg-dark-3' : 'bg-dark-2'}">`
 
     db.each((thestatus) => {
       try {
@@ -467,7 +467,7 @@ function processStatus (db) {
           } else {
             secondRow = false
           }
-          statusMarquee += `</div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`
+          statusMarquee += `</div><div class="row ${secondRow ? 'bg-dark-3' : 'bg-dark-2'}">`
           doRow = false
         } else {
           doRow = true
@@ -523,13 +523,13 @@ function processStatus (db) {
       } catch (e) {
         iziToast.show({
           title: 'An error occurred - Please check the logs',
-          message: `Error occurred during Status iteration in processStatus call.`
+          message: 'Error occurred during Status iteration in processStatus call.'
         })
         console.error(e)
       }
     })
 
-    statusMarquee += `</div>`
+    statusMarquee += '</div>'
 
     if (disconnected) { globalStatus = 0 }
 
@@ -553,8 +553,8 @@ function processStatus (db) {
           }, 250)
         }, 1000)
 
-        Slides.slide(`system`).isSticky = true
-        Slides.slide(`system`).active = true
+        Slides.slide('system').isSticky = true
+        Slides.slide('system').active = true
         break
       case 1:
         color = 'rgba(244, 67, 54, 0.5)'
@@ -569,8 +569,8 @@ function processStatus (db) {
           }, 250)
         }, 1000)
 
-        Slides.slide(`system`).isSticky = true
-        Slides.slide(`system`).active = true
+        Slides.slide('system').isSticky = true
+        Slides.slide('system').active = true
         break
       case 2:
         color = 'rgba(245, 124, 0, 0.5)'
@@ -586,29 +586,29 @@ function processStatus (db) {
           }, 250)
         }, 5000)
 
-        Slides.slide(`system`).isSticky = false
-        Slides.slide(`system`).active = true
+        Slides.slide('system').isSticky = false
+        Slides.slide('system').active = true
         break
       case 3:
         statusLine.innerHTML = 'WWSU is experiencing minor issues'
         clearTimeout(offlineTimer)
         color = 'rgba(251, 192, 45, 0.5)'
 
-        Slides.slide(`system`).isSticky = false
-        Slides.slide(`system`).active = true
+        Slides.slide('system').isSticky = false
+        Slides.slide('system').active = true
         break
       case 5:
         statusLine.innerHTML = 'WWSU is operational'
         clearTimeout(offlineTimer)
         color = 'rgba(76, 175, 80, 0.5)'
-        Slides.slide(`system`).active = false
-        Slides.slide(`system`).isSticky = false
+        Slides.slide('system').active = false
+        Slides.slide('system').isSticky = false
         break
       default:
         statusLine.innerHTML = 'WWSU status is unknown'
         color = 'rgba(158, 158, 158, 0.3)'
-        Slides.slide(`system`).active = false
-        Slides.slide(`system`).isSticky = false
+        Slides.slide('system').active = false
+        Slides.slide('system').isSticky = false
     }
 
     prevStatus = globalStatus
@@ -642,13 +642,13 @@ function processDirectors (ddb, hdb) {
     var stuff
     if (innercontent) { innercontent.innerHTML = '' }
 
-    Slides.slide(`directors`).displayTime = 5
+    Slides.slide('directors').displayTime = 5
 
     ddb.each((dodo) => {
       try {
         directors[dodo.name] = dodo
         if (dodo.present) { directorpresent = true }
-        Slides.slide(`directors`).displayTime += 1
+        Slides.slide('directors').displayTime += 1
         var color = 'rgba(211, 47, 47, 0.8)'
         var text1 = 'OUT'
         var theClass = 'danger'
@@ -667,7 +667,7 @@ function processDirectors (ddb, hdb) {
         console.error(e)
         iziToast.show({
           title: 'An error occurred - Please check the logs',
-          message: `Error occurred in Directors iteration in doSlide.`
+          message: 'Error occurred in Directors iteration in doSlide.'
         })
       }
     })
@@ -686,7 +686,7 @@ function processDirectors (ddb, hdb) {
         console.error(e)
         iziToast.show({
           title: 'An error occurred - Please check the logs',
-          message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
+          message: 'Error occurred in the compare function of Calendar.sort in the Calendar[0] call.'
         })
       }
     }
@@ -701,7 +701,7 @@ function processDirectors (ddb, hdb) {
         var temp = directors[event.director]
 
         // No temp record? Exit immediately.
-        if (typeof temp === `undefined`) { return null }
+        if (typeof temp === 'undefined') { return null }
         var assistant
         if (typeof temp.assistant !== 'undefined') {
           assistant = temp.assistant
@@ -711,23 +711,23 @@ function processDirectors (ddb, hdb) {
         // Format calendar for the director
         if (!assistant && typeof calendar[event.director] === 'undefined') {
           calendar[event.director] = {}
-          calendar[event.director][0] = ``
-          calendar[event.director][1] = ``
-          calendar[event.director][2] = ``
-          calendar[event.director][3] = ``
-          calendar[event.director][4] = ``
-          calendar[event.director][5] = ``
-          calendar[event.director][6] = ``
+          calendar[event.director][0] = ''
+          calendar[event.director][1] = ''
+          calendar[event.director][2] = ''
+          calendar[event.director][3] = ''
+          calendar[event.director][4] = ''
+          calendar[event.director][5] = ''
+          calendar[event.director][6] = ''
         }
         if (assistant && typeof asstcalendar[event.director] === 'undefined') {
           asstcalendar[event.director] = {}
-          asstcalendar[event.director][0] = ``
-          asstcalendar[event.director][1] = ``
-          asstcalendar[event.director][2] = ``
-          asstcalendar[event.director][3] = ``
-          asstcalendar[event.director][4] = ``
-          asstcalendar[event.director][5] = ``
-          asstcalendar[event.director][6] = ``
+          asstcalendar[event.director][0] = ''
+          asstcalendar[event.director][1] = ''
+          asstcalendar[event.director][2] = ''
+          asstcalendar[event.director][3] = ''
+          asstcalendar[event.director][4] = ''
+          asstcalendar[event.director][5] = ''
+          asstcalendar[event.director][6] = ''
         }
 
         // null start or end? Use a default to prevent errors.
@@ -770,8 +770,8 @@ function processDirectors (ddb, hdb) {
             }
 
             // Push the final products into our formatted variable
-            if (!assistant) { calendar[event.director][i] += `<div class="m-1 text-white" style="${bg || ``}">${endText}</div>` }
-            if (assistant) { asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg || ``}">${endText}</div>` }
+            if (!assistant) { calendar[event.director][i] += `<div class="m-1 text-white" style="${bg || ''}">${endText}</div>` }
+            if (assistant) { asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg || ''}">${endText}</div>` }
           }
         }
       })
@@ -807,14 +807,14 @@ function processDirectors (ddb, hdb) {
      </div>`
     doShade = false
     isActive = false
-    Slides.slide(`hours-directors`).displayTime = 7
+    Slides.slide('hours-directors').displayTime = 7
     for (var director in calendar) {
       if (calendar.hasOwnProperty(director)) {
         isActive = true
         var temp = directors[director] || null
-        Slides.slide(`hours-directors`).displayTime += 3
-        stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
+        Slides.slide('hours-directors').displayTime += 3
+        stuff += `<div class="row shadow-2 ${doShade ? 'bg-dark-3' : 'bg-dark-2'}">
+     <div class="col-3 shadow-2" style="background-color: ${temp.present ? 'rgba(56, 142, 60, 0.25)' : 'rgba(211, 47, 47, 0.25)'};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
@@ -823,7 +823,7 @@ function processDirectors (ddb, hdb) {
     <div class="col-8">
       <span class="text-white">${director}</span><br />
       <span class="text-warning" style="font-size: 0.8em;">${temp.position}</span><br />
-      ${temp.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
+      ${temp.present ? '<span class="text-success"><strong>IN</strong></span>' : '<span class="text-danger"><strong>OUT</strong></span>'}
     </div>
   </div>
 </div>
@@ -858,7 +858,7 @@ function processDirectors (ddb, hdb) {
       }
     }
 
-    Slides.slide(`hours-directors`).active = isActive
+    Slides.slide('hours-directors').active = isActive
     innercontent.innerHTML = stuff
 
     // Assistant hours slide
@@ -892,14 +892,14 @@ function processDirectors (ddb, hdb) {
      </div>`
     doShade = false
     isActive = false
-    Slides.slide(`hours-assistants`).displayTime = 7
+    Slides.slide('hours-assistants').displayTime = 7
     for (var director2 in asstcalendar) {
       if (asstcalendar.hasOwnProperty(director2)) {
         isActive = true
         var temp2 = directors[director2] || null
-        Slides.slide(`hours-assistants`).displayTime += 3
-        stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
-     <div class="col-3 shadow-2" style="background-color: ${temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
+        Slides.slide('hours-assistants').displayTime += 3
+        stuff += `<div class="row shadow-2 ${doShade ? 'bg-dark-3' : 'bg-dark-2'}">
+     <div class="col-3 shadow-2" style="background-color: ${temp2.present ? 'rgba(56, 142, 60, 0.25)' : 'rgba(211, 47, 47, 0.25)'};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
@@ -908,7 +908,7 @@ function processDirectors (ddb, hdb) {
     <div class="col-8">
       <span class="text-white">${director2}</span><br />
       <span class="text-warning" style="font-size: 0.8em;">${temp2.position}</span><br />
-      ${temp2.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
+      ${temp2.present ? '<span class="text-success"><strong>IN</strong></span>' : '<span class="text-danger"><strong>OUT</strong></span>'}
     </div>
   </div>
 </div>
@@ -943,7 +943,7 @@ function processDirectors (ddb, hdb) {
       }
     }
 
-    Slides.slide(`hours-assistants`).active = isActive
+    Slides.slide('hours-assistants').active = isActive
 
     innercontent.innerHTML = stuff
   } catch (e) {
@@ -1035,18 +1035,18 @@ function announcementsSocket () {
 }
 
 function createAnnouncement (data) {
-  if (data.type.startsWith(`display-internal`)) {
+  if (data.type.startsWith('display-internal')) {
     Slides.newSlide({
       name: `attn-${data.ID}`,
       label: data.title,
       weight: 0,
-      isSticky: data.type === `display-internal-sticky`,
+      isSticky: data.type === 'display-internal-sticky',
       color: data.level,
       active: true,
       starts: moment(data.starts),
       expires: moment(data.expires),
-      transitionIn: `fadeIn`,
-      transitionOut: `fadeOut`,
+      transitionIn: 'fadeIn',
+      transitionOut: 'fadeOut',
       displayTime: data.displayTime || 15,
       fitContent: true,
       html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`

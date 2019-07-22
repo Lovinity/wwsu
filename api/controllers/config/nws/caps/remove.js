@@ -8,7 +8,7 @@ module.exports = {
     code: {
       type: 'string',
       required: true,
-      description: `The county or zone code to remove from the EAS.`
+      description: 'The county or zone code to remove from the EAS.'
     }
   },
 

@@ -8,7 +8,7 @@ module.exports = {
     word: {
       type: 'string',
       required: true,
-      description: `The word or phrase that should be filtered out from all metadata and messages.`
+      description: 'The word or phrase that should be filtered out from all metadata and messages.'
     }
   },
 

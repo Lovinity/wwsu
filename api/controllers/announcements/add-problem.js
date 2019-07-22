@@ -17,7 +17,7 @@ module.exports = {
 
     try {
       // Add the reported issue to the database
-      await sails.models.announcements.create({ type: `djcontrols`, level: `danger`, title: `Reported Problem`, announcement: inputs.information, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) }).fetch()
+      await sails.models.announcements.create({ type: 'djcontrols', level: 'danger', title: 'Reported Problem', announcement: inputs.information, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) }).fetch()
 
       return exits.success()
     } catch (e) {

@@ -23,7 +23,7 @@ module.exports = {
     },
     message: {
       type: 'string',
-      defaultsTo: `Unspecified Reason`,
+      defaultsTo: 'Unspecified Reason',
       description: 'Reason for the discipline.'
     }
   },
@@ -33,7 +33,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug(`controller discipline/add called.`)
+    sails.log.debug('controller discipline/add called.')
 
     try {
       await sails.helpers.discipline.add(inputs.IP, inputs.action, inputs.message, inputs.active)

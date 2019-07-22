@@ -30,13 +30,13 @@ module.exports = {
 
     try {
       // Do not continue if not in sports or automation mode; client should request automation before requesting sports
-      if (!sails.models.meta['A'].state.startsWith('sports') && !sails.models.meta['A'].state.startsWith('automation_')) { return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`)) }
+      if (!sails.models.meta['A'].state.startsWith('sports') && !sails.models.meta['A'].state.startsWith('automation_')) { return exits.error(new Error('Cannot execute state/sports unless in automation or sports mode. Please go to automation first.')) }
 
       // Block this request if we are already switching states
-      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error('The system is in the process of changing states. The request was blocked to prevent clashes.')) }
 
       // Lock so that any other state changing requests are blocked until we are done
-      await sails.models.meta.changeMeta({ changingState: `Switching to sports` })
+      await sails.models.meta.changeMeta({ changingState: 'Switching to sports' })
 
       // Filter profanity
       if (inputs.topic !== '') {

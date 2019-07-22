@@ -8,42 +8,42 @@ module.exports = {
     listenerMinutes: {
       type: 'number',
       min: 0.01,
-      description: `For live and remove shows, DJs earn 1 XP for every specified listener minute during their show. Decimals are permitted. Minimum allowed value is 0.01.`
+      description: 'For live and remove shows, DJs earn 1 XP for every specified listener minute during their show. Decimals are permitted. Minimum allowed value is 0.01.'
     },
     prerecordListenerMinutes: {
       type: 'number',
       min: 0.01,
-      description: `For prerecorded shows, DJs earn 1 XP for every specified listener minute during the airing of the prerecord. Decimals are permitted. Minimum allowed value is 0.01.`
+      description: 'For prerecorded shows, DJs earn 1 XP for every specified listener minute during the airing of the prerecord. Decimals are permitted. Minimum allowed value is 0.01.'
     },
     showMinutes: {
       type: 'number',
       min: 0.01,
-      description: `For live shows and remotes, Earn 1 XP for every specified minutes a DJ was on the air. Can be a decimal. Minimum allowed value is 0.01.`
+      description: 'For live shows and remotes, Earn 1 XP for every specified minutes a DJ was on the air. Can be a decimal. Minimum allowed value is 0.01.'
     },
     prerecordShowMinutes: {
       type: 'number',
       min: 0.01,
-      description: `For prerecorded shows, Earn 1 XP for every specified minutes a prerecord was on the air. Can be a decimal. Minimum allowed value is 0.01.`
+      description: 'For prerecorded shows, Earn 1 XP for every specified minutes a prerecord was on the air. Can be a decimal. Minimum allowed value is 0.01.'
     },
     ID: {
       type: 'number',
-      description: `For live shows and remotes, earn the specified number in XP for every on-time top of the hour break taken.`
+      description: 'For live shows and remotes, earn the specified number in XP for every on-time top of the hour break taken.'
     },
     prerecordBreak: {
       type: 'number',
-      description: `For prerecords, earn the specified number in XP for every time the prerecord was divided into a separate track, thereby allowing the system to air a break.`
+      description: 'For prerecords, earn the specified number in XP for every time the prerecord was divided into a separate track, thereby allowing the system to air a break.'
     },
     topAdd: {
       type: 'number',
-      description: `For live shows and remotes, earn the specified number in XP for every time the DJ played a Top Add.`
+      description: 'For live shows and remotes, earn the specified number in XP for every time the DJ played a Top Add.'
     },
     web: {
       type: 'number',
-      description: `For live shows and remotes, earn the specified number in XP every time the DJ sent a message out to a website/mobile visitor (or publicly to all visitors).`
+      description: 'For live shows and remotes, earn the specified number in XP every time the DJ sent a message out to a website/mobile visitor (or publicly to all visitors).'
     },
     remoteCredit: {
       type: 'number',
-      description: `A DJ should have the specified number of XP added to their profile for every remote credit they earned.`
+      description: 'A DJ should have the specified number of XP added to their profile for every remote credit they earned.'
     }
   },
 

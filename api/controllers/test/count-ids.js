@@ -15,7 +15,7 @@ module.exports = {
       records3
         .filter((record) => record.attendanceID !== null)
         .map((record) => {
-          if (typeof records4[record.attendanceID] === `undefined`) { records4[record.attendanceID] = 0 }
+          if (typeof records4[record.attendanceID] === 'undefined') { records4[record.attendanceID] = 0 }
           records4[record.attendanceID] += 1
         })
 

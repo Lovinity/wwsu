@@ -11,12 +11,12 @@ module.exports = {
         return moment(value).isValid()
       },
       allowNull: true,
-      description: `moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.`
+      description: 'moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.'
     },
     fourteenDays: {
       type: 'boolean',
       defaultsTo: false,
-      description: `If true, will get timesheet records for the specified date, the past 7 days, and the next 7 days, instead of the week which the date falls in.`
+      description: 'If true, will get timesheet records for the specified date, the past 7 days, and the next 7 days, instead of the week which the date falls in.'
     }
   },
 

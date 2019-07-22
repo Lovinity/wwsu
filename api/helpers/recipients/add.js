@@ -36,7 +36,7 @@ module.exports = {
     device: {
       type: 'string',
       allowNull: true,
-      description: `If this recipient comes from the WWSU mobile app, provide their OneSignal ID here.`
+      description: 'If this recipient comes from the WWSU mobile app, provide their OneSignal ID here.'
     }
 
   },
@@ -91,7 +91,7 @@ module.exports = {
         }
       }
       if (updateIt) {
-        sails.log.verbose(`Updating recipient as it has changed.`)
+        sails.log.verbose('Updating recipient as it has changed.')
         await sails.models.recipients.update({ host: inputs.host }, { host: inputs.host, group: inputs.group, device: inputs.device, status: status, time: moment().toISOString(true) }).fetch()
       }
 
@@ -104,8 +104,8 @@ module.exports = {
       }
 
       // If the recipient group is computers, update sails.models.status
-      if (inputs.group === 'computers' && host && typeof host[0] !== `undefined` && (host[0].silenceDetection || host[0].recordAudio || host[0].answerCalls)) {
-        await sails.models.status.changeStatus([{ name: `host-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`, label: `Host ${host && typeof host[0] !== 'undefined' ? inputs.label : 'Unknown'}`, status: 5, data: `Host is online.` }])
+      if (inputs.group === 'computers' && host && typeof host[0] !== 'undefined' && (host[0].silenceDetection || host[0].recordAudio || host[0].answerCalls)) {
+        await sails.models.status.changeStatus([{ name: `host-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`, label: `Host ${host && typeof host[0] !== 'undefined' ? inputs.label : 'Unknown'}`, status: 5, data: 'Host is online.' }])
       }
 
       // If the recipient group is display, update sails.models.status if there are at least instances connections.

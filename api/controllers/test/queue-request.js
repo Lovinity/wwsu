@@ -14,7 +14,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     await sails.helpers.requests.queue(3, false, true)
-    sails.log.verbose(`Test finished`)
+    sails.log.verbose('Test finished')
     return exits.success()
   }
 

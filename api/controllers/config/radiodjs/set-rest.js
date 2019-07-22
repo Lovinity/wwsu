@@ -8,7 +8,7 @@ module.exports = {
     auth: {
       type: 'string',
       required: true,
-      description: `The new REST auth password that should be used for all configured RadioDJs.`
+      description: 'The new REST auth password that should be used for all configured RadioDJs.'
     }
   },
 

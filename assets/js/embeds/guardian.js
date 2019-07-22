@@ -80,7 +80,7 @@ if (document.querySelector('#nativeflashradio')) {
 
 // Change the theme when the player loads
 waitFor(() => {
-  return (document.querySelector(`#nativeflashradioplaystopcontainer`) !== null && document.querySelector(`#nativeflashradioplaybutton`) !== null && document.querySelector(`#nativeflashradioimagecontainer`) !== null && document.querySelector(`#nativeflashradiovolumecontroller`) !== null)
+  return (document.querySelector('#nativeflashradioplaystopcontainer') !== null && document.querySelector('#nativeflashradioplaybutton') !== null && document.querySelector('#nativeflashradioimagecontainer') !== null && document.querySelector('#nativeflashradiovolumecontroller') !== null)
 }, () => {
   $('#nativeflashradioplaystopcontainer').css('background-color', 'rgb(255, 255, 255);')
   $('#nativeflashradioplaybutton').css('fill', 'rgb(0, 0, 0);')
