@@ -1,49 +1,45 @@
 module.exports = {
 
-    friendlyName: 'config / categories / get-available',
+  friendlyName: 'config / categories / get-available',
 
-    description: 'Return an array of available RadioDJ categories and subcategories.',
+  description: 'Return an array of available RadioDJ categories and subcategories.',
 
-    inputs: {
+  inputs: {
 
-    },
+  },
 
-    exits: {
+  exits: {
 
-    },
+  },
 
-    fn: async function (inputs, exits) {
-        sails.log.debug('Controller config/categories/get-available called.');
+  fn: async function (inputs, exits) {
+    sails.log.debug('Controller config/categories/get-available called.')
 
-        try {
-            var returnData = {};
+    try {
+      var returnData = {}
 
-            // Get main categories and loop through each one
-            var categories = await Category.find();
+      // Get main categories and loop through each one
+      var categories = await sails.models.category.find()
 
-            var maps = categories.map(async (category) => {
-                var categoryData = [];
+      var maps = categories.map(async (category) => {
+        var categoryData = []
 
-                // Get each subcategory in this main category, and add it to our temp array
-                var subcategories = await Subcategory.find({parentid: category.ID});
-                subcategories.map((subcategory) => {
-                   categoryData.push(subcategory.name);
-                });
+        // Get each subcategory in this main category, and add it to our temp array
+        var subcategories = await sails.models.subcategory.find({ parentid: category.ID })
+        subcategories.map((subcategory) => {
+          categoryData.push(subcategory.name)
+        })
 
-                // Now, compile this main category record along with all its subcategories
-                returnData[category.name] = categoryData;
-            });
-            await Promise.all(maps);
+        // Now, compile this main category record along with all its subcategories
+        returnData[category.name] = categoryData
+      })
+      await Promise.all(maps)
 
-            // Return the object of categories and subcategories
-            return exits.success(returnData);
-        } catch (e) {
-            return exits.error(e);
-        }
-
+      // Return the object of categories and subcategories
+      return exits.success(returnData)
+    } catch (e) {
+      return exits.error(e)
     }
+  }
 
-
-};
-
-
+}

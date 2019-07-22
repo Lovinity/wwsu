@@ -15,4 +15,4 @@ module.exports = {
 
   bootstrapTimeout: 60000
 
-};
+}

@@ -6,8 +6,7 @@
  */
 
 module.exports = async function (req, res, next) {
-    if (!req.isSocket)
-        {return res.status(403).json({err: 'This endpoint must be called with a websocket'});}
+  if (!req.isSocket) { return res.status(403).json({ err: 'This endpoint must be called with a websocket' }) }
 
-    next();
-};
+  next()
+}

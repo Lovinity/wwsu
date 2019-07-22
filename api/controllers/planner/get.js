@@ -1,35 +1,30 @@
 module.exports = {
 
-    friendlyName: 'Planner / get',
+  friendlyName: 'Planner / get',
 
-    description: 'Get the shows saved in the show planner.',
+  description: 'Get the shows saved in the show planner.',
 
-    inputs: {
+  inputs: {
 
-    },
+  },
 
-    fn: async function (inputs, exits) {
-        sails.log.debug('Controller planner/get called.');
-        try {
-            // Get items in the schedule planner
-            var records = await Planner.find();
-            sails.log.verbose(`planner records retrieved: ${records.length}`);
+  fn: async function (inputs, exits) {
+    sails.log.debug('Controller planner/get called.')
+    try {
+      // Get items in the schedule planner
+      var records = await sails.models.planner.find()
+      sails.log.verbose(`planner records retrieved: ${records.length}`)
 
-            // Subscribe to web socket if applicable
-            if (this.req.isSocket)
-            {
-                sails.sockets.join(this.req, 'planner');
-                sails.log.verbose('Request was a socket. Joining planner.');
-            }
+      // Subscribe to web socket if applicable
+      if (this.req.isSocket) {
+        sails.sockets.join(this.req, 'planner')
+        sails.log.verbose('Request was a socket. Joining planner.')
+      }
 
-            return exits.success(records);
-        } catch (e) {
-            return exits.error(e);
-        }
+      return exits.success(records)
+    } catch (e) {
+      return exits.error(e)
     }
+  }
 
-
-};
-
-
-
+}

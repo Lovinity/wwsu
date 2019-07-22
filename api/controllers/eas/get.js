@@ -1,34 +1,32 @@
 module.exports = {
 
-    friendlyName: 'EAS / Get',
+  friendlyName: 'EAS / Get',
 
-    description: 'Get the currently active EAS alerts.',
+  description: 'Get the currently active EAS alerts.',
 
-    inputs: {
+  inputs: {
 
-    },
+  },
 
-    fn: async function (inputs, exits) {
-        sails.log.debug('Controller eas/get called.');
+  fn: async function (inputs, exits) {
+    sails.log.debug('Controller eas/get called.')
 
-        try {
-            // Get records
-            var records = await Eas.find();
-            sails.log.verbose(`Retrieved Eas records: ${records.length}`);
-            sails.log.silly(records);
+    try {
+      // Get records
+      var records = await sails.models.eas.find()
+      sails.log.verbose(`Retrieved Eas records: ${records.length}`)
+      sails.log.silly(records)
 
-            // Subscribe to sockets, if applicable
-            if (this.req.isSocket)
-            {
-                sails.sockets.join(this.req, 'eas');
-                sails.log.verbose('Request was a socket. Joining eas.');
-            }
+      // Subscribe to sockets, if applicable
+      if (this.req.isSocket) {
+        sails.sockets.join(this.req, 'eas')
+        sails.log.verbose('Request was a socket. Joining eas.')
+      }
 
-            return exits.success(records);
-        } catch (e) {
-            return exits.error(e);
-        }
+      return exits.success(records)
+    } catch (e) {
+      return exits.error(e)
     }
+  }
 
-
-};
+}

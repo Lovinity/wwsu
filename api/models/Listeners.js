@@ -7,26 +7,25 @@
 
 module.exports = {
 
-    datastore: 'nodebase',
-    attributes: {
+  datastore: 'nodebase',
+  attributes: {
 
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
-
-        dj: {
-            type: 'number',
-            allowNull: true
-        },
-
-        listeners: {
-            type: 'number'
-        }
-
+    ID: {
+      type: 'number',
+      autoIncrement: true
     },
 
-    memory: {dj: null, listeners: 0} // Used to track when listener count or DJ changes; only adds entries in the database when things change, so that it doesn't get flooded with rows.
+    dj: {
+      type: 'number',
+      allowNull: true
+    },
 
-};
+    listeners: {
+      type: 'number'
+    }
 
+  },
+
+  memory: { dj: null, listeners: 0 } // Used to track when listener count or DJ changes; only adds entries in the database when things change, so that it doesn't get flooded with rows.
+
+}

@@ -6,54 +6,53 @@
  */
 
 module.exports = {
-    datastore: 'nodebase',
-    attributes: {
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
-
-        name: {
-            type: 'string',
-            required: true,
-            unique: true
-        },
-
-        login: {
-            type: 'string',
-            allowNull: true
-        },
-
-        lastSeen: {
-            type: 'ref',
-            columnType: 'datetime'
-        }
-
+  datastore: 'nodebase',
+  attributes: {
+    ID: {
+      type: 'number',
+      autoIncrement: true
     },
 
-    // Websockets standards
-    afterCreate: function (newlyCreatedRecord, proceed) {
-        delete newlyCreatedRecord.login;
-        var data = {insert: newlyCreatedRecord};
-        sails.log.silly(`djs socket: ${data}`);
-        sails.sockets.broadcast('djs', 'djs', data);
-        return proceed();
+    name: {
+      type: 'string',
+      required: true,
+      unique: true
     },
 
-    afterUpdate: function (updatedRecord, proceed) {
-        delete updatedRecord.login;
-        var data = {update: updatedRecord};
-        sails.log.silly(`djs socket: ${data}`);
-        sails.sockets.broadcast('djs', 'djs', data);
-        return proceed();
+    login: {
+      type: 'string',
+      allowNull: true
     },
 
-    afterDestroy: function (destroyedRecord, proceed) {
-        var data = {remove: destroyedRecord.ID};
-        sails.log.silly(`djs socket: ${data}`);
-        sails.sockets.broadcast('djs', 'djs', data);
-        return proceed();
+    lastSeen: {
+      type: 'ref',
+      columnType: 'datetime'
     }
 
-};
+  },
 
+  // Websockets standards
+  afterCreate: function (newlyCreatedRecord, proceed) {
+    delete newlyCreatedRecord.login
+    var data = { insert: newlyCreatedRecord }
+    sails.log.silly(`djs socket: ${data}`)
+    sails.sockets.broadcast('djs', 'djs', data)
+    return proceed()
+  },
+
+  afterUpdate: function (updatedRecord, proceed) {
+    delete updatedRecord.login
+    var data = { update: updatedRecord }
+    sails.log.silly(`djs socket: ${data}`)
+    sails.sockets.broadcast('djs', 'djs', data)
+    return proceed()
+  },
+
+  afterDestroy: function (destroyedRecord, proceed) {
+    var data = { remove: destroyedRecord.ID }
+    sails.log.silly(`djs socket: ${data}`)
+    sails.sockets.broadcast('djs', 'djs', data)
+    return proceed()
+  }
+
+}

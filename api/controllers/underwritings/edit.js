@@ -1,74 +1,65 @@
 module.exports = {
 
-    friendlyName: 'Underwritings / Edit',
+  friendlyName: 'Underwritings / Edit',
 
-    description: 'Edit an underwriting record.',
+  description: 'Edit an underwriting record.',
 
-    inputs: {
-        ID: {
-            type: 'number',
-            required: true,
-            description: 'The ID of the underwriting record to edit.'
-        },
-        name: {
-            type: 'string',
-            description: 'New name for the underwriting entry.'
-        },
-        trackID: {
-            type: 'number',
-            description: 'Updated ID of the track in RadioDJ that this underwriting is associated with.'
-        },
-        mode: {
-            type: 'json',
-            custom: (value) => {
-                if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1))
-                    {return false;}
-
-                if (typeof value.schedule === `undefined`)
-                    {return false;}
-
-                if (typeof value.schedule.schedules === `undefined`)
-                    {return false;}
-
-                if (typeof value.scheduleForced === `undefined`)
-                    {return false;}
-
-                if (typeof value.scheduleForced.schedules === `undefined`)
-                    {return false;}
-
-                return true;
-            },
-            description: 'Mode data for this underwriting.'
-        },
+  inputs: {
+    ID: {
+      type: 'number',
+      required: true,
+      description: 'The ID of the underwriting record to edit.'
     },
-
-    exits: {
-
+    name: {
+      type: 'string',
+      description: 'New name for the underwriting entry.'
     },
+    trackID: {
+      type: 'number',
+      description: 'Updated ID of the track in RadioDJ that this underwriting is associated with.'
+    },
+    mode: {
+      type: 'json',
+      custom: (value) => {
+        if (typeof value.mode === `undefined` || (value.mode !== 0 && value.mode !== 1)) { return false }
 
-    fn: async function (inputs, exits) {
-        sails.log.debug('Controller underwritings/edit called.');
+        if (typeof value.schedule === `undefined`) { return false }
 
-        try {
-            // Determine what needs updating
-            var criteria = {};
-            if (typeof inputs.name !== `undefined`)
-                {criteria.name = inputs.name;}
-            if (typeof inputs.trackID !== `undefined`)
-                {criteria.trackID = inputs.trackID;}
-            if (typeof inputs.mode !== `undefined`)
-                {criteria.mode = inputs.mode;}
+        if (typeof value.schedule.schedules === `undefined`) { return false }
 
-            var criteriaB = _.cloneDeep(criteria);
+        if (typeof value.scheduleForced === `undefined`) { return false }
 
-            // Update the underwriting
-            await Underwritings.update({ ID: inputs.ID }, criteriaB).fetch();
+        if (typeof value.scheduleForced.schedules === `undefined`) { return false }
 
-            return exits.success();
-        } catch (e) {
-            return exits.error(e);
-        }
+        return true
+      },
+      description: 'Mode data for this underwriting.'
     }
+  },
 
+  exits: {
 
-};
+  },
+
+  fn: async function (inputs, exits) {
+    sails.log.debug('Controller underwritings/edit called.')
+
+    try {
+      // Determine what needs updating
+      var criteria = {}
+      if (typeof inputs.name !== `undefined`) { criteria.name = inputs.name }
+      if (typeof inputs.trackID !== `undefined`) { criteria.trackID = inputs.trackID }
+      if (typeof inputs.mode !== `undefined`) { criteria.mode = inputs.mode }
+
+      var criteriaB = _.cloneDeep(criteria)
+
+      // Update the underwriting
+      await sails.models.underwritings.update({ ID: inputs.ID }, criteriaB).fetch()
+
+      return exits.success()
+    } catch (e) {
+      return exits.error(e)
+    }
+  }
+
+}

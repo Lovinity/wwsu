@@ -6,21 +6,20 @@
  */
 
 module.exports = {
-    datastore: 'nodebase',
-    attributes: {
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
+  datastore: 'nodebase',
+  attributes: {
+    ID: {
+      type: 'number',
+      autoIncrement: true
+    },
 
-        IP: {
-            type: 'string'
-        },
+    IP: {
+      type: 'string'
+    },
 
-        trackID: {
-            type: 'number'
-        }
+    trackID: {
+      type: 'number'
     }
+  }
 
-};
-
+}

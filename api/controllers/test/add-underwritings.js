@@ -1,22 +1,17 @@
 module.exports = {
 
+  friendlyName: 'test / add-underwritings',
 
-    friendlyName: 'test / add-underwritings',
+  description: 'test / add-underwritings test.',
 
+  inputs: {
 
-    description: 'test / add-underwritings test.',
+  },
 
+  fn: async function () {
+    // LINT: await required by Sails.js
+    // eslint-disable-next-line no-return-await
+    return await sails.helpers.break.addUnderwritings(false, 1)
+  }
 
-    inputs: {
-
-    },
-
-
-    fn: async function () {
-
-      return await sails.helpers.break.addUnderwritings(false, 1);
-
-    }
-
-
-  };
+}

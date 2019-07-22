@@ -1,10 +1,9 @@
 /* Copyright (C) 2014 Justin Windle, http://soulwire.co.uk */
 
-var fit = (function() {
+var fit = (function () {
+  'use strict';
 
-    'use strict';
-
-    /*
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         Constants
@@ -12,18 +11,18 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    var THROTTLE_DURATION = 50;
-    var TRANSFORM_ORIGIN = 'TransformOrigin';
-    var TRANSFORM = 'Transform';
-    var VENDORS = 'moz ms o webkit'.split( ' ' );
-    var CENTER = 'center';
-    var BOTTOM = 'bottom';
-    var RIGHT = 'right';
-    var LEFT = 'left';
-    var TOP = 'top';
-    var PX = 'px';
+  var THROTTLE_DURATION = 50;
+  var TRANSFORM_ORIGIN = 'TransformOrigin';
+  var TRANSFORM = 'Transform';
+  var VENDORS = 'moz ms o webkit'.split(' ');
+  var CENTER = 'center';
+  var BOTTOM = 'bottom';
+  var RIGHT = 'right';
+  var LEFT = 'left';
+  var TOP = 'top';
+  var PX = 'px';
 
-    /*
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         Globals
@@ -31,23 +30,23 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    var win = window || self;
-    var doc = document;
-    var getStyle = win.getComputedStyle;
-    var watching = [];
-    var vendor;
-    var then;
-    var wait;
+  var win = window || self;
+  var doc = document;
+  var getStyle = win.getComputedStyle;
+  var watching = [];
+  var vendor;
+  var then;
+  var wait;
 
-    var defaults = {
-        hAlign: CENTER,
-        vAlign: CENTER,
-        watch: false,
-        cover: false,
-        apply: true
-    };
+  var defaults = {
+    hAlign: CENTER,
+    vAlign: CENTER,
+    watch: false,
+    cover: false,
+    apply: true
+  };
 
-    /*
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         Utilities
@@ -55,110 +54,90 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    // Uppercase proxy for regex
+  // Uppercase proxy for regex
 
-    function toUpperCase( value ) {
+  function toUpperCase (value) {
+    return value.toUpperCase();
+  }
 
-        return value.toUpperCase();
+  // Returns true if an object is a number and not NaN
+
+  function isNumber (value) {
+    return typeof value === 'number' && !isNaN(value);
+  }
+
+  // Shortcut to get the current time
+
+  function getTime () {
+    return new Date().getTime();
+  }
+
+  // Simple array mapping method (for non-ES5 browsers)
+
+  function map (list, func) {
+    var out = [];
+
+    for (var i = 0, n = list.length; i < n; i++) { out[i] = func(list[i]); }
+
+    return out;
+  }
+
+  // Soft object augmentation
+
+  function extend (target, source) {
+    for (var key in source) {
+      if (!(key in target)) { target[key] = source[key]; }
     }
 
-    // Returns true if an object is a number and not NaN
+    return target;
+  }
 
-    function isNumber( value ) {
+  // Determine vendor and prefix property
 
-        return typeof value === 'number' && !isNaN( value );
+  function prefix (prop) {
+    if (!vendor) {
+      var name; var style = getStyle(doc.body); var test = TRANSFORM;
+
+      for (var i = 0, n = VENDORS.length; i < n; i++) {
+        vendor = VENDORS[i];
+        name = vendor + test;
+
+        if (name in style) { break; }
+
+        vendor = vendor.replace(/^(\w)/, toUpperCase);
+        name = vendor + test;
+
+        if (name in style) { break; }
+      }
     }
 
-    // Shortcut to get the current time
+    return vendor + prop;
+  }
 
-    function getTime() {
+  // Returns the current CSS transformation matrix as an array
 
-        return new Date().getTime();
+  function getMatrix (el) {
+    var css = getStyle(el);
+    var ctm = css[prefix(TRANSFORM)].replace(/[a-z()]/gi, '').split(',');
+
+    if (ctm.length < 6) { return [1, 0, 0, 1, 0, 0]; }
+
+    for (var i = 0; i < 16; i++) {
+      if (i < ctm.length) { ctm[i] = parseFloat(ctm[i]); }
     }
 
-    // Simple array mapping method (for non-ES5 browsers)
+    return ctm;
+  }
 
-    function map( list, func ) {
+  if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (object) {
+      for (var i = 0; i < this.length; ++i) { if (this[i] == object) { return i; } }
 
-        var out = [];
+      return -1;
+    };
+  }
 
-        for ( var i = 0, n = list.length; i < n; i++ )
-
-            {out[ i ] = func( list[ i ] );}
-
-        return out;
-    }
-
-    // Soft object augmentation
-
-    function extend( target, source ) {
-
-        for ( var key in source )
-
-            {if ( !( key in target ) )
-
-                {target[ key ] = source[ key ];}}
-
-        return target;
-    }
-
-    // Determine vendor and prefix property
-
-    function prefix( prop ) {
-
-        if ( !vendor ) {
-
-            var name; var style = getStyle( doc.body ); var test = TRANSFORM;
-
-            for ( var i = 0, n = VENDORS.length; i < n; i++ ) {
-
-                vendor = VENDORS[i];
-                name = vendor + test;
-
-                if ( name in style ) {break;}
-
-                vendor = vendor.replace( /^(\w)/, toUpperCase );
-                name = vendor + test;
-
-                if ( name in style ) {break;}
-            }
-        }
-
-        return vendor + prop;
-    }
-
-    // Returns the current CSS transformation matrix as an array
-
-    function getMatrix( el ) {
-
-        var css = getStyle( el );
-        var ctm = css[ prefix( TRANSFORM ) ].replace( /[a-z()]/gi, '' ).split( ',' );
-
-        if ( ctm.length < 6 )
-
-            {return [ 1, 0, 0, 1, 0, 0 ];}
-
-        for ( var i = 0; i < 16; i++ ){
-            if (i < ctm.length)
-                {ctm[i] = parseFloat( ctm[i] );}
-        }
-
-        return ctm;
-    }
-
-    if( !Array.prototype.indexOf ){
-
-        Array.prototype.indexOf = function( object ) {
-
-            for( var i = 0; i < this.length; ++i )
-
-                {if( this[i] == object ) {return i;}}
-
-            return -1;
-        };
-    }
-
-    /*
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         Transform methods
@@ -166,61 +145,54 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    function cssTransform( transform, element ) {
+  function cssTransform (transform, element) {
+    var matrix = getMatrix(element);
 
-        var matrix = getMatrix( element );
+    matrix[0] = transform.scale;
+    matrix[3] = transform.scale;
+    matrix[4] += transform.tx;
+    matrix[5] += transform.ty;
 
-        matrix[0] = transform.scale;
-        matrix[3] = transform.scale;
-        matrix[4] += transform.tx;
-        matrix[5] += transform.ty;
+    var fixed = map(matrix, (n) => { return n.toFixed(6); }).slice(0, 6);
 
-        var fixed = map( matrix, ( n ) => { return n.toFixed( 6 ); }).slice(0,6);
+    element.style[prefix(TRANSFORM_ORIGIN)] = '0 0';
+    element.style[prefix(TRANSFORM)] = 'matrix(' + fixed.join(',') + ')';
+  }
 
+  function cssPosition (transform, element) {
+    var style = getStyle(element);
+    var left = parseFloat(style.left) || 0;
+    var top = parseFloat(style.top) || 0;
 
-        element.style[ prefix( TRANSFORM_ORIGIN ) ] = '0 0';
-        element.style[ prefix( TRANSFORM ) ] = 'matrix(' + fixed.join( ',' ) + ')';
-    }
+    if (style.position === 'static') { element.style.position = 'relative'; }
 
-    function cssPosition( transform, element ) {
+    element.style.left = left + transform.tx + PX;
+    element.style.top = top + transform.ty + PX;
 
-        var style = getStyle( element );
-        var left = parseFloat( style.left ) || 0;
-        var top = parseFloat( style.top ) || 0;
+    element.style.height = transform.height + PX;
+    element.style.width = transform.width + PX;
+  }
 
-        if ( style.position === 'static' )
+  function cssMargin (transform, element) {
+    var style = getStyle(element);
+    var left = parseFloat(style.marginLeft) || 0;
+    var top = parseFloat(style.marginTop) || 0;
 
-            {element.style.position = 'relative';}
+    element.style.marginLeft = left + transform.tx + PX;
+    element.style.marginTop = top + transform.ty + PX;
 
-        element.style.left = left + transform.tx + PX;
-        element.style.top = top + transform.ty + PX;
+    element.style.height = transform.height + PX;
+    element.style.width = transform.width + PX;
+  }
 
-        element.style.height = transform.height + PX;
-        element.style.width = transform.width + PX;
-    }
+  function rectangle (transform, target) {
+    target.height *= transform.scale;
+    target.width *= transform.scale;
+    target.x += transform.tx;
+    target.y += transform.ty;
+  }
 
-    function cssMargin( transform, element ) {
-
-        var style = getStyle( element );
-        var left = parseFloat( style.marginLeft ) || 0;
-        var top = parseFloat( style.marginTop ) || 0;
-
-        element.style.marginLeft = left + transform.tx + PX;
-        element.style.marginTop = top + transform.ty + PX;
-
-        element.style.height = transform.height + PX;
-        element.style.width = transform.width + PX;
-    }
-
-    function rectangle( transform, target ) {
-
-        target.height *= transform.scale;
-        target.width *= transform.scale;
-        target.x += transform.tx;
-        target.y += transform.ty;
-    }
-
-    /*
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         Given an element or object, defines a standard rectangle
@@ -228,32 +200,26 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    function toRectangle( target ) {
+  function toRectangle (target) {
+    if (target.nodeType && target.nodeType == 1) {
+      var bounds = target.getBoundingClientRect();
 
-        if ( target.nodeType && target.nodeType == 1 ) {
-
-            var bounds = target.getBoundingClientRect();
-
-            target = {
-                height: target.offsetHeight,
-                width: target.offsetWidth,
-                x: bounds.left,
-                y: bounds.top
-            };
-        }
-
-        if ( !isNumber( target.x ) && isNumber( target.left ) )
-
-            {target.x = target.left;}
-
-        if ( !isNumber( target.y ) && isNumber( target.top ) )
-
-            {target.y = target.top;}
-
-        return target;
+      target = {
+        height: target.offsetHeight,
+        width: target.offsetWidth,
+        x: bounds.left,
+        y: bounds.top
+      };
     }
 
-    /*
+    if (!isNumber(target.x) && isNumber(target.left)) { target.x = target.left; }
+
+    if (!isNumber(target.y) && isNumber(target.top)) { target.y = target.top; }
+
+    return target;
+  }
+
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         Event Handlers
@@ -261,29 +227,23 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    function onWindowResize() {
+  function onWindowResize () {
+    // Throttle
 
-        // Throttle
+    var now = getTime();
+    var delta = now - then;
 
-        var now = getTime();
-        var delta = now - then;
+    if (delta <= THROTTLE_DURATION) {
+      clearInterval(wait);
+      wait = setTimeout(onWindowResize, THROTTLE_DURATION - delta);
+    } else {
+      for (var i = 0, n = watching.length; i < n; i++) { watching[i](); }
 
-        if ( delta <= THROTTLE_DURATION ) {
-
-            clearInterval( wait );
-            wait = setTimeout( onWindowResize, THROTTLE_DURATION - delta );
-
-        } else {
-
-            for ( var i = 0, n = watching.length; i < n; i++ )
-
-                {watching[ i ]();}
-
-            then = now;
-        }
+      then = now;
     }
+  }
 
-    /*
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         Fit
@@ -291,159 +251,131 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    // Cache last saved value to prevent 'NaN' values
-    // when calculating transform.scale
+  // Cache last saved value to prevent 'NaN' values
+  // when calculating transform.scale
 
-    var lastSavedRectWidth;
-        var lastSavedRectHeight;
-        var lastSavedAreaWidth;
-        var lastSavedAreaHeight;
+  var lastSavedRectWidth;
+  var lastSavedRectHeight;
+  var lastSavedAreaWidth;
+  var lastSavedAreaHeight;
 
-    function fit( target, container, options, callback, transform ) {
+  function fit (target, container, options, callback, transform) {
+    // Normalise inputs to standard rectangle definitions
 
-        // Normalise inputs to standard rectangle definitions
+    var rect = toRectangle(target);
+    var area = toRectangle(container);
 
-        var rect = toRectangle( target );
-        var area = toRectangle( container );
+    // Compute position offset and scale
 
-        // Compute position offset and scale
+    var wa = rect.width === 0 ? lastSavedRectWidth : rect.width;
+    var ha = rect.height === 0 ? lastSavedAreaHeight : rect.height;
 
-        var wa = rect.width === 0 ? lastSavedRectWidth : rect.width;
-        var ha = rect.height === 0 ? lastSavedAreaHeight : rect.height;
+    var wb = area.width === 0 ? lastSavedAreaWidth : area.width;
+    var hb = area.height === 0 ? lastSavedAreaHeight : area.height;
 
-        var wb = area.width === 0 ? lastSavedAreaWidth : area.width;
-        var hb = area.height === 0 ? lastSavedAreaHeight : area.height;
+    lastSavedRectWidth = wa;
+    lastSavedRectHeight = ha;
+    lastSavedAreaWidth = wb;
+    lastSavedAreaHeight = hb;
 
-        lastSavedRectWidth = wa;
-        lastSavedRectHeight = ha;
-        lastSavedAreaWidth = wb;
-        lastSavedAreaHeight = hb;
+    var sx = wb / wa;
+    var sy = hb / ha;
 
-        var sx = wb / wa;
-        var sy = hb / ha;
+    var ra = wa / ha;
+    var rb = wb / hb;
 
-        var ra = wa / ha;
-        var rb = wb / hb;
+    var sH = options.cover ? sy : sx;
+    var sV = options.cover ? sx : sy;
 
-        var sH = options.cover ? sy : sx;
-        var sV = options.cover ? sx : sy;
+    var scale = ra >= rb ? sH : sV;
+    var w = wa * scale;
+    var h = ha * scale;
 
-        var scale = ra >= rb ? sH : sV;
-        var w = wa * scale;
-        var h = ha * scale;
+    var tx = options.hAlign == CENTER ? 0.5 * (w - wb) : options.hAlign == RIGHT ? w - wb : 0.0;
+    var ty = options.vAlign == CENTER ? 0.5 * (h - hb) : options.vAlign == BOTTOM ? h - hb : 0.0;
 
-        var tx = options.hAlign == CENTER ? 0.5 * ( w - wb ) : options.hAlign == RIGHT ? w - wb : 0.0;
-        var ty = options.vAlign == CENTER ? 0.5 * ( h - hb ) : options.vAlign == BOTTOM ? h - hb : 0.0;
+    // Build / modify transform object
 
-        // Build / modify transform object
+    transform = transform || {};
 
-        transform = transform || {};
+    transform.tx = (area.x - tx) - rect.x;
+    transform.ty = (area.y - ty) - rect.y;
 
-        transform.tx = ( area.x - tx ) - rect.x;
-        transform.ty = ( area.y - ty ) - rect.y;
+    transform.x = (area.x - tx) - rect.x * scale;
+    transform.y = (area.y - ty) - rect.y * scale;
 
-        transform.x = ( area.x - tx ) - rect.x * scale;
-        transform.y = ( area.y - ty ) - rect.y * scale;
+    transform.height = rect.height * scale;
+    transform.width = rect.width * scale;
 
-        transform.height = rect.height * scale;
-        transform.width = rect.width * scale;
+    transform.scale = scale;
 
-        transform.scale = scale;
+    // Apply default transform
 
-        // Apply default transform
+    if (callback) { callback(transform, target); } else if (options.apply) {
+      if (typeof (HTMLElement) !== 'undefined' && target instanceof HTMLElement) { callback = cssTransform; } else { callback = rectangle; }
 
-        if ( callback )
-
-            {callback( transform, target );}
-
-        else if ( options.apply ) {
-
-            if (typeof(HTMLElement) !== 'undefined' && target instanceof HTMLElement )
-
-                {callback = cssTransform;}
-
-            else
-
-                {callback = rectangle;}
-
-            callback( transform, target );
-        }
-
-        return transform;
+      callback(transform, target);
     }
 
-    function main( target, container, options, callback ) {
+    return transform;
+  }
 
-        // Parse arguments
+  function main (target, container, options, callback) {
+    // Parse arguments
 
-        if ( !target || !container )
+    if (!target || !container) { throw 'You must supply a target and a container'; }
 
-            {throw 'You must supply a target and a container';}
-
-        if ( typeof options === 'function' ) {
-
-            callback = options;
-            options = {};
-        }
-
-        // Default options
-
-        options = extend( options || {}, defaults );
-
-        // Do it
-
-        var transform = fit( target, container, options, callback );
-
-        // Optionally handle window resizes automatically
-
-        if ( options.watch ) {
-
-            if ( !watching.length ){
-
-                if(win.addEventListener){
-                    win.addEventListener( 'resize', onWindowResize );
-                    win.addEventListener( 'orientationchange', onWindowResize );
-                }else{
-                    win.attachEvent( 'onresize', onWindowResize );
-                    win.attachEvent( 'onorientationchange', onWindowResize );
-                }
-
-            }
-
-            transform.trigger = function() {
-
-                fit( target, container, options, callback, transform );
-            };
-
-            transform.on = function( suppress ) {
-
-                var index = watching.indexOf( transform.trigger );
-
-                if ( !~index )
-
-                    {watching.push( transform.trigger );}
-
-                if ( !suppress )
-
-                    {transform.trigger();}
-            };
-
-            transform.off = function() {
-
-                var index = watching.indexOf( transform.trigger );
-
-                if ( !!~index )
-
-                    {watching.splice( index, 1 );}
-            };
-
-            transform.on( true );
-        }
-
-        return transform;
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
     }
 
-    /*
+    // Default options
+
+    options = extend(options || {}, defaults);
+
+    // Do it
+
+    var transform = fit(target, container, options, callback);
+
+    // Optionally handle window resizes automatically
+
+    if (options.watch) {
+      if (!watching.length) {
+        if (win.addEventListener) {
+          win.addEventListener('resize', onWindowResize);
+          win.addEventListener('orientationchange', onWindowResize);
+        } else {
+          win.attachEvent('onresize', onWindowResize);
+          win.attachEvent('onorientationchange', onWindowResize);
+        }
+      }
+
+      transform.trigger = function () {
+        fit(target, container, options, callback, transform);
+      };
+
+      transform.on = function (suppress) {
+        var index = watching.indexOf(transform.trigger);
+
+        if (!~index) { watching.push(transform.trigger); }
+
+        if (!suppress) { transform.trigger(); }
+      };
+
+      transform.off = function () {
+        var index = watching.indexOf(transform.trigger);
+
+        if (~index) { watching.splice(index, 1); }
+      };
+
+      transform.on(true);
+    }
+
+    return transform;
+  }
+
+  /*
     ————————————————————————————————————————————————————————————————————————————————
 
         API
@@ -451,36 +383,33 @@ var fit = (function() {
     ————————————————————————————————————————————————————————————————————————————————
     */
 
-    return extend( main, {
+  return extend(main, {
 
-        // Properties
+    // Properties
 
-        watching: watching,
-        defaults: defaults,
+    watching: watching,
+    defaults: defaults,
 
-        // Methods
+    // Methods
 
-        cssTransform: cssTransform,
-        cssPosition: cssPosition,
-        cssMargin: cssMargin,
+    cssTransform: cssTransform,
+    cssPosition: cssPosition,
+    cssMargin: cssMargin,
 
-        // Constants
+    // Constants
 
-        CENTER: CENTER,
-        BOTTOM: BOTTOM,
-        RIGHT: RIGHT,
-        LEFT: LEFT,
-        TOP: TOP
+    CENTER: CENTER,
+    BOTTOM: BOTTOM,
+    RIGHT: RIGHT,
+    LEFT: LEFT,
+    TOP: TOP
 
-    });
-
+  });
 })();
 
-if( typeof exports !== 'undefined' ) {
-    if( typeof module !== 'undefined' && module.exports ) {
-        exports = module.exports = fit;
-    }
-    exports.fit = fit;
+if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
+    exports = module.exports = fit;
+  }
+  exports.fit = fit;
 }
-
-

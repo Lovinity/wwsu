@@ -8,99 +8,98 @@
  */
 
 module.exports = {
-    datastore: 'radiodj',
-    attributes: {
+  datastore: 'radiodj',
+  attributes: {
 
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
+    ID: {
+      type: 'number',
+      autoIncrement: true
+    },
 
-        trackID: {
-            type: 'number'
-        },
+    trackID: {
+      type: 'number'
+    },
 
-        date_played: {
-            type: 'ref',
-            columnType: 'datetime',
-            defaultsTo: '2002-01-01 00:00:01'
-        },
+    date_played: {
+      type: 'ref',
+      columnType: 'datetime',
+      defaultsTo: '2002-01-01 00:00:01'
+    },
 
-        song_type: {
-            type: 'number',
-            max: 99,
-            min: 0
-        },
+    song_type: {
+      type: 'number',
+      max: 99,
+      min: 0
+    },
 
-        id_subcat: {
-            type: 'number'
-        },
+    id_subcat: {
+      type: 'number'
+    },
 
-        id_genre: {
-            type: 'number'
-        },
+    id_genre: {
+      type: 'number'
+    },
 
-        duration: {
-            type: 'number'
-        },
+    duration: {
+      type: 'number'
+    },
 
-        artist: {
-            type: 'string'
-        },
+    artist: {
+      type: 'string'
+    },
 
-        original_artist: {
-            type: 'string'
-        },
+    original_artist: {
+      type: 'string'
+    },
 
-        title: {
-            type: 'string'
-        },
+    title: {
+      type: 'string'
+    },
 
-        album: {
-            type: 'string'
-        },
+    album: {
+      type: 'string'
+    },
 
-        composer: {
-            type: 'string'
-        },
+    composer: {
+      type: 'string'
+    },
 
-        label: {
-            type: 'string'
-        },
+    label: {
+      type: 'string'
+    },
 
-        year: {
-            type: 'string',
-            maxLength: 4
-        },
+    year: {
+      type: 'string',
+      maxLength: 4
+    },
 
-        track_no: {
-            type: 'number',
-            max: 999999,
-            min: 0
-        },
+    track_no: {
+      type: 'number',
+      max: 999999,
+      min: 0
+    },
 
-        disc_no: {
-            type: 'number',
-            max: 999999,
-            min: 0
-        },
+    disc_no: {
+      type: 'number',
+      max: 999999,
+      min: 0
+    },
 
-        publisher: {
-            type: 'string'
-        },
+    publisher: {
+      type: 'string'
+    },
 
-        copyright: {
-            type: 'string'
-        },
+    copyright: {
+      type: 'string'
+    },
 
-        isrc: {
-            type: 'string'
-        },
+    isrc: {
+      type: 'string'
+    },
 
-        listeners: {
-            type: 'number'
-        }
+    listeners: {
+      type: 'number'
     }
+  }
 
-};
-
+}

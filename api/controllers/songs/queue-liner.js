@@ -1,43 +1,38 @@
 module.exports = {
 
-    friendlyName: 'songs / queue-liner',
+  friendlyName: 'songs / queue-liner',
 
-    description: 'Queue and play a Sports Liner.',
+  description: 'Queue and play a Sports Liner.',
 
-    inputs: {
+  inputs: {
 
-    },
+  },
 
-    fn: async function (inputs, exits) {
-        sails.log.debug('Controller songs/queue-liner called.');
+  fn: async function (inputs, exits) {
+    sails.log.debug('Controller songs/queue-liner called.')
 
-        try {
+    try {
+      // Error if we are not in a sports state
+      if (sails.models.meta['A'].state.startsWith('sports')) { return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`)) }
 
-            // Error if we are not in a sports state
-            if (Meta['A'].state.startsWith('sports'))
-                {return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`));}
+      // Log it
+      await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: sails.models.meta['A'].show, event: '<strong>Sports Liner requested.</strong>' }).fetch()
+        .tolerate((err) => {
+          // Do not throw for errors, but log it
+          sails.log.error(err)
+        })
 
-            // Log it
-            await Logs.create({attendanceID: Meta['A'].attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: Meta['A'].show, event: '<strong>Sports Liner requested.</strong>'}).fetch()
-                    .tolerate((err) => {
-                        // Do not throw for errors, but log it
-                        sails.log.error(err);
-                    });
+      // Queue it
+      if (typeof sails.config.custom.sportscats[sails.models.meta['A'].show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta['A'].show]['Sports Liners']], 'Top', 1) }
 
-            // Queue it
-            if (typeof sails.config.custom.sportscats[Meta['A'].show] !== 'undefined')
-                {await sails.helpers.songs.queue([sails.config.custom.sportscats[Meta['A'].show]['Sports Liners']], 'Top', 1);}
+      // Play it
+      await sails.helpers.rest.cmd('EnableAssisted', 0)
+      await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
 
-            // Play it
-            await sails.helpers.rest.cmd('EnableAssisted', 0);
-            await sails.helpers.rest.cmd('PlayPlaylistTrack', 0);
-
-            return exits.success();
-        } catch (e) {
-            return exits.error(e);
-        }
-
+      return exits.success()
+    } catch (e) {
+      return exits.error(e)
     }
+  }
 
-
-};
+}

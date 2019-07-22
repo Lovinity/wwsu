@@ -11,241 +11,241 @@ module.exports = {
   datastore: 'radiodj',
   attributes: {
 
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
+    ID: {
+      type: 'number',
+      autoIncrement: true
+    },
 
-        path: {
-            type: 'string'
-        },
+    path: {
+      type: 'string'
+    },
 
-        enabled: {
-            type: 'number'
-        },
+    enabled: {
+      type: 'number'
+    },
 
-        date_added: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    date_added: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        date_modified: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    date_modified: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        date_played: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    date_played: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        artist_played: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    artist_played: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        album_played: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    album_played: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        title_played: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    title_played: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        count_played: {
-            type: 'number'
-        },
+    count_played: {
+      type: 'number'
+    },
 
-        play_limit: {
-            type: 'number'
-        },
+    play_limit: {
+      type: 'number'
+    },
 
-        limit_action: {
-            type: 'number'
-        },
+    limit_action: {
+      type: 'number'
+    },
 
-        start_date: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    start_date: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        end_date: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    end_date: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        startEvent: {
-            type: 'number'
-        },
+    startEvent: {
+      type: 'number'
+    },
 
-        endEvent: {
-            type: 'number'
-        },
+    endEvent: {
+      type: 'number'
+    },
 
-        song_type: {
-            type: 'number'
-        },
+    song_type: {
+      type: 'number'
+    },
 
-        id_subcat: {
-            type: 'number'
-        },
+    id_subcat: {
+      type: 'number'
+    },
 
-        id_genre: {
-            type: 'number'
-        },
+    id_genre: {
+      type: 'number'
+    },
 
-        weight: {
-            type: 'number'
-        },
+    weight: {
+      type: 'number'
+    },
 
-        duration: {
-            type: 'number'
-        },
+    duration: {
+      type: 'number'
+    },
 
-        original_duration: {
-            type: 'number'
-        },
+    original_duration: {
+      type: 'number'
+    },
 
-        cue_times: {
-            type: 'string'
-        },
+    cue_times: {
+      type: 'string'
+    },
 
-        precise_cue: {
-            type: 'number'
-        },
+    precise_cue: {
+      type: 'number'
+    },
 
-        fade_type: {
-            type: 'number'
-        },
+    fade_type: {
+      type: 'number'
+    },
 
-        start_type: {
-            type: 'number'
-        },
+    start_type: {
+      type: 'number'
+    },
 
-        end_type: {
-            type: 'number'
-        },
+    end_type: {
+      type: 'number'
+    },
 
-        mix_type: {
-            type: 'number'
-        },
+    mix_type: {
+      type: 'number'
+    },
 
-        mood: {
-            type: 'string'
-        },
+    mood: {
+      type: 'string'
+    },
 
-        gender: {
-            type: 'string'
-        },
+    gender: {
+      type: 'string'
+    },
 
-        lang: {
-            type: 'string'
-        },
+    lang: {
+      type: 'string'
+    },
 
-        rating: {
-            type: 'number'
-        },
+    rating: {
+      type: 'number'
+    },
 
-        loudness: {
-            type: 'number'
-        },
+    loudness: {
+      type: 'number'
+    },
 
-        overlay: {
-            type: 'number'
-        },
+    overlay: {
+      type: 'number'
+    },
 
-        artist: {
-            type: 'string'
-        },
+    artist: {
+      type: 'string'
+    },
 
-        original_artist: {
-            type: 'string'
-        },
+    original_artist: {
+      type: 'string'
+    },
 
-        title: {
-            type: 'string'
-        },
+    title: {
+      type: 'string'
+    },
 
-        album: {
-            type: 'string'
-        },
+    album: {
+      type: 'string'
+    },
 
-        composer: {
-            type: 'string'
-        },
+    composer: {
+      type: 'string'
+    },
 
-        label: {
-            type: 'string'
-        },
+    label: {
+      type: 'string'
+    },
 
-        year: {
-            type: 'string'
-        },
+    year: {
+      type: 'string'
+    },
 
-        track_no: {
-            type: 'number'
-        },
+    track_no: {
+      type: 'number'
+    },
 
-        disc_no: {
-            type: 'number'
-        },
+    disc_no: {
+      type: 'number'
+    },
 
-        publisher: {
-            type: 'string'
-        },
+    publisher: {
+      type: 'string'
+    },
 
-        copyright: {
-            type: 'string'
-        },
+    copyright: {
+      type: 'string'
+    },
 
-        isrc: {
-            type: 'string'
-        },
+    isrc: {
+      type: 'string'
+    },
 
-        bpm: {
-            type: 'number'
-        },
+    bpm: {
+      type: 'number'
+    },
 
-        comments: {
-            type: 'string'
-        },
+    comments: {
+      type: 'string'
+    },
 
-        sweepers: {
-            type: 'string'
-        },
+    sweepers: {
+      type: 'string'
+    },
 
-        image: {
-            type: 'string'
-        },
+    image: {
+      type: 'string'
+    },
 
-        buy_link: {
-            type: 'string'
-        },
+    buy_link: {
+      type: 'string'
+    },
 
-        url1: {
-            type: 'string'
-        },
+    url1: {
+      type: 'string'
+    },
 
-        url2: {
-            type: 'string'
-        },
+    url2: {
+      type: 'string'
+    },
 
-        tdate_played: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    tdate_played: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        tartist_played: {
-            type: 'ref',
-            columnType: 'datetime'
-        },
+    tartist_played: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
 
-        originalmetadata: {
-            type: 'number'
-        },
-        /*
+    originalmetadata: {
+      type: 'number'
+    }
+    /*
         spins_7: {
             type: 'number'
         },
@@ -268,5 +268,4 @@ module.exports = {
   pendingCmd: [], // DEPRECATED
   queueCheck: [] // Array of objects containing tracks we're waiting to confirm were queued in RadioDJ (checked by sails.helpers.rest.getQueue).
 
-};
-
+}

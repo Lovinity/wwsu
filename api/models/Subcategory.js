@@ -7,23 +7,22 @@
 
 module.exports = {
 
-    datastore: 'radiodj',
-    attributes: {
+  datastore: 'radiodj',
+  attributes: {
 
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
+    ID: {
+      type: 'number',
+      autoIncrement: true
+    },
 
-        parentid: {
-            type: 'number'
-        },
+    parentid: {
+      type: 'number'
+    },
 
-        name: {
-            type: 'string'
-        }
+    name: {
+      type: 'string'
+    }
 
-  },
+  }
 
-};
-
+}

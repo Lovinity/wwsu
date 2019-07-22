@@ -6,17 +6,16 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 module.exports = {
-    datastore: 'radiodj',
-    attributes: {
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
-        name: {
-            type: 'string'
-        }
+  datastore: 'radiodj',
+  attributes: {
+    ID: {
+      type: 'number',
+      autoIncrement: true
     },
-    active: {tracks: []},
-    queuing: false
-};
-
+    name: {
+      type: 'string'
+    }
+  },
+  active: { tracks: [] },
+  queuing: false
+}

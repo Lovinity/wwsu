@@ -6,52 +6,51 @@
  */
 
 module.exports = {
-    datastore: 'nodebase',
-    attributes: {
+  datastore: 'nodebase',
+  attributes: {
 
-        ID: {
-            type: 'number',
-            autoIncrement: true
-        },
-
-        active: {
-            type: 'boolean',
-            defaultsTo: true,
-        },
-
-        IP: {
-            type: 'string'
-        },
-
-        action: {
-            type: 'string'
-        },
-
-        message: {
-            type: 'string'
-        }
+    ID: {
+      type: 'number',
+      autoIncrement: true
     },
 
-    // Websockets standards
-    afterCreate: function (newlyCreatedRecord, proceed) {
-        var data = {insert: newlyCreatedRecord};
-        sails.log.silly(`discipline socket: ${data}`);
-        sails.sockets.broadcast('discipline', 'discipline', data);
-        return proceed();
+    active: {
+      type: 'boolean',
+      defaultsTo: true
     },
 
-    afterUpdate: function (updatedRecord, proceed) {
-        var data = {update: updatedRecord};
-        sails.log.silly(`discipline socket: ${data}`);
-        sails.sockets.broadcast('discipline', 'discipline', data);
-        return proceed();
+    IP: {
+      type: 'string'
     },
 
-    afterDestroy: function (destroyedRecord, proceed) {
-        var data = {remove: destroyedRecord.ID};
-        sails.log.silly(`discipline socket: ${data}`);
-        sails.sockets.broadcast('discipline', 'discipline', data);
-        return proceed();
+    action: {
+      type: 'string'
+    },
+
+    message: {
+      type: 'string'
     }
-};
+  },
 
+  // Websockets standards
+  afterCreate: function (newlyCreatedRecord, proceed) {
+    var data = { insert: newlyCreatedRecord }
+    sails.log.silly(`discipline socket: ${data}`)
+    sails.sockets.broadcast('discipline', 'discipline', data)
+    return proceed()
+  },
+
+  afterUpdate: function (updatedRecord, proceed) {
+    var data = { update: updatedRecord }
+    sails.log.silly(`discipline socket: ${data}`)
+    sails.sockets.broadcast('discipline', 'discipline', data)
+    return proceed()
+  },
+
+  afterDestroy: function (destroyedRecord, proceed) {
+    var data = { remove: destroyedRecord.ID }
+    sails.log.silly(`discipline socket: ${data}`)
+    sails.sockets.broadcast('discipline', 'discipline', data)
+    return proceed()
+  }
+}

@@ -1,24 +1,19 @@
 module.exports = {
 
-
   friendlyName: 'Restructure',
 
-
   description: 'Restructure test.',
-
 
   inputs: {
 
   },
 
-
   exits: {
 
   },
 
-
   fn: async function (inputs, exits) {
-      /*
+    /*
       var genres = await Subcategory.find({parentid: 1});
       var genres2 = await Genre.find();
       var genresO = {};
@@ -44,13 +39,11 @@ module.exports = {
       }
       */
 
-     var tracks = await Playlists_list.find({pID: [14,15,16,18,24,26,27]});
-     var trackUpdate = [];
-     tracks.map(track => trackUpdate.push(track.sID));
-     await Songs.update({ID: trackUpdate}, {id_subcat: 211});
-    return exits.success();
-
+    var tracks = await sails.models.playlists_list.find({ pID: [14, 15, 16, 18, 24, 26, 27] })
+    var trackUpdate = []
+    tracks.map(track => trackUpdate.push(track.sID))
+    await sails.models.songs.update({ ID: trackUpdate }, { id_subcat: 211 })
+    return exits.success()
   }
 
-
-};
+}
