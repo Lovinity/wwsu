@@ -838,9 +838,9 @@ module.exports = {
               continue
             }
 
-            if (directors.indexOf(event.summary) === -1 && issues.indexOf(`Office Hours for "${event.summary}" exists on Google Calendar, but this director does not exist in the system. These hours were ignored.`) === -1) {
+            if (directors.indexOf(event.summary) === -1 && issues.indexOf(`Office Hours for "${event.summary}" exists on the Office Hours Google Calendar, but this director does not exist in the system. These hours were ignored. Please add this director to the system under DJ Controls -> Manage Directors. Do not add anything other than director office hours to the Office Hours calendar.`) === -1) {
               if (status > 3) { status = 3 }
-              issues.push(`Office Hours for "${event.summary}" exists on Google Calendar, but this director does not exist in the system. These hours were ignored.`)
+              issues.push(`Office Hours for "${event.summary}" exists on the Office Hours Google Calendar, but this director does not exist in the system. These hours were ignored. Please add this director to the system under DJ Controls -> Manage Directors. Do not add anything other than director office hours to the Office Hours calendar.`)
             } else {
               // Prepare data structure for event
               criteria = {

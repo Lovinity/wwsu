@@ -12,7 +12,7 @@ module.exports = {
 
     try {
       // Activate status issue
-      sails.models.status.changeStatus([{ name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio detected.` }])
+      sails.models.status.changeStatus([{ name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio detected! Please ensure audio is going out over the air. If so, check the audio settings on the DJ Controls responsible for silence detection.` }])
 
       // If a track is playing in RadioDJ, skip it and log it
       if (typeof sails.models.meta.automation[0] !== 'undefined' && parseInt(sails.models.meta.automation[0].ID) !== 0) {

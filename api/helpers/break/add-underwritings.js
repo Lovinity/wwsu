@@ -45,7 +45,7 @@ module.exports = {
 
       // If there are no queueUnderwritings breaks, this is an error! Bail.
       if (x === 0) {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: `sails.models.underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration.`, status: 2 }])
+        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: `sails.models.underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration. You can do this in DJ Controls under admin menu -> Server Configuration -> Breaks - Hourly`, status: 2 }])
         return exits.success()
       }
 
@@ -289,7 +289,7 @@ module.exports = {
               sails.log.debug(`Underwriting ${underwriting.ID}: Track disabled / expired.`)
             }
           } else {
-            bad.push(`The set track for underwriting "${underwriting.name}" was not found in RadioDJ; this underwriting will not air.`)
+            bad.push(`The set track for underwriting "${underwriting.name}" was not found in RadioDJ; this underwriting will not air. To fix, import the underwriting track to RadioDJ, and then go in DJ Controls under admin menu -> Manage Underwritings, and edit ${underwriting.name}.`)
             sails.log.debug(`Underwriting ${underwriting.ID}: Did NOT find song.`)
           }
         })
@@ -336,7 +336,7 @@ module.exports = {
 
       return exits.success()
     } catch (e) {
-      await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: `Internal Error with the underwritings system.`, status: 2 }])
+      await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: `Internal Error with the underwritings system. Please check the npm logs.`, status: 2 }])
       return exits.error(e)
     }
   }

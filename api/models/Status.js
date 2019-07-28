@@ -1,11 +1,11 @@
 /**
- * Status.js
+ * sails.models.status.js
  *
  * @description :: Model contains information about the status of certain systems.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-// API NOTE: Do not use Status.update() to update statuses; use Status.changeStatus instead. Otherwise, websockets may get flooded with updates.
+// API NOTE: Do not use sails.models.status.update() to update statuses; use sails.models.status.changeStatus instead. Otherwise, websockets may get flooded with updates.
 
 module.exports = {
 
@@ -55,7 +55,7 @@ module.exports = {
     { name: 'EAS-internal', label: 'EAS NWS CAPS', data: 'No successful connection to all EAS NWS CAPS has been made yet since initialization.', status: 4, time: null },
     { name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 4, time: null },
     { name: 'music-library', label: 'Music Library', data: 'Music library tests have not yet executed since initialization.', status: 4, time: null },
-    { name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar has not been loaded since initialization.', status: 4, time: null },
+    { name: 'google-calendar', label: 'Google sails.models.calendar', data: 'Google sails.models.calendar has not been loaded since initialization.', status: 4, time: null },
     { name: 'underwritings', label: 'Underwritings', data: 'Underwritings were not yet checked since initialization.', status: 4, time: null }
   ],
 
@@ -102,40 +102,42 @@ module.exports = {
       trigger: 15,
       active: false,
       fn: function () {
+        // LINT: async required because of sails.js await.
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             // Do not continue if we are in the process of waiting for a status 5 RadioDJ
-            if (Status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
+            if (sails.models.status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
 
-            await Meta.changeMeta({ changingState: `Switching radioDJ instances due to queueFail` })
+            await sails.models.meta.changeMeta({ changingState: `Switching radioDJ instances due to queueFail` })
             sails.sockets.broadcast('system-error', 'system-error', true)
-            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await Announcements.findOrCreate({ type: 'djcontrols', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+            await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
               .tolerate((err) => {
                 sails.log.error(err)
               })
             var maps = sails.config.custom.radiodjs
-              .filter((instance) => instance.rest === Meta['A'].radiodj)
+              .filter((instance) => instance.rest === sails.models.meta['A'].radiodj)
               .map(async (instance) => {
-                var status = await Status.findOne({ name: `radiodj-${instance.name}` })
-                if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data.` }]) }
+                var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
+                if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }]) }
                 return true
               })
             await Promise.all(maps)
             await sails.helpers.rest.cmd('EnableAssisted', 1, 0)
             await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0)
             await sails.helpers.rest.cmd('StopPlayer', 1, 0)
-            var queue = Meta.automation
+            var queue = sails.models.meta.automation
             await sails.helpers.rest.changeRadioDj()
             await sails.helpers.rest.cmd('ClearPlaylist', 1)
             await sails.helpers.error.post(queue)
-            await Meta.changeMeta({ changingState: null })
+            await sails.models.meta.changeMeta({ changingState: null })
             return resolve(0)
           } catch (e) {
-            await Meta.changeMeta({ changingState: null })
+            await sails.models.meta.changeMeta({ changingState: null })
             return reject(e)
           }
         })
@@ -148,35 +150,37 @@ module.exports = {
       trigger: 15,
       active: false,
       fn: function () {
+        // LINT: async required because of sails.js await
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
-            if (!moment().isBefore(moment(Status.errorCheck.prevError).add(1, 'minutes'))) {
+            if (!moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(1, 'minutes'))) {
               sails.log.verbose(`No recent error; attempting standard recovery.`)
-              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Queue recovery attempted; queue was frozen.</strong>` }).fetch()
+              await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Queue recovery attempted; queue was frozen.</strong>` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
               await sails.helpers.error.post()
             } else {
               // Do not continue if we are in the process of waiting for a status 5 RadioDJ
-              if (Status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
+              if (sails.models.status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
 
-              await Meta.changeMeta({ changingState: `Switching automation instances due to frozen` })
+              await sails.models.meta.changeMeta({ changingState: `Switching automation instances due to frozen` })
               sails.log.verbose(`Recent error; switching RadioDJs.`)
-              await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> queue was frozen.` }).fetch()
+              await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> queue was frozen.` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await Announcements.findOrCreate({ type: 'djcontrols', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+              await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
               var maps = sails.config.custom.radiodjs
-                .filter((instance) => instance.rest === Meta['A'].radiodj)
+                .filter((instance) => instance.rest === sails.models.meta['A'].radiodj)
                 .map(async (instance) => {
-                  var status = await Status.findOne({ name: `radiodj-${instance.name}` })
-                  if (status && status.status !== 1) { await Status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed.` }]) }
+                  var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
+                  if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }]) }
                   return true
                 })
               await Promise.all(maps)
@@ -184,15 +188,15 @@ module.exports = {
               await sails.helpers.rest.cmd('EnableAutoDJ', 0, 0)
               await sails.helpers.rest.cmd('EnableAssisted', 1, 0)
               await sails.helpers.rest.cmd('StopPlayer', 0, 0)
-              var queue = Meta.automation
+              var queue = sails.models.meta.automation
               await sails.helpers.rest.changeRadioDj()
               await sails.helpers.rest.cmd('ClearPlaylist', 1)
               await sails.helpers.error.post(queue)
-              await Meta.changeMeta({ changingState: null })
+              await sails.models.meta.changeMeta({ changingState: null })
             }
             return resolve(0)
           } catch (e) {
-            await Meta.changeMeta({ changingState: null })
+            await sails.models.meta.changeMeta({ changingState: null })
             return reject(e)
           }
         })
@@ -205,11 +209,13 @@ module.exports = {
       trigger: 6,
       active: false,
       condition: function () {
-        Meta.automation.map(() => {
+        sails.models.meta.automation.map(() => {
           // WORK ON THIS
         })
       },
       fn: function () {
+        // LINT: async required because of sails.js lint
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             // WORK ON THIS
@@ -228,12 +234,14 @@ module.exports = {
       active: false,
       condition: function () {
         var inQueue = false
-        Meta.automation
+        sails.models.meta.automation
           .filter(track => sails.config.custom.subcats.IDs.indexOf(parseInt(track.IDSubcat)) > -1)
           .map(() => { inQueue = true })
         return inQueue
       },
       fn: function () {
+        // LINT: async required because of sails.js lint
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1)
@@ -251,28 +259,30 @@ module.exports = {
       trigger: 300,
       active: false,
       fn: function () {
+        // LINT: async required because of sails.js lint
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
-            if (Meta['A'].changingState !== null) { return resolve(295) }
+            if (sails.models.meta['A'].changingState !== null) { return resolve(295) }
 
-            await Meta.changeMeta({ changingState: `Switching to automation via automationBreak` })
-            await Meta.changeMeta({ state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() })
+            await sails.models.meta.changeMeta({ changingState: `Switching to automation via automationBreak` })
+            await sails.models.meta.changeMeta({ state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlist_position: -1, playlist_played: moment('2002-01-01').toISOString() })
 
             // Add up to 3 track requests if any are pending
             await sails.helpers.requests.queue(3, true, true)
 
             // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
             try {
-              await Calendar.preLoadEvents(true)
+              await sails.models.calendar.preLoadEvents(true)
             } catch (unusedE2) {
               // Couldn't load calendar? Fall back to Default automation
               await sails.helpers.genre.start('Default', true)
             }
 
-            await Meta.changeMeta({ changingState: null })
+            await sails.models.meta.changeMeta({ changingState: null })
             return resolve(0)
           } catch (e) {
-            await Meta.changeMeta({ changingState: null })
+            await sails.models.meta.changeMeta({ changingState: null })
             return reject(e)
           }
         })
@@ -285,14 +295,16 @@ module.exports = {
       trigger: 10,
       active: false,
       fn: function () {
+        // LINT: async required because of sails.js lint
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
-            await Meta.changeMeta({ changingState: `Switching to automation via genreEmpty` })
+            await sails.models.meta.changeMeta({ changingState: `Switching to automation via genreEmpty` })
             await sails.helpers.genre.start('Default', true)
-            await Meta.changeMeta({ changingState: null })
+            await sails.models.meta.changeMeta({ changingState: null })
             return resolve(0)
           } catch (e) {
-            await Meta.changeMeta({ changingState: null })
+            await sails.models.meta.changeMeta({ changingState: null })
             return reject(e)
           }
         })
@@ -308,8 +320,10 @@ module.exports = {
      */
 
   changeStatus: function (array) {
+    // LINT: async required because of sails.js lint
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
-      sails.log.debug(`Status.changeStatus called.`)
+      sails.log.debug(`sails.models.status.changeStatus called.`)
       try {
         var maps = array.map(async status => {
           var criteriaB
@@ -320,7 +334,7 @@ module.exports = {
           criteriaB = _.cloneDeep(criteria)
 
           // Find or create the status record
-          var record = await Status.findOrCreate({ name: status.name }, criteriaB)
+          var record = await sails.models.status.findOrCreate({ name: status.name }, criteriaB)
             .tolerate(() => {
               return true
             })
@@ -328,7 +342,7 @@ module.exports = {
           // Search to see if any changes are made to the status; we only want to update if there is a change.
           var updateIt = false
           for (var key in criteria) {
-            if (criteria.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(criteria, key)) {
               if (criteria[key] !== record[key]) {
                 // We don't want to fetch() on time-only updates; this will flood websockets
                 if (!updateIt && key === 'time') {
@@ -348,7 +362,7 @@ module.exports = {
             }
 
             // Log changes in status
-            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: sails.models.meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)
@@ -356,7 +370,7 @@ module.exports = {
           }
           if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3) {
             // Log when bad statuses are now good.
-            await Logs.create({ attendanceID: Meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: Meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: sails.models.meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)
@@ -366,7 +380,7 @@ module.exports = {
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             criteriaB = _.cloneDeep(criteria)
             sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`)
-            await Status.update({ name: status.name }, criteriaB)
+            await sails.models.status.update({ name: status.name }, criteriaB)
               .tolerate((err) => {
                 throw err
               })
@@ -375,7 +389,7 @@ module.exports = {
             // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
             criteriaB = _.cloneDeep(criteria)
             sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`)
-            await Status.update({ name: status.name }, criteriaB)
+            await sails.models.status.update({ name: status.name }, criteriaB)
               .tolerate((err) => {
                 throw err
               })

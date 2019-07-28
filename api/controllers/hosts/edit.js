@@ -103,6 +103,7 @@ module.exports = {
 
       // Edit the status of this host if necessary
       var statusRecord = await sails.models.status.findOne({ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}` })
+      var additionalData = ``
 
       if (statusRecord) {
         if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls) {
@@ -110,12 +111,18 @@ module.exports = {
             var status = 4
             if (hostRecord.silenceDetection || hostRecord.recordAudio) {
               status = 2
+              if (hostRecord.silenceDetection) {
+                additionalData += ` This host is responsible for reporting silence when detected. Until the host is brought back online, you will not be alerted of on-air silence.`
+              }
+              if (hostRecord.recordAudio) {
+                additionalData += ` This host is responsible for recording on-air programming. Until the host is brought back online, on-air programming will not be recorded.`
+              }
             } else if (hostRecord.answerCalls) {
               status = 3
             }
-            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host is offline.` }])
+            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host / DJ Controls is offline.${additionalData}` }])
           } else {
-            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: `Host is online.` }])
+            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: `Host / DJ Controls is online.` }])
           }
         } else {
           await sails.models.status.destroy({ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}` }).fetch()
