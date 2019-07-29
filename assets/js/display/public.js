@@ -122,6 +122,7 @@ try {
   var content = document.getElementById('slide')
   var djAlert = document.getElementById('dj-alert')
   var easAlert = document.getElementById('eas-alert')
+  var nowplaying = document.getElementById('nowplaying')
   var nowplayingtime = document.getElementById('nowplaying-time')
   var nowplayingline1 = document.getElementById('nowplaying-line1')
   var nowplayingline2 = document.getElementById('nowplaying-line2')
@@ -1005,6 +1006,52 @@ function processNowPlaying (response) {
         clearInterval(nowPlayingTimer)
         clearTimeout(nowPlayingTimer)
         nowPlayingTimer = setInterval(nowPlayingTick, 1000)
+      }
+
+      if (typeof response.state !== 'undefined') {
+        switch (response.state) {
+          case 'automation_on':
+          case 'automation_genre':
+          case 'automation_break':
+            nowplaying.style.background = '#1F285A'
+            break
+          case 'automation_playlist':
+            nowplaying.style.background = '#014D72'
+            break
+          case 'automation_prerecord':
+          case 'automation_live':
+          case 'automation_remote':
+          case 'automation_sports':
+          case 'automation_sportsremote':
+            nowplaying.style.background = '#312607'
+            break
+          case 'live_on':
+          case 'live_break':
+          case 'live_returning':
+            nowplaying.style.background = '#6A0000'
+            break
+          case 'live_prerecord':
+            nowplaying.style.background = '#5C312E'
+            break
+          case 'sports_on':
+          case 'sports_break':
+          case 'sports_halftime':
+          case 'sports_returning':
+          case 'sportsremote_on':
+          case 'sportsremote_break':
+          case 'sportsremote_returning':
+          case 'sportsremote_halftime':
+          case 'sportsremote_break_disconnected':
+            nowplaying.style.background = '#054021'
+            break
+          case 'remote_on':
+          case 'remote_break':
+          case 'remote_returning':
+            nowplaying.style.background = '#471255'
+            break
+          default:
+            nowplaying.style.background = '#191919'
+        }
       }
 
       // First, process now playing information
