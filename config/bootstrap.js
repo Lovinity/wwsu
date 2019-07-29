@@ -1054,7 +1054,7 @@ module.exports.bootstrap = async function (done) {
         var checksMemory = [sails.models.recipients, sails.models.status]
         // LINT: RadioDJ tables cannot be changed
         // eslint-disable-next-line camelcase
-        var checksRadioDJ = [sails.models.category, sails.models.events, sails.models.genre, History, sails.models.playlists, sails.models.playlists_list, sails.models.requests, sails.models.settings, sails.models.subcategory]
+        var checksRadioDJ = [sails.models.category, sails.models.events, sails.models.genre, sails.models.history, sails.models.playlists, sails.models.playlists_list, sails.models.requests, sails.models.settings, sails.models.subcategory]
         var checksNodebase = [sails.models.announcements, sails.models.calendar, sails.models.discipline, sails.models.eas, sails.models.subscribers, sails.models.planner, sails.models.underwritings, sails.models.attendance, sails.models.darksky, sails.models.listeners, sails.models.djs, sails.models.hosts, sails.models.logs, sails.models.messages, sails.models.meta, sails.models.nodeusers, sails.models.timesheet, sails.models.directors, sails.models.songsliked, sails.models.sports, sails.models.xp]
         // Memory checks
         var checkStatus = { data: ``, status: 5 }

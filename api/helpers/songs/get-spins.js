@@ -25,7 +25,7 @@ module.exports = {
       if (!song) { return exits.error(new Error('The song was not found.')) }
 
       // Get history from RadioDJ
-      var history = await History.find({ artist: song.artist, title: song.title }).sort(`date_played ASC`)
+      var history = await sails.models.history.find({ artist: song.artist, title: song.title }).sort(`date_played ASC`)
       sails.log.verbose(`Retrieved history records: ${history.length}`)
       sails.log.silly(history)
 

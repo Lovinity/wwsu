@@ -34,7 +34,7 @@ module.exports = {
 
       // Next, check to see this track ID actually played recently. We will allow a 30-minute grace. Any tracks not played within the last 30 minutes cannot be liked.
       var canLike = false
-      records = await History.find({ createdAt: { '>=': moment().subtract(30, 'minutes').toISOString(true) } }).sort('createdAt DESC')
+      records = await sails.models.history.find({ createdAt: { '>=': moment().subtract(30, 'minutes').toISOString(true) } }).sort('createdAt DESC')
       if (records && records.length > 0) {
         records
           .filter(song => song.trackID === inputs.trackID)
