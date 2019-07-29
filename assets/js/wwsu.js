@@ -5,6 +5,7 @@
  *
  * @class WWSUdb
  */
+// eslint-disable-next-line no-unused-vars
 class WWSUdb {
   /**
      *Creates an instance of WWSUdb.
@@ -92,7 +93,7 @@ class WWSUdb {
       return null
     } else {
       for (var key in query) {
-        if (query.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(query, key)) {
           switch (key) {
             case 'insert':
               this._db.insert(query[key])
@@ -134,6 +135,7 @@ class WWSUdb {
 }
 
 // Class for managing requests and authorization to WWSU's API
+// eslint-disable-next-line no-unused-vars
 class WWSUreq {
   constructor (socket, host, usernameField = null, authPath = null, authName = null) {
     this.socket = socket
@@ -276,18 +278,17 @@ class WWSUreq {
 
       this.socket.request(opts, (body) => {
         if (!body) {
-          // eslint-disable-next-line callback-return
+          // eslint-disable-next-line standard/no-callback-literal
           cb(0)
         } else if (typeof body.tokenErr !== `undefined`) {
-          // eslint-disable-next-line callback-return
+          // eslint-disable-next-line standard/no-callback-literal
           cb(-1)
         } else {
-          // eslint-disable-next-line callback-return
           cb(body)
         }
       })
     } catch (unusedE) {
-      // eslint-disable-next-line callback-return
+      // eslint-disable-next-line standard/no-callback-literal
       cb(0)
     }
   }
@@ -298,26 +299,24 @@ class WWSUreq {
     try {
       this.socket.request({ method: 'POST', url: this.authPath, data: { username: username, password: password } }, (body) => {
         if (!body) {
-          // eslint-disable-next-line callback-return
+          // eslint-disable-next-line standard/no-callback-literal
           cb(0)
         } else {
           if (typeof body.token !== `undefined`) {
             this.token = body.token
             this.expiration = body.expires || (60000 * 5)
             this.time = moment()
-            // eslint-disable-next-line callback-return
             cb(body)
           } else if (typeof body.errToken !== `undefined`) {
-            // eslint-disable-next-line callback-return
             cb(body)
           } else {
-            // eslint-disable-next-line callback-return
+            // eslint-disable-next-line standard/no-callback-literal
             cb(0)
           }
         }
       })
     } catch (unusedE) {
-      // eslint-disable-next-line callback-return
+      // eslint-disable-next-line standard/no-callback-literal
       cb(0)
     }
   }
@@ -370,6 +369,7 @@ class WWSUreq {
 }
 
 // Use this function to wait for an element to exist. Calls back the cb when it exists, providing the DOM as a parameter.
+// eslint-disable-next-line no-unused-vars
 function waitForElement (theelement, cb) {
   console.log(theelement)
   if (!document.querySelector(theelement)) {

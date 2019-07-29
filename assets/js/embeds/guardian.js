@@ -30,7 +30,7 @@ waitFor(() => {
   io.socket.on('meta', (data) => {
     try {
       for (var key in data) {
-        if (data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
           Meta[key] = data[key]
         }
       }
@@ -100,7 +100,7 @@ function doSockets () {
   io.socket.post('/meta/get', {}, function serverResponded (body) {
     try {
       for (var key in body) {
-        if (body.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(body, key)) {
           Meta[key] = body[key]
         }
       }

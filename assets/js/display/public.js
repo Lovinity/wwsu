@@ -123,7 +123,6 @@ try {
   var djAlert = document.getElementById('dj-alert')
   var easAlert = document.getElementById('eas-alert')
   var nowplayingtime = document.getElementById('nowplaying-time')
-  var nowplayinglines = document.getElementById('nowplaying-lines')
   var nowplayingline1 = document.getElementById('nowplaying-line1')
   var nowplayingline2 = document.getElementById('nowplaying-line2')
   var wrapper = document.getElementById('wrapper')
@@ -360,9 +359,9 @@ $.fn.extend({
     this.addClass('animated ' + animationName).one(animationEnd, function () {
       $(this).removeClass('animated ' + animationName)
 
-      if (typeof callback === 'function')
-      // eslint-disable-next-line callback-return
-      { callback() }
+      if (typeof callback === 'function') {
+        callback()
+      }
     })
 
     return this
@@ -532,7 +531,7 @@ waitFor(() => {
   io.socket.on('meta', (data) => {
     try {
       for (var key in data) {
-        if (data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
           Meta[key] = data[key]
         }
       }
@@ -618,7 +617,7 @@ waitFor(() => {
   // on messages, display message if event is an insert
   io.socket.on('messages', (data) => {
     for (var key in data) {
-      if (data.hasOwnProperty(key) && key === 'insert') {
+      if (Object.prototype.hasOwnProperty.call(data, key) && key === 'insert') {
         iziToast.show({
           title: 'Message',
           message: data[key].message,
@@ -760,7 +759,7 @@ function MetaSocket () {
     try {
       temp = body
       for (var key in temp) {
-        if (temp.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(temp, key)) {
           Meta[key] = temp[key]
         }
       }
@@ -1002,39 +1001,13 @@ function processNowPlaying (response) {
           nowPlayingTick()
           nowPlayingTimer = setInterval(nowPlayingTick, 1000)
         }, moment(Meta.queueFinish).diff(moment(Meta.queueFinish).startOf('second')))
-      }
-      // Reset ticker when time is provided
-      else if (typeof response.time !== 'undefined') {
+      } else if (typeof response.time !== 'undefined') {
         clearInterval(nowPlayingTimer)
         clearTimeout(nowPlayingTimer)
         nowPlayingTimer = setInterval(nowPlayingTick, 1000)
       }
 
-      // April Fool's
-      if (typeof response.trackID !== `undefined` && parseInt(response.trackID) >= 74255 && parseInt(response.trackID) <= 74259) {
-        setTimeout(() => {
-          iziToast.show({
-            title: '',
-            message: `<img src="../../images/giphy.gif">`,
-            timeout: 25000,
-            close: true,
-            color: 'blue',
-            drag: false,
-            position: 'center',
-            closeOnClick: true,
-            pauseOnHover: false,
-            overlay: true,
-            zindex: 250,
-            layout: 2,
-            image: ``,
-            maxWidth: 480
-          })
-        }, 9500)
-      }
-
       // First, process now playing information
-      var color = 'rgba(72, 51, 43, 1)'
-      var statebadge = ''
       easDelay -= 1
       var temp
       var countdown
@@ -1061,20 +1034,7 @@ function processNowPlaying (response) {
              */
 
       if (disconnected || typeof Meta.state === 'undefined') {
-        statebadge = `<span class="badge badge-secondary shadow-2">OFFLINE</span>`
         djAlert.style.display = 'none'
-      } else if (Meta.state.startsWith('automation_')) {
-        statebadge = `<span class="badge badge-info shadow-2">MUSIC</span>`
-        color = 'rgba(1, 84, 122, 1)'
-      } else if (Meta.state.startsWith('live_')) {
-        statebadge = `<span class="badge badge-primary shadow-2">SHOW</span>`
-        color = 'rgba(115, 6, 23, 1)'
-      } else if (Meta.state.startsWith('remote_')) {
-        statebadge = `<span class="badge badge-purple shadow-2">REMOTE</span>`
-        color = 'rgba(51, 29, 91, 1)'
-      } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-        statebadge = `<span class="badge badge-success shadow-2">SPORTS</span>`
-        color = 'rgba(38, 87, 40, 1)'
       }
       if (typeof response.state !== `undefined` || typeof response.topic !== `undefined` || typeof response.show !== `undefined`) {
         /*

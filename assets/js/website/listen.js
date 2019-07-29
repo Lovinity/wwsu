@@ -359,7 +359,7 @@ waitFor(() => {
   // On meta changes, process meta
   io.socket.on('meta', (data) => {
     for (var key in data) {
-      if (data.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
         Meta[key] = data[key]
       }
     }
@@ -370,7 +370,7 @@ waitFor(() => {
   io.socket.on('messages', (data) => {
     try {
       for (var key in data) {
-        if (data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
           switch (key) {
             case 'insert':
               addMessage(data[key], firstTime)
@@ -591,7 +591,7 @@ function metaSocket () {
     // console.log(body);
     try {
       for (var key in body) {
-        if (body.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(body, key)) {
           Meta[key] = body[key]
         }
       }
@@ -1269,7 +1269,7 @@ function processCalendar (data, replace = false) {
       updateCalendar()
     } else {
       for (var key in data) {
-        if (data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
           switch (key) {
             case 'insert':
               Calendar.insert(data[key])
@@ -1557,7 +1557,7 @@ function displayEventInfo (showID) {
 }
 
 function getUrlParameter (name) {
-  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
+  name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
   var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
   var results = regex.exec(window.location.search)
   return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '))

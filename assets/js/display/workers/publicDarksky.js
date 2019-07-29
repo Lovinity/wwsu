@@ -16,16 +16,12 @@ onmessage = function (e) {
       // Current conditions
       this.postMessage([`setWeatherSlide`, [`weather`, true, `#424242`, `Current Weather`, getConditionIcon(item.currently.icon), `${item.currently.summary}; ${item.currently.temperature}°F`]])
 
-      // Determine when precipitation is going to fall
-      var precipExpected = false
-
       item.minutely.data.map((data, index) => {
         if (data.precipType && data.precipProbability >= 0.3) {
           if (precipStart > index) {
             precipStart = index
             precipType = data.precipType
           }
-          precipExpected = true
           if (precipEnd < index) { precipEnd = index }
         }
       })

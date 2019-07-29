@@ -190,9 +190,9 @@ $.fn.extend({
     this.addClass('animated ' + animationName).one(animationEnd, function () {
       $(this).removeClass('animated ' + animationName)
 
-      if (typeof callback === 'function')
-      // eslint-disable-next-line callback-return
-      { callback() }
+      if (typeof callback === 'function') {
+        callback()
+      }
     })
 
     return this
@@ -315,7 +315,7 @@ waitFor(() => {
   io.socket.on('meta', (data) => {
     try {
       for (var key in data) {
-        if (data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
           Meta[key] = data[key]
 
           // Do a status update if a state change was returned; this could impact power saving mode
@@ -446,16 +446,16 @@ function processStatus (db) {
     globalStatus = 4
     statusMarquee = `<div class="row bg-dark-1">
                       <div class="col-2 text-warning">
-                  	<strong>System</strong>
+                      <strong>System</strong>
                       </div>
                       <div class="col text-white">
-                  	<strong>Status</strong>
+                      <strong>Status</strong>
                       </div>
                       <div class="col-2 text-warning">
-                  	<strong>System</strong>
+                      <strong>System</strong>
                       </div>
                       <div class="col text-white">
-                  	<strong>Status</strong>
+                      <strong>Status</strong>
                       </div>
                     </div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`
 
@@ -476,45 +476,45 @@ function processStatus (db) {
         switch (thestatus.status) {
           case 1:
             statusMarquee += `<div class="col-2">
-                  	<span class="m-1 badge badge-danger">${thestatus.label}</span>
+                      <span class="m-1 badge badge-danger">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
-                  	<strong>CRITICAL</strong>: ${thestatus.data}
+                      <strong>CRITICAL</strong>: ${thestatus.data}
                       </div>`
             if (globalStatus > 1) { globalStatus = 1 }
             break
           case 2:
             statusMarquee += `<div class="col-2">
-                  	<span class="m-1 badge badge-urgent">${thestatus.label}</span>
+                      <span class="m-1 badge badge-urgent">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
-                  	<strong>Urgent</strong>: ${thestatus.data}
+                      <strong>Urgent</strong>: ${thestatus.data}
                       </div>`
             if (globalStatus > 2) { globalStatus = 2 }
             break
           case 3:
             statusMarquee += `<div class="col-2">
-                  	<span class="m-1 badge badge-warning">${thestatus.label}</span>
+                      <span class="m-1 badge badge-warning">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
-                  	<strong>Warning</strong>: ${thestatus.data}
+                      <strong>Warning</strong>: ${thestatus.data}
                       </div>`
             if (globalStatus > 3) { globalStatus = 3 }
             break
           case 4:
             statusMarquee += `<div class="col-2">
-                  	<span class="m-1 badge badge-secondary">${thestatus.label}</span>
+                      <span class="m-1 badge badge-secondary">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
-                  	<strong>Offline</strong>: ${thestatus.data}
+                      <strong>Offline</strong>: ${thestatus.data}
                       </div>`
             break
           case 5:
             statusMarquee += `<div class="col-2">
-                  	<span class="m-1 badge badge-success">${thestatus.label}</span>
+                      <span class="m-1 badge badge-success">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
-                  	<strong>Good</strong>: ${thestatus.data}
+                      <strong>Good</strong>: ${thestatus.data}
                       </div>`
             if (globalStatus > 3) { globalStatus = 5 }
             break
@@ -747,7 +747,7 @@ function processDirectors (ddb, hdb) {
           }
           if ((moment(event.start).isSameOrAfter(looptime) && moment(event.start).isBefore(looptime2)) || (moment(event.start).isBefore(looptime) && moment(event.end).isAfter(looptime))) {
             event.startT = moment(event.start).minutes() === 0 ? moment(event.start).format('h') : moment(event.start).format('h:mm')
-            if ((moment(event.start).hours() < 12 && moment(event.end).hours() >= 12) || (moment(event.start).hours() >= 12) && moment(event.end).hours() < 12) { event.startT += moment(event.start).format('A') }
+            if ((moment(event.start).hours() < 12 && moment(event.end).hours() >= 12) || ((moment(event.start).hours() >= 12) && moment(event.end).hours() < 12)) { event.startT += moment(event.start).format('A') }
             event.endT = moment(event.end).minutes() === 0 ? moment(event.end).format('hA') : moment(event.end).format('h:mmA')
 
             // Update strings if need be, if say, start time was before this day, or end time is after this day.
@@ -809,7 +809,7 @@ function processDirectors (ddb, hdb) {
     isActive = false
     Slides.slide(`hours-directors`).displayTime = 7
     for (var director in calendar) {
-      if (calendar.hasOwnProperty(director)) {
+      if (Object.prototype.hasOwnProperty.call(calendar, director)) {
         isActive = true
         var temp = directors[director] || null
         Slides.slide(`hours-directors`).displayTime += 3
@@ -894,7 +894,7 @@ function processDirectors (ddb, hdb) {
     isActive = false
     Slides.slide(`hours-assistants`).displayTime = 7
     for (var director2 in asstcalendar) {
-      if (asstcalendar.hasOwnProperty(director2)) {
+      if (Object.prototype.hasOwnProperty.call(asstcalendar, director2)) {
         isActive = true
         var temp2 = directors[director2] || null
         Slides.slide(`hours-assistants`).displayTime += 3
@@ -986,7 +986,7 @@ function metaSocket () {
     try {
       var temp = body
       for (var key in temp) {
-        if (temp.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(temp, key)) {
           Meta[key] = temp[key]
           if (key === 'time') {
             clearInterval(clockTimer)

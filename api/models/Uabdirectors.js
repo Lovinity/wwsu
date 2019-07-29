@@ -55,12 +55,13 @@ module.exports = {
      * Re-updates director presence
      */
   updateDirectors: function () {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       sails.log.debug(`updateDirectors called.`)
       var names = {}
 
       // Determine presence by analyzing timesheet records up to 14 days ago
-      var records = await Uabtimesheet.find({
+      var records = await sails.models.uabtimesheet.find({
         where: {
           or: [
             { time_out: { '>=': moment().subtract(14, 'days').toDate() } },
@@ -77,12 +78,12 @@ module.exports = {
             names[record.name] = true
             // If there's an entry with a null time_out, then consider the director clocked in
             if (record.time_out === null && record.time_in !== null) {
-              await Uabdirectors.update({ name: record.name }, { present: true, since: moment(record.time_in).toISOString(true) })
+              await sails.models.uabdirectors.update({ name: record.name }, { present: true, since: moment(record.time_in).toISOString(true) })
                 .tolerate(() => {
                 })
                 .fetch()
             } else {
-              await Uabdirectors.update({ name: record.name }, { present: false, since: moment(record.time_out).toISOString(true) })
+              await sails.models.uabdirectors.update({ name: record.name }, { present: false, since: moment(record.time_out).toISOString(true) })
                 .tolerate(() => {
                 })
                 .fetch()

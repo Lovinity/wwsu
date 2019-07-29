@@ -18,7 +18,7 @@ module.exports = async function (req, res, next) {
      ], IP: req.ip}, sort: 'createdAt DESC'}).exec(function (error, record)
      */
   try {
-    var record = await Discipline.find({ where: { active: 1,
+    var record = await sails.models.discipline.find({ where: { active: 1,
       or: [
         { action: 'permaban' },
         { action: 'dayban', createdAt: { '>': searchto } },

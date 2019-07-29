@@ -298,8 +298,8 @@ Slides = (() => {
         updateBadges()
 
         // Fit content if necessary
-        var temp = document.getElementById(`slide-${activeSlide().name}`)
-        var temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
+        temp = document.getElementById(`slide-${activeSlide().name}`)
+        temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
         if (activeSlide().fitContent && temp !== null && temp2 !== null) {
           console.log(`fitting content`)
           temp.classList.add('scale-wrapper')
@@ -401,7 +401,7 @@ Slides = (() => {
       if (temp2 !== null) {
         if (activeSlide().reset) { temp2.innerHTML = activeSlide().innerHtml }
       }
-      var temp = document.getElementById(`slide-${activeSlide().name}`)
+      temp = document.getElementById(`slide-${activeSlide().name}`)
       if (temp !== null) { temp.style.display = 'inline' }
 
       activeSlide().fn()
@@ -434,7 +434,7 @@ Slides = (() => {
   }
 
   // Timer for controlling transitions between slides
-  var timer = setInterval(() => {
+  setInterval(() => {
     if (timeLeft !== null) {
       timeLeft--
 
@@ -484,8 +484,8 @@ Slides = (() => {
           }
         } else {
           console.log(`Qualified slides after current`)
-          var done = false
-          var iteration = currentSlide + 1
+          done = false
+          iteration = currentSlide + 1
           while (!done) {
             if (activeIndexes[iteration]) {
               console.log(`Qualified ${iteration}`)

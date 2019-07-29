@@ -83,7 +83,7 @@ directorsdb.setOnUpdate((data) => {
     Directors[data.ID] = new Director(data)
   } else {
     for (var key in data) {
-      if (data.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
         Directors[data.ID][key] = data[key]
       }
     }
@@ -138,34 +138,42 @@ class Timesheet {
     this._name = value
   }
 
+  // eslint-disable-next-line camelcase
   get scheduled_in () {
     return this._scheduled_in
   }
 
+  // eslint-disable-next-line camelcase
   set scheduled_in (value) {
     this._scheduled_in = value
   }
 
+  // eslint-disable-next-line camelcase
   get scheduled_out () {
     return this._scheduled_out
   }
 
+  // eslint-disable-next-line camelcase
   set scheduled_out (value) {
     this._scheduled_out = value
   }
 
+  // eslint-disable-next-line camelcase
   get time_in () {
     return this._time_in
   }
 
+  // eslint-disable-next-line camelcase
   set time_in (value) {
     this._time_in = value
   }
 
+  // eslint-disable-next-line camelcase
   get time_out () {
     return this._time_out
   }
 
+  // eslint-disable-next-line camelcase
   set time_out (value) {
     this._time_out = value
   }
@@ -194,7 +202,7 @@ timesheetsdb.setOnUpdate((data) => {
     Timesheets[data.ID] = new Timesheet(data)
   } else {
     for (var key in data) {
-      if (data.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
         Timesheets[data.ID][key] = data[key]
       }
     }
@@ -262,16 +270,6 @@ $(document).ready(() => {
     zindex: 5
   })
 })
-
-function closeModal () {
-  $('#clockModal').iziModal(`close`)
-}
-
-function escapeHTML (str) {
-  var div = document.createElement('div')
-  div.appendChild(document.createTextNode(str))
-  return div.innerHTML
-}
 
 // Edit a timesheet entry, or view a single entry
 function editClock (clockID, save = false) {
@@ -848,7 +846,7 @@ function filterDate () {
 
         // Iterate through each director and list their hours worked.
         for (var key in hours) {
-          if (hours.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(hours, key)) {
             cell = document.getElementById(`options-timesheets-director-cell-h-${key.replace(/\W/g, '')}`)
             if (cell) {
               cell.innerHTML = `${hours[key].format('h', 1)}`

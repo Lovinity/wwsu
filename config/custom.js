@@ -20,6 +20,7 @@ const config = (() => {
   let defaultCfg
   let saveConfigFunc
   const rawConfig = {}
+  // eslint-disable-next-line prefer-const
   let config
   let timer
 
@@ -63,7 +64,7 @@ const config = (() => {
         for (const k in config) {
           delete config[k]
         }
-        cfg = Object.assign({}, defaultCfg)
+        const cfg = Object.assign({}, defaultCfg)
         for (const k in cfg) {
           config[k] = cfg[k]
         }
@@ -120,7 +121,7 @@ const config = (() => {
     }
     proxys.push(obj)
     for (var k in obj) {
-      if (obj.hasOwnProperty(k)) {
+      if (Object.prototype.hasOwnProperty.call(obj, k)) {
         const v = obj[k]
         if (v && typeof v === 'object') {
           proxyObject(v, proxys)
@@ -1090,7 +1091,7 @@ var defaultConfig = {
     allowedStyles: {
       span: {
         // Match HEX and RGB
-        color: [/^\#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/]
+        color: [/^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/]
       }
     },
     // Lots of these won't come up by default because we don't allow them

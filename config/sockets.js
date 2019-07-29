@@ -1,5 +1,3 @@
-/* global sails, Hosts, Discipline */
-
 /**
  * WebSocket Server Settings
  * (sails.config.sockets)
@@ -55,7 +53,7 @@ module.exports.sockets = {
     var theip = typeof handshake.headers['x-forwarded-for'] !== 'undefined' ? handshake.headers['x-forwarded-for'] : handshake.address
     var theid = sh.unique(theip + sails.config.custom.hostSecret)
     try {
-      var record = await Discipline.find({
+      var record = await sails.models.discipline.find({
         where: {
           active: 1,
           or: [
@@ -88,7 +86,7 @@ module.exports.sockets = {
         return proceed(new Error(`You must provide a host query parameter to authorize this websocket connection.`), false)
       }
 
-      var record = await Hosts.findOrCreate({ host: handshake._query.host }, { host: handshake._query.host, friendlyname: handshake._query.host })
+      record = await sails.models.hosts.findOrCreate({ host: handshake._query.host }, { host: handshake._query.host, friendlyname: handshake._query.host })
 
       if (!record.authorized) {
         return proceed(new Error(`The provided host is not yet authorized to connect to WWSU. Please have an administrator authorize this host.`), false)
