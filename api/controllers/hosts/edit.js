@@ -30,7 +30,8 @@ module.exports = {
 
     lockToDJ: {
       type: 'number',
-      description: 'If provided, the lockToDJ setting for the host will be changed to this.'
+      description: 'If provided, the lockToDJ setting for the host will be changed to this.',
+      allowNull: true
     },
 
     makeCalls: {
