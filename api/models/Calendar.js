@@ -253,7 +253,7 @@ module.exports = {
         // Alert if no events returned; this may be a problem. Also exit.
         if (events.length === 0) {
           if (status > 3) { status = 3 }
-          issues.push(`WWSU Events Google Calendar returned no events. Is this normal?`)
+          issues.push(`WWSU Events Google Calendar returned no events for the next 28 days. Is this normal?`)
         } else {
           // Iterate through each returned event from Google Calendar
 
@@ -818,7 +818,7 @@ module.exports = {
         // Should have at least one event.
         if (events.length === 0) {
           if (status > 3) { status = 3 }
-          issues.push(`Google Calendar Office Hours returned no events. Is this normal?`)
+          issues.push(`Google Calendar Office Hours returned no events for the next 28 days. Is this normal?`)
         } else {
           eventIds = [] // Used for determining which events in memory no longer exist, and therefore should be destroyed
 
@@ -866,7 +866,7 @@ module.exports = {
               needsUpdate = false
               isChanged = false
               for (var key2 in theEvent) {
-                if (Object.prototype.hasOwnProperty.call(theEvent, key)) {
+                if (Object.prototype.hasOwnProperty.call(theEvent, key2)) {
                   if (typeof criteria[key2] !== 'undefined' && theEvent[key2] !== criteria[key2] && key2 !== 'ID' && key2 !== 'createdAt' && key2 !== `updatedAt`) {
                     // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
                     if (key2 === `start` && moment(theEvent[key2]).isSame(moment(criteria[key2]))) { continue }
