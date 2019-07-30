@@ -14,6 +14,9 @@ module.exports = {
     sails.log.debug('Controller songs/get called.')
 
     try {
+      // Prevent adding tracks if host is lockToDJ and the specified lockToDJ is not on the air
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to queue a Top Add because you are not on the air.')) }
+
       // Log it
       await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: sails.models.meta['A'].show, event: '<strong>Top Add requested.</strong>' }).fetch()
         .tolerate((err) => {

@@ -35,6 +35,14 @@ module.exports = {
       // Block this request if we are already switching states
       if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
+      // Disallow starting a sports remote broadcast if the host has lockToDJ and there is no scheduled sports broadcast at this time
+      if (this.req.payload.lockToDJ !== null) {
+        var record = await sails.models.calendar.find({ title: { startsWith: `Sports: ` }, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
+        if (!record || record.length === 0) {
+          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote sports broadcasts when scheduled. There are no sports broadcasts scheduled at this time.'))
+        }
+      }
+
       // Lock so that any other state changing requests are blocked until we are done
       await sails.models.meta.changeMeta({ changingState: `Switching to sports-remote` })
 

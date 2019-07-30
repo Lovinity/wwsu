@@ -49,6 +49,9 @@ module.exports = {
             // Update all listeners records
             await sails.models.listeners.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
 
+            // Update lockToDJ in hosts
+            await sails.models.hosts.update({ lockToDJ: record.ID }, { lockToDJ: inputs.ID }).fetch()
+
             // Remove the original record
             await sails.models.djs.destroy({ ID: record.ID }).fetch()
 

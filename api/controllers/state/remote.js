@@ -40,6 +40,23 @@ module.exports = {
       // Block this request if we are changing states right now
       if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
+      // Disallow starting a remote broadcast if the host has lockToDJ and the provided DJ either does not match lockToDJ or is not scheduled to start a remote broadcast
+      if (this.req.payload.lockToDJ !== null) {
+        var dj = inputs.showname.split(' - ')
+        dj = dj[0]
+        var djRecord = await sails.models.djs.find({ name: dj })
+        if (!djRecord || djRecord.length === 0) {
+          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided does not exist in the system.'))
+        } else if (djRecord[0].ID !== this.req.payload.lockToDJ) {
+          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided does not match the DJ you are allowed to use.'))
+        }
+
+        var record = await sails.models.calendar.find({ title: `Remote: ${inputs.showname}`, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
+        if (!record || record.length === 0) {
+          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ and show name you provided is not scheduled to go on the air at this time.'))
+        }
+      }
+
       // Lock so that other state changing requests get blocked until we are done.
       await sails.models.meta.changeMeta({ changingState: `Switching to remote` })
 

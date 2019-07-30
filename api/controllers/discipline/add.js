@@ -36,6 +36,9 @@ module.exports = {
     sails.log.debug(`controller discipline/add called.`)
 
     try {
+      // Prevent adding discipline to website visitors if host is lockToDJ and the specified lockToDJ is not on the air
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to discipline website visitors because you are not on the air.')) }
+
       await sails.helpers.discipline.add(inputs.IP, inputs.action, inputs.message, inputs.active)
 
       return exits.success()

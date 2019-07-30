@@ -35,6 +35,11 @@ module.exports = {
       // Block this request if we are already switching states
       if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
+      // If the specified host has lockToDJ, deny going sports because going sports live from the studio should only happen inside WWSU studios
+      if (this.req.payload.lockToDJ !== null) {
+        return exits.error(new Error('You are not authorized to start a non-remote sports broadcast.'))
+      }
+
       // Lock so that any other state changing requests are blocked until we are done
       await sails.models.meta.changeMeta({ changingState: `Switching to sports` })
 

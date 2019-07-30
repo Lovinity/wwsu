@@ -40,6 +40,11 @@ module.exports = {
       // Block the request if we are changing states right now
       if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
+      // If the specified host has lockToDJ, deny going live because going live should only happen inside WWSU studios
+      if (this.req.payload.lockToDJ !== null) {
+        return exits.error(new Error('You are not authorized to start a live broadcast.'))
+      }
+
       // Lock so other state changing requests get blocked until we are done
       await sails.models.meta.changeMeta({ changingState: `Switching to live` })
 

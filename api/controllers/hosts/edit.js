@@ -28,6 +28,11 @@ module.exports = {
       description: 'If provided, the admin setting for the host will be changed to this. If changing to false, and no other authorized admin exists, an error will be thrown to prevent accidental lockout.'
     },
 
+    lockToDJ: {
+      type: 'number',
+      description: 'If provided, the lockToDJ setting for the host will be changed to this.'
+    },
+
     makeCalls: {
       type: 'boolean',
       description: 'If provided, the makeCalls setting for the host will be changed to this.'

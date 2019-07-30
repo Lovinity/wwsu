@@ -12,6 +12,9 @@ module.exports = {
     sails.log.debug('Controller songs/queue-liner called.')
 
     try {
+      // Prevent adding tracks if host is lockToDJ and the specified lockToDJ is not on the air
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to queue a sports liner because you are not on the air.')) }
+
       // Error if we are not in a sports state
       if (sails.models.meta['A'].state.startsWith('sports')) { return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`)) }
 

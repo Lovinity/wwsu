@@ -24,6 +24,9 @@ module.exports = {
       // Block this request if we are already trying to change states
       if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
+      // Prevent state changing if host is lockToDJ and the specified lockToDJ is not on the air
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to send the system into break because you are not on the air.')) }
+
       // Lock so that other state changing requests get blocked until we are done
       await sails.models.meta.changeMeta({ changingState: `Going into break` })
 

@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Attendance.createRecord now accepts undefined as a parameter. If undefined, current attendance record will be closed off, but a new one will not be made.
  - Attendance.createRecord might return a property of "updatedRecord" in its returned object if the function closed off an active attendance record.
  - Triggering silence/active more than once in a 3-minute time span when a broadcast is on the air will result in the automatic termination of the broadcast (into automation_break mode). This is to prevent show hosts from airing excessive silence.
+ - lockToDJ column in the Hosts model of type number, allowing null. This allows locking hosts to a specific DJ (null if not locked to one). When a host is locked to a specific DJ, they cannot start live shows nor live sports broadcasts. They can only start remote and sports remote broadcasts when scheduled and only under their name. They cannot queue/play PSAs, Top Adds, Sports Liners, nor requested tracks unless they are on the air. They cannot send messages to the display signs nor to website visitors unless they are on the air. They cannot issue discipline against website visitors unless they are on the air. [Issue 97](https://github.com/Lovinity/wwsu/issues/97)
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.

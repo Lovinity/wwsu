@@ -35,6 +35,11 @@ module.exports = {
       defaultsTo: false
     },
 
+    lockToDJ: {
+      type: 'number',
+      allowNull: true
+    },
+
     makeCalls: {
       type: 'boolean',
       defaultsTo: false
