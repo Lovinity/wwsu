@@ -26,6 +26,9 @@ module.exports = {
       // Update all listeners records to null DJ
       await sails.models.listeners.update({ dj: inputs.ID }, { dj: null }).fetch()
 
+      // Update lockToDJ in hosts to 0, which means the host cannot start any broadcasts at all
+      await sails.models.hosts.update({ lockToDJ: inputs.ID }, { lockToDJ: 0 }).fetch()
+
       // Destroy XP records
       await sails.models.xp.destroy({ dj: inputs.ID }).fetch()
 
