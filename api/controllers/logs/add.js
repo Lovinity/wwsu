@@ -66,6 +66,9 @@ module.exports = {
     sails.log.debug('Controller logs/add called.')
 
     try {
+      // Prevent adding manual logs if host is lockToDJ and the specified lockToDJ is not on the air
+      if (inputs.logtype === 'manual' && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to add a log entry because you are not on the air.')) }
+
       // Create the log entry
       await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }).fetch()
 
