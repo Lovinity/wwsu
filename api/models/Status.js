@@ -115,7 +115,7 @@ module.exports = {
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `queueFail (system)`, announcement: 'System recently had switched automation instances because automation was failing to return what was in the queue. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+            await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `RadioDJ Queue Failure (system)` }, { type: 'djcontrols', level: 'warning', title: `RadioDJ Queue Failure (system)`, announcement: `System had switched automation instances on ${moment().toISOString(true).format('LLLL')} because the other RadioDJ was failing to return queue data; it might have crashed or the REST server lost connection to the internet. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
               .tolerate((err) => {
                 sails.log.error(err)
               })
@@ -172,7 +172,7 @@ module.exports = {
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `frozen (system)`, announcement: 'System recently had switched automation instances because the queue seems to have frozen. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+              await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `RadioDJ Frozen Playback (system)` }, { type: 'djcontrols', level: 'warning', title: `RadioDJ Frozen Playback (system)`, announcement: `System had switched automation instances on ${moment().toISOString(true).format('LLLL')} because the playback on the other RadioDJ froze. RadioDJ might have frozen because of an audio device issue [check RadioDJ's sound card options], corrupt track [check to ensure the most recently played tracks are okay], or problem reading an audio file [check to ensure RadioDJ can actually read the file path and the hard drive is healthy]. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
                 .tolerate((err) => {
                   sails.log.error(err)
                 })

@@ -120,7 +120,7 @@ module.exports = {
             } else if (hostRecord.answerCalls) {
               status = 3
             }
-            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host / DJ Controls is offline.${additionalData}` }])
+            await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: status, data: `Host / DJ Controls is offline. Please ensure the application is running and connected to the internet.${additionalData}` }])
           } else {
             await sails.models.status.changeStatus([{ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${hostRecord.friendlyname}`, status: 5, data: `Host / DJ Controls is online.` }])
           }

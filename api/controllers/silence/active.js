@@ -36,7 +36,7 @@ module.exports = {
           .tolerate((err) => {
             sails.log.error(err)
           })
-        await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `Audio Error (system)`, announcement: 'System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info.' }, { type: 'djcontrols', level: 'urgent', title: `Audio Error (system)`, announcement: 'System recently had switched automation instances because the silence detection system triggered multiple times. Please check the logs for more info.', starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+        await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `Audio Error (system)` }, { type: 'djcontrols', level: 'warning', title: `Audio Error (system)`, announcement: `System had switched automation instances on ${moment().toISOString(true).format('LLLL')} because the silence detection system triggered multiple times. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
           .tolerate((err) => {
             sails.log.error(err)
           })
@@ -62,6 +62,23 @@ module.exports = {
         await sails.helpers.rest.cmd('ClearPlaylist', 1)
         await sails.helpers.error.post(queue)
         await sails.models.meta.changeMeta({ changingState: null })
+      }
+
+      // If we are not in automation, and prvError is less than 3 minutes ago, assume irresponsible DJ and automatically end the show (but go into automation_break).
+      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && !sails.models.meta['A'].state.startsWith('automation_') && sails.models.meta['A'].state !== 'live_prerecord') {
+        await sails.models.meta.changeMeta({ changingState: `Ending current broadcast due to no audio` })
+
+        // Log the problem
+        await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Long period of silence detected</strong>. This is likely due to an irresponsible DJ / show host. System terminated the current broadcast and went to automation to stop the silence.` }).fetch()
+          .tolerate((err) => {
+            sails.log.error(err)
+          })
+        await sails.models.announcements.create({ type: 'djcontrols', level: 'warning', title: `Silence During Broadcast (system)`, announcement: `System had automatically terminated a broadcast on ${moment().toISOString(true).format('LLLL')} because the silence detection system reported a long period of dead air / silence, or multiple silences within a short period of time. Please review show recordings and determine if this was a technical issue or human error. If human error, please discuss the proper operation of broadcasts and equipment. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+          .tolerate((err) => {
+            sails.log.error(err)
+          })
+
+        await sails.helpers.state.automation(true)
       }
 
       sails.models.status.errorCheck.prevError = moment()

@@ -199,7 +199,7 @@ module.exports = {
         })
         .catch(err => {
           sails.log.error(err)
-          sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar Error: ' + breakdance(err.message), status: 2 }])
+          sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar error: ${breakdance(err.message)}. This is likely a network problem or an issue with Google. Until resolved, modifications to the calendar will not reflect in the system; system will use the calendar stored in memory.`, status: 2 }])
           return reject(err)
         })
     })
@@ -990,7 +990,7 @@ module.exports = {
           return resolve()
         }
       } catch (e) {
-        sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: 'Google Calendar error: ' + breakdance(e.message), status: 2 }])
+        sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar error: ${breakdance(e.message)}. This is likely a network problem or an issue with Google. Until resolved, modifications to the calendar will not reflect in the system; system will use the calendar stored in memory.`, status: 2 }])
         sails.log.error(e)
         return reject(e)
       }

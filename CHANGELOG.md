@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Added parameter "ignoreSpins" to songs/get. If true, spin counts will not be returned, speeding up response time. Ignored if ID is not specified.
  - Attendance.createRecord now accepts undefined as a parameter. If undefined, current attendance record will be closed off, but a new one will not be made.
  - Attendance.createRecord might return a property of "updatedRecord" in its returned object if the function closed off an active attendance record.
+ - Triggering silence/active more than once in a 3-minute time span when a broadcast is on the air will result in the automatic termination of the broadcast (into automation_break mode). This is to prevent show hosts from airing excessive silence.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
