@@ -77,6 +77,20 @@ try {
     html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
   })
 
+  Slides.newSlide({
+    name: `eas-nationwide-test`,
+    label: `EAS Nationwide Test 2:20PM`,
+    weight: 800000,
+    isSticky: true,
+    color: `danger`,
+    active: false,
+    transitionIn: `fadeIn`,
+    transitionOut: `fadeOut`,
+    displayTime: 60,
+    fitContent: true,
+    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">EAS Nationwide Test at 2:20 PM!</h1><span style="color: #FFFFFF; font-size: 1.5em;">At least one WWSU personnel is to report to the OnAir studio to monitor the blue SAGE Digital ENDEC during the test at 2:20 PM.<br />The following items need to be monitored:<br /><ul><li>Three chirps at the beginning of the test</li><li>8-10 second "alert tone"</li><li>Automated, audible, understandable voice "This is a Nationwide Test of the Emergency Alert System..."</li><li>Three short chirps at the end of the test.</li></ul><p>Patrick is in charge of monitoring the test and reporting the results to the FCC.<br />If they are not in the station during the test, please report the status of the above information to them.</span>`
+  })
+
   // Define data variables
   var Directors = new WWSUdb(TAFFY())
   var Directorhours = new WWSUdb(TAFFY())
@@ -426,6 +440,20 @@ function clockTick () {
   } else if (directorNotify) {
     Slides.slide(`director-clockout`).active = false
     directorNotify = false
+  }
+
+  // EAS Nationwide Test
+  if (moment(Meta.time).format('YYYY-MM-DD HH') === '2019-08-07 14' && moment(Meta.time).minute() >= 10 && moment(Meta.time).minute() < 30) {
+    if (!Slides.slide(`eas-nationwide-test`).active) {
+      Slides.slide(`eas-nationwide-test`).active = true
+    }
+    if (moment(Meta.time).second() === 0 && moment(Meta.time).minute() < 20) {
+      responsiveVoice.speak(`Attention all directors! Attention all directors! The Nationwide Emergency Alert System test will commence at 2:20 PM. At least one WWSU personnel must be present for this test. Please review the internal display sign for instructions. This message will repeat every minute until 2:20 PM.`)
+    }
+  } else {
+    if (Slides.slide(`eas-nationwide-test`).active) {
+      Slides.slide(`eas-nationwide-test`).active = false
+    }
   }
 
   // Refresh hours every midnight
