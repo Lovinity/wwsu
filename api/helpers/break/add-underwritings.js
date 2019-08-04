@@ -37,7 +37,7 @@ module.exports = {
         if (Object.prototype.hasOwnProperty.call(sails.config.custom.breaks, minute)) {
           if (sails.config.custom.breaks[minute].length > 0) {
             sails.config.custom.breaks[minute].map((task) => {
-              if (task.task === `queueUnderwritings` && task.quantity > 0) { x++ }
+              if (task && task !== null && task.task === `queueUnderwritings` && task.quantity > 0) { x++ }
             })
           }
         }
