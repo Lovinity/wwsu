@@ -43,7 +43,7 @@ module.exports = {
     try {
       for (var key in inputs) {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
-          sails.config.custom.specialBreaks.live[key] = inputs[key]
+          sails.config.custom.specialBreaks.live[key] = await sails.helpers.break.removeNullTasks(inputs[key])
         }
       }
 

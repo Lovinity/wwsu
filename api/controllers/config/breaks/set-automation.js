@@ -23,7 +23,7 @@ module.exports = {
       // Modify configuration
       for (var key in inputs) {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
-          sails.config.custom.specialBreaks.automation[key] = inputs[key]
+          sails.config.custom.specialBreaks.automation[key] = await sails.helpers.break.removeNullTasks(inputs[key])
         }
       }
 

@@ -48,7 +48,7 @@ module.exports = {
       // Modify config
       for (var key in inputs) {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
-          sails.config.custom.specialBreaks.sports[key] = inputs[key]
+          sails.config.custom.specialBreaks.sports[key] = await sails.helpers.break.removeNullTasks(inputs[key])
         }
       }
 

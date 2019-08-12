@@ -33,7 +33,7 @@ module.exports = {
       if (inputs.tasks.length < 1 && inputs.minute !== 0) {
         delete sails.config.custom.breaks[inputs.minute]
       } else {
-        sails.config.custom.breaks[inputs.minute] = inputs.tasks
+        sails.config.custom.breaks[inputs.minute] = await sails.helpers.break.removeNullTasks(inputs.tasks)
       }
 
       // Transmit new config through socket
