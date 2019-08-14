@@ -93,7 +93,7 @@ module.exports = {
               break
             default:
               // For all other states, queue a request liner before we queue the requests
-              if (queuedSomething && inputs.liner_first) { await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, false, null) }
+              if (queuedSomething && inputs.liner_first) { await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, 'lenientRules', null) }
               return resolve()
               break
           }

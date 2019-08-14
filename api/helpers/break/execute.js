@@ -25,9 +25,10 @@ module.exports = {
       description: 'For tasks involving queuing of tracks or requests, number of tracks to queue.'
     },
     rules: {
-      type: 'boolean',
-      defaultsTo: false,
-      description: 'For track queuing, If true, follow playlist rotation rules. Defaults to false.'
+      type: 'string',
+      isIn: ['noRules', 'lenientRules', 'strictRules'],
+      defaultsTo: 'noRules',
+      description: 'For track queuing, noRules = do not consider rotation rules, lenientRules = consider rotation rules until/unless there are no more tracks that can be queued, and then queue randomly, strictRules = consider rotation rules and stop queuing when no more tracks can be queued.'
     }
   },
 

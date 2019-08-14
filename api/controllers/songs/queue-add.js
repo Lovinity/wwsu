@@ -25,7 +25,7 @@ module.exports = {
         })
 
       // Queue it
-      await sails.helpers.songs.queue(sails.config.custom.subcats.adds, 'Top', 1, true)
+      await sails.helpers.songs.queue(sails.config.custom.subcats.adds, 'Top', 1, 'lenientRules')
 
       // Play it
       await sails.helpers.rest.cmd('EnableAssisted', 0)

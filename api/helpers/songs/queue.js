@@ -25,9 +25,10 @@ module.exports = {
     },
 
     rules: {
-      type: 'boolean',
-      defaultsTo: true,
-      description: 'If true (default), will check for rotation rules before queuing tracks (unless there is not enough tracks to queue given rotation rules).'
+      type: 'string',
+      isIn: ['noRules', 'lenientRules', 'strictRules'],
+      defaultsTo: 'lenientRules',
+      description: 'Accepted values: "noRules" (do not consider rotation rules), "lenientRules" [default] (consider rotation rules until/unless there are no more tracks that can be queued, then start queuing randomly), and "strictRules" (consider rotation rules and stop queuing when there are no more tracks that can be queued)'
     },
 
     duration: {
@@ -77,7 +78,7 @@ module.exports = {
         tracks.map(queuedtrack => queuedtracksa.push(queuedtrack.ID))
 
         // Queue up the chosen tracks if they pass rotation rules, and if rules is not set to false
-        if (inputs.rules) {
+        if (inputs.rules !== 'noRules') {
           thesongs2 = thesongs.filter(thesong => thesong !== 'undefined' && queuedtracksa.indexOf(thesong.ID) === -1)
           while (queuedtracks < inputs.quantity && thesongs2.length > 0) {
             temp = await sails.helpers.pickRandom(thesongs2, true)
@@ -92,8 +93,8 @@ module.exports = {
           }
         }
 
-        // Not enough tracks, or rules was set to false? Let's try queuing [more] tracks without rotation rules
-        if (queuedtracks < inputs.quantity) {
+        // Not enough tracks and rules are not strict? Let's try queuing [more] tracks without rotation rules
+        if (queuedtracks < inputs.quantity && inputs.rules !== 'strictRules') {
           sails.log.verbose('Not enough tracks to queue when considering rotation rules.')
 
           // We want to be sure we don't queue any tracks that are already in the queue. Let's get the queue again.

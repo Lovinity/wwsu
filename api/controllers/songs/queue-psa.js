@@ -19,7 +19,7 @@ module.exports = {
       if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to queue a PSA because you are not on the air.')) }
 
       // Queue applicable PSA
-      await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, true, inputs.duration)
+      await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, 'lenientRules', inputs.duration)
 
       return exits.success()
     } catch (e) {

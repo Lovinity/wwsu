@@ -64,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Timesheet now creates records in advance for upcoming director hours. Timesheet system will merge clock in/out entries with these ones as necessary. Allows for better logging of director absences, cancellations, and scheduled hours.
  - Google Calendar status will now list each specific issue found with calendar events. [Issue 86](https://github.com/Lovinity/wwsu/issues/86)
  - Liners might also queue underwritings if any of them are way behind schedule.
+ - sails.helpers.songs.queue: the rules parameter was changed from type boolean to type string and accepts the following values: "noRules" (do not consider rotation rules), "lenientRules" [default] (consider rotation rules until/unless there are no more tracks that can be queued, then start queuing randomly), and "strictRules" (consider rotation rules and stop queuing when there are no more tracks that can be queued)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

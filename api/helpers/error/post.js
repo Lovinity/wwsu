@@ -64,7 +64,7 @@ module.exports = {
         await sails.helpers.rest.cmd('EnableAutoDJ', 0)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.rest.cmd('ClearPlaylist', 1)
-        await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, false)
+        await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1)
         await sails.helpers.rest.cmd('EnableAssisted', 0)
         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
         // LINT: await is required by Sails.js
