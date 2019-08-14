@@ -41,6 +41,7 @@ module.exports = {
             break
           case 'queue':
             if (typeof obj.category === `undefined`) { rejectIt = true }
+            if (['noRules', 'lenientRules', 'strictRules'].indexOf(obj.rules) === -1) { rejectIt = true }
             break
             // No enforcements for these tasks
           case 'queueRequests':
