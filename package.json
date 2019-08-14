@@ -15,7 +15,7 @@
     "dark-sky": "^1.1.5",
     "google-auth-library": "^1.6.1",
     "googleapis": "^30.0.0",
-    "grunt": "^1.0.3",
+    "grunt": "^1.0.4",
     "he": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
     "later": "^1.2.0",
