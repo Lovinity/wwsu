@@ -116,6 +116,12 @@ module.exports = {
             return resolve(false)
           }
 
+          // Double check rotation rules on the track
+          if (!await sails.helpers.songs.checkRotationRules(record.songID)) {
+            sails.log.verbose(`Track violates rotation rules. Abandoning queueRequest.`)
+            return resolve(false)
+          }
+
           // Prepare the request
           await sails.helpers.rest.cmd('LoadTrackToTop', record.songID, 10000)
           // wait.for.time(1);
