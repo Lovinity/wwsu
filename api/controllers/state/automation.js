@@ -24,7 +24,7 @@ module.exports = {
 
       // Lock system from any other state changing requests until we are done.
       await sails.models.meta.changeMeta({ changingState: `Changing to automation / calculating show stats` })
-      return sails.helpers.state.automation(inputs.transition)
+      return exits.success(await sails.helpers.state.automation(inputs.transition))
     } catch (e) {
       await sails.models.meta.changeMeta({ changingState: null })
       return exits.error(e)
