@@ -56,7 +56,7 @@ module.exports = {
         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
         // LINT: await is required by Sails.js
         // eslint-disable-next-line no-return-await
-        maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'Bottom', 1))
+        maps = reQueue.map(async (queueItem) => await sails.helpers.rest.cmd('LoadTrackToBottom', queueItem))
         await Promise.all(maps)
         // When in break, queue PSAs
       } else if (sails.models.meta['A'].state.includes('_break') || sails.models.meta['A'].state.includes('_returning') || sails.models.meta['A'].state.includes('_disconnected')) {
@@ -69,7 +69,7 @@ module.exports = {
         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
         // LINT: await is required by Sails.js
         // eslint-disable-next-line no-return-await
-        maps = reQueue.map(async (queueItem) => await sails.helpers.songs.queue(queueItem, 'Bottom', 1))
+        maps = reQueue.map(async (queueItem) => await sails.helpers.rest.cmd('LoadTrackToBottom', queueItem))
         await Promise.all(maps)
       }
 
