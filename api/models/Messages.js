@@ -26,7 +26,7 @@ module.exports = {
     fromFriendly: {
       type: 'string'
     },
-    from_IP: {
+    fromIP: {
       type: 'string',
       defaultsTo: 'Not Specified'
     },
@@ -47,7 +47,7 @@ module.exports = {
   // Websockets standards
   afterCreate: function (newlyCreatedRecord, proceed) {
     // Do not pass IP addresses through web sockets!
-    if (typeof newlyCreatedRecord.from_IP !== 'undefined') { delete newlyCreatedRecord.from_IP }
+    if (typeof newlyCreatedRecord.fromIP !== 'undefined') { delete newlyCreatedRecord.fromIP }
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`messages socket: ${data}`)
     sails.sockets.broadcast('messages', 'messages', data)
@@ -77,7 +77,7 @@ module.exports = {
 
   afterUpdate: function (updatedRecord, proceed) {
     // Do not pass IP addresses through web sockets!
-    if (typeof updatedRecord.from_IP !== 'undefined') { delete updatedRecord.from_IP }
+    if (typeof updatedRecord.fromIP !== 'undefined') { delete updatedRecord.fromIP }
     var data = { update: updatedRecord }
 
     if (updatedRecord.status === 'deleted') { data = { remove: updatedRecord.ID } }
@@ -106,7 +106,7 @@ module.exports = {
 
   afterDestroy: function (destroyedRecord, proceed) {
     // Do not pass IP addresses through web sockets!
-    if (typeof destroyedRecord.from_IP !== 'undefined') { delete destroyedRecord.from_IP }
+    if (typeof destroyedRecord.fromIP !== 'undefined') { delete destroyedRecord.fromIP }
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`messages socket: ${data}`)
     sails.sockets.broadcast('messages', 'messages', data)

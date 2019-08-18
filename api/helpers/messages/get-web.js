@@ -36,8 +36,8 @@ module.exports = {
       } else {
         // Remove IP addresses from response!
         records
-          .filter((record, index) => typeof records[index].from_IP !== 'undefined')
-          .map((record, index) => delete records[index].from_IP)
+          .filter((record, index) => typeof records[index].fromIP !== 'undefined')
+          .map((record, index) => delete records[index].fromIP)
 
         return exits.success(records)
       }
