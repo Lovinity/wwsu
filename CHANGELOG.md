@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### REMOVED
  - Removed deprecated discipline endpoints discipline/ban-* [Issue 64](https://github.com/Lovinity/wwsu/issues/64)
  - Removed deprecated discipline helpers sails.helpers.discipline.ban* [Issue 64](https://github.com/Lovinity/wwsu/issues/64)
+ - Removed deprecated queue parameter in sails.helpers.rest.cmd [Issue 60](https://github.com/Lovinity/wwsu/issues/60)
 
 ### Added
  - "device" property returned for recipient objects in recipients/get. This will contain the OneSignal UUID if the recipient is using the WWSU mobile app. Otherwise, it will be null.

@@ -19,11 +19,6 @@ module.exports = {
       type: 'number',
       defaultsTo: 10000,
       description: 'Amount of time allowed for waiting for a connection, a response header, and response data (each). If this value is set to 0, the promise will resolve immediately without waiting for needle to finish, and will assume 10000 for needle timeout.'
-    },
-    queue: {
-      type: 'boolean',
-      defaultsTo: false,
-      description: 'DEPRECATED'
     }
   },
 
