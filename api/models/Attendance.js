@@ -135,7 +135,12 @@ module.exports = {
         // Add a new attendance record if event is specified.
         if (event) {
           // Find a calendar record with the provided event name. Allow up to 10 grace minutes before start time
-          var record = await sails.models.calendar.find({ title: event, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
+          var queryTitle = event
+          // For sports broadcasts, ignore anything after the sport in case the calendar event contains a " vs.".
+          if (queryTitle.startsWith('Sports: ')) {
+            queryTitle = { startsWith: event }
+          }
+          var record = await sails.models.calendar.find({ title: queryTitle, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
           sails.log.debug(`sails.models.calendar records found: ${record.length || 0}`)
 
           // Create the new attendance record

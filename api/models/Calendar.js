@@ -398,18 +398,24 @@ module.exports = {
               // Sports broadcast
             } else if (criteria.title.startsWith('Sports: ')) {
               summary = criteria.title.replace('Sports: ', '')
+              // Strip " vs." in titles
+              var summary2 = ``
+              if (summary.indexOf(' vs.') > -1) {
+                summary2 = summary.substring(summary.indexOf(' vs.'))
+                summary = summary.substring(0, summary.indexOf(' vs.'))
+              }
 
               // Ensure the name of the sport is one that is implemented in the system.
               if (sails.config.custom.sports.indexOf(summary) > -1) {
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
+                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>${summary2}`
                 criteria.verify = 'Valid'
                 criteria.verify_message = `Valid. Sport in green.`
               } else {
                 if (status > 3) { status = 3 }
                 issues.push(`A sport event "${summary}" is invalid; the specified sport does not exist in the system.`)
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>${summary2}`
                 criteria.verify = 'Invalid'
-                criteria.verify_message = `Invalid; sport is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.`
+                criteria.verify_message = `Invalid; sport marked in red is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.`
               }
 
               // Prerecord (via RadioDJ Playlists)

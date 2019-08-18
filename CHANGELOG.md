@@ -67,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Liners might also queue underwritings if any of them are way behind schedule.
  - sails.helpers.songs.queue: the rules parameter was changed from type boolean to type string and accepts the following values: "noRules" (do not consider rotation rules), "lenientRules" [default] (consider rotation rules until/unless there are no more tracks that can be queued, then start queuing randomly), and "strictRules" (consider rotation rules and stop queuing when there are no more tracks that can be queued)
  - Remove live_prerecord; replace with prerecord_on and prerecord_break [Issue 98](https://github.com/Lovinity/wwsu/issues/98)
+ - New attendance records for sports broadcasts search calendar titles with "startsWith" instead of exact title; this allows directors to add " vs. team" in sports events. Calendar verification has also been updated accordingly. [Issue 94](https://github.com/Lovinity/wwsu/issues/94)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated
