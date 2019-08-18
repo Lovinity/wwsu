@@ -73,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - changed scheduled_in and scheduled_out to scheduledIn and scheduledOut in Timesheets [Issue 91](https://github.com/Lovinity/wwsu/issues/91)
  - Meta: change playlist_played to playlistPlayed [Issue 89](https://github.com/Lovinity/wwsu/issues/89)
  - Meta: change playlist_position to playlistPosition [Issue 88](https://github.com/Lovinity/wwsu/issues/88)
- - messages; change to_friendly to toFriendly and from_friendly to fromFriendly [Issue 87](https://github.com/Lovinity/wwsu/issues/87)
+ - messages; change to_friendly to toFriendly and from_friendly to fromFriendly and from_IP to fromIP [Issue 87](https://github.com/Lovinity/wwsu/issues/87)
+ - Moved listeners/get to analytics/listeners [Issue 71](https://github.com/Lovinity/wwsu/issues/71)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

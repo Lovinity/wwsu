@@ -1,6 +1,6 @@
 module.exports = {
 
-  friendlyName: 'listeners / get',
+  friendlyName: 'analytics / listeners',
 
   description: 'Get an array of listener counts between a specified time period.',
 
@@ -29,7 +29,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller listeners/get called.')
+    sails.log.debug('Controller analytics/listeners called.')
 
     try {
       var records = []
