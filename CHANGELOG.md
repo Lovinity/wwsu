@@ -5,7 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
 ## [unreleased]
-## Added
+### REMOVED
+ - Removed deprecated discipline endpoints discipline/ban-* [Issue 64](https://github.com/Lovinity/wwsu/issues/64)
+ - Removed deprecated discipline helpers sails.helpers.discipline.ban* [Issue 64](https://github.com/Lovinity/wwsu/issues/64)
+
+### Added
  - "device" property returned for recipient objects in recipients/get. This will contain the OneSignal UUID if the recipient is using the WWSU mobile app. Otherwise, it will be null.
  - "device" optional parameter for requests/place. If provided, the onesignal ID will receive a push notification when the requested track is played.
  - "device=" query-string parameter for /listen and all /listen/* web pages. Specify OneSignal ID if loading these pages from the WWSU app. That way, subscribing / push notifications will be enabled for that device.
