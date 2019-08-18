@@ -325,18 +325,18 @@ module.exports = {
 
       // Change underwriting statuses
       if (veryBad.length > 0) {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: veryBad.join(` `) + ` ` + bad.join(` `), status: 2 }])
+        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: veryBad.join(` `) + ` ` + bad.join(` `), status: 2 }])
       } else if (bad.length > 0) {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: bad.join(` `), status: 3 }])
+        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: bad.join(` `), status: 3 }])
       } else {
-        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: `No underwritings are significantly behind schedule.`, status: 5 }])
+        await sails.models.status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: `No underwritings are significantly behind schedule.`, status: 5 }])
       }
 
       sails.log.debug(`Finished.`)
 
       return exits.success()
     } catch (e) {
-      await sails.models.status.changeStatus([{ name: 'underwritings', label: 'sails.models.underwritings', data: `Internal Error with the underwritings system. Please check the npm logs.`, status: 2 }])
+      await sails.models.status.changeStatus([{ name: 'underwritings', label: 'Underwritings', data: `Internal Error with the underwritings system. Please check the npm logs.`, status: 2 }])
       return exits.error(e)
     }
   }

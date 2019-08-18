@@ -502,13 +502,13 @@ module.exports.bootstrap = async function (done) {
           if (sails.models.meta['A'].state === 'automation_sports' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.models.meta.changeMeta({ state: 'sports_on', showStamp: moment().toISOString(true) })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
-            attendance = await sails.models.attendance.createRecord(`sails.models.sports: ${sails.models.meta['A'].show}`)
+            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta['A'].show}`)
             await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta['A'].show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + sails.models.meta['A'].show + '<br />Topic: ' + sails.models.meta['A'].topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`sails.models.sports: `, sails.models.meta['A'].show, `sails.models.sports Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta['A'].show, `Sports Broadcast`, attendance.unique)
           }
           // If we are preparing for remote, do some stuff
           if (sails.models.meta['A'].state === 'automation_remote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
@@ -524,13 +524,13 @@ module.exports.bootstrap = async function (done) {
           // If we are preparing for sportsremote, do some stuff if we are playing the stream track
           if (sails.models.meta['A'].state === 'automation_sportsremote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.models.meta.changeMeta({ state: 'sportsremote_on', showStamp: moment().toISOString(true) })
-            attendance = await sails.models.attendance.createRecord(`sails.models.sports: ${sails.models.meta['A'].show}`)
+            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta['A'].show}`)
             await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta['A'].show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + sails.models.meta['A'].show + '<br />Topic: ' + sails.models.meta['A'].topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`sails.models.sports: `, sails.models.meta['A'].show, `sails.models.sports Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta['A'].show, `Sports Broadcast`, attendance.unique)
           }
           // If returning from break, do stuff once queue is empty
           if (sails.models.meta['A'].state.includes('_returning') && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
