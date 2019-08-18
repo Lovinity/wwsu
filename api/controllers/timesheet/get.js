@@ -44,11 +44,11 @@ module.exports = {
 
       // Get timesheet records
       var records = await sails.models.timesheet.find({ or: [
-        { time_in: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { time_out: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { time_in: null, time_out: null, scheduled_in: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { time_in: null, time_out: null, scheduled_out: { '>=': start.toISOString(true), '<': end.toISOString(true) } }
-      ] }).sort([{ time_in: 'ASC' }, { scheduled_in: 'ASC' }])
+        { timeIn: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
+        { timeOut: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
+        { timeIn: null, timeOut: null, scheduledIn: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
+        { timeIn: null, timeOut: null, scheduledOut: { '>=': start.toISOString(true), '<': end.toISOString(true) } }
+      ] }).sort([{ timeIn: 'ASC' }, { scheduledIn: 'ASC' }])
       sails.log.verbose(`Returned Timesheet records: ${records.length}`)
       sails.log.silly(records)
 

@@ -18,12 +18,12 @@ module.exports = {
       required: true
     },
 
-    time_in: {
+    timeIn: {
       type: 'ref',
       columnType: 'datetime'
     },
 
-    time_out: {
+    timeOut: {
       type: 'ref',
       columnType: 'datetime'
     },

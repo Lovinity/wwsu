@@ -111,10 +111,10 @@ class Timesheet {
     this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000))
     this._unique = data.unique || null
     this._name = data.name || 'Unknown'
-    this._scheduled_in = data.scheduled_in || null
-    this._scheduled_out = data.scheduled_in || null
-    this._time_in = data.time_in || null
-    this._time_out = data.time_out || null
+    this._scheduledIn = data.scheduledIn || null
+    this._scheduledOut = data.scheduledOut || null
+    this._timeIn = data.timeIn || null
+    this._timeOut = data.timeOut || null
     this._approved = data.approved || false
   }
 
@@ -139,43 +139,43 @@ class Timesheet {
   }
 
   // eslint-disable-next-line camelcase
-  get scheduled_in () {
-    return this._scheduled_in
+  get scheduledIn () {
+    return this._scheduledIn
   }
 
   // eslint-disable-next-line camelcase
-  set scheduled_in (value) {
-    this._scheduled_in = value
+  set scheduledIn (value) {
+    this._scheduledIn = value
   }
 
   // eslint-disable-next-line camelcase
-  get scheduled_out () {
-    return this._scheduled_out
+  get scheduledOut () {
+    return this._scheduledOut
   }
 
   // eslint-disable-next-line camelcase
-  set scheduled_out (value) {
-    this._scheduled_out = value
+  set scheduledOut (value) {
+    this._scheduledOut = value
   }
 
   // eslint-disable-next-line camelcase
-  get time_in () {
-    return this._time_in
+  get timeIn () {
+    return this._timeIn
   }
 
   // eslint-disable-next-line camelcase
-  set time_in (value) {
-    this._time_in = value
+  set timeIn (value) {
+    this._timeIn = value
   }
 
   // eslint-disable-next-line camelcase
-  get time_out () {
-    return this._time_out
+  get timeOut () {
+    return this._timeOut
   }
 
   // eslint-disable-next-line camelcase
-  set time_out (value) {
-    this._time_out = value
+  set timeOut (value) {
+    this._timeOut = value
   }
 
   get approved () {
@@ -287,12 +287,12 @@ function editClock (clockID, save = false) {
       .filter(timesheet => timesheet.ID === clockID)
       .map(timesheet => {
         modalBody.innerHTML = `<form action="javascript:editClock(${clockID}, true)"><div class="form-group">
-            <p><strong>Scheduled In:</strong> ${timesheet.scheduled_in !== null ? moment(timesheet.scheduled_in).format('YYYY-MM-DD HH:mm:ss') : `Not scheduled`}<br />
-            <strong>Scheduled Out:</strong> ${timesheet.scheduled_out !== null ? moment(timesheet.scheduled_out).format('YYYY-MM-DD HH:mm:ss') : `Not scheduled`}</p>
+            <p><strong>Scheduled In:</strong> ${timesheet.scheduledIn !== null ? moment(timesheet.scheduledIn).format('YYYY-MM-DD HH:mm:ss') : `Not scheduled`}<br />
+            <strong>Scheduled Out:</strong> ${timesheet.scheduledOut !== null ? moment(timesheet.scheduledOut).format('YYYY-MM-DD HH:mm:ss') : `Not scheduled`}</p>
         <label for="clock-in">Clock In:</label>
-        <input type="text" class="form-control" id="clock-in" value="${timesheet.time_in !== null ? moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss') : null}">
+        <input type="text" class="form-control" id="clock-in" value="${timesheet.timeIn !== null ? moment(timesheet.timeIn).format('YYYY-MM-DD HH:mm:ss') : null}">
         <label for="clock-out">Clock Out:</label>
-        <input type="text" class="form-control" id="clock-out" value="${timesheet.time_out !== null ? moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss') : null}">
+        <input type="text" class="form-control" id="clock-out" value="${timesheet.timeOut !== null ? moment(timesheet.timeOut).format('YYYY-MM-DD HH:mm:ss') : null}">
         <div class="form-group" title="Choose the status for this timesheet record">
                         <label for="clock-approved">Timesheet record status</label>
                         <select class="form-control" id="clock-approved">
@@ -316,7 +316,7 @@ function editClock (clockID, save = false) {
     var bapproved = document.getElementById('clock-approved')
     var selectedOption = bapproved.options[bapproved.selectedIndex].value
     if (selectedOption !== `delete`) {
-      adminDirectorReq.request({ db: directorsdb.db({ admin: true }), method: 'POST', url: '/timesheet/edit', data: { ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: selectedOption } }, (resHTML) => {
+      adminDirectorReq.request({ db: directorsdb.db({ admin: true }), method: 'POST', url: '/timesheet/edit', data: { ID: clockID, timeIn: moment(bclockin.value).toISOString(true), timeOut: moment(bclockout.value).toISOString(true), approved: selectedOption } }, (resHTML) => {
       })
     } else {
       adminDirectorReq.request({ db: directorsdb.db({ admin: true }), method: 'POST', url: '/timesheet/remove', data: { ID: clockID } }, () => {
@@ -596,10 +596,10 @@ function filterDate () {
         }
 
         // Prepare clock moments
-        var clockin = record.time_in !== null ? moment(record.time_in) : null
-        var clockout = record.time_out !== null ? moment(record.time_out) : null
-        var scheduledin = record.scheduled_in !== null ? moment(record.scheduled_in) : null
-        var scheduledout = record.scheduled_out !== null ? moment(record.scheduled_out) : null
+        var clockin = record.timeIn !== null ? moment(record.timeIn) : null
+        var clockout = record.timeOut !== null ? moment(record.timeOut) : null
+        var scheduledin = record.scheduledIn !== null ? moment(record.scheduledIn) : null
+        var scheduledout = record.scheduledOut !== null ? moment(record.scheduledOut) : null
         var clocknow = moment()
         var clockday = moment(clockin !== null ? clockin : scheduledin).format('e')
 

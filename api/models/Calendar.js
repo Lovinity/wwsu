@@ -867,7 +867,7 @@ module.exports = {
               // Find existing record of event. If does not exist, create it in the Calendar.
               theEvent = await sails.models.directorhours.findOrCreate({ unique: event.id }, criteriaB)
               theEvent2 = await sails.models.timesheet.count({ unique: criteria.unique })
-              if (theEvent2 === 0) { theEvent2 = await sails.models.timesheet.create({ unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 1 }).fetch() }
+              if (theEvent2 === 0) { theEvent2 = await sails.models.timesheet.create({ unique: criteria.unique, name: criteria.director, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true), approved: 1 }).fetch() }
 
               // sails.log.verbose(`WAS NOT created ${event.id} / ${event.summary}`);
               // Check if the event changed. If so, update it and push it out to clients.
@@ -898,7 +898,7 @@ module.exports = {
                     .tolerate((err) => {
                       sails.log.error(err)
                     })
-                  toUpdate = { scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), approved: 2 }
+                  toUpdate = { scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true), approved: 2 }
                 }
                 toUpdate.name = criteria.director
                 await sails.models.timesheet.update({ unique: criteria.unique }, toUpdate).fetch()
@@ -908,20 +908,20 @@ module.exports = {
               // Check to see if any active timesheet records now fall within director hours. If so, update the timesheets.
               if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter()) {
                 try {
-                  var record = await sails.models.timesheet.find({ time_in: { '!=': null }, name: criteria.director, time_out: null }).limit(1)
+                  var record = await sails.models.timesheet.find({ timeIn: { '!=': null }, name: criteria.director, timeOut: null }).limit(1)
                   if (record.length > 0) {
                     // If the currently clocked in timesheet is not tied to any google calendar events, tie it to this event.
                     if (record[0].unique === null) {
                       // Try to find another record that may have already been created for these hours, and merge it if found.
-                      var record2 = await sails.models.timesheet.find({ unique: criteria.unique, approved: { '>': -1 }, time_in: null, time_out: null }).limit(1)
+                      var record2 = await sails.models.timesheet.find({ unique: criteria.unique, approved: { '>': -1 }, timeIn: null, timeOut: null }).limit(1)
                       if (record2.length > 0) { await sails.models.timesheet.destroy({ ID: record2[0].ID }).fetch() }
 
-                      await sails.models.timesheet.update({ name: record[0].name, unique: null, time_in: { '!=': null }, time_out: null }, { unique: criteria.unique, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true) }).fetch()
+                      await sails.models.timesheet.update({ name: record[0].name, unique: null, timeIn: { '!=': null }, timeOut: null }, { unique: criteria.unique, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true) }).fetch()
 
                       // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
                     } else if (record[0].unique !== criteria.unique) {
-                      var updater = await sails.models.timesheet.update({ name: criteria.director, time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true) }).fetch()
-                      await sails.models.timesheet.create({ unique: criteria.unique, name: criteria.director, scheduled_in: moment(criteria.start).toISOString(true), scheduled_out: moment(criteria.end).toISOString(true), time_in: moment().toISOString(true), time_out: null, approved: updater[0].approved }).fetch()
+                      var updater = await sails.models.timesheet.update({ name: criteria.director, timeIn: { '!=': null }, timeOut: null }, { timeOut: moment().toISOString(true) }).fetch()
+                      await sails.models.timesheet.create({ unique: criteria.unique, name: criteria.director, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true), timeIn: moment().toISOString(true), timeOut: null, approved: updater[0].approved }).fetch()
                     }
                   }
                 } catch (e) {
@@ -954,7 +954,7 @@ module.exports = {
             // Log office hours cancellations
             if (cancelled.length > 0) {
               maps = cancelled.map(async (cEvent) => {
-                await sails.models.timesheet.update({ unique: cEvent.unique }, { unique: cEvent.unique, name: cEvent.director, scheduled_in: moment(cEvent.start).toISOString(true), scheduled_out: moment(cEvent.end).toISOString(true), approved: -1 }).fetch()
+                await sails.models.timesheet.update({ unique: cEvent.unique }, { unique: cEvent.unique, name: cEvent.director, scheduledIn: moment(cEvent.start).toISOString(true), scheduledOut: moment(cEvent.end).toISOString(true), approved: -1 }).fetch()
                 await sails.models.logs.create({ attendanceID: null, logtype: 'director-cancellation', loglevel: 'info', logsubtype: cEvent.director, event: `<strong>Director office hours were cancelled via Google Calendar!</strong><br />Director: ${cEvent.director}<br />Cancelled time: ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}`, createdAt: moment().toISOString(true) }).fetch()
                   .tolerate((err) => {
                     sails.log.error(err)
@@ -969,11 +969,11 @@ module.exports = {
             maps = destroyed
               .map(async event => {
                 try {
-                  sails.models.timesheet.findOrCreate({ unique: event.unique }, { unique: event.unique, name: event.director, scheduled_in: moment(event.start).toISOString(true), scheduled_out: moment(event.end).toISOString(true), approved: 0 })
+                  sails.models.timesheet.findOrCreate({ unique: event.unique }, { unique: event.unique, name: event.director, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true), approved: 0 })
                     .exec(async (err, record, wasCreated) => {
                       if (err) { return false }
-                      if (wasCreated || (!wasCreated && record.time_in === null && record.approved === 1)) {
-                        await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduled_in).format('LLL')} - ${moment(record.scheduled_out).format('LT')}`, createdAt: moment().toISOString(true) }).fetch()
+                      if (wasCreated || (!wasCreated && record.timeIn === null && record.approved === 1)) {
+                        await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduledIn).format('LLL')} - ${moment(record.scheduledOut).format('LT')}`, createdAt: moment().toISOString(true) }).fetch()
                           .tolerate((err) => {
                             sails.log.error(err)
                           })

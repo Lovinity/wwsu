@@ -110,8 +110,8 @@ class Timesheet {
   constructor (data = {}) {
     this.ID = data.ID || Math.floor(1000000 + (Math.random() * 1000000))
     this._name = data.name || 'Unknown'
-    this._time_in = data.time_in || null
-    this._time_out = data.time_out || null
+    this._timeIn = data.timeIn || null
+    this._timeOut = data.timeOut || null
     this._approved = data.approved || false
   }
 
@@ -127,20 +127,20 @@ class Timesheet {
     this._name = value
   }
 
-  get time_in () {
-    return this._time_in
+  get timeIn () {
+    return this._timeIn
   }
 
-  set time_in (value) {
-    this._time_in = value
+  set timeIn (value) {
+    this._timeIn = value
   }
 
-  get time_out () {
-    return this._time_out
+  get timeOut () {
+    return this._timeOut
   }
 
-  set time_out (value) {
-    this._time_out = value
+  set timeOut (value) {
+    this._timeOut = value
   }
 
   get approved () {
@@ -247,9 +247,9 @@ function editClock (clockID, save = false) {
       .map(timesheet => {
         modalBody.innerHTML = `<form action="javascript:editClock(${clockID}, true)"><div class="form-group">
         <label for="clock-in">Clock In:</label>
-        <input type="text" class="form-control" id="clock-in" value="${moment(timesheet.time_in).format('YYYY-MM-DD HH:mm:ss')}">
+        <input type="text" class="form-control" id="clock-in" value="${moment(timesheet.timeIn).format('YYYY-MM-DD HH:mm:ss')}">
         <label for="clock-out">Clock Out:</label>
-        <input type="text" class="form-control" id="clock-out" value="${moment(timesheet.time_out).format('YYYY-MM-DD HH:mm:ss')}">
+        <input type="text" class="form-control" id="clock-out" value="${moment(timesheet.timeOut).format('YYYY-MM-DD HH:mm:ss')}">
                 <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="clock-approved" ${(timesheet.approved) ? 'checked' : ''}>
                             <label class="form-check-label" for="clock-approved">
@@ -268,7 +268,7 @@ function editClock (clockID, save = false) {
     var bclockin = document.getElementById('clock-in')
     var bclockout = document.getElementById('clock-out')
     var bapproved = document.getElementById('clock-approved')
-    adminDirectorReq.request({ db: directorsdb.db({ admin: true }), method: 'POST', url: '/timesheet/edit', data: { ID: clockID, time_in: moment(bclockin.value).toISOString(true), time_out: moment(bclockout.value).toISOString(true), approved: (bapproved.checked) } }, (resHTML) => {
+    adminDirectorReq.request({ db: directorsdb.db({ admin: true }), method: 'POST', url: '/timesheet/edit', data: { ID: clockID, timeIn: moment(bclockin.value).toISOString(true), timeOut: moment(bclockout.value).toISOString(true), approved: (bapproved.checked) } }, (resHTML) => {
       $('#clockModal').modal('handleUpdate')
     })
   }
@@ -314,18 +314,18 @@ function filterDate () {
         }
 
         // Prepare clock moments
-        var clockin = moment(record.time_in)
-        var clockout = moment(record.time_out)
+        var clockin = moment(record.timeIn)
+        var clockout = moment(record.timeOut)
         var clocknow = moment()
         var clocknext = moment(thedate.value).add(1, 'weeks')
         var clockday = moment(clockin).format('e')
 
-        // Determine status. 1 = approved, 2 = no time_out (clocked in), 0 = not approved.
+        // Determine status. 1 = approved, 2 = no timeOut (clocked in), 0 = not approved.
         var status = 1
         if (!record.approved) { status = 0 }
-        if (record.time_out === null) { status = 2 }
+        if (record.timeOut === null) { status = 2 }
 
-        // If approved record, add its hours for the director. If clocked in record, add hours from time_in to current time.
+        // If approved record, add its hours for the director. If clocked in record, add hours from timeIn to current time.
         if (status === 1) { hours[record.name].add(clockout.diff(clockin)) }
         if (status === 2) { hours[record.name].add(clocknow.diff(clockin)) }
 

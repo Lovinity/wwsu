@@ -36,8 +36,8 @@ module.exports = {
         // If the entry is less than 30 minutes off from the current time, approve automatically
         if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
 
-        // Add the time_out entry
-        await sails.models.timesheet.update({ time_in: { '!=': null }, time_out: null, name: record.name }, { time_out: thetime.toISOString(true), approved: toapprove }).fetch()
+        // Add the timeOut entry
+        await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name }, { timeOut: thetime.toISOString(true), approved: toapprove }).fetch()
 
         // Update the director presence
         await sails.models.directors.update({ ID: record.ID }, { present: false, since: thetime.toISOString(true) })
@@ -54,10 +54,10 @@ module.exports = {
 
         // Clock-ins need a new entry
         if (calendar.length > 0) {
-          var records = await sails.models.timesheet.update({ unique: calendar[0].unique, time_in: null }, { name: record.name, unique: calendar[0].unique, time_in: thetime.toISOString(true), approved: toapprove }).fetch()
-          if (records.length === 0) { await sails.models.timesheet.create({ name: record.name, unique: calendar[0].unique, scheduled_in: moment(calendar[0].start).toISOString(true), scheduled_out: moment(calendar[0].end).toISOString(true), time_in: thetime.toISOString(true), approved: toapprove }).fetch() }
+          var records = await sails.models.timesheet.update({ unique: calendar[0].unique, timeIn: null }, { name: record.name, unique: calendar[0].unique, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
+          if (records.length === 0) { await sails.models.timesheet.create({ name: record.name, unique: calendar[0].unique, scheduledIn: moment(calendar[0].start).toISOString(true), scheduledOut: moment(calendar[0].end).toISOString(true), timeIn: thetime.toISOString(true), approved: toapprove }).fetch() }
         } else {
-          await sails.models.timesheet.create({ name: record.name, unique: null, scheduled_in: null, scheduled_out: null, time_in: thetime.toISOString(true), approved: toapprove }).fetch()
+          await sails.models.timesheet.create({ name: record.name, unique: null, scheduledIn: null, scheduledOut: null, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
         }
 
         // Update the director presence

@@ -64,11 +64,11 @@ module.exports = {
       var records = await sails.models.uabtimesheet.find({
         where: {
           or: [
-            { time_out: { '>=': moment().subtract(14, 'days').toDate() } },
-            { time_out: null }
+            { timeOut: { '>=': moment().subtract(14, 'days').toDate() } },
+            { timeOut: null }
           ]
         },
-        sort: 'time_in DESC' })
+        sort: 'timeIn DESC' })
       if (records.length > 0) {
         // Update present and since entries in the Directors database
         var maps = records
@@ -76,14 +76,14 @@ module.exports = {
             if (typeof names[record.name] !== 'undefined') { return false }
 
             names[record.name] = true
-            // If there's an entry with a null time_out, then consider the director clocked in
-            if (record.time_out === null && record.time_in !== null) {
-              await sails.models.uabdirectors.update({ name: record.name }, { present: true, since: moment(record.time_in).toISOString(true) })
+            // If there's an entry with a null timeOut, then consider the director clocked in
+            if (record.timeOut === null && record.timeIn !== null) {
+              await sails.models.uabdirectors.update({ name: record.name }, { present: true, since: moment(record.timeIn).toISOString(true) })
                 .tolerate(() => {
                 })
                 .fetch()
             } else {
-              await sails.models.uabdirectors.update({ name: record.name }, { present: false, since: moment(record.time_out).toISOString(true) })
+              await sails.models.uabdirectors.update({ name: record.name }, { present: false, since: moment(record.timeOut).toISOString(true) })
                 .tolerate(() => {
                 })
                 .fetch()

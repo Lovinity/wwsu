@@ -23,22 +23,22 @@ module.exports = {
       required: true
     },
 
-    scheduled_in: {
+    scheduledIn: {
       type: 'ref',
       columnType: 'datetime'
     },
 
-    scheduled_out: {
+    scheduledOut: {
       type: 'ref',
       columnType: 'datetime'
     },
 
-    time_in: {
+    timeIn: {
       type: 'ref',
       columnType: 'datetime'
     },
 
-    time_out: {
+    timeOut: {
       type: 'ref',
       columnType: 'datetime'
     },
