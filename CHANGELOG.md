@@ -71,6 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Calendar property verify_message is now verifyMessage, and verify_titleHTML is now verifyTitleHTML. [Issue 93](https://github.com/Lovinity/wwsu/issues/93)
  - requests.queue: consider_playlist to considerPlaylist and liner_first to linerFirst [Issue 92](https://github.com/Lovinity/wwsu/issues/92)
  - changed scheduled_in and scheduled_out to scheduledIn and scheduledOut in Timesheets [Issue 91](https://github.com/Lovinity/wwsu/issues/91)
+ - Meta: change playlist_played to playlistPlayed [Issue 89](https://github.com/Lovinity/wwsu/issues/89)
+ - Meta: change playlist_position to playlistPosition [Issue 88](https://github.com/Lovinity/wwsu/issues/88)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

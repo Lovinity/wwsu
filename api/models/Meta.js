@@ -87,12 +87,12 @@ module.exports = {
       allowNull: true
     },
 
-    playlist_position: {
+    playlistPosition: {
       type: 'number',
       defaultsTo: -1
     },
 
-    playlist_played: {
+    playlistPlayed: {
       type: 'ref',
       columnType: 'datetime'
     }
@@ -136,8 +136,8 @@ module.exports = {
     lastID: null, // An ISO timestamp of when the last top of hour ID break was taken.
     webchat: true, // Set to false to restrict the ability to send chat messages through the website
     playlist: null, // Name of the playlist we are currently airing
-    playlist_position: -1, // Current position within the playlist
-    playlist_played: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
+    playlistPosition: -1, // Current position within the playlist
+    playlistPlayed: null // Use moment.toISOString() when changing in changeMeta! If you directly store a moment instance here, database updating will fail
   },
   automation: [], // Tracks in automation, populated by sails.helpers.rest.getQueue().
   history: [], // track history array

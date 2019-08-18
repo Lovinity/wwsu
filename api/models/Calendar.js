@@ -595,7 +595,7 @@ module.exports = {
             if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter()) {
               try {
                 // Do not trigger playlists or prerecords if they were already triggered, unless we are restarting them
-                if (moment(criteria.start).isAfter(moment(sails.models.meta['A'].playlist_played)) || ignoreChangingState) {
+                if (moment(criteria.start).isAfter(moment(sails.models.meta['A'].playlistPlayed)) || ignoreChangingState) {
                   if (event.summary.startsWith('Playlist: ') && (toTrigger === null || toTrigger.priority >= 2)) {
                     toTrigger = { priority: 2, event: event.summary.replace('Playlist: ', ''), type: 0, description: '' }
                   }
