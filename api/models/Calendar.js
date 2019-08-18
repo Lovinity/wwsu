@@ -64,11 +64,11 @@ module.exports = {
       type: 'string'
     },
 
-    verify_message: {
+    verifyMessage: {
       type: 'string'
     },
 
-    verify_titleHTML: {
+    verifyTitleHTML: {
       type: 'string'
     }
   },
@@ -356,8 +356,8 @@ module.exports = {
 
             // Verify the event
             criteria.verify = 'Manual'
-            criteria.verify_message = 'This was not detected as an event dealing with OnAir programming. If this event was meant to trigger OnAir programming, <strong>please ensure the event title formatting is correct and that everything is spelled correctly</strong>.'
-            criteria.verify_titleHTML = event.summary
+            criteria.verifyMessage = 'This was not detected as an event dealing with OnAir programming. If this event was meant to trigger OnAir programming, <strong>please ensure the event title formatting is correct and that everything is spelled correctly</strong>.'
+            criteria.verifyTitleHTML = event.summary
 
             // Live shows
             if (criteria.title.startsWith('Show: ')) {
@@ -366,15 +366,15 @@ module.exports = {
 
               // Check proper formatting so system can determine show host from show name
               if (temp2.length === 2) {
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
                 criteria.verify = 'Valid'
-                criteria.verify_message = `Valid. DJ in yellow, show in green.`
+                criteria.verifyMessage = `Valid. DJ in yellow, show in green.`
               } else {
                 if (status > 3) { status = 3 }
                 issues.push(`The formatting of the live show "${summary}" is invalid; must have a " - " to separate DJ/handle from show name.`)
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
                 criteria.verify = 'Invalid'
-                criteria.verify_message = `Invalid; cannot determine DJ and show. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>.`
+                criteria.verifyMessage = `Invalid; cannot determine DJ and show. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>.`
               }
 
               // Remote broadcasts
@@ -384,15 +384,15 @@ module.exports = {
 
               // Check proper formatting so system can determine broadcast host from broadcastn name
               if (temp2.length === 2) {
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
                 criteria.verify = 'Valid'
-                criteria.verify_message = `Valid. Host / org in yellow, show name in green.`
+                criteria.verifyMessage = `Valid. Host / org in yellow, show name in green.`
               } else {
                 if (status > 3) { status = 3 }
                 issues.push(`The formatting of the remote event "${summary}" is invalid; must have a " - " to separate DJ/host from show name.`)
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
                 criteria.verify = 'Invalid'
-                criteria.verify_message = `Invalid; cannot determine host and show. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>.`
+                criteria.verifyMessage = `Invalid; cannot determine host and show. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>.`
               }
 
               // Sports broadcast
@@ -407,44 +407,44 @@ module.exports = {
 
               // Ensure the name of the sport is one that is implemented in the system.
               if (sails.config.custom.sports.indexOf(summary) > -1) {
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>${summary2}`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>${summary2}`
                 criteria.verify = 'Valid'
-                criteria.verify_message = `Valid. Sport in green.`
+                criteria.verifyMessage = `Valid. Sport in green.`
               } else {
                 if (status > 3) { status = 3 }
                 issues.push(`A sport event "${summary}" is invalid; the specified sport does not exist in the system.`)
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>${summary2}`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Sports</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>${summary2}`
                 criteria.verify = 'Invalid'
-                criteria.verify_message = `Invalid; sport marked in red is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.`
+                criteria.verifyMessage = `Invalid; sport marked in red is not configured in Node. <strong>Please ensure you spelled the sport correctly (case sensitive), and the sport exists in the system</strong>.`
               }
 
               // Prerecord (via RadioDJ Playlists)
             } else if (criteria.title.startsWith('Prerecord: ')) {
               summary = criteria.title.replace('Prerecord: ', '')
               eventLength = (moment(criteria.end).diff(moment(criteria.start)) / 1000)
-              criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
-              criteria.verify_message = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
+              criteria.verifyMessage = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
 
               // Check to see a playlist exists
               if (typeof playlists[summary] !== 'undefined') {
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
 
                 // Check to see if the length of the playlists are over 15 minutes too short
                 if ((eventLength - 900) >= (playlists[summary].duration * 1.05)) {
                   criteria.verify = 'Check'
-                  criteria.verify_message = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
+                  criteria.verifyMessage = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
 
                   // Check to see if the playlist is over 5 minutes too long
                 } else if ((eventLength + 300) <= (playlists[summary].duration * 1.05)) {
                   criteria.verify = 'Check'
-                  criteria.verify_message = `Valid, but duration exceeds scheduled time. <strong>The prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
+                  criteria.verifyMessage = `Valid, but duration exceeds scheduled time. <strong>The prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
                 } else if (playlists[summary].duplicates > 0) {
                   criteria.verify = 'Check'
-                  criteria.verify_message = `Valid, but duplicates detected. <strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.`
+                  criteria.verifyMessage = `Valid, but duplicates detected. <strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.`
                 } else {
                   criteria.verify = 'Valid'
-                  criteria.verify_message = `Valid; playlist in green.`
+                  criteria.verifyMessage = `Valid; playlist in green.`
                 }
               }
 
@@ -457,27 +457,27 @@ module.exports = {
             } else if (criteria.title.startsWith('Playlist: ')) {
               summary = criteria.title.replace('Playlist: ', '')
               eventLength = (moment(criteria.end).diff(moment(criteria.start)) / 1000)
-              criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
-              criteria.verify_message = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
+              criteria.verifyMessage = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
 
               // Check to see that playlist exists
               if (typeof playlists[summary] !== 'undefined') {
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
 
                 // Check to see if the playlist duration is shorter than the event duration
                 if (eventLength <= (playlists[summary].duration * 1.05) && playlists[summary].duplicates === 0) {
                   criteria.verify = 'Valid'
-                  criteria.verify_message = `Valid; playlist in green.`
+                  criteria.verifyMessage = `Valid; playlist in green.`
                 } else if (playlists[summary].duplicates === 0) {
                   criteria.verify = 'Check'
-                  criteria.verify_message = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`
+                  criteria.verifyMessage = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`
                 } else if (eventLength <= (playlists[summary].duration * 1.05)) {
                   criteria.verify = 'Check'
-                  criteria.verify_message = `Valid, but duplicate tracks detected. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped` : ''}`
+                  criteria.verifyMessage = `Valid, but duplicate tracks detected. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped` : ''}`
                 } else {
                   criteria.verify = 'Check'
-                  criteria.verify_message = `Valid, but duration is shorter than scheduled time, and duplicate tracks detected. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
+                  criteria.verifyMessage = `Valid, but duration is shorter than scheduled time, and duplicate tracks detected. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
                 }
               }
 
@@ -489,29 +489,29 @@ module.exports = {
               // Genre rotations (via manual events in RadioDJ)
             } else if (criteria.title.startsWith('Genre: ')) {
               summary = criteria.title.replace('Genre: ', '')
-              criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Genre</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Genre</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
-              criteria.verify_message = `Invalid; event with same name does not exist in RadioDJ. <strong>Please ensure there is an event with the same name in RadioDJ.</strong>. The event should trigger a rotation change in RadioDJ when executed.`
+              criteria.verifyMessage = `Invalid; event with same name does not exist in RadioDJ. <strong>Please ensure there is an event with the same name in RadioDJ.</strong>. The event should trigger a rotation change in RadioDJ when executed.`
 
               // Check to see if the manual event exists in RadioDJ
               if (typeof djevents[summary] !== 'undefined') {
-                criteria.verify_titleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Genre</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
+                criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Genre</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
 
                 // Check to see the event is active, and there is a "Load Rotation" action in the event
                 if (djevents[summary].data.includes('Load Rotation') && djevents[summary].enabled === 'True') {
                   criteria.verify = `Valid`
-                  criteria.verify_message = `Valid; genre in green.`
+                  criteria.verifyMessage = `Valid; genre in green.`
 
                   // Event is enabled, but does not have a Load Rotation event
                 } else if (djevents[summary].enabled === 'True') {
                   criteria.verify = 'Invalid'
-                  criteria.verify_message = `Invalid; a "Load Rotation" action does not exist in the RadioDJ event. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`
+                  criteria.verifyMessage = `Invalid; a "Load Rotation" action does not exist in the RadioDJ event. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`
                   if (status > 3) { status = 3 }
                   issues.push(`Genre "${summary}" is invalid; the event for this genre in RadioDJ does not contain a "Load Rotation" action.`)
                   // Event is not enabled
                 } else {
                   criteria.verify = 'Invalid'
-                  criteria.verify_message = `Invalid; the event in RadioDJ is disabled. <strong>Please enable the manual event in RadioDJ</strong>.`
+                  criteria.verifyMessage = `Invalid; the event in RadioDJ is disabled. <strong>Please enable the manual event in RadioDJ</strong>.`
                   if (status > 3) { status = 3 }
                   issues.push(`Genre "${summary}" is invalid; the event for this genre in RadioDJ is disabled.`)
                 }
@@ -520,7 +520,7 @@ module.exports = {
                 issues.push(`Genre "${summary}" is invalid; an event with this name does not exist in RadioDJ.`)
               }
             } else {
-              criteria.verify_titleHTML = `<span style="background: rgba(128, 128, 128, 0.2);">${criteria.verify_titleHTML}</span>`
+              criteria.verifyTitleHTML = `<span style="background: rgba(128, 128, 128, 0.2);">${criteria.verifyTitleHTML}</span>`
             }
 
             sails.log.silly(`Event criteria: ${JSON.stringify(criteria)}`)
