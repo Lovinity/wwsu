@@ -10,11 +10,6 @@ module.exports = {
       required: true,
       description: 'The name of the playlist to begin, as saved in RadioDJ.'
     },
-    resume: {
-      type: 'boolean',
-      defaultsTo: false,
-      description: 'DEPRECATED'
-    },
     type: {
       type: 'number',
       defaultsTo: 0,

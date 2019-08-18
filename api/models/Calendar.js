@@ -630,7 +630,7 @@ module.exports = {
 
           // Trigger playlist or genre, if there is one to trigger
           if (toTrigger !== null && toTrigger.priority < 3) {
-            await sails.helpers.playlists.start(toTrigger.event, false, toTrigger.type, toTrigger.description, ignoreChangingState, toTrigger.forced)
+            await sails.helpers.playlists.start(toTrigger.event, toTrigger.type, toTrigger.description, ignoreChangingState, toTrigger.forced)
           } else if (toTrigger !== null && toTrigger.priority === 3) {
             try {
               await sails.helpers.genre.start(toTrigger.event, ignoreChangingState)
