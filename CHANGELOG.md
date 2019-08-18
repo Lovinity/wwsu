@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Removed deprecated queue parameter in sails.helpers.rest.cmd [Issue 60](https://github.com/Lovinity/wwsu/issues/60)
  - Removed deprecated Songs.pendingCmd [Issue 59](https://github.com/Lovinity/wwsu/issues/59)
  - Removed resume parameter from sails.helpers.playlists.start [Issue 58](https://github.com/Lovinity/wwsu/issues/58)
+ - Removed Meta.djcontrols [Issue 57](https://github.com/Lovinity/wwsu/issues/57)
 
 ### Added
  - "device" property returned for recipient objects in recipients/get. This will contain the OneSignal UUID if the recipient is using the WWSU mobile app. Otherwise, it will be null.

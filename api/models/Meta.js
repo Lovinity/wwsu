@@ -73,11 +73,6 @@ module.exports = {
       type: 'string'
     },
 
-    djcontrols: {
-      type: 'string',
-      allowNull: true
-    },
-
     webchat: {
       type: 'boolean'
     },
@@ -122,7 +117,6 @@ module.exports = {
     topic: '', // If the DJ specified a show topic, this is the topic.
     stream: '', // sails.models.meta for the internet radio stream
     radiodj: '', // REST IP of the RadioDJ instance currently in control
-    djcontrols: 'EngineeringPC', // Hostname of the computer in which has activated the most recent live/sports/remote broadcast via DJ Controls
     line1: 'We are unable to provide now playing info at this time.', // First line of meta for display signs
     line2: '', // Second line of meta for display signs
     time: moment().toISOString(true), // ISO string of the current WWSU time. NOTE: time is only pushed in websockets every night at 11:50pm for re-sync. Clients should keep their own time ticker in sync with this value.
@@ -470,9 +464,6 @@ module.exports = {
 
         // Do not push empty (no) changes through websockets
         if (_.isEmpty(push)) { return resolve() }
-
-        // Do not push sails.models.meta.djcontrols
-        if (typeof push.djcontrols !== 'undefined') { delete push.djcontrols }
 
         sails.log.silly(`meta socket: ${push}`)
         sails.sockets.broadcast('meta', 'meta', push)

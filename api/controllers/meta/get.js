@@ -18,7 +18,6 @@ module.exports = {
 
     // Return current meta, but update time to current time since it's not auto-updated automatically by changeMeta.
     var returnData = sails.models.meta['A']
-    returnData.djcontrols = ''
     returnData.time = moment().toISOString(true)
     return exits.success(returnData)
   }
