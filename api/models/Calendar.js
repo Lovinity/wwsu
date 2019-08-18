@@ -595,6 +595,8 @@ module.exports = {
                   }
                   if (event.summary.startsWith('Prerecord: ') && (toTrigger === null || toTrigger.priority >= 1)) {
                     toTrigger = { priority: 1, event: event.summary.replace('Prerecord: ', ''), type: 1, description: criteria.description }
+                    // If there is a prerecord still airing now and this scheduled prerecord is 5 minutes late, force it to start
+                    toTrigger.forced = moment(criteria.start).add(5, 'minutes').isSameOrBefore(moment()) && sails.models.meta['A'].state.startsWith('prerecord_')
                   }
                 }
                 // Do not re-trigger an already active genre, unless we are restarting it
@@ -622,7 +624,7 @@ module.exports = {
 
           // Trigger playlist or genre, if there is one to trigger
           if (toTrigger !== null && toTrigger.priority < 3) {
-            await sails.helpers.playlists.start(toTrigger.event, false, toTrigger.type, toTrigger.description, ignoreChangingState)
+            await sails.helpers.playlists.start(toTrigger.event, false, toTrigger.type, toTrigger.description, ignoreChangingState, toTrigger.forced)
           } else if (toTrigger !== null && toTrigger.priority === 3) {
             try {
               await sails.helpers.genre.start(toTrigger.event, ignoreChangingState)

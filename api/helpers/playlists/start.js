@@ -31,6 +31,10 @@ module.exports = {
       type: 'boolean',
       defaultsTo: false,
       description: 'Set to true if we should ignore the sails.models.meta.changingState conflict check.'
+    },
+    forced: {
+      type: 'boolean',
+      description: 'Set to true if we want the playlist or prerecord to start regardless of what state we are currently in.'
     }
   },
 
@@ -38,7 +42,7 @@ module.exports = {
     sails.log.debug('Helper playlists.start called.')
     try {
       // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, we're in the middle of changing states and ignoreChangingState is false.
-      if (!sails.models.playlists.queuing && (((sails.models.meta['A'].changingState === null || inputs.ignoreChangingState) && ((sails.models.meta['A'].state === 'automation_on' || sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'automation_genre'))))) {
+      if (!sails.models.playlists.queuing && (((sails.models.meta['A'].changingState === null || inputs.ignoreChangingState) && ((sails.models.meta['A'].state === 'automation_on' || sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'automation_genre' || inputs.forced))))) {
         sails.log.verbose(`Processing helper.`)
         sails.models.playlists.queuing = true // Mark that the playlist is being queued, to avoid app conflicts.
 
