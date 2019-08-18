@@ -46,7 +46,7 @@ module.exports = {
 
         await sails.helpers.rest.cmd('EnableAutoDJ', 1)
         // When in playlist or prerecord, queue an ID and restart the playlist/prerecord
-      } else if (sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'live_prerecord') {
+      } else if (sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state.startsWith('prerecord_')) {
         sails.log.verbose(`Playlist recovery triggered.`)
         await sails.helpers.rest.cmd('EnableAutoDJ', 0)
         await sails.helpers.rest.cmd('EnableAssisted', 1)

@@ -28,7 +28,7 @@ module.exports = {
       }
 
       // If we are in automation, and prevError is less than 3 minutes ago, assume an audio issue and switch RadioDJs
-      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state === 'live_prerecord')) {
+      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.startsWith('prerecord_'))) {
         await sails.models.meta.changeMeta({ changingState: `Switching automation instances due to no audio` })
 
         // Log the problem
@@ -65,7 +65,7 @@ module.exports = {
       }
 
       // If we are not in automation, and prvError is less than 3 minutes ago, assume irresponsible DJ and automatically end the show (but go into automation_break).
-      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && !sails.models.meta['A'].state.startsWith('automation_') && sails.models.meta['A'].state !== 'live_prerecord') {
+      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && !sails.models.meta['A'].state.startsWith('automation_') && !sails.models.meta['A'].state.startsWith('prerecord_')) {
         await sails.models.meta.changeMeta({ changingState: `Ending current broadcast due to no audio` })
 
         // Log the problem

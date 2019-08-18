@@ -349,7 +349,7 @@ module.exports.bootstrap = async function (done) {
       sails.models.status.errorCheck.prevQueueLength = queueLength
 
       // If we do not know active playlist, we need to populate the info
-      if (sails.models.meta['A'].playlist !== null && sails.models.meta['A'].playlist !== '' && sails.models.playlists.active.tracks.length <= 0 && (sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'live_prerecord')) {
+      if (sails.models.meta['A'].playlist !== null && sails.models.meta['A'].playlist !== '' && sails.models.playlists.active.tracks.length <= 0 && (sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state.startsWith('prerecord_'))) {
         try {
           theplaylist = await sails.models.playlists.findOne({ name: sails.models.meta['A'].playlist })
             .tolerate(() => {
@@ -383,7 +383,7 @@ module.exports.bootstrap = async function (done) {
       }
 
       // Clear manual metadata if it is old
-      if (sails.models.meta['A'].trackStamp !== null && (moment().isAfter(moment(sails.models.meta['A'].trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !sails.models.meta['A'].state.startsWith('automation_') && sails.models.meta['A'].state !== 'live_prerecord')) {
+      if (sails.models.meta['A'].trackStamp !== null && (moment().isAfter(moment(sails.models.meta['A'].trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !sails.models.meta['A'].state.startsWith('automation_') && !sails.models.meta['A'].state.startsWith('prerecord_'))) {
         change.trackStamp = null
         change.trackArtist = null
         change.trackTitle = null
@@ -393,9 +393,10 @@ module.exports.bootstrap = async function (done) {
 
       // Playlist maintenance
       var thePosition = -1
-      if ((sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'automation_prerecord' || sails.models.meta['A'].state === 'live_prerecord')) {
+      if ((sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'automation_prerecord' || sails.models.meta['A'].state.startsWith('prerecord_'))) {
         // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
         sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`)
+        var playingTrack = false
         await sails.helpers.asyncForEach(queue, (autoTrack, index) => {
           // eslint-disable-next-line promise/param-names
           return new Promise((resolve2) => {
@@ -406,7 +407,7 @@ module.exports.bootstrap = async function (done) {
                   // Waiting for the playlist to begin, and it has begun? Switch states.
                   if (sails.models.meta['A'].state === 'automation_prerecord' && index === 0 && !sails.models.playlists.queuing && sails.models.meta['A'].changingState === null) {
                     // State switching should be pushed in sockets
-                    sails.models.meta.changeMeta({ state: 'live_prerecord', showStamp: moment().toISOString(true) })
+                    sails.models.meta.changeMeta({ state: 'prerecord_on', showStamp: moment().toISOString(true) })
                       .then(() => {
                         sails.models.attendance.createRecord(`Prerecord: ${sails.models.meta['A'].playlist}`)
                           .then((attendance) => {
@@ -424,8 +425,18 @@ module.exports.bootstrap = async function (done) {
                           })
                       })
                   }
+                  // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
                   if (index === 0) {
-                  } else {
+                    playingTrack = true
+                    if (sails.models.meta['A'].state === 'prerecord_break') {
+                      (async () => {
+                        await sails.models.meta.changeMeta({ state: `prerecord_on` })
+                      })()
+                    }
+                  } else if (index > 0 && sails.models.meta['A'].state === 'prerecord_on' && !playingTrack) {
+                    (async () => {
+                      await sails.models.meta.changeMeta({ state: `prerecord_break` })
+                    })()
                   }
                   if (thePosition === -1 || i < thePosition) {
                     thePosition = i
@@ -453,7 +464,8 @@ module.exports.bootstrap = async function (done) {
                     sails.log.error(err)
                   })
                 break
-              case 'live_prerecord':
+              case 'prerecord_on':
+              case 'prerecord_break':
                 await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta['A'].playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
                   .tolerate((err) => {
                     // Do not throw for errors, but log it.
@@ -581,7 +593,7 @@ module.exports.bootstrap = async function (done) {
           // Check if a DJ neglected the required top of the hour break (passes :05 after)
           var d = new Date()
           var n = d.getMinutes()
-          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta['A'].lastID)) && !sails.models.meta['A'].state.startsWith('automation_') && sails.models.meta['A'].state !== `live_prerecord`) {
+          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta['A'].lastID)) && !sails.models.meta['A'].state.startsWith('automation_') && !sails.models.meta['A'].state.startsWith('prerecord_')) {
             await sails.models.meta.changeMeta({ lastID: moment().toISOString(true) })
             await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: sails.models.meta['A'].show, event: `<strong>Required top of the hour break was not taken!</strong><br />Show: ${sails.models.meta['A'].show}` }).fetch()
               .tolerate((err) => {
@@ -600,7 +612,7 @@ module.exports.bootstrap = async function (done) {
           }
 
           // Do automation system error checking and handling
-          if (queue.length > 0 && queue[0].Duration === sails.models.status.errorCheck.prevDuration && queue[0].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.endsWith('_break') || sails.models.meta['A'].state.endsWith('_disconnected') || sails.models.meta['A'].state.endsWith('_returning') || sails.models.meta['A'].state === 'live_prerecord')) {
+          if (queue.length > 0 && queue[0].Duration === sails.models.status.errorCheck.prevDuration && queue[0].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.endsWith('_break') || sails.models.meta['A'].state.endsWith('_disconnected') || sails.models.meta['A'].state.endsWith('_returning') || sails.models.meta['A'].state.startsWith('prerecord_'))) {
             await sails.helpers.error.count('frozen')
           } else {
             sails.models.status.errorCheck.prevDuration = queue[0].Duration
@@ -648,7 +660,7 @@ module.exports.bootstrap = async function (done) {
                 }
 
                 // Do not queue if we are not in automation, playlist, genre, or prerecord states
-                if (sails.models.meta['A'].state !== 'automation_on' && sails.models.meta['A'].state !== 'automation_playlist' && sails.models.meta['A'].state !== 'automation_genre' && sails.models.meta['A'].state !== 'live_prerecord') { doBreak = false }
+                if (sails.models.meta['A'].state !== 'automation_on' && sails.models.meta['A'].state !== 'automation_playlist' && sails.models.meta['A'].state !== 'automation_genre' && !sails.models.meta['A'].state.startsWith('prerecord_')) { doBreak = false }
 
                 // Do not queue if we queued a break less than the configured failsafe time, and this isn't the 0 break
                 if (key !== 0 && sails.models.status.errorCheck.prevBreak !== null && moment(sails.models.status.errorCheck.prevBreak).isAfter(moment().subtract(sails.config.custom.breakCheck, 'minutes'))) { doBreak = false }
@@ -677,7 +689,7 @@ module.exports.bootstrap = async function (done) {
                   }
 
                   // Add XP for prerecords
-                  if (sails.models.meta['A'].state === 'live_prerecorded') {
+                  if (sails.models.meta['A'].state.startsWith('prerecord_')) {
                     await sails.models.xp.create({ dj: sails.models.meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.` })
                       .tolerate((err) => {
                         // Do not throw for error, but log it
@@ -711,7 +723,7 @@ module.exports.bootstrap = async function (done) {
           }
         } else {
           // We have no queue... which should never happen because RadioDJ always returns a dummy track in position 0. This is an error.
-          if (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.endsWith('_break') || sails.models.meta['A'].state.endsWith('_disconnected') || sails.models.meta['A'].state.endsWith('_returning') || sails.models.meta['A'].state === 'live_prerecord') {
+          if (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.endsWith('_break') || sails.models.meta['A'].state.endsWith('_disconnected') || sails.models.meta['A'].state.endsWith('_returning') || sails.models.meta['A'].state.startsWith('prerecord_')) {
             await sails.helpers.error.count('frozen')
           }
         }

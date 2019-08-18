@@ -147,6 +147,12 @@ module.exports = {
           await sails.helpers.onesignal.sendEvent(`Playlist: `, theplaylist.name, `Playlist`, attendance.unique)
           // Prerecords
         } else if (inputs.type === 1) {
+          if (inputs.forced) {
+            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta['A'].playlist, event: `<strong>Prerecord forcefully terminated as it was interfering with another scheduled prerecord.</strong>` }).fetch()
+              .tolerate((err) => {
+                sails.log.error(err)
+              })
+          }
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false)
           await sails.helpers.rest.cmd('EnableAssisted', 0)

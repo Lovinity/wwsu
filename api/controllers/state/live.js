@@ -63,7 +63,7 @@ module.exports = {
       await sails.models.meta.changeMeta({ show: inputs.showname, topic: inputs.topic, trackStamp: null })
 
       // If we are not already in live mode, prepare to go live in RadioDJ
-      if (!sails.models.meta['A'].state.startsWith('live_') || sails.models.meta['A'].state === 'live_prerecord') {
+      if (!sails.models.meta['A'].state.startsWith('live_')) {
         // await sails.helpers.error.count('goLive');
 
         // Operation: Remove all music tracks, queue a station ID, and disable auto DJ.

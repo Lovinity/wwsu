@@ -1030,7 +1030,8 @@ function processNowPlaying (response) {
           case 'live_returning':
             nowplaying.style.background = '#6A0000'
             break
-          case 'live_prerecord':
+          case 'prerecord_on':
+          case 'prerecord_break':
             nowplaying.style.background = '#5C312E'
             break
           case 'sports_on':

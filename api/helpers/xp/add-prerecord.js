@@ -17,7 +17,7 @@ module.exports = {
 
     try {
       // Calculate XP if exiting prerecord
-      if (sails.models.meta['A'].state === 'live_prerecord') {
+      if (sails.models.meta['A'].state.startsWith('prerecord_')) {
         // Award XP based on time on the air
         var showTime = moment().diff(moment(sails.models.meta['A'].showStamp), 'minutes')
         var showXP = Math.round(showTime / sails.config.custom.XP.prerecordShowMinutes)

@@ -166,7 +166,7 @@ module.exports = {
             // Do stuff if we are changing states, mainly with regards to genres, playlists, and prerecords.
             if (key === 'state') {
               // Changing out of a prerecord? Award XP.
-              if (sails.models.meta['A'][key] === 'live_prerecord') { await sails.helpers.xp.addPrerecord() }
+              if (sails.models.meta['A'][key].startsWith('prerecord_') && !obj[key].startsWith('prerecord_')) { await sails.helpers.xp.addPrerecord() }
 
               // Enable webchat automatically when going into automation state
               if (obj[key] === 'automation_on' || obj[key] === 'automation_genre' || obj[key] === 'automation_playlist' || obj[key] === 'automation_prerecord') { push2.webchat = true }
@@ -285,7 +285,7 @@ module.exports = {
               }
 
               // Live shows
-            } else if (sails.models.meta['A'].state.startsWith('live_') && sails.models.meta['A'].state !== 'live_prerecord') {
+            } else if (sails.models.meta['A'].state.startsWith('live_')) {
               // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
               if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta['A'].trackIDSubcat || 0) > -1) || sails.models.meta['A'].trackArtist.includes('Unknown Artist') || sails.models.meta['A'].trackArtist === null || sails.models.meta['A'].trackArtist === '') {
                 push2.line1 = `${sails.config.custom.meta.prefix.live}${sails.models.meta['A'].show}`
@@ -299,7 +299,7 @@ module.exports = {
               }
 
               // Prerecorded shows
-            } else if (sails.models.meta['A'].state === 'live_prerecord') {
+            } else if (sails.models.meta['A'].state.startsWith('prerecord_')) {
               // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
               if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta['A'].trackIDSubcat || 0) > -1) || sails.models.meta['A'].trackArtist.includes('Unknown Artist') || sails.models.meta['A'].trackArtist === null || sails.models.meta['A'].trackArtist === '') {
                 push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta['A'].playlist}`
@@ -383,13 +383,13 @@ module.exports = {
             }
 
             // Live shows
-            if (sails.models.meta['A'].state.startsWith('live_') && sails.models.meta['A'].state !== 'live_prerecord') {
+            if (sails.models.meta['A'].state.startsWith('live_')) {
               push2.line1 = `${sails.config.custom.meta.prefix.live}${sails.models.meta['A'].show}`
               push2.line2 = manual ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${sails.models.meta['A'].trackArtist || 'Unknown Artist'} - ${sails.models.meta['A'].trackTitle || 'Unknown Title'}`) : ``
               push2.stream = manual ? await sails.helpers.filterProfane(`${sails.models.meta['A'].trackArtist || 'Unknown Artist'} - ${sails.models.meta['A'].trackTitle || 'Unknown Title'}`) : await sails.helpers.filterProfane(`${sails.models.meta['A'].show} (LIVE)`)
 
               // Prerecorded shows (should never happen; this is an error!)
-            } else if (sails.models.meta['A'].state === 'live_prerecord') {
+            } else if (sails.models.meta['A'].state.startsWith('prerecord_')) {
               push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta['A'].playlist}`
               push2.line2 = ``
               push2.stream = await sails.helpers.filterProfane(`${sails.models.meta['A'].show} (PRERECORD)`)

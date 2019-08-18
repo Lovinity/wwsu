@@ -837,7 +837,7 @@ function doMeta (response) {
         }
         temp = document.querySelector(`#show-subscribe`)
         if (temp !== null) { temp.style.display = 'none' }
-      } else if (response.state === 'live_prerecord') {
+      } else if (response.state.startsWith('prerecord_')) {
         if (automationpost !== response.live) {
           temp = document.getElementById('msg-state')
           if (temp) { temp.remove() }
