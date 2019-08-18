@@ -34,7 +34,7 @@ module.exports = {
       type: 'string'
     },
 
-    to_friendly: {
+    toFriendly: {
       type: 'string'
     },
 
@@ -67,7 +67,7 @@ module.exports = {
       sails.log.silly(`messages socket for messages-${newlyCreatedRecord.to}: ${data}`)
       sails.sockets.broadcast(`messages-${newlyCreatedRecord.to}`, 'messages', data);
       (async () => {
-        var recipient = await Recipients.findOne({ host: newlyCreatedRecord.to, device: { '!=': null } })
+        var recipient = await sails.models.recipients.findOne({ host: newlyCreatedRecord.to, device: { '!=': null } })
         if (recipient) { await sails.helpers.onesignal.send([recipient.device], `message`, `WWSU New Message From DJ`, await sails.helpers.truncateText(newlyCreatedRecord.message, 128), (60 * 60)) }
       })()
     }

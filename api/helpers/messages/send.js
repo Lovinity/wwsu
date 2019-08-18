@@ -16,7 +16,7 @@ module.exports = {
       description: 'ID of the client to receive the message.'
     },
 
-    to_friendly: {
+    toFriendly: {
       type: 'string',
       required: true,
       description: 'Friendly name of the client to receive the message.'
