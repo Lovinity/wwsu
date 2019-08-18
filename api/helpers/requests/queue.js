@@ -12,12 +12,12 @@ module.exports = {
       defaultsTo: 1,
       description: 'Number of requests to queue'
     },
-    consider_playlist: {
+    considerPlaylist: {
       type: 'boolean',
       defaultsTo: false,
       description: 'If true, request will only be queued if we are in automation mode.'
     },
-    liner_first: {
+    linerFirst: {
       type: 'boolean',
       defaultsTo: false,
       description: 'If true, a request liner will queue before this request is queued. Only applicable in non-show modes.'
@@ -35,9 +35,9 @@ module.exports = {
       var query = { played: 0 }
       if (inputs.ID !== 0) { query.ID = inputs.ID }
 
-      // End if consider_playlist and we are not in automation mode.
-      if (inputs.consider_playlist && sails.models.meta['A'].state !== 'automation_on' && sails.models.meta['A'].state !== 'automation_genre' && sails.models.meta['A'].state !== 'automation_playlist') {
-        sails.log.verbose(`Helper abandoned: consider_playlist is true, and we are airing a playlist.`)
+      // End if considerPlaylist and we are not in automation mode.
+      if (inputs.considerPlaylist && sails.models.meta['A'].state !== 'automation_on' && sails.models.meta['A'].state !== 'automation_genre' && sails.models.meta['A'].state !== 'automation_playlist') {
+        sails.log.verbose(`Helper abandoned: considerPlaylist is true, and we are airing a playlist.`)
         return exits.success(false)
       }
 
@@ -93,7 +93,7 @@ module.exports = {
               break
             default:
               // For all other states, queue a request liner before we queue the requests
-              if (queuedSomething && inputs.liner_first) { await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, 'lenientRules', null) }
+              if (queuedSomething && inputs.linerFirst) { await sails.helpers.songs.queue(sails.config.custom.subcats.requestLiners, 'Top', 1, 'lenientRules', null) }
               return resolve()
               break
           }

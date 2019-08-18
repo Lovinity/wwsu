@@ -69,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Remove live_prerecord; replace with prerecord_on and prerecord_break [Issue 98](https://github.com/Lovinity/wwsu/issues/98)
  - New attendance records for sports broadcasts search calendar titles with "startsWith" instead of exact title; this allows directors to add " vs. team" in sports events. Calendar verification has also been updated accordingly. [Issue 94](https://github.com/Lovinity/wwsu/issues/94)
  - Calendar property verify_message is now verifyMessage, and verify_titleHTML is now verifyTitleHTML. [Issue 93](https://github.com/Lovinity/wwsu/issues/93)
+ - requests.queue: consider_playlist to considerPlaylist and liner_first to linerFirst [Issue 92](https://github.com/Lovinity/wwsu/issues/92)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated
