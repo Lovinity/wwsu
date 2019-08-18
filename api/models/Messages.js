@@ -23,7 +23,7 @@ module.exports = {
       type: 'string'
     },
 
-    from_friendly: {
+    fromFriendly: {
       type: 'string'
     },
     from_IP: {

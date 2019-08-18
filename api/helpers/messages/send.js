@@ -42,7 +42,7 @@ module.exports = {
       // Grab data pertaining to the host that is retrieving messages. Create if not exists.
       var stuff = await sails.models.hosts.findOrCreate({ host: inputs.from }, { host: inputs.from, friendlyname: inputs.from })
       sails.log.silly(`Host: ${stuff}`)
-      inputs.from_friendly = stuff.friendlyname
+      inputs.fromFriendly = stuff.friendlyname
 
       // Create the message
       var records = await sails.models.messages.create(inputs).fetch()

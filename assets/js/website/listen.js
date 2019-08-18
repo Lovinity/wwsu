@@ -659,7 +659,7 @@ function addMessage (data, firsttime = false) {
       ${jdenticon.toSvg(data.from, 64)}
     </div>
     <div class="flex-grow-1 p-2">
-      <small>${data.from_friendly} -> YOU (private; only you see this message)</small>
+      <small>${data.fromFriendly} -> YOU (private; only you see this message)</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
@@ -669,7 +669,7 @@ function addMessage (data, firsttime = false) {
     }
     if (!firsttime) {
       iziToast.show({
-        title: 'Private message from ' + data.from_friendly,
+        title: 'Private message from ' + data.fromFriendly,
         message: data.message,
         color: 'yellow',
         zindex: 100,
@@ -689,7 +689,7 @@ function addMessage (data, firsttime = false) {
       ${jdenticon.toSvg(data.from, 64)}
     </div>
     <div class="flex-grow-1 p-2">
-      <small>${data.from_friendly} -> Public web/mobile visitors</small>
+      <small>${data.fromFriendly} -> Public web/mobile visitors</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
@@ -699,7 +699,7 @@ function addMessage (data, firsttime = false) {
     }
     if (!firsttime) {
       iziToast.show({
-        title: 'Message from ' + data.from_friendly,
+        title: 'Message from ' + data.fromFriendly,
         message: data.message,
         color: 'yellow',
         zindex: 100,
@@ -719,7 +719,7 @@ function addMessage (data, firsttime = false) {
       ${jdenticon.toSvg(data.from, 64)}
     </div>
     <div class="flex-grow-1 p-2">
-      <small>${data.from_friendly} -> DJ (private; other visitors cannot see this message)</small>
+      <small>${data.fromFriendly} -> DJ (private; other visitors cannot see this message)</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
@@ -729,7 +729,7 @@ function addMessage (data, firsttime = false) {
     }
     if (!firsttime) {
       iziToast.show({
-        title: 'Message from ' + data.from_friendly,
+        title: 'Message from ' + data.fromFriendly,
         message: data.message,
         color: '#ffffff',
         zindex: 100,
@@ -748,7 +748,7 @@ function addMessage (data, firsttime = false) {
       ${jdenticon.toSvg(data.from, 64)}
     </div>
     <div class="flex-grow-1 p-2">
-      <small>${data.from_friendly} -> DJ / public</small>
+      <small>${data.fromFriendly} -> DJ / public</small>
       <div id="msg-t-${data.ID}">${data.message}</div>
     </div>
     <div class="w-64 p-2">
@@ -758,7 +758,7 @@ function addMessage (data, firsttime = false) {
     }
     if (!firsttime) {
       iziToast.show({
-        title: 'Message from ' + data.from_friendly,
+        title: 'Message from ' + data.fromFriendly,
         message: data.message,
         color: '#ffffff',
         zindex: 100,
