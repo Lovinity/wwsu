@@ -75,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Meta: change playlist_position to playlistPosition [Issue 88](https://github.com/Lovinity/wwsu/issues/88)
  - messages; change to_friendly to toFriendly and from_friendly to fromFriendly and from_IP to fromIP [Issue 87](https://github.com/Lovinity/wwsu/issues/87)
  - Moved listeners/get to analytics/listeners [Issue 71](https://github.com/Lovinity/wwsu/issues/71)
+ - Renamed songs/queue-add to songs/queue-top-add [Issue 67](https://github.com/Lovinity/wwsu/issues/67)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

@@ -2,7 +2,7 @@
 
 module.exports = {
 
-  friendlyName: 'songs / queue-add',
+  friendlyName: 'songs / queue-top-add',
 
   description: 'Queue a Top Add into RadioDJ, and play it if necessary.',
 
@@ -11,7 +11,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller songs/get called.')
+    sails.log.debug('Controller songs/queue-top-add called.')
 
     try {
       // Prevent adding tracks if host is lockToDJ and the specified lockToDJ is not on the air
