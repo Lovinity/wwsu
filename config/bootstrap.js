@@ -14,6 +14,7 @@ module.exports.bootstrap = async function (done) {
   var sh = require('shorthash')
   const queryString = require('query-string')
   const DarkSkyApi = require('dark-sky')
+  const cryptoRandomString = require('crypto-random-string')
   const darksky = new DarkSkyApi(sails.config.custom.darksky.api)
 
   // By convention, this is a good place to set up fake data during development.
@@ -44,7 +45,6 @@ module.exports.bootstrap = async function (done) {
 
   // Generate token secrets
   sails.log.verbose(`BOOTSTRAP: generating token secrets`)
-  var cryptoRandomString = require('crypto-random-string')
   sails.config.custom.secrets = {}
   sails.config.custom.secrets.host = cryptoRandomString(256)
   sails.config.custom.secrets.dj = cryptoRandomString(256)
@@ -332,15 +332,17 @@ module.exports.bootstrap = async function (done) {
           sails.models.status.errorCheck.trueZero -= 1
           if (sails.models.status.errorCheck.trueZero < 1) {
             sails.models.status.errorCheck.trueZero = 0
+            // If not an accurate queue count, use previous queue - 1 instead
           } else {
-            // Statemeta.final.queueLength = (Statesystem.errors.prevqueuelength - 1);
+            queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
           }
           if (queueLength < 0) { queueLength = 0 }
         } else { // No error wait time [remaining]? Use actual detected queue time.
         }
       } else {
-        sails.models.status.errorCheck.trueZero = 5 // Wait up to 5 seconds before considering the queue accurate
+        sails.models.status.errorCheck.trueZero = 3 // Wait up to 3 seconds before considering the queue accurate
         // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
+        queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
         if (queueLength < 0) { queueLength = 0 }
       }
 
