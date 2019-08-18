@@ -479,15 +479,15 @@ module.exports.bootstrap = async function (done) {
             await sails.helpers.requests.queue(3, true, true)
 
             // Switch back to automation
-            await sails.models.meta.changeMeta({ changingState: null, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlist_position: 0 })
+            await sails.models.meta.changeMeta({ changingState: null, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
 
             // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
             await sails.models.calendar.preLoadEvents()
 
             // Did not finish the playlist? Ensure the position is updated in meta.
           } else if (thePosition !== -1) {
-            if (thePosition !== sails.models.meta['A'].playlist_position) {
-              change.playlist_position = thePosition
+            if (thePosition !== sails.models.meta['A'].playlistPosition) {
+              change.playlistPosition = thePosition
             }
           }
         } catch (e) {
