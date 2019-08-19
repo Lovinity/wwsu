@@ -157,8 +157,7 @@ module.exports.bootstrap = async function (done) {
 
   // Load directors.
   sails.log.verbose(`BOOTSTRAP: Refreshing directors.`)
-  await sails.models.directors.updateDirectors()
-  await sails.models.uabdirectors.updateDirectors()
+  await sails.helpers.directors.update()
 
   // Load Google sails.models.calendar.
   sails.log.verbose(`BOOTSTRAP: Loading calendar events.`)
@@ -1358,8 +1357,7 @@ module.exports.bootstrap = async function (done) {
           .tolerate(() => {
           })
         // Force reload all directors based on timesheets
-        await sails.models.directors.updateDirectors()
-        await sails.models.uabdirectors.updateDirectors()
+        await sails.helpers.directors.update()
 
         return resolve()
       } catch (e) {

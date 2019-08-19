@@ -28,7 +28,7 @@ module.exports = {
       if (IDs.length > 0) { await sails.models.directorhours.destroy({ unique: IDs }).fetch() }
 
       // Force a re-load of all directors to update any possible changes in presence
-      await sails.models.directors.updateDirectors()
+      await sails.helpers.directors.update()
 
       return exits.success()
     } catch (e) {

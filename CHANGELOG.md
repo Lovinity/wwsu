@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Removed resume parameter from sails.helpers.playlists.start [Issue 58](https://github.com/Lovinity/wwsu/issues/58)
  - Removed Meta.djcontrols [Issue 57](https://github.com/Lovinity/wwsu/issues/57)
  - Removed includeCurrentTrack parameter from sails.helpers.songs.remove [Issue 56](https://github.com/Lovinity/wwsu/issues/56)
+ - UAB Directors timesheet system.
 
 ### Added
  - "device" property returned for recipient objects in recipients/get. This will contain the OneSignal UUID if the recipient is using the WWSU mobile app. Otherwise, it will be null.
@@ -87,6 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Renamed songs/queue-add to songs/queue-top-add [Issue 67](https://github.com/Lovinity/wwsu/issues/67)
  - Moved sails.models.attendance.createRecord to sails.helpers.attendance.createRecord. [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
  - Moved all functions in the calendar model for syncing events to sails.helpers.calendar.sync(ignoreChangingState = false). [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
+ - Moved model function directors.updateDirectors to sails.helpers.directors.update. [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

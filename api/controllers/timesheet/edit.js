@@ -69,7 +69,7 @@ module.exports = {
       }
 
       // Force a re-load of all directors to update any possible changes in presence
-      await sails.models.directors.updateDirectors()
+      await sails.helpers.directors.update()
 
       return exits.success()
     } catch (e) {

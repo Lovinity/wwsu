@@ -56,53 +56,6 @@ module.exports = {
     }
   },
 
-  /**
-   * Re-updates director presence
-   */
-  updateDirectors: function () {
-    // LINT: async necessary for Sails.js await
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
-      sails.log.debug(`updateDirectors called.`)
-      var names = {}
-
-      // Determine presence by analyzing timesheet records up to 14 days ago
-      var records = await sails.models.timesheet.find({
-        where: {
-          or: [
-            { timeOut: { '>=': moment().subtract(14, 'days').toDate() } },
-            { timeOut: null }
-          ]
-        },
-        sort: 'timeIn DESC'
-      })
-      if (records.length > 0) {
-        // Update present and since entries in the Directors database
-        var maps = records
-          .map(async record => {
-            if (typeof names[record.name] !== 'undefined') { return false }
-
-            names[record.name] = true
-            // If there's an entry with a null timeOut, then consider the director clocked in
-            if (record.timeOut === null && record.timeIn !== null) {
-              await sails.models.directors.update({ name: record.name }, { present: true, since: moment(record.timeIn).toISOString(true) })
-                .tolerate(() => {
-                })
-                .fetch()
-            } else {
-              await sails.models.directors.update({ name: record.name }, { present: false, since: moment(record.timeOut).toISOString(true) })
-                .tolerate(() => {
-                })
-                .fetch()
-            }
-            return true
-          })
-        await Promise.all(maps)
-      }
-      return resolve()
-    })
-  },
-
   // Websockets standards
   afterCreate: function (newlyCreatedRecord, proceed) {
     delete newlyCreatedRecord.login
