@@ -27,7 +27,7 @@ module.exports = {
         }
       }
       // When in automation, but not playlist, queue an ID and re-queue oldQueue
-      if (sails.models.meta['A'].state.startsWith('automation_') && sails.models.meta['A'].state !== 'automation_playlist') {
+      if (sails.models.meta.memory.state.startsWith('automation_') && sails.models.meta.memory.state !== 'automation_playlist') {
         sails.log.verbose(`Automation recovery triggered.`)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.rest.cmd('ClearPlaylist', 1)
@@ -38,15 +38,15 @@ module.exports = {
         // eslint-disable-next-line no-return-await
         maps = reQueue.map(async (queueItem) => await sails.helpers.rest.cmd('LoadTrackToBottom', queueItem))
         await Promise.all(maps)
-        if (sails.models.meta['A'].state === 'automation_genre') {
-          await sails.helpers.genre.start(sails.models.meta['A'].genre, true)
+        if (sails.models.meta.memory.state === 'automation_genre') {
+          await sails.helpers.genre.start(sails.models.meta.memory.genre, true)
         } else {
           await sails.helpers.genre.start('Default', true)
         }
 
         await sails.helpers.rest.cmd('EnableAutoDJ', 1)
         // When in playlist or prerecord, queue an ID and restart the playlist/prerecord
-      } else if (sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state.startsWith('prerecord_')) {
+      } else if (sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state.startsWith('prerecord_')) {
         sails.log.verbose(`Playlist recovery triggered.`)
         await sails.helpers.rest.cmd('EnableAutoDJ', 0)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
@@ -59,7 +59,7 @@ module.exports = {
         maps = reQueue.map(async (queueItem) => await sails.helpers.rest.cmd('LoadTrackToBottom', queueItem))
         await Promise.all(maps)
         // When in break, queue PSAs
-      } else if (sails.models.meta['A'].state.includes('_break') || sails.models.meta['A'].state.includes('_returning') || sails.models.meta['A'].state.includes('_disconnected')) {
+      } else if (sails.models.meta.memory.state.includes('_break') || sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state.includes('_disconnected')) {
         sails.log.verbose(`Break recovery triggered.`)
         await sails.helpers.rest.cmd('EnableAutoDJ', 0)
         await sails.helpers.rest.cmd('EnableAssisted', 1)

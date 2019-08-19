@@ -20,8 +20,8 @@ module.exports = {
       var returnData = { showTime: 0, subtotalXP: 0 }
 
       // Duplicate current meta dj since it's about to change; we need it for stats calculations
-      var dj = sails.models.meta['A'].dj
-      var showStamp = sails.models.meta['A'].showStamp
+      var dj = sails.models.meta.memory.dj
+      var showStamp = sails.models.meta.memory.showStamp
       var attendance
 
       if (dj === null) {
@@ -29,7 +29,7 @@ module.exports = {
       }
 
       // Log the request
-      await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta['A'].show, event: '<strong>Show ended.</strong>' }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>Show ended.</strong>' }).fetch()
         .tolerate((err) => {
           // Do not throw for error, but log it
           sails.log.error(err)
@@ -44,12 +44,12 @@ module.exports = {
         await sails.helpers.rest.cmd('EnableAssisted', 1)
 
         // If coming out of a sports broadcast, queue a closer if exists.
-        if (sails.models.meta['A'].state.startsWith('sports')) {
-          if (typeof sails.config.custom.sportscats[sails.models.meta['A'].show] !== 'undefined') {
-            await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta['A'].show]['Sports Closers']], 'Bottom', 1)
+        if (sails.models.meta.memory.state.startsWith('sports')) {
+          if (typeof sails.config.custom.sportscats[sails.models.meta.memory.show] !== 'undefined') {
+            await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta.memory.show]['Sports Closers']], 'Bottom', 1)
           }
         } else {
-          if (typeof sails.config.custom.showcats[sails.models.meta['A'].show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta['A'].show]['Show Closers']], 'Bottom', 1) }
+          if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Closers']], 'Bottom', 1) }
         }
 
         // Queue a station ID and a PSA
@@ -62,15 +62,15 @@ module.exports = {
         await sails.helpers.error.count('stationID')
 
         // Queue ending stuff
-        if (sails.models.meta['A'].state.startsWith('live_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end) }
+        if (sails.models.meta.memory.state.startsWith('live_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end) }
 
-        if (sails.models.meta['A'].state.startsWith('remote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end) }
+        if (sails.models.meta.memory.state.startsWith('remote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end) }
 
-        if (sails.models.meta['A'].state.startsWith('sports_') || sails.models.meta['A'].state.startsWith('sportsremote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end) }
+        if (sails.models.meta.memory.state.startsWith('sports_') || sails.models.meta.memory.state.startsWith('sportsremote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end) }
 
         // We are going to automation
         if (!inputs.transition) {
-          await sails.models.meta.changeMeta({ genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+          await sails.helpers.meta.change.with({ genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
           await sails.helpers.error.reset('automationBreak')
 
           // Add up to 3 track requests if any are pending
@@ -89,7 +89,7 @@ module.exports = {
 
           // We are going to break
         } else {
-          await sails.models.meta.changeMeta({ genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+          await sails.helpers.meta.change.with({ genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
           attendance = await sails.helpers.attendance.createRecord(`Genre: Default`)
         }
 
@@ -97,7 +97,7 @@ module.exports = {
         await sails.helpers.songs.queuePending()
         await sails.helpers.rest.cmd('EnableAssisted', 0)
 
-        await sails.models.meta.changeMeta({ changingState: null })
+        await sails.helpers.meta.change.with({ changingState: null })
 
         return true
       })()
@@ -158,7 +158,7 @@ module.exports = {
       // Return our stats
       return exits.success(returnData)
     } catch (e) {
-      await sails.models.meta.changeMeta({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
       return exits.error(e)
     }
   }

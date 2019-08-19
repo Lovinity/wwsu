@@ -252,7 +252,7 @@ module.exports = {
         sails.log.silly(djeventsR)
 
         // Load the current attendance record into memory
-        var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta['A'].attendanceID })
+        var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
 
         djeventsR.map(event => { djevents[event.name] = event })
 
@@ -531,18 +531,18 @@ module.exports = {
           if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter()) {
             try {
               // Do not trigger playlists or prerecords if they were already triggered, unless we are restarting them
-              if (moment(criteria.start).isAfter(moment(sails.models.meta['A'].playlistPlayed)) || inputs.ignoreChangingState) {
+              if (moment(criteria.start).isAfter(moment(sails.models.meta.memory.playlistPlayed)) || inputs.ignoreChangingState) {
                 if (event.summary.startsWith('Playlist: ') && (toTrigger === null || toTrigger.priority >= 2)) {
                   toTrigger = { priority: 2, event: event.summary.replace('Playlist: ', ''), type: 0, description: '' }
                 }
                 if (event.summary.startsWith('Prerecord: ') && (toTrigger === null || toTrigger.priority >= 1)) {
                   toTrigger = { priority: 1, event: event.summary.replace('Prerecord: ', ''), type: 1, description: criteria.description }
                   // If there is a prerecord still airing now and this scheduled prerecord is 5 minutes late, force it to start
-                  toTrigger.forced = moment(criteria.start).add(5, 'minutes').isSameOrBefore(moment()) && sails.models.meta['A'].state.startsWith('prerecord_')
+                  toTrigger.forced = moment(criteria.start).add(5, 'minutes').isSameOrBefore(moment()) && sails.models.meta.memory.state.startsWith('prerecord_')
                 }
               }
               // Do not re-trigger an already active genre, unless we are restarting it
-              if (inputs.ignoreChangingState || sails.models.meta['A'].genre !== event.summary.replace('Genre: ', '')) {
+              if (inputs.ignoreChangingState || sails.models.meta.memory.genre !== event.summary.replace('Genre: ', '')) {
                 if (event.summary.startsWith('Genre: ') && (toTrigger === null || toTrigger.priority >= 3)) {
                   toTrigger = { priority: 3, event: event.summary.replace('Genre: ', '') }
                 }
@@ -551,9 +551,9 @@ module.exports = {
               if (event.summary.startsWith('Genre: ')) { genreActive = true }
 
               // Check if the event started over 10 minutes prior to start time, and if so, update the attendance record accordingly.
-              if (sails.models.meta['A'].attendanceID !== null) {
+              if (sails.models.meta.memory.attendanceID !== null) {
                 if (attendanceRecord.event === event.summary && event.active >= 1 && (attendanceRecord.unique === null || attendanceRecord.unique === ``)) {
-                  await sails.models.attendance.update({ ID: sails.models.meta['A'].attendanceID }, { unique: event.id, scheduledStart: moment(criteria.start).toISOString(true), scheduledEnd: moment(criteria.end).toISOString(true) }).fetch()
+                  await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { unique: event.id, scheduledStart: moment(criteria.start).toISOString(true), scheduledEnd: moment(criteria.end).toISOString(true) }).fetch()
                 }
               }
             } catch (e) {
@@ -571,12 +571,12 @@ module.exports = {
           try {
             await sails.helpers.genre.start(toTrigger.event, inputs.ignoreChangingState)
           } catch (unusedE) {
-            if (sails.models.meta['A'].state === `automation_genre`) { await sails.helpers.genre.start('Default', inputs.ignoreChangingState) }
+            if (sails.models.meta.memory.state === `automation_genre`) { await sails.helpers.genre.start('Default', inputs.ignoreChangingState) }
           }
         }
 
         // No genre events active right now? Switch back to regular automation.
-        if (toTrigger === null && !genreActive && sails.models.meta['A'].genre !== 'Default') {
+        if (toTrigger === null && !genreActive && sails.models.meta.memory.genre !== 'Default') {
           await sails.helpers.genre.start('Default', inputs.ignoreChangingState)
         }
 

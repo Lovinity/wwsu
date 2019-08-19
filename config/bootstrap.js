@@ -57,8 +57,14 @@ module.exports.bootstrap = async function (done) {
   await sails.models.darksky.findOrCreate({ ID: 1 }, { ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {} })
 
   // Load blank sails.models.meta template
-  sails.log.verbose(`BOOTSTRAP: Cloning sails.models.meta.A to sails.models.meta.template`)
-  sails.models.meta.template = _.cloneDeep(sails.models.meta['A'])
+  sails.log.verbose(`BOOTSTRAP: Generating sails.models.meta.memory`)
+  var temp = {}
+  for (var key in sails.models.meta.template) {
+    if (Object.prototype.hasOwnProperty.call(sails.models.meta.template, key)) {
+      temp = sails.models.meta.template[key]
+      sails.models.meta.memory[key] = (typeof temp.defaultsTo !== 'undefined') ? temp.defaultsTo : null
+    }
+  }
 
   // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
   sails.log.verbose(`BOOTSTRAP: Loading RadioDJ instances into template`)
@@ -137,7 +143,7 @@ module.exports.bootstrap = async function (done) {
     meta = meta[0]
     meta.time = moment().toISOString(true)
     sails.log.silly(meta)
-    await sails.models.meta.changeMeta(meta)
+    await sails.helpers.meta.change.with(meta)
     if (meta.playlist !== null && meta.playlist !== '') {
       var theplaylist = await sails.models.playlists.findOne({ name: meta.playlist })
       // LINT: RadioDJ table; is not camel cased
@@ -161,12 +167,12 @@ module.exports.bootstrap = async function (done) {
 
   // Load Google sails.models.calendar.
   sails.log.verbose(`BOOTSTRAP: Loading calendar events.`)
-  await sails.models.meta.changeMeta({ changingState: `Initializing program calendar` })
+  await sails.helpers.meta.change.with({ changingState: `Initializing program calendar` })
   try {
     await sails.helpers.calendar.sync(true)
-    await sails.models.meta.changeMeta({ changingState: null })
+    await sails.helpers.meta.change.with({ changingState: null })
   } catch (unusedE) {
-    await sails.models.meta.changeMeta({ changingState: null })
+    await sails.helpers.meta.change.with({ changingState: null })
   }
 
   // CRON JOBS
@@ -189,7 +195,7 @@ module.exports.bootstrap = async function (done) {
         try {
           change = sails.models.meta.template
           change.time = moment().toISOString(true)
-          await sails.models.meta.changeMeta(change)
+          await sails.helpers.meta.change.with(change)
         } catch (e) {
           sails.log.error(e)
           return resolve(e)
@@ -198,7 +204,7 @@ module.exports.bootstrap = async function (done) {
       }
 
       // If we do not know current state, we may need to populate the info from the database.
-      if (sails.models.meta['A'].state === '' || sails.models.meta['A'].state === 'unknown') {
+      if (sails.models.meta.memory.state === '' || sails.models.meta.memory.state === 'unknown') {
         try {
           sails.log.verbose(`Unknown meta. Retrieving from database.`)
           var meta = await sails.models.meta.find().limit(1)
@@ -209,7 +215,7 @@ module.exports.bootstrap = async function (done) {
           meta = meta[0]
           meta.time = moment().toISOString(true)
           sails.log.silly(meta)
-          await sails.models.meta.changeMeta(meta)
+          await sails.helpers.meta.change.with(meta)
           if (meta.playlist !== null && meta.playlist !== '') {
             theplaylist = await sails.models.playlists.findOne({ name: meta.playlist })
             // LINT: RadioDJ table that is not camel case
@@ -256,7 +262,7 @@ module.exports.bootstrap = async function (done) {
           var breakQueueLength = -2
           var firstNoMeta = 0
           change.queueMusic = false
-          if ((sails.models.meta['A'].state.includes('_returning') || sails.models.meta['A'].state === 'automation_live' || sails.models.meta['A'].state === 'automation_remote' || sails.models.meta['A'].state === 'automation_sports' || sails.models.meta['A'].state === 'automation_sportsremote')) {
+          if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
             breakQueueLength = -1
             firstNoMeta = -1
             queue.forEach((track, index) => {
@@ -272,7 +278,7 @@ module.exports.bootstrap = async function (done) {
           }
 
           // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
-          if (sails.models.meta['A'].changingState === null) {
+          if (sails.models.meta.memory.changingState === null) {
             sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`)
             await sails.helpers.asyncForEach(queue, (track, index) => {
               // eslint-disable-next-line promise/param-names
@@ -348,9 +354,9 @@ module.exports.bootstrap = async function (done) {
       sails.models.status.errorCheck.prevQueueLength = queueLength
 
       // If we do not know active playlist, we need to populate the info
-      if (sails.models.meta['A'].playlist !== null && sails.models.meta['A'].playlist !== '' && sails.models.playlists.active.tracks.length <= 0 && (sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state.startsWith('prerecord_'))) {
+      if (sails.models.meta.memory.playlist !== null && sails.models.meta.memory.playlist !== '' && sails.models.playlists.active.tracks.length <= 0 && (sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state.startsWith('prerecord_'))) {
         try {
-          theplaylist = await sails.models.playlists.findOne({ name: sails.models.meta['A'].playlist })
+          theplaylist = await sails.models.playlists.findOne({ name: sails.models.meta.memory.playlist })
             .tolerate(() => {
             })
           if (typeof theplaylist !== 'undefined') {
@@ -366,7 +372,7 @@ module.exports.bootstrap = async function (done) {
               })
             }
           } else {
-            await sails.models.meta.changeMeta({ playlist: null })
+            await sails.helpers.meta.change.with({ playlist: null })
           }
         } catch (e) {
           sails.log.error(e)
@@ -375,14 +381,14 @@ module.exports.bootstrap = async function (done) {
 
       // If we are in automation_genre, check to see if the queue is less than 20 seconds. If so, the genre rotation may be out of tracks to play.
       // In that case, flip to automation_on with Default rotation.
-      if (sails.models.meta['A'].state === 'automation_genre' && queueLength <= 20) {
+      if (sails.models.meta.memory.state === 'automation_genre' && queueLength <= 20) {
         await sails.helpers.error.count('genreEmpty')
       } else {
         await sails.helpers.error.reset('genreEmpty')
       }
 
       // Clear manual metadata if it is old
-      if (sails.models.meta['A'].trackStamp !== null && (moment().isAfter(moment(sails.models.meta['A'].trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !sails.models.meta['A'].state.startsWith('automation_') && !sails.models.meta['A'].state.startsWith('prerecord_'))) {
+      if (sails.models.meta.memory.trackStamp !== null && (moment().isAfter(moment(sails.models.meta.memory.trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_'))) {
         change.trackStamp = null
         change.trackArtist = null
         change.trackTitle = null
@@ -392,7 +398,7 @@ module.exports.bootstrap = async function (done) {
 
       // Playlist maintenance
       var thePosition = -1
-      if ((sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'automation_prerecord' || sails.models.meta['A'].state.startsWith('prerecord_'))) {
+      if ((sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_prerecord' || sails.models.meta.memory.state.startsWith('prerecord_'))) {
         // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
         sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`)
         var playingTrack = false
@@ -404,20 +410,20 @@ module.exports.bootstrap = async function (done) {
                 var name = sails.models.playlists.active.tracks[i]
                 if (name === parseInt(autoTrack.ID)) {
                   // Waiting for the playlist to begin, and it has begun? Switch states.
-                  if (sails.models.meta['A'].state === 'automation_prerecord' && index === 0 && !sails.models.playlists.queuing && sails.models.meta['A'].changingState === null) {
+                  if (sails.models.meta.memory.state === 'automation_prerecord' && index === 0 && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null) {
                     // State switching should be pushed in sockets
-                    sails.models.meta.changeMeta({ state: 'prerecord_on', showStamp: moment().toISOString(true) })
+                    sails.helpers.meta.change.with({ state: 'prerecord_on', showStamp: moment().toISOString(true) })
                       .then(() => {
-                        sails.models.attendance.createRecord(`Prerecord: ${sails.models.meta['A'].playlist}`)
+                        sails.models.attendance.createRecord(`Prerecord: ${sails.models.meta.memory.playlist}`)
                           .then((attendance) => {
                             (async () => {
-                              await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta['A'].playlist, event: `<strong>A prerecord started airing.</strong><br />Prerecord: ${sails.models.meta['A'].playlist}` }).fetch()
+                              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord started airing.</strong><br />Prerecord: ${sails.models.meta.memory.playlist}` }).fetch()
                                 .tolerate((err) => {
                                   // Do not throw for errors, but log it.
                                   sails.log.error(err)
                                 })
                             })()
-                            sails.helpers.onesignal.sendEvent(`Prerecord: `, sails.models.meta['A'].playlist, `Prerecorded Show`, attendance.unique)
+                            sails.helpers.onesignal.sendEvent(`Prerecord: `, sails.models.meta.memory.playlist, `Prerecorded Show`, attendance.unique)
                               .then(() => {
 
                               })
@@ -427,14 +433,14 @@ module.exports.bootstrap = async function (done) {
                   // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
                   if (index === 0) {
                     playingTrack = true
-                    if (sails.models.meta['A'].state === 'prerecord_break') {
+                    if (sails.models.meta.memory.state === 'prerecord_break') {
                       (async () => {
-                        await sails.models.meta.changeMeta({ state: `prerecord_on` })
+                        await sails.helpers.meta.change.with({ state: `prerecord_on` })
                       })()
                     }
-                  } else if (index > 0 && sails.models.meta['A'].state === 'prerecord_on' && !playingTrack) {
+                  } else if (index > 0 && sails.models.meta.memory.state === 'prerecord_on' && !playingTrack) {
                     (async () => {
-                      await sails.models.meta.changeMeta({ state: `prerecord_break` })
+                      await sails.helpers.meta.change.with({ state: `prerecord_break` })
                     })()
                   }
                   if (thePosition === -1 || i < thePosition) {
@@ -453,11 +459,11 @@ module.exports.bootstrap = async function (done) {
 
         try {
           // Finished the playlist? Go back to automation.
-          if (thePosition === -1 && sails.models.status.errorCheck.trueZero <= 0 && !sails.models.playlists.queuing && sails.models.meta['A'].changingState === null) {
-            await sails.models.meta.changeMeta({ changingState: `Ending playlist` })
-            switch (sails.models.meta['A'].state) {
+          if (thePosition === -1 && sails.models.status.errorCheck.trueZero <= 0 && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null) {
+            await sails.helpers.meta.change.with({ changingState: `Ending playlist` })
+            switch (sails.models.meta.memory.state) {
               case 'automation_playlist':
-                await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta['A'].playlist, event: `<strong>A playlist finished airing.</strong>` }).fetch()
+                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A playlist finished airing.</strong>` }).fetch()
                   .tolerate((err) => {
                     // Do not throw for errors, but log it.
                     sails.log.error(err)
@@ -465,7 +471,7 @@ module.exports.bootstrap = async function (done) {
                 break
               case 'prerecord_on':
               case 'prerecord_break':
-                await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta['A'].playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
+                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
                   .tolerate((err) => {
                     // Do not throw for errors, but log it.
                     sails.log.error(err)
@@ -478,14 +484,14 @@ module.exports.bootstrap = async function (done) {
             await sails.helpers.requests.queue(3, true, true)
 
             // Switch back to automation
-            await sails.models.meta.changeMeta({ changingState: null, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
+            await sails.helpers.meta.change.with({ changingState: null, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
 
             // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
             await sails.helpers.calendar.sync()
 
             // Did not finish the playlist? Ensure the position is updated in meta.
           } else if (thePosition !== -1) {
-            if (thePosition !== sails.models.meta['A'].playlistPosition) {
+            if (thePosition !== sails.models.meta.memory.playlistPosition) {
               change.playlistPosition = thePosition
             }
           }
@@ -498,74 +504,74 @@ module.exports.bootstrap = async function (done) {
         var attendance
         if (queue.length > 0) {
           // If we are preparing for live, so some stuff if queue is done
-          if (sails.models.meta['A'].state === 'automation_live' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
-            await sails.models.meta.changeMeta({ state: 'live_on', showStamp: moment().toISOString(true) })
+          if (sails.models.meta.memory.state === 'automation_live' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
+            await sails.helpers.meta.change.with({ state: 'live_on', showStamp: moment().toISOString(true) })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
-            attendance = await sails.models.attendance.createRecord(`Show: ${sails.models.meta['A'].show}`)
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta['A'].show, event: '<strong>DJ is now live.</strong><br />DJ - Show: ' + sails.models.meta['A'].show + '<br />Topic: ' + sails.models.meta['A'].topic }).fetch()
+            attendance = await sails.models.attendance.createRecord(`Show: ${sails.models.meta.memory.show}`)
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>DJ is now live.</strong><br />DJ - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Show: `, sails.models.meta['A'].show, `Live Show`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent(`Show: `, sails.models.meta.memory.show, `Live Show`, attendance.unique)
           }
           // If we are preparing for sports, do some stuff if queue is done
-          if (sails.models.meta['A'].state === 'automation_sports' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
-            await sails.models.meta.changeMeta({ state: 'sports_on', showStamp: moment().toISOString(true) })
+          if (sails.models.meta.memory.state === 'automation_sports' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
+            await sails.helpers.meta.change.with({ state: 'sports_on', showStamp: moment().toISOString(true) })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
-            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta['A'].show}`)
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta['A'].show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + sails.models.meta['A'].show + '<br />Topic: ' + sails.models.meta['A'].topic }).fetch()
+            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta['A'].show, `Sports Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
           }
           // If we are preparing for remote, do some stuff
-          if (sails.models.meta['A'].state === 'automation_remote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
-            await sails.models.meta.changeMeta({ state: 'remote_on', showStamp: moment().toISOString(true) })
-            attendance = await sails.models.attendance.createRecord(`Remote: ${sails.models.meta['A'].show}`)
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta['A'].show, event: '<strong>A remote broadcast is now on the air.</strong><br />Host - Show: ' + sails.models.meta['A'].show + '<br />Topic: ' + sails.models.meta['A'].topic }).fetch()
+          if (sails.models.meta.memory.state === 'automation_remote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
+            await sails.helpers.meta.change.with({ state: 'remote_on', showStamp: moment().toISOString(true) })
+            attendance = await sails.models.attendance.createRecord(`Remote: ${sails.models.meta.memory.show}`)
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote broadcast is now on the air.</strong><br />Host - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Remote: `, sails.models.meta['A'].show, `Remote Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent(`Remote: `, sails.models.meta.memory.show, `Remote Broadcast`, attendance.unique)
           }
           // If we are preparing for sportsremote, do some stuff if we are playing the stream track
-          if (sails.models.meta['A'].state === 'automation_sportsremote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
-            await sails.models.meta.changeMeta({ state: 'sportsremote_on', showStamp: moment().toISOString(true) })
-            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta['A'].show}`)
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta['A'].show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + sails.models.meta['A'].show + '<br />Topic: ' + sails.models.meta['A'].topic }).fetch()
+          if (sails.models.meta.memory.state === 'automation_sportsremote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
+            await sails.helpers.meta.change.with({ state: 'sportsremote_on', showStamp: moment().toISOString(true) })
+            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta['A'].show, `Sports Broadcast`, attendance.unique)
+            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
           }
           // If returning from break, do stuff once queue is empty
-          if (sails.models.meta['A'].state.includes('_returning') && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
-            switch (sails.models.meta['A'].state) {
+          if (sails.models.meta.memory.state.includes('_returning') && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
+            switch (sails.models.meta.memory.state) {
               case 'live_returning':
-                await sails.models.meta.changeMeta({ state: 'live_on' })
+                await sails.helpers.meta.change.with({ state: 'live_on' })
                 if (!change.queueMusic) { await sails.helpers.rest.cmd('EnableAssisted', 1) }
                 break
               case 'remote_returning':
-                await sails.models.meta.changeMeta({ state: 'remote_on' })
+                await sails.helpers.meta.change.with({ state: 'remote_on' })
                 break
               case 'sports_returning':
-                await sails.models.meta.changeMeta({ state: 'sports_on' })
+                await sails.helpers.meta.change.with({ state: 'sports_on' })
                 if (!change.queueMusic) { await sails.helpers.rest.cmd('EnableAssisted', 1) }
                 break
               case 'sportsremote_returning':
-                await sails.models.meta.changeMeta({ state: 'sportsremote_on' })
+                await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
                 break
             }
           }
 
           // If we are in break, queue something if the queue is under 2 items to keep the break going, and if we are not changing states
-          if (sails.models.meta['A'].changingState === null && queue.length < 2) {
-            switch (sails.models.meta['A'].state) {
+          if (sails.models.meta.memory.changingState === null && queue.length < 2) {
+            switch (sails.models.meta.memory.state) {
               case 'automation_break':
                 await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.automation.during)
                 break
@@ -587,22 +593,22 @@ module.exports.bootstrap = async function (done) {
           }
 
           // Counter to ensure automation break is not running for too long
-          if (sails.models.meta['A'].state === 'automation_break') { await sails.helpers.error.count('automationBreak') }
+          if (sails.models.meta.memory.state === 'automation_break') { await sails.helpers.error.count('automationBreak') }
 
           // Check if a DJ neglected the required top of the hour break (passes :05 after)
           var d = new Date()
           var n = d.getMinutes()
-          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta['A'].lastID)) && !sails.models.meta['A'].state.startsWith('automation_') && !sails.models.meta['A'].state.startsWith('prerecord_')) {
-            await sails.models.meta.changeMeta({ lastID: moment().toISOString(true) })
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: sails.models.meta['A'].show, event: `<strong>Required top of the hour break was not taken!</strong><br />Show: ${sails.models.meta['A'].show}` }).fetch()
+          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta.memory.lastID)) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
+            await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: sails.models.meta.memory.show, event: `<strong>Required top of the hour break was not taken!</strong><br />Show: ${sails.models.meta.memory.show}` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
 
-            if (sails.models.meta['A'].attendanceID !== null) {
-              var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta['A'].attendanceID })
+            if (sails.models.meta.memory.attendanceID !== null) {
+              var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
               if (attendanceRecord) {
-                await sails.models.attendance.update({ ID: sails.models.meta['A'].attendanceID }, { missedIDs: attendanceRecord.missedIDs + 1 }).fetch()
+                await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { missedIDs: attendanceRecord.missedIDs + 1 }).fetch()
                   .tolerate((err) => {
                     sails.log.error(err)
                   })
@@ -611,7 +617,7 @@ module.exports.bootstrap = async function (done) {
           }
 
           // Do automation system error checking and handling
-          if (queue.length > 0 && queue[0].Duration === sails.models.status.errorCheck.prevDuration && queue[0].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.endsWith('_break') || sails.models.meta['A'].state.endsWith('_disconnected') || sails.models.meta['A'].state.endsWith('_returning') || sails.models.meta['A'].state.startsWith('prerecord_'))) {
+          if (queue.length > 0 && queue[0].Duration === sails.models.status.errorCheck.prevDuration && queue[0].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
             await sails.helpers.error.count('frozen')
           } else {
             sails.models.status.errorCheck.prevDuration = queue[0].Duration
@@ -659,7 +665,7 @@ module.exports.bootstrap = async function (done) {
                 }
 
                 // Do not queue if we are not in automation, playlist, genre, or prerecord states
-                if (sails.models.meta['A'].state !== 'automation_on' && sails.models.meta['A'].state !== 'automation_playlist' && sails.models.meta['A'].state !== 'automation_genre' && !sails.models.meta['A'].state.startsWith('prerecord_')) { doBreak = false }
+                if (sails.models.meta.memory.state !== 'automation_on' && sails.models.meta.memory.state !== 'automation_playlist' && sails.models.meta.memory.state !== 'automation_genre' && !sails.models.meta.memory.state.startsWith('prerecord_')) { doBreak = false }
 
                 // Do not queue if we queued a break less than the configured failsafe time, and this isn't the 0 break
                 if (key !== 0 && sails.models.status.errorCheck.prevBreak !== null && moment(sails.models.status.errorCheck.prevBreak).isAfter(moment().subtract(sails.config.custom.breakCheck, 'minutes'))) { doBreak = false }
@@ -684,12 +690,12 @@ module.exports.bootstrap = async function (done) {
                   if (key === 0) {
                     sails.models.status.errorCheck.prevID = moment()
                     await sails.helpers.error.count('stationID')
-                    await sails.models.meta.changeMeta({ lastID: moment().toISOString(true) })
+                    await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
                   }
 
                   // Add XP for prerecords
-                  if (sails.models.meta['A'].state.startsWith('prerecord_')) {
-                    await sails.models.xp.create({ dj: sails.models.meta['A'].dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.` })
+                  if (sails.models.meta.memory.state.startsWith('prerecord_')) {
+                    await sails.models.xp.create({ dj: sails.models.meta.memory.dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.` })
                       .tolerate((err) => {
                         // Do not throw for error, but log it
                         sails.log.error(err)
@@ -707,7 +713,7 @@ module.exports.bootstrap = async function (done) {
                   // Don't do a liner if it was too soon.
                   if (sails.models.status.errorCheck.prevLiner === null || moment().diff(moment(sails.models.status.errorCheck.prevLiner), 'minutes') > sails.config.custom.linerTime) {
                     // Only do liners when in automation
-                    if (sails.models.meta['A'].state.startsWith('automation_')) {
+                    if (sails.models.meta.memory.state.startsWith('automation_')) {
                       // If there is at least 1 track in the queue, and both the current track and the next track are not noMeta tracks, queue a liner
                       if (queue.length > 1 && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[1].IDSubcat)) === -1) {
                         sails.models.status.errorCheck.prevLiner = moment()
@@ -722,7 +728,7 @@ module.exports.bootstrap = async function (done) {
           }
         } else {
           // We have no queue... which should never happen because RadioDJ always returns a dummy track in position 0. This is an error.
-          if (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.endsWith('_break') || sails.models.meta['A'].state.endsWith('_disconnected') || sails.models.meta['A'].state.endsWith('_returning') || sails.models.meta['A'].state.startsWith('prerecord_')) {
+          if (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_')) {
             await sails.helpers.error.count('frozen')
           }
         }
@@ -735,7 +741,7 @@ module.exports.bootstrap = async function (done) {
         }
 
         // Change applicable meta
-        await sails.models.meta.changeMeta(change)
+        await sails.helpers.meta.change.with(change)
 
         // All done
         return resolve()
@@ -776,12 +782,12 @@ module.exports.bootstrap = async function (done) {
               sails.models.status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5 }])
 
               // Log listeners if there are any changes
-              if (sails.models.meta['A'].dj !== sails.models.listeners.memory.dj || streams[0].uniquelisteners !== sails.models.listeners.memory.listeners) {
-                await sails.models.listeners.create({ dj: sails.models.meta['A'].dj, listeners: streams[0].uniquelisteners })
+              if (sails.models.meta.memory.dj !== sails.models.listeners.memory.dj || streams[0].uniquelisteners !== sails.models.listeners.memory.listeners) {
+                await sails.models.listeners.create({ dj: sails.models.meta.memory.dj, listeners: streams[0].uniquelisteners })
                   .tolerate(() => {
                   })
               }
-              sails.models.listeners.memory = { dj: sails.models.meta['A'].dj, listeners: streams[0].uniquelisteners }
+              sails.models.listeners.memory = { dj: sails.models.meta.memory.dj, listeners: streams[0].uniquelisteners }
             } else {
               sails.models.status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: `Stream is offline. Please ensure the audio encoder is connected and streaming to the ${sails.config.custom.stream} Shoutcast server.`, status: 2 }])
             }
@@ -830,9 +836,9 @@ module.exports.bootstrap = async function (done) {
              var dj = '';
 
              // Do not tie DJ with listener count unless DJ is actually on the air
-             if (!sails.models.meta['A'].state.startsWith("automation_"))
+             if (!sails.models.meta.memory.state.startsWith("automation_"))
              {
-             dj = sails.models.meta['A'].dj;
+             dj = sails.models.meta.memory.dj;
              if (dj.includes(" - "))
              {
              dj = dj.split(" - ")[0];
@@ -867,7 +873,7 @@ module.exports.bootstrap = async function (done) {
              sails.models.status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Offline.', status: 2}]);
              if (!remoteStream)
              {
-             if (sails.models.meta['A'].state.includes("remote_"))
+             if (sails.models.meta.memory.state.includes("remote_"))
              {
              // TODO: send system into disconnected mode (if not already) if remote stream is disconnected
              sails.models.status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline.', status: 2}]);
@@ -878,7 +884,7 @@ module.exports.bootstrap = async function (done) {
              })
              .catch(function (err) {
              sails.models.status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
-             if (sails.models.meta['A'].state.includes("remote"))
+             if (sails.models.meta.memory.state.includes("remote"))
              {
              sails.models.status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error.', status: 2}]);
              } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
@@ -917,19 +923,19 @@ module.exports.bootstrap = async function (done) {
 
                           // Get the current RadioDJ out of critical status if necessary
                           var maps = sails.config.custom.radiodjs
-                            .filter((instance) => instance.rest === sails.models.meta['A'].radiodj && instance.name !== radiodj.name)
+                            .filter((instance) => instance.rest === sails.models.meta.memory.radiodj && instance.name !== radiodj.name)
                             .map(async (instance) => {
                               await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: instance.level, data: `RadioDJ is not operational. Please ensure this RadioDJ is running and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.` }])
                               return true
                             })
                           await Promise.all(maps)
                           var queue = sails.models.meta.automation
-                          await sails.models.meta.changeMeta({ radiodj: radiodj.rest })
+                          await sails.helpers.meta.change.with({ radiodj: radiodj.rest })
                           await sails.helpers.rest.cmd('ClearPlaylist', 1)
                           await sails.helpers.error.post(queue)
                         }
                         // If this RadioDJ is inactive, check to see if it is playing anything and send a stop command if so.
-                        if (sails.models.meta['A'].radiodj !== radiodj.rest) {
+                        if (sails.models.meta.memory.radiodj !== radiodj.rest) {
                           var automation = []
                           if (resp.body.name === 'ArrayOfSongData') {
                             resp.body.children.map(trackA => {
@@ -1348,7 +1354,7 @@ module.exports.bootstrap = async function (done) {
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON clockOutDirectors called`)
       try {
-        await sails.models.meta.changeMeta({ time: moment().toISOString(true) })
+        await sails.helpers.meta.change.with({ time: moment().toISOString(true) })
 
         await sails.models.timesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: false }).fetch()
           .tolerate(() => {

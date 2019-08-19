@@ -18,7 +18,7 @@ module.exports = {
       var returnData = { newID: null, unique: null }
 
       // Store the current ID in a variable; we want to start a new record before processing the old one
-      var currentID = sails.models.meta['A'].attendanceID
+      var currentID = sails.models.meta.memory.attendanceID
 
       // Add a new attendance record if event is specified.
       if (inputs.event) {
@@ -36,9 +36,9 @@ module.exports = {
 
         if (record.length > 0) {
           returnData.unique = record[0].unique
-          created = await sails.models.attendance.create({ unique: record[0].unique, dj: sails.models.meta['A'].dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
+          created = await sails.models.attendance.create({ unique: record[0].unique, dj: sails.models.meta.memory.dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
         } else {
-          created = await sails.models.attendance.create({ dj: sails.models.meta['A'].dj, event: inputs.event, actualStart: moment().toISOString(true) }).fetch()
+          created = await sails.models.attendance.create({ dj: sails.models.meta.memory.dj, event: inputs.event, actualStart: moment().toISOString(true) }).fetch()
 
           // Broadcasts without a calendar ID are unauthorized. Log them!
           if (inputs.event.startsWith('Show: ') || inputs.event.startsWith('Remote: ') || inputs.event.startsWith('Sports: ')) {
@@ -52,9 +52,9 @@ module.exports = {
         returnData.newID = created.ID
 
         // Switch to the new record in the system
-        await sails.models.meta.changeMeta({ attendanceID: created.ID })
+        await sails.helpers.meta.change.with({ attendanceID: created.ID })
       } else {
-        await sails.models.meta.changeMeta({ attendanceID: null })
+        await sails.helpers.meta.change.with({ attendanceID: null })
       }
 
       // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast

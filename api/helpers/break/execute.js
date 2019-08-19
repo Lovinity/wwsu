@@ -45,7 +45,7 @@ module.exports = {
       switch (inputs.task) {
         // Log an entry
         case 'log':
-          await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'break', loglevel: 'info', logsubtype: 'automation', event: `<strong>${inputs.event}</strong>` }).fetch()
+          await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'break', loglevel: 'info', logsubtype: 'automation', event: `<strong>${inputs.event}</strong>` }).fetch()
             .tolerate(() => {
             })
           break

@@ -113,7 +113,7 @@ module.exports = {
               })
 
               // Skip this underwriting if it contains any show filters, and none of them are on the air right now.
-              if (typeof underwriting.mode.show === `undefined` || underwriting.mode.show.length === 0 || underwriting.mode.show.indexOf(sails.models.meta['A'].show) !== -1) {
+              if (typeof underwriting.mode.show === `undefined` || underwriting.mode.show.length === 0 || underwriting.mode.show.indexOf(sails.models.meta.memory.show) !== -1) {
                 // Determine the next date/time this underwriting is allowed to queue.
                 var schedule = later.schedule(underwriting.mode.schedule)
                 var start = moment(song.date_played).toISOString(false)

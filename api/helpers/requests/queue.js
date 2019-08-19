@@ -36,7 +36,7 @@ module.exports = {
       if (inputs.ID !== 0) { query.ID = inputs.ID }
 
       // End if considerPlaylist and we are not in automation mode.
-      if (inputs.considerPlaylist && sails.models.meta['A'].state !== 'automation_on' && sails.models.meta['A'].state !== 'automation_genre' && sails.models.meta['A'].state !== 'automation_playlist') {
+      if (inputs.considerPlaylist && sails.models.meta.memory.state !== 'automation_on' && sails.models.meta.memory.state !== 'automation_genre' && sails.models.meta.memory.state !== 'automation_playlist') {
         sails.log.verbose(`Helper abandoned: considerPlaylist is true, and we are airing a playlist.`)
         return exits.success(false)
       }
@@ -52,7 +52,7 @@ module.exports = {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve) => {
           sails.log.verbose(`prepareRequests called.`)
-          switch (sails.models.meta['A'].state) {
+          switch (sails.models.meta.memory.state) {
             case 'live_on':
               await sails.helpers.rest.cmd('EnableAssisted', 1)
               return resolve()
@@ -82,7 +82,7 @@ module.exports = {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve) => {
           sails.log.verbose(`finalizeRequests called.`)
-          switch (sails.models.meta['A'].state) {
+          switch (sails.models.meta.memory.state) {
             case 'live_on':
             case 'remote_on':
             case 'sports_on':

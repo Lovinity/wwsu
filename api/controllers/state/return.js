@@ -13,17 +13,17 @@ module.exports = {
 
     try {
       // Block this request if we are already changing states
-      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
       // Prevent state changing if host is lockToDJ and the specified lockToDJ is not on the air
-      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to return the system from break because you are not on the air.')) }
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to return the system from break because you are not on the air.')) }
 
       // Lock so that other state changing requests get blocked until we are done
-      await sails.models.meta.changeMeta({ changingState: `Returning from break` });
+      await sails.helpers.meta.change.with({ changingState: `Returning from break` });
 
       // log it
       (async () => {
-        await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'return', loglevel: 'info', logsubtype: sails.models.meta['A'].show, event: '<strong>Return from break requested.</strong>' }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'return', loglevel: 'info', logsubtype: sails.models.meta.memory.show, event: '<strong>Return from break requested.</strong>' }).fetch()
           .tolerate((err) => {
             // Don't throw errors, but log them
             sails.log.error(err)
@@ -38,7 +38,7 @@ module.exports = {
       // Perform the break
 
       // If returning from a halftime break...
-      if (sails.models.meta['A'].state.includes('halftime')) {
+      if (sails.models.meta.memory.state.includes('halftime')) {
         // Queue a legal ID
         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
         sails.models.status.errorCheck.prevID = moment()
@@ -48,7 +48,7 @@ module.exports = {
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after)
 
         // Queue a sports liner
-        if (typeof sails.config.custom.sportscats[sails.models.meta['A'].show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta['A'].show]['Sports Liners']], 'Bottom', 1) }
+        if (typeof sails.config.custom.sportscats[sails.models.meta.memory.show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta.memory.show]['Sports Liners']], 'Bottom', 1) }
 
         var queueLength = await sails.helpers.songs.calculateQueueLength()
 
@@ -56,7 +56,7 @@ module.exports = {
         if (queueLength >= sails.config.custom.queueCorrection.sportsReturn) {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0) // Try to Disable autoDJ again in case it was mistakenly still active
           // await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
-          if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(sails.models.meta['A'].trackIDSubcat) !== -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
+          if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(sails.models.meta.memory.trackIDSubcat) !== -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
 
           queueLength = await sails.helpers.songs.calculateQueueLength()
         }
@@ -64,28 +64,28 @@ module.exports = {
         // await sails.helpers.error.count('sportsReturnQueue');
 
         // Change state
-        if (sails.models.meta['A'].state === 'sportsremote_halftime' || sails.models.meta['A'].state === 'sportsremote_halftime_disconnected') {
-          await sails.models.meta.changeMeta({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning', lastID: moment().toISOString(true) })
+        if (sails.models.meta.memory.state === 'sportsremote_halftime' || sails.models.meta.memory.state === 'sportsremote_halftime_disconnected') {
+          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning', lastID: moment().toISOString(true) })
         } else {
-          await sails.models.meta.changeMeta({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning', lastID: moment().toISOString(true) })
         }
       } else {
         sails.models.status.errorCheck.prevBreak = moment()
 
         // Do stuff depending on the state
-        switch (sails.models.meta['A'].state) {
+        switch (sails.models.meta.memory.state) {
           case 'live_break':
             // Queue after break
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.after)
 
             // Queue a show return if there is one
-            if (typeof sails.config.custom.showcats[sails.models.meta['A'].show] !== 'undefined') {
-              await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta['A'].show]['Show Returns']], 'Bottom', 1)
+            if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') {
+              await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Returns']], 'Bottom', 1)
             } else {
               await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Returns']], 'Bottom', 1)
             }
 
-            await sails.models.meta.changeMeta({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning' })
             break
           case 'sports_break':
             // Queue after break
@@ -96,25 +96,25 @@ module.exports = {
             if (queueLength >= sails.config.custom.queueCorrection.sportsReturn) {
               await sails.helpers.rest.cmd('EnableAutoDJ', 0) // Try to Disable autoDJ again in case it was mistakenly still active
               // await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
-              if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(sails.models.meta['A'].trackIDSubcat) !== -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
+              if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(sails.models.meta.memory.trackIDSubcat) !== -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
 
               queueLength = await sails.helpers.songs.calculateQueueLength()
             }
 
             // await sails.helpers.error.count('sportsReturnQueue');
-            await sails.models.meta.changeMeta({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning' })
             break
           case 'remote_break':
           case 'remote_break_disconnected':
             // Queue after break
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.after)
             // Queue a show return if there is one
-            if (typeof sails.config.custom.showcats[sails.models.meta['A'].show] !== 'undefined') {
-              await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta['A'].show]['Show Returns']], 'Bottom', 1)
+            if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') {
+              await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Returns']], 'Bottom', 1)
             } else {
               await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Returns']], 'Bottom', 1)
             }
-            await sails.models.meta.changeMeta({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'remote_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'remote_returning' })
             break
           case 'sportsremote_break':
           case 'sportsremote_break_disconnected':
@@ -125,23 +125,23 @@ module.exports = {
             if (queueLength >= sails.config.custom.queueCorrection.sportsReturn) {
               await sails.helpers.rest.cmd('EnableAutoDJ', 0) // Try to Disable autoDJ again in case it was mistakenly still active
               // await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false);
-              if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(sails.models.meta['A'].trackIDSubcat) !== -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
+              if ((sails.config.custom.subcats.clearBreak && sails.config.custom.subcats.clearBreak.indexOf(sails.models.meta.memory.trackIDSubcat) !== -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
 
               queueLength = await sails.helpers.songs.calculateQueueLength()
             }
 
             // await sails.helpers.error.count('sportsReturnQueue');
-            await sails.models.meta.changeMeta({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning' })
             break
         }
       }
 
       await sails.helpers.rest.cmd('EnableAssisted', 0)
 
-      await sails.models.meta.changeMeta({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
       return exits.success()
     } catch (e) {
-      await sails.models.meta.changeMeta({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
       return exits.error(e)
     }
   }

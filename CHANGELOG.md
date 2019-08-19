@@ -89,6 +89,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Moved sails.models.attendance.createRecord to sails.helpers.attendance.createRecord. [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
  - Moved all functions in the calendar model for syncing events to sails.helpers.calendar.sync(ignoreChangingState = false). [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
  - Moved model function directors.updateDirectors to sails.helpers.directors.update. [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
+ - meta.changeMeta moved to sails.helpers.meta.change with input validation for all keys via meta.template. [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
+ - meta['A'] replaced with meta.memory.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

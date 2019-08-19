@@ -14,7 +14,7 @@ module.exports = {
       // Determine which inactive RadioDJs are healthy (status 5).
       var healthyRadioDJs = []
       var maps = sails.config.custom.radiodjs.map(async (instance) => {
-        if (instance.rest === sails.models.meta['A'].radiodj) { return false }
+        if (instance.rest === sails.models.meta.memory.radiodj) { return false }
         var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
         if (status && status.status === 5) { healthyRadioDJs.push(instance) }
         return true
@@ -24,12 +24,12 @@ module.exports = {
       // If there is at least one healthy inactive RadioDJ, choose one randomly to switch to
       if (healthyRadioDJs.length > 0) {
         var changeTo = await sails.helpers.pickRandom(healthyRadioDJs)
-        await sails.models.meta.changeMeta({ radiodj: changeTo.item.rest })
+        await sails.helpers.meta.change.with({ radiodj: changeTo.item.rest })
 
         // Otherwise, check to see if the active RadioDJ is still status 5
       } else {
         maps = sails.config.custom.radiodjs
-          .filter((instance) => instance.rest === sails.models.meta['A'].radiodj)
+          .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
           .map(async (instance) => {
             var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
             // If the current RadioDJ is also not status 5, we have a huge problem! Trigger critical status, and wait for a good RadioDJ to report

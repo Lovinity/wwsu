@@ -15,10 +15,10 @@ module.exports = {
 
     try {
       // Prevent adding tracks if host is lockToDJ and the specified lockToDJ is not on the air
-      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta['A'].dj) { return exits.error(new Error('You are not authorized to queue a Top Add because you are not on the air.')) }
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to queue a Top Add because you are not on the air.')) }
 
       // Log it
-      await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: sails.models.meta['A'].show, event: '<strong>Top Add requested.</strong>' }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: sails.models.meta.memory.show, event: '<strong>Top Add requested.</strong>' }).fetch()
         .tolerate((err) => {
           // Do not throw for an error, but log it.
           sails.log.error(err)
@@ -32,8 +32,8 @@ module.exports = {
       await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
 
       // Earn XP for playing a Top Add, if the show is live
-      if (sails.models.meta['A'].state.startsWith('live_')) {
-        await sails.models.xp.create({ dj: sails.models.meta['A'].dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: 'DJ played a Top Add.' })
+      if (sails.models.meta.memory.state.startsWith('live_')) {
+        await sails.models.xp.create({ dj: sails.models.meta.memory.dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: 'DJ played a Top Add.' })
           .tolerate((err) => {
             // Do not throw for error, but log it
             sails.log.error(err)

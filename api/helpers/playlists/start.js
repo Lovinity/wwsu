@@ -37,12 +37,12 @@ module.exports = {
     sails.log.debug('Helper playlists.start called.')
     try {
       // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, we're in the middle of changing states and ignoreChangingState is false.
-      if (!sails.models.playlists.queuing && (((sails.models.meta['A'].changingState === null || inputs.ignoreChangingState) && ((sails.models.meta['A'].state === 'automation_on' || sails.models.meta['A'].state === 'automation_playlist' || sails.models.meta['A'].state === 'automation_genre' || inputs.forced))))) {
+      if (!sails.models.playlists.queuing && (((sails.models.meta.memory.changingState === null || inputs.ignoreChangingState) && ((sails.models.meta.memory.state === 'automation_on' || sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_genre' || inputs.forced))))) {
         sails.log.verbose(`Processing helper.`)
         sails.models.playlists.queuing = true // Mark that the playlist is being queued, to avoid app conflicts.
 
         // Lock state changes when necessary until we are done
-        if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: `Switching to playlist` }) }
+        if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: `Switching to playlist` }) }
 
         // Find the playlist
         var theplaylist = await sails.models.playlists.findOne({ name: inputs.name })
@@ -50,7 +50,7 @@ module.exports = {
 
         // Error if we cannot find the playlist
         if (!theplaylist) {
-          if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: null }) }
+          if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
           sails.models.playlists.queuing = false
           return exits.error(new Error('Playlist not found!'))
         }
@@ -71,7 +71,7 @@ module.exports = {
 
               // Bail if there are no tracks in this playlist
               if (!playlistTracks) {
-                if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: null }) }
+                if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
                 sails.models.playlists.queuing = false
                 return reject(new Error(`No playlist tracks were returned.`))
               }
@@ -90,7 +90,7 @@ module.exports = {
                   bail -= 1
                   if (bail < 1) {
                     sails.models.playlists.queuing = false
-                    if (!inputs.ignoreChangingState) { sails.models.meta.changeMeta({ changingState: null }) }
+                    if (!inputs.ignoreChangingState) { sails.helpers.meta.change.with({ changingState: null }) }
                     sails.log.verbose(`Failed to queue playlist after 60 seconds.`)
                     return reject(new Error('The playlist was not considered queued after 60 seconds.'))
                   }
@@ -103,7 +103,7 @@ module.exports = {
                     // Consider playlist as finished queuing if counter reaches zero.
                     if (slot <= 0) {
                       sails.models.playlists.queuing = false
-                      if (!inputs.ignoreChangingState) { sails.models.meta.changeMeta({ changingState: null }) }
+                      if (!inputs.ignoreChangingState) { sails.helpers.meta.change.with({ changingState: null }) }
                       sails.log.verbose(`Considered playlist as queued. Proceeding.`)
                       return resolve()
                     } else {
@@ -132,8 +132,8 @@ module.exports = {
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, true) // Leave requests in the queue for standard playlists.
           await sails.helpers.rest.cmd('EnableAssisted', 0)
           var attendance = await sails.helpers.attendance.createRecord(`Playlist: ${theplaylist.name}`)
-          await sails.models.meta.changeMeta({ state: 'automation_playlist', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true) })
-          await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + theplaylist.name, event: '<strong>Playlist started.</strong><br />Playlist: ' + inputs.name }).fetch()
+          await sails.helpers.meta.change.with({ state: 'automation_playlist', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true) })
+          await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + theplaylist.name, event: '<strong>Playlist started.</strong><br />Playlist: ' + inputs.name }).fetch()
             .tolerate((err) => {
               sails.log.error(err)
             })
@@ -143,7 +143,7 @@ module.exports = {
           // Prerecords
         } else if (inputs.type === 1) {
           if (inputs.forced) {
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta['A'].playlist, event: `<strong>Prerecord forcefully terminated as it was interfering with another scheduled prerecord.</strong>` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>Prerecord forcefully terminated as it was interfering with another scheduled prerecord.</strong>` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
@@ -151,7 +151,7 @@ module.exports = {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false)
           await sails.helpers.rest.cmd('EnableAssisted', 0)
-          await sails.models.meta.changeMeta({ state: 'automation_prerecord', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 256) })
+          await sails.helpers.meta.change.with({ state: 'automation_prerecord', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: theplaylist.name, topic: await sails.helpers.truncateText(inputs.topic, 256) })
           await loadPlaylist()
 
           // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.
@@ -166,19 +166,19 @@ module.exports = {
             }
           })
           if (timeToFirstTrack >= sails.config.custom.queueCorrection.prerecord) {
-            if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(sails.models.meta['A'].trackIDSubcat) === -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
+            if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(sails.models.meta.memory.trackIDSubcat) === -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
           }
 
           await sails.helpers.rest.cmd('EnableAutoDJ', 1)
         }
-        if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: null }) }
+        if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
         return exits.success()
       } else {
         sails.log.verbose('Helper SKIPPED.')
         return exits.success()
       }
     } catch (e) {
-      if (!inputs.ignoreChangingState) { await sails.models.meta.changeMeta({ changingState: null }) }
+      if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
       sails.models.playlists.queuing = false
       return exits.error(e)
     }

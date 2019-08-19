@@ -18,7 +18,7 @@ module.exports = {
       // Queue length should only include up to the first track not in config.custom.categories.noMeta.
       var breakQueueLength = -2
       var firstNoMeta = 0
-      if ((sails.models.meta['A'].state.includes('_returning') || sails.models.meta['A'].state === 'automation_live' || sails.models.meta['A'].state === 'automation_remote' || sails.models.meta['A'].state === 'automation_sports' || sails.models.meta['A'].state === 'automation_sportsremote')) {
+      if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
         breakQueueLength = -1
         firstNoMeta = -1
         queue.map((track, index) => {

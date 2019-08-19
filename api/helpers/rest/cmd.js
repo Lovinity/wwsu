@@ -40,7 +40,7 @@ module.exports = {
       // Query REST
       // LINT: do NOT camel case; these are needle parameters.
       // eslint-disable-next-line camelcase
-      needle('get', sails.models.meta['A'].radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, { open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout, headers: { 'Content-Type': 'application/json' } })
+      needle('get', sails.models.meta.memory.radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, { open_timeout: inputs.timeout, response_timeout: inputs.timeout, read_timeout: inputs.timeout, headers: { 'Content-Type': 'application/json' } })
         .then(async () => {
           try {
             return exits.success(true)

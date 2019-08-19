@@ -109,9 +109,9 @@ module.exports = {
             // Do not continue if we are in the process of waiting for a status 5 RadioDJ
             if (sails.models.status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
 
-            await sails.models.meta.changeMeta({ changingState: `Switching radioDJ instances due to queueFail` })
+            await sails.helpers.meta.change.with({ changingState: `Switching radioDJ instances due to queueFail` })
             sails.sockets.broadcast('system-error', 'system-error', true)
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> active RadioDJ was failing to return queue data.` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
@@ -120,7 +120,7 @@ module.exports = {
                 sails.log.error(err)
               })
             var maps = sails.config.custom.radiodjs
-              .filter((instance) => instance.rest === sails.models.meta['A'].radiodj)
+              .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
               .map(async (instance) => {
                 var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
                 if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }]) }
@@ -134,10 +134,10 @@ module.exports = {
             await sails.helpers.rest.changeRadioDj()
             await sails.helpers.rest.cmd('ClearPlaylist', 1)
             await sails.helpers.error.post(queue)
-            await sails.models.meta.changeMeta({ changingState: null })
+            await sails.helpers.meta.change.with({ changingState: null })
             return resolve(0)
           } catch (e) {
-            await sails.models.meta.changeMeta({ changingState: null })
+            await sails.helpers.meta.change.with({ changingState: null })
             return reject(e)
           }
         })
@@ -157,7 +157,7 @@ module.exports = {
             // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
             if (!moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(1, 'minutes'))) {
               sails.log.verbose(`No recent error; attempting standard recovery.`)
-              await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Queue recovery attempted; queue was frozen.</strong>` }).fetch()
+              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Queue recovery attempted; queue was frozen.</strong>` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -166,9 +166,9 @@ module.exports = {
               // Do not continue if we are in the process of waiting for a status 5 RadioDJ
               if (sails.models.status.errorCheck.waitForGoodRadioDJ) { return resolve(0) }
 
-              await sails.models.meta.changeMeta({ changingState: `Switching automation instances due to frozen` })
+              await sails.helpers.meta.change.with({ changingState: `Switching automation instances due to frozen` })
               sails.log.verbose(`Recent error; switching RadioDJs.`)
-              await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> queue was frozen.` }).fetch()
+              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switched automation instances;</strong> queue was frozen.` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -177,7 +177,7 @@ module.exports = {
                   sails.log.error(err)
                 })
               var maps = sails.config.custom.radiodjs
-                .filter((instance) => instance.rest === sails.models.meta['A'].radiodj)
+                .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
                 .map(async (instance) => {
                   var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
                   if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }]) }
@@ -192,11 +192,11 @@ module.exports = {
               await sails.helpers.rest.changeRadioDj()
               await sails.helpers.rest.cmd('ClearPlaylist', 1)
               await sails.helpers.error.post(queue)
-              await sails.models.meta.changeMeta({ changingState: null })
+              await sails.helpers.meta.change.with({ changingState: null })
             }
             return resolve(0)
           } catch (e) {
-            await sails.models.meta.changeMeta({ changingState: null })
+            await sails.helpers.meta.change.with({ changingState: null })
             return reject(e)
           }
         })
@@ -263,10 +263,10 @@ module.exports = {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
-            if (sails.models.meta['A'].changingState !== null) { return resolve(295) }
+            if (sails.models.meta.memory.changingState !== null) { return resolve(295) }
 
-            await sails.models.meta.changeMeta({ changingState: `Switching to automation via automationBreak` })
-            await sails.models.meta.changeMeta({ state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+            await sails.helpers.meta.change.with({ changingState: `Switching to automation via automationBreak` })
+            await sails.helpers.meta.change.with({ state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
 
             // Add up to 3 track requests if any are pending
             await sails.helpers.requests.queue(3, true, true)
@@ -279,10 +279,10 @@ module.exports = {
               await sails.helpers.genre.start('Default', true)
             }
 
-            await sails.models.meta.changeMeta({ changingState: null })
+            await sails.helpers.meta.change.with({ changingState: null })
             return resolve(0)
           } catch (e) {
-            await sails.models.meta.changeMeta({ changingState: null })
+            await sails.helpers.meta.change.with({ changingState: null })
             return reject(e)
           }
         })
@@ -299,12 +299,12 @@ module.exports = {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
-            await sails.models.meta.changeMeta({ changingState: `Switching to automation via genreEmpty` })
+            await sails.helpers.meta.change.with({ changingState: `Switching to automation via genreEmpty` })
             await sails.helpers.genre.start('Default', true)
-            await sails.models.meta.changeMeta({ changingState: null })
+            await sails.helpers.meta.change.with({ changingState: null })
             return resolve(0)
           } catch (e) {
-            await sails.models.meta.changeMeta({ changingState: null })
+            await sails.helpers.meta.change.with({ changingState: null })
             return reject(e)
           }
         })
@@ -362,7 +362,7 @@ module.exports = {
             }
 
             // Log changes in status
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: sails.models.meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: sails.models.meta.memory.show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)
@@ -370,7 +370,7 @@ module.exports = {
           }
           if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3) {
             // Log when bad statuses are now good.
-            await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'status', loglevel: 'success', logsubtype: sails.models.meta['A'].show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: 'success', logsubtype: sails.models.meta.memory.show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
               .tolerate((err) => {
                 // Don't throw errors, but log them
                 sails.log.error(err)

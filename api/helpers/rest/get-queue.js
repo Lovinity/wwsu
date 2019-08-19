@@ -16,7 +16,7 @@ module.exports = {
       // Query for the radioDJ queue and update sails.models.meta.automation with the queue.
       // LINT: Do not camel case; parameters are for needle.
       // eslint-disable-next-line camelcase
-      needle('get', sails.models.meta['A'].radiodj + '/p?auth=' + sails.config.custom.rest.auth, {}, { open_timeout: 2000, response_timeout: 2000, read_timeout: 2000, headers: { 'Content-Type': 'application/json' } })
+      needle('get', sails.models.meta.memory.radiodj + '/p?auth=' + sails.config.custom.rest.auth, {}, { open_timeout: 2000, response_timeout: 2000, read_timeout: 2000, headers: { 'Content-Type': 'application/json' } })
         .then(async (resp) => {
           // No queue? Return empty array
           if (typeof resp.body.name === 'undefined' || (resp.body.name !== 'ArrayOfSongData' && resp.body.name !== 'SongData')) {

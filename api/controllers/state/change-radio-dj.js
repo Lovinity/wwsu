@@ -13,7 +13,7 @@ module.exports = {
 
     try {
       // Lock state change
-      await sails.models.meta.changeMeta({ changingState: `Switching radioDJ instances` })
+      await sails.helpers.meta.change.with({ changingState: `Switching radioDJ instances` })
 
       // Try to stop the current automation, then switch to another and execute post error tasks to get it going
       await sails.helpers.rest.cmd('EnableAssisted', 1, 0)
@@ -24,10 +24,10 @@ module.exports = {
       await sails.helpers.rest.cmd('ClearPlaylist', 1)
       await sails.helpers.error.post(queue)
 
-      await sails.models.meta.changeMeta({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
       return exits.success()
     } catch (e) {
-      await sails.models.meta.changeMeta({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
       return exits.error(e)
     }
   }

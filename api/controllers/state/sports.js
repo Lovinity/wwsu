@@ -30,10 +30,10 @@ module.exports = {
 
     try {
       // Do not continue if not in sports or automation mode; client should request automation before requesting sports
-      if (!sails.models.meta['A'].state.startsWith('sports') && !sails.models.meta['A'].state.startsWith('automation_')) { return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`)) }
+      if (!sails.models.meta.memory.state.startsWith('sports') && !sails.models.meta.memory.state.startsWith('automation_')) { return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`)) }
 
       // Block this request if we are already switching states
-      if (sails.models.meta['A'].changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
       // If the specified host has lockToDJ, deny going sports because going sports live from the studio should only happen inside WWSU studios
       if (this.req.payload.lockToDJ !== null) {
@@ -41,7 +41,7 @@ module.exports = {
       }
 
       // Lock so that any other state changing requests are blocked until we are done
-      await sails.models.meta.changeMeta({ changingState: `Switching to sports` })
+      await sails.helpers.meta.change.with({ changingState: `Switching to sports` })
 
       // Filter profanity
       if (inputs.topic !== '') {
@@ -51,10 +51,10 @@ module.exports = {
       }
 
       // Set meta to prevent accidental messages in DJ Controls
-      sails.models.meta.changeMeta({ show: inputs.sport, topic: inputs.topic, trackStamp: null })
+      sails.helpers.meta.change.with({ show: inputs.sport, topic: inputs.topic, trackStamp: null })
 
       // Start the sports broadcast
-      if (!sails.models.meta['A'].state.startsWith('sports')) {
+      if (!sails.models.meta.memory.state.startsWith('sports')) {
         // await sails.helpers.error.count('goLive');
 
         // Operation: Remove all music tracks, queue a station ID, queue an opener if one exists for this sport, and start the next track if current track is music.
@@ -77,7 +77,7 @@ module.exports = {
         if (queueLength >= sails.config.custom.queueCorrection.sports) {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0) // Try to Disable autoDJ again in case it was mistakenly still active
           // await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
-          if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(sails.models.meta['A'].trackIDSubcat) === -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
+          if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(sails.models.meta.memory.trackIDSubcat) === -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
 
           queueLength = await sails.helpers.songs.calculateQueueLength()
         }
@@ -86,17 +86,17 @@ module.exports = {
         // await sails.helpers.error.count('sportsQueue');
 
         // Change meta
-        sails.models.meta.changeMeta({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_sports', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host })
+        sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_sports', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host })
       } else {
         // Otherwise, just update metadata but do not do anything else
-        sails.models.meta.changeMeta({ show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host })
+        sails.helpers.meta.change.with({ show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host })
       }
 
       await sails.helpers.error.reset('automationBreak')
-      await sails.models.meta.changeMeta({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
       return exits.success()
     } catch (e) {
-      await sails.models.meta.changeMeta({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
       return exits.error(e)
     }
   }

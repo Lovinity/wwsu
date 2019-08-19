@@ -36,7 +36,7 @@ module.exports = {
       await sails.models.djs.destroy({ ID: inputs.ID }).fetch()
 
       // Edit meta if necessary
-      if (sails.models.meta['A'].dj === inputs.ID) { sails.models.meta.changeMeta({ dj: null }) }
+      if (sails.models.meta.memory.dj === inputs.ID) { sails.helpers.meta.change.with({ dj: null }) }
 
       return exits.success()
     } catch (e) {

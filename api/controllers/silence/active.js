@@ -17,7 +17,7 @@ module.exports = {
       // If a track is playing in RadioDJ, skip it and log it
       if (typeof sails.models.meta.automation[0] !== 'undefined' && parseInt(sails.models.meta.automation[0].ID) !== 0) {
         // Add a log about the track
-        await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: sails.models.meta['A'].show, event: `<strong>Track skipped due to silence.</strong><br />Track: ${sails.models.meta.automation[0].ID} (${sails.models.meta.automation[0].Artist} - ${sails.models.meta.automation[0].Title})` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: sails.models.meta.memory.show, event: `<strong>Track skipped due to silence.</strong><br />Track: ${sails.models.meta.automation[0].ID} (${sails.models.meta.automation[0].Artist} - ${sails.models.meta.automation[0].Title})` }).fetch()
           .tolerate(() => {
           })
 
@@ -28,11 +28,11 @@ module.exports = {
       }
 
       // If we are in automation, and prevError is less than 3 minutes ago, assume an audio issue and switch RadioDJs
-      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && (sails.models.meta['A'].state.startsWith('automation_') || sails.models.meta['A'].state.startsWith('prerecord_'))) {
-        await sails.models.meta.changeMeta({ changingState: `Switching automation instances due to no audio` })
+      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+        await sails.helpers.meta.change.with({ changingState: `Switching automation instances due to no audio` })
 
         // Log the problem
-        await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switching automation instances;</strong> silence detection executed multiple times.` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switching automation instances;</strong> silence detection executed multiple times.` }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })
@@ -43,7 +43,7 @@ module.exports = {
 
         // Find a RadioDJ to switch to
         var maps = sails.config.custom.radiodjs
-          .filter((instance) => instance.rest === sails.models.meta['A'].radiodj)
+          .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
           .map(async (instance) => {
             var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
             if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.` }]) }
@@ -61,15 +61,15 @@ module.exports = {
         await sails.helpers.rest.changeRadioDj()
         await sails.helpers.rest.cmd('ClearPlaylist', 1)
         await sails.helpers.error.post(queue)
-        await sails.models.meta.changeMeta({ changingState: null })
+        await sails.helpers.meta.change.with({ changingState: null })
       }
 
       // If we are not in automation, and prvError is less than 3 minutes ago, assume irresponsible DJ and automatically end the show (but go into automation_break).
-      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && !sails.models.meta['A'].state.startsWith('automation_') && !sails.models.meta['A'].state.startsWith('prerecord_')) {
-        await sails.models.meta.changeMeta({ changingState: `Ending current broadcast due to no audio` })
+      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
+        await sails.helpers.meta.change.with({ changingState: `Ending current broadcast due to no audio` })
 
         // Log the problem
-        await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Long period of silence detected</strong>. This is likely due to an irresponsible DJ / show host. System terminated the current broadcast and went to automation to stop the silence.` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Long period of silence detected</strong>. This is likely due to an irresponsible DJ / show host. System terminated the current broadcast and went to automation to stop the silence.` }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })
