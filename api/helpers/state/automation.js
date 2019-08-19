@@ -36,7 +36,7 @@ module.exports = {
         })
 
       // Close off the current attendance record and calculate statistics.
-      attendance = await sails.models.attendance.createRecord();
+      attendance = await sails.helpers.attendance.createRecord();
 
       // Begin parallel function for sending the system into automation
       (async () => {
@@ -90,7 +90,7 @@ module.exports = {
           // We are going to break
         } else {
           await sails.models.meta.changeMeta({ genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
-          attendance = await sails.models.attendance.createRecord(`Genre: Default`)
+          attendance = await sails.helpers.attendance.createRecord(`Genre: Default`)
         }
 
         // Finish up

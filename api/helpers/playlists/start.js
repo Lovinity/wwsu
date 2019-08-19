@@ -131,7 +131,7 @@ module.exports = {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, true) // Leave requests in the queue for standard playlists.
           await sails.helpers.rest.cmd('EnableAssisted', 0)
-          var attendance = await sails.models.attendance.createRecord(`Playlist: ${theplaylist.name}`)
+          var attendance = await sails.helpers.attendance.createRecord(`Playlist: ${theplaylist.name}`)
           await sails.models.meta.changeMeta({ state: 'automation_playlist', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true) })
           await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + theplaylist.name, event: '<strong>Playlist started.</strong><br />Playlist: ' + inputs.name }).fetch()
             .tolerate((err) => {

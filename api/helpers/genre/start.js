@@ -51,7 +51,7 @@ module.exports = {
 
           // If we are going back to default rotation, we don't want to activate genre mode; leave in automation_on mode
           if (inputs.event !== 'Default') {
-            attendance = await sails.models.attendance.createRecord(`Genre: ${inputs.event}`)
+            attendance = await sails.helpers.attendance.createRecord(`Genre: ${inputs.event}`)
             await sails.models.meta.changeMeta({ state: 'automation_genre', genre: inputs.event })
             await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Genre started.</strong><br />Genre: ' + inputs.event }).fetch()
               .tolerate((err) => {
@@ -59,7 +59,7 @@ module.exports = {
               })
             await sails.helpers.onesignal.sendEvent(`Genre: `, inputs.event, `Genre`, attendance.unique)
           } else {
-            attendance = await sails.models.attendance.createRecord(`Genre: Default`)
+            attendance = await sails.helpers.attendance.createRecord(`Genre: Default`)
             await sails.models.meta.changeMeta({ state: 'automation_on', genre: 'Default' })
             await sails.models.logs.create({ attendanceID: sails.models.meta['A'].attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Default rotation started.</strong>' }).fetch()
               .tolerate((err) => {
