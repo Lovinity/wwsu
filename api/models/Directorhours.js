@@ -44,8 +44,6 @@ module.exports = {
 
   calendar: [],
 
-  // NOTE: loading of Director hour events happens in Calendar.loadEvents.
-
   // Websockets standards
   afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord }

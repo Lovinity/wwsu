@@ -273,7 +273,7 @@ module.exports = {
 
             // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
             try {
-              await sails.models.calendar.preLoadEvents(true)
+              await sails.helpers.calendar.sync(true)
             } catch (unusedE2) {
               // Couldn't load calendar? Fall back to Default automation
               await sails.helpers.genre.start('Default', true)

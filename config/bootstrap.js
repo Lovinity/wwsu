@@ -164,7 +164,7 @@ module.exports.bootstrap = async function (done) {
   sails.log.verbose(`BOOTSTRAP: Loading calendar events.`)
   await sails.models.meta.changeMeta({ changingState: `Initializing program calendar` })
   try {
-    await sails.models.calendar.preLoadEvents(true)
+    await sails.helpers.calendar.sync(true)
     await sails.models.meta.changeMeta({ changingState: null })
   } catch (unusedE) {
     await sails.models.meta.changeMeta({ changingState: null })
@@ -482,7 +482,7 @@ module.exports.bootstrap = async function (done) {
             await sails.models.meta.changeMeta({ changingState: null, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
 
             // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-            await sails.models.calendar.preLoadEvents()
+            await sails.helpers.calendar.sync()
 
             // Did not finish the playlist? Ensure the position is updated in meta.
           } else if (thePosition !== -1) {
@@ -754,7 +754,7 @@ module.exports.bootstrap = async function (done) {
   cron.schedule('2 */5 * * * *', () => {
     sails.log.debug(`CRON updateCalendar triggered.`)
     try {
-      sails.models.calendar.preLoadEvents()
+      sails.helpers.calendar.sync()
     } catch (e) {
       sails.log.error(e)
     }
