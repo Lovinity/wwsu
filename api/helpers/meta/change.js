@@ -114,7 +114,6 @@ module.exports = {
     },
     radiodj: {
       type: 'string',
-      isIn: sails.config.custom.radiodjs,
       description: 'REST IP of the RadioDJ instance currently in control'
     },
     line1: {
