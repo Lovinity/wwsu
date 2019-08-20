@@ -218,8 +218,12 @@ module.exports.bootstrap = async function (done) {
           delete meta.updatedAt
           delete meta.ID
           meta.time = moment().toISOString(true)
-          sails.log.silly(meta)
-          await sails.helpers.meta.change.with(meta)
+          sails.log.verbose(meta)
+          try {
+            await sails.helpers.meta.change.with(meta)
+          } catch (e) {
+            sails.log.error(e)
+          }
           if (meta.playlist !== null && meta.playlist !== '') {
             theplaylist = await sails.models.playlists.findOne({ name: meta.playlist })
             // LINT: RadioDJ table that is not camel case
