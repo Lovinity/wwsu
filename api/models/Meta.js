@@ -95,7 +95,7 @@ module.exports = {
   },
 
   // Used for sails.helpers.meta.change when changing meta.memory
-  // Update sails.helpers.meta.update.inputs whenever you change any of these!
+  // Update sails.helpers.meta.change.inputs whenever you change any of these!
   template: {
     state: {
       type: 'string',

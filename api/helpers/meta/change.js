@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'meta.update',
+  friendlyName: 'meta.change',
 
-  description: 'Update metadata information',
+  description: 'Change metadata information',
 
   inputs: {
     state: {
@@ -184,7 +184,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper meta.update called.')
+    sails.log.debug('Helper meta.change called.')
     try {
       var push = {}
       var db = {}
