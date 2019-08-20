@@ -63,6 +63,7 @@ module.exports.bootstrap = async function (done) {
     if (Object.prototype.hasOwnProperty.call(sails.models.meta.template, key)) {
       temp = sails.models.meta.template[key]
       sails.models.meta.memory[key] = (typeof temp.defaultsTo !== 'undefined') ? temp.defaultsTo : null
+      sails.log.verbose(`Meta memory ${key} set to ${(typeof temp.defaultsTo !== 'undefined') ? temp.defaultsTo : null}`)
     }
   }
 
@@ -213,6 +214,9 @@ module.exports.bootstrap = async function (done) {
               return resolve(err)
             })
           meta = meta[0]
+          delete meta.createdAt
+          delete meta.updatedAt
+          delete meta.ID
           meta.time = moment().toISOString(true)
           sails.log.silly(meta)
           await sails.helpers.meta.change.with(meta)
