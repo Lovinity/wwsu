@@ -44,9 +44,19 @@ module.exports = {
         return valid
       }
     },
-    clearActual: {
-      type: 'boolean',
-      defaultsTo: false
+    actual: {
+      type: 'json',
+      custom: (value) => {
+        for (var key in value) {
+          if (!Object.prototype.hasOwnProperty.call(value, key)) {
+            return false
+          }
+          if (key !== 'start' && key !== 'end') {
+            return false
+          }
+        }
+        return true
+      }
     }
   },
 

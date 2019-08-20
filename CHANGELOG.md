@@ -60,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - lockToDJ column in the Hosts model of type number, allowing null. This allows locking hosts to a specific DJ (null if not locked to one). When a host is locked to a specific DJ, they cannot start live shows nor live sports broadcasts. They can only start remote and sports remote broadcasts when scheduled and only under their name. They cannot queue/play PSAs, Top Adds, Sports Liners, nor requested tracks unless they are on the air. They cannot send messages to the display signs nor to website visitors unless they are on the air. They cannot issue discipline against website visitors unless they are on the air. [Issue 97](https://github.com/Lovinity/wwsu/issues/97)
  - sails.helpers.break.removeNullTasks to filter out null tasks from a break tasks array. Null tasks were being added and causing bugs.
  - forced parameter to sails.helpers.playlists.start. When true, playlist will start regardless of current meta state. [Issue 95](https://github.com/Lovinity/wwsu/issues/95)
+ - "actual" property to planner/add and planner/edit for setting and modifying final scheduled times for shows.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
