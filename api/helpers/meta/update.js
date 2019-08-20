@@ -4,20 +4,184 @@ module.exports = {
 
   description: 'Update metadata information',
 
-  inputs: ((template) => {
-    var returnData = {}
-    var temp = {}
-    for (var key in template) {
-      if (Object.prototype.hasOwnProperty.call(template, key)) {
-        temp = template[key]
-        if (typeof temp.defaultsTo !== 'undefined') {
-          delete temp.defaultsTo
-        }
-        returnData[key] = temp
+  inputs: {
+    state: {
+      type: 'string',
+      description: 'State of the WWSU system'
+    },
+    dj: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the DJ currently on the air, or null if not applicable.'
+    },
+    attendanceID: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the Attendance record the system is currently running under'
+    },
+    show: {
+      type: 'string',
+      description: 'If someone is on the air, host name - show name, or name of sports for sports broadcasts'
+    },
+    showStamp: {
+      type: 'string',
+      allowNull: true,
+      description: 'When a show starts, this is the ISO timestamp which the show began',
+      custom: function (value) {
+        return moment(value).isValid()
       }
+    },
+    track: {
+      type: 'string',
+      description: 'Currently playing track either in automation or manually logged'
+    },
+    trackID: {
+      type: 'number',
+      description: 'The ID of the track currently playing'
+    },
+    trackIDSubcat: {
+      type: 'number',
+      description: 'The ID of the subcategory the currently playing track falls in'
+    },
+    trackArtist: {
+      type: 'string',
+      allowNull: true,
+      description: 'The artist of the currently playing track'
+    },
+    trackTitle: {
+      type: 'string',
+      allowNull: true,
+      description: 'The title of the currently playing track'
+    },
+    trackAlbum: {
+      type: 'string',
+      allowNull: true,
+      description: 'The album of the currently playing track'
+    },
+    trackLabel: {
+      type: 'string',
+      allowNull: true,
+      description: 'The label of the currently playing track'
+    },
+    trackStamp: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when manual track meta was added',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    requested: {
+      type: 'boolean',
+      description: 'Whether or not this track was requested'
+    },
+    requestedBy: {
+      type: 'string',
+      description: 'The user who requested this track, if requested'
+    },
+    requestedMessage: {
+      type: 'string',
+      description: 'The provided message for this track request, if requested'
+    },
+    genre: {
+      type: 'string',
+      description: 'Name of the genre or rotation currently being played, if any'
+    },
+    playlist: {
+      type: 'string',
+      allowNull: true,
+      description: 'Name of the playlist we are currently airing'
+    },
+    playlistPosition: {
+      type: 'number',
+      description: 'Current position within the playlist'
+    },
+    playlistPlayed: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when the playlist was started',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    topic: {
+      type: 'string',
+      description: 'If the DJ specified a show topic, this is the topic.'
+    },
+    stream: {
+      type: 'string',
+      description: 'sails.models.meta for the internet radio stream'
+    },
+    radiodj: {
+      type: 'string',
+      isIn: sails.config.custom.radiodjs,
+      description: 'REST IP of the RadioDJ instance currently in control'
+    },
+    line1: {
+      type: 'string',
+      description: 'First line of meta for display signs'
+    },
+    line2: {
+      type: 'string',
+      description: 'Second line of meta for display signs'
+    },
+    time: {
+      type: 'string',
+      description: 'ISO string of the current WWSU time. NOTE: time is only pushed periodically in websockets. Clients should keep their own time ticker in sync with this value.',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    listeners: {
+      type: 'number',
+      description: 'Number of current online listeners'
+    },
+    listenerPeak: {
+      type: 'number',
+      description: 'Number of peak online listeners'
+    },
+    queueFinish: {
+      type: 'string',
+      allowNull: true,
+      description: 'An ISO timestamp of when the queue is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    trackFinish: {
+      type: 'string',
+      allowNull: true,
+      description: 'An ISO timestamp of when the current track is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    queueMusic: {
+      type: 'boolean',
+      description: 'If returning from break, or going live, and there are music tracks in the queue not counted towards queueFinish, this will be true'
+    },
+    playing: {
+      type: 'boolean',
+      description: 'Whether or not something is currently playing in the active RadioDJ'
+    },
+    changingState: {
+      type: 'string',
+      allowNull: true,
+      description: 'If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. Will be state changing string otherwise.'
+    },
+    lastID: {
+      type: 'string',
+      allowNull: true,
+      description: 'An ISO timestamp of when the last top of hour ID break was taken.',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    webchat: {
+      type: 'boolean',
+      description: 'Set to false to restrict the ability to send chat messages through the website'
     }
-    return returnData
-  })(sails.models.meta.template),
+  },
 
   fn: async function (inputs, exits) {
     sails.log.debug('Helper meta.update called.')
