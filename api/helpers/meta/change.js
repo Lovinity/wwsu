@@ -193,7 +193,6 @@ module.exports = {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
           // Exit if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value
           if (typeof sails.models.meta.memory[key] === 'undefined' || sails.models.meta.memory[key] === inputs[key]) {
-            sails.log.verbose(`Key ${key} skipped; does not exist in meta memory.`)
             continue
           }
 
