@@ -36,7 +36,7 @@ module.exports = {
           .tolerate((err) => {
             sails.log.error(err)
           })
-        await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `Audio Error (system)` }, { type: 'djcontrols', level: 'warning', title: `Audio Error (system)`, announcement: `System had switched automation instances on ${moment().toISOString(true).format('LLLL')} because the silence detection system triggered multiple times. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+        await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `Audio Error (system)` }, { type: 'djcontrols', level: 'warning', title: `Audio Error (system)`, announcement: `System had switched automation instances on ${moment().format('LLLL')} because the silence detection system triggered multiple times. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
           .tolerate((err) => {
             sails.log.error(err)
           })
