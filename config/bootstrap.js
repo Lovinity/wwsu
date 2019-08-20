@@ -418,7 +418,7 @@ module.exports.bootstrap = async function (done) {
                     // State switching should be pushed in sockets
                     sails.helpers.meta.change.with({ state: 'prerecord_on', showStamp: moment().toISOString(true) })
                       .then(() => {
-                        sails.models.attendance.createRecord(`Prerecord: ${sails.models.meta.memory.playlist}`)
+                        sails.helpers.attendance.createRecord(`Prerecord: ${sails.models.meta.memory.playlist}`)
                           .then((attendance) => {
                             (async () => {
                               await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord started airing.</strong><br />Prerecord: ${sails.models.meta.memory.playlist}` }).fetch()
@@ -511,7 +511,7 @@ module.exports.bootstrap = async function (done) {
           if (sails.models.meta.memory.state === 'automation_live' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'live_on', showStamp: moment().toISOString(true) })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
-            attendance = await sails.models.attendance.createRecord(`Show: ${sails.models.meta.memory.show}`)
+            attendance = await sails.helpers.attendance.createRecord(`Show: ${sails.models.meta.memory.show}`)
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>DJ is now live.</strong><br />DJ - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
@@ -523,7 +523,7 @@ module.exports.bootstrap = async function (done) {
           if (sails.models.meta.memory.state === 'automation_sports' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'sports_on', showStamp: moment().toISOString(true) })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
-            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+            attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
@@ -534,7 +534,7 @@ module.exports.bootstrap = async function (done) {
           // If we are preparing for remote, do some stuff
           if (sails.models.meta.memory.state === 'automation_remote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'remote_on', showStamp: moment().toISOString(true) })
-            attendance = await sails.models.attendance.createRecord(`Remote: ${sails.models.meta.memory.show}`)
+            attendance = await sails.helpers.attendance.createRecord(`Remote: ${sails.models.meta.memory.show}`)
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote broadcast is now on the air.</strong><br />Host - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
@@ -545,7 +545,7 @@ module.exports.bootstrap = async function (done) {
           // If we are preparing for sportsremote, do some stuff if we are playing the stream track
           if (sails.models.meta.memory.state === 'automation_sportsremote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'sportsremote_on', showStamp: moment().toISOString(true) })
-            attendance = await sails.models.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+            attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
