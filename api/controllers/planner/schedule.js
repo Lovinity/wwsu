@@ -96,7 +96,7 @@ module.exports = {
               var scheduled = false
 
               // Try to schedule one of the proposed show times by while looping until we do, or until we run out of options.
-              while (typeof show.proposal[0] !== `undefined` && typeof show.proposal[0].start !== `undefined`) {
+              while (typeof show.proposal[0] !== `undefined` && typeof show.proposal[0].start !== `undefined` && !scheduled) {
                 var proposal = show.proposal[0]
                 if (isAvailable(proposal.start, proposal.end)) {
                   // The scheduling is available, so schedule it and make it final
