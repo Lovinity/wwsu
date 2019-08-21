@@ -43,6 +43,21 @@ module.exports = {
 
         return valid
       }
+    },
+    actual: {
+      type: 'json',
+      defaultsTo: {},
+      custom: (value) => {
+        for (var key in value) {
+          if (!Object.prototype.hasOwnProperty.call(value, key)) {
+            return false
+          }
+          if (key !== 'start' && key !== 'end') {
+            return false
+          }
+        }
+        return true
+      }
     }
   },
 
@@ -54,7 +69,7 @@ module.exports = {
     sails.log.debug('Controller planner/add called.')
 
     try {
-      await sails.models.planner.create({ inputs }).fetch()
+      await sails.models.planner.create({ dj: inputs.dj, show: inputs.show, priority: inputs.priority, proposal: inputs.proposal, actual: inputs.actual }).fetch()
 
       return exits.success()
     } catch (e) {
