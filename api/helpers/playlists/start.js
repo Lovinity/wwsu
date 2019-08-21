@@ -29,6 +29,7 @@ module.exports = {
     },
     forced: {
       type: 'boolean',
+      defaultsTo: false,
       description: 'Set to true if we want the playlist or prerecord to start regardless of what state we are currently in.'
     }
   },

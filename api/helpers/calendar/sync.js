@@ -538,7 +538,7 @@ module.exports = {
                 if (event.summary.startsWith('Prerecord: ') && (toTrigger === null || toTrigger.priority >= 1)) {
                   toTrigger = { priority: 1, event: event.summary.replace('Prerecord: ', ''), type: 1, description: criteria.description }
                   // If there is a prerecord still airing now and this scheduled prerecord is 5 minutes late, force it to start
-                  toTrigger.forced = moment(criteria.start).add(5, 'minutes').isSameOrBefore(moment()) && sails.models.meta.memory.state.startsWith('prerecord_')
+                  toTrigger.forced = moment(criteria.start).add(5, 'minutes').isSameOrBefore(moment()) && sails.models.meta.memory.state.startsWith('prerecord_') && !inputs.ignoreChangingState
                 }
               }
               // Do not re-trigger an already active genre, unless we are restarting it

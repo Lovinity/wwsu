@@ -760,10 +760,11 @@ module.exports.bootstrap = async function (done) {
 
   // Every 5 minutes on second 02, update sails.models.calendar.
   sails.log.verbose(`BOOTSTRAP: scheduling updateCalendar CRON.`)
-  cron.schedule('2 */5 * * * *', () => {
+  cron.schedule('2 */5 * * * *', async () => {
     sails.log.debug(`CRON updateCalendar triggered.`)
     try {
-      sails.helpers.calendar.sync()
+      await sails.helpers.calendar.sync()
+      return true
     } catch (e) {
       sails.log.error(e)
     }
