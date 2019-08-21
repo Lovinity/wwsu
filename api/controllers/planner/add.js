@@ -46,7 +46,6 @@ module.exports = {
     },
     actual: {
       type: 'json',
-      defaultsTo: {},
       custom: (value) => {
         for (var key in value) {
           if (!Object.prototype.hasOwnProperty.call(value, key)) {
