@@ -27,8 +27,8 @@ module.exports = {
         }
       }
 
-      // If we are in automation, and prevError is less than 3 minutes ago, assume an audio issue and switch RadioDJs
-      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(3, 'minutes')) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+      // If we are in automation, and prevError is less than 2 minutes ago, assume an audio issue and switch RadioDJs
+      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(2, 'minutes')) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
         await sails.helpers.meta.change.with({ changingState: `Switching automation instances due to no audio` })
 
         // Log the problem
@@ -73,7 +73,7 @@ module.exports = {
           .tolerate((err) => {
             sails.log.error(err)
           })
-        await sails.models.announcements.create({ type: 'djcontrols', level: 'warning', title: `Silence During Broadcast (system)`, announcement: `System had automatically terminated a broadcast on ${moment().toISOString(true).format('LLLL')} because the silence detection system reported a long period of dead air / silence, or multiple silences within a short period of time. Please review show recordings and determine if this was a technical issue or human error. If human error, please discuss the proper operation of broadcasts and equipment. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+        await sails.models.announcements.create({ type: 'djcontrols', level: 'warning', title: `Silence During Broadcast (system)`, announcement: `System had automatically terminated a broadcast on ${moment().format('LLLL')} because the silence detection system reported a long period of dead air / silence, or multiple silences within a short period of time. Please review show recordings and determine if this was a technical issue or human error. If human error, please discuss the proper operation of broadcasts and equipment. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
           .tolerate((err) => {
             sails.log.error(err)
           })
