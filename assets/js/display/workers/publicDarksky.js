@@ -48,7 +48,7 @@ onmessage = function (e) {
       // Also generate 48 hour forecast.
       item.hourly.data.map((data, index) => {
         if (data.precipType && data.precipProbability >= 0.1) {
-          conditions[index] = { type: data.precipType, amount: data.precipIntensity, temperature: data.temperature, visibility: data.visibility }
+          conditions[index] = { type: data.precipType, amount: data.precipProbability, temperature: data.temperature, visibility: data.visibility }
         } else {
           conditions[index] = { type: 'clouds', amount: data.cloudCover, temperature: data.temperature, visibility: data.visibility }
         }
@@ -117,7 +117,6 @@ onmessage = function (e) {
       var theTime = moment(e.data[1]).startOf('hour')
       var shadeColor = ``
       var innerIcon = ``
-      var conversionRatio = 1
       for (var i = 0; i < 48; i++) {
         theTime = moment(e.data[1]).add(i, 'hours')
 
@@ -145,10 +144,10 @@ onmessage = function (e) {
             }
             break
           case 'rain':
-            if (conditions[i].amount >= 0.3) {
+            if (conditions[i].amount >= 0.65) {
               shadeColor = `#1A4C6D`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-rain"></i></span>`
-            } else if (conditions[i].amount >= 0.1) {
+            } else if (conditions[i].amount >= 0.4) {
               shadeColor = `#3498DB`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-showers-heavy"></i></span>`
             } else {
@@ -157,11 +156,10 @@ onmessage = function (e) {
             }
             break
           case 'snow':
-            conversionRatio = ((-18 / 11) * conditions[i].temperature) + (722 / 11)
-            if ((conditions[i].amount * conversionRatio) >= 1) {
+            if (conditions[i].amount >= 0.65) {
               shadeColor = `#7C7C7C`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-snowman"></i></span>`
-            } else if ((conditions[i].amount * conversionRatio) >= 0.33) {
+            } else if (conditions[i].amount >= 0.4) {
               shadeColor = `#C6C6C6`
               innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-snowflake"></i></span>`
             } else {
@@ -170,10 +168,10 @@ onmessage = function (e) {
             }
             break
           case 'sleet':
-            if (conditions[i].amount >= 0.2) {
+            if (conditions[i].amount >= 0.65) {
               shadeColor = `#780E35`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-igloo"></i></span>`
-            } else if (conditions[i].amount >= 0.05) {
+            } else if (conditions[i].amount >= 0.4) {
               shadeColor = `#F01D6A`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-icicles"></i></span>`
             } else {
