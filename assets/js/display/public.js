@@ -129,10 +129,10 @@ try {
   var wrapper = document.getElementById('wrapper')
 
   // Define data sources
-  var Meta = { time: moment().toISOString(true) }
+  var Meta = { time: moment().toISOString(true), state: 'unknown' }
   var Calendar = new WWSUdb(TAFFY())
+  var calendar = []
   var calendarWorker = new Worker('../../js/display/workers/publicCalendar.js')
-  // calendar is an array of arrays. calendar[0] contains an object of today's events {"label": [array of events]}. Calendar[1] contains an array of objects for days 2-4 (one object per day, {"label": [array of events]}), calendar[2] contains an array of objects for days 5-7 (one object per day, {"label": [array of events]}).
   var Announcements = new WWSUdb(TAFFY())
   var Directors = new WWSUdb(TAFFY())
   var Eas = new WWSUdb(TAFFY())
@@ -247,6 +247,52 @@ try {
     displayTime: 15,
     fitContent: true,
     html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`
+  })
+
+  // Promote Random Radio Shows
+  Slides.newSlide({
+    name: `show-info`,
+    label: `Radio Shows`,
+    weight: -1,
+    isSticky: false,
+    color: `primary`,
+    active: true,
+    transitionIn: `fadeIn`,
+    transitionOut: `fadeOut`,
+    displayTime: 10,
+    fitContent: false,
+    reset: true,
+    html: `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="promote-show-name"></h2><h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="promote-show-time"></h3><div style="overflow-y: hidden; font-size: 4.5vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; height: 45vh;" class="${!isLightTheme ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8" id="promote-show-topic"></div>`,
+    fn: (slide) => {
+      slide.displayTime = 10
+      if (calendar.length > 0) {
+        var index = Math.floor(Math.random() * calendar.length)
+        if (typeof calendar[index] !== 'undefined') {
+          slide.displayTime = 10 + Math.floor(calendar[index].topic.length / 20)
+          var temp1 = document.querySelector('#promote-show-name')
+          if (temp1 !== null) {
+            temp1.innerHTML = `<strong>${calendar[index].name}</strong>`
+          }
+          temp1 = document.querySelector('#promote-show-time')
+          if (temp1 !== null) {
+            temp1.innerHTML = calendar[index].time
+          }
+          temp1 = document.querySelector('#promote-show-topic')
+          if (temp1 !== null) {
+            temp1.innerHTML = calendar[index].topic
+          }
+          temp1 = document.querySelector(`#calendar-event-${calendar[index].ID}`)
+          if (temp1 !== null) {
+            temp1.style.borderStyle = 'solid'
+            temp1.style.borderWidth = '0.25vw'
+            setTimeout(() => {
+              delete temp1.style.borderStyle
+              delete temp1.style.borderWidth
+            }, slide.displayTime * 1000)
+          }
+        }
+      }
+    }
   })
 
   // scoreboard
@@ -413,7 +459,13 @@ function processCalendar (db) {
 
 calendarWorker.onmessage = function (e) {
   var innercontent = document.getElementById('events-today')
-  innercontent.innerHTML = e.data
+  innercontent.innerHTML = e.data[0]
+  calendar = e.data[1]
+  if (calendar.length > 0 && Meta.state.startsWith('automation_')) {
+    Slides.slide(`show-info`).active = true
+  } else {
+    Slides.slide(`show-info`).active = false
+  }
 }
 
 // Check for new Eas alerts and push them out when necessary.
@@ -1052,6 +1104,12 @@ function processNowPlaying (response) {
             break
           default:
             nowplaying.style.background = '#191919'
+        }
+
+        if (calendar.length > 0 && response.state.startsWith('automation_')) {
+          Slides.slide(`show-info`).active = true
+        } else {
+          Slides.slide(`show-info`).active = false
         }
       }
 

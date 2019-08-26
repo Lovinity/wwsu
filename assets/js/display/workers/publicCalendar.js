@@ -17,6 +17,7 @@ onmessage = function (e) {
   }
 
   var innercontent = ``
+  var today = []
 
   // Run through the events for the next 24 hours and add them to the coming up panel
   var noEvents = true
@@ -98,7 +99,7 @@ onmessage = function (e) {
         }
         color = `rgb(${color.red}, ${color.green}, ${color.blue});`
         innercontent += `
-                    <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh;">
+                    <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh; border-color: #F9D91C;" id="calendar-event-${event.ID}">
                         <div class="col-2 text-white">
                             ${image}
                         </div>
@@ -109,6 +110,7 @@ onmessage = function (e) {
                         </div>
                     </div>`
         noEvents = false
+        today.push({ name: `${line1}${line1 !== '' ? ` - ` : ``}${line2}`, ID: `calendar-event-${event.ID}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
       } catch (e) {
         console.error(e)
         innercontent = `
@@ -129,7 +131,7 @@ onmessage = function (e) {
                     </div>`
   }
 
-  this.postMessage(innercontent)
+  this.postMessage([innercontent, today])
 }
 
 function hexRgb (hex, options = {}) {
