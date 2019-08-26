@@ -1128,7 +1128,7 @@ module.exports.bootstrap = async function (done) {
         } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn) {
           await sails.helpers.status.change.with({ name: `music-library`, status: 3, label: `Music Library`, data: `Music library has ${found} bad tracks. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.` })
         } else {
-          await sails.helpers.status.change.with({ name: `music-library`, status: 5, label: `Music Library`, data: `Music library has ${found} bad tracks.` }])
+          await sails.helpers.status.change.with({ name: `music-library`, status: 5, label: `Music Library`, data: `Music library has ${found} bad tracks.` })
         }
 
         return resolve()
