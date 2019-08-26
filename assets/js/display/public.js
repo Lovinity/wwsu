@@ -282,23 +282,24 @@ try {
     html: `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="promote-show-name"></h2><h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="promote-show-time"></h3><div style="overflow-y: hidden; font-size: 4.5vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; height: 45vh;" class="${!isLightTheme ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8" id="promote-show-topic"></div>`,
     fn: (slide) => {
       slide.displayTime = 10
-      if (calendar.length > 0) {
-        var index = Math.floor(Math.random() * calendar.length)
-        if (typeof calendar[index] !== 'undefined') {
-          slide.displayTime = 10 + Math.floor(calendar[index].topic.length / 20)
+      var tcalendar = calendar.filter((event) => event.active > 0)
+      if (tcalendar.length > 0) {
+        var index = Math.floor(Math.random() * tcalendar.length)
+        if (typeof tcalendar[index] !== 'undefined') {
+          slide.displayTime = 10 + Math.floor(tcalendar[index].topic.length / 20)
           var temp1 = document.querySelector('#promote-show-name')
           if (temp1 !== null) {
-            temp1.innerHTML = `<strong>${calendar[index].name}</strong>`
+            temp1.innerHTML = `<strong>${tcalendar[index].name}</strong>`
           }
           temp1 = document.querySelector('#promote-show-time')
           if (temp1 !== null) {
-            temp1.innerHTML = calendar[index].time
+            temp1.innerHTML = tcalendar[index].time
           }
           temp1 = document.querySelector('#promote-show-topic')
           if (temp1 !== null) {
-            temp1.innerHTML = calendar[index].topic
+            temp1.innerHTML = tcalendar[index].topic
           }
-          temp1 = document.querySelector(`#calendar-event-${calendar[index].ID}`)
+          temp1 = document.querySelector(`#calendar-event-${tcalendar[index].ID}`)
           if (temp1 !== null) {
             temp1.style.borderStyle = 'solid'
             temp1.style.borderWidth = '0.25vw'
