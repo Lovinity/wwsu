@@ -143,7 +143,7 @@ module.exports = {
     try {
       var auth = await authenticate()
     } catch (e) {
-      sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar error during authentication: ${breakdance(e.message)}. This is likely a network problem or an issue with Google. Until resolved, modifications to the calendar will not reflect in the system; system will use the calendar stored in memory.`, status: 2 }])
+      await sails.helpers.status.change.with({ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar error during authentication: ${breakdance(e.message)}. This is likely a network problem or an issue with Google. Until resolved, modifications to the calendar will not reflect in the system; system will use the calendar stored in memory.`, status: 2 })
       return exits.error(e)
     }
 
@@ -925,16 +925,16 @@ module.exports = {
           await Promise.all(maps)
         }
         if (issues.length === 0) {
-          sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar is operational and all events are valid.`, status: 5 }])
+          await sails.helpers.status.change.with({ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar is operational and all events are valid.`, status: 5 })
         } else {
           // Remove duplicates
           issues = issues.filter((v, i, a) => a.indexOf(v) === i)
-          sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: issues.join(` `), status: status }])
+          await sails.helpers.status.change.with({ name: 'google-calendar', label: 'Google Calendar', data: issues.join(` `), status: status })
         }
         return exits.success()
       }
     } catch (e) {
-      sails.models.status.changeStatus([{ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar error: ${breakdance(e.message)}. This is likely a network problem or an issue with Google. Until resolved, modifications to the calendar will not reflect in the system; system will use the calendar stored in memory.`, status: 2 }])
+      await sails.helpers.status.change.with({ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar error: ${breakdance(e.message)}. This is likely a network problem or an issue with Google. Until resolved, modifications to the calendar will not reflect in the system; system will use the calendar stored in memory.`, status: 2 })
       return exits.error(e)
     }
   }

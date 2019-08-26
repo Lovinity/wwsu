@@ -12,7 +12,7 @@ module.exports = {
 
     try {
       // Activate status issue
-      sails.models.status.changeStatus([{ name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio detected! Please ensure audio is going out over the air. If so, check the audio settings on the DJ Controls responsible for silence detection.` }])
+      await sails.helpers.status.change.with({ name: `silence`, status: 2, label: `Silence`, data: `Silence / very low audio detected! Please ensure audio is going out over the air. If so, check the audio settings on the DJ Controls responsible for silence detection.` })
 
       // If a track is playing in RadioDJ, skip it and log it
       if (typeof sails.models.meta.automation[0] !== 'undefined' && parseInt(sails.models.meta.automation[0].ID) !== 0) {
@@ -46,7 +46,7 @@ module.exports = {
           .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
           .map(async (instance) => {
             var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
-            if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.` }]) }
+            if (status && status.status !== 1) { await sails.helpers.status.change({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.` }) }
             return true
           })
         await Promise.all(maps)

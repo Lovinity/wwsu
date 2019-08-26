@@ -79,7 +79,7 @@ module.exports = {
               } else {
                 offStatus = 3
               }
-              await sails.models.status.changeStatus([{ name: `host-${sh.unique(recipient.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}` }])
+              await sails.helpers.status.change.with({ name: `host-${sh.unique(recipient.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}` })
             }
           }
         }
@@ -88,7 +88,7 @@ module.exports = {
         var maps = sails.config.custom.displaysigns
           .filter(display => recipient.host === `display-${display.name}` && sails.models.recipients.sockets[recipient.ID].length < display.instances)
           .map(async display => {
-            await sails.models.status.changeStatus([{ name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `${sails.models.recipients.sockets[recipient.ID].length} out of ${display.instances} displays are operational.` }])
+            await sails.helpers.status.change.with({ name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: `${sails.models.recipients.sockets[recipient.ID].length} out of ${display.instances} displays are operational.` })
             return true
           })
         await Promise.all(maps)

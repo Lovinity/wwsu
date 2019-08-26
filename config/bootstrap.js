@@ -772,7 +772,7 @@ module.exports.bootstrap = async function (done) {
 
   // Four times per minute, at 03, 18, 33, and 48 past the minute, check the online status of the radio streams, and log listener count
   sails.log.verbose(`BOOTSTRAP: scheduling checkRadioStreams CRON.`)
-  cron.schedule('3,18,33,48 * * * * *', () => {
+  cron.schedule('3,18,33,48 * * * * *', async () => {
     sails.log.debug(`CRON checkRadioStreams triggered.`)
     try {
       // SHOUTCAST 2.6
@@ -784,7 +784,7 @@ module.exports.bootstrap = async function (done) {
             // Check public stream
             if (typeof streams !== 'undefined' && typeof streams[0] !== 'undefined' && typeof streams[0].streamstatus !== 'undefined' && streams[0].streamstatus !== 0) {
               // Mark stream as good
-              sails.models.status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5 }])
+              await sails.helpers.status.change.with({ name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5 })
 
               // Log listeners if there are any changes
               if (sails.models.meta.memory.dj !== sails.models.listeners.memory.dj || streams[0].uniquelisteners !== sails.models.listeners.memory.listeners) {
@@ -794,113 +794,25 @@ module.exports.bootstrap = async function (done) {
               }
               sails.models.listeners.memory = { dj: sails.models.meta.memory.dj, listeners: streams[0].uniquelisteners }
             } else {
-              sails.models.status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: `Stream is offline. Please ensure the audio encoder is connected and streaming to the ${sails.config.custom.stream} Shoutcast server.`, status: 2 }])
+              await sails.helpers.status.change.with({ name: 'stream-public', label: 'Radio Stream', data: `Stream is offline. Please ensure the audio encoder is connected and streaming to the ${sails.config.custom.stream} Shoutcast server.`, status: 2 })
             }
+            return true
           } catch (e) {
             sails.log.error(e)
-            sails.models.status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: `Error parsing data from the Shoutcast server. Please ensure the Shoutcast server ${sails.config.custom.stream} is online and working properly.`, status: 2 }])
+            await sails.helpers.status.change.with({ name: 'stream-public', label: 'Radio Stream', data: `Error parsing data from the Shoutcast server. Please ensure the Shoutcast server ${sails.config.custom.stream} is online and working properly.`, status: 2 })
+            return false
           }
         })
-        .catch(err => {
-          sails.models.status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: `Shoutcast server ${sails.config.custom.stream} is offline.`, status: 2 }])
+        .catch(async err => {
+          await sails.helpers.status.change.with({ name: 'stream-public', label: 'Radio Stream', data: `Shoutcast server ${sails.config.custom.stream} is offline.`, status: 2 })
           sails.log.error(err)
+          return false
         })
-      /* ICECAST 2.3
-             // Get the JSON status from Icecast
-             needle('get', sails.config.custom.stream + `/status-json.xsl`, {}, {headers: {'Content-Type': 'application/json'}})
-             .then(async function (resp) {
-             var publicStream = false;
-             var remoteStream = false;
-             if (typeof resp.body.icestats.source !== 'undefined')
-             {
-             // Parse source data
-             var sources = [];
-             if (!_.isArray(resp.body.icestats.source))
-             {
-             sources.push(resp.body.icestats.source);
-             } else {
-             sources = resp.body.icestats.source;
-             }
-             // Go through each source
-             sails.log.debug(`Calling asyncForEach in cron checkRadioStreams for each source returned`);
-             await sails.helpers.asyncForEach(sources, function (source, index) {
-             return new Promise(async (resolve2, reject2) => {
-             try {
-             if (typeof source.listenurl !== 'undefined')
-             {
-             // Source is mountpoint /public?
-             if (source.listenurl.endsWith("/public"))
-             {
-             // Mark stream as good
-             sails.models.status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Operational.', status: 5}]);
-             publicStream = true;
-
-             // Log listeners
-             if (typeof source.listeners !== 'undefined')
-             {
-             var dj = '';
-
-             // Do not tie DJ with listener count unless DJ is actually on the air
-             if (!sails.models.meta.memory.state.startsWith("automation_"))
-             {
-             dj = sails.models.meta.memory.dj;
-             if (dj.includes(" - "))
-             {
-             dj = dj.split(" - ")[0];
-             }
-             }
-             if (dj !== sails.models.listeners.memory.dj || source.listeners !== sails.models.listeners.memory.listeners)
-             {
-             await sails.models.listeners.create({dj: dj, listeners: source.listeners})
-             .tolerate((err) => {
-             });
-             }
-             sails.models.listeners.memory = {dj: dj, listeners: source.listeners};
-             }
-             }
-
-             // Source is mountpoint /remote?
-             if (source.listenurl.endsWith("/remote"))
-             {
-             sails.models.status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Operational.', status: 5}]);
-             remoteStream = true;
-             }
-             }
-             return resolve2(false);
-             } catch (e) {
-             sails.log.error(e);
-             return resolve2(false);
-             }
-             });
-             });
-             }
-             if (!publicStream)
-             sails.models.status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Offline.', status: 2}]);
-             if (!remoteStream)
-             {
-             if (sails.models.meta.memory.state.includes("remote_"))
-             {
-             // TODO: send system into disconnected mode (if not already) if remote stream is disconnected
-             sails.models.status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline.', status: 2}]);
-             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-             sails.models.status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Offline (OK, as we do not need it right now).', status: 4}]);
-             }
-             }
-             })
-             .catch(function (err) {
-             sails.models.status.changeStatus([{name: 'stream-public', label: 'Radio Stream', data: 'Internet stream server connection error.', status: 2}]);
-             if (sails.models.meta.memory.state.includes("remote"))
-             {
-             sails.models.status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error.', status: 2}]);
-             } else { // If we are not doing a remote broadcast, remote stream being offline is a non-issue
-             sails.models.status.changeStatus([{name: 'stream-remote', label: 'Remote Stream', data: 'Internet stream server connection error (OK, as we do not need remote stream right now)', status: 4}]);
-             }
-             sails.log.error(err);
-             });
-             */
+      return true
     } catch (e) {
-      sails.models.status.changeStatus([{ name: 'stream-public', label: 'Radio Stream', data: 'Error checking Shoutcast server. Please see node server logs.', status: 2 }])
+      await sails.helpers.status.change.with({ name: 'stream-public', label: 'Radio Stream', data: 'Error checking Shoutcast server. Please see node server logs.', status: 2 })
       sails.log.error(e)
+      return false
     }
   })
 
@@ -916,12 +828,12 @@ module.exports.bootstrap = async function (done) {
           // eslint-disable-next-line promise/param-names
           return new Promise((resolve2) => {
             sails.models.status.findOne({ name: `radiodj-${radiodj.name}` })
-              .then((status) => {
+              .then(async (status) => {
                 try {
                   needle('get', `${radiodj.rest}/p?auth=${sails.config.custom.rest.auth}`, {}, { headers: { 'Content-Type': 'application/json' } })
                     .then(async (resp) => {
                       if (typeof resp.body !== 'undefined' && typeof resp.body.children !== 'undefined') {
-                        sails.models.status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is online.', status: 5 }])
+                        await sails.helpers.status.change.with({ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is online.', status: 5 })
                         // We were waiting for a good RadioDJ to switch to. Switch to it immediately.
                         if (sails.models.status.errorCheck.waitForGoodRadioDJ) {
                           sails.models.status.errorCheck.waitForGoodRadioDJ = false
@@ -930,7 +842,7 @@ module.exports.bootstrap = async function (done) {
                           var maps = sails.config.custom.radiodjs
                             .filter((instance) => instance.rest === sails.models.meta.memory.radiodj && instance.name !== radiodj.name)
                             .map(async (instance) => {
-                              await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: instance.level, data: `RadioDJ is not operational. Please ensure this RadioDJ is running and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.` }])
+                              await sails.helpers.status.change.with({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: instance.level, data: `RadioDJ is not operational. Please ensure this RadioDJ is running and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.` })
                               return true
                             })
                           await Promise.all(maps)
@@ -969,16 +881,16 @@ module.exports.bootstrap = async function (done) {
                           }
                         }
                       } else {
-                        if (status && status.status !== 1) { sails.models.status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data. Please ensure the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.', status: radiodj.level }]) }
+                        if (status && status.status !== 1) { await sails.helpers.status.change.with({ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST did not return queue data. Please ensure the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.', status: radiodj.level }) }
                       }
                       return resolve2(false)
                     })
-                    .catch(() => {
-                      if (status && status.status !== 1) { sails.models.status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline. Please ensure RadioDJ is open and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.', status: radiodj.level }]) }
+                    .catch(async () => {
+                      if (status && status.status !== 1) { await sails.helpers.status.change.with({ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ is offline. Please ensure RadioDJ is open and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.', status: radiodj.level }) }
                       return resolve2(false)
                     })
                 } catch (unusedE) {
-                  if (status && status.status !== 1) { sails.models.status.changeStatus([{ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding. Please ensure RadioDJ is open and functional, and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.', status: radiodj.level }]) }
+                  if (status && status.status !== 1) { await sails.helpers.status.change.with({ name: `radiodj-${radiodj.name}`, label: `RadioDJ ${radiodj.label}`, data: 'RadioDJ REST returned an error or is not responding. Please ensure RadioDJ is open and functional, and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.', status: radiodj.level }) }
                   return resolve2(false)
                 }
               })
@@ -994,22 +906,22 @@ module.exports.bootstrap = async function (done) {
 
   // Twice per minute at 05 and 35 seconds, check for connectivity to the website.
   sails.log.verbose(`BOOTSTRAP: scheduling checkWebsite CRON.`)
-  cron.schedule('5,35 * * * * *', () => {
+  cron.schedule('5,35 * * * * *', async () => {
     sails.log.debug(`CRON checkWebsite triggered.`)
     try {
       needle('get', sails.config.custom.website, {}, { headers: { 'Content-Type': 'application/json' } })
         .then(async (resp) => {
           if (typeof resp.body !== 'undefined') {
-            sails.models.status.changeStatus([{ name: `website`, label: `Website`, data: 'Website is online.', status: 5 }])
+            await sails.helpers.status.change.with({ name: `website`, label: `Website`, data: 'Website is online.', status: 5 })
           } else {
-            sails.models.status.changeStatus([{ name: `website`, label: `Website`, data: `Website ${sails.config.custom.website} did not return body data. Please ensure the web server is operational.`, status: 2 }])
+            await sails.helpers.status.change.with({ name: `website`, label: `Website`, data: `Website ${sails.config.custom.website} did not return body data. Please ensure the web server is operational.`, status: 2 })
           }
         })
-        .catch(() => {
-          sails.models.status.changeStatus([{ name: `website`, label: `Website`, data: `Website ${sails.config.custom.website} is offline, or there is a network issue preventing node from connecting to the website at this time.`, status: 2 }])
+        .catch(async () => {
+          await sails.helpers.status.change.with({ name: `website`, label: `Website`, data: `Website ${sails.config.custom.website} is offline, or there is a network issue preventing node from connecting to the website at this time.`, status: 2 })
         })
     } catch (e) {
-      sails.models.status.changeStatus([{ name: `website`, label: `Website`, data: `Error checking the status of the ${sails.config.custom.website} website. Please see node server logs.`, status: 2 }])
+      await sails.helpers.status.change.with({ name: `website`, label: `Website`, data: `Error checking the status of the ${sails.config.custom.website} website. Please see node server logs.`, status: 2 })
       sails.log.error(e)
     }
   })
@@ -1050,9 +962,9 @@ module.exports.bootstrap = async function (done) {
 
         // If all counties succeeded, mark EAS-internal as operational
         if (complete >= sails.config.custom.EAS.NWSX.length) {
-          sails.models.status.changeStatus([{ name: 'EAS-internal', label: 'Internal EAS', data: 'All NWS CAPS are online.', status: 5 }])
+          await sails.helpers.status.change.with({ name: 'EAS-internal', label: 'Internal EAS', data: 'All NWS CAPS are online.', status: 5 })
         } else {
-          sails.models.status.changeStatus([{ name: 'EAS-internal', label: 'Internal EAS', data: `Could not fetch the following NWS CAPS counties: ${bad.join(', ')}. This is usually caused by a network issue, or the NWS CAPS server is experiencing a temporary service disruption.`, status: 3 }])
+          await sails.helpers.status.change.with({ name: 'EAS-internal', label: 'Internal EAS', data: `Could not fetch the following NWS CAPS counties: ${bad.join(', ')}. This is usually caused by a network issue, or the NWS CAPS server is experiencing a temporary service disruption.`, status: 3 })
         }
 
         // Finish up
@@ -1107,7 +1019,7 @@ module.exports.bootstrap = async function (done) {
           })
         })
         if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.` }
-        sails.models.status.changeStatus([{ name: 'db-memory', label: 'DB Memory', data: checkStatus.data, status: checkStatus.status }])
+        await sails.helpers.status.change.with({ name: 'db-memory', label: 'DB Memory', data: checkStatus.data, status: checkStatus.status })
 
         // RadioDJ checks
         sails.log.debug(`CHECK: DB RadioDJ`)
@@ -1136,7 +1048,7 @@ module.exports.bootstrap = async function (done) {
           })
         })
         if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.` }
-        sails.models.status.changeStatus([{ name: 'db-radiodj', label: 'DB RadioDJ', data: checkStatus.data, status: checkStatus.status }])
+        await sails.helpers.status.change.with({ name: 'db-radiodj', label: 'DB RadioDJ', data: checkStatus.data, status: checkStatus.status })
 
         // Nodebase checks
         sails.log.debug(`CHECK: DB Nodebase`)
@@ -1165,13 +1077,13 @@ module.exports.bootstrap = async function (done) {
           })
         })
         if (checkStatus.status === 5) { checkStatus.data = `This datastore is fully operational.` }
-        sails.models.status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status }])
+        await sails.helpers.status.change.with({ name: 'db-nodebase', label: 'DB Nodebase', data: checkStatus.data, status: checkStatus.status })
 
         return true
       } catch (e) {
-        sails.models.status.changeStatus([{ name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.', status: 1 }])
-        sails.models.status.changeStatus([{ name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.', status: 1 }])
-        sails.models.status.changeStatus([{ name: 'db-nodebase', label: 'DB Nodebase', data: 'The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.', status: 1 }])
+        await sails.helpers.status.change.with({ name: 'db-memory', label: 'DB Memory', data: 'The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.', status: 1 })
+        await sails.helpers.status.change.with({ name: 'db-radiodj', label: 'DB RadioDJ', data: 'The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.', status: 1 })
+        await sails.helpers.status.change.with({ name: 'db-nodebase', label: 'DB Nodebase', data: 'The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.', status: 1 })
         sails.log.error(e)
         return null
       }
@@ -1210,13 +1122,13 @@ module.exports.bootstrap = async function (done) {
           .tolerate(() => {
           })
         if (found && found >= sails.config.custom.status.musicLibrary.verify.critical) {
-          sails.models.status.changeStatus([{ name: `music-library`, status: 1, label: `Music Library`, data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.` }])
+          await sails.helpers.status.change.with({ name: `music-library`, status: 1, label: `Music Library`, data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.` })
         } else if (found && found >= sails.config.custom.status.musicLibrary.verify.error) {
-          sails.models.status.changeStatus([{ name: `music-library`, status: 2, label: `Music Library`, data: `Music library has ${found} bad tracks. This is quite high. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.` }])
+          await sails.helpers.status.change.with({ name: `music-library`, status: 2, label: `Music Library`, data: `Music library has ${found} bad tracks. This is quite high. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.` })
         } else if (found && found >= sails.config.custom.status.musicLibrary.verify.warn) {
-          sails.models.status.changeStatus([{ name: `music-library`, status: 3, label: `Music Library`, data: `Music library has ${found} bad tracks. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.` }])
+          await sails.helpers.status.change.with({ name: `music-library`, status: 3, label: `Music Library`, data: `Music library has ${found} bad tracks. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.` })
         } else {
-          sails.models.status.changeStatus([{ name: `music-library`, status: 5, label: `Music Library`, data: `Music library has ${found} bad tracks.` }])
+          await sails.helpers.status.change.with({ name: `music-library`, status: 5, label: `Music Library`, data: `Music library has ${found} bad tracks.` }])
         }
 
         return resolve()
@@ -1335,13 +1247,13 @@ module.exports.bootstrap = async function (done) {
         var mem = os.freemem()
 
         if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical) {
-          sails.models.status.changeStatus([{ name: `server`, label: `Server`, status: 1, data: `Server resource use is dangerously high!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 1, data: `Server resource use is dangerously high!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
         } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error) {
-          sails.models.status.changeStatus([{ name: `server`, label: `Server`, status: 2, data: `Server resource use is very high! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 2, data: `Server resource use is very high! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
         } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn) {
-          sails.models.status.changeStatus([{ name: `server`, label: `Server`, status: 3, data: `Server resource use is mildly high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 3, data: `Server resource use is mildly high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
         } else {
-          sails.models.status.changeStatus([{ name: `server`, label: `Server`, status: 5, data: `Server resource use is good. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` }])
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 5, data: `Server resource use is good. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
         }
 
         return resolve()

@@ -5,7 +5,7 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-// API NOTE: Do not use sails.models.status.update() to update statuses; use sails.models.status.changeStatus instead. Otherwise, websockets may get flooded with updates.
+// API NOTE: Do not use sails.models.status.update() to update statuses; use sails.helpers.status.change instead. This helper has additional functionality.
 
 module.exports = {
 
@@ -123,7 +123,7 @@ module.exports = {
               .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
               .map(async (instance) => {
                 var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
-                if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }]) }
+                if (status && status.status !== 1) { await sails.helpers.status.change.with({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFail for failing to report queue data. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }) }
                 return true
               })
             await Promise.all(maps)
@@ -181,7 +181,7 @@ module.exports = {
                 .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
                 .map(async (instance) => {
                   var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
-                  if (status && status.status !== 1) { await sails.models.status.changeStatus([{ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }]) }
+                  if (status && status.status !== 1) { await sails.helpers.status.change.with({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `RadioDJ triggered queueFrozen multiple times; it has probably crashed. Please ensure this RadioDJ is not frozen and the REST server is online, configured correctly, and accessible on the network. You might have to play a track after opening RadioDJ before REST begins to work.` }) }
                   return true
                 })
               await Promise.all(maps)
@@ -312,97 +312,6 @@ module.exports = {
       }
     }
 
-  },
-
-  /**
-     * Change statuses
-     * @constructor
-     * @param {Array} array - Object containing objects of statuses to change {name: 'key', label: 'friendly name', status: 5, data: 'String of data regarding this subsystem.'}.
-     */
-
-  changeStatus: function (array) {
-    // LINT: async required because of sails.js lint
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
-      sails.log.debug(`sails.models.status.changeStatus called.`)
-      try {
-        var maps = array.map(async status => {
-          var criteriaB
-          var criteria = { name: status.name, status: status.status, data: status.data || '', label: status.label || status.name }
-          if (status.status === 5) { criteria.time = moment().toISOString(true) }
-
-          // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-          criteriaB = _.cloneDeep(criteria)
-
-          // Find or create the status record
-          var record = await sails.models.status.findOrCreate({ name: status.name }, criteriaB)
-            .tolerate(() => {
-              return true
-            })
-
-          // Search to see if any changes are made to the status; we only want to update if there is a change.
-          var updateIt = false
-          for (var key in criteria) {
-            if (Object.prototype.hasOwnProperty.call(criteria, key)) {
-              if (criteria[key] !== record[key]) {
-                // We don't want to fetch() on time-only updates; this will flood websockets
-                if (!updateIt && key === 'time') {
-                  updateIt = 2
-                } else {
-                  updateIt = 1
-                }
-              }
-            }
-          }
-          if (updateIt === 1 && typeof criteria.status !== 'undefined' && criteria.status <= 3 && (!record.status || (record.status !== criteria.status))) {
-            var loglevel = `warning`
-            if (criteria.status < 2) {
-              loglevel = `danger`
-            } else if (criteria.status < 3) {
-              loglevel = `urgent`
-            }
-
-            // Log changes in status
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: sails.models.meta.memory.show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
-              .tolerate((err) => {
-                // Don't throw errors, but log them
-                sails.log.error(err)
-              })
-          }
-          if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3) {
-            // Log when bad statuses are now good.
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: 'success', logsubtype: sails.models.meta.memory.show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
-              .tolerate((err) => {
-                // Don't throw errors, but log them
-                sails.log.error(err)
-              })
-          }
-          if (updateIt === 1) {
-            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-            criteriaB = _.cloneDeep(criteria)
-            sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`)
-            await sails.models.status.update({ name: status.name }, criteriaB)
-              .tolerate((err) => {
-                throw err
-              })
-              .fetch()
-          } else if (updateIt === 2) {
-            // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
-            criteriaB = _.cloneDeep(criteria)
-            sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`)
-            await sails.models.status.update({ name: status.name }, criteriaB)
-              .tolerate((err) => {
-                throw err
-              })
-          }
-          return true
-        })
-        await Promise.all(maps)
-        return resolve()
-      } catch (e) {
-        return reject(e)
-      }
-    })
   },
 
   // Websockets standards
