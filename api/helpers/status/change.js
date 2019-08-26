@@ -37,13 +37,13 @@ module.exports = {
     try {
       var criteriaB
       var criteria = { name: inputs.name, status: inputs.status, data: inputs.data || '', label: inputs.label || inputs.name }
-      if (status.status === 5) { criteria.time = moment().toISOString(true) }
+      if (inputs.status === 5) { criteria.time = moment().toISOString(true) }
 
       // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
       criteriaB = _.cloneDeep(criteria)
 
       // Find or create the status record
-      var record = await sails.models.status.findOrCreate({ name: status.name }, criteriaB)
+      var record = await sails.models.status.findOrCreate({ name: inputs.name }, criteriaB)
         .tolerate(() => {
           return true
         })
