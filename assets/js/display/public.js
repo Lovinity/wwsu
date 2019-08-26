@@ -231,7 +231,24 @@ try {
     transitionOut: `fadeOut`,
     displayTime: 10,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`
+    html: `<h1 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`,
+    fn: (slide) => {
+      if (calendar.length > 0) {
+        calendar
+          .filter((event) => event.name === Meta.show && event.type === 'show' && event.active > 0)
+          .map((event) => {
+            var temp1 = document.querySelector(`#calendar-event-${event.ID}`)
+            if (temp1 !== null) {
+              temp1.style.borderStyle = 'solid'
+              temp1.style.borderWidth = '0.25vw'
+              setTimeout(() => {
+                delete temp1.style.borderStyle
+                delete temp1.style.borderWidth
+              }, slide.displayTime * 1000)
+            }
+          })
+      }
+    }
   })
 
   // Weather alerts

@@ -43,6 +43,7 @@ onmessage = function (e) {
         var stripped
         var image
         var temp
+        var type
         if (event.active < 1) { color = hexRgb(`#161616`) }
         color.red = Math.round(color.red / 3)
         color.green = Math.round(color.green / 3)
@@ -56,6 +57,7 @@ onmessage = function (e) {
         }
         if (event.title.startsWith('Show: ')) {
           stripped = event.title.replace('Show: ', '')
+          type = 'show'
           image = `<i class="fas fa-microphone text-white" style="font-size: 36px;"></i>`
           temp = stripped.split(' - ')
           if (temp.length === 2) {
@@ -67,6 +69,7 @@ onmessage = function (e) {
           }
         } else if (event.title.startsWith('Prerecord: ')) {
           stripped = event.title.replace('Prerecord: ', '')
+          type = 'prerecord'
           image = `<i class="fas fa-play-circle text-white" style="font-size: 36px;"></i>`
           temp = stripped.split(' - ')
           if (temp.length === 2) {
@@ -78,6 +81,7 @@ onmessage = function (e) {
           }
         } else if (event.title.startsWith('Remote: ')) {
           stripped = event.title.replace('Remote: ', '')
+          type = 'remote'
           image = `<i class="fas fa-broadcast-tower text-white" style="font-size: 36px;"></i>`
           temp = stripped.split(' - ')
           if (temp.length === 2) {
@@ -89,10 +93,12 @@ onmessage = function (e) {
           }
         } else if (event.title.startsWith('Sports: ')) {
           stripped = event.title.replace('Sports: ', '')
+          type = 'sports'
           line1 = 'Raider Sports'
           line2 = stripped
           image = `<i class="fas fa-trophy text-white" style="font-size: 36px;"></i>`
         } else {
+          type = 'event'
           line1 = ''
           line2 = event.title
           image = `<i class="fas fa-calendar text-white" style="font-size: 36px;"></i>`
@@ -110,7 +116,7 @@ onmessage = function (e) {
                         </div>
                     </div>`
         noEvents = false
-        today.push({ name: `${line1}${line1 !== '' ? ` - ` : ``}${line2}`, ID: `calendar-event-${event.ID}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
+        today.push({ name: `${line1}${line1 !== '' ? ` - ` : ``}${line2}`, type: type, active: event.active, ID: `calendar-event-${event.ID}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
       } catch (e) {
         console.error(e)
         innercontent = `
