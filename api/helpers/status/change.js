@@ -88,8 +88,8 @@ module.exports = {
       if (updateIt === 1) {
         // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
         criteriaB = _.cloneDeep(criteria)
-        sails.log.verbose(`Updating status ${status.name} and pushing to sockets via fetch.`)
-        await sails.models.status.update({ name: status.name }, criteriaB)
+        sails.log.verbose(`Updating status ${inputs.name} and pushing to sockets via fetch.`)
+        await sails.models.status.update({ name: inputs.name }, criteriaB)
           .tolerate((err) => {
             throw err
           })
@@ -97,8 +97,8 @@ module.exports = {
       } else if (updateIt === 2) {
         // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
         criteriaB = _.cloneDeep(criteria)
-        sails.log.verbose(`Updating status ${status.name} without using fetch / pushing to sockets.`)
-        await sails.models.status.update({ name: status.name }, criteriaB)
+        sails.log.verbose(`Updating status ${inputs.name} without using fetch / pushing to sockets.`)
+        await sails.models.status.update({ name: inputs.name }, criteriaB)
           .tolerate((err) => {
             throw err
           })
