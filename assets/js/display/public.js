@@ -205,19 +205,21 @@ try {
   wrapper.width = window.innerWidth
   wrapper.height = window.innerHeight
 
-  Slides.newSlide({
-    name: `weekly-stats`,
-    label: `Weekly Stats`,
-    weight: 1000000,
-    isSticky: false,
-    color: `success`,
-    active: true,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
-    displayTime: 15,
-    fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
-  })
+  if (!isStudio) {
+    Slides.newSlide({
+      name: `weekly-stats`,
+      label: `Weekly Stats`,
+      weight: 1000000,
+      isSticky: false,
+      color: `success`,
+      active: true,
+      transitionIn: `fadeIn`,
+      transitionOut: `fadeOut`,
+      displayTime: 15,
+      fitContent: false,
+      html: `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`
+    })
+  }
 
   // On the Air
   Slides.newSlide({
@@ -266,10 +268,10 @@ try {
     html: `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`
   })
 
-  // Promote Random Radio Shows
+  // Promote Random Radio Shows and Events
   Slides.newSlide({
     name: `show-info`,
-    label: `Radio Shows`,
+    label: `Events`,
     weight: -1,
     isSticky: false,
     color: `primary`,
