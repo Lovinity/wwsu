@@ -44,6 +44,11 @@ module.exports = {
       allowNull: true
     },
 
+    answerCalls: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     time: {
       type: 'ref',
       columnType: 'datetime',

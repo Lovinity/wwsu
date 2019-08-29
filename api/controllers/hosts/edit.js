@@ -104,8 +104,11 @@ module.exports = {
       // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
       var criteriaB = _.cloneDeep(inputs)
 
-      // Edit it
+      // Edit it. Also update answerCalls in recipients if necessary.
       var hostRecord = await sails.models.hosts.updateOne({ ID: inputs.ID }, criteriaB)
+      if (typeof inputs.answerCalls !== 'undefined') {
+        await sails.models.recipients.update({ host: `computer-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}` }, { answerCalls: inputs.answerCalls && hostRecord.authorized }).fetch()
+      }
 
       // Edit the status of this host if necessary
       var statusRecord = await sails.models.status.findOne({ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}` })

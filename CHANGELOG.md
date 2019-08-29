@@ -61,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.break.removeNullTasks to filter out null tasks from a break tasks array. Null tasks were being added and causing bugs.
  - forced parameter to sails.helpers.playlists.start. When true, playlist will start regardless of current meta state. [Issue 95](https://github.com/Lovinity/wwsu/issues/95)
  - "actual" property to planner/add and planner/edit for setting and modifying final scheduled times for shows.
+ - "answerCalls" boolean property to recipients. It is true when the corresponding host's authorized and answerCalls settings are true, otherwise it is false.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
@@ -93,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - meta.changeMeta moved to sails.helpers.meta.change with input validation for all keys via meta.template. [Issue 12](https://github.com/Lovinity/wwsu/issues/12)
  - meta['A'] replaced with meta.memory.
  - sails.models.status.changeStatus changed to sails.helpers.status.change.
+ - Host property of recipients for computers no longer uses the actual host, but instead a protected unique string, for security purposes.
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

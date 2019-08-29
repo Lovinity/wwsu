@@ -34,6 +34,7 @@ module.exports = {
 
       // Destroy it
       var hostRecord = await sails.models.hosts.destroyOne({ ID: inputs.ID })
+      await sails.models.recipients.update({ host: `computer-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}` }, { answerCalls: false }).fetch()
 
       // Destroy the status records for this host as well
       await sails.models.status.destroy({ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}` }).fetch()
