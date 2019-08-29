@@ -1,3 +1,5 @@
+var sh = require('shorthash')
+
 module.exports = {
 
   friendlyName: 'Recipients / register-peer',
@@ -19,7 +21,7 @@ module.exports = {
       if (!this.req.isSocket) { return exits.error(new Error('This controller requires a websocket.')) }
 
       // Update the recipient peer ID
-      await sails.models.recipients.update({ host: this.req.payload.host }, { peer: inputs.peer || null }).fetch()
+      await sails.models.recipients.update({ host: `computer-${sh.unique(this.req.payload.host + sails.config.custom.hostSecret)}` }, { peer: inputs.peer || null }).fetch()
 
       return exits.success()
     } catch (e) {
