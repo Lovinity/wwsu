@@ -70,7 +70,7 @@ module.exports = {
 
         // We are going to automation
         if (!inputs.transition) {
-          await sails.helpers.meta.change.with({ genre: '', state: 'automation_on', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+          await sails.helpers.meta.change.with({ genre: '', state: 'automation_on', show: '', track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
           await sails.helpers.error.reset('automationBreak')
 
           // Add up to 3 track requests if any are pending
@@ -89,7 +89,7 @@ module.exports = {
 
           // We are going to break
         } else {
-          await sails.helpers.meta.change.with({ genre: '', state: 'automation_break', show: '', track: '', djcontrols: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+          await sails.helpers.meta.change.with({ genre: '', state: 'automation_break', show: '', track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
           attendance = await sails.helpers.attendance.createRecord(`Genre: Default`)
         }
 

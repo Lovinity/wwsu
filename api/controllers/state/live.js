@@ -98,10 +98,10 @@ module.exports = {
         }
 
         await sails.helpers.rest.cmd('EnableAssisted', 0)
-        await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat, djcontrols: this.req.payload.host })
+        await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_live', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat })
       } else {
         // Otherwise, just update metadata but do not do anything else
-        await sails.helpers.meta.change.with({ show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat, djcontrols: this.req.payload.host })
+        await sails.helpers.meta.change.with({ show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
       }
 
       await sails.helpers.error.reset('automationBreak')

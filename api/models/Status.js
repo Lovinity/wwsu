@@ -267,7 +267,7 @@ module.exports = {
             if (sails.models.meta.memory.changingState !== null) { return resolve(295) }
 
             await sails.helpers.meta.change.with({ changingState: `Switching to automation via automationBreak` })
-            await sails.helpers.meta.change.with({ state: 'automation_on', genre: '', show: '', trackStamp: null, djcontrols: '', topic: '', webchat: true, playlist: null, playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+            await sails.helpers.meta.change.with({ state: 'automation_on', genre: '', show: '', trackStamp: null, topic: '', webchat: true, playlist: null, playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
 
             // Add up to 3 track requests if any are pending
             await sails.helpers.requests.queue(3, true, true)
