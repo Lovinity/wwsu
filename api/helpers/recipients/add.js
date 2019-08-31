@@ -61,6 +61,7 @@ module.exports = {
       sails.log.silly(`sails.models.status: ${status}`)
       var answerCalls = false
       var makeCalls = false
+      var hostID = null
       var find = inputs.host
       var alreadyConnected = false
 
@@ -76,17 +77,18 @@ module.exports = {
           inputs.label = host[0].friendlyname
           answerCalls = host[0].answerCalls && host[0].authorized
           makeCalls = host[0].makeCalls && host[0].authorized
+          hostID = host[0].ID
           find = `computer-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`
         }
       }
 
       // Get or create the recipient entry
-      var recipient = await sails.models.recipients.findOrCreate({ host: find }, { host: find, device: inputs.device, group: inputs.group, label: inputs.label, status: status, answerCalls: answerCalls, makeCalls: makeCalls, time: moment().toISOString(true) })
+      var recipient = await sails.models.recipients.findOrCreate({ host: find }, { hostID: hostID, host: find, device: inputs.device, group: inputs.group, label: inputs.label, status: status, answerCalls: answerCalls, makeCalls: makeCalls, time: moment().toISOString(true) })
 
       sails.log.silly(`sails.models.recipients record: ${recipient}`)
 
       // Search to see if any changes are made to the recipient; we only want to update if there is a change.
-      var criteria = { host: find, group: inputs.group, status: status, device: inputs.device, answerCalls: answerCalls, makeCalls: makeCalls }
+      var criteria = { hostID: hostID, host: find, group: inputs.group, status: status, device: inputs.device, answerCalls: answerCalls, makeCalls: makeCalls }
       var updateIt = false
       for (var key in criteria) {
         if (Object.prototype.hasOwnProperty.call(criteria, key)) {
@@ -101,7 +103,7 @@ module.exports = {
       }
       if (updateIt) {
         sails.log.verbose(`Updating recipient as it has changed.`)
-        await sails.models.recipients.update({ host: find }, { host: find, group: inputs.group, device: inputs.device, status: status, answerCalls: answerCalls, makeCalls: makeCalls, time: moment().toISOString(true) }).fetch()
+        await sails.models.recipients.update({ host: find }, { hostID: hostID, host: find, group: inputs.group, device: inputs.device, status: status, answerCalls: answerCalls, makeCalls: makeCalls, time: moment().toISOString(true) }).fetch()
       }
 
       // Put the socket ID in memory

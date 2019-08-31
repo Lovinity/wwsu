@@ -15,6 +15,11 @@ module.exports = {
       autoIncrement: true
     },
 
+    hostID: {
+      type: 'number',
+      allowNull: true
+    },
+
     host: {
       type: 'string'
     },

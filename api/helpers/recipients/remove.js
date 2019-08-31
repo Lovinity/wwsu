@@ -63,23 +63,25 @@ module.exports = {
           sails.log.verbose(`Recipient is no longer connected. Setting to offline.`)
           await sails.models.recipients.update({ host: recipient.host }, { host: recipient.host, status: 0, peer: null, time: moment().toISOString(true) }).fetch()
 
-          var hostRecord = await sails.models.hosts.findOne({ host: recipient.host })
-          if (hostRecord) {
-            var offStatus = 4
-            var additionalData = ``
-            if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls) {
-              if (hostRecord.silenceDetection || hostRecord.recordAudio) {
-                offStatus = 2
-                if (hostRecord.silenceDetection) {
-                  additionalData += ` Host is responsible for silence detection; you will not be alerted of silence until this host is back online.`
+          if (recipient.hostID !== null) {
+            var hostRecord = await sails.models.hosts.findOne({ ID: recipient.hostID })
+            if (hostRecord) {
+              var offStatus = 4
+              var additionalData = ``
+              if (hostRecord.silenceDetection || hostRecord.recordAudio || hostRecord.answerCalls) {
+                if (hostRecord.silenceDetection || hostRecord.recordAudio) {
+                  offStatus = 2
+                  if (hostRecord.silenceDetection) {
+                    additionalData += ` Host is responsible for silence detection; you will not be alerted of silence until this host is back online.`
+                  }
+                  if (hostRecord.recordAudio) {
+                    additionalData += ` Host is responsible for recording on-air programming; until this host is back online, programming is not being recorded.`
+                  }
+                } else {
+                  offStatus = 3
                 }
-                if (hostRecord.recordAudio) {
-                  additionalData += ` Host is responsible for recording on-air programming; until this host is back online, programming is not being recorded.`
-                }
-              } else {
-                offStatus = 3
+                await sails.helpers.status.change.with({ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}` })
               }
-              await sails.helpers.status.change.with({ name: `host-${sh.unique(recipient.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}` })
             }
           }
         }

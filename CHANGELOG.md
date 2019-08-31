@@ -63,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "actual" property to planner/add and planner/edit for setting and modifying final scheduled times for shows.
  - "answerCalls" boolean property to recipients. It is true when the corresponding host's authorized and answerCalls settings are true, otherwise it is false.
  - "makeCalls" boolean property to recipients. It is true when the corresponding host's authorized and makeCalls settings are true, otherwise it is false.
+ - "hostID" number property to recipients. If the recipient is mapped to a host in the hosts model, this will be the ID number of the hosts record. Otherwise, it will be null.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
