@@ -329,7 +329,7 @@ module.exports.bootstrap = async function (done) {
 
       /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
              * This results in false transitions in system state. Run a check to detect if the queuelength deviated by more than 2 seconds since last run.
-             * If so, we assume this was an error, so do not treat it as accurate, and trigger a 5 second error resolution wait.
+             * If so, we assume this was an error, so do not treat it as accurate, and trigger a 3 second error resolution wait.
              */
       if (queueLength > (sails.models.status.errorCheck.prevQueueLength - 3) || sails.models.status.errorCheck.trueZero > 0) {
         // If the detected queueLength gets bigger, assume the issue resolved itself and immediately mark the queuelength as accurate

@@ -29,10 +29,10 @@ module.exports = {
       sails.sockets.join(this.req, `discipline-${host}`)
 
       // Mark the client as online and retrieve their nickname
-      var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`, inputs.device)
+      var response = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`, inputs.device)
 
       // Return the nickname of this client as a label object
-      return exits.success({ label: label })
+      return exits.success(response)
     } catch (e) {
       return exits.error(e)
     }

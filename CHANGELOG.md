@@ -96,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - meta['A'] replaced with meta.memory.
  - sails.models.status.changeStatus changed to sails.helpers.status.change.
  - Host property of recipients for computers no longer uses the actual host, but instead a protected unique string, for security purposes.
+ - Response of sails.helpers.recipients.add is now an object: {label: 'friendly name of host', alreadyConnected: true|false (if true, this host already has one other socket connected)} .
 
 ## [5.1.0] - 2019-03-15
 ### Deprecated

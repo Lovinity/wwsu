@@ -62,6 +62,7 @@ module.exports = {
       var answerCalls = false
       var makeCalls = false
       var find = inputs.host
+      var alreadyConnected = false
 
       // If this is a computers recipient, see if it's in the Hosts table. If so, use that as the label instead of the provided label.
       // Also, use generic `computer-uniqueString` as host instead of actual host for security purposes.
@@ -106,6 +107,11 @@ module.exports = {
       // Put the socket ID in memory
       if (typeof sails.models.recipients.sockets[recipient.ID] === 'undefined') { sails.models.recipients.sockets[recipient.ID] = [] }
 
+      // Check to see if we are already connected
+      var connections = sails.models.recipients.sockets[recipient.ID].length
+      if (_.includes(sails.models.recipients.sockets[recipient.ID], inputs.socket)) { connections -= 1 }
+      if (connections > 0) { alreadyConnected = true }
+
       // Make sure we do not add the same socket more than once
       if (!_.includes(sails.models.recipients.sockets[recipient.ID], inputs.socket)) {
         sails.models.recipients.sockets[recipient.ID].push(inputs.socket)
@@ -127,7 +133,7 @@ module.exports = {
         await Promise.all(maps)
       }
 
-      return exits.success(recipient.label)
+      return exits.success({ label: recipient.label, alreadyConnected: alreadyConnected })
     } catch (e) {
       return exits.error(e)
     }

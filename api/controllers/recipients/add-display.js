@@ -18,7 +18,7 @@ module.exports = {
       // Request must be a socket
       if (!this.req.isSocket) { return exits.error(new Error('This controller requires a websocket.')) }
 
-      var label = await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.host, 'display', inputs.host)
+      var response = await sails.helpers.recipients.add(sails.sockets.getId(this.req), inputs.host, 'display', inputs.host)
 
       // Join display-refresh to receive requests to refresh the display signs
       sails.sockets.join(this.req, 'display-refresh')
@@ -29,7 +29,7 @@ module.exports = {
       sails.log.verbose('Request was a display host. Joined display-refresh and messages-(host).')
 
       // Return the nickname for this host as a label object
-      return exits.success({ label: label })
+      return exits.success(response)
     } catch (e) {
       return exits.error(e)
     }
