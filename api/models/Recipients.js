@@ -44,6 +44,11 @@ module.exports = {
       allowNull: true
     },
 
+    makeCalls: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     answerCalls: {
       type: 'boolean',
       defaultsTo: false
