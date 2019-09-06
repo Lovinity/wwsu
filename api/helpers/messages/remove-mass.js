@@ -16,7 +16,7 @@ module.exports = {
     sails.log.debug('Helper messages.removeMass called.')
     try {
       // Mark all messages from provided host as deleted
-      await sails.models.messages.update({ from: inputs.host }, { status: 'deleted' }).fetch()
+      await sails.models.messages.update({ or: [{ from: inputs.host }, { fromIP: inputs.host }] }, { status: 'deleted' }).fetch()
       return exits.success()
     } catch (e) {
       return exits.error(e)

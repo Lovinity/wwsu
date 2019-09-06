@@ -1,3 +1,5 @@
+var sh = require('shorthash')
+
 module.exports = {
 
   friendlyName: 'Messages / Send',
@@ -36,7 +38,7 @@ module.exports = {
       if (inputs.to.startsWith('website') && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to send a message to website visitors because you are not on the air.')) }
 
       // Send the message
-      await sails.helpers.messages.send(this.req.payload.host, inputs.to, inputs.toFriendly, inputs.message)
+      await sails.helpers.messages.send(`computer-${sh.unique(this.req.payload.host + sails.config.custom.hostSecret)}`, inputs.to, inputs.toFriendly, inputs.message)
       return exits.success()
     } catch (e) {
       return exits.error(e)
