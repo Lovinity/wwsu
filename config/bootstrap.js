@@ -1273,12 +1273,33 @@ module.exports.bootstrap = async function (done) {
       try {
         await sails.helpers.meta.change.with({ time: moment().toISOString(true) })
 
-        var records = await sails.models.timesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: 0 }).fetch()
-          .tolerate(() => {
-          })
-
+        var records = await sails.models.timesheet.find({ time_in: { '!=': null }, time_out: null })
+        var recordsX = []
         if (records.length > 0) {
+          var theStart
+          var theEnd
           records.map((record) => {
+            // Edge case example: It is 5PM. A director clocks in for 1PM. Director has scheduled hours for 1-3PM and 4-6PM. Ensure there's a record for all in-between hours.
+            if (!theEnd) {
+              theStart = record.scheduledIn
+            } else {
+              theStart = theEnd
+            }
+            theEnd = record.scheduledOut
+            var result = (async (recordB, theStartB, theEndB) => {
+              return recordsX.concat(await sails.models.timesheet.update({ ID: recordB.ID }, { timeIn: moment(theStartB).toISOString(true), timeOut: moment(theEndB).toISOString(true), approved: 0 }).fetch())
+            })(record, theStart, theEnd)
+            return result
+          })
+          // Add special clock-out entry
+          recordsX = recordsX.concat(await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null }, { timeIn: moment(theEnd).toISOString(true), timeOut: moment().toISOString(true), approved: 0 }).fetch())
+        } else {
+          // Add normal clock-out entry
+          recordsX = recordsX.concat(await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null }, { timeOut: moment().toISOString(true), approved: 0 }).fetch())
+        }
+
+        if (recordsX.length > 0) {
+          recordsX.map((record) => {
             (async () => {
               sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Timesheet needs approved', `The timesheet for ${record.name}, ending on ${moment().format('LLLL')}, has been flagged and needs reviewed/approved.`)
             })()

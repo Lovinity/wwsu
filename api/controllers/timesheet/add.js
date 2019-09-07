@@ -36,9 +36,31 @@ module.exports = {
         // If the entry is less than 30 minutes off from the current time, approve automatically
         if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
 
-        // Add the timeOut entry
-        await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '>=': 1 } }, { timeOut: thetime.toISOString(true), approved: toapprove }).fetch()
-        await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '<': 1 } }, { timeOut: thetime.toISOString(true) }).fetch()
+        // Edge case example: It is 5PM. A director clocks in for 1PM. Director has scheduled hours for 1-3PM and 4-6PM. Ensure there's a record for all in-between hours.
+        var records = await sails.models.timesheet.find({ name: record.name, approved: { '>=': 0 }, timeIn: null, timeOut: null, scheduledIn: { '<': moment(thetime).toISOString(true) }, scheduledOut: { '>=': moment(record.since).toISOString(true) } }).sort('scheduledIn ASC')
+        if (records.length > 0) {
+          var theStart
+          var theEnd
+          records.map((record2) => {
+            if (!theEnd) {
+              theStart = record2.scheduledIn
+            } else {
+              theStart = theEnd
+            }
+            theEnd = record2.scheduledOut
+            var result = (async (recordB, theStartB, theEndB) => {
+              await sails.models.timesheet.update({ ID: recordB.ID }, { timeIn: moment(theStartB).toISOString(true), timeOut: moment(theEndB).toISOString(true), approved: 0 }).fetch()
+            })(record2, theStart, theEnd)
+            return result
+          })
+          // Add special clock-out entry
+          await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '>=': 1 } }, { timeIn: moment(theEnd).toISOString(true), timeOut: thetime.toISOString(true), approved: toapprove }).fetch()
+          await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '<': 1 } }, { timeIn: moment(theEnd).toISOString(true), timeOut: thetime.toISOString(true) }).fetch()
+        } else {
+          // Add normal clock-out entry
+          await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '>=': 1 } }, { timeOut: thetime.toISOString(true), approved: toapprove }).fetch()
+          await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '<': 1 } }, { timeOut: thetime.toISOString(true) }).fetch()
+        }
 
         // Update the director presence
         await sails.models.directors.update({ ID: record.ID }, { present: false, since: thetime.toISOString(true) })
@@ -57,7 +79,7 @@ module.exports = {
 
         // Clock-ins need a new entry
         if (calendar.length > 0) {
-          var records = await sails.models.timesheet.update({ unique: calendar[0].unique, timeIn: null }, { name: record.name, unique: calendar[0].unique, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
+          records = await sails.models.timesheet.update({ unique: calendar[0].unique, timeIn: null }, { name: record.name, unique: calendar[0].unique, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
           if (records.length === 0) { await sails.models.timesheet.create({ name: record.name, unique: calendar[0].unique, scheduledIn: moment(calendar[0].start).toISOString(true), scheduledOut: moment(calendar[0].end).toISOString(true), timeIn: thetime.toISOString(true), approved: toapprove }).fetch() }
         } else {
           await sails.models.timesheet.create({ name: record.name, unique: null, scheduledIn: null, scheduledOut: null, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
