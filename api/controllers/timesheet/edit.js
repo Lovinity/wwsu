@@ -31,9 +31,11 @@ module.exports = {
     },
 
     approved: {
-      type: 'boolean',
+      type: 'number',
       required: true,
-      description: 'If true, this timesheet is approved. If false, this timesheet is flagged for approval.'
+      min: -1,
+      max: 2,
+      description: '-1 = absent hours, 0 = not approved timesheet, 1 = approved timesheet / scheduled hours, 2 = cancelled hours'
     }
   },
 
