@@ -33,31 +33,33 @@ module.exports = {
     try {
       // Determine what needs updating
       var criteria = {}
-      if (inputs.name !== null && typeof inputs.name !== 'undefined') {
+      if (inputs.name !== null && typeof inputs.name !== 'undefined' && inputs.name !== '') {
         criteria.name = inputs.name
 
         // Merge other DJ entries with the same name with this one
         var dj = await sails.models.djs.find({ name: inputs.name })
         if (dj && dj.length > 0) {
-          var maps = dj.map(async record => {
+          var maps = dj
+            .filter((record) => record.ID !== inputs.ID)
+            .map(async record => {
             // Update all XP records
-            await sails.models.xp.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
+              await sails.models.xp.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
 
-            // Update all attendance records
-            await sails.models.attendance.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
+              // Update all attendance records
+              await sails.models.attendance.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
 
-            // Update all listeners records
-            await sails.models.listeners.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
+              // Update all listeners records
+              await sails.models.listeners.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
 
-            // Update lockToDJ in hosts
-            await sails.models.hosts.update({ lockToDJ: record.ID }, { lockToDJ: inputs.ID }).fetch()
+              // Update lockToDJ in hosts
+              await sails.models.hosts.update({ lockToDJ: record.ID }, { lockToDJ: inputs.ID }).fetch()
 
-            // Remove the original record
-            await sails.models.djs.destroy({ ID: record.ID }).fetch()
+              // Remove the original record
+              await sails.models.djs.destroy({ ID: record.ID }).fetch()
 
-            // Edit meta if necessary
-            if (sails.models.meta.memory.dj === record.ID) { sails.helpers.meta.change.with({ dj: inputs.ID }) }
-          })
+              // Edit meta if necessary
+              if (sails.models.meta.memory.dj === record.ID) { sails.helpers.meta.change.with({ dj: inputs.ID }) }
+            })
           await Promise.all(maps)
         }
       }
