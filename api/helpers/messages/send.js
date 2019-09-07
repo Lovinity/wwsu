@@ -1,3 +1,5 @@
+var sh = require('shorthash')
+
 module.exports = {
 
   friendlyName: 'messages.send',
@@ -43,6 +45,9 @@ module.exports = {
       var stuff = await sails.models.hosts.findOrCreate({ host: inputs.from }, { host: inputs.from, friendlyname: inputs.from })
       sails.log.silly(`Host: ${stuff}`)
       inputs.fromFriendly = stuff.friendlyname
+
+      // Obfuscate the real host
+      inputs.from = `computer-${sh.unique(inputs.from + sails.config.custom.hostSecret)}`
 
       // Create the message
       var records = await sails.models.messages.create(inputs).fetch()
