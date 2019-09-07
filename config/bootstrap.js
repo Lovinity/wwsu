@@ -85,7 +85,7 @@ module.exports.bootstrap = async function (done) {
         } else {
           offStatus = 3
         }
-        sails.models.status.template.push({ name: `host-${sh.unique(client.host + sails.config.custom.hostSecret)}`, label: `Host ${client.friendlyname}`, status: offStatus, data: 'This host has not reported online since initialization.', time: null })
+        sails.models.status.template.push({ name: `computer-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`, label: `Host ${client.friendlyname}`, status: offStatus, data: 'This host has not reported online since initialization.', time: null })
       }
     })
   }
