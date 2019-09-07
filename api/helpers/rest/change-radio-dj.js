@@ -40,6 +40,7 @@ module.exports = {
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
+              await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - RadioDJ offline!', `On ${moment().format('LLLL')}, the system ran into a condition where there were no operational RadioDJs. Dead air was likely and may be still occurring. Please ensure at least 1 RadioDJ is functional immediately.`)
               // Throw an error so that error.post does not get called, which is sometimes called after this helper finishes.
               throw new Error(`There are no healthy RadioDJ instances to switch to at this time.`)
             }
