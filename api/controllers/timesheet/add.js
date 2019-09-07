@@ -37,11 +37,14 @@ module.exports = {
         if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
 
         // Add the timeOut entry
-        await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name }, { timeOut: thetime.toISOString(true), approved: toapprove }).fetch()
+        await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '>=': 1 } }, { timeOut: thetime.toISOString(true), approved: toapprove }).fetch()
+        await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '<': 1 } }, { timeOut: thetime.toISOString(true) }).fetch()
 
         // Update the director presence
         await sails.models.directors.update({ ID: record.ID }, { present: false, since: thetime.toISOString(true) })
           .fetch()
+
+        if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Timesheet needs approved', `The timesheet for ${record.name}, ending on ${moment(thetime).format('LLLL')}, has been flagged and needs reviewed/approved.`) }
       } else { // If the director is not present, this is a clock-in entry.
         toapprove = 0
         thetime = moment(inputs.timestamp)
@@ -63,6 +66,8 @@ module.exports = {
         // Update the director presence
         await sails.models.directors.update({ ID: record.ID }, { present: true, since: thetime.toISOString(true) })
           .fetch()
+
+        if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Timesheet needs approved', `The timesheet for ${record.name}, beginning on ${moment(thetime).format('LLLL')}, has been flagged and needs reviewed/approved.`) }
       }
       return exits.success()
     } catch (e) {

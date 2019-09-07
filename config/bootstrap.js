@@ -616,6 +616,8 @@ module.exports.bootstrap = async function (done) {
                   })
               }
             }
+
+            await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Failed Top-of-Hour ID', `On ${moment().format('LLLL')}, the show ${sails.models.meta.memory.show} failed to take a Top of the Hour ID break.`)
           }
 
           // Do automation system error checking and handling
@@ -1271,9 +1273,17 @@ module.exports.bootstrap = async function (done) {
       try {
         await sails.helpers.meta.change.with({ time: moment().toISOString(true) })
 
-        await sails.models.timesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: false }).fetch()
+        var records = await sails.models.timesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: 0 }).fetch()
           .tolerate(() => {
           })
+
+        if (records.length > 0) {
+          records.map((record) => {
+            (async () => {
+              sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Timesheet needs approved', `The timesheet for ${record.name}, ending on ${moment().format('LLLL')}, has been flagged and needs reviewed/approved.`)
+            })()
+          })
+        }
         // Force reload all directors based on timesheets
         await sails.helpers.directors.update()
 

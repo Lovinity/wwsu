@@ -65,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "makeCalls" boolean property to recipients. It is true when the corresponding host's authorized and makeCalls settings are true, otherwise it is false.
  - "hostID" number property to recipients. If the recipient is mapped to a host in the hosts model, this will be the ID number of the hosts record. Otherwise, it will be null.
  - added "lastTwoWeeks" property to DJ analytics which includes arrays of timestamps for offStarts, offEnds, absences, cancellations, and missedIDs from the last 2 weeks.
+ - "emergencies", "accountability-shows", and "accountability-directors" subscription types. Those subscribed to "emergencies" will receive notifications when very critical incidents happen. Those subscribed to "accountability-shows" will receive notifications about DJ shows. "accountability-directors" are notifications about directors / their hours.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
