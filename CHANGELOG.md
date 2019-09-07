@@ -64,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "answerCalls" boolean property to recipients. It is true when the corresponding host's authorized and answerCalls settings are true, otherwise it is false.
  - "makeCalls" boolean property to recipients. It is true when the corresponding host's authorized and makeCalls settings are true, otherwise it is false.
  - "hostID" number property to recipients. If the recipient is mapped to a host in the hosts model, this will be the ID number of the hosts record. Otherwise, it will be null.
+ - added "lastTwoWeeks" property to DJ analytics which includes arrays of timestamps for offStarts, offEnds, absences, cancellations, and missedIDs from the last 2 weeks.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.
