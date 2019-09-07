@@ -63,13 +63,6 @@ module.exports = {
     records.map(record => {
       DJs[record.ID] = {
         name: record.name,
-        lastTwoWeeks: {
-          offStarts: [],
-          offEnds: [],
-          absences: [],
-          cancellations: [],
-          missedIDs: []
-        },
         semester: {
           showtime: 0,
           listeners: 0,
@@ -80,10 +73,15 @@ module.exports = {
           prerecords: 0,
           remotes: 0,
           offStart: 0,
+          offStartArray: [],
           offEnd: 0,
+          offEndArray: [],
           absences: 0,
+          absencesArray: [],
           cancellations: 0,
+          cancellationsArray: [],
           missedIDs: 0,
+          missedIDsArray: [],
           reputationScore: 0,
           reputationPercent: 0
         },
@@ -184,7 +182,6 @@ module.exports = {
             }
             DJs[record.dj].overall.missedIDs += record.missedIDs
             DJs[0].overall.missedIDs += record.missedIDs
-            if (moment().subtract(2, 'weeks').isBefore(record.actualStart)) { DJs[record.dj].lastTwoWeeks.missedIDs.push(moment(record.actualStart).toISOString(true)) }
             if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
               if (record.ignore !== 1) {
                 DJs[record.dj].semester.reputationScore -= (2 * record.missedIDs)
@@ -192,6 +189,7 @@ module.exports = {
               }
               DJs[record.dj].semester.missedIDs += record.missedIDs
               DJs[0].semester.missedIDs += record.missedIDs
+              DJs[record.dj].semester.missedIDsArray.push(moment(record.actualStart).toISOString(true))
             }
           }
 
@@ -226,14 +224,12 @@ module.exports = {
                   DJs[record.dj].overall.offStart += 1
                   if (record.ignore === 0) { DJs[0].overall.reputationScore -= 1 }
                   DJs[0].overall.offStart += 1
-                  if (moment().subtract(2, 'weeks').isBefore(record.actualStart)) { DJs[record.dj].lastTwoWeeks.offStarts.push(moment(record.actualStart).toISOString(true)) }
                 }
                 if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10 && record.ignore !== 2) {
                   if (record.ignore === 0) { DJs[record.dj].overall.reputationScore -= 1 }
                   DJs[record.dj].overall.offEnd += 1
                   if (record.ignore === 0) { DJs[0].overall.reputationScore -= 1 }
                   DJs[0].overall.offEnd += 1
-                  if (moment().subtract(2, 'weeks').isBefore(record.actualStart)) { DJs[record.dj].lastTwoWeeks.offEnds.push(moment(record.actualStart).toISOString(true)) }
                 }
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
@@ -247,12 +243,14 @@ module.exports = {
                     DJs[record.dj].semester.offStart += 1
                     if (record.ignore === 0) { DJs[0].semester.reputationScore -= 1 }
                     DJs[0].semester.offStart += 1
+                    DJs[record.dj].semester.offStartArray.push(moment(record.actualStart).toISOString(true))
                   }
                   if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10 && record.ignore !== 2) {
                     if (record.ignore === 0) { DJs[record.dj].semester.reputationScore -= 1 }
                     DJs[record.dj].semester.offEnd += 1
                     if (record.ignore === 0) { DJs[0].semester.reputationScore -= 1 }
                     DJs[0].semester.offEnd += 1
+                    DJs[record.dj].semester.offEndArray.push(moment(record.actualEnd).toISOString(true))
                   }
                 }
               }
@@ -295,14 +293,14 @@ module.exports = {
                     DJs[record.dj].semester.offStart += 1
                     if (record.ignore === 0) { DJs[0].semester.reputationScore -= 1 }
                     DJs[0].semester.offStart += 1
-                    if (moment().subtract(2, 'weeks').isBefore(record.actualStart)) { DJs[record.dj].lastTwoWeeks.offStarts.push(moment(record.actualStart).toISOString(true)) }
+                    DJs[record.dj].semester.offStartArray.push(moment(record.actualStart).toISOString(true))
                   }
                   if (Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10 && record.ignore !== 2) {
                     if (record.ignore === 0) { DJs[record.dj].semester.reputationScore -= 1 }
                     DJs[record.dj].semester.offEnd += 1
                     if (record.ignore === 0) { DJs[0].semester.reputationScore -= 1 }
                     DJs[0].semester.offEnd += 1
-                    if (moment().subtract(2, 'weeks').isBefore(record.actualStart)) { DJs[record.dj].lastTwoWeeks.offEnds.push(moment(record.actualStart).toISOString(true)) }
+                    DJs[record.dj].semester.offEndArray.push(moment(record.actualEnd).toISOString(true))
                   }
                 }
               }
@@ -314,7 +312,6 @@ module.exports = {
               DJs[0].overall.reputationScore -= 1
               DJs[record.dj].overall.cancellations += 1
               DJs[0].overall.cancellations += 1
-              if (moment().subtract(2, 'weeks').isBefore(record.actualStart)) { DJs[record.dj].lastTwoWeeks.cancellations.push(moment(record.actualStart).toISOString(true)) }
             } else {
               if (record.happened === 0 && record.ignore !== 2) {
                 if (record.ignore === 0) {
@@ -323,7 +320,6 @@ module.exports = {
                 }
                 DJs[record.dj].overall.absences += 1
                 DJs[0].overall.absences += 1
-                if (moment().subtract(2, 'weeks').isBefore(record.actualStart)) { DJs[record.dj].lastTwoWeeks.absences.push(moment(record.actualStart).toISOString(true)) }
               } else if (record.happened === -1 && record.ignore !== 2) {
                 if (record.ignore === 0) {
                   DJs[record.dj].overall.reputationScore -= 1
@@ -342,6 +338,7 @@ module.exports = {
                 DJs[0].semester.reputationScore -= 1
                 DJs[record.dj].semester.cancellations += 1
                 DJs[0].semester.cancellations += 1
+                DJs[record.dj].semester.cancellationsArray.push(moment(record.scheduledStart).toISOString(true))
               } else {
                 if (record.happened === 0 && record.ignore !== 2) {
                   if (record.ignore === 0) {
@@ -350,6 +347,7 @@ module.exports = {
                   }
                   DJs[record.dj].semester.absences += 1
                   DJs[0].semester.absences += 1
+                  DJs[record.dj].semester.absencesArray.push(moment(record.scheduledStart).toISOString(true))
                 } else if (record.happened === -1 && record.ignore !== 2) {
                   if (record.ignore === 0) {
                     DJs[record.dj].semester.reputationScore -= 1
@@ -357,6 +355,7 @@ module.exports = {
                   }
                   DJs[record.dj].semester.cancellations += 1
                   DJs[0].semester.cancellations += 1
+                  DJs[record.dj].semester.cancellationsArray.push(moment(record.scheduledStart).toISOString(true))
                 }
               }
             }

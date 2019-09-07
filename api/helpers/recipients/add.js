@@ -121,7 +121,7 @@ module.exports = {
 
       // If the recipient group is computers, update sails.models.status
       if (inputs.group === 'computers' && host && typeof host[0] !== `undefined` && (host[0].silenceDetection || host[0].recordAudio || host[0].answerCalls)) {
-        await sails.helpers.status.change.with({ name: `host-${sh.unique(inputs.host + sails.config.custom.hostSecret)}`, label: `Host ${host && typeof host[0] !== 'undefined' ? inputs.label : 'Unknown'}`, status: 5, data: `Host / DJ Controls is online.` })
+        await sails.helpers.status.change.with({ name: find, label: `Host ${host && typeof host[0] !== 'undefined' ? inputs.label : 'Unknown'}`, status: 5, data: `Host / DJ Controls is online.` })
       }
 
       // If the recipient group is display, update sails.models.status if there are at least instances connections.
@@ -135,7 +135,7 @@ module.exports = {
         await Promise.all(maps)
       }
 
-      return exits.success({ label: recipient.label, alreadyConnected: alreadyConnected })
+      return exits.success({ host: find, label: recipient.label, alreadyConnected: alreadyConnected })
     } catch (e) {
       return exits.error(e)
     }

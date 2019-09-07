@@ -64,8 +64,8 @@ module.exports = {
         await sails.helpers.meta.change.with({ changingState: null })
       }
 
-      // If we are not in automation, and prvError is less than 1 minutes ago, assume irresponsible DJ and automatically end the show (but go into automation_break).
-      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(1, 'minutes')) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
+      // If we are not in automation, and prvError is less than 2 minutes ago, assume irresponsible DJ and automatically end the show (but go into automation_break).
+      if (moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(2, 'minutes')) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
         await sails.helpers.meta.change.with({ changingState: `Ending current broadcast due to no audio` })
 
         // Log the problem

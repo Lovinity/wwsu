@@ -80,7 +80,7 @@ module.exports = {
                 } else {
                   offStatus = 3
                 }
-                await sails.helpers.status.change.with({ name: `host-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}` })
+                await sails.helpers.status.change.with({ name: `computer-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}` })
               }
             }
           }
