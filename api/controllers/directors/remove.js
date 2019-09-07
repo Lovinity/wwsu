@@ -34,6 +34,9 @@ module.exports = {
 
       await sails.models.directors.destroy({ ID: inputs.ID }).fetch()
 
+      // Also remove the director's push notification subscriptions
+      await sails.models.subscribers.destroy({ type: ['emergencies', 'accountability'], subtype: inputs.ID }).fetch()
+
       return exits.success()
     } catch (e) {
       return exits.error(e)
