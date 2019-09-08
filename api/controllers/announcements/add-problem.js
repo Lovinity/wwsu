@@ -19,6 +19,9 @@ module.exports = {
       // Add the reported issue to the database
       await sails.models.announcements.create({ type: `djcontrols`, level: `danger`, title: `Reported Problem`, announcement: inputs.information, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) }).fetch()
 
+      // Push notification
+      await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - DJ Reported a Problem', inputs.information)
+
       return exits.success()
     } catch (e) {
       return exits.error(e)
