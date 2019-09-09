@@ -47,10 +47,11 @@ waitFor(() => {
   directorReq = new WWSUreq(io.socket, null, 'name', '/auth/director', 'Administrator Director')
   directorsdb.assignSocketEvent('directors', io.socket)
   io.socket.on('connect', () => {
-    directorsdb.replaceData(noReq, '/directors/get')
     doSockets()
+    directorsdb.replaceData(noReq, '/directors/get')
   })
   doSockets()
+  directorsdb.replaceData(noReq, '/directors/get')
 
   io.socket.on('disconnect', () => {
     try {
