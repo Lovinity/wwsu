@@ -556,8 +556,6 @@ function processDirectors (ddb, hdb) {
 
           if (temp2 === null) { return null }
 
-          temp2.innerHTML = ``
-
           // null start or end? Use a default to prevent errors.
           if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day') }
           if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day') }
@@ -567,24 +565,24 @@ function processDirectors (ddb, hdb) {
           event.endT = moment(event.end).minutes() === 0 ? moment(event.end).format('hA') : moment(event.end).format('h:mmA')
 
           // Update strings if need be, if say, start time was before this day, or end time is after this day.
-          if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(1, 'days'))) {
+          if (moment(event.end).isAfter(moment(event.start).startOf('day').add(1, 'days'))) {
             event.endT = `${moment(event.end).format('MM/DD ')} ${event.endT}`
           }
           event.startT = `${moment(event.start).format('MM/DD ')} ${event.startT}`
 
-          var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`
+          var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`
           if (event.active === 0) {
-            endText = `<strike><span class="text-white-50">${event.startT} - ${event.endT}</span></strike>`
+            endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT}</span></strike>`
           }
           if (event.active === 2) {
-            endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`
+            endText = `<span class="text-info">${event.startT} - ${event.endT}</span>`
           }
           if (event.active === -1) {
             endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`
           }
 
           // Push the final product
-          temp2.innerHTML += `<div class="m-1 text-white">${endText}</div><br />`
+          temp2.innerHTML += `<div class="m-1 text-dark">${endText}</div><br />`
         })
     })
   } catch (e) {
