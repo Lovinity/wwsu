@@ -1,9 +1,22 @@
 <div class="row">
     <div class="col">
         <div class="p-1 m-3 card text-dark bg-light-3">
+            <h2 class="card-header text-center">WWSU Directors and Office Hours</h2>
+            <div class="card-body">
+                <p class="card-text" style="text-align: center;">Get to know your WWSU directors and their office hours for the upcoming week. Check back regularly as directors update the calendar when they need to make changes.</p>
+                <div class="card-text d-flex flex-wrap" id="directors">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="p-1 m-3 card text-dark bg-light-3">
             <h2 class="card-header text-center">WWSU Director Push Notifications</h2>
             <div class="card-body">
-                <p class="card-text" style="text-align: center;">WWSU Directors can use this page to subscribe and un-subscribe their web browser or mobile app push notifications to various things. This page was not intended to be used by the general public; director authentication will be required.</p>
+                <p class="card-text" style="text-align: center;">WWSU Directors can use this block to subscribe and un-subscribe their web browser or mobile app push notifications to various things. Director authentication will be required.</p>
                 <div class="card-text d-flex flex-wrap">
                         <div id="subscriptions-emergencies" onclick="subscribeEmergencies()" onkeydown="subscribeEmergencies()" tabindex="0" style="width: 190px; position: relative;" class="m-2 text-dark rounded shadow-8 bg-light-1" title="Click to subscribe or un-subscribe from notifications for system problems.">
                             <div class="p-1 text-center" style="width: 100%;"><i class="fas fa-exclamation-triangle fa-w-16 text-danger" style="font-size: 96px;"></i>

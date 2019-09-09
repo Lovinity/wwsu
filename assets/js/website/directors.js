@@ -1,4 +1,4 @@
-/* global iziToast, WWSUreq, WWSUdb, TAFFY */
+/* global iziToast, WWSUreq, WWSUdb, TAFFY, jdenticon */
 
 var subscribedEmergencies = false
 var subscribedShows = false
@@ -9,7 +9,11 @@ var notificationsSupported = false
 var OneSignal
 var noReq
 var directorReq
-var directorsdb = new WWSUdb(TAFFY())
+var Directors = new WWSUdb(TAFFY())
+var Directorhours = new WWSUdb(TAFFY())
+var officeHoursTimer
+var Meta = { time: moment().toISOString(true) }
+var clockTimer
 
 function getUrlParameter (name) {
   name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
@@ -45,13 +49,65 @@ waitFor(() => {
 }, () => {
   noReq = new WWSUreq(io.socket, null)
   directorReq = new WWSUreq(io.socket, null, 'name', '/auth/director', 'Administrator Director')
-  directorsdb.assignSocketEvent('directors', io.socket)
+  Directors.assignSocketEvent('directors', io.socket)
+  Directorhours.assignSocketEvent('directorhours', io.socket)
+  Directors.setOnUpdate(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
+  Directors.setOnInsert(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
+  Directors.setOnRemove(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
+  Directors.setOnReplace(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
+
+  Directorhours.setOnUpdate(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
+  Directorhours.setOnInsert(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
+  Directorhours.setOnRemove(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
+  Directorhours.setOnReplace(() => {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
+  })
   io.socket.on('connect', () => {
     doSockets()
-    directorsdb.replaceData(noReq, '/directors/get')
+    Directors.replaceData(noReq, '/directors/get')
+    Directorhours.replaceData(noReq, '/directors/get-hours')
   })
   doSockets()
-  directorsdb.replaceData(noReq, '/directors/get')
+  Directors.replaceData(noReq, '/directors/get')
+  Directorhours.replaceData(noReq, '/directors/get-hours')
 
   io.socket.on('disconnect', () => {
     try {
@@ -60,15 +116,39 @@ waitFor(() => {
     } catch (unusedE) {
     }
   })
+
+  // Update meta information when meta is provided
+  io.socket.on('meta', (data) => {
+    try {
+      for (var key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          Meta[key] = data[key]
+          if (key === 'time') {
+            clearInterval(clockTimer)
+            clearTimeout(clockTimer)
+            clockTimer = setInterval(clockTick, 1000)
+          }
+        }
+      }
+    } catch (e) {
+      iziToast.show({
+        title: 'An error occurred - Please check the logs',
+        message: 'Error occurred on meta event.'
+      })
+      console.error(e)
+    }
+  })
 })
 
 function doSockets () {
   // Mobile devices and web devices where device parameter was passed, start sockets immediately.
   if (isMobile || (!isMobile && device !== null)) {
+    metaSocket()
     onlineSocket()
     // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
   } else {
     OneSignal = window.OneSignal || []
+    metaSocket()
     onlineSocket(true)
   }
 }
@@ -201,7 +281,7 @@ function subscribeEmergencies () {
     })
   } else {
     if (!subscribedEmergencies) {
-      directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'emergencies' } }, (response) => {
+      directorReq.request({ db: Directors.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'emergencies' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
             title: 'Subscribed!',
@@ -228,7 +308,7 @@ function subscribeEmergencies () {
         }
       })
     } else {
-      directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/remove-directors', data: { device: device, type: 'emergencies' } }, (response) => {
+      directorReq.request({ db: Directors.db(), method: 'POST', url: '/subscribers/remove-directors', data: { device: device, type: 'emergencies' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
             title: 'Un-Subscribed!',
@@ -274,7 +354,7 @@ function subscribeShows () {
     })
   } else {
     if (!subscribedShows) {
-      directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'accountability-shows' } }, (response) => {
+      directorReq.request({ db: Directors.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'accountability-shows' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
             title: 'Subscribed!',
@@ -301,7 +381,7 @@ function subscribeShows () {
         }
       })
     } else {
-      directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/remove-directors', data: { device: device, type: 'accountability-shows' } }, (response) => {
+      directorReq.request({ db: Directors.db(), method: 'POST', url: '/subscribers/remove-directors', data: { device: device, type: 'accountability-shows' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
             title: 'Un-Subscribed!',
@@ -347,7 +427,7 @@ function subscribeDirectors () {
     })
   } else {
     if (!subscribedDirectors) {
-      directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'accountability-directors' } }, (response) => {
+      directorReq.request({ db: Directors.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'accountability-directors' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
             title: 'Subscribed!',
@@ -374,7 +454,7 @@ function subscribeDirectors () {
         }
       })
     } else {
-      directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/remove-directors', data: { device: device, type: 'accountability-directors' } }, (response) => {
+      directorReq.request({ db: Directors.db(), method: 'POST', url: '/subscribers/remove-directors', data: { device: device, type: 'accountability-directors' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
             title: 'Un-Subscribed!',
@@ -401,5 +481,153 @@ function subscribeDirectors () {
         }
       })
     }
+  }
+}
+
+function processDirectors (ddb, hdb) {
+  try {
+    var directors = {}
+
+    // Update directors html
+    var innercontent = document.getElementById('directors')
+    if (innercontent) { innercontent.innerHTML = '' }
+
+    ddb.each((dodo) => {
+      try {
+        directors[dodo.name] = dodo
+        var color = 'rgba(211, 47, 47, 0.25)'
+        var text1 = 'OUT'
+        var theClass = 'danger'
+        if (dodo.present) {
+          color = 'rgba(56, 142, 60, 0.25)'
+          text1 = 'IN'
+          theClass = 'success'
+        }
+        if (innercontent) {
+          innercontent.innerHTML += `<div id="director-${dodo.ID}" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">
+          <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="96" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 96)}
+          <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+          <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>
+          <h4><strong>Office Hours</strong></h4>
+          <div id="director-hours-${dodo.ID}"></div>
+          </div>
+      </div>`
+        }
+      } catch (e) {
+        console.error(e)
+        iziToast.show({
+          title: 'An error occurred - Please check the logs',
+          message: `Error occurred in processDirectors ddb iteration.`
+        })
+      }
+    })
+
+    // A list of Office Hours for the directors
+
+    // Define a comparison function that will order calendar events by start time when we run the iteration
+    var compare = function (a, b) {
+      try {
+        if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
+        if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
+        if (a.ID < b.ID) { return -1 }
+        if (a.ID > b.ID) { return 1 }
+        return 0
+      } catch (e) {
+        console.error(e)
+        iziToast.show({
+          title: 'An error occurred - Please check the logs',
+          message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
+        })
+      }
+    }
+    window.requestAnimationFrame(() => {
+      hdb.get()
+        .filter(event => !moment(event.start).isAfter(moment(Meta.time).add(7, 'days').startOf('day')))
+        .sort(compare)
+        .map(event => {
+          var temp = directors[event.director]
+
+          // No temp record? Exit immediately.
+          if (typeof temp === `undefined`) { return null }
+
+          var directorID = temp.ID
+
+          var temp2 = document.querySelector(`#director-hours-${directorID}`)
+
+          if (temp2 === null) { return null }
+
+          temp2.innerHTML = ``
+
+          // null start or end? Use a default to prevent errors.
+          if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day') }
+          if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day') }
+
+          event.startT = moment(event.start).minutes() === 0 ? moment(event.start).format('h') : moment(event.start).format('h:mm')
+          if ((moment(event.start).hours() < 12 && moment(event.end).hours() >= 12) || ((moment(event.start).hours() >= 12) && moment(event.end).hours() < 12)) { event.startT += moment(event.start).format('A') }
+          event.endT = moment(event.end).minutes() === 0 ? moment(event.end).format('hA') : moment(event.end).format('h:mmA')
+
+          // Update strings if need be, if say, start time was before this day, or end time is after this day.
+          if (moment(event.end).isAfter(moment(Meta.time).startOf('day').add(1, 'days'))) {
+            event.endT = `${moment(event.end).format('MM/DD ')} ${event.endT}`
+          }
+          event.startT = `${moment(event.start).format('MM/DD ')} ${event.startT}`
+
+          var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`
+          if (event.active === 0) {
+            endText = `<strike><span class="text-white-50">${event.startT} - ${event.endT}</span></strike>`
+          }
+          if (event.active === 2) {
+            endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`
+          }
+          if (event.active === -1) {
+            endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`
+          }
+
+          // Push the final product
+          temp2.innerHTML += `<div class="m-1 text-white">${endText}</div><br />`
+        })
+    })
+  } catch (e) {
+    iziToast.show({
+      title: 'An error occurred - Please check the logs',
+      message: 'Error occurred during the call of office hours.'
+    })
+    console.error(e)
+  }
+}
+
+// Called to update all meta information with that of a body request
+function metaSocket () {
+  console.log('attempting meta socket')
+  noReq.request({ method: 'POST', url: '/meta/get', data: {} }, (body) => {
+    try {
+      var temp = body
+      for (var key in temp) {
+        if (Object.prototype.hasOwnProperty.call(temp, key)) {
+          Meta[key] = temp[key]
+          if (key === 'time') {
+            clearInterval(clockTimer)
+            clearTimeout(clockTimer)
+            clockTimer = setInterval(clockTick, 1000)
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e)
+      console.log('FAILED META CONNECTION')
+      setTimeout(metaSocket, 10000)
+    }
+  })
+}
+
+function clockTick () {
+  Meta.time = moment(Meta.time).add(1, 'seconds')
+
+  // Refresh hours every midnight
+  if (moment(Meta.time).hour() === 0 && moment(Meta.time).minute() === 0 && moment(Meta.time).second() < 5) {
+    clearTimeout(officeHoursTimer)
+    officeHoursTimer = setTimeout(() => {
+      processDirectors(Directors.db(), Directorhours.db())
+    }, 1000)
   }
 }
