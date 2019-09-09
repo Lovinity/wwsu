@@ -553,9 +553,9 @@ module.exports = {
                     toTrigger = { priority: 3, event: event.summary.replace('Genre: ', '') }
                   }
                 }
-                // Mark when we are supposed to be in genre rotation
-                if (event.summary.startsWith('Genre: ')) { genreActive = true }
               }
+              // Mark when we are supposed to be in genre rotation
+              if (event.summary.startsWith('Genre: ')) { genreActive = true }
 
               // Check if the event started over 10 minutes prior to start time, and if so, update the attendance record accordingly.
               if (sails.models.meta.memory.attendanceID !== null) {

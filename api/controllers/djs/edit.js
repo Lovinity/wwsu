@@ -16,8 +16,8 @@ module.exports = {
       allowNull: true,
       custom: function (value) { // Prevent use of space dash space in names as this will cause problems in the system
         var temp2 = value.split(' - ')
-        if (temp2.length === 2) { return true }
-        return false
+        if (temp2.length > 1) { return false }
+        return true
       },
       description: 'The new name for the DJ.'
     },
