@@ -23,14 +23,6 @@ module.exports = {
       type: 'string',
       description: 'If someone is on the air, host name - show name, or name of sports for sports broadcasts'
     },
-    showStamp: {
-      type: 'string',
-      allowNull: true,
-      description: 'When a show starts, this is the ISO timestamp which the show began',
-      custom: function (value) {
-        return moment(value).isValid()
-      }
-    },
     track: {
       type: 'string',
       description: 'Currently playing track either in automation or manually logged'

@@ -29,11 +29,6 @@ module.exports = {
       allowNull: true
     },
 
-    showStamp: {
-      type: 'ref',
-      columnType: 'datetime'
-    },
-
     attendanceID: {
       type: 'number',
       allowNull: true
@@ -116,14 +111,6 @@ module.exports = {
       type: 'string',
       defaultsTo: '',
       description: 'If someone is on the air, host name - show name, or name of sports for sports broadcasts'
-    },
-    showStamp: {
-      type: 'string',
-      allowNull: true,
-      description: 'When a show starts, this is the ISO timestamp which the show began',
-      custom: function (value) {
-        return moment(value).isValid()
-      }
     },
     track: {
       type: 'string',

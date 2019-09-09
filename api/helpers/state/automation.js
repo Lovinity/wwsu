@@ -16,18 +16,6 @@ module.exports = {
     sails.log.debug('Helper state.automation called.')
 
     try {
-      // What to return for DJ Controls show stats, if applicable
-      var returnData = { showTime: 0, subtotalXP: 0 }
-
-      // Duplicate current meta dj since it's about to change; we need it for stats calculations
-      var dj = sails.models.meta.memory.dj
-      var showStamp = sails.models.meta.memory.showStamp
-      var attendance
-
-      if (dj === null) {
-        delete returnData.subtotalXP
-      }
-
       // Log the request
       await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>Show ended.</strong>' }).fetch()
         .tolerate((err) => {
@@ -36,7 +24,14 @@ module.exports = {
         })
 
       // Close off the current attendance record and calculate statistics.
-      attendance = await sails.helpers.attendance.createRecord();
+      var attendance = await sails.helpers.attendance.createRecord()
+
+      // What to return for DJ Controls show stats, if applicable
+      var returnData = { showTime: 0, subtotalXP: 0 }
+
+      if (attendance.dj === null) {
+        delete returnData.subtotalXP
+      }
 
       // Begin parallel function for sending the system into automation
       (async () => {
@@ -107,10 +102,10 @@ module.exports = {
       if (typeof attendance !== `undefined`) {
         returnData.showTime = attendance.showTime || 0
         returnData.listenerMinutes = attendance.listenerMinutes || 0
-        if (dj !== null) {
+        if (attendance.dj !== null) {
           returnData.showXP = Math.round(returnData.showTime / sails.config.custom.XP.showMinutes)
           returnData.subtotalXP += returnData.showXP
-          await sails.models.xp.create({ dj: dj, type: 'xp', subtype: 'showtime', amount: returnData.showXP, description: `DJ was on the air for ${returnData.showTime} minutes.` })
+          await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'showtime', amount: returnData.showXP, description: `DJ was on the air for ${returnData.showTime} minutes.` })
             .tolerate((err) => {
               // Do not throw for error, but log it
               sails.log.error(err)
@@ -120,7 +115,7 @@ module.exports = {
 
           returnData.listenerXP = Math.round(returnData.listenerMinutes / sails.config.custom.XP.listenerMinutes)
           returnData.subtotalXP += returnData.listenerXP
-          await sails.models.xp.create({ dj: dj, type: 'xp', subtype: 'listeners', amount: returnData.listenerXP, description: `DJ had ${returnData.listenerMinutes} online listener minutes during their show.` })
+          await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'listeners', amount: returnData.listenerXP, description: `DJ had ${returnData.listenerMinutes} online listener minutes during their show.` })
             .tolerate((err) => {
               // Do not throw for error, but log it
               sails.log.error(err)
@@ -132,17 +127,17 @@ module.exports = {
 
       // Earn XP for sending messages to website visitors
       // TODO: figure out a way to get host in the event the silence detection triggers, and add back in the "from" in the waterline.
-      returnData.messagesWeb = await sails.models.messages.count({ to: { startsWith: 'website' }, createdAt: { '>=': moment(showStamp).toISOString(true) } })
+      returnData.messagesWeb = await sails.models.messages.count({ to: { startsWith: 'website' }, createdAt: { '>=': moment(attendance.actualStart).toISOString(true) } })
         .tolerate((err) => {
           // Do not throw for error, but log it
           sails.log.error(err)
         })
 
       if (returnData.messagesWeb) {
-        if (dj !== null) {
+        if (attendance.dj !== null) {
           returnData.messagesXP = Math.round(returnData.messagesWeb * sails.config.custom.XP.web)
           returnData.subtotalXP += returnData.messagesXP
-          await sails.models.xp.create({ dj: dj, type: 'xp', subtype: 'messages', amount: returnData.messagesXP, description: `DJ sent ${returnData.messagesWeb} messages to web visitors during their show.` })
+          await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'messages', amount: returnData.messagesXP, description: `DJ sent ${returnData.messagesWeb} messages to web visitors during their show.` })
             .tolerate((err) => {
               // Do not throw for error, but log it
               sails.log.error(err)
@@ -153,7 +148,7 @@ module.exports = {
       }
 
       // Gather updated DJ stats
-      if (dj !== null) { returnData = Object.assign(returnData, await sails.helpers.analytics.showtime(dj)) }
+      if (attendance.dj !== null) { returnData = Object.assign(returnData, await sails.helpers.analytics.showtime(attendance.dj)) }
 
       // Return our stats
       return exits.success(returnData)
