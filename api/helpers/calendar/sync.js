@@ -307,7 +307,7 @@ module.exports = {
               criteria.verifyMessage = `Valid. DJ in yellow, show in green.`
             } else {
               if (status > 3) { status = 3 }
-              issues.push(`The formatting of the live show "${summary}" is invalid; must have a " - " to separate DJ/handle from show name.`)
+              issues.push(`The formatting of the live show "${summary}" is invalid; must have a single " - " to separate DJ/handle from show name.`)
               criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
               criteria.verifyMessage = `Invalid; cannot determine DJ and show. <strong>Ensure the event title separates DJ handle from show name with a space hyphen space (" - ")</strong>.`
@@ -325,7 +325,7 @@ module.exports = {
               criteria.verifyMessage = `Valid. Host / org in yellow, show name in green.`
             } else {
               if (status > 3) { status = 3 }
-              issues.push(`The formatting of the remote event "${summary}" is invalid; must have a " - " to separate DJ/host from show name.`)
+              issues.push(`The formatting of the remote event "${summary}" is invalid; must have a single " - " to separate DJ/host from show name.`)
               criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
               criteria.verifyMessage = `Invalid; cannot determine host and show. <strong>Ensure the event title separates host / organization from broadcast name with a space hyphen space (" - ")</strong>.`
@@ -357,14 +357,24 @@ module.exports = {
             // Prerecord (via RadioDJ Playlists)
           } else if (criteria.title.startsWith('Prerecord: ')) {
             summary = criteria.title.replace('Prerecord: ', '')
+            temp2 = summary.split(' - ')
             eventLength = (moment(criteria.end).diff(moment(criteria.start)) / 1000)
-            criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
-            criteria.verify = 'Invalid'
-            criteria.verifyMessage = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
 
             // Check to see a playlist exists
-            if (typeof playlists[summary] !== 'undefined') {
-              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
+            if (temp2.length !== 2) {
+              if (status > 3) { status = 3 }
+              issues.push(`The formatting of the prerecord "${summary}" is invalid; must have a single " - " to separate DJ/host from show name.`)
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+              criteria.verify = 'Invalid'
+              criteria.verifyMessage = `Invalid; cannot determine host and show. <strong>Ensure the event title separates DJ/host from show name with a space hyphen space (" - ")</strong>.`
+            } else if (typeof playlists[summary] === 'undefined') {
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
+              criteria.verify = 'Invalid'
+              criteria.verifyMessage = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
+              if (status > 3) { status = 3 }
+              issues.push(`Prerecord "${summary}" is invalid; a playlist with this name does not exist in RadioDJ.`)
+            } else {
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(0, 0, 0, 0.2);"><span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span></span>`
 
               // Check to see if the length of the playlists are over 15 minutes too short
               if ((eventLength - 900) >= (playlists[summary].duration * 1.05)) {
@@ -374,19 +384,14 @@ module.exports = {
                 // Check to see if the playlist is over 5 minutes too long
               } else if ((eventLength + 300) <= (playlists[summary].duration * 1.05)) {
                 criteria.verify = 'Check'
-                criteria.verifyMessage = `Valid, but duration exceeds scheduled time. <strong>The prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
+                criteria.verifyMessage = `Valid, but duration exceeds scheduled time. <strong>The prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. If this prerecord runs into another prerecord or show, it may be terminated early. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
               } else if (playlists[summary].duplicates > 0) {
                 criteria.verify = 'Check'
                 criteria.verifyMessage = `Valid, but duplicates detected. <strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.`
               } else {
                 criteria.verify = 'Valid'
-                criteria.verifyMessage = `Valid; playlist in green.`
+                criteria.verifyMessage = `Valid; playlist in gray, DJ/handle in yellow, show name in green.`
               }
-            }
-
-            if (criteria.verify === 'Invalid') {
-              if (status > 3) { status = 3 }
-              issues.push(`Prerecord "${summary}" is invalid; a playlist with this name does not exist in RadioDJ.`)
             }
 
             // Playlists (RadioDJ)
