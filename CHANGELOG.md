@@ -67,6 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - added "lastTwoWeeks" property to DJ analytics which includes arrays of timestamps for offStarts, offEnds, absences, cancellations, and missedIDs from the last 2 weeks.
  - "emergencies", "accountability-shows", and "accountability-directors" subscription types. Those subscribed to "emergencies" will receive notifications when very critical incidents happen. Those subscribed to "accountability-shows" will receive notifications about DJ shows. "accountability-directors" are notifications about directors / their hours.
  - listen/directors for subscribing and unsubscribing a device to/from director-related push notifications. Also added subscribers/add-directors and subscribers/remove-directors for these specific subscription types with director authorization required.
+ - Editing / removing DJs will automatically update related push notification subscription records.
+ - When calendar events no longer exist, their one-time subscription records will be removed automatically.
 
 ### Changed
  - Many of the methods used in api controllers and in models have been migrated to sails helpers.

@@ -9,6 +9,11 @@ module.exports = {
     name: {
       type: 'string',
       required: true,
+      custom: function (value) { // Prevent use of space dash space in names as this will cause problems in the system
+        var temp2 = value.split(' - ')
+        if (temp2.length > 1) { return false }
+        return true
+      },
       description: 'The DJ to add.'
     },
 
@@ -25,6 +30,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     sails.log.debug('Controller djs/add called.')
+    if (inputs.login === '') { inputs.login = null }
 
     try {
       // Use findOrCreate because we do not want to create a DJ that already exists

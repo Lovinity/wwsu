@@ -20,6 +20,8 @@ module.exports = {
     sails.log.debug('Controller djs/remove called.')
 
     try {
+      var djID = await sails.models.djs.findOne({ ID: inputs.ID })
+
       // Update all attendance records to null DJ
       await sails.models.attendance.update({ dj: inputs.ID }, { dj: null }).fetch()
 
@@ -31,6 +33,9 @@ module.exports = {
 
       // Destroy XP records
       await sails.models.xp.destroy({ dj: inputs.ID }).fetch()
+
+      // Destroy subscriptions
+      await sails.models.subscribers.destroy({ type: 'calendar-all', subtype: { startsWith: `${djID.name} - ` } }).fetch()
 
       // Destroy DJ
       await sails.models.djs.destroy({ ID: inputs.ID }).fetch()

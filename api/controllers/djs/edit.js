@@ -14,6 +14,11 @@ module.exports = {
     name: {
       type: 'string',
       allowNull: true,
+      custom: function (value) { // Prevent use of space dash space in names as this will cause problems in the system
+        var temp2 = value.split(' - ')
+        if (temp2.length === 2) { return true }
+        return false
+      },
       description: 'The new name for the DJ.'
     },
     login: {
@@ -38,6 +43,7 @@ module.exports = {
 
         // Merge other DJ entries with the same name with this one
         var dj = await sails.models.djs.find({ name: inputs.name })
+        var djID = await sails.models.djs.findOne({ ID: inputs.ID })
         if (dj && dj.length > 0) {
           var maps = dj
             .filter((record) => record.ID !== inputs.ID)
@@ -72,6 +78,19 @@ module.exports = {
 
       // Edit it
       await sails.models.djs.update({ ID: inputs.ID }, criteriaB).fetch()
+
+      // Update subscriptions with new DJ name
+      var tempRecords = await sails.models.subscribers.find({ type: 'calendar-all', subtype: { startsWith: `${djID.name} - ` } })
+      if (tempRecords.length > 0) {
+        tempRecords.map((tmpRecord) => {
+          var splitter = tmpRecord.subtype.split(' - ')
+          var newName = `${inputs.name} - ${splitter[1]}`
+          var re = (async (ID, name) => {
+            await sails.models.subscribers.update({ ID: ID }, { subtype: name })
+          })(tmpRecord.ID, newName)
+          return re
+        })
+      }
 
       return exits.success()
     } catch (e) {

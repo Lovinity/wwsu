@@ -588,10 +588,18 @@ module.exports = {
 
         if (events.length > 0) {
           // Destroy events which ended before midnight of today's day.
-          await sails.models.calendar.destroy({ end: { '<': moment().startOf('day').toISOString(true) } })
+          var destruction = await sails.models.calendar.destroy({ end: { '<': moment().startOf('day').toISOString(true) } })
             .tolerate(() => {
             })
             .fetch()
+          // Remove one-time calendar subscriptions of calendar events that were destroyed
+          if (destruction.length > 0) {
+            destruction.map((record) => {
+              (async (recordB) => {
+                await sails.models.subscribers.destroy({ type: 'calendar-once', subtype: recordB.unique }).fetch()
+              })(record)
+            })
+          }
 
           // Entries no longer in Google Calendar should be updated to active = -1 to indicate they were canceled.
           cancelled = await sails.models.calendar.update({ unique: { nin: eventIds }, active: { '>=': 1 } }, { active: -1 })
