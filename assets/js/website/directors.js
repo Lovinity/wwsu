@@ -582,7 +582,7 @@ function processDirectors (ddb, hdb) {
           }
 
           // Push the final product
-          temp2.innerHTML += `<div class="m-1 text-dark">${endText}</div><br />`
+          temp2.innerHTML += `<div class="m-1 text-dark">${endText}</div>`
         })
     })
   } catch (e) {
