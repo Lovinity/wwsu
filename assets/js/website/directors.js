@@ -5,7 +5,7 @@ var subscribedShows = false
 var subscribedDirectors = false
 var device = getUrlParameter(`device`)
 var isMobile = device !== null
-var notificationsSupported = false
+var notificationsSupported = isMobile
 var OneSignal
 var noReq
 var directorReq
@@ -48,7 +48,7 @@ waitFor(() => {
   return (typeof io !== 'undefined' && typeof io.socket !== 'undefined' && io.socket.isConnected())
 }, () => {
   noReq = new WWSUreq(io.socket, null)
-  directorReq = new WWSUreq(io.socket, null, 'name', '/auth/director', 'Administrator Director')
+  directorReq = new WWSUreq(io.socket, null, 'name', '/auth/director', 'director')
   Directors.assignSocketEvent('directors', io.socket)
   Directorhours.assignSocketEvent('directorhours', io.socket)
   Directors.setOnUpdate(() => {
