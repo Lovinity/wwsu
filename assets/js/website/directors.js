@@ -144,44 +144,44 @@ function onlineSocket (doOneSignal = false) {
             }
           })
         }
+
+        if (notificationsSupported) {
+          var temp = document.querySelector(`#subscriptions-emergencies-text`)
+          if (temp !== null) {
+            if (subscribedEmergencies) {
+              temp.innerHTML = 'Un-subscribe'
+            } else {
+              temp.innerHTML = 'Subscribe'
+            }
+          }
+          temp = document.querySelector(`#subscriptions-shows-text`)
+          if (temp !== null) {
+            if (subscribedShows) {
+              temp.innerHTML = 'Un-subscribe'
+            } else {
+              temp.innerHTML = 'Subscribe'
+            }
+          }
+          temp = document.querySelector(`#subscriptions-directors-text`)
+          if (temp !== null) {
+            if (subscribedDirectors) {
+              temp.innerHTML = 'Un-subscribe'
+            } else {
+              temp.innerHTML = 'Subscribe'
+            }
+          }
+        } else {
+          temp = document.querySelector(`#subscriptions-emergencies-text`)
+          if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
+          temp = document.querySelector(`#subscriptions-shows-text`)
+          if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
+          temp = document.querySelector(`#subscriptions-directors-text`)
+          if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
+        }
       } catch (unusedE) {
         setTimeout(onlineSocket, 10000)
       }
     })
-  }
-
-  if (notificationsSupported) {
-    var temp = document.querySelector(`#subscriptions-emergencies-text`)
-    if (temp !== null) {
-      if (subscribedEmergencies) {
-        temp.innerHTML = 'Un-subscribe'
-      } else {
-        temp.innerHTML = 'Subscribe'
-      }
-    }
-    temp = document.querySelector(`#subscriptions-shows-text`)
-    if (temp !== null) {
-      if (subscribedShows) {
-        temp.innerHTML = 'Un-subscribe'
-      } else {
-        temp.innerHTML = 'Subscribe'
-      }
-    }
-    temp = document.querySelector(`#subscriptions-directors-text`)
-    if (temp !== null) {
-      if (subscribedDirectors) {
-        temp.innerHTML = 'Un-subscribe'
-      } else {
-        temp.innerHTML = 'Subscribe'
-      }
-    }
-  } else {
-    temp = document.querySelector(`#subscriptions-emergencies-text`)
-    if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
-    temp = document.querySelector(`#subscriptions-shows-text`)
-    if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
-    temp = document.querySelector(`#subscriptions-directors-text`)
-    if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
   }
 }
 
