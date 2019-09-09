@@ -535,8 +535,8 @@ module.exports = {
           // Prerecords should take priority over playlists, which take priority over genres.
           if (moment(criteria.start).isSameOrBefore() && moment(criteria.end).isAfter()) {
             try {
-              // Do not trigger playlists or prerecords if they were already triggered, unless we are restarting them
-              if (moment(criteria.start).isAfter(moment(sails.models.meta.memory.playlistPlayed)) || inputs.ignoreChangingState) {
+              // Do not trigger playlists, prerecords, or genres if they were already triggered
+              if (moment(criteria.start).isAfter(moment(sails.models.meta.memory.playlistPlayed))) {
                 if (event.summary.startsWith('Playlist: ') && (toTrigger === null || toTrigger.priority >= 2)) {
                   toTrigger = { priority: 2, event: event.summary.replace('Playlist: ', ''), type: 0, description: '' }
                 }
@@ -546,14 +546,16 @@ module.exports = {
                   toTrigger.forced = moment(criteria.start).add(5, 'minutes').isSameOrBefore(moment()) && sails.models.meta.memory.state.startsWith('prerecord_') && !inputs.ignoreChangingState
                 }
               }
-              // Do not re-trigger an already active genre, unless we are restarting it
-              if (inputs.ignoreChangingState || sails.models.meta.memory.genre !== event.summary.replace('Genre: ', '')) {
-                if (event.summary.startsWith('Genre: ') && (toTrigger === null || toTrigger.priority >= 3)) {
-                  toTrigger = { priority: 3, event: event.summary.replace('Genre: ', '') }
+              if (moment(criteria.start).isAfter(moment(sails.models.meta.memory.playlistPlayed)) || inputs.ignoreChangingState) {
+                // Do not re-trigger an already active genre, unless ignoreChangingState is true (which assumes force re-loading)
+                if (sails.models.meta.memory.genre !== event.summary.replace('Genre: ', '')) {
+                  if (event.summary.startsWith('Genre: ') && (toTrigger === null || toTrigger.priority >= 3)) {
+                    toTrigger = { priority: 3, event: event.summary.replace('Genre: ', '') }
+                  }
                 }
+                // Mark when we are supposed to be in genre rotation
+                if (event.summary.startsWith('Genre: ')) { genreActive = true }
               }
-              // Mark when we are supposed to be in genre rotation
-              if (event.summary.startsWith('Genre: ')) { genreActive = true }
 
               // Check if the event started over 10 minutes prior to start time, and if so, update the attendance record accordingly.
               if (sails.models.meta.memory.attendanceID !== null) {
