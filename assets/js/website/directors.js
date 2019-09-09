@@ -273,7 +273,7 @@ function subscribeShows () {
       timeout: 15000
     })
   } else {
-    if (!subscribedEmergencies) {
+    if (!subscribedShows) {
       directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'accountability-shows' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
@@ -346,7 +346,7 @@ function subscribeDirectors () {
       timeout: 15000
     })
   } else {
-    if (!subscribedEmergencies) {
+    if (!subscribedDirectors) {
       directorReq.request({ db: directorsdb.db(), method: 'POST', url: '/subscribers/add-directors', data: { device: device, type: 'accountability-directors' } }, (response) => {
         if (response === 'OK') {
           iziToast.show({
