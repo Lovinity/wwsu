@@ -67,6 +67,8 @@ module.exports.policies = {
   'state/change-radio-dj': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'status/get': ['isBanned', 'isSocket'],
   'subscribers/*': ['isBanned', 'isSocket'],
+  'subscribers/add-directors': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+  'subscribers/remove-directors': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'timesheet/add': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'timesheet/edit': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
   'timesheet/get': ['isBanned', 'isSocket'],

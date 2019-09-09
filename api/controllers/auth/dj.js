@@ -46,7 +46,7 @@ module.exports = {
       if (!match) { return exits.noToken({ errToken: 'The provided DJ either does not exist or is not authorized.' }) }
 
       // Generate the token valid for 60 minutes
-      var token = jwt.sign({ name: dj.name, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, sails.config.custom.secrets.dj, { subject: 'dj' })
+      var token = jwt.sign({ ID: dj.ID, name: dj.name, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, sails.config.custom.secrets.dj, { subject: 'dj' })
 
       // Return the token as an object
       return exits.success({ token: token, expires: (60000 * 60) })

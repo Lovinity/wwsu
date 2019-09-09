@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script>if (typeof module === 'object') {
+                window.module = module;
+                module = undefined;
+            }</script> 
+<script src="../../js/jquery-3.3.1.min.js"></script>
+<script src="../../js/jquery-ui.min.js"></script>
+<link rel="manifest" href="../../images/icons/manifest.json">
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+<script type="text/javascript" src="../../dependencies/sails.io.js"></script>
+<script src="../../js/iziToast.min.js"></script>
+<script src="../../js/material/material.min.js"></script>
+<script src="../../js/fontawesome.js"></script>
+<script src="../../js/taffy-min.js"></script>
+<script src="../../js/wwsu.js"></script>
+<link rel="stylesheet" href="../../../styles/material/material.min.css">
+<link rel="stylesheet" href="../../../styles/iziToast.min.css">
+<link rel="apple-touch-icon" sizes="57x57" href="../../images/icons/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="../../images/icons/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="../../images/icons/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="../../images/icons/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="../../images/icons/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="../../images/icons/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="../../images/icons/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../../images/icons/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../images/icons/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="../../images/icons/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../images/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="../../images/icons/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../images/icons/favicon-16x16.png">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<script>
+</script>
+
+        <meta charset="UTF-8">
+<title>WWSU Director Push Notifications</title>
+<meta name="Description" content="Directors of WWSU can use this page to subscribe to push notifications for various director-related things.">
+        <style>
+            body
+            {
+                overflow-x: hidden;
+            }
+            ::-webkit-scrollbar {
+                width: 10px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #FFF;
+                -webkit-box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #CCC;
+                -webkit-box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #AAA;
+            }
+            ::-webkit-scrollbar-thumb:active {
+                background: #888;
+                -webkit-box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+            }
+           .bs-callout {
+                padding: 10px;
+                margin: 10px 0;
+                border: 0px solid #eee;
+                border-left-width: 5px;
+            }
+            .bs-callout h4 {
+                margin-top: 0;
+                margin-bottom: 5px;
+            }
+            .bs-callout p:last-child {
+                margin-bottom: 0;
+            }
+            .bs-callout code {
+                border-radius: 3px;
+            }
+            .bs-callout+.bs-callout {
+                margin-top: -5px;
+            }
+            .bs-callout-default {
+                border-color: #9e9e9e;
+                background: #383838;
+            }
+            .bs-callout-default h4 {
+                color: #cfd8dc;
+            }
+            .bs-callout-trivial {
+                border-color: #9e9e9e;
+                background: #383838;
+            }
+            .bs-callout-trivial h4 {
+                color: #cfd8dc;
+            }
+            .bs-callout-secondary {
+                border-color: #9e9e9e;
+                background: #383838;
+            }
+            .bs-callout-secondary h4 {
+                color: #cfd8dc;
+            }
+            .bs-callout-primary {
+                border-color: #e70d2f;
+                background: rgba(115, 6, 23, 1);
+            }
+            .bs-callout-primary h4 {
+                color: #faced5;
+            }
+            .bs-callout-success {
+                border-color: #5cb85c;
+                background: #1D441F;
+            }
+            .bs-callout-success h4 {
+                color: #c8e6c9;
+            }
+            .bs-callout-danger {
+                border-color: #f44336;
+                background: #721818;
+            }
+            .bs-callout-danger h4 {
+                color: #ffcdd2;
+            }
+            .bs-callout-warning {
+                border-color: #ffc107;
+                background:#4F3C03;
+            }
+            .bs-callout-warning h4 {
+                color: #ffecb3;
+            }
+            .bs-callout-info {
+                border-color: #2196f3;
+                background: #0C3B69;
+            }
+            .bs-callout-info h4 {
+                color: #bbdefb;
+            }
+            .bs-callout-urgent {
+                border-color: #ff9800;
+                background: #702700;
+            }
+            .bs-callout-urgent h4 {
+                color: #ffe0b2;
+            }
+
+            .notification {
+                position:absolute;
+                top: 84px;
+                right: 64px;
+            }
+        </style>
+    </head>
+    <body style="background-color: #000000; min-width: 240px;">
+        <h1 class="text-white">WWSU Director Push Notifications</h1>
+<div class="container">
+<%- body %>
+</div>
+    <script>if (window.module)
+                module = window.module;</script>
+<script src="../../js/website/directors.js?t=<%= timestamp %>2" defer></script>
+</body>
+</html>

@@ -2,9 +2,9 @@ var sh = require('shorthash')
 
 module.exports = {
 
-  friendlyName: 'subscribers / Add',
+  friendlyName: 'subscribers / Add-directors',
 
-  description: 'Add a push notification subscription.',
+  description: 'Add a push notification subscription to director-related matters.',
 
   inputs: {
 
@@ -17,19 +17,13 @@ module.exports = {
     type: {
       type: 'string',
       required: true,
-      isIn: ['calendar-once', 'calendar-all'],
+      isIn: ['accountability-shows', 'accountability-directors', 'emergencies'],
       description: 'The main type of the subscription'
-    },
-
-    subtype: {
-      type: 'string',
-      required: true,
-      description: 'The subtype of the subscription'
     }
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller subscribers/add called.')
+    sails.log.debug('Controller subscribers/add-directors called.')
 
     try {
       // Get the client IP address
@@ -37,7 +31,7 @@ module.exports = {
       var host = sh.unique(fromIP + sails.config.custom.hostSecret)
 
       // Use find or create so that duplicate subscriptions do not happen (ignore host when checking for duplicates).
-      await sails.models.subscribers.findOrCreate(inputs, { host: `website-${host}`, device: inputs.device, type: inputs.type, subtype: inputs.subtype })
+      await sails.models.subscribers.findOrCreate(inputs, { host: `website-${host}`, device: inputs.device, type: inputs.type, subtype: this.req.payload.ID })
 
       return exits.success()
     } catch (e) {
