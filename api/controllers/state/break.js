@@ -49,7 +49,7 @@ module.exports = {
 
       // If this break was triggered because of a technical problem, play a technical problem liner
       if (inputs.problem) {
-        await sails.helpers.songs.queue(sails.config.custom.subcats.technicalIssues, 'top', 1, 'noRules')
+        await sails.helpers.songs.queue(sails.config.custom.subcats.technicalIssues, 'Top', 1, 'noRules')
         if (sails.models.meta.memory.state.startsWith('sportsremote_') || sails.models.meta.memory.state.startsWith('remote_')) {
           await sails.sockets.broadcast('silent-call', 'silent-call', true)
         }

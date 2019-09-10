@@ -7,7 +7,6 @@ module.exports = {
   inputs: {
     subcategories: {
       type: 'ref',
-      required: true,
       description: 'Array of subcategories to queue from.'
     },
 
@@ -51,7 +50,7 @@ module.exports = {
       try {
         inputs.subcategories = inputs.subcategories.filter(subcategory => subcategory && subcategory !== null)
       } catch (unusedE) {
-        inputs.subcategories = []
+        return exits.success(false)
       }
 
       // Find all applicable songs that are in the subcategory and load them in memory (have to do randomisation by Node, not by database)
