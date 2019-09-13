@@ -203,7 +203,7 @@ function onlineSocket (doOneSignal = false) {
     })
   }
 
-  if (device && device !== null) {
+  if (device && device !== null && device !== 'null') {
     io.socket.post('/subscribers/get-web', { device: device }, function serverResponded (body) {
       try {
         subscribedEmergencies = false
