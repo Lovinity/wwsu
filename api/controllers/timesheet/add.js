@@ -66,7 +66,7 @@ module.exports = {
         await sails.models.directors.update({ ID: record.ID }, { present: false, since: thetime.toISOString(true) })
           .fetch()
 
-        if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Timesheet needs approved', `The timesheet for ${record.name}, ending on ${moment(thetime).format('LLLL')}, has been flagged and needs reviewed/approved.`) }
+        if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'Timesheet Needs Approved in DJ Controls', `${record.name}'s timesheet ending on ${moment(thetime).format('LLLL')} has been flagged and needs reviewed/approved because the director set their clock-out time more than 30 minutes from the current time.`) }
       } else { // If the director is not present, this is a clock-in entry.
         toapprove = 0
         thetime = moment(inputs.timestamp)
@@ -89,7 +89,7 @@ module.exports = {
         await sails.models.directors.update({ ID: record.ID }, { present: true, since: thetime.toISOString(true) })
           .fetch()
 
-        if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Timesheet needs approved', `The timesheet for ${record.name}, beginning on ${moment(thetime).format('LLLL')}, has been flagged and needs reviewed/approved.`) }
+        if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'Timesheet Needs Approved in DJ Controls', `${record.name}'s timesheet, beginning on ${moment(thetime).format('LLLL')}, has been flagged and needs reviewed/approved because the director set their clock-in time more than 30 minutes from the current time.`) }
       }
       return exits.success()
     } catch (e) {

@@ -119,7 +119,7 @@ module.exports = {
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - RadioDJ queue failure', `On ${moment().format('LLLL')}, the system switched RadioDJs because the active one was not returning queue data. It might have crashed or there is a problem connecting to it on the network. Please see DJ Controls.`)
+            await sails.helpers.onesignal.sendMass('emergencies', 'RadioDJ Queue Failure', `On ${moment().format('LLLL')}, the system switched RadioDJs because the active one was not returning queue data. It might have crashed or there is a problem connecting to it on the network. Please see DJ Controls.`)
             var maps = sails.config.custom.radiodjs
               .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
               .map(async (instance) => {
@@ -178,7 +178,7 @@ module.exports = {
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - RadioDJ frozen playback', `On ${moment().format('LLLL')}, the system switched RadioDJs because the active one froze. There might be an audio device issue, corrupt track, or problem reading audio files. Please see DJ Controls.`)
+              await sails.helpers.onesignal.sendMass('emergencies', 'RadioDJ stopped playing / froze', `On ${moment().format('LLLL')}, the system switched RadioDJs because the active one froze or stopped playing. There might be an audio device issue, corrupt track, or problem reading audio files. Please see DJ Controls.`)
               var maps = sails.config.custom.radiodjs
                 .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
                 .map(async (instance) => {

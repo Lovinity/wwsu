@@ -617,7 +617,7 @@ module.exports.bootstrap = async function (done) {
               }
             }
 
-            await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Failed Top-of-Hour ID', `On ${moment().format('LLLL')}, the show ${sails.models.meta.memory.show} failed to take a Top of the Hour ID break.`)
+            await sails.helpers.onesignal.sendMass('accountability-shows', 'Broadcast did not do Top-of-hour ID!', `${sails.models.meta.memory.show} failed to take a required Top of the Hour ID break. This is an FCC violation.`)
           }
 
           // Do automation system error checking and handling
@@ -1301,7 +1301,7 @@ module.exports.bootstrap = async function (done) {
         if (recordsX.length > 0) {
           recordsX.map((record) => {
             (async () => {
-              sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Timesheet needs approved', `The timesheet for ${record.name}, ending on ${moment().format('LLLL')}, has been flagged and needs reviewed/approved.`)
+              sails.helpers.onesignal.sendMass('accountability-directors', 'Timesheet needs approved in DJ Controls', `${record.name}'s timesheet, ending on ${moment().format('LLLL')}, has been flagged and needs reviewed/approved because the director forgot to clock out at midnight.`)
             })()
           })
         }

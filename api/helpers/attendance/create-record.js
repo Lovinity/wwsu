@@ -46,7 +46,7 @@ module.exports = {
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Unauthorized Show on the Air', `On ${moment().format('LLLL')}, an unauthorized / unscheduled show went on the air: ${inputs.event}`)
+            await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${inputs.event} went on the air at ${moment().format('LLL')}; this show was not scheduled to go on the air!`)
           }
         }
 

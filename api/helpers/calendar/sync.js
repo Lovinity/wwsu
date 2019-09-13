@@ -644,7 +644,7 @@ module.exports = {
                       .tolerate((err) => {
                         sails.log.error(err)
                       })
-                    await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Cancelled Show', `On ${moment().format('LLLL')}, the show ${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
+                    await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Show', `${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
                   }
                   if (cEvent.title.startsWith('Remote: ')) {
                     temp = cEvent.title.replace('Remote: ', '')
@@ -653,7 +653,7 @@ module.exports = {
                       .tolerate((err) => {
                         sails.log.error(err)
                       })
-                    await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Cancelled Remote', `On ${moment().format('LLLL')}, the remote ${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
+                    await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Remote', `${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
                   }
                   if (cEvent.title.startsWith('Sports: ')) {
                     temp = cEvent.title.replace('Sports: ', '')
@@ -662,7 +662,7 @@ module.exports = {
                       .tolerate((err) => {
                         sails.log.error(err)
                       })
-                    await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Cancelled Sports Broadcast', `On ${moment().format('LLLL')}, the sports broadcast ${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
+                    await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Sports Broadcast', `${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
                   }
                   if (cEvent.title.startsWith('Prerecord: ')) {
                     temp = cEvent.title.replace('Prerecord: ', '')
@@ -671,7 +671,7 @@ module.exports = {
                       .tolerate((err) => {
                         sails.log.error(err)
                       })
-                    await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Cancelled Prerecord', `On ${moment().format('LLLL')}, the prerecord ${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
+                    await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Prerecord', `${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled; removed from Google Calendar.`)
                   }
                   // We don't care about logging cancelled genres nor playlists, but we still want to send notifications out.
                   if (cEvent.title.startsWith('Genre: ')) {
@@ -719,7 +719,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Absent Show', `The show ${record.event.replace('Show: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
+                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Show did not air!', `${record.event.replace('Show: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
                       }
 
                       if (record.event.startsWith('Prerecord: ')) {
@@ -727,7 +727,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - Failed Prerecord', `The prerecord ${record.event.replace('Prerecord: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; this is likely a problem with the system.`)
+                        await sails.helpers.onesignal.sendMass('emergencies', 'Prerecord failed to air!', `${record.event.replace('Prerecord: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; this is likely a problem with the system.`)
                       }
 
                       if (record.event.startsWith('Remote: ')) {
@@ -735,7 +735,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Absent Remote Broadcast', `The remote broadcast ${record.event.replace('Remote: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
+                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Remote broadcast did not air!', `${record.event.replace('Remote: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
                       }
 
                       if (record.event.startsWith('Sports: ')) {
@@ -743,7 +743,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('accountability-shows', 'WWSU - Absent Sports Broadcast', `The sports broadcast ${record.event.replace('Sports: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
+                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Sports broadcast did not air!', `${record.event.replace('Sports: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
                       }
 
                       if (record.event.startsWith('Playlist: ')) {
@@ -751,7 +751,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - Failed Playlist', `The playlist ${record.event.replace('Playlist: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; this is likely a problem with the system.`)
+                        await sails.helpers.onesignal.sendMass('emergencies', 'Playlist failed to air', `${record.event.replace('Playlist: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; this is likely a problem with the system.`)
                       }
 
                       // We do not care about genres
@@ -920,7 +920,7 @@ module.exports = {
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Cancelled Director Hours', `On ${moment().format('LLLL')}, ${cEvent.director} cancelled their hours for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}.`)
+              await sails.helpers.onesignal.sendMass('accountability-directors', 'Director cancelled hours', `${cEvent.director} cancelled their hours for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}.`)
             })
             await Promise.all(maps)
           }
@@ -939,7 +939,7 @@ module.exports = {
                         .tolerate((err) => {
                           sails.log.error(err)
                         })
-                      await sails.helpers.onesignal.sendMass('accountability-directors', 'WWSU - Cancelled Director Hours', `On ${moment().format('LLLL')}, ${record.name} failed to show up for their scheduled hours of ${moment(record.scheduledIn).format('LLL')} - ${moment(record.scheduledOut).format('LT')}.`)
+                      await sails.helpers.onesignal.sendMass('accountability-directors', 'Director failed to do their hours!', `${record.name} failed to show up for their scheduled hours at ${moment(record.scheduledIn).format('LLL')} - ${moment(record.scheduledOut).format('LT')}.`)
                       await sails.models.timesheet.update({ ID: record.ID }, { approved: 0 }).fetch()
                     }
                   })

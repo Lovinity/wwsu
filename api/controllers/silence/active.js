@@ -40,7 +40,7 @@ module.exports = {
           .tolerate((err) => {
             sails.log.error(err)
           })
-        await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - Multiple Silences Detected', `System had switched automation instances on ${moment().format('LLLL')} because the silence detection system triggered multiple times. Please check DJ Controls.`)
+        await sails.helpers.onesignal.sendMass('emergencies', 'Silence Detection Triggered Multiple Times', `System had switched automation instances on ${moment().format('LLLL')} because the silence detection system triggered multiple times. Please check DJ Controls.`)
 
         // Find a RadioDJ to switch to
         var maps = sails.config.custom.radiodjs
@@ -78,7 +78,7 @@ module.exports = {
           .tolerate((err) => {
             sails.log.error(err)
           })
-        await sails.helpers.onesignal.sendMass('emergencies', 'WWSU - Silence During Broadcast', `System had automatically terminated ${sails.models.meta.memory.show} on ${moment().format('LLLL')} because of a long period of silence or multiple silences in a short time. Please talk with the DJ about avoiding silence on the air.`)
+        await sails.helpers.onesignal.sendMass('emergencies', 'Multiple Silences During Broadcast', `${sails.models.meta.memory.show} was terminated automatically on ${moment().format('LLLL')} because of a long period of silence or multiple silences in a short time. Please talk with the DJ about avoiding silence on the air.`)
 
         await sails.helpers.state.automation(true)
       }
