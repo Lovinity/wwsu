@@ -458,7 +458,7 @@ module.exports = {
           var subscriptions = await sails.models.subscribers.destroy({ type: `request`, subtype: requested[0].ID }).fetch()
           var devices = []
           subscriptions.map((subscription) => devices.push(subscription.device))
-          if (devices.length > 0) { await sails.helpers.onesignal.send(devices, `request`, `WWSU - Your Request is Playing!`, `The track you requested is now playing on WWSU: ` + await sails.helpers.filterProfane(`${sails.models.meta.memory.trackArtist} - ${sails.models.meta.memory.trackTitle}`), (60 * 15)) }
+          if (devices.length > 0) { await sails.helpers.onesignal.send(devices, `request`, `Your Request is Playing!`, await sails.helpers.filterProfane(`${sails.models.meta.memory.trackArtist} - ${sails.models.meta.memory.trackTitle}`) + ` is now playing on WWSU!`, (60 * 15)) }
         }
       }
 

@@ -58,14 +58,14 @@ module.exports = {
       if (devices.length > 0) {
         // If date was not specified, this push notification is for a show that went on the air.
         if (!inputs.date) {
-          await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} is On the Air!`, `${inputs.event} just started on WWSU Radio!`, (60 * 60 * 3))
+          await sails.helpers.onesignal.send(devices, `event`, `Subscribed show on the air!`, `${inputs.event} just started on WWSU Radio!`, (60 * 60 * 3))
         } else {
           // If date specified and cancelled is false, this push notification is to inform subscribers that an event changed date/time
           if (!inputs.cancelled) {
-            await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} changed the date/time.`, `The date/time for ${inputs.event} was changed to ${inputs.date}.`, (60 * 60 * 24 * 7))
+            await sails.helpers.onesignal.send(devices, `event`, `Subscribed show changed date/time`, `${inputs.event} will now air at ${inputs.date}.`, (60 * 60 * 24 * 7))
             // If date specified and cancelled is true, this push notification is to inform subscribers the event was cancelled.
           } else {
-            await sails.helpers.onesignal.send(devices, `event`, `WWSU - ${inputs.type} was cancelled.`, `${inputs.event} was cancelled for the date of ${inputs.date}.`, (60 * 60 * 24 * 7))
+            await sails.helpers.onesignal.send(devices, `event`, `Subscribed show cancelled`, `${inputs.event} was cancelled for ${inputs.date}.`, (60 * 60 * 24 * 7))
           }
         }
       }

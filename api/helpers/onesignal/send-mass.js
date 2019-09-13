@@ -1,3 +1,4 @@
+var breakdance = require('breakdance')
 module.exports = {
 
   friendlyName: 'sails.helpers.onesignal.sendMass',
@@ -34,7 +35,7 @@ module.exports = {
 
       // If we have at least 1 person to receive a push notification, continue
       if (devices.length > 0) {
-        await sails.helpers.onesignal.send(devices, `message`, inputs.title, inputs.content, (60 * 60 * 24 * 7))
+        await sails.helpers.onesignal.send(devices, `message`, inputs.title, breakdance(inputs.content), (60 * 60 * 24 * 7))
       }
 
       return exits.success(true)
