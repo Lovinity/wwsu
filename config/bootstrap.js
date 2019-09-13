@@ -486,10 +486,12 @@ module.exports.bootstrap = async function (done) {
             await sails.helpers.requests.queue(3, true, true)
 
             // Switch back to automation
-            await sails.helpers.meta.change.with({ changingState: null, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
+            await sails.helpers.meta.change.with({ changingState: `Ending prerecord`, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
 
             // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-            await sails.helpers.calendar.sync()
+            await sails.helpers.calendar.sync(true)
+
+            await sails.helpers.meta.change.with({ changingState: null })
 
             // Did not finish the playlist? Ensure the position is updated in meta.
           } else if (thePosition !== -1) {
@@ -498,6 +500,7 @@ module.exports.bootstrap = async function (done) {
             }
           }
         } catch (e) {
+          await sails.helpers.meta.change.with({ changingState: null })
           sails.log.error(e)
         }
       }

@@ -53,9 +53,9 @@ module.exports = {
         returnData.newID = created.ID
 
         // Switch to the new record in the system
-        await sails.helpers.meta.change.with({ attendanceID: created.ID })
+        await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: returnData.unique || null })
       } else {
-        await sails.helpers.meta.change.with({ attendanceID: null })
+        await sails.helpers.meta.change.with({ attendanceID: null, calendarUnique: null })
       }
 
       // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast

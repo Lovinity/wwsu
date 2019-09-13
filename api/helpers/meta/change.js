@@ -75,6 +75,11 @@ module.exports = {
       type: 'string',
       description: 'The provided message for this track request, if requested'
     },
+    calendarUnique: {
+      type: 'string',
+      allowNull: true,
+      description: 'Google Calendar unique ID of the current program.'
+    },
     genre: {
       type: 'string',
       description: 'Name of the genre or rotation currently being played, if any'

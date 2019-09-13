@@ -72,6 +72,11 @@ module.exports = {
       type: 'boolean'
     },
 
+    calendarUnique: {
+      type: 'string',
+      allowNull: true
+    },
+
     playlist: {
       type: 'string',
       allowNull: true
@@ -175,6 +180,11 @@ module.exports = {
       type: 'string',
       defaultsTo: '',
       description: 'The provided message for this track request, if requested'
+    },
+    calendarUnique: {
+      type: 'string',
+      allowNull: true,
+      description: 'Google Calendar unique ID of the current program.'
     },
     genre: {
       type: 'string',

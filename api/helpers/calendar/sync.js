@@ -561,6 +561,7 @@ module.exports = {
               if (sails.models.meta.memory.attendanceID !== null) {
                 if (attendanceRecord.event === event.summary && event.active >= 1 && (attendanceRecord.unique === null || attendanceRecord.unique === ``)) {
                   await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { unique: event.id, scheduledStart: moment(criteria.start).toISOString(true), scheduledEnd: moment(criteria.end).toISOString(true) }).fetch()
+                  await sails.helpers.meta.change.with({ calendarUnique: event.id })
                 }
               }
             } catch (e) {
