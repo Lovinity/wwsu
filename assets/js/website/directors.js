@@ -262,6 +262,15 @@ function onlineSocket (doOneSignal = false) {
         setTimeout(onlineSocket, 10000)
       }
     })
+  } else {
+    notificationsSupported = false
+    var temp = document.querySelector(`#subscriptions-emergencies-text`)
+    temp = document.querySelector(`#subscriptions-emergencies-text`)
+    if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
+    temp = document.querySelector(`#subscriptions-shows-text`)
+    if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
+    temp = document.querySelector(`#subscriptions-directors-text`)
+    if (temp !== null) { temp.innerHTML = 'Notifications not supported' }
   }
 }
 
