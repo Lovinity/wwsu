@@ -170,6 +170,33 @@ function oppInjury () {
 
 // USED IN HTML
 // eslint-disable-next-line no-unused-vars
+function halftime () {
+  updateValue(`wsuText`, `HALFTIME`)
+  updateValue(`oppText`, `HALFTIME`)
+  updateValue(`wsuNum`, ``)
+  updateValue(`oppNum`, ``)
+}
+
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
+function final () {
+  updateValue(`wsuText`, `FINAL`)
+  updateValue(`oppText`, `FINAL`)
+  updateValue(`wsuNum`, ``)
+  updateValue(`oppNum`, ``)
+}
+
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
+function coachChallenge () {
+  updateValue(`wsuText`, `COACH'S CHALLENGE`)
+  updateValue(`oppText`, `COACH'S CHALLENGE`)
+  updateValue(`wsuNum`, ``)
+  updateValue(`oppNum`, ``)
+}
+
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
 function wsuFoul () {
   document.querySelector('#wsu-fouls').value = parseInt(document.querySelector('#wsu-fouls').value) + 1
   updateValue(`wsuFouls`, document.querySelector('#wsu-fouls').value)
@@ -188,4 +215,31 @@ function oppFoul () {
   updateValue(`oppText`, `FOUL`)
   updateValue(`wsuNum`, document.querySelector('#wsu-fouls').value)
   updateValue(`oppNum`, document.querySelector('#opp-fouls').value)
+}
+
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
+function flagDown () {
+  updateValue(`wsuText`, `FLAG`)
+  updateValue(`oppText`, `FLAG`)
+}
+
+// USED IN HTML
+// eslint-disable-next-line no-unused-vars
+function displayDown () {
+  var temp = document.querySelector('#down-number')
+  var temp2 = document.querySelector('#down-yards')
+  var temp3 = document.querySelector('#down-possession')
+
+  if (temp !== null && temp2 !== null && temp3 !== null) {
+    var selection = temp.options[temp.selectedIndex].value
+    var text = `${selection} AND ${temp2 > 0 ? temp2 : 'GOAL'}`
+    if (temp3.checked) {
+      updateValue(`wsuText`, text)
+      updateValue(`oppText`, ``)
+    } else {
+      updateValue(`wsuText`, ``)
+      updateValue(`oppText`, text)
+    }
+  }
 }

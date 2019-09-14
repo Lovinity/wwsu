@@ -1,0 +1,157 @@
+<body>
+
+<div class="card-columns">
+
+    <div class="card border-primary mb-3" style="max-width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">WSU Score</h5>
+                <p class="card-text">
+
+                    <div class="form-group">
+                        <label for="wsu-score">Current WSU Score</label>
+                        <input type="text" id="wsu-score" class="form-control" value="0" onchange="updateValue('wsuScore', this.value)">
+                    </div>
+                </p>
+                <button type="button" class="btn btn-info" onclick="wsuScore(1)" id="wsu-score-1">+1</button>
+                <button type="button" class="btn btn-success" onclick="wsuScore(2)" id="wsu-score-2">+2</button>
+                <button type="button" class="btn btn-warning" onclick="wsuScore(3)" id="wsu-score-3">+3</button>
+                <button type="button" class="btn btn-danger" onclick="wsuScore(6)" id="wsu-score-3">+6</button>
+        </div>
+    </div>
+
+    <div class="card border-secondary mb-3" style="max-width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Opponent Score</h5>
+                <p class="card-text">
+
+                    <div class="form-group">
+                        <label for="opp-score">Current Opponent Score</label>
+                        <input type="text" id="opp-score" class="form-control" value="0" onchange="updateValue('oppScore', this.value)">
+                    </div>
+                </p>
+                <button type="button" class="btn btn-info" onclick="oppScore(1)" id="opp-score-1">+1</button>
+                <button type="button" class="btn btn-success" onclick="oppScore(2)" id="opp-score-2">+2</button>
+                <button type="button" class="btn btn-warning" onclick="oppScore(3)" id="opp-score-3">+3</button>
+                <button type="button" class="btn btn-danger" onclick="oppScore(6)" id="opp-score-3">+6</button>
+        </div>
+    </div>
+
+    <div class="card border-info mb-3" style="max-width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Timeouts</h5>
+                <p class="card-text">
+
+                    <div class="form-group">
+                        <label for="wsu-timeouts">WSU Timeouts Remaining</label>
+                        <input type="text" id="wsu-timeouts" class="form-control" value="4" onchange="updateValue('wsuTimeouts', this.value)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="opp-timeouts">Opponent Timeouts Remaining</label>
+                        <input type="text" id="opp-timeouts" class="form-control" value="4" onchange="updateValue('oppTimeouts', this.value)">
+                    </div>
+
+                </p>
+                <button type="button" class="btn btn-primary" id="wsu-timeout" onclick="wsuTimeout()">WSU took a Timeout</button>
+                <button type="button" class="btn btn-secondary" id="opp-timeout" onclick="oppTimeout()">Opponent took a Timeout</button>
+                <button type="button" class="btn btn-info" id="media-timeout" onclick="mediaTimeout()">Media Timeout</button>
+                <button type="button" class="btn btn-info" id="halftime" onclick="halftime()">Halftime</button>
+                <button type="button" class="btn btn-info" id="final" onclick="final()">Final / End of Game</button>
+                <button type="button" class="btn btn-warning" id="ref-timeout" onclick="refReview()">Referee Review</button>
+                <button type="button" class="btn btn-warning" id="coach-timeout" onclick="coachChallenge()">Coach's Challenge</button>
+                <button type="button" class="btn btn-danger" id="wsu-injury" onclick="wsuInjury()">WSU Player Injured</button>
+                <button type="button" class="btn btn-danger" id="opp-injury" onclick="oppInjury()">Opponent Player Injured</button>
+                <button type="button" class="btn btn-success" id="end-timeout" onclick="clearAlt()">Game Resumed</button>
+        </div>
+    </div>
+
+    <div class="card border-danger mb-3" style="max-width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Team Fouls</h5>
+                <p class="card-text">
+
+                    <div class="form-group">
+                        <label for="wsu-fould">WSU Team Fouls</label>
+                        <input type="text" id="wsu-fouls" class="form-control" value="0" onchange="updateValue('wsuFouls', this.value)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="opp-fouls">Opponent Team Fouls</label>
+                        <input type="text" id="opp-fouls" class="form-control" value="0" onchange="updateValue('oppFouls', this.value)">
+                    </div>
+
+                </p>
+                <button type="button" class="btn btn-primary" id="wsu-foul" onclick="wsuFoul()">WSU Fouled</button>
+                <button type="button" class="btn btn-secondary" id="opp-foul" onclick="oppFoul()">Opponent Fouled</button>
+                <button type="button" class="btn btn-success" id="end-foul" onclick="clearAlt()">Game Resumed</button>
+        </div>
+    </div>
+
+    <div class="card border-info mb-3" style="max-width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Downs</h5>
+                <p class="card-text">
+
+                    <div class="form-group">
+                        <label for="down-number">Down</label>
+                        <select class="form-control" id="down-number">
+                            <option value="">Choose a down...</option>
+                            <option value="1st">1st</option>
+                            <option value="2nd">2nd</option>
+                            <option value="3rd">3rd</option>
+                            <option value="4th">4th</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="down-yards">Yards to first down</label>
+                        <input type="number" id="down-yards" class="form-control" value="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="down-possession">WSU has possession?</label>
+                        <input type="checkbox" id="down-possession" class="form-control">
+                    </div>
+
+                </p>
+                <button type="button" class="btn btn-primary" id="display-down" onclick="displayDown()">Display</button>
+                <button type="button" class="btn btn-secondary" id="end-down" onclick="clearAlt()">Hide</button>
+        </div>
+    </div>
+
+    <div class="card border-warning mb-3" style="max-width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Custom Alternate Text</h5>
+                <p class="card-text">
+
+                    <div class="form-group">
+                        <label for="wsu-text">WSU Alternate Text</label>
+                        <input type="text" id="wsu-text" class="form-control" placeholder="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="wsu-num">WSU Alternate Number</label>
+                        <input type="text" id="wsu-num" class="form-control" placeholder="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="opp-fouls">Opponent Alternate Text</label>
+                        <input type="text" id="opp-text" class="form-control" placeholder="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="opp-num">Opponent Alternate Number</label>
+                        <input type="text" id="opp-num" class="form-control" placeholder="">
+                    </div>
+
+                </p>
+                <button type="button" class="btn btn-primary" id="show-alt" onclick="showAlt()">Show Alternate Text</button>
+                <button type="button" class="btn btn-success" id="end-alt" onclick="clearAlt()">Remove Alternate Text</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="../../js/sports/remote.js?t=<%= timestamp %>" defer>
+</script>
+</body>
