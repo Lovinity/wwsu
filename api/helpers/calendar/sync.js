@@ -935,7 +935,7 @@ module.exports = {
                 sails.models.timesheet.findOrCreate({ unique: event.unique }, { unique: event.unique, name: event.director, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true), approved: 0 })
                   .exec(async (err, record, wasCreated) => {
                     if (err) { return false }
-                    if (wasCreated || (!wasCreated && record.timeIn === null && record.approved === 1)) {
+                    if (wasCreated || (!wasCreated && record.timeIn === null && record.approved >= 1)) {
                       await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: record.name, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${record.name}<br />Scheduled time: ${moment(record.scheduledIn).format('LLL')} - ${moment(record.scheduledOut).format('LT')}`, createdAt: moment().toISOString(true) }).fetch()
                         .tolerate((err) => {
                           sails.log.error(err)
