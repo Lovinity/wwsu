@@ -720,7 +720,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Show did not air!', `${record.event.replace('Show: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
+                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Show did not air!', `${record.event.replace('Show: ', '')} failed to air on ${moment(record.scheduledStart).format('LLL')} - ${moment(record.scheduledEnd).format('LT')}; unexcused absence.`)
                       }
 
                       if (record.event.startsWith('Prerecord: ')) {
@@ -728,7 +728,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('emergencies', 'Prerecord failed to air!', `${record.event.replace('Prerecord: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; this is likely a problem with the system.`)
+                        await sails.helpers.onesignal.sendMass('emergencies', 'Prerecord failed to air!', `${record.event.replace('Prerecord: ', '')} failed to air on ${moment(record.scheduledStart).format('LLL')} - ${moment(record.scheduledEnd).format('LT')}; this is likely a problem with the system.`)
                       }
 
                       if (record.event.startsWith('Remote: ')) {
@@ -736,7 +736,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Remote broadcast did not air!', `${record.event.replace('Remote: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
+                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Remote broadcast did not air!', `${record.event.replace('Remote: ', '')} failed to air on ${moment(record.scheduledStart).format('LLL')} - ${moment(record.scheduledEnd).format('LT')}; unexcused absence.`)
                       }
 
                       if (record.event.startsWith('Sports: ')) {
@@ -744,7 +744,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Sports broadcast did not air!', `${record.event.replace('Sports: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; unexcused absence.`)
+                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Sports broadcast did not air!', `${record.event.replace('Sports: ', '')} failed to air on ${moment(record.scheduledStart).format('LLL')} - ${moment(record.scheduledEnd).format('LT')}; unexcused absence.`)
                       }
 
                       if (record.event.startsWith('Playlist: ')) {
@@ -752,7 +752,7 @@ module.exports = {
                           .tolerate((err) => {
                             sails.log.error(err)
                           })
-                        await sails.helpers.onesignal.sendMass('emergencies', 'Playlist failed to air', `${record.event.replace('Playlist: ', '')} failed to air on ${moment(record.scheduledStart).format('hh:mm A')} - ${moment(record.scheduledEnd).format('hh:mm A')}; this is likely a problem with the system.`)
+                        await sails.helpers.onesignal.sendMass('emergencies', 'Playlist failed to air', `${record.event.replace('Playlist: ', '')} failed to air on ${moment(record.scheduledStart).format('LLL')} - ${moment(record.scheduledEnd).format('LT')}; this is likely a problem with the system.`)
                       }
 
                       // We do not care about genres
