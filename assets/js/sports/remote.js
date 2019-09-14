@@ -233,7 +233,7 @@ function displayDown () {
 
   if (temp !== null && temp2 !== null && temp3 !== null) {
     var selection = temp.options[temp.selectedIndex].value
-    var text = `${selection} AND ${temp2 > 0 ? temp2 : 'GOAL'}`
+    var text = `${selection} AND ${temp2.value > 0 ? temp2.value : 'GOAL'}`
     if (temp3.checked) {
       updateValue(`wsuText`, text)
       updateValue(`oppText`, ``)
