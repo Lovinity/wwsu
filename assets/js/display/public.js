@@ -160,6 +160,7 @@ try {
   var directorpresent = false
   var nowPlayingTimer
   var temp
+  var queueUnknown = false
   var isStudio = window.location.search.indexOf('studio=true') !== -1
   var isLightTheme = window.location.search.indexOf('light=true') !== -1
   var weatherSlide = [
@@ -1081,6 +1082,10 @@ function processNowPlaying (response) {
       }
 
       if (typeof response.state !== 'undefined') {
+        queueUnknown = true
+        setTimeout(() => {
+          queueUnknown = false
+        }, 4000)
         switch (response.state) {
           case 'automation_on':
           case 'automation_genre':
@@ -1220,7 +1225,7 @@ function processNowPlaying (response) {
           checkSlideCounts()
         }
       }
-      var queuelength = Meta.queueFinish !== null ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), 'seconds')) : 0
+      var queuelength = Meta.queueFinish !== null && !queueUnknown ? Math.round(moment(Meta.queueFinish).diff(moment(Meta.time), 'seconds')) : 100000
       if (queuelength < 0) { queuelength = 0 }
       if (queuelength > 29) { queueReminder = false }
       if (typeof response.line1 !== 'undefined') {
