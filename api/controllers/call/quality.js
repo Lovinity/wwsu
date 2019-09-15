@@ -9,7 +9,7 @@ module.exports = {
       type: 'number',
       required: true,
       min: 0,
-      max: 0,
+      max: 100,
       description: `The call quality %.`
     }
   },
