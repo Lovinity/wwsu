@@ -22,6 +22,7 @@ module.exports = {
         sails.sockets.join(this.req, 'very-bad-call')
         sails.sockets.join(this.req, 'silent-call')
         sails.sockets.join(this.req, 'finalize-call')
+        sails.sockets.join(this.req, 'call-quality')
         sails.log.verbose('Request was a socket. Joining bad-call and very-bad-call.')
       }
 
