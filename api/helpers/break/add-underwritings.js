@@ -97,6 +97,9 @@ module.exports = {
             if (song.enabled === 1 && moment(song.start_date).isSameOrBefore(moment()) && (moment(song.end_date).isSameOrBefore(moment('2002-01-02 00:00:02')) || moment().isBefore(moment(song.end_date))) && (song.play_limit === 0 || song.count_played < song.play_limit)) {
               sails.log.debug(`Underwriting ${underwriting.ID}: Track enabled.`)
 
+              // We want to calculate how many breaks the underwriting will go through in a week
+              var underwritingBreaks = 0
+
               // The "minute" portion of every underwriting schedule should correspond with the clockwheel breaks
               underwriting.mode.schedule.schedules.map((schedule, index) => {
                 if (typeof underwriting.mode.schedule.schedules[index].m === `undefined`) { underwriting.mode.schedule.schedules[index].m = [] }
@@ -105,7 +108,29 @@ module.exports = {
                     underwriting.mode.schedule.schedules[index].m.push(minute)
                   }
                 }
+
+                // Calculate number of underwriting breaks given the date/time filters
+                if (typeof underwriting.mode.schedule.schedules[index].dw === `undefined`) {
+                  underwritingBreaks = (typeof underwriting.mode.schedule.schedules[index].h !== 'undefined' && underwriting.mode.schedule.schedules[index].h.length > 0 ? underwriting.mode.schedule.schedules[index].h.length : 24) * x * 7
+                } else {
+                  underwritingBreaks = (typeof underwriting.mode.schedule.schedules[index].h !== 'undefined' && underwriting.mode.schedule.schedules[index].h.length > 0 ? underwriting.mode.schedule.schedules[index].h.length : 24) * x * (underwriting.mode.schedule.schedules[index].dw.length > 0 ? underwriting.mode.schedule.schedules[index].dw : 7)
+                }
               })
+
+              // If the schedules portion is empty, then every hour of every day in the week will have a break.
+              if (underwriting.mode.schedule.schedules.length === 0) {
+                underwritingBreaks = x * 24 * 7
+              }
+
+              // Calculate average number of hourly breaks based off of date/time filters
+              underwritingBreaks = underwritingBreaks / (24 * 7)
+
+              // Decrease the number if there are show filters based off of 2 hours per week per show (average show time for each show).
+              // Average breaks per hour for shows is assumed to be 2 (top and bottom of the hour).
+              if (typeof underwriting.mode.show !== 'undefined' && underwriting.mode.show.length > 0) {
+                var showBreaks = (underwriting.mode.show.length * 2 * 7 * 2) / (7 * 24 * 2)
+                underwritingBreaks = underwritingBreaks * showBreaks
+              }
 
               // every scheduleForced should have "minute" set to 0 and only 0
               underwriting.mode.scheduleForced.schedules.map((schedule, index) => {
@@ -134,9 +159,9 @@ module.exports = {
                 if (moment(song.end_date).isAfter(moment('2002-01-01 00:00:01')) && song.play_limit > 0) {
                   var y1 = moment(song.start_date).isAfter(moment('2002-01-01 00:00:01')) ? song.start_date : underwriting.createdAt
                   var y2 = moment(song.end_date).diff(moment(y1))
-                  var y = (y2 / 1000 / 60 / 60) * x
+                  var y = (y2 / 1000 / 60 / 60) * underwritingBreaks
                   var z1 = moment(song.end_date).diff(moment())
-                  var z = (z1 / 1000 / 60 / 60) * x
+                  var z = (z1 / 1000 / 60 / 60) * underwritingBreaks
 
                   sails.log.debug(`Underwriting ${underwriting.ID}: End date and spin counts set. Using algorithm.`)
                   var d = b / a // Percent of spin counts aired
