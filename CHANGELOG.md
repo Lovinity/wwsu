@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file as of versio
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as of version 4.5.0.
 
-## [1.0.0 BETA 6] (Due to being behind the release schedule, 1.0.0 will never be stable)
+## [Unreleased]
+### Added
+ - djs/get-web for the DJ Web panel. Similar to djs/get except uses DJ authorization instead of host authorization.
+
+## [6.0.0 BETA 6] (Due to being behind the release schedule, 6.0.0 will never be stable)
 ### REMOVED
  - Removed deprecated discipline endpoints discipline/ban-* [Issue 64](https://github.com/Lovinity/wwsu/issues/64)
  - Removed deprecated discipline helpers sails.helpers.discipline.ban* [Issue 64](https://github.com/Lovinity/wwsu/issues/64)

@@ -41,6 +41,7 @@ module.exports.policies = {
   'display/internal': 'isBanned',
   'djs/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'djs/get': ['isBanned', 'isSocket'],
+  'djs/get-web': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
   'eas/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'eas/get': 'isBanned',
   'embeds/guardian': 'isBanned',
