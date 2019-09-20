@@ -56,51 +56,6 @@ waitFor(() => {
   DJs.replaceData(noReq, '/djs/get')
 })
 
-document.querySelector(`#dj-attendance`).addEventListener('click', function (e) {
-  try {
-    console.log(e.target.id)
-    if (e.target) {
-      if (e.target.id.startsWith(`dj-show-logs-`)) {
-        document.querySelector('#dj-show-logs').innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`
-        document.querySelector('#dj-logs-listeners').innerHTML = ''
-        $('#options-modal-dj-logs').iziModal('open')
-        DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: parseInt(e.target.id.replace(`dj-show-logs-`, ``)) } }, function (response) {
-          var logs = document.querySelector('#dj-show-logs')
-          logs.scrollTop = 0
-          var newLog = ``
-          if (response.length > 0) {
-            response.map(log => {
-              if (log.logLevel === 'urgent') { log.logLevel = 'warning' }
-              if (log.logLevel === 'purple') { log.logLevel = 'secondary' }
-              newLog += `<div class="row card mb-4 py-3 border-left-${log.logLevel}">
-                                <div class="card-body">
-                                <div class="col-3 text-primary">
-                                    ${moment(log.createdAt).format('h:mm:ss A')}
-                                </div>
-                                <div class="col-9 text-secondary">
-                                ${log.event}
-                                ${log.trackArtist !== null && log.trackArtist !== '' ? `<br />Track: ${log.trackArtist}` : ``}${log.trackTitle !== null && log.trackTitle !== '' ? ` - ${log.trackTitle}` : ``}
-                                ${log.trackAlbum !== null && log.trackAlbum !== '' ? `<br />Album: ${log.trackAlbum}` : ``}
-                                ${log.trackLabel !== null && log.trackLabel !== '' ? `<br />Label: ${log.trackLabel}` : ``}
-                                </div>
-                            </div></div>`
-            })
-            logs.innerHTML = newLog
-          } else {
-            logs.innerHTML = 'ERROR: Unable to load the log for that show. Please try again or contact engineer@wwsu1069.org .'
-          }
-        })
-      }
-    }
-  } catch (err) {
-    console.error(err)
-    iziToast.show({
-      title: 'An error occurred - Please inform engineer@wwsu1069.org.',
-      message: 'Error occurred during the click event of #dj-attendance.'
-    })
-  }
-})
-
 function doRequests () {
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/djs/get-web', data: {} }, (response) => {
     if (typeof response.stats === 'undefined') {
@@ -272,7 +227,7 @@ function doRequests () {
                                   ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
                               </div>
                               <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
+                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
                   <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
                   </button>
                               </div>
@@ -323,7 +278,7 @@ function doRequests () {
                                   ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
                               </div>
                               <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
+                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
                   <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
                   </button>
                               </div>
@@ -343,7 +298,7 @@ function doRequests () {
                                   ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
                               </div>
                               <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
+                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
                   <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
                   </button>
                               </div>
@@ -364,7 +319,7 @@ function doRequests () {
                                   ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
                               </div>
                               <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
+                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
                   <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
                   </button>
                               </div>
@@ -452,7 +407,7 @@ function doRequests () {
                     x: {
                       label: 'Show Time',
                       format: function (n) {
-                        return moment(n).format('LT')
+                        return moment(n).format('LLL')
                       }
                     },
                     y: {
@@ -498,14 +453,46 @@ function activateMenu (menuItem) {
     case 'menu-dashboard':
       temp = document.querySelector(`#body-dashboard`)
       if (temp !== null) {
-        delete temp.style.display
+        temp.style.display = undefined
       }
       break
     case 'menu-analytics':
       temp = document.querySelector(`#body-analytics`)
       if (temp !== null) {
-        delete temp.style.display
+        temp.style.display = undefined
       }
       break
   }
+}
+
+function loadLog (logID) {
+  document.querySelector('#dj-show-logs').innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`
+  document.querySelector('#dj-logs-listeners').innerHTML = ''
+  $('#options-modal-dj-logs').iziModal('open')
+  DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
+    var logs = document.querySelector('#dj-show-logs')
+    logs.scrollTop = 0
+    var newLog = ``
+    if (response.length > 0) {
+      response.map(log => {
+        if (log.logLevel === 'urgent') { log.logLevel = 'warning' }
+        if (log.logLevel === 'purple') { log.logLevel = 'secondary' }
+        newLog += `<div class="row card mb-4 py-3 border-left-${log.logLevel}">
+                                <div class="card-body">
+                                <div class="col-3 text-primary">
+                                    ${moment(log.createdAt).format('h:mm:ss A')}
+                                </div>
+                                <div class="col-9 text-secondary">
+                                ${log.event}
+                                ${log.trackArtist !== null && log.trackArtist !== '' ? `<br />Track: ${log.trackArtist}` : ``}${log.trackTitle !== null && log.trackTitle !== '' ? ` - ${log.trackTitle}` : ``}
+                                ${log.trackAlbum !== null && log.trackAlbum !== '' ? `<br />Album: ${log.trackAlbum}` : ``}
+                                ${log.trackLabel !== null && log.trackLabel !== '' ? `<br />Label: ${log.trackLabel}` : ``}
+                                </div>
+                            </div></div>`
+      })
+      logs.innerHTML = newLog
+    } else {
+      logs.innerHTML = 'ERROR: Unable to load the log for that show. Please try again or contact engineer@wwsu1069.org .'
+    }
+  })
 }
