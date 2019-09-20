@@ -1,5 +1,3 @@
-import { youtubeAnalytics_v1 } from "googleapis"
-
 /* global WWSUdb, TAFFY, WWSUreq, iziToast, $, Taucharts */
 
 var DJReq
