@@ -1,3 +1,5 @@
+import { youtubeAnalytics_v1 } from "googleapis"
+
 /* global WWSUdb, TAFFY, WWSUreq, iziToast, $, Taucharts */
 
 var DJReq
@@ -21,7 +23,7 @@ var containers = [
   '#body-analytics'
 ]
 
-function waitFor (check, callback, count = 0) {
+function waitFor(check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
       count++
@@ -41,13 +43,16 @@ waitFor(() => {
   DJReq = new WWSUreq(io.socket, null, 'name', '/auth/dj', 'DJ')
   noReq = new WWSUreq(io.socket, null)
 
+  DJs.assignSocketEvent('djs', io.socket)
+
+  DJs.setOnReplace((db) => {
+    console.log('DJ replace')
+    doRequests()
+  })
+
   // Register event handlers
   io.socket.on('connect', () => {
     DJs.replaceData(noReq, '/djs/get')
-  })
-
-  DJs.setOnReplace(() => {
-    doRequests()
   })
 })
 
@@ -146,7 +151,7 @@ document.querySelector(`#dj-attendance`).addEventListener('click', function (e) 
   }
 })
 
-function doRequests () {
+function doRequests() {
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/djs/get-web', data: {} }, (response) => {
     if (typeof response.stats === 'undefined') {
       iziToast.show({

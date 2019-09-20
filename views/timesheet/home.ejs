@@ -1,38 +1,39 @@
 <h1>WWSU Director Timesheets</h1>
 <div class="bs-callout bs-callout-info shadow-4 text-white">
-                    <strong class="text-black">Hover your cursor over a shaded block to see exact in/out times. Click a shaded block to view more information about that timesheet and to edit.</strong> 
-                    <p>
-                        <span class="badge badge-success m-2">Approved timesheet</span>
-                        <span class="badge badge-purple m-2">Still Clocked In</span>
-                        <span class="badge badge-warning m-2">Timesheet Needs Review</span>
-                        <span class="badge badge-secondary m-2">Scheduled Hours</span>
-                        <span class="badge badge-secondary m-2" style="background-color: #787878;">Cancelled Hours</span>
-                        <span class="badge badge-danger m-2">NO-SHOW Hours</span>
-                    </p>
-                </div>
-	<div class="container">    
+    <strong class="text-black">Hover your cursor over a shaded block to see exact in/out times. Click a shaded block to
+        view more information about that timesheet and to edit.</strong>
+    <p>
+        <span class="badge badge-success m-2">Approved timesheet</span>
+        <span class="badge badge-purple m-2">Still Clocked In</span>
+        <span class="badge badge-warning m-2">Timesheet Needs Review</span>
+        <span class="badge badge-secondary m-2">Scheduled Hours</span>
+        <span class="badge badge-secondary m-2" style="background-color: #787878;">Cancelled Hours</span>
+        <span class="badge badge-danger m-2">NO-SHOW Hours</span>
+    </p>
+</div>
+<div class="container">
     <div class="row">
         <div class="col-sm-6 form-group">
             <div class="input-group" id="DateDemo">
-	<form action="javascript:filterDate()" method="post" class="form">
-              <input type='date' id='weekly-date-picker' name="firstdate" value="<%= currentDate %>" />
-              <input type="submit" class="btn btn-default" value="Filter">
-              </form>
-              <button class="btn btn-info" id="csvExport">CSV Export</button>
-          </div>
-      </div>
-  </div>
+                <form action="javascript:filterDate()" method="post" class="form">
+                    <input type='date' id='weekly-date-picker' name="firstdate" value="<%= currentDate %>" />
+                    <input type="submit" class="btn btn-default" value="Filter">
+                </form>
+                <button class="btn btn-info" id="csvExport">CSV Export</button>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="d-flex justify-content-start flex-wrap" id="options-timesheets-records">
 </div>
 
 <!-- Modal -->
-        <div class="modal" id="clockModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
-                        <h5 class="modal-title" id="exampleModalLabel2">Edit Clock</h5>
-                    <div class="modal-body" id="clock-body">
-                        Please wait...
-                    </div>
-                    <div class="modal-footer">
-                    </div>
-        </div>
+<div class="modal" id="clockModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+    <h5 class="modal-title" id="exampleModalLabel2">Edit Clock</h5>
+    <div class="modal-body" id="clock-body">
+        Please wait...
+    </div>
+    <div class="modal-footer">
+    </div>
+</div>
 <script src="../../js/timesheet/timesheet.js"></script>
