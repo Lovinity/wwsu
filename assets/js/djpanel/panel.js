@@ -52,6 +52,8 @@ waitFor(() => {
   io.socket.on('connect', () => {
     DJs.replaceData(noReq, '/djs/get')
   })
+
+  DJs.replaceData(noReq, '/djs/get')
 })
 
 document.querySelector(`#accordionSidebar`).addEventListener('click', function (e) {
