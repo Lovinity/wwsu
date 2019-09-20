@@ -473,7 +473,7 @@ function doRequests () {
   })
 }
 
-function activateMenu (menu) {
+function activateMenu (menuItem) {
   menu.map((item) => {
     var temp = document.querySelector(item)
     if (temp !== null) {
@@ -488,12 +488,12 @@ function activateMenu (menu) {
     }
   })
 
-  var temp = document.querySelector(`#${menu}`)
+  var temp = document.querySelector(`#${menuItem}`)
   if (temp !== null) {
     temp.classList.add('active')
   }
 
-  switch (menu) {
+  switch (menuItem) {
     case 'menu-home':
     case 'menu-dashboard':
       temp = document.querySelector(`#body-dashboard`)
