@@ -44,10 +44,11 @@ waitFor(() => {
   // Register event handlers
   io.socket.on('connect', () => {
     DJs.replaceData(noReq, '/djs/get')
-    doRequests()
   })
 
-  doRequests()
+  DJs.setOnReplace(() => {
+    doRequests()
+  })
 })
 
 document.querySelector(`#accordionSidebar`).addEventListener('click', function (e) {
