@@ -108,7 +108,7 @@ document.querySelector(`#dj-attendance`).addEventListener('click', function (e) 
         document.querySelector('#dj-show-logs').innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`
         document.querySelector('#dj-logs-listeners').innerHTML = ''
         $('#options-modal-dj-logs').iziModal('open')
-        DJReq.request({ method: 'POST', url: '/logs/get-dj', data: { attendanceID: parseInt(e.target.id.replace(`dj-show-logs-`, ``)) } }, function (response) {
+        DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: parseInt(e.target.id.replace(`dj-show-logs-`, ``)) } }, function (response) {
           var logs = document.querySelector('#dj-show-logs')
           logs.scrollTop = 0
           var newLog = ``
@@ -146,7 +146,7 @@ document.querySelector(`#dj-attendance`).addEventListener('click', function (e) 
 })
 
 function doRequests () {
-  DJReq.request({ method: 'POST', url: '/djs/get-web', data: {} }, (response) => {
+  DJReq.request({ db: DJs.db(), method: 'POST', url: '/djs/get-web', data: {} }, (response) => {
     if (typeof response.stats === 'undefined') {
       iziToast.show({
         title: 'An error occurred',
