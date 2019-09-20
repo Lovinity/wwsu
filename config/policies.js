@@ -39,6 +39,7 @@ module.exports.policies = {
   'discipline/remove': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'display/public': 'isBanned',
   'display/internal': 'isBanned',
+  dj: 'isBanned',
   'djs/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'djs/get': ['isBanned', 'isSocket'],
   'djs/get-web': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
