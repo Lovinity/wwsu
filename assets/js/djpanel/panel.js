@@ -1,7 +1,6 @@
-/* global WWSUdb, TAFFY, WWSUreq, iziToast, $, Taucharts */
+/* global WWSUdb, TAFFY, WWSUreq, iziToast, JQuery, Taucharts */
 
-$.noConflict()
-
+jQuery.noConflict()
 var DJReq
 var noReq
 var DJs = new WWSUdb(TAFFY())
@@ -104,7 +103,7 @@ function doRequests () {
       analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
 
       // Render analytics table
-      $('#analytics-table').DataTable({
+      jQuery('#analytics-table').DataTable({
         data: analyticsTable,
         columns: [
           { title: "" },
@@ -461,7 +460,7 @@ function activateMenu (menuItem) {
 
 function loadLog (logID) {
   document.querySelector('#dj-show-logs').innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`
-  $('#options-modal-dj-logs').iziModal('open')
+  jQuery('#options-modal-dj-logs').iziModal('open')
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
     var logs = document.querySelector('#dj-show-logs')
     logs.scrollTop = 0
