@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - djs/get-web for the DJ Web panel. Similar to djs/get except uses DJ authorization instead of host authorization.
 
+### Fixed
+ - timesheet/edit bug
+ - director clock-out at midnight bug.
+
 ## [6.0.0 BETA 6] (Due to being behind the release schedule, 6.0.0 will never be stable)
 ### REMOVED
  - Removed deprecated discipline endpoints discipline/ban-* [Issue 64](https://github.com/Lovinity/wwsu/issues/64)
