@@ -203,6 +203,81 @@ function doRequests () {
       temp = document.querySelector('#dj-remotecreditsL')
       if (temp !== null) { temp.innerHTML = response.stats.overall.remoteCredits }
 
+      // Show Notices
+      temp = document.querySelector('#dash-show')
+      if (temp !== null) {
+        var notices = ''
+        if (response.stats.semester.missedIDsArray.length > 1) {
+          notices += `<div class="card mb-4 py-3 border-left-danger">
+          <div class="card-body">
+            This semester, you did not take a required Top of the hour ID break for the show dates listed below (if a show date is listed more the once, you missed an ID more than once). We are required by the FCC to take a break at the top of every hour. <strong>Not doing the top of the hour break could result in suspension of your show.</strong>
+            <ul>
+            <li>
+            ${response.stats.semester.missedIDsArray.join('</li><li>')}
+            </li>
+            </ul>
+          </div>
+        </div>`
+        }
+        if (response.stats.semester.missedIDsArray.length > 1) {
+          notices += `<div class="card mb-4 py-3 border-left-danger">
+          <div class="card-body">
+            This semester, you did not take a required Top of the hour ID break for the show dates listed below (if a show date is listed more the once, you missed an ID more than once).
+            <ul>`
+          response.stats.semester.missedIDsArray.map((item) => {
+            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+          })
+          notices += `</ul>
+          <p>We are required by the FCC to take a break at the top of every hour. <strong>Not doing the top of the hour break could result in suspension of your show.</strong></p>
+          </div>
+          </div>`
+        }
+
+        if (response.stats.semester.absencesArray.length > 1) {
+          notices += `<div class="card mb-4 py-3 border-left-danger">
+          <div class="card-body">
+            This semester, you were scheduled to do a show on the following dates / times, but you did not show up nor cancel ahead of time.
+            <ul>`
+          response.stats.semester.absencesArray.map((item) => {
+            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+          })
+          notices += `</ul>
+          <p>DJs are required to either cancel their show or request a re-run via the "Cancel an Episode" or "Air a re-run" pages on the DJ panel (see the left menu) if they are not doing a show. Repeated unexcused absences may result in suspension of your show. Please contact a director if you canceled a show listed above in advance, or if a show listed above fell within a "shows optional" period.</p>
+          </div>
+          </div>`
+        }
+
+        if (response.stats.semester.offStartArray.length > 1) {
+          notices += `<div class="card mb-4 py-3 border-left-warning">
+          <div class="card-body">
+            This semester, you started your show 10+ minutes early or late on the following dates / times.
+            <ul>`
+          response.stats.semester.offStartArray.map((item) => {
+            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+          })
+          notices += `</ul>
+          <p>In the future, please contact a director or use the "Request a Time Change" page in the DJ panel if you expect to be late for your show, or you want to air your show at a different time. Repeatedly not airing your show on time could result in suspension of your show.</p>
+          </div>
+          </div>`
+        }
+
+        if (response.stats.semester.offEndArray.length > 1) {
+          notices += `<div class="card mb-4 py-3 border-left-warning">
+          <div class="card-body">
+            This semester, you ended your show 10+ minutes early or late on the following dates / times.
+            <ul>`
+          response.stats.semester.offEndArray.map((item) => {
+            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+          })
+          notices += `</ul>
+          <p>In the future, please contact a director or use the "Request a Time Change" page in the DJ panel if you want to end your show early, or you want to air your show at a different time. Repeatedly not airing your show on time could result in suspension of your show.</p>
+          </div>
+          </div>`
+        }
+
+        temp.innerHTML = notices
+      }
+
       // Show Logs and show listener graph
       var data = []
       temp = document.querySelector('#dj-attendance')
