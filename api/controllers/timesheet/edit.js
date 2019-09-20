@@ -58,16 +58,12 @@ module.exports = {
       // Update the timesheet record
       var records = await sails.models.timesheet.update({ ID: inputs.ID }, { timeIn: moment(inputs.timeIn).toISOString(true), timeOut: moment(inputs.timeOut).toISOString(true), approved: inputs.approved }).fetch()
 
-      // Update director calendar
-      var IDs = []
-      records.map((record) => IDs.push(record.unique))
+      if (records.length > 0) {
+        if (inputs.approved === -1) { await sails.models.directorhours.update({ unique: records[0].unique, active: [1, 2] }, { active: -1 }).fetch() }
 
-      if (IDs.length > 0) {
-        if (inputs.approved === -1) { await sails.models.directorhours.update({ unique: IDs, active: [1, 2] }, { active: -1 }).fetch() }
+        if (inputs.approved === 0 || inputs.approved === 1) { await sails.models.directorhours.update({ unique: records[0].unique, active: [-1, 2] }, { active: 1 }).fetch() }
 
-        if (inputs.approved === 0 || inputs.approved === 1) { await sails.models.directorhours.update({ unique: IDs, active: [-1, 2] }, { active: 1 }).fetch() }
-
-        if (inputs.approved === 2) { await sails.models.directorhours.update({ unique: IDs, active: [-1, 1] }, { active: 2 }).fetch() }
+        if (inputs.approved === 2) { await sails.models.directorhours.update({ unique: records[0].unique, active: [-1, 1] }, { active: 2 }).fetch() }
       }
 
       // Force a re-load of all directors to update any possible changes in presence

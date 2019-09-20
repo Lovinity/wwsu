@@ -1276,7 +1276,7 @@ module.exports.bootstrap = async function (done) {
       try {
         await sails.helpers.meta.change.with({ time: moment().toISOString(true) })
 
-        var records = await sails.models.timesheet.find({ time_in: { '!=': null }, time_out: null })
+        var records = await sails.models.timesheet.find({ timeIn: { '!=': null }, timeOut: null })
         var recordsX = []
         if (records.length > 0) {
           var theStart
