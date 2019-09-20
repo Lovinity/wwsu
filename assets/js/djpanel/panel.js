@@ -201,8 +201,8 @@ function doRequests () {
           }
           response.attendance.sort(compare)
           response.attendance.map(record => {
-            if (record.listenerMinutes !== null) {
-              data.push({ x: moment(record.actualStart).toISOString(true), y: Math.floor((record.listenerMinutes / 60) * 100) / 100 })
+            if (record.showTime !== null) {
+              data.push({ x: moment(record.actualStart).toISOString(true), y: record.showTime > 0 ? (record.listenerMinutes / record.showTime) : 0, showTime: record.showTime, listenerMinutes: record.listenerMinutes })
             }
             var theDate = record.actualStart !== null ? record.actualStart : record.scheduledStart
             if (record.scheduledStart === null) {
@@ -379,9 +379,8 @@ function doRequests () {
               y: 'y',
               color: 'primary',
               guide: {
-                y: { label: { text: 'Total Listener Hours' }, autoScale: true, nice: true },
-                x: { label: { text: 'Show Time' }, autoScale: true, nice: false },
-                interpolate: 'step-after',
+                y: { label: { text: 'Show time : Online Listener Ratio' }, autoScale: true, nice: true },
+                x: { label: { text: 'Date/Time of Show' }, autoScale: true, nice: false },
                 showGridLines: 'xy'
               },
               dimensions: {
@@ -398,9 +397,9 @@ function doRequests () {
                 Taucharts.api.plugins.get('tooltip')({
                   formatters: {
                     x: {
-                      label: 'Show Time',
+                      label: 'Show Time : Online Listeners ratio',
                       format: function (n) {
-                        return moment(n).format('LLL')
+                        return n
                       }
                     },
                     y: {
@@ -408,8 +407,19 @@ function doRequests () {
                       format: function (n) {
                         return n
                       }
+                    },
+                    showTime: {
+                      label: 'Show Time (minutes)',
+                      format: function (n) {
+                        return formatInt(n)
+                      }
+                    },
+                    listenerMinutes: {
+                      label: 'Online Listeners (minutes)',
+                      format: function (n) {
+                        return formatInt(n)
+                      }
                     }
-
                   }
                 })
               ]
