@@ -189,7 +189,7 @@ module.exports = {
               }
               DJs[record.dj].semester.missedIDs += record.missedIDs
               DJs[0].semester.missedIDs += record.missedIDs
-              DJs[record.dj].semester.missedIDsArray.push(moment(record.actualStart).toISOString(true))
+              if (record.missedIDs > 0) { DJs[record.dj].semester.missedIDsArray.push(moment(record.actualStart).toISOString(true)) }
             }
           }
 

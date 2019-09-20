@@ -21,7 +21,7 @@ var containers = [
   '#body-analytics'
 ]
 
-function waitFor(check, callback, count = 0) {
+function waitFor (check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
       count++
@@ -54,56 +54,6 @@ waitFor(() => {
   })
 
   DJs.replaceData(noReq, '/djs/get')
-})
-
-document.querySelector(`#accordionSidebar`).addEventListener('click', function (e) {
-  try {
-    console.log(e.target.id)
-    if (e.target) {
-      if (e.target.id.startsWith(`menu-`)) {
-        menu.map((item) => {
-          var temp = document.querySelector(item)
-          if (temp !== null) {
-            temp.classList.remove('active')
-          }
-        })
-
-        containers.map((item) => {
-          var temp = document.querySelector(item)
-          if (temp !== null) {
-            temp.style.display = 'none'
-          }
-        })
-
-        var temp = document.querySelector(`#${e.target.id}`)
-        if (temp !== null) {
-          temp.classList.add('active')
-        }
-
-        switch (e.target.id) {
-          case 'menu-home':
-          case 'menu-dashboard':
-            temp = document.querySelector(`#body-dashboard`)
-            if (temp !== null) {
-              delete temp.style.display
-            }
-            break
-          case 'menu-analytics':
-            temp = document.querySelector(`#body-analytics`)
-            if (temp !== null) {
-              delete temp.style.display
-            }
-            break
-        }
-      }
-    }
-  } catch (err) {
-    console.error(err)
-    iziToast.show({
-      title: 'An error occurred - Please inform engineer@wwsu1069.org.',
-      message: 'Error occurred during the click event of #accordionSidebar.'
-    })
-  }
 })
 
 document.querySelector(`#dj-attendance`).addEventListener('click', function (e) {
@@ -151,7 +101,7 @@ document.querySelector(`#dj-attendance`).addEventListener('click', function (e) 
   }
 })
 
-function doRequests() {
+function doRequests () {
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/djs/get-web', data: {} }, (response) => {
     if (typeof response.stats === 'undefined') {
       iziToast.show({
@@ -184,18 +134,24 @@ function doRequests() {
       if (temp !== null) { temp.innerHTML = response.stats.overall.remotes }
 
       // Showtime
+      temp = document.querySelector('#dash-showtime')
+      if (temp !== null) { temp.innerHTML = Math.floor((response.stats.overall.showtime / 60) * 100) / 100 }
       temp = document.querySelector('#dj-showtime')
       if (temp !== null) { temp.innerHTML = response.stats.semester.showtime }
       temp = document.querySelector('#dj-showtimeL')
       if (temp !== null) { temp.innerHTML = response.stats.overall.showtime }
 
       // Listener hours
+      temp = document.querySelector('#dash-hours')
+      if (temp !== null) { temp.innerHTML = Math.floor((response.stats.overall.listeners / 60) * 100) / 100 }
       temp = document.querySelector('#dj-listenertime')
       if (temp !== null) { temp.innerHTML = response.stats.semester.listeners }
       temp = document.querySelector('#dj-listenertimeL')
       if (temp !== null) { temp.innerHTML = response.stats.overall.listeners }
 
       // XP
+      temp = document.querySelector('#dash-XP')
+      if (temp !== null) { temp.innerHTML = response.stats.overall.xp }
       temp = document.querySelector('#dj-xp')
       if (temp !== null) { temp.innerHTML = response.stats.semester.xp }
       temp = document.querySelector('#dj-xpL')
@@ -213,18 +169,6 @@ function doRequests() {
       temp = document.querySelector('#dash-show')
       if (temp !== null) {
         var notices = ''
-        if (response.stats.semester.missedIDsArray.length > 1) {
-          notices += `<div class="card mb-4 py-3 border-left-danger">
-          <div class="card-body">
-            This semester, you did not take a required Top of the hour ID break for the show dates listed below (if a show date is listed more the once, you missed an ID more than once). We are required by the FCC to take a break at the top of every hour. <strong>Not doing the top of the hour break could result in suspension of your show.</strong>
-            <ul>
-            <li>
-            ${response.stats.semester.missedIDsArray.join('</li><li>')}
-            </li>
-            </ul>
-          </div>
-        </div>`
-        }
         if (response.stats.semester.missedIDsArray.length > 1) {
           notices += `<div class="card mb-4 py-3 border-left-danger">
           <div class="card-body">
@@ -527,4 +471,41 @@ function doRequests() {
       }
     }
   })
+}
+
+function activateMenu (menu) {
+  menu.map((item) => {
+    var temp = document.querySelector(item)
+    if (temp !== null) {
+      temp.classList.remove('active')
+    }
+  })
+
+  containers.map((item) => {
+    var temp = document.querySelector(item)
+    if (temp !== null) {
+      temp.style.display = 'none'
+    }
+  })
+
+  var temp = document.querySelector(`#${menu}`)
+  if (temp !== null) {
+    temp.classList.add('active')
+  }
+
+  switch (menu) {
+    case 'menu-home':
+    case 'menu-dashboard':
+      temp = document.querySelector(`#body-dashboard`)
+      if (temp !== null) {
+        delete temp.style.display
+      }
+      break
+    case 'menu-analytics':
+      temp = document.querySelector(`#body-analytics`)
+      if (temp !== null) {
+        delete temp.style.display
+      }
+      break
+  }
 }
