@@ -1,5 +1,7 @@
 /* global WWSUdb, TAFFY, WWSUreq, iziToast, $, Taucharts */
 
+$.noConflict()
+
 var DJReq
 var noReq
 var DJs = new WWSUdb(TAFFY())
