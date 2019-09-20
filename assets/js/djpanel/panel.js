@@ -66,59 +66,51 @@ function doRequests () {
     } else {
       // Populate DJ statistics and information
 
+      var analyticsTable = []
+
       // DJ Name
       var temp = document.querySelector('#dj-name')
       if (temp !== null) { temp.innerHTML = response.stats.name }
 
       // Live Shows
-      temp = document.querySelector('#dj-shows')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.shows }
-      temp = document.querySelector('#dj-showsL')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.shows }
+      analyticsTable.push([ '<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows) ])
 
       // Prerecords
-      temp = document.querySelector('#dj-prerecords')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.prerecords }
-      temp = document.querySelector('#dj-prerecordsL')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.prerecords }
+      analyticsTable.push([ '<i class="fas fa-compact-disc" width="32"></i>', 'Prerecorded Shows', formatInt(response.stats.semester.prerecords), formatInt(response.stats.overall.prerecords) ])
 
       // Remotes
-      temp = document.querySelector('#dj-remotes')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.remotes }
-      temp = document.querySelector('#dj-remotesL')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.remotes }
+      analyticsTable.push([ '<i class="fas fa-broadcast-tower" width="32"></i>', 'Remote Broadcasts', formatInt(response.stats.semester.remotes), formatInt(response.stats.overall.remotes) ])
 
       // Showtime
       temp = document.querySelector('#dash-showtime')
-      if (temp !== null) { temp.innerHTML = Math.floor((response.stats.overall.showtime / 60) * 100) / 100 }
-      temp = document.querySelector('#dj-showtime')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.showtime }
-      temp = document.querySelector('#dj-showtimeL')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.showtime }
+      if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) }
+      analyticsTable.push([ '<i class="fas fa-play" width="32"></i>', 'Showtime (Hours)', formatInt(Math.floor((response.stats.semester.showtime / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) ])
 
       // Listener hours
       temp = document.querySelector('#dash-hours')
-      if (temp !== null) { temp.innerHTML = Math.floor((response.stats.overall.listeners / 60) * 100) / 100 }
-      temp = document.querySelector('#dj-listenertime')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.listeners }
-      temp = document.querySelector('#dj-listenertimeL')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.listeners }
+      if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) }
+      analyticsTable.push([ '<i class="fas fa-headphones" width="32"></i>', 'Online Listeners (Hours)', formatInt(Math.floor((response.stats.semester.listeners / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) ])
 
       // XP
       temp = document.querySelector('#dash-XP')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.xp }
-      temp = document.querySelector('#dj-xp')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.xp }
-      temp = document.querySelector('#dj-xpL')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.xp }
+      if (temp !== null) { temp.innerHTML = formatInt(response.stats.overall.xp) }
+      analyticsTable.push([ '<i class="fas fa-star" width="32"></i>', 'Experience Points (XP)', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp) ])
 
       // Remote credits
       temp = document.querySelector('#dash-credits')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.remoteCredits }
-      temp = document.querySelector('#dj-remotecredits')
-      if (temp !== null) { temp.innerHTML = response.stats.semester.remoteCredits }
-      temp = document.querySelector('#dj-remotecreditsL')
-      if (temp !== null) { temp.innerHTML = response.stats.overall.remoteCredits }
+      if (temp !== null) { temp.innerHTML = formatInt(response.stats.semester.remoteCredits) }
+      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
+
+      // Render analytics table
+      $('#analytics-table').DataTable({
+        data: analyticsTable,
+        columns: [
+          { title: "" },
+          { title: "Statistic" },
+          { title: "Semester" },
+          { title: "Lifetime" },
+        ]
+      })
 
       // Show Notices
       temp = document.querySelector('#dash-show')
@@ -453,13 +445,13 @@ function activateMenu (menuItem) {
     case 'menu-dashboard':
       temp = document.querySelector(`#body-dashboard`)
       if (temp !== null) {
-        temp.style.display = undefined
+        temp.style.removeProperty('display')
       }
       break
     case 'menu-analytics':
       temp = document.querySelector(`#body-analytics`)
       if (temp !== null) {
-        temp.style.display = undefined
+        temp.style.removeProperty('display')
       }
       break
   }
@@ -467,7 +459,6 @@ function activateMenu (menuItem) {
 
 function loadLog (logID) {
   document.querySelector('#dj-show-logs').innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`
-  document.querySelector('#dj-logs-listeners').innerHTML = ''
   $('#options-modal-dj-logs').iziModal('open')
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
     var logs = document.querySelector('#dj-show-logs')
@@ -495,4 +486,8 @@ function loadLog (logID) {
       logs.innerHTML = 'ERROR: Unable to load the log for that show. Please try again or contact engineer@wwsu1069.org .'
     }
   })
+}
+
+function formatInt (x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
