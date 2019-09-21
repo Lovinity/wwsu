@@ -8,7 +8,7 @@ module.exports = {
     attendanceID: {
       type: 'number',
       allowNull: true,
-      description: 'If provided, logs pertaining to this attendance record ID will be returned. This overwrites start, end, and date.'
+      description: 'If provided, logs pertaining to this attendance record ID will be returned if the authorized DJ is associated with the provided attendance ID.'
     }
   },
 
@@ -17,8 +17,12 @@ module.exports = {
 
     try {
       // Get records
-      var records = await sails.models.logs.find({ attendanceID: inputs.attendance, dj: this.req.payload.ID }).sort('createdAt ASC')
+      var dj = await sails.models.attendance.findOne({ ID: inputs.attendanceID })
+      if (!dj || dj.ID !== this.req.payload.ID) {
+        return exits.success([])
+      }
 
+      var records = await sails.models.logs.find({ attendanceID: inputs.attendanceID }).sort('createdAt ASC')
       sails.log.verbose(`Retrieved Logs records: ${records.length}`)
 
       return exits.success(records)
