@@ -332,7 +332,7 @@ function doRequests() {
           })
 
           // Render analytics table
-          jQuery('#analytics-table').DataTable({
+          jQuery('#logs-table').DataTable({
             data: djLogs,
             responsive: true
           })
