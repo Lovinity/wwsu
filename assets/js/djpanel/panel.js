@@ -437,34 +437,36 @@ function activateMenu(menuItem) {
 }
 
 function loadLog(logID) {
-  document.querySelector('#dj-show-logs').innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`
-  jQuery('#options-modal-dj-logs').iziModal('open')
-  DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
-    var logs = document.querySelector('#dj-show-logs')
-    logs.scrollTop = 0
-    var newLog = ``
-    if (response.length > 0) {
-      response.map(log => {
-        if (log.logLevel === 'urgent') { log.logLevel = 'warning' }
-        if (log.logLevel === 'purple') { log.logLevel = 'secondary' }
-        newLog += `<div class="row card mb-4 py-3 border-left-${log.logLevel}">
-                                <div class="card-body">
-                                <div class="col-3 text-primary">
-                                    ${moment(log.createdAt).format('h:mm:ss A')}
-                                </div>
-                                <div class="col-9 text-secondary">
-                                ${log.event}
-                                ${log.trackArtist !== null && log.trackArtist !== '' ? `<br />Track: ${log.trackArtist}` : ``}${log.trackTitle !== null && log.trackTitle !== '' ? ` - ${log.trackTitle}` : ``}
-                                ${log.trackAlbum !== null && log.trackAlbum !== '' ? `<br />Album: ${log.trackAlbum}` : ``}
-                                ${log.trackLabel !== null && log.trackLabel !== '' ? `<br />Label: ${log.trackLabel}` : ``}
-                                </div>
-                            </div></div>`
-      })
-      logs.innerHTML = newLog
-    } else {
-      logs.innerHTML = 'ERROR: Unable to load the log for that show. Please try again or contact engineer@wwsu1069.org .'
-    }
-  })
+  jQuery('#modal-dj-logs').iziModal('open')
+  var logs = document.querySelector('#dj-show-logs')
+  if (logs !== null) {
+    logs.innerHTML = `<table class="table table-bordered" id="dj-show-logs-table" width="100%" cellspacing="0"></table>`
+    DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
+      logs.scrollTop = 0
+      var newLog = []
+      if (response.length > 0) {
+        response.map(log => {
+          if (log.logLevel === 'urgent') { log.logLevel = 'warning' }
+          if (log.logLevel === 'purple') { log.logLevel = 'secondary' }
+          newLog.push([`<span class="text-${log.logLevel}"><i class="fas fa-dot-circle" width="32"></i></span>`, moment(log.createdAt).format('h:mm:ss A'), `${log.event}
+          ${log.trackArtist !== null && log.trackArtist !== '' ? `<br />Track: ${log.trackArtist}` : ``}${log.trackTitle !== null && log.trackTitle !== '' ? ` - ${log.trackTitle}` : ``}
+          ${log.trackAlbum !== null && log.trackAlbum !== '' ? `<br />Album: ${log.trackAlbum}` : ``}
+          ${log.trackLabel !== null && log.trackLabel !== '' ? `<br />Label: ${log.trackLabel}` : ``}`])
+        })
+        jQuery('#dj-show-logs-table').DataTable({
+          data: newLog,
+          responsive: true,
+          columns: [
+            { title: "" },
+            { title: "Time" },
+            { title: "Event" }
+          ]
+        })
+      } else {
+        logs.innerHTML = 'ERROR: Unable to load the log for that show. Please try again or contact engineer@wwsu1069.org .'
+      }
+    })
+  }
 }
 
 function formatInt(x) {
