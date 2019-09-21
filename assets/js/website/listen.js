@@ -793,10 +793,10 @@ function doMeta (response) {
 
     // Update meta and color code it, if new meta was provided
     if (('line1' in response || 'line2' in response) && nowPlaying) {
-      if (Meta.state.includes('live_')) { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>` }
-      if (Meta.state.includes('sports_') || Meta.state.includes('sportsremote_')) { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>` }
-      if (Meta.state.includes('remote_')) { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>` }
-      if (Meta.state.includes('automation_') || Meta.state === 'unknown') { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>` }
+      if (Meta.state.startsWith('live_') || Meta.state.startsWith('prerecord_')) { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>` }
+      if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>` }
+      if (Meta.state.startsWith('remote_')) { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}<br />${(Meta.topic.length > 2 ? `Topic: ${Meta.topic}` : '')}</div>` }
+      if (Meta.state.startsWith('automation_') || Meta.state === 'unknown') { nowPlaying.innerHTML = `<div class="p-3 mb-2 shadow-4 bg-light-1">${Meta.line1}<br />${Meta.line2}</div>` }
       iziToast.show({
         title: Meta.line1,
         message: Meta.line2,
@@ -825,7 +825,7 @@ function doMeta (response) {
 
     // If a state change was returned, process it by informing the client whether or not there is probably a DJ at the studio to read messages
     if ('state' in response) {
-      if (response.state.includes('automation_') || Meta.state === 'unknown') {
+      if (response.state.startsWith('automation_') || Meta.state === 'unknown') {
         if (automationpost !== 'automation') {
           temp = document.getElementById('msg-state')
           if (temp) { temp.remove() }
@@ -838,11 +838,11 @@ function doMeta (response) {
         temp = document.querySelector(`#show-subscribe`)
         if (temp !== null) { temp.style.display = 'none' }
       } else if (response.state.startsWith('prerecord_')) {
-        if (automationpost !== response.live) {
+        if (automationpost !== response.show) {
           temp = document.getElementById('msg-state')
           if (temp) { temp.remove() }
           if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>` }
-          automationpost = response.live
+          automationpost = response.show
           if (shouldScroll && document.querySelector('#messages')) {
             $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
           }
@@ -891,11 +891,11 @@ function doMeta (response) {
           }
         }
       } else {
-        if (automationpost !== response.live) {
+        if (automationpost !== response.show) {
           temp = document.getElementById('msg-state')
           if (temp) { temp.remove() }
           if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>` }
-          automationpost = response.live
+          automationpost = response.show
           if (shouldScroll && document.querySelector('#messages')) {
             $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
           }
