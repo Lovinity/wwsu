@@ -23,6 +23,7 @@ var containers = [
 ]
 
 jQuery('#modal-dj-logs').iziModal({
+  title: 'Show Logs',
   width: '75%',
   focusInput: true,
   arrowKeys: false,
@@ -460,9 +461,9 @@ function loadLog(logID) {
       var newLog = []
       if (response.length > 0) {
         response.map(log => {
-          if (log.logLevel === 'urgent') { log.logLevel = 'warning' }
-          if (log.logLevel === 'purple') { log.logLevel = 'secondary' }
-          newLog.push([`<span class="text-${log.logLevel}"><i class="fas fa-dot-circle" width="32"></i></span>`, moment(log.createdAt).format('h:mm:ss A'), `${log.event}
+          if (log.loglevel === 'urgent') { log.loglevel = 'warning' }
+          if (log.loglevel === 'purple') { log.loglevel = 'secondary' }
+          newLog.push([`<span class="text-${log.loglevel}"><i class="fas fa-dot-circle" width="32"></i></span>`, moment(log.createdAt).format('h:mm:ss A'), `${log.event}
           ${log.trackArtist !== null && log.trackArtist !== '' ? `<br />Track: ${log.trackArtist}` : ``}${log.trackTitle !== null && log.trackTitle !== '' ? ` - ${log.trackTitle}` : ``}
           ${log.trackAlbum !== null && log.trackAlbum !== '' ? `<br />Album: ${log.trackAlbum}` : ``}
           ${log.trackLabel !== null && log.trackLabel !== '' ? `<br />Label: ${log.trackLabel}` : ``}`])
