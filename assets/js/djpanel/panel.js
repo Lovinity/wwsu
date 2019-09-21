@@ -139,7 +139,7 @@ function doRequests() {
       temp = document.querySelector('#dash-show')
       if (temp !== null) {
         var notices = ''
-        if (response.stats.semester.missedIDsArray.length > 1) {
+        if (response.stats.semester.missedIDsArray.length > 0) {
           notices += `<div class="card mb-4 py-3 border-left-danger">
           <div class="card-body">
             This semester, you did not take a required Top of the hour ID break for the show dates listed below (if a show date is listed more the once, you missed an ID more than once).
@@ -153,7 +153,7 @@ function doRequests() {
           </div>`
         }
 
-        if (response.stats.semester.absencesArray.length > 1) {
+        if (response.stats.semester.absencesArray.length > 0) {
           notices += `<div class="card mb-4 py-3 border-left-danger">
           <div class="card-body">
             This semester, you were scheduled to do a show on the following dates / times, but you did not show up nor cancel ahead of time.
@@ -167,7 +167,7 @@ function doRequests() {
           </div>`
         }
 
-        if (response.stats.semester.offStartArray.length > 1) {
+        if (response.stats.semester.offStartArray.length > 0) {
           notices += `<div class="card mb-4 py-3 border-left-warning">
           <div class="card-body">
             This semester, you started your show 10+ minutes early or late on the following dates / times.
@@ -181,7 +181,7 @@ function doRequests() {
           </div>`
         }
 
-        if (response.stats.semester.offEndArray.length > 1) {
+        if (response.stats.semester.offEndArray.length > 0) {
           notices += `<div class="card mb-4 py-3 border-left-warning">
           <div class="card-body">
             This semester, you ended your show 10+ minutes early or late on the following dates / times.
