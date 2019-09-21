@@ -185,7 +185,7 @@ function doRequests() {
 
       // Show Logs and show listener graph
       var data = []
-      temp = document.querySelector('#dj-attendance')
+      temp = document.querySelector('#logs-table')
       if (temp !== null) {
         var newAtt = ``
         if (response.attendance.length > 0) {
