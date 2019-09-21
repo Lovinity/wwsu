@@ -22,6 +22,20 @@ var containers = [
   '#body-analytics'
 ]
 
+jQuery('#modal-dj-logs').iziModal({
+  width: '75%',
+  focusInput: true,
+  arrowKeys: false,
+  navigateCaption: false,
+  navigateArrows: false, // Boolean, 'closeToModal', 'closeScreenEdge'
+  overlayClose: false,
+  overlayColor: 'rgba(0, 0, 0, 0.75)',
+  timeout: false,
+  pauseOnHover: true,
+  timeoutProgressbarColor: 'rgba(255,255,255,0.5)',
+  zindex: 50
+})
+
 function waitFor(check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
