@@ -22,7 +22,7 @@ var containers = [
   '#body-analytics'
 ]
 
-function waitFor (check, callback, count = 0) {
+function waitFor(check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
       count++
@@ -57,7 +57,7 @@ waitFor(() => {
   DJs.replaceData(noReq, '/djs/get')
 })
 
-function doRequests () {
+function doRequests() {
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/djs/get-web', data: {} }, (response) => {
     if (typeof response.stats === 'undefined') {
       iziToast.show({
@@ -74,33 +74,40 @@ function doRequests () {
       if (temp !== null) { temp.innerHTML = response.stats.name }
 
       // Live Shows
-      analyticsTable.push([ '<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows) ])
+      analyticsTable.push(['<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows)])
 
       // Prerecords
-      analyticsTable.push([ '<i class="fas fa-compact-disc" width="32"></i>', 'Prerecorded Shows', formatInt(response.stats.semester.prerecords), formatInt(response.stats.overall.prerecords) ])
+      analyticsTable.push(['<i class="fas fa-compact-disc" width="32"></i>', 'Prerecorded Shows', formatInt(response.stats.semester.prerecords), formatInt(response.stats.overall.prerecords)])
 
       // Remotes
-      analyticsTable.push([ '<i class="fas fa-broadcast-tower" width="32"></i>', 'Remote Broadcasts', formatInt(response.stats.semester.remotes), formatInt(response.stats.overall.remotes) ])
+      analyticsTable.push(['<i class="fas fa-broadcast-tower" width="32"></i>', 'Remote Broadcasts', formatInt(response.stats.semester.remotes), formatInt(response.stats.overall.remotes)])
 
       // Showtime
       temp = document.querySelector('#dash-showtime')
       if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) }
-      analyticsTable.push([ '<i class="fas fa-play" width="32"></i>', 'Showtime (Hours)', formatInt(Math.floor((response.stats.semester.showtime / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) ])
+      analyticsTable.push(['<i class="fas fa-play" width="32"></i>', 'Showtime (Hours)', formatInt(Math.floor((response.stats.semester.showtime / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100)])
 
       // Listener hours
       temp = document.querySelector('#dash-hours')
       if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) }
-      analyticsTable.push([ '<i class="fas fa-headphones" width="32"></i>', 'Online Listeners (Hours)', formatInt(Math.floor((response.stats.semester.listeners / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) ])
+      analyticsTable.push(['<i class="fas fa-headphones" width="32"></i>', 'Online Listeners (Hours)', formatInt(Math.floor((response.stats.semester.listeners / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100)])
 
       // XP
       temp = document.querySelector('#dash-XP')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.overall.xp) }
-      analyticsTable.push([ '<i class="fas fa-star" width="32"></i>', 'Experience Points (XP)', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp) ])
+      analyticsTable.push(['<i class="fas fa-star" width="32"></i>', 'Experience Points (XP)', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp)])
 
       // Remote credits
       temp = document.querySelector('#dash-credits')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.semester.remoteCredits) }
-      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
+      analyticsTable.push(['<i class="fas fa-gem" width="32"></i>', 'Remote Credits', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits)])
+
+      // Reputation
+      analyticsTable.push(['<i class="fas fa-smile"></i>', 'Reputation / Responsibility', `<div class="progress progress-sm mr-2">
+      <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.semester.reputationPercent}%" aria-valuenow="${response.stats.semester.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>`, `<div class="progress progress-sm mr-2">
+    <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.overall.reputationPercent}%" aria-valuenow="${response.stats.overall.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
+  </div>`])
 
       // Render analytics table
       jQuery('#analytics-table').DataTable({
@@ -199,6 +206,8 @@ function doRequests () {
               })
             }
           }
+
+          var djLogs = []
           response.attendance.sort(compare)
           response.attendance.map(record => {
             if (record.showTime !== null) {
@@ -206,168 +215,127 @@ function doRequests () {
             }
             var theDate = record.actualStart !== null ? record.actualStart : record.scheduledStart
             if (record.scheduledStart === null) {
-              newAtt += `<div class="row card mb-4 py-3 border-left-danger" title="You went on the air when you were not scheduled to be on the air.">
-                              <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">UN-SCHEDULED</span><br />
-                                  <span class="text-primary">${moment(record.actualStart).format('h:mm A')} - ${record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`}</span>
-                                  ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
-                              </div>
-                              <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
-                  <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
-                  </button>
-                              </div>
-                          </div></div>`
+              djLogs.push([
+                moment(theDate).format('YYYY/MM/DD'),
+                record.event,
+                '',
+                '',
+                moment(record.actualStart).format('h:mm A'),
+                record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`,
+                '<i class="fas fa-exclamation-triangle"></i>',
+                '',
+                '',
+                '',
+                '',
+                0,
+                `<button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show"><span aria-hidden="true"><i class="fas fa-file text-dark"></i></span></button>`
+              ])
             } else if (moment(record.scheduledStart).isAfter(moment()) && record.happened === 1) {
-              newAtt += `<div class="row card mb-4 py-3 border-left-primary" title="This show has not aired yet.">
-                              <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">${moment(record.scheduledStart).format('h:mm A')} - ${moment(record.scheduledEnd).format('h:mm A')}</span><br />
-                                  <span class="text-primary">FUTURE EVENT</span>
-                              </div>
-                              <div class="col-2">
-                              </div>
-                          </div></div>`
+              djLogs.push([
+                moment(theDate).format('YYYY/MM/DD'),
+                record.event,
+                moment(record.scheduledStart).format('h:mm A'),
+                moment(record.scheduledEnd).format('h:mm A'),
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                0,
+                ``
+              ])
             } else if (record.actualStart !== null && record.actualEnd !== null) {
-              if (Math.abs(moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes')) >= 10 || Math.abs(moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes')) >= 10) {
-                var tempStart = moment(record.actualStart).format('h:mm A')
-                var tempEnd = record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`
-                if (moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') >= 10) {
-                  tempStart = `⚠️${moment(record.actualStart).format('h:mm A')}`
-                }
-                if (moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') <= -10) {
-                  tempStart = `${moment(record.actualStart).format('h:mm A')}⚠️`
-                }
-                if (moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes') >= 10) {
-                  tempEnd = `⚠️${record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`}`
-                }
-                if (moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes') <= -10) {
-                  tempEnd = `${record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`}⚠️`
-                }
-                newAtt += `<div class="row card mb-4 py-3 border-left-warning" title="You went on the air, or signed off, 10 or more minutes from the scheduled time.">
-                           <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">${moment(record.scheduledStart).format('h:mm A')} - ${moment(record.scheduledEnd).format('h:mm A')}</span><br />
-                                  <span class="text-primary">${tempStart} - ${tempEnd}</span>
-                                  ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
-                              </div>
-                              <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
-                  <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
-                  </button>
-                              </div>
-                          </div></div>`
-              } else {
-                newAtt += `<div class="row card mb-4 py-3 border-left-success" title="You went on the air during your scheduled time.">
-                              <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">${moment(record.scheduledStart).format('h:mm A')} - ${moment(record.scheduledEnd).format('h:mm A')}</span><br />
-                                  <span class="text-primary">${moment(record.actualStart).format('h:mm A')} - ${record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`}</span>
-                                  ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
-                              </div>
-                              <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
-                  <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
-                  </button>
-                              </div>
-                          </div></div>`
-              }
+              var tempStart = moment(record.actualStart).format('h:mm A')
+              var tempEnd = record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`
+              djLogs.push([
+                moment(theDate).format('YYYY/MM/DD'),
+                record.event,
+                moment(record.scheduledStart).format('h:mm A'),
+                moment(record.scheduledEnd).format('h:mm A'),
+                tempStart,
+                tempEnd,
+                '',
+                moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') >= 10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
+                moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') <= -10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
+                moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes') >= 10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
+                moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes') <= -10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
+                record.missedIDs,
+                `<button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show"><span aria-hidden="true"><i class="fas fa-file text-dark"></i></span></button>`
+              ])
             } else if (record.actualStart !== null && record.actualEnd === null) {
-              newAtt += `<div class="row card mb-4 py-3 border-left-primary" title="This show is still on the air.">
-                              <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">${moment(record.scheduledStart).format('h:mm A')} - ${moment(record.scheduledEnd).format('h:mm A')}</span><br />
-                                  <span class="text-primary">${moment(record.actualStart).format('h:mm A')} - ${record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`}</span>
-                                  ${record.missedIDs > 0 ? `<br /><span class="text-primary">⚠Missed IDs: ${record.missedIDs}</span>` : ``}
-                              </div>
-                              <div class="col-2">
-                                  <button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show">
-                  <span aria-hidden="true"><i class="fas fa-file text-dark"></i></span>
-                  </button>
-                              </div>
-                          </div></div>`
+              djLogs.push([
+                moment(theDate).format('YYYY/MM/DD'),
+                record.event,
+                moment(record.scheduledStart).format('h:mm A'),
+                moment(record.scheduledEnd).format('h:mm A'),
+                moment(record.actualStart).format('h:mm A'),
+                'ONGOING',
+                '',
+                moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') >= 10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
+                moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') <= -10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
+                '',
+                '',
+                record.missedIDs,
+                `<button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show"><span aria-hidden="true"><i class="fas fa-file text-dark"></i></span></button>`
+              ])
             } else if (record.happened === 0) {
-              newAtt += `<div class="row card mb-4 py-3 border-left-danger" title="You were scheduled to be on the air, but failed to do your show.">
-                              <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">${moment(record.scheduledStart).format('h:mm A')} - ${moment(record.scheduledEnd).format('h:mm A')}</span><br />
-                                  <span class="text-primary">NO-SHOW / ABSENT</span>
-                              </div>
-                              <div class="col-2">                        
-                              </div>
-                          </div></div>`
+              djLogs.push([
+                moment(theDate).format('YYYY/MM/DD'),
+                record.event,
+                moment(record.scheduledStart).format('h:mm A'),
+                moment(record.scheduledEnd).format('h:mm A'),
+                'ABSENT',
+                'ABSENT',
+                '',
+                '',
+                '',
+                '',
+                '',
+                0,
+                ``
+              ])
             } else if (record.happened === -1) {
-              newAtt += `<div class="row card mb-4 py-3 border-left-info" title="This show was canceled ahead of time.">
-                              <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">${moment(record.scheduledStart).format('h:mm A')} - ${moment(record.scheduledEnd).format('h:mm A')}</span><br />
-                                  <span class="text-primary">CANCELED</span>
-                              </div>
-                              <div class="col-2">
-                              </div>
-                          </div></div>`
+              djLogs.push([
+                moment(theDate).format('YYYY/MM/DD'),
+                record.event,
+                moment(record.scheduledStart).format('h:mm A'),
+                moment(record.scheduledEnd).format('h:mm A'),
+                'CANCELED',
+                'CANCELED',
+                '',
+                '',
+                '',
+                '',
+                '',
+                0,
+                ``
+              ])
             } else {
-              newAtt += `<div class="row card mb-4 py-3 border-left-primary" title="This show has not yet started">
-                              <div class="card-body">
-                              <div class="col-2 text-danger">
-                                  ${moment(theDate).format('MM/DD/YYYY')}
-                              </div>
-                              <div class="col-4 text-info">
-                                  ${record.event}
-                              </div>
-                              <div class="col-4">
-                                  <span class="text-secondary">${moment(record.scheduledStart).format('h:mm A')} - ${moment(record.scheduledEnd).format('h:mm A')}</span><br />
-                                  <span class="text-primary">NOT YET STARTED</span>
-                              </div>
-                              <div class="col-2">
-                              </div>
-                          </div></div>`
+              djLogs.push([
+                moment(theDate).format('YYYY/MM/DD'),
+                record.event,
+                moment(record.scheduledStart).format('h:mm A'),
+                moment(record.scheduledEnd).format('h:mm A'),
+                'SCHEDULED',
+                'SCHEDULED',
+                '',
+                '',
+                '',
+                '',
+                '',
+                0,
+                ``
+              ])
             }
           })
-          temp.innerHTML = newAtt
+
+          // Render analytics table
+          jQuery('#analytics-table').DataTable({
+            data: djLogs,
+            responsive: true
+          })
 
           temp = document.querySelector('#analytics-listenerChart')
           if (temp !== null) {
@@ -431,7 +399,7 @@ function doRequests () {
   })
 }
 
-function activateMenu (menuItem) {
+function activateMenu(menuItem) {
   menu.map((item) => {
     var temp = document.querySelector(item)
     if (temp !== null) {
@@ -468,7 +436,7 @@ function activateMenu (menuItem) {
   }
 }
 
-function loadLog (logID) {
+function loadLog(logID) {
   document.querySelector('#dj-show-logs').innerHTML = `<h2 class="text-warning" style="text-align: center;">PLEASE WAIT...</h4>`
   jQuery('#options-modal-dj-logs').iziModal('open')
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
@@ -499,6 +467,6 @@ function loadLog (logID) {
   })
 }
 
-function formatInt (x) {
+function formatInt(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
