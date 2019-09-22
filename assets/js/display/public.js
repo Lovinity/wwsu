@@ -1318,6 +1318,7 @@ function processNowPlaying (response) {
         countdown = document.getElementById('countdown')
         countdowntext = document.getElementById('countdown-text')
         countdownclock = document.getElementById('countdown-clock')
+        countdownclock.innerHTML = queuelength
         if (!countdown || !countdowntext || !countdownclock) {
           temp = Meta.show.split(' - ')
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
@@ -1327,7 +1328,6 @@ function processNowPlaying (response) {
           countdown = document.getElementById('countdown')
           countdowntext = document.getElementById('countdown-text')
           countdownclock = document.getElementById('countdown-clock')
-          countdownclock.innerHTML = queuelength
           countdowntext.innerHTML = `<span class="text-danger">${temp[ 0 ]}</span><br />is going live in`
           if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[ 0 ]} is about to go on the air on WWSU radio: ${temp[ 1 ]}.`) }
         }
@@ -1356,17 +1356,16 @@ function processNowPlaying (response) {
           countdown = document.getElementById('countdown')
           countdowntext = document.getElementById('countdown-text')
           countdownclock = document.getElementById('countdown-clock')
-          countdownclock.innerHTML = queuelength
           countdowntext.innerHTML = 'Remote Broadcast starting in'
           if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[ 0 ]} is about to remotely go on the air on WWSU radio: ${temp[ 1 ]}.`) }
         }
+        countdownclock.innerHTML = queuelength
         // Sports broadcast about to begin
       } else if ((Meta.state === 'automation_sports' || Meta.state.startsWith('sports_') || Meta.state === 'automation_sportsremote' || Meta.state.startsWith('sportsremote_')) && queuelength < 60 && (!Meta.queueCalculating || djAlert.style.display === 'inline')) {
         djAlert.style.display = 'inline'
         countdown = document.getElementById('countdown')
         countdowntext = document.getElementById('countdown-text')
         countdownclock = document.getElementById('countdown-clock')
-        countdownclock.innerHTML = queuelength
         if (!countdown || !countdowntext || !countdownclock) {
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
                     <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
@@ -1377,6 +1376,7 @@ function processNowPlaying (response) {
           countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span><br />about to broadcast in`
           if (!isStudio) { responsiveVoice.speak(`Raider Up! ${Meta.show} is about to go on the air on WWSU Radio.`) }
         }
+        countdownclock.innerHTML = queuelength
         if (Meta.state === 'automation_sports' || Meta.state.startsWith('sports_')) {
           if (queuelength <= 10) {
             if (!queueReminder && isStudio) { responsiveVoice.speak(`Attention! Producer is going live in less than 10 seconds`) }
