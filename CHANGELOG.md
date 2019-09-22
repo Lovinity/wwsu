@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - djs/get-web for the DJ Web panel. Similar to djs/get except uses DJ authorization instead of host authorization.
 
+### Changed
+ - Meta.queueFinish time will now include music tracks / openers when starting a broadcast to avoid confusion on the DJ Controls queue countdown. State will still switch to "*_on" after noMeta tracks have been played to trigger the recorder in DJ Controls.
+
 ### Fixed
  - timesheet/edit bug
  - director clock-out at midnight bug.

@@ -59,8 +59,8 @@ module.exports.bootstrap = async function (done) {
   var temp = {}
   for (var key in sails.models.meta.template) {
     if (Object.prototype.hasOwnProperty.call(sails.models.meta.template, key)) {
-      temp = sails.models.meta.template[key]
-      sails.models.meta.memory[key] = (typeof temp.defaultsTo !== 'undefined') ? temp.defaultsTo : null
+      temp = sails.models.meta.template[ key ]
+      sails.models.meta.memory[ key ] = (typeof temp.defaultsTo !== 'undefined') ? temp.defaultsTo : null
       sails.log.verbose(`Meta memory ${key} set to ${(typeof temp.defaultsTo !== 'undefined') ? temp.defaultsTo : null}`)
     }
   }
@@ -139,7 +139,7 @@ module.exports.bootstrap = async function (done) {
       .tolerate((err) => {
         sails.log.error(err)
       })
-    meta = meta[0]
+    meta = meta[ 0 ]
     meta.time = moment().toISOString(true)
     sails.log.silly(meta)
     await sails.helpers.meta.change.with(meta)
@@ -211,7 +211,7 @@ module.exports.bootstrap = async function (done) {
               sails.log.error(err)
               return resolve(err)
             })
-          meta = meta[0]
+          meta = meta[ 0 ]
           delete meta.createdAt
           delete meta.updatedAt
           delete meta.ID
@@ -244,20 +244,20 @@ module.exports.bootstrap = async function (done) {
         try {
           sails.log.silly(`queueCheck executed.`)
           var theTracks = []
-          change.trackID = parseInt(queue[0].ID)
-          change.trackIDSubcat = parseInt(queue[0].IDSubcat) || 0
+          change.trackID = parseInt(queue[ 0 ].ID)
+          change.trackIDSubcat = parseInt(queue[ 0 ].IDSubcat) || 0
 
           // Determine if something is currently playing via whether or not track 0 has ID of 0.
-          if (parseInt(queue[0].ID) === 0) {
+          if (parseInt(queue[ 0 ].ID) === 0) {
             change.playing = false
             change.trackFinish = null
           } else {
             change.playing = true
-            change.trackArtist = queue[0].Artist || null
-            change.trackTitle = queue[0].Title || null
-            change.trackAlbum = queue[0].Album || null
-            change.trackLabel = queue[0].Label || null
-            change.trackFinish = moment().add(parseFloat(queue[0].Duration) - parseFloat(queue[0].Elapsed), 'seconds').toISOString(true)
+            change.trackArtist = queue[ 0 ].Artist || null
+            change.trackTitle = queue[ 0 ].Title || null
+            change.trackAlbum = queue[ 0 ].Album || null
+            change.trackLabel = queue[ 0 ].Label || null
+            change.trackFinish = moment().add(parseFloat(queue[ 0 ].Duration) - parseFloat(queue[ 0 ].Elapsed), 'seconds').toISOString(true)
           }
 
           // When on queue to go live or return from break, search for the position of the last noMeta track
@@ -277,6 +277,64 @@ module.exports.bootstrap = async function (done) {
                 firstNoMeta = index
               }
             })
+            if (firstNoMeta < 0 && breakQueueLength < 0) {
+              if (sails.models.meta.memory.state === 'automation_live') {
+                await sails.helpers.meta.change.with({ state: 'live_on' })
+                attendance = await sails.helpers.attendance.createRecord(`Show: ${sails.models.meta.memory.show}`)
+                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>DJ is now live.</strong><br />DJ - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
+                  .tolerate((err) => {
+                    // Do not throw for errors, but log it.
+                    sails.log.error(err)
+                  })
+                await sails.helpers.onesignal.sendEvent(`Show: `, sails.models.meta.memory.show, `Live Show`, attendance.unique)
+              }
+              if (sails.models.meta.memory.state === 'automation_sports') {
+                await sails.helpers.meta.change.with({ state: 'sports_on' })
+                attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
+                  .tolerate((err) => {
+                    // Do not throw for errors, but log it.
+                    sails.log.error(err)
+                  })
+                await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
+              }
+              if (sails.models.meta.memory.state === 'automation_remote') {
+                await sails.helpers.meta.change.with({ state: 'remote_on' })
+                attendance = await sails.helpers.attendance.createRecord(`Remote: ${sails.models.meta.memory.show}`)
+                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote broadcast is now on the air.</strong><br />Host - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
+                  .tolerate((err) => {
+                    // Do not throw for errors, but log it.
+                    sails.log.error(err)
+                  })
+                await sails.helpers.onesignal.sendEvent(`Remote: `, sails.models.meta.memory.show, `Remote Broadcast`, attendance.unique)
+              }
+              if (sails.models.meta.memory.state === 'automation_sportsremote') {
+                await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
+                attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
+                  .tolerate((err) => {
+                    // Do not throw for errors, but log it.
+                    sails.log.error(err)
+                  })
+                await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
+              }
+              if (sails.models.meta.memory.state.includes('_returning')) {
+                switch (sails.models.meta.memory.state) {
+                  case 'live_returning':
+                    await sails.helpers.meta.change.with({ state: 'live_on' })
+                    break
+                  case 'remote_returning':
+                    await sails.helpers.meta.change.with({ state: 'remote_on' })
+                    break
+                  case 'sports_returning':
+                    await sails.helpers.meta.change.with({ state: 'sports_on' })
+                    break
+                  case 'sportsremote_returning':
+                    await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
+                    break
+                }
+              }
+            }
           }
 
           // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
@@ -289,7 +347,7 @@ module.exports.bootstrap = async function (done) {
                 // If there is a duplicate, remove the track, store for later queuing if necessary.
                 // Also, calculate length of the queue
                 if (theTracks.indexOf(title) > -1) {
-                  sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[theTracks.indexOf(title)]}. Removing!`)
+                  sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[ theTracks.indexOf(title) ]}. Removing!`)
                   if (track.TrackType !== 'Music') { sails.models.songs.pending.push(track.ID) }
                   sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1)
                     .then(() => {
@@ -303,11 +361,7 @@ module.exports.bootstrap = async function (done) {
                     })
                 } else {
                   theTracks.push(title)
-
-                  if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1)) {
-                    queueLength += (track.Duration - track.Elapsed)
-                  }
-
+                  queueLength += (track.Duration - track.Elapsed)
                   return resolve2(false)
                 }
               })
@@ -351,6 +405,11 @@ module.exports.bootstrap = async function (done) {
         // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
         queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
         if (queueLength < 0) { queueLength = 0 }
+      }
+
+      // Enable assisted if we are in a live show and just finished playing stuff in the queue
+      if ((sails.models.meta.memory.state === 'live_on' || sails.models.meta.memory.state === 'sports_on') && queueLength <= 0 && sails.models.status.errorCheck.prevQueueLength > 0) {
+        await sails.helpers.rest.cmd('EnableAssisted', 1)
       }
 
       sails.models.status.errorCheck.prevQueueLength = queueLength
@@ -409,7 +468,7 @@ module.exports.bootstrap = async function (done) {
           return new Promise((resolve2) => {
             try {
               for (var i = 0; i < sails.models.playlists.active.tracks.length; i++) {
-                var name = sails.models.playlists.active.tracks[i]
+                var name = sails.models.playlists.active.tracks[ i ]
                 if (name === parseInt(autoTrack.ID)) {
                   // Waiting for the playlist to begin, and it has begun? Switch states.
                   if (sails.models.meta.memory.state === 'automation_prerecord' && index === 0 && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null) {
@@ -559,14 +618,14 @@ module.exports.bootstrap = async function (done) {
             switch (sails.models.meta.memory.state) {
               case 'live_returning':
                 await sails.helpers.meta.change.with({ state: 'live_on' })
-                if (!change.queueMusic) { await sails.helpers.rest.cmd('EnableAssisted', 1) }
+                await sails.helpers.rest.cmd('EnableAssisted', 1)
                 break
               case 'remote_returning':
                 await sails.helpers.meta.change.with({ state: 'remote_on' })
                 break
               case 'sports_returning':
                 await sails.helpers.meta.change.with({ state: 'sports_on' })
-                if (!change.queueMusic) { await sails.helpers.rest.cmd('EnableAssisted', 1) }
+                await sails.helpers.rest.cmd('EnableAssisted', 1)
                 break
               case 'sportsremote_returning':
                 await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
@@ -624,18 +683,18 @@ module.exports.bootstrap = async function (done) {
           }
 
           // Do automation system error checking and handling
-          if (queue.length > 0 && queue[0].Duration === sails.models.status.errorCheck.prevDuration && queue[0].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+          if (queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
             await sails.helpers.error.count('frozen')
           } else {
-            sails.models.status.errorCheck.prevDuration = queue[0].Duration
-            sails.models.status.errorCheck.prevElapsed = queue[0].Elapsed
+            sails.models.status.errorCheck.prevDuration = queue[ 0 ].Duration
+            sails.models.status.errorCheck.prevElapsed = queue[ 0 ].Elapsed
             await sails.helpers.error.reset('frozen')
           }
 
           // Manage breaks intelligently using track queue length. This gets complicated, so comments explain the process.
 
           // Do not run this process if we cannot get a duration for the currently playing track, or if we suspect the current queue duration to be inaccurate
-          if (sails.models.status.errorCheck.trueZero <= 0 && typeof queue[0] !== 'undefined' && typeof queue[0].Duration !== 'undefined' && typeof queue[0].Elapsed !== 'undefined') {
+          if (sails.models.status.errorCheck.trueZero <= 0 && typeof queue[ 0 ] !== 'undefined' && typeof queue[ 0 ].Duration !== 'undefined' && typeof queue[ 0 ].Elapsed !== 'undefined') {
             // Iterate through each configured break to see if it's time to do it
             for (var key in sails.config.custom.breaks) {
               if (Object.prototype.hasOwnProperty.call(sails.config.custom.breaks, key)) {
@@ -644,7 +703,7 @@ module.exports.bootstrap = async function (done) {
                 var breakTime2 = moment().minutes(key).add(1, 'hours')
 
                 // Determine when the current track in RadioDJ will finish.
-                var endTime = moment().add((queue[0].Duration - queue[0].Elapsed), 'seconds')
+                var endTime = moment().add((queue[ 0 ].Duration - queue[ 0 ].Elapsed), 'seconds')
 
                 var doBreak = false
                 var distancebefore
@@ -657,15 +716,15 @@ module.exports.bootstrap = async function (done) {
                 // If the currently playing track will not end after the scheduled break,
                 // but the following track will end further after the scheduled break than the current track would,
                 // queue the break early.
-                if (typeof queue[1] !== 'undefined' && typeof queue[1].Duration !== 'undefined') {
+                if (typeof queue[ 1 ] !== 'undefined' && typeof queue[ 1 ].Duration !== 'undefined') {
                   if (moment().isBefore(moment(breakTime))) {
                     distancebefore = moment(breakTime).diff(moment(endTime))
-                    endtime2 = moment(endTime).add(queue[1].Duration, 'seconds')
+                    endtime2 = moment(endTime).add(queue[ 1 ].Duration, 'seconds')
                     distanceafter = endtime2.diff(breakTime)
                     if (moment(endtime2).isAfter(moment(breakTime)) && distanceafter > distancebefore) { doBreak = true }
                   } else {
                     distancebefore = moment(breakTime2).diff(moment(endTime))
-                    endtime2 = moment(endTime).add(queue[1].Duration, 'seconds')
+                    endtime2 = moment(endTime).add(queue[ 1 ].Duration, 'seconds')
                     distanceafter = endtime2.diff(breakTime2)
                     if (moment(endtime2).isAfter(moment(breakTime2)) && distanceafter > distancebefore) { doBreak = true }
                   }
@@ -681,9 +740,9 @@ module.exports.bootstrap = async function (done) {
                 if (key === 0 && sails.models.status.errorCheck.prevID !== null && moment(sails.models.status.errorCheck.prevID).isAfter(moment().subtract(10, 'minutes'))) { doBreak = false }
 
                 // Do not queue anything yet if the current track has breakCheck minutes or more left (resolves a discrepancy with the previous logic)
-                if (key !== 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * sails.config.custom.breakCheck)) { doBreak = false }
+                if (key !== 0 && (queue[ 0 ].Duration - queue[ 0 ].Elapsed) >= (60 * sails.config.custom.breakCheck)) { doBreak = false }
 
-                if (key === 0 && (queue[0].Duration - queue[0].Elapsed) >= (60 * 10)) { doBreak = false }
+                if (key === 0 && (queue[ 0 ].Duration - queue[ 0 ].Elapsed) >= (60 * 10)) { doBreak = false }
 
                 // Do the break if we are supposed to
                 if (doBreak) {
@@ -713,7 +772,7 @@ module.exports.bootstrap = async function (done) {
                   await sails.helpers.songs.remove(false, sails.config.custom.subcats.liners, true, true)
 
                   // Execute the break array
-                  await sails.helpers.break.executeArray(sails.config.custom.breaks[key])
+                  await sails.helpers.break.executeArray(sails.config.custom.breaks[ key ])
 
                   // If not doing a break, check to see if it's time to do a liner
                 } else {
@@ -722,7 +781,7 @@ module.exports.bootstrap = async function (done) {
                     // Only do liners when in automation
                     if (sails.models.meta.memory.state.startsWith('automation_')) {
                       // If there is at least 1 track in the queue, and both the current track and the next track are not noMeta tracks, queue a liner
-                      if (queue.length > 1 && parseInt(queue[0].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[0].IDSubcat)) === -1 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[1].IDSubcat)) === -1) {
+                      if (queue.length > 1 && parseInt(queue[ 0 ].ID) !== 0 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[ 0 ].IDSubcat)) === -1 && sails.config.custom.subcats.noMeta.indexOf(parseInt(queue[ 1 ].IDSubcat)) === -1) {
                         sails.models.status.errorCheck.prevLiner = moment()
                         await sails.helpers.songs.queue(sails.config.custom.subcats.liners, 'Top', 1)
                         await sails.helpers.break.addUnderwritings(true)
@@ -785,17 +844,17 @@ module.exports.bootstrap = async function (done) {
             var streams = resp.body.streams
 
             // Check public stream
-            if (typeof streams !== 'undefined' && typeof streams[0] !== 'undefined' && typeof streams[0].streamstatus !== 'undefined' && streams[0].streamstatus !== 0) {
+            if (typeof streams !== 'undefined' && typeof streams[ 0 ] !== 'undefined' && typeof streams[ 0 ].streamstatus !== 'undefined' && streams[ 0 ].streamstatus !== 0) {
               // Mark stream as good
               await sails.helpers.status.change.with({ name: 'stream-public', label: 'Radio Stream', data: 'Stream is online.', status: 5 })
 
               // Log listeners if there are any changes
-              if (sails.models.meta.memory.dj !== sails.models.listeners.memory.dj || streams[0].uniquelisteners !== sails.models.listeners.memory.listeners) {
-                await sails.models.listeners.create({ dj: sails.models.meta.memory.dj, listeners: streams[0].uniquelisteners })
+              if (sails.models.meta.memory.dj !== sails.models.listeners.memory.dj || streams[ 0 ].uniquelisteners !== sails.models.listeners.memory.listeners) {
+                await sails.models.listeners.create({ dj: sails.models.meta.memory.dj, listeners: streams[ 0 ].uniquelisteners })
                   .tolerate(() => {
                   })
               }
-              sails.models.listeners.memory = { dj: sails.models.meta.memory.dj, listeners: streams[0].uniquelisteners }
+              sails.models.listeners.memory = { dj: sails.models.meta.memory.dj, listeners: streams[ 0 ].uniquelisteners }
             } else {
               await sails.helpers.status.change.with({ name: 'stream-public', label: 'Radio Stream', data: `Stream is offline. Please ensure the audio encoder is connected and streaming to the ${sails.config.custom.stream} Shoutcast server.`, status: 2 })
             }
@@ -860,26 +919,26 @@ module.exports.bootstrap = async function (done) {
                           if (resp.body.name === 'ArrayOfSongData') {
                             resp.body.children.map(trackA => {
                               var theTrack = {}
-                              trackA.children.map(track => { theTrack[track.name] = track.value })
+                              trackA.children.map(track => { theTrack[ track.name ] = track.value })
                               automation.push(theTrack)
                             })
                           } else {
                             var theTrack = {}
-                            resp.body.children.map(track => { theTrack[track.name] = track.value })
+                            resp.body.children.map(track => { theTrack[ track.name ] = track.value })
                             automation.push(theTrack)
                           }
 
                           // If this if condition passes, the RadioDJ is playing when it shouldn't be. Stop it!
-                          if (typeof automation[0] !== 'undefined' && parseInt(automation[0].ID) !== 0) {
+                          if (typeof automation[ 0 ] !== 'undefined' && parseInt(automation[ 0 ].ID) !== 0) {
                             try {
-                            // LINT: Necessary needle parameters
-                            // eslint-disable-next-line camelcase
+                              // LINT: Necessary needle parameters
+                              // eslint-disable-next-line camelcase
                               needle('get', radiodj.rest + '/opt?auth=' + sails.config.custom.rest.auth + '&command=StopPlayer&arg=1', {}, { open_timeout: 10000, response_timeout: 10000, read_timeout: 10000, headers: { 'Content-Type': 'application/json' } })
                                 .catch(() => {
-                                // Ignore errors
+                                  // Ignore errors
                                 })
                             } catch (unusedE3) {
-                            // Ignore errors
+                              // Ignore errors
                             }
                           }
                         }
@@ -947,7 +1006,7 @@ module.exports.bootstrap = async function (done) {
           for (let index = 0; index < array.length; index++) {
             // LINT: This is a loop; we do not want to return the callback.
             // eslint-disable-next-line callback-return
-            await callback(array[index], index, array)
+            await callback(array[ index ], index, array)
           }
         }
 
@@ -990,11 +1049,11 @@ module.exports.bootstrap = async function (done) {
       try {
         // Make sure all models have a record at ID 1, even if it's a dummy.
         // TODO: Find a way to auto-populate these arrays.
-        var checksMemory = [sails.models.recipients, sails.models.status]
+        var checksMemory = [ sails.models.recipients, sails.models.status ]
         // LINT: RadioDJ tables cannot be changed
         // eslint-disable-next-line camelcase
-        var checksRadioDJ = [sails.models.category, sails.models.events, sails.models.genre, sails.models.history, sails.models.playlists, sails.models.playlists_list, sails.models.requests, sails.models.settings, sails.models.subcategory]
-        var checksNodebase = [sails.models.announcements, sails.models.calendar, sails.models.discipline, sails.models.eas, sails.models.subscribers, sails.models.planner, sails.models.underwritings, sails.models.attendance, sails.models.darksky, sails.models.listeners, sails.models.djs, sails.models.hosts, sails.models.logs, sails.models.messages, sails.models.meta, sails.models.nodeusers, sails.models.timesheet, sails.models.directors, sails.models.songsliked, sails.models.sports, sails.models.xp]
+        var checksRadioDJ = [ sails.models.category, sails.models.events, sails.models.genre, sails.models.history, sails.models.playlists, sails.models.playlists_list, sails.models.requests, sails.models.settings, sails.models.subcategory ]
+        var checksNodebase = [ sails.models.announcements, sails.models.calendar, sails.models.discipline, sails.models.eas, sails.models.subscribers, sails.models.planner, sails.models.underwritings, sails.models.attendance, sails.models.darksky, sails.models.listeners, sails.models.djs, sails.models.hosts, sails.models.logs, sails.models.messages, sails.models.meta, sails.models.nodeusers, sails.models.timesheet, sails.models.directors, sails.models.songsliked, sails.models.sports, sails.models.xp ]
         // Memory checks
         var checkStatus = { data: ``, status: 5 }
         sails.log.debug(`CHECK: DB Memory`)
@@ -1008,7 +1067,7 @@ module.exports.bootstrap = async function (done) {
                   checkStatus.status = 1
                   checkStatus.data += `Model failure (query error): ${index}. Please ensure this table / the database is online and not corrupt. `
                 })
-              if (typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') {
+              if (typeof record[ 0 ] === 'undefined' || typeof record[ 0 ].ID === 'undefined') {
                 if (checkStatus.status > 3) { checkStatus.status = 3 }
                 checkStatus.data += `Model failure (No records returned): ${index}. Expected at least 1 row in this database table. Please ensure the table is not corrupt.`
               }
@@ -1037,7 +1096,7 @@ module.exports.bootstrap = async function (done) {
                   checkStatus.status = 1
                   checkStatus.data += `Model failure (query error): ${index}. Please ensure this table / the database is online and not corrupt. `
                 })
-              if (typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') {
+              if (typeof record[ 0 ] === 'undefined' || typeof record[ 0 ].ID === 'undefined') {
                 if (checkStatus.status > 3) { checkStatus.status = 3 }
                 checkStatus.data += `Model failure (No records returned): ${index}. Expected at least 1 row in this database table. Please ensure the table is not corrupt.`
               }
@@ -1066,7 +1125,7 @@ module.exports.bootstrap = async function (done) {
                   checkStatus.status = 1
                   checkStatus.data += `Model failure (query error): ${index}. Please ensure this table / the database is online and not corrupt. `
                 })
-              if ((typeof record[0] === 'undefined' || typeof record[0].ID === 'undefined') && index > 6) {
+              if ((typeof record[ 0 ] === 'undefined' || typeof record[ 0 ].ID === 'undefined') && index > 6) {
                 if (checkStatus.status > 3) { checkStatus.status = 3 }
                 checkStatus.data += `Model failure (No records returned): ${index}. Expected at least 1 row in this database table. Please ensure the table is not corrupt.`
               }
@@ -1149,7 +1208,7 @@ module.exports.bootstrap = async function (done) {
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON sails.models.recipientsCheck called.`)
       try {
-        var records = await sails.models.recipients.find({ host: { '!=': ['website'] }, status: 0 })
+        var records = await sails.models.recipients.find({ host: { '!=': [ 'website' ] }, status: 0 })
         var destroyIt = []
         var searchto = moment().subtract(4, 'hours')
         records.forEach((record) => {
@@ -1249,14 +1308,14 @@ module.exports.bootstrap = async function (done) {
         var load = os.loadavg()
         var mem = os.freemem()
 
-        if (load[0] >= sails.config.custom.status.server.load1.critical || load[1] >= sails.config.custom.status.server.load5.critical || load[2] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical) {
-          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 1, data: `Server resource use is dangerously high!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
-        } else if (load[0] >= sails.config.custom.status.server.load1.error || load[1] >= sails.config.custom.status.server.load5.error || load[2] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error) {
-          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 2, data: `Server resource use is very high! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
-        } else if (load[0] >= sails.config.custom.status.server.load1.warn || load[1] >= sails.config.custom.status.server.load5.warn || load[2] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn) {
-          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 3, data: `Server resource use is mildly high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
+        if (load[ 0 ] >= sails.config.custom.status.server.load1.critical || load[ 1 ] >= sails.config.custom.status.server.load5.critical || load[ 2 ] >= sails.config.custom.status.server.load15.critical || mem <= sails.config.custom.status.server.memory.critical) {
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 1, data: `Server resource use is dangerously high!!! CPU: 1-min ${load[ 0 ]}, 5-min: ${load[ 1 ]}, 15-min: ${load[ 2 ]}. Free memory: ${mem}` })
+        } else if (load[ 0 ] >= sails.config.custom.status.server.load1.error || load[ 1 ] >= sails.config.custom.status.server.load5.error || load[ 2 ] >= sails.config.custom.status.server.load15.error || mem <= sails.config.custom.status.server.memory.error) {
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 2, data: `Server resource use is very high! CPU: 1-min ${load[ 0 ]}, 5-min: ${load[ 1 ]}, 15-min: ${load[ 2 ]}. Free memory: ${mem}` })
+        } else if (load[ 0 ] >= sails.config.custom.status.server.load1.warn || load[ 1 ] >= sails.config.custom.status.server.load5.warn || load[ 2 ] >= sails.config.custom.status.server.load15.warn || mem <= sails.config.custom.status.server.memory.warn) {
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 3, data: `Server resource use is mildly high. CPU: 1-min ${load[ 0 ]}, 5-min: ${load[ 1 ]}, 15-min: ${load[ 2 ]}. Free memory: ${mem}` })
         } else {
-          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 5, data: `Server resource use is good. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}` })
+          await sails.helpers.status.change.with({ name: `server`, label: `Server`, status: 5, data: `Server resource use is good. CPU: 1-min ${load[ 0 ]}, 5-min: ${load[ 1 ]}, 15-min: ${load[ 2 ]}. Free memory: ${mem}` })
         }
 
         return resolve()
@@ -1329,7 +1388,7 @@ module.exports.bootstrap = async function (done) {
         // First, get the value of default priority
         var defaultPriority = await sails.models.settings.find({ source: 'settings_general', setting: 'DefaultTrackPriority' }).limit(1)
 
-        if (typeof defaultPriority[0] === 'undefined' || defaultPriority === null || defaultPriority[0] === null) { throw new Error('Could not find DefaultTrackPriority setting in the RadioDJ database') }
+        if (typeof defaultPriority[ 0 ] === 'undefined' || defaultPriority === null || defaultPriority[ 0 ] === null) { throw new Error('Could not find DefaultTrackPriority setting in the RadioDJ database') }
 
         var songs = await sails.models.songs.find()
 
@@ -1337,7 +1396,7 @@ module.exports.bootstrap = async function (done) {
         songs
           .map((song) => {
             try {
-              var minPriority = song.rating === 0 ? 0 : (defaultPriority[0] * (song.rating / 9))
+              var minPriority = song.rating === 0 ? 0 : (defaultPriority[ 0 ] * (song.rating / 9))
               minPriority = Math.round(minPriority * 10) / 10
               if (song.weight < minPriority) {
                 (async (song2, minPriority2) => {
