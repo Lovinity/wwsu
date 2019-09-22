@@ -570,8 +570,8 @@ function processStatus (db) {
         statusLine.innerHTML = 'No connection to WWSU! The server might be offline and WWSU not functional'
         if (globalStatus !== prevStatus) {
           offlineTimer = setTimeout(() => {
-            responsiveVoice.speak('Attention! The display sign has been disconnected from the server for one minute. This could indicate a network problem, the server crashed, or the server is rebooting.')
-          }, 60000)
+            responsiveVoice.speak('Attention! The display sign has been disconnected from the server for over 3 minutes. This could indicate a network problem, the server crashed, or the server is having difficulty rebooting.')
+          }, 180000)
         }
         // Flash screen for major outages every second
         flashInterval = setInterval(() => {
