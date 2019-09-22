@@ -267,6 +267,7 @@ module.exports.bootstrap = async function (done) {
           if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
             breakQueueLength = -1
             firstNoMeta = -1
+            change.showCountdown = true
             queue.forEach((track, index) => {
               if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1) {
                 if (firstNoMeta > -1 && breakQueueLength < 0) {
@@ -389,10 +390,12 @@ module.exports.bootstrap = async function (done) {
         // If the detected queueLength gets bigger, assume the issue resolved itself and immediately mark the queuelength as accurate
         if (queueLength > (sails.models.status.errorCheck.prevQueueLength)) {
           sails.models.status.errorCheck.trueZero = 0
+          change.queueCalculating = false
         } else if (sails.models.status.errorCheck.trueZero > 0) {
           sails.models.status.errorCheck.trueZero -= 1
           if (sails.models.status.errorCheck.trueZero < 1) {
             sails.models.status.errorCheck.trueZero = 0
+            change.queueCalculating = false
             // If not an accurate queue count, use previous queue - 1 instead
           } else {
             queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
@@ -402,6 +405,7 @@ module.exports.bootstrap = async function (done) {
         }
       } else {
         sails.models.status.errorCheck.trueZero = 3 // Wait up to 3 seconds before considering the queue accurate
+        change.queueCalculating = true
         // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
         queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
         if (queueLength < 0) { queueLength = 0 }
@@ -410,6 +414,10 @@ module.exports.bootstrap = async function (done) {
       // Enable assisted if we are in a live show and just finished playing stuff in the queue
       if ((sails.models.meta.memory.state === 'live_on' || sails.models.meta.memory.state === 'sports_on') && queueLength <= 0 && sails.models.status.errorCheck.prevQueueLength > 0) {
         await sails.helpers.rest.cmd('EnableAssisted', 1)
+      }
+
+      if (queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
+        change.showCountdown = false
       }
 
       sails.models.status.errorCheck.prevQueueLength = queueLength

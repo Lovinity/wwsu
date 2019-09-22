@@ -261,6 +261,11 @@ module.exports = {
         return moment(value).isValid()
       }
     },
+    queueCalculating: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'If true, do not consider queueFinish as accurate until this changes to false.'
+    },
     trackFinish: {
       type: 'string',
       allowNull: true,
@@ -268,6 +273,11 @@ module.exports = {
       custom: function (value) {
         return moment(value).isValid()
       }
+    },
+    showCountdown: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'If true, display signs should count down to when the DJ/host goes live.'
     },
     queueMusic: {
       type: 'boolean',
