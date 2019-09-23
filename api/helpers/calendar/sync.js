@@ -279,7 +279,9 @@ module.exports = {
             title: event.summary,
             description: (typeof event.description !== 'undefined') ? breakdance(event.description) : '',
             start: event.start.dateTime || event.start.date,
-            end: event.end.dateTime || event.end.date
+            end: event.end.dateTime || event.end.date,
+            originalStart: event.start.dateTime || event.start.date,
+            originalEnd: event.end.dateTime || event.end.date
           }
           criteria.allDay = (moment(criteria.start).isSameOrBefore(moment().startOf('day')) && moment(criteria.end).isSameOrAfter(moment().startOf('day').add(1, 'days')))
           if (event.colorId && event.colorId in colors) {

@@ -50,7 +50,17 @@ module.exports = {
       columnType: 'datetime'
     },
 
+    originalStart: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
+
     end: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
+
+    originalEnd: {
       type: 'ref',
       columnType: 'datetime'
     },
