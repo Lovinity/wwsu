@@ -280,8 +280,6 @@ module.exports = {
             description: (typeof event.description !== 'undefined') ? breakdance(event.description) : '',
             start: event.start.dateTime || event.start.date,
             end: event.end.dateTime || event.end.date,
-            originalStart: event.start.dateTime || event.start.date,
-            originalEnd: event.end.dateTime || event.end.date
           }
           criteria.allDay = (moment(criteria.start).isSameOrBefore(moment().startOf('day')) && moment(criteria.end).isSameOrAfter(moment().startOf('day').add(1, 'days')))
           if (event.colorId && event.colorId in colors) {
@@ -471,6 +469,8 @@ module.exports = {
           // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
           criteriaB = _.cloneDeep(criteria)
           criteriaC = _.cloneDeep(criteria)
+          criteriaB.originalStart = event.start.dateTime || event.start.date,
+          criteriaB.originalEnd =  event.end.dateTime || event.end.date
           // TODO: Make so that new records do not also trigger an update
 
           // Find existing record of event. If does not exist, create it in the Calendar.

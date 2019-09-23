@@ -3,6 +3,7 @@
 jQuery.noConflict()
 var DJReq
 var noReq
+var djName
 var DJs = new WWSUdb(TAFFY())
 var menu = [
   '#menu-home',
@@ -87,6 +88,7 @@ function doRequests() {
       // DJ Name
       var temp = document.querySelector('#dj-name')
       if (temp !== null) { temp.innerHTML = response.stats.name }
+      djName = response.stats.name
 
       // Live Shows
       analyticsTable.push(['<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows)])
@@ -139,6 +141,21 @@ function doRequests() {
       temp = document.querySelector('#dash-show')
       if (temp !== null) {
         var notices = ''
+
+        if (response.changes.length > 0) {
+          notices += `<div class="card mb-4 py-3 border-left-info">
+          <div class="card-body">
+            Your shows
+            <ul>`
+          response.stats.semester.missedIDsArray.map((item) => {
+            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+          })
+          notices += `</ul>
+          <p>We are required by the FCC to take a break at the top of every hour. <strong>Not doing the top of the hour break could result in suspension of your show.</strong></p>
+          </div>
+          </div>`
+        }
+
         if (response.stats.semester.missedIDsArray.length > 0) {
           notices += `<div class="card mb-4 py-3 border-left-danger">
           <div class="card-body">
@@ -196,6 +213,7 @@ function doRequests() {
         }
 
         temp.innerHTML = notices
+        Calendar.replaceData(noReq, '/calendar/get')
       }
 
       // Show Logs and show listener graph
