@@ -1318,7 +1318,6 @@ function processNowPlaying (response) {
         countdown = document.getElementById('countdown')
         countdowntext = document.getElementById('countdown-text')
         countdownclock = document.getElementById('countdown-clock')
-        countdownclock.innerHTML = queuelength
         if (!countdown || !countdowntext || !countdownclock) {
           temp = Meta.show.split(' - ')
           djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="countdown">
@@ -1331,6 +1330,7 @@ function processNowPlaying (response) {
           countdowntext.innerHTML = `<span class="text-danger">${temp[ 0 ]}</span><br />is going live in`
           if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[ 0 ]} is about to go on the air on WWSU radio: ${temp[ 1 ]}.`) }
         }
+        countdownclock.innerHTML = queuelength
         if (queuelength <= 10) {
           if (!queueReminder && isStudio) { responsiveVoice.speak(`Attention! Going live in less than 10 seconds.`) }
           queueReminder = true

@@ -469,8 +469,10 @@ module.exports = {
           // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
           criteriaB = _.cloneDeep(criteria)
           criteriaC = _.cloneDeep(criteria)
-          criteriaB.originalStart = event.start.dateTime || event.start.date,
-          criteriaB.originalEnd =  event.end.dateTime || event.end.date
+
+          // Add originalStart and originalEnd to criteriaB. We add it after cloning so the update checker does not check these values
+          criteriaB.originalStart = event.start.dateTime || event.start.date
+          criteriaB.originalEnd = event.end.dateTime || event.end.date
           // TODO: Make so that new records do not also trigger an update
 
           // Find existing record of event. If does not exist, create it in the Calendar.
