@@ -142,16 +142,29 @@ function doRequests() {
       if (temp !== null) {
         var notices = ''
 
+        if (response.cancellations.length > 0) {
+          notices += `<div class="card mb-4 py-3 border-left-info">
+          <div class="card-body">
+            The following upcoming shows have been canceled, either by you or by a director:
+            <ul>`
+          response.cancellations.map((item) => {
+            notices += `<li><strong>${moment(item.start).format('LLL')} - ${moment(item.end).format('HH:mm A')}</strong>. Reason: ${item.happenedReason}</li>`
+          })
+          notices += `</ul>
+          </div>
+          </div>`
+        }
+
         if (response.changes.length > 0) {
           notices += `<div class="card mb-4 py-3 border-left-info">
           <div class="card-body">
-            Your shows
+            The dates/times for your upcoming shows listed below have been changed, either by you or by a director:
             <ul>`
-          response.stats.semester.missedIDsArray.map((item) => {
-            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+          response.changes.map((item) => {
+            notices += `<li><strong>${moment(item.originalStart).format('LLL')} - ${moment(item.originalEnd).format('HH:mm A')}</strong> changed to <strong>${moment(item.start).format('LLL')} - ${moment(item.end).format('HH:mm A')}</strong></li>`
           })
           notices += `</ul>
-          <p>We are required by the FCC to take a break at the top of every hour. <strong>Not doing the top of the hour break could result in suspension of your show.</strong></p>
+          <p>Please contact a director for more information if you did not make these changes; most likely, a change was made because of a sports broadcast.</strong></p>
           </div>
           </div>`
         }
