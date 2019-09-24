@@ -375,11 +375,11 @@ function doRequests() {
               ])
             }
           })
-          djLogs = djLogs.reverse()
           // Render analytics table
           jQuery('#logs-table').DataTable({
             data: djLogs,
-            responsive: true
+            responsive: true,
+            "order": [[ 0, 'desc' ]]
           })
 
           temp = document.querySelector('#analytics-listenerChart')
