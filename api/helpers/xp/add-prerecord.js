@@ -22,7 +22,7 @@ module.exports = {
         var attendance = await sails.helpers.attendance.createRecord()
 
         // Award XP based on time on the air
-        var showXP = Math.round(attendance.showTime / sails.config.custom.XP.prerecordShowMinutes)
+        var showXP = Math.round(attendance.updatedRecord.showTime / sails.config.custom.XP.prerecordShowMinutes)
 
         await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'showtime', amount: showXP, description: `Prerecord was on the air for ${attendance.showTime} minutes.` })
           .tolerate((err) => {
@@ -30,36 +30,14 @@ module.exports = {
             sails.log.error(err)
           })
 
-        // Calculate number of listener minutes for the show, and award XP based on configured values.
-        var listenerMinutes = 0
-        var listeners = await sails.models.listeners.find({ dj: attendance.dj, createdAt: { '>=': moment(attendance.actualStart).toISOString(true) } }).sort('createdAt ASC')
+        // Calculate listener minutes
+        var listenerXP = Math.round(attendance.updatedRecord.listenerMinutes / sails.config.custom.XP.prerecordListenerMinutes)
+
+        await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'listeners', amount: listenerXP, description: `There were ${listenerMinutes} online listener minutes during the prerecord.` })
           .tolerate((err) => {
             // Do not throw for error, but log it
             sails.log.error(err)
           })
-
-        if (listeners && listeners.length > 0) {
-          var prevTime = moment(attendance.actualStart)
-          var prevListeners = 0
-          listenerMinutes = 0
-          listeners.map(listener => {
-            listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners
-            prevListeners = listener.listeners
-            prevTime = moment(listener.createdAt)
-          })
-
-          // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-          listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners
-
-          listenerMinutes = Math.round(listenerMinutes)
-          var listenerXP = Math.round(listenerMinutes / sails.config.custom.XP.prerecordListenerMinutes)
-
-          await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'listeners', amount: listenerXP, description: `There were ${listenerMinutes} online listener minutes during the prerecord.` })
-            .tolerate((err) => {
-              // Do not throw for error, but log it
-              sails.log.error(err)
-            })
-        }
       }
 
       return exits.success()
