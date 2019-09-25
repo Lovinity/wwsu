@@ -148,7 +148,7 @@ function doRequests() {
             The following upcoming shows have been canceled, either by you or by a director:
             <ul>`
           response.cancellations.map((item) => {
-            notices += `<li><strong>${moment(item.start).format('LLL')} - ${moment(item.end).format('HH:mm A')}</strong>. Reason: ${item.happenedReason}</li>`
+            notices += `<li><strong>${moment(item.scheduledStart).format('LLL')} - ${moment(item.scheduledEnd).format('h:mm A')}</strong>. Reason: ${item.happenedReason}</li>`
           })
           notices += `</ul>
           </div>
@@ -161,7 +161,7 @@ function doRequests() {
             The dates/times for your upcoming shows listed below have been changed, either by you or by a director:
             <ul>`
           response.changes.map((item) => {
-            notices += `<li><strong>${moment(item.originalStart).format('LLL')} - ${moment(item.originalEnd).format('HH:mm A')}</strong> changed to <strong>${moment(item.start).format('LLL')} - ${moment(item.end).format('HH:mm A')}</strong></li>`
+            notices += `<li><strong>${moment(item.originalStart).format('LLL')} - ${moment(item.originalEnd).format('h:mm A')}</strong> changed to <strong>${moment(item.start).format('LLL')} - ${moment(item.end).format('h:mm A')}</strong></li>`
           })
           notices += `</ul>
           <p>Please contact a director for more information if you did not make these changes; most likely, a change was made because of a sports broadcast.</strong></p>
@@ -226,7 +226,6 @@ function doRequests() {
         }
 
         temp.innerHTML = notices
-        Calendar.replaceData(noReq, '/calendar/get')
       }
 
       // Show Logs and show listener graph
@@ -376,11 +375,11 @@ function doRequests() {
               ])
             }
           })
-
           // Render analytics table
           jQuery('#logs-table').DataTable({
             data: djLogs,
-            responsive: true
+            responsive: true,
+            "order": [[ 0, 'desc' ]]
           })
 
           temp = document.querySelector('#analytics-listenerChart')
