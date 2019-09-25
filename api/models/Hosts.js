@@ -60,6 +60,16 @@ module.exports = {
       defaultsTo: false
     },
 
+    delaySystem: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
+    EAS: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     requests: {
       type: 'boolean',
       defaultsTo: false

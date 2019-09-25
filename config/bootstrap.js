@@ -1302,10 +1302,30 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  // Every minute at second 13, check server memory and CPU use.
+  // every hour at second 13, check for certain statuses
+  sails.log.verbose(`BOOTSTRAP: scheduling checkStatuses CRON.`)
+  cron.schedule('13 * * * * *', () => {
+    return new Promise(async (resolve, reject) => {
+      sails.log.debug(`CRON checkStatuses called.`)
+      try {
+        // Delay system; error if no status data for over 3 minutes
+        var delay = await sails.models.status.findOne({name: 'delay-system'})
+        if (moment(delay.time).add(3, 'minutes').isBefore(moment()) && delay.status > 3) {
+          await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `There has been no information received about the delay system for over 3 minutes. Please ensure the delay system is online, the serial port is properly connected to the responsible computer, and DJ Controls is running on the responsible computer.`, status: 1 })
+        }
+
+        return resolve()
+      } catch (e) {
+        sails.log.error(e)
+        return reject(e)
+      }
+    })
+  })
+
+  // Every minute at second 15, check server memory and CPU use.
   // ADVICE: It is advised that serverCheck is the last cron executed at the top of the minute. That way, the 1-minute CPU load will more likely detect issues.
   sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`)
-  cron.schedule('13 * * * * *', () => {
+  cron.schedule('15 * * * * *', () => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON serverCheck called.`)

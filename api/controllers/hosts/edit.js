@@ -54,6 +54,16 @@ module.exports = {
       description: 'If provided, the recordAudio setting for the host will be changed to this. If changing to true, and another host already has this set at true, an error will be thrown to prevent silence detection conflicts.'
     },
 
+    delaySystem: {
+      type: 'boolean',
+      description: 'If provided, the delaySystem setting for the host will be changed to this. If changing to true, and another host already has this set at true, an error will be thrown to prevent delay system conflicts.'
+    },
+
+    EAS: {
+      type: 'boolean',
+      description: 'If provided, the EAS setting for the host will be changed to this. If changing to true, and another host already has this set at true, an error will be thrown to prevent EAS conflicts.'
+    },
+
     requests: {
       type: 'boolean',
       description: 'If provided, whether or not this host should receive track request notifications will be changed to this.'
@@ -99,6 +109,14 @@ module.exports = {
       if (typeof inputs.recordAudio !== 'undefined' && inputs.recordAudio !== null && inputs.recordAudio) {
         lockout = await sails.models.hosts.count({ ID: { '!=': inputs.ID }, recordAudio: true })
         if (lockout >= 1) { return exits.conflict('To prevent audio recording conflicts, this request was denied because another host already has recordAudio. Please set the other host recordAudio to false first.') }
+      }
+      if (typeof inputs.delaySystem !== 'undefined' && inputs.delaySystem !== null && inputs.delaySystem) {
+        lockout = await sails.models.hosts.count({ ID: { '!=': inputs.ID }, delaySystem: true })
+        if (lockout >= 1) { return exits.conflict('To prevent delay system conflicts, this request was denied because another host already has delaySystem. Please set the other host delaySystem to false first.') }
+      }
+      if (typeof inputs.EAS !== 'undefined' && inputs.EAS !== null && inputs.EAS) {
+        lockout = await sails.models.hosts.count({ ID: { '!=': inputs.ID }, EAS: true })
+        if (lockout >= 1) { return exits.conflict('To prevent EAS conflicts, this request was denied because another host already has EAS. Please set the other host EAS to false first.') }
       }
 
       // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.

@@ -56,7 +56,8 @@ module.exports = {
     { name: 'server', label: 'Server', data: 'No server data has been returned yet since initialization.', status: 4, time: null },
     { name: 'music-library', label: 'Music Library', data: 'Music library tests have not yet executed since initialization.', status: 4, time: null },
     { name: 'google-calendar', label: 'Google sails.models.calendar', data: 'Google sails.models.calendar has not been loaded since initialization.', status: 4, time: null },
-    { name: 'underwritings', label: 'Underwritings', data: 'Underwritings were not yet checked since initialization.', status: 4, time: null }
+    { name: 'underwritings', label: 'Underwritings', data: 'Underwritings were not yet checked since initialization.', status: 4, time: null },
+    { name: 'delay-system', label: 'Delay System', data: 'Status of Delay System has not been checked since initialization', status: 4, time: moment().toISOString(true) }
   ],
 
   /* Object used internally to check for errors.

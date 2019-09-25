@@ -6,9 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
- - djs/get-web for the DJ Web panel. Similar to djs/get except uses DJ authorization instead of host authorization.
+ - djs/get-web for the DJ Web panel.
  - Meta.showCountdown (boolean); display signs should use this to determine whether or not to display a countdown to when someone goes live (if showCountdown is true).
  - Meta.queueCalculating (boolean); if true, Meta.queueFinish should be considered inaccurate.
+ - "originalStart" and "originalEnd" columns for Calendar; these contain the original start and end times for events for comparison when times are changed.
+ - "delaySystem" option to Hosts (can only be set to one host). Used to specify which host is responsible for / connected to the delay system.
+ - "EAS" option to Hosts (can only be set to one host). Used to specify which host is responsible for / connected to the Emergency Alery System.
 
 ### Changed
  - Meta.queueFinish time will now include music tracks / openers when starting a broadcast to avoid confusion on the DJ Controls queue countdown. State will still switch to "*_on" after noMeta tracks have been played to trigger the recorder in DJ Controls.
