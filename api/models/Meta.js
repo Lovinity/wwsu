@@ -302,6 +302,11 @@ module.exports = {
         return moment(value).isValid()
       }
     },
+    delaySystem: {
+      type: 'number',
+      allowNull: true,
+      description: 'Number of seconds currently on the delay system. Null means delay system might be offline or delay system is in bypass mode.'
+    },
     webchat: {
       type: 'boolean',
       defaultsTo: true,

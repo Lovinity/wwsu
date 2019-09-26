@@ -33,7 +33,6 @@ module.exports = {
         if (host.delaySystem) {
           sails.sockets.join(this.req, 'delay-system-dump')
         }
-        sails.sockets.join(this.req, 'delay-system-status')
       }
 
       // Return the host label object

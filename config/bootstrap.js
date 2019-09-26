@@ -1312,6 +1312,7 @@ module.exports.bootstrap = async function (done) {
         var delay = await sails.models.status.findOne({name: 'delay-system'})
         if (moment(delay.time).add(3, 'minutes').isBefore(moment()) && delay.status > 3) {
           await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `There has been no information received about the delay system for over 3 minutes. Please ensure the delay system is online, the serial port is properly connected to the responsible computer, and DJ Controls is running on the responsible computer.`, status: 1 })
+          await sails.helpers.meta.change.with({delaySystem: null})
         }
 
         return resolve()
