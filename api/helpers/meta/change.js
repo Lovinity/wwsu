@@ -209,7 +209,7 @@ module.exports = {
           // Do stuff if we are changing states, mainly with regards to genres, playlists, and prerecords.
           if (key === 'state') {
             // Changing out of a prerecord? Award XP.
-            if (sails.models.meta.memory[key].startsWith('prerecord_') && !inputs[key].startsWith('prerecord_')) { await sails.helpers.xp.addPrerecord() }
+            if (sails.models.meta.memory.state.startsWith('prerecord_') && !inputs.state.startsWith('prerecord_')) { await sails.helpers.xp.addPrerecord() }
 
             // Enable webchat automatically when going into automation state
             if (inputs[key] === 'automation_on' || inputs[key] === 'automation_genre' || inputs[key] === 'automation_playlist' || inputs[key] === 'automation_prerecord') { push2.webchat = true }
