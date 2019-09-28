@@ -1361,7 +1361,7 @@ function processNowPlaying (response) {
         }
         countdownclock.innerHTML = queuelength
         // Sports broadcast about to begin
-      } else if ((Meta.state === 'automation_sports' || Meta.state.startsWith('sports_') || Meta.state === 'automation_sportsremote' || Meta.state.startsWith('sportsremote_')) && queuelength < 60 && (!Meta.queueCalculating || djAlert.style.display === 'inline')) {
+      } else if ((Meta.state === 'automation_sports' || Meta.state.startsWith('sports_') || Meta.state === 'automation_sportsremote' || Meta.state.startsWith('sportsremote_')) && queuelength < 60 && Meta.showCountdown && (!Meta.queueCalculating || djAlert.style.display === 'inline')) {
         djAlert.style.display = 'inline'
         countdown = document.getElementById('countdown')
         countdowntext = document.getElementById('countdown-text')
