@@ -886,9 +886,9 @@ module.exports.bootstrap = async function (done) {
     }
   })
 
-  // Twice per minute at 04 and 34 seconds, check all RadioDJs for connectivity.
+  // Every minute at second 4, check all RadioDJs for connectivity.
   sails.log.verbose(`BOOTSTRAP: scheduling checkRadioDJs CRON.`)
-  cron.schedule('4,34 * * * * *', () => {
+  cron.schedule('4 * * * * *', () => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON checkRadioDJs triggered.`)
@@ -974,9 +974,9 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  // Twice per minute at 05 and 35 seconds, check for connectivity to the website.
+  // Every minute at second 5, check for connectivity to the website.
   sails.log.verbose(`BOOTSTRAP: scheduling checkWebsite CRON.`)
-  cron.schedule('5,35 * * * * *', async () => {
+  cron.schedule('5 * * * * *', async () => {
     sails.log.debug(`CRON checkWebsite triggered.`)
     try {
       needle('get', sails.config.custom.website, {}, { headers: { 'Content-Type': 'application/json' } })
@@ -1302,7 +1302,7 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  // every hour at second 13, check for certain statuses
+  // every minute at second 13, check for certain statuses
   sails.log.verbose(`BOOTSTRAP: scheduling checkStatuses CRON.`)
   cron.schedule('13 * * * * *', () => {
     return new Promise(async (resolve, reject) => {
@@ -1355,7 +1355,7 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  // Every day at 11:59:50pm, clock out any directors still clocked in, and re-sync station time to all clients
+  // Every day at 11:59:50pm, clock out any directors still clocked in
   sails.log.verbose(`BOOTSTRAP: scheduling clockOutDirectors CRON.`)
   cron.schedule('50 59 23 * * *', () => {
     // eslint-disable-next-line no-async-promise-executor
