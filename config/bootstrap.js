@@ -540,12 +540,12 @@ module.exports.bootstrap = async function (done) {
                 break
               case 'prerecord_on':
               case 'prerecord_break':
-                await sails.helpers.xp.addPrerecord()
                 await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
                   .tolerate((err) => {
                     // Do not throw for errors, but log it.
                     sails.log.error(err)
                   })
+                await sails.helpers.xp.addPrerecord()
                 break
             }
             await sails.helpers.rest.cmd('EnableAssisted', 0)
