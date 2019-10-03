@@ -540,6 +540,7 @@ module.exports.bootstrap = async function (done) {
                 break
               case 'prerecord_on':
               case 'prerecord_break':
+                await sails.helpers.xp.addPrerecord()
                 await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
                   .tolerate((err) => {
                     // Do not throw for errors, but log it.
@@ -1309,10 +1310,10 @@ module.exports.bootstrap = async function (done) {
       sails.log.debug(`CRON checkStatuses called.`)
       try {
         // Delay system; error if no status data for over 3 minutes
-        var delay = await sails.models.status.findOne({name: 'delay-system'})
+        var delay = await sails.models.status.findOne({ name: 'delay-system' })
         if (moment(delay.time).add(3, 'minutes').isBefore(moment()) && delay.status > 3) {
           await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `There has been no information received about the delay system for over 3 minutes. Please ensure the delay system is online, the serial port is properly connected to the responsible computer, and DJ Controls is running on the responsible computer.`, status: 1 })
-          await sails.helpers.meta.change.with({delaySystem: null})
+          await sails.helpers.meta.change.with({ delaySystem: null })
         }
 
         return resolve()
