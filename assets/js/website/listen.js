@@ -1688,7 +1688,7 @@ function checkDiscipline (cb) {
       var docb = true
       if (body.length > 0) {
         body.map((discipline) => {
-          var activeDiscipline = (discipline.active && (discipline.action !== 'dayban' || moment(discipline.createdAt).add(1, 'days').isBefore(moment())))
+          var activeDiscipline = (discipline.active && (discipline.action !== 'dayban' || moment(discipline.createdAt).add(1, 'days').isAfter(moment())))
           if (activeDiscipline) { docb = false }
           if (activeDiscipline || !discipline.acknowledged) {
             iziToast.show({
