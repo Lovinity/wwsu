@@ -27,9 +27,12 @@ module.exports = {
                 where: {
                     acknowledged: 0,
                     or: [
-                        { action: 'permaban' },
-                        { action: 'dayban', createdAt: { '>': searchto } },
-                        { action: 'showban' }
+                        { action: 'permaban', active: 1 },
+                        { action: 'dayban', createdAt: { '>': searchto }, active: 1 },
+                        { action: 'showban', active: 1 },
+                        { action: 'permaban', acknowledged: 0 },
+                        { action: 'dayban', acknowledged: 0 },
+                        { action: 'showban', acknowledged: 0 }
                     ],
                     IP: [ fromIP, `website-${host}` ]
                 }
