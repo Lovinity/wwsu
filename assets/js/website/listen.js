@@ -1717,9 +1717,9 @@ function checkDiscipline (cb) {
             })
           }
         })
-        if (docb) {
-          cb()
-        }
+      }
+      if (docb) {
+        cb()
       }
     } catch (e) {
       iziToast.show({
