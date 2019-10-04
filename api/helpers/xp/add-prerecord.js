@@ -22,7 +22,7 @@ module.exports = {
       // Award XP based on time on the air
       var showXP = Math.round(attendance.updatedRecord.showTime / sails.config.custom.XP.prerecordShowMinutes)
 
-      await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'showtime', amount: showXP, description: `Prerecord was on the air for ${attendance.updatedRecord.showTime} minutes.` })
+      await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'showtime', amount: showXP, description: `Prerecord was on the air for ${attendance.updatedRecord.showTime} minutes.` }).fetch()
         .tolerate((err) => {
           // Do not throw for error, but log it
           sails.log.error(err)
@@ -31,7 +31,7 @@ module.exports = {
       // Calculate listener minutes
       var listenerXP = Math.round(attendance.updatedRecord.listenerMinutes / sails.config.custom.XP.prerecordListenerMinutes)
 
-      await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'listeners', amount: listenerXP, description: `There were ${attendance.updatedRecord.listenerMinutes} online listener minutes during the prerecord.` })
+      await sails.models.xp.create({ dj: attendance.dj, type: 'xp', subtype: 'listeners', amount: listenerXP, description: `There were ${attendance.updatedRecord.listenerMinutes} online listener minutes during the prerecord.` }).fetch()
         .tolerate((err) => {
           // Do not throw for error, but log it
           sails.log.error(err)
