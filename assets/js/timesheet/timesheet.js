@@ -234,8 +234,10 @@ var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director',
 
 // Register event handlers
 socket.on('connect', () => {
-  directorsdb.replaceData(noReq, '/directors/get')
-  timesheetsdb.replaceData(noReq, '/timesheet/get')
+  checkDiscipline(() => {
+    directorsdb.replaceData(noReq, '/directors/get')
+    timesheetsdb.replaceData(noReq, '/timesheet/get')
+  })
 })
 
 directorsdb.assignSocketEvent('directors', socket)
@@ -862,6 +864,60 @@ function filterDate () {
       message: 'Error occurred during loadTimesheets.'
     })
   }
+}
+
+function checkDiscipline (cb) {
+  io.socket.post('/discipline/get-web', {}, function serverResponded (body) {
+    try {
+      var docb = true
+      if (body.length > 0) {
+        body.map((discipline) => {
+          var activeDiscipline = (discipline.active && (discipline.action !== 'dayban' || moment(discipline.createdAt).add(1, 'days').isBefore(moment())))
+          if (activeDiscipline) { docb = false }
+          if (activeDiscipline || !discipline.acknowledged) {
+            iziToast.show({
+              title: `Disciplinary action ${activeDiscipline ? `active against you` : `was issued in the past against you`}`,
+              message: `On ${moment(discipline.createdAt).format('LLL')}, disciplinary action was issued against you for the following reason: ${discipline.message}. <br /><br />
+              ${activeDiscipline ? `A ${discipline.action} is currently active, and you are not allowed to use WWSU's services at this time.` : `The discipline has expired, but you must acknowledge this message before you may use WWSU's services. Further issues may warrant more severe disciplinary action.`}<br />
+              Please contact gm@wwsu1069.org if you have any questions or concerns.`,
+              timeout: false,
+              close: false,
+              color: 'red',
+              drag: false,
+              position: 'center',
+              closeOnClick: false,
+              overlay: true,
+              zindex: 1000,
+              layout: 2,
+              maxWidth: 480,
+              buttons: [
+                [ '<button>Acknowledge</button>', function (instance, toast, button, e, inputs) {
+                  if (activeDiscipline) {
+                    io.socket.post('/discipline/acknowledge', { ID: discipline.ID }, function serverResponded (body) { })
+                  }
+                  instance.hide({}, toast, 'button')
+                } ]
+              ]
+            })
+          }
+        })
+        if (docb) {
+          cb()
+        }
+      }
+    } catch (e) {
+      iziToast.show({
+        title: 'Failed to check discipline',
+        message: 'Unable to connect to WWSU because we could not determine if you are banned. Please try again later.',
+        color: 'red',
+        zindex: 100,
+        layout: 1,
+        closeOnClick: true,
+        position: 'center',
+        timeout: 10000
+      })
+    }
+  })
 }
 
 filterDate()

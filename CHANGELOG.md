@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - "delaySystem" option to Hosts (can only be set to one host). Used to specify which host is responsible for / connected to the delay system.
  - "EAS" option to Hosts (can only be set to one host). Used to specify which host is responsible for / connected to the Emergency Alery System.
  - Meta.delaySystem; number of seconds currently on ther delay. Could be null if delay is offline or in bypass mode.
+ - "acknowledged" column for discipline, boolean, to store whether or not the host read and acknowledged the discipline issued.
+ - discipline/get-web to get an array of un-acknowledged discipline for the requesting host.
+ - discipline/acknowledge for a client to mark a discipline as read / acknowledged.
 
 ### Changed
  - Meta.queueFinish time will now include music tracks / openers when starting a broadcast to avoid confusion on the DJ Controls queue countdown. State will still switch to "*_on" after noMeta tracks have been played to trigger the recorder in DJ Controls.

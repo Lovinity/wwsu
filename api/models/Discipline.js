@@ -19,6 +19,11 @@ module.exports = {
       defaultsTo: true
     },
 
+    acknowledged: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     IP: {
       type: 'string'
     },

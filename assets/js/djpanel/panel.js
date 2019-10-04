@@ -38,7 +38,7 @@ jQuery('#modal-dj-logs').iziModal({
   zindex: 50
 })
 
-function waitFor(check, callback, count = 0) {
+function waitFor (check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
       count++
@@ -67,13 +67,16 @@ waitFor(() => {
 
   // Register event handlers
   io.socket.on('connect', () => {
+    checkDiscipline(() => {
+      DJs.replaceData(noReq, '/djs/get')
+    })
+  })
+  checkDiscipline(() => {
     DJs.replaceData(noReq, '/djs/get')
   })
-
-  DJs.replaceData(noReq, '/djs/get')
 })
 
-function doRequests() {
+function doRequests () {
   DJReq.request({ db: DJs.db(), method: 'POST', url: '/djs/get-web', data: {} }, (response) => {
     if (typeof response.stats === 'undefined') {
       iziToast.show({
@@ -91,36 +94,36 @@ function doRequests() {
       djName = response.stats.name
 
       // Live Shows
-      analyticsTable.push(['<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows)])
+      analyticsTable.push([ '<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows) ])
 
       // Prerecords
-      analyticsTable.push(['<i class="fas fa-compact-disc" width="32"></i>', 'Prerecorded Shows', formatInt(response.stats.semester.prerecords), formatInt(response.stats.overall.prerecords)])
+      analyticsTable.push([ '<i class="fas fa-compact-disc" width="32"></i>', 'Prerecorded Shows', formatInt(response.stats.semester.prerecords), formatInt(response.stats.overall.prerecords) ])
 
       // Remotes
-      analyticsTable.push(['<i class="fas fa-broadcast-tower" width="32"></i>', 'Remote Broadcasts', formatInt(response.stats.semester.remotes), formatInt(response.stats.overall.remotes)])
+      analyticsTable.push([ '<i class="fas fa-broadcast-tower" width="32"></i>', 'Remote Broadcasts', formatInt(response.stats.semester.remotes), formatInt(response.stats.overall.remotes) ])
 
       // Showtime
       temp = document.querySelector('#dash-showtime')
       if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) }
-      analyticsTable.push(['<i class="fas fa-play" width="32"></i>', 'Showtime (Hours)', formatInt(Math.floor((response.stats.semester.showtime / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100)])
+      analyticsTable.push([ '<i class="fas fa-play" width="32"></i>', 'Showtime (Hours)', formatInt(Math.floor((response.stats.semester.showtime / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) ])
 
       // Listener hours
       temp = document.querySelector('#dash-hours')
       if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) }
-      analyticsTable.push(['<i class="fas fa-headphones" width="32"></i>', 'Online Listeners (Hours)', formatInt(Math.floor((response.stats.semester.listeners / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100)])
+      analyticsTable.push([ '<i class="fas fa-headphones" width="32"></i>', 'Online Listeners (Hours)', formatInt(Math.floor((response.stats.semester.listeners / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) ])
 
       // XP
       temp = document.querySelector('#dash-XP')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.overall.xp) }
-      analyticsTable.push(['<i class="fas fa-star" width="32"></i>', 'Experience Points (XP)', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp)])
+      analyticsTable.push([ '<i class="fas fa-star" width="32"></i>', 'Experience Points (XP)', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp) ])
 
       // Remote credits
       temp = document.querySelector('#dash-credits')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.semester.remoteCredits) }
-      analyticsTable.push(['<i class="fas fa-gem" width="32"></i>', 'Remote Credits', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits)])
+      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
 
       // Reputation
-      analyticsTable.push(['<i class="fas fa-smile"></i>', 'Reputation / Responsibility', `<div class="progress progress-sm mr-2">
+      analyticsTable.push([ '<i class="fas fa-smile"></i>', 'Reputation / Responsibility', `<div class="progress progress-sm mr-2">
       <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.semester.reputationPercent}%" aria-valuenow="${response.stats.semester.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>`, `<div class="progress progress-sm mr-2">
     <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.overall.reputationPercent}%" aria-valuenow="${response.stats.overall.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -379,7 +382,7 @@ function doRequests() {
           jQuery('#logs-table').DataTable({
             data: djLogs,
             responsive: true,
-            "order": [[ 0, 'desc' ]]
+            "order": [ [ 0, 'desc' ] ]
           })
 
           temp = document.querySelector('#analytics-listenerChart')
@@ -444,7 +447,7 @@ function doRequests() {
   })
 }
 
-function activateMenu(menuItem) {
+function activateMenu (menuItem) {
   menu.map((item) => {
     var temp = document.querySelector(item)
     if (temp !== null) {
@@ -481,7 +484,7 @@ function activateMenu(menuItem) {
   }
 }
 
-function loadLog(logID) {
+function loadLog (logID) {
   jQuery('#modal-dj-logs').iziModal('open')
   var logs = document.querySelector('#dj-show-logs')
   if (logs !== null) {
@@ -493,10 +496,10 @@ function loadLog(logID) {
         response.map(log => {
           if (log.loglevel === 'urgent') { log.loglevel = 'warning' }
           if (log.loglevel === 'purple') { log.loglevel = 'secondary' }
-          newLog.push([`<span class="text-${log.loglevel}"><i class="fas fa-dot-circle" width="32"></i></span>`, moment(log.createdAt).format('h:mm:ss A'), `${log.event}
+          newLog.push([ `<span class="text-${log.loglevel}"><i class="fas fa-dot-circle" width="32"></i></span>`, moment(log.createdAt).format('h:mm:ss A'), `${log.event}
           ${log.trackArtist !== null && log.trackArtist !== '' ? `<br />Track: ${log.trackArtist}` : ``}${log.trackTitle !== null && log.trackTitle !== '' ? ` - ${log.trackTitle}` : ``}
           ${log.trackAlbum !== null && log.trackAlbum !== '' ? `<br />Album: ${log.trackAlbum}` : ``}
-          ${log.trackLabel !== null && log.trackLabel !== '' ? `<br />Label: ${log.trackLabel}` : ``}`])
+          ${log.trackLabel !== null && log.trackLabel !== '' ? `<br />Label: ${log.trackLabel}` : ``}` ])
         })
         jQuery('#dj-show-logs-table').DataTable({
           data: newLog,
@@ -514,6 +517,60 @@ function loadLog(logID) {
   }
 }
 
-function formatInt(x) {
+function formatInt (x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function checkDiscipline (cb) {
+  io.socket.post('/discipline/get-web', {}, function serverResponded (body) {
+    try {
+      var docb = true
+      if (body.length > 0) {
+        body.map((discipline) => {
+          var activeDiscipline = (discipline.active && (discipline.action !== 'dayban' || moment(discipline.createdAt).add(1, 'days').isBefore(moment())))
+          if (activeDiscipline) { docb = false }
+          if (activeDiscipline || !discipline.acknowledged) {
+            iziToast.show({
+              title: `Disciplinary action ${activeDiscipline ? `active against you` : `was issued in the past against you`}`,
+              message: `On ${moment(discipline.createdAt).format('LLL')}, disciplinary action was issued against you for the following reason: ${discipline.message}. <br /><br />
+              ${activeDiscipline ? `A ${discipline.action} is currently active, and you are not allowed to use WWSU's services at this time.` : `The discipline has expired, but you must acknowledge this message before you may use WWSU's services. Further issues may warrant more severe disciplinary action.`}<br />
+              Please contact gm@wwsu1069.org if you have any questions or concerns.`,
+              timeout: false,
+              close: false,
+              color: 'red',
+              drag: false,
+              position: 'center',
+              closeOnClick: false,
+              overlay: true,
+              zindex: 1000,
+              layout: 2,
+              maxWidth: 480,
+              buttons: [
+                [ '<button>Acknowledge</button>', function (instance, toast, button, e, inputs) {
+                  if (activeDiscipline) {
+                    io.socket.post('/discipline/acknowledge', { ID: discipline.ID }, function serverResponded (body) { })
+                  }
+                  instance.hide({}, toast, 'button')
+                } ]
+              ]
+            })
+          }
+        })
+        if (docb) {
+          cb()
+        }
+      }
+    } catch (e) {
+      iziToast.show({
+        title: 'Failed to check discipline',
+        message: 'Unable to connect to WWSU because we could not determine if you are banned. Please try again later.',
+        color: 'red',
+        zindex: 100,
+        layout: 1,
+        closeOnClick: true,
+        position: 'center',
+        timeout: 10000
+      })
+    }
+  })
 }

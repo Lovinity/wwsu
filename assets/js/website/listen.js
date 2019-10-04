@@ -81,13 +81,13 @@ if (document.querySelector('#themessage')) {
   var quill = new Quill('#themessage', {
     modules: {
       toolbar: [
-        ['bold', 'italic', 'underline', 'strike', { color: [] }],
-        ['link'],
-        ['clean']
+        [ 'bold', 'italic', 'underline', 'strike', { color: [] } ],
+        [ 'link' ],
+        [ 'clean' ]
       ],
       keyboard: {
         bindings: {
-        // Disable tab input (ADA compliance)
+          // Disable tab input (ADA compliance)
           tab: false
         }
       }
@@ -134,7 +134,7 @@ if (document.querySelector(`#dialog`)) {
 function quillGetHTML (inputDelta) {
   var tempCont = document.createElement('div');
   (new Quill(tempCont)).setContents(inputDelta)
-  return tempCont.getElementsByClassName('ql-editor')[0].innerHTML
+  return tempCont.getElementsByClassName('ql-editor')[ 0 ].innerHTML
 }
 
 // Set up schedule calendar
@@ -360,7 +360,7 @@ waitFor(() => {
   io.socket.on('meta', (data) => {
     for (var key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
-        Meta[key] = data[key]
+        Meta[ key ] = data[ key ]
       }
     }
     doMeta(data)
@@ -373,10 +373,10 @@ waitFor(() => {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           switch (key) {
             case 'insert':
-              addMessage(data[key], firstTime)
+              addMessage(data[ key ], firstTime)
               break
             case 'remove':
-              var temp = document.getElementById(`msg-${data[key]}`)
+              var temp = document.getElementById(`msg-${data[ key ]}`)
               if (temp !== null) { temp.innerHTML = 'XXX This message was deleted XXX' }
               break
           }
@@ -422,23 +422,27 @@ waitFor(() => {
 function doSockets (firsttime = false) {
   // Mobile devices and web devices where device parameter was passed, start sockets immediately.
   if (isMobile || !firsttime || (!isMobile && device !== null)) {
-    tracksLikedSocket()
-    metaSocket()
-    announcementsSocket()
-    messagesSocket()
-    calendarSocket()
-    loadGenres()
-    onlineSocket()
+    checkDiscipline(() => {
+      tracksLikedSocket()
+      metaSocket()
+      announcementsSocket()
+      messagesSocket()
+      calendarSocket()
+      loadGenres()
+      onlineSocket()
+    })
     // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
   } else {
     OneSignal = window.OneSignal || []
-    tracksLikedSocket()
-    metaSocket()
-    announcementsSocket()
-    messagesSocket()
-    calendarSocket()
-    loadGenres()
-    onlineSocket(true)
+    checkDiscipline(() => {
+      tracksLikedSocket()
+      metaSocket()
+      announcementsSocket()
+      messagesSocket()
+      calendarSocket()
+      loadGenres()
+      onlineSocket(true)
+    })
   }
 }
 
@@ -448,7 +452,7 @@ function onlineSocket (doOneSignal = false) {
       if (nickname) {
         nickname.value = body.label
         nickname.value = nickname.value.replace('Web ', '')
-        nickname.value = nickname.value.match(/\(([^)]+)\)/)[1]
+        nickname.value = nickname.value.match(/\(([^)]+)\)/)[ 1 ]
       }
       onlineSocketDone = true
       automationpost = ``
@@ -592,7 +596,7 @@ function metaSocket () {
     try {
       for (var key in body) {
         if (Object.prototype.hasOwnProperty.call(body, key)) {
-          Meta[key] = body[key]
+          Meta[ key ] = body[ key ]
         }
       }
       doMeta(body)
@@ -1023,23 +1027,23 @@ function loadTrackInfo (trackID) {
       // WORK ON THIS: HTML table of song information
       if (document.querySelector('#trackModal')) {
         $('#trackModal').iziModal('open')
-        $('#track-info-ID').html(response[0].ID)
-        $('#track-info-status').html(response[0].enabled === 1 ? 'Enabled' : 'Disabled')
-        document.getElementById('track-info-status').className = `table-${response[0].enabled === 1 ? 'success' : 'dark'}`
-        $('#track-info-artist').html(response[0].artist)
-        $('#track-info-title').html(response[0].title)
-        $('#track-info-album').html(response[0].album)
-        $('#track-info-genre').html(response[0].genre)
-        $('#track-info-duration').html(moment.duration(response[0].duration, 'seconds').format('HH:mm:ss'))
-        $('#track-info-lastplayed').html(moment(response[0].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[0].date_played).format('LLLL') : 'Unknown')
+        $('#track-info-ID').html(response[ 0 ].ID)
+        $('#track-info-status').html(response[ 0 ].enabled === 1 ? 'Enabled' : 'Disabled')
+        document.getElementById('track-info-status').className = `table-${response[ 0 ].enabled === 1 ? 'success' : 'dark'}`
+        $('#track-info-artist').html(response[ 0 ].artist)
+        $('#track-info-title').html(response[ 0 ].title)
+        $('#track-info-album').html(response[ 0 ].album)
+        $('#track-info-genre').html(response[ 0 ].genre)
+        $('#track-info-duration').html(moment.duration(response[ 0 ].duration, 'seconds').format('HH:mm:ss'))
+        $('#track-info-lastplayed').html(moment(response[ 0 ].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[ 0 ].date_played).format('LLLL') : 'Unknown')
         $('#track-info-limits').html(`<ul>
-            ${response[0].limit_action > 0 && response[0].count_played < response[0].play_limit ? `<li>Track has ${response[0].play_limit - response[0].count_played} spins left</li>` : ``}
-            ${response[0].limit_action > 0 && response[0].count_played >= response[0].play_limit ? `<li>Track expired (reached spin limit)</li>` : ``}
-            ${moment(response[0].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[0].start_date).format('LLLL')}</li>` : ``}
-            ${moment(response[0].end_date).isBefore() && moment(response[0].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[0].end_date).format('LLLL')}</li>` : ``}
+            ${response[ 0 ].limit_action > 0 && response[ 0 ].count_played < response[ 0 ].play_limit ? `<li>Track has ${response[ 0 ].play_limit - response[ 0 ].count_played} spins left</li>` : ``}
+            ${response[ 0 ].limit_action > 0 && response[ 0 ].count_played >= response[ 0 ].play_limit ? `<li>Track expired (reached spin limit)</li>` : ``}
+            ${moment(response[ 0 ].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[ 0 ].start_date).format('LLLL')}</li>` : ``}
+            ${moment(response[ 0 ].end_date).isBefore() && moment(response[ 0 ].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[ 0 ].end_date).format('LLLL')}</li>` : ``}
             </ul>`)
 
-        if (response[0].request.requestable) {
+        if (response[ 0 ].request.requestable) {
           $('#track-info-request').html(`<div class="form-group">
                                     <h6>Request this Track</h6>
                                     <label for="track-request-name">Name (optional; displayed when the request plays)</label>
@@ -1049,13 +1053,13 @@ function loadTrackInfo (trackID) {
                                     </div>                    
                                     <button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0">Place Request</button>`)
         } else {
-          $('#track-info-request').html(`<div class="bs-callout bs-callout-${response[0].request.listDiv} shadow-4 text-white">
-                        ${response[0].request.message}
+          $('#track-info-request').html(`<div class="bs-callout bs-callout-${response[ 0 ].request.listDiv} shadow-4 text-white">
+                        ${response[ 0 ].request.message}
                     </div>`)
         }
       }
     } catch (e) {
-      console.dir(response[0])
+      console.dir(response[ 0 ])
       console.error(e)
     }
   })
@@ -1116,7 +1120,7 @@ function loadTracks (skip = 0) {
   var search = document.getElementById('searchterm')
   var query = { search: escapeHTML(search.value), skip: skip, limit: 50, ignoreDisabled: true, ignoreNonMusic: true }
   var genreOptions = document.getElementById('filter-genre')
-  var selectedOption = genreOptions.options[genreOptions.selectedIndex].value
+  var selectedOption = genreOptions.options[ genreOptions.selectedIndex ].value
   if (selectedOption !== '0') { query.genre = parseInt(selectedOption) }
   if (skip === 0) { songData.innerHTML = `` }
   io.socket.post('/songs/get', query, function serverResponded (response) {
@@ -1272,13 +1276,13 @@ function processCalendar (data, replace = false) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           switch (key) {
             case 'insert':
-              Calendar.insert(data[key])
+              Calendar.insert(data[ key ])
               break
             case 'update':
-              Calendar({ ID: data[key].ID }).update(data[key])
+              Calendar({ ID: data[ key ].ID }).update(data[ key ])
               break
             case 'remove':
-              Calendar({ ID: data[key] }).remove()
+              Calendar({ ID: data[ key ] }).remove()
               break
           }
         }
@@ -1304,7 +1308,7 @@ function updateCalendar () {
 
     // Get the value of the currently selected calendar item
     var calendarOptions = document.getElementById('calendar-select')
-    var selectedOption = parseInt(calendarOptions.options[calendarOptions.selectedIndex].value || 0) || 0
+    var selectedOption = parseInt(calendarOptions.options[ calendarOptions.selectedIndex ].value || 0) || 0
 
     // Define a comparison function that will order calendar events by start time when we run the iteration
     var compare = function (a, b) {
@@ -1347,8 +1351,8 @@ function updateCalendar () {
             image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`
             temp = stripped.split(' - ')
             if (temp.length === 2) {
-              line1 = temp[0]
-              line2 = temp[1]
+              line1 = temp[ 0 ]
+              line2 = temp[ 1 ]
             } else {
               line1 = 'Unknown DJ'
               line2 = temp
@@ -1359,8 +1363,8 @@ function updateCalendar () {
             image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`
             temp = stripped.split(' - ')
             if (temp.length === 2) {
-              line1 = temp[0]
-              line2 = temp[1]
+              line1 = temp[ 0 ]
+              line2 = temp[ 1 ]
             } else {
               line1 = 'Unknown DJ'
               line2 = temp
@@ -1371,8 +1375,8 @@ function updateCalendar () {
             image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`
             temp = stripped.split(' - ')
             if (temp.length === 2) {
-              line1 = temp[0]
-              line2 = temp[1]
+              line1 = temp[ 0 ]
+              line2 = temp[ 1 ]
             } else {
               line1 = 'Unknown Host'
               line2 = temp
@@ -1389,8 +1393,8 @@ function updateCalendar () {
             image = `<i class="fas fa-list text-info" style="font-size: 96px;"></i>`
             temp = stripped.split(' - ')
             if (temp.length === 2) {
-              line1 = temp[0]
-              line2 = temp[1]
+              line1 = temp[ 0 ]
+              line2 = temp[ 1 ]
             } else {
               line1 = ''
               line2 = temp
@@ -1447,7 +1451,7 @@ function hexRgb (hex, options = {}) {
     }
 
     if (hex.length === 3) {
-      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
+      hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ]
     }
 
     const num = parseInt(hex, 16)
@@ -1456,7 +1460,7 @@ function hexRgb (hex, options = {}) {
     const blue = num & 255
 
     return options.format === 'array'
-      ? [red, green, blue, alpha]
+      ? [ red, green, blue, alpha ]
       : { red, green, blue, alpha }
   } catch (e) {
     console.error(e)
@@ -1494,18 +1498,18 @@ function displayEventInfo (showID) {
     }
 
     // Check the number of subscriptions
-    var subscribed = Subscriptions([{ type: `calendar-once`, subtype: item.unique }, { type: `calendar-all`, subtype: subtypefilter }]).get().length
+    var subscribed = Subscriptions([ { type: `calendar-once`, subtype: item.unique }, { type: `calendar-all`, subtype: subtypefilter } ]).get().length
 
     if (subscribed === 0) {
       message += `<hr><p>To receive a ${isMobile ? `push` : ``} notification when this event goes on the air for this specific date/time, click "Subscribe One-Time".</p>
 <p>To receive a ${isMobile ? `push` : ``} notification every time this event goes on the air, click "Subscribe All Times".</p>
 <p>You can always come back to this screen to unsubscribe from ${isMobile ? `push` : ``} notifications.</p>`
       buttons = [
-        ['<button><b>Subscribe One-Time</b></button>', function (instance, toast) {
+        [ '<button><b>Subscribe One-Time</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
           subscribe(`calendar-once`, item.unique)
-        }, true],
-        ['<button><b>Subscribe All Times</b></button>', function (instance, toast) {
+        }, true ],
+        [ '<button><b>Subscribe All Times</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
 
           // For shows, remotes, and prerecords... subscribe to events regardless of prefix
@@ -1515,12 +1519,12 @@ function displayEventInfo (showID) {
           } else {
             subscribe(`calendar-all`, item.title)
           }
-        }]
+        } ]
       ]
     } else {
       message += `<hr><p>You are currently subscribed to receive ${isMobile ? `push` : ``} notifications for this event. To unsubscribe from ALL ${isMobile ? `push` : ``} notifications for this event now and in the future, click "unsubscribe".</p>`
       buttons = [
-        ['<button><b>Unsubscribe</b></button>', function (instance, toast) {
+        [ '<button><b>Unsubscribe</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
           // For shows, remotes, and prerecords... unsubscribe from events regardless of prefix
           if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
@@ -1529,16 +1533,16 @@ function displayEventInfo (showID) {
           } else {
             unsubscribe(item.unique, item.title)
           }
-        }, true]
+        }, true ]
       ]
     }
   } else if (!isMobile) {
     message += `<hr><p>If you want to receive notifications for when events go on the air, you first need to grant permission in your web browser for us to show notifications. Click "Show Prompt". After allowing notifications, wait about 10 seconds and then click the event again to re-open this screen.</p>`
     buttons = [
-      ['<button><b>Show Prompt</b></button>', function (instance, toast) {
+      [ '<button><b>Show Prompt</b></button>', function (instance, toast) {
         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
         OneSignal.showNativePrompt()
-      }, true]
+      }, true ]
     ]
   }
   iziToast.show({
@@ -1560,7 +1564,7 @@ function getUrlParameter (name) {
   name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
   var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
   var results = regex.exec(window.location.search)
-  return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '))
+  return results === null ? null : decodeURIComponent(results[ 1 ].replace(/\+/g, ' '))
 }
 
 function subscribe (type, subtype) {
@@ -1667,6 +1671,60 @@ function unsubscribe (ID, event) {
       iziToast.show({
         title: 'Failed to unsubscribe',
         message: 'Unable to un-subscribe you to this event at this time. Please try again later.',
+        color: 'red',
+        zindex: 100,
+        layout: 1,
+        closeOnClick: true,
+        position: 'center',
+        timeout: 10000
+      })
+    }
+  })
+}
+
+function checkDiscipline (cb) {
+  io.socket.post('/discipline/get-web', {}, function serverResponded (body) {
+    try {
+      var docb = true
+      if (body.length > 0) {
+        body.map((discipline) => {
+          var activeDiscipline = (discipline.active && (discipline.action !== 'dayban' || moment(discipline.createdAt).add(1, 'days').isBefore(moment())))
+          if (activeDiscipline) { docb = false }
+          if (activeDiscipline || !discipline.acknowledged) {
+            iziToast.show({
+              title: `Disciplinary action ${activeDiscipline ? `active against you` : `was issued in the past against you`}`,
+              message: `On ${moment(discipline.createdAt).format('LLL')}, disciplinary action was issued against you for the following reason: ${discipline.message}. <br /><br />
+              ${activeDiscipline ? `A ${discipline.action} is currently active, and you are not allowed to use WWSU's services at this time.` : `The discipline has expired, but you must acknowledge this message before you may use WWSU's services. Further issues may warrant more severe disciplinary action.`}<br />
+              Please contact gm@wwsu1069.org if you have any questions or concerns.`,
+              timeout: false,
+              close: false,
+              color: 'red',
+              drag: false,
+              position: 'center',
+              closeOnClick: false,
+              overlay: true,
+              zindex: 1000,
+              layout: 2,
+              maxWidth: 480,
+              buttons: [
+                [ '<button>Acknowledge</button>', function (instance, toast, button, e, inputs) {
+                  if (activeDiscipline) {
+                    io.socket.post('/discipline/acknowledge', { ID: discipline.ID }, function serverResponded (body) { })
+                  }
+                  instance.hide({}, toast, 'button')
+                } ]
+              ]
+            })
+          }
+        })
+        if (docb) {
+          cb()
+        }
+      }
+    } catch (e) {
+      iziToast.show({
+        title: 'Failed to check discipline',
+        message: 'Unable to connect to WWSU because we could not determine if you are banned. Please try again later.',
         color: 'red',
         zindex: 100,
         layout: 1,
