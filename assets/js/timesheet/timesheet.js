@@ -892,9 +892,7 @@ function checkDiscipline (cb) {
               maxWidth: 480,
               buttons: [
                 [ '<button>Acknowledge</button>', function (instance, toast, button, e, inputs) {
-                  if (activeDiscipline) {
-                    io.socket.post('/discipline/acknowledge', { ID: discipline.ID }, function serverResponded (body) { })
-                  }
+                  io.socket.post('/discipline/acknowledge', { ID: discipline.ID }, function serverResponded (body) { })
                   instance.hide({}, toast, 'button')
                 } ]
               ]

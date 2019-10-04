@@ -404,17 +404,20 @@ waitFor(() => {
   io.socket.on('discipline', (data) => {
     io.socket.disconnect()
     iziToast.show({
-      title: `Disciplinary notice - Disconnected from WWSU`,
-      message: data.discipline,
+      title: `Disciplinary action issued - disconnected from WWSU`,
+      message: `Disciplinary action was issued against you for the following reason: ${data.message}. <br /><br />
+      A ${data.action} was issued against you, and you may no longer use WWSU's services until the discipline expires.<br />
+      Please contact gm@wwsu1069.org if you have any questions or concerns.`,
+      timeout: false,
+      close: false,
       color: 'red',
+      drag: false,
+      position: 'center',
+      closeOnClick: false,
+      overlay: true,
       zindex: 1000,
       layout: 2,
-      closeOnClick: false,
-      close: false,
-      overlay: true,
-      position: 'center',
-      timeout: false,
-      balloon: false
+      maxWidth: 480
     })
   })
 })
@@ -1708,9 +1711,7 @@ function checkDiscipline (cb) {
               maxWidth: 480,
               buttons: [
                 [ '<button>Acknowledge</button>', function (instance, toast, button, e, inputs) {
-                  if (activeDiscipline) {
-                    io.socket.post('/discipline/acknowledge', { ID: discipline.ID }, function serverResponded (body) { })
-                  }
+                  io.socket.post('/discipline/acknowledge', { ID: discipline.ID }, function serverResponded (body) { })
                   instance.hide({}, toast, 'button')
                 } ]
               ]
