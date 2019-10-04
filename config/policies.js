@@ -35,7 +35,7 @@ module.exports.policies = {
   'directors/get': 'isBanned',
   'directors/get-hours': 'isBanned',
   'directors/remove-hours': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
-  'discipline/acknowledge': '',
+  'discipline/acknowledge': true,
   'discipline/edit': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'discipline/get-web': true,
   'discipline/remove': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
