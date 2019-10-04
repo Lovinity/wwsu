@@ -25,7 +25,6 @@ module.exports = {
 
             var records = await sails.models.discipline.find({
                 where: {
-                    acknowledged: 0,
                     or: [
                         { action: 'permaban', active: 1 },
                         { action: 'dayban', createdAt: { '>': searchto }, active: 1 },
