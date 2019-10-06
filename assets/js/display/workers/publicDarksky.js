@@ -10,7 +10,7 @@ onmessage = function (e) {
       var conditions = []
 
       var precipStart = 61
-      var precipEnd = -1
+      var precipEnd = 61
       var precipType = `precipitation`
 
       // Current conditions
@@ -22,13 +22,14 @@ onmessage = function (e) {
             precipStart = index
             precipType = data.precipType
           }
-          if (precipEnd < index) { precipEnd = index }
+        } else {
+          if (precipEnd > index) { precipEnd = index }
         }
       })
 
       if (item.currently.precipType) {
         if (precipStart === 0 && precipEnd >= 59) {
-          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will continue to fall for the next hour.`]])
+          this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will continue for a while.`]])
         } else if (precipStart === 0) {
           this.postMessage([`setWeatherSlide`, [`precipitation`, true, `#4F3C03`, `${item.currently.precipType || `precipitation`} falling!`, `fa-umbrella`, `Rate: ${item.currently.precipIntensity} fluid inches per hour.<br />Will end at about ${moment(e.data[1]).add(precipEnd, 'minutes').format('h:mmA')}.`]])
         } else if (precipStart < 61) {
@@ -132,10 +133,10 @@ onmessage = function (e) {
         shadeColor = ``
         switch (conditions[i].type) {
           case 'clouds':
-            if (conditions[i].amount > 0.75) {
+            if (conditions[i].amount > 0.66) {
               shadeColor = `#786207`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud"></i></span>`
-            } else if (conditions[i].amount >= 0.25) {
+            } else if (conditions[i].amount >= 0.33) {
               shadeColor = `#F1C40F`
               innerIcon = `<span class="text-dark" style="font-size: 1em;"><i class="fas fa-cloud-sun"></i></span>`
             } else {
@@ -144,7 +145,7 @@ onmessage = function (e) {
             }
             break
           case 'rain':
-            if (conditions[i].amount >= 0.65) {
+            if (conditions[i].amount >= 0.7) {
               shadeColor = `#1A4C6D`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-cloud-rain"></i></span>`
             } else if (conditions[i].amount >= 0.4) {
@@ -156,7 +157,7 @@ onmessage = function (e) {
             }
             break
           case 'snow':
-            if (conditions[i].amount >= 0.65) {
+            if (conditions[i].amount >= 0.7) {
               shadeColor = `#7C7C7C`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-snowman"></i></span>`
             } else if (conditions[i].amount >= 0.4) {
@@ -168,7 +169,7 @@ onmessage = function (e) {
             }
             break
           case 'sleet':
-            if (conditions[i].amount >= 0.65) {
+            if (conditions[i].amount >= 0.7) {
               shadeColor = `#780E35`
               innerIcon = `<span class="text-white" style="font-size: 1em;"><i class="fas fa-igloo"></i></span>`
             } else if (conditions[i].amount >= 0.4) {
