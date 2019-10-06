@@ -132,10 +132,6 @@ module.exports = {
       type: 'number',
       description: 'Number of current online listeners'
     },
-    listenerPeak: {
-      type: 'number',
-      description: 'Number of peak online listeners'
-    },
     queueFinish: {
       type: 'string',
       allowNull: true,
@@ -210,6 +206,11 @@ module.exports = {
           if (key === 'state') {
             // Enable webchat automatically when going into automation state
             if (inputs[key] === 'automation_on' || inputs[key] === 'automation_genre' || inputs[key] === 'automation_playlist' || inputs[key] === 'automation_prerecord') { push2.webchat = true }
+          }
+
+          if (key === 'listeners' && inputs.listeners > sails.models.meta.memory.listenerPeak) {
+            sails.models.meta.memory.listenerPeak = inputs.listeners
+            push.listenerPeak = inputs.listeners
           }
 
           // show key

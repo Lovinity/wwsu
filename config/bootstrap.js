@@ -862,6 +862,7 @@ module.exports.bootstrap = async function (done) {
                 await sails.models.listeners.create({ dj: sails.models.meta.memory.dj, listeners: streams[ 0 ].uniquelisteners })
                   .tolerate(() => {
                   })
+                  await sails.helpers.meta.change.with({listeners: streams[ 0 ].uniquelisteners})
               }
               sails.models.listeners.memory = { dj: sails.models.meta.memory.dj, listeners: streams[ 0 ].uniquelisteners }
             } else {
