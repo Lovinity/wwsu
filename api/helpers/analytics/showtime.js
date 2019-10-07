@@ -177,15 +177,15 @@ module.exports = {
           // First, subtract for missed IDs; we do not want to combine missed ID records.
           if (record.ignore !== 2) {
             if (record.ignore !== 1) {
-              DJs[record.dj].overall.reputationScore -= (2 * record.missedIDs)
-              DJs[0].overall.reputationScore -= (2 * record.missedIDs)
+              DJs[record.dj].overall.reputationScore -= (3 * record.missedIDs)
+              DJs[0].overall.reputationScore -= (3 * record.missedIDs)
             }
             DJs[record.dj].overall.missedIDs += record.missedIDs
             DJs[0].overall.missedIDs += record.missedIDs
             if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
               if (record.ignore !== 1) {
-                DJs[record.dj].semester.reputationScore -= (2 * record.missedIDs)
-                DJs[0].semester.reputationScore -= (2 * record.missedIDs)
+                DJs[record.dj].semester.reputationScore -= (3 * record.missedIDs)
+                DJs[0].semester.reputationScore -= (3 * record.missedIDs)
               }
               DJs[record.dj].semester.missedIDs += record.missedIDs
               DJs[0].semester.missedIDs += record.missedIDs

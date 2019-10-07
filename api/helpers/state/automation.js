@@ -150,6 +150,9 @@ module.exports = {
       // Gather updated DJ stats
       if (attendance.dj !== null) { returnData = Object.assign(returnData, await sails.helpers.analytics.showtime(attendance.dj)) }
 
+      // Get listener analytics
+      returnData.listeners = await sails.helpers.analytics.listeners(attendance.actualStart, attendance.actualEnd)
+
       // Return our stats
       return exits.success(returnData)
     } catch (e) {
