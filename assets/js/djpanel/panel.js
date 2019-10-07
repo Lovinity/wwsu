@@ -38,6 +38,36 @@ jQuery('#modal-dj-logs').iziModal({
   zindex: 50
 })
 
+jQuery('#modal-help-remotes').iziModal({
+  title: 'What Are Remote Credits?',
+  width: '75%',
+  focusInput: true,
+  arrowKeys: false,
+  navigateCaption: false,
+  navigateArrows: false, // Boolean, 'closeToModal', 'closeScreenEdge'
+  overlayClose: false,
+  overlayColor: 'rgba(0, 0, 0, 0.75)',
+  timeout: false,
+  pauseOnHover: true,
+  timeoutProgressbarColor: 'rgba(255,255,255,0.5)',
+  zindex: 50
+})
+
+jQuery('#modal-help-reputation').iziModal({
+  title: 'What is reputation?',
+  width: '75%',
+  focusInput: true,
+  arrowKeys: false,
+  navigateCaption: false,
+  navigateArrows: false, // Boolean, 'closeToModal', 'closeScreenEdge'
+  overlayClose: false,
+  overlayColor: 'rgba(0, 0, 0, 0.75)',
+  timeout: false,
+  pauseOnHover: true,
+  timeoutProgressbarColor: 'rgba(255,255,255,0.5)',
+  zindex: 50
+})
+
 function waitFor (check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
@@ -120,10 +150,10 @@ function doRequests () {
       // Remote credits
       temp = document.querySelector('#dash-credits')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.semester.remoteCredits) }
-      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
+      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits <i class="fas fa-question-circle" style="padding-left: 1em;" onclick="creditsHelp()"></i>', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
 
       // Reputation
-      analyticsTable.push([ '<i class="fas fa-smile"></i>', 'Reputation / Responsibility', `<div class="progress progress-sm mr-2">
+      analyticsTable.push([ '<i class="fas fa-smile"></i>', 'Reputation / Responsibility <i class="fas fa-question-circle" style="padding-left: 1em;" onclick="reputationHelp()"></i>', `<div class="progress progress-sm mr-2">
       <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.semester.reputationPercent}%" aria-valuenow="${response.stats.semester.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>`, `<div class="progress progress-sm mr-2">
     <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.overall.reputationPercent}%" aria-valuenow="${response.stats.overall.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -571,4 +601,12 @@ function checkDiscipline (cb) {
       })
     }
   })
+}
+
+function creditsHelp () {
+  jQuery('#modal-help-remotes').iziModal('open')
+}
+
+function reputationHelp () {
+  jQuery('#modal-help-reputation').iziModal('open')
 }
