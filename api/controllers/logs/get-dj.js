@@ -24,7 +24,6 @@ module.exports = {
       }
 
       returnData.logs = await sails.models.logs.find({ attendanceID: inputs.attendanceID }).sort('createdAt ASC')
-      sails.log.verbose(`Retrieved Logs records: ${records.length}`)
 
       returnData.listeners = await sails.helpers.analytics.listeners(dj.actualStart, dj.actualEnd)
 
