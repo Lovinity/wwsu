@@ -531,6 +531,12 @@ function loadLog (logID) {
       logs.scrollTop = 0
       var newLog = []
       if (typeof response.logs !== 'undefined' && response.logs.length > 0) {
+        var data = []
+        if (response.listeners.length > 0) {
+          response.listeners.map((listener) => {
+            data.push({ x: moment(listener.createdAt).toISOString(true), y: listener.listeners })
+          })
+        }
         temp = document.querySelector('#listener-graph')
         if (temp !== null) {
           temp.innerHTML = ''
