@@ -160,15 +160,15 @@ function doRequests () {
       // XP
       temp = document.querySelector('#dash-XP')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.overall.xp) }
-      analyticsTable.push([ '<i class="fas fa-star" width="32"></i>', 'Experience Points (XP) <i class="fas fa-question-circle" style="padding-left: 1em;" width="32" onclick="xpHelp()"></i>', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp) ])
+      analyticsTable.push([ '<i class="fas fa-star" width="32"></i>', 'Experience Points (XP) <span style="font-size: 32px;"><i class="fas fa-question-circle" style="padding-left: 1em;" width="32" onclick="xpHelp()"></i></span>', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp) ])
 
       // Remote credits
       temp = document.querySelector('#dash-credits')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.semester.remoteCredits) }
-      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits <i class="fas fa-question-circle" style="padding-left: 1em;" width="32" onclick="creditsHelp()"></i>', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
+      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits <span style="font-size: 32px;"><i class="fas fa-question-circle" style="padding-left: 1em;" width="32" onclick="creditsHelp()"></i></span>', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
 
       // Reputation
-      analyticsTable.push([ '<i class="fas fa-smile"></i>', 'Reputation / Responsibility <i class="fas fa-question-circle" style="padding-left: 1em;" width="32" onclick="reputationHelp()"></i>', `<div class="progress progress-sm mr-2">
+      analyticsTable.push([ '<i class="fas fa-smile"></i>', 'Reputation / Responsibility <span style="font-size: 32px;"><i class="fas fa-question-circle" style="padding-left: 1em;" width="32" onclick="reputationHelp()"></i></span>', `<div class="progress progress-sm mr-2">
       <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.semester.reputationPercent}%" aria-valuenow="${response.stats.semester.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>`, `<div class="progress progress-sm mr-2">
     <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.overall.reputationPercent}%" aria-valuenow="${response.stats.overall.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
