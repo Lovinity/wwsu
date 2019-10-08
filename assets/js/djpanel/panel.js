@@ -526,7 +526,10 @@ function loadLog (logID) {
   jQuery('#modal-dj-logs').iziModal('open')
   var logs = document.querySelector('#dj-show-logs')
   if (logs !== null) {
-    logs.innerHTML = `<table class="table table-bordered" id="dj-show-logs-table" width="100%" cellspacing="0"></table>`
+    logs.innerHTML = `<div class="chart-area">
+                      <div id="listener-graph"></div>
+                      </div>
+    <table class="table table-bordered" id="dj-show-logs-table" width="100%" cellspacing="0"></table>`
     DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
       logs.scrollTop = 0
       var newLog = []
@@ -539,7 +542,6 @@ function loadLog (logID) {
         }
         temp = document.querySelector('#listener-graph')
         if (temp !== null) {
-          temp.innerHTML = ''
           new Taucharts.Chart({
             data: data,
             type: 'line',
