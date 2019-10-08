@@ -127,6 +127,7 @@
                 <div class="chart-area">
                     <div id="analytics-listenerChart"></div>
                 </div>
+                <p>The greater the online listener to showtime ratio, the better (the more popular your show was). To see listener graphs of individual shows, scroll down to "Show Logs" and click the Logs icon (paper) next to the show you want to view (you may have to click the blue + on the left side if applicable to see it)</p>
                 <hr>
             </div>
         </div>
@@ -141,7 +142,7 @@
             </div>
 
             <div class="card-body">
-                <table class="table table-bordered stripe" id="logs-table" width="100%" cellspacing="0">
+                <table class="table table-bordered stripe" id="logs-table" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -150,7 +151,6 @@
                             <th>Scheduled End</th>
                             <th>Actual Start</th>
                             <th>Actual End</th>
-                            <th>Unauthorized?</th>
                             <th>Started Early?</th>
                             <th>Started Late?</th>
                             <th>Ended Early?</th>
@@ -168,6 +168,9 @@
 <div class="modal" id="modal-dj-logs" tabindex="-1" role="dialog">
     <div class="modal-content text-dark bg-light-3">
         <div class="modal-body" style="max-height: 640px; overflow: scroll;" id="dj-show-logs">
+            <div class="chart-area">
+                <div id="listener-graph"></div>
+            </div>
             <table class="table table-bordered" id="dj-show-logs-table" width="90%" cellspacing="0">
             </table>
         </div>

@@ -315,7 +315,6 @@ function doRequests () {
                 '',
                 moment(record.actualStart).format('h:mm A'),
                 record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`,
-                '<i class="fas fa-exclamation-triangle"></i>',
                 '',
                 '',
                 '',
@@ -335,7 +334,6 @@ function doRequests () {
                 '',
                 '',
                 '',
-                '',
                 0,
                 ``
               ])
@@ -349,7 +347,6 @@ function doRequests () {
                 moment(record.scheduledEnd).format('h:mm A'),
                 tempStart,
                 tempEnd,
-                '',
                 moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') >= 10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
                 moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') <= -10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
                 moment(record.scheduledEnd).diff(moment(record.actualEnd), 'minutes') >= 10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
@@ -365,7 +362,6 @@ function doRequests () {
                 moment(record.scheduledEnd).format('h:mm A'),
                 moment(record.actualStart).format('h:mm A'),
                 'ONGOING',
-                '',
                 moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') >= 10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
                 moment(record.scheduledStart).diff(moment(record.actualStart), 'minutes') <= -10 ? '<i class="fas fa-exclamation-triangle"></i>' : '',
                 '',
@@ -385,7 +381,6 @@ function doRequests () {
                 '',
                 '',
                 '',
-                '',
                 0,
                 ``
               ])
@@ -401,7 +396,6 @@ function doRequests () {
                 '',
                 '',
                 '',
-                '',
                 0,
                 ``
               ])
@@ -413,7 +407,6 @@ function doRequests () {
                 moment(record.scheduledEnd).format('h:mm A'),
                 'SCHEDULED',
                 'SCHEDULED',
-                '',
                 '',
                 '',
                 '',
@@ -458,13 +451,13 @@ function doRequests () {
                 Taucharts.api.plugins.get('tooltip')({
                   formatters: {
                     x: {
-                      label: 'Show Time : Online Listeners ratio',
+                      label: 'Date / Time',
                       format: function (n) {
-                        return n
+                        return moment(n).format('LLL')
                       }
                     },
                     y: {
-                      label: 'Total Listener Hours',
+                      label: 'Show Time : Online Listeners ratio',
                       format: function (n) {
                         return n
                       }
@@ -537,8 +530,52 @@ function loadLog (logID) {
     DJReq.request({ db: DJs.db(), method: 'POST', url: '/logs/get-dj', data: { attendanceID: logID } }, function (response) {
       logs.scrollTop = 0
       var newLog = []
-      if (response.length > 0) {
-        response.map(log => {
+      if (typeof response.logs !== 'undefined' && response.logs.length > 0) {
+        temp = document.querySelector('#listener-graph')
+        if (temp !== null) {
+          temp.innerHTML = ''
+          new Taucharts.Chart({
+            data: data,
+            type: 'line',
+            x: 'x',
+            y: 'y',
+            color: 'primary',
+            guide: {
+              y: { label: { text: 'Online Listeners' }, autoScale: true, nice: true },
+              x: { label: { text: 'Time' }, autoScale: true, nice: false },
+              showGridLines: 'xy'
+            },
+            dimensions: {
+              x: {
+                type: 'measure',
+                scale: 'time'
+              },
+              y: {
+                type: 'measure',
+                scale: 'linear'
+              }
+            },
+            plugins: [
+              Taucharts.api.plugins.get('tooltip')({
+                formatters: {
+                  x: {
+                    label: 'Time',
+                    format: function (n) {
+                      return moment(n).format('LT')
+                    }
+                  },
+                  y: {
+                    label: 'Online Listeners',
+                    format: function (n) {
+                      return n
+                    }
+                  }
+                }
+              })
+            ]
+          }).renderTo('#listener-graph')
+        }
+        response.logs.map(log => {
           if (log.loglevel === 'urgent') { log.loglevel = 'warning' }
           if (log.loglevel === 'purple') { log.loglevel = 'secondary' }
           newLog.push([ `<span class="text-${log.loglevel}"><i class="fas fa-dot-circle" width="32"></i></span>`, moment(log.createdAt).format('h:mm:ss A'), `${log.event}

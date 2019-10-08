@@ -17,15 +17,18 @@ module.exports = {
 
     try {
       // Get records
+      var returnData = {logs: [], listeners: []}
       var dj = await sails.models.attendance.findOne({ ID: inputs.attendanceID })
       if (!dj || dj.dj !== this.req.payload.ID) {
-        return exits.success([])
+        return exits.success(returnData)
       }
 
-      var records = await sails.models.logs.find({ attendanceID: inputs.attendanceID }).sort('createdAt ASC')
+      returnData.logs = await sails.models.logs.find({ attendanceID: inputs.attendanceID }).sort('createdAt ASC')
       sails.log.verbose(`Retrieved Logs records: ${records.length}`)
 
-      return exits.success(records)
+      returnData.listeners = await sails.helpers.analytics.listeners(dj.actualStart, dj.actualEnd)
+
+      return exits.success(returnData)
     } catch (e) {
       return exits.error(e)
     }
