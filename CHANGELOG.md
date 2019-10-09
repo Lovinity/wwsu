@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - discipline/get-web to get an array of un-acknowledged discipline for the requesting host.
  - discipline/acknowledge for a client to mark a discipline as read / acknowledged.
  - sails.helpers.listeners.analytics(start, end) for getting listener records between start and end. Returned through listeners property in state/automation as well.
+ - UAB timesheet system, which was removed in 6.0.0, re-added due to interest in use by UAB.
 
 ### Changed
  - Meta.queueFinish time will now include music tracks / openers when starting a broadcast to avoid confusion on the DJ Controls queue countdown. State will still switch to "*_on" after noMeta tracks have been played to trigger the recorder in DJ Controls.

@@ -50,6 +50,8 @@ module.exports.bootstrap = async function (done) {
   sails.config.custom.secrets.dj = cryptoRandomString(256)
   sails.config.custom.secrets.director = cryptoRandomString(256)
   sails.config.custom.secrets.adminDirector = cryptoRandomString(256)
+  sails.config.custom.secrets.directorUab = cryptoRandomString(256)
+  sails.config.custom.secrets.adminDirectorUab = cryptoRandomString(256)
 
   // Load darksky
   await sails.models.darksky.findOrCreate({ ID: 1 }, { ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {} })
@@ -1400,6 +1402,12 @@ module.exports.bootstrap = async function (done) {
         }
         // Force reload all directors based on timesheets
         await sails.helpers.directors.update()
+
+        // UAB DIRECTORS
+        await sails.models.uabtimesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: false }).fetch()
+                    .tolerate((err) => {
+                    });
+        await sails.helpers.uabdirectors.update()
 
         return resolve()
       } catch (e) {
