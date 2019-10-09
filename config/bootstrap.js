@@ -1404,7 +1404,7 @@ module.exports.bootstrap = async function (done) {
         await sails.helpers.directors.update()
 
         // UAB DIRECTORS
-        await sails.models.uabtimesheet.update({ time_in: { '!=': null }, time_out: null }, { time_out: moment().toISOString(true), approved: false }).fetch()
+        await sails.models.uabtimesheet.update({ timeIn: { '!=': null }, timeOut: null }, { timeOut: moment().toISOString(true), approved: false }).fetch()
                     .tolerate((err) => {
                     });
         await sails.helpers.uabdirectors.update()

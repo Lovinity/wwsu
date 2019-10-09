@@ -41,8 +41,8 @@ module.exports = {
                 if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))
                     toapprove = true;
 
-                // Add the time_out entry
-                await sails.models.uabtimesheet.update({time_in: {'!=': null}, time_out: null, name: record.name}, {time_out: thetime.toISOString(true), approved: toapprove}).fetch();
+                // Add the timeOut entry
+                await sails.models.uabtimesheet.update({timeIn: {'!=': null}, timeOut: null, name: record.name}, {timeOut: thetime.toISOString(true), approved: toapprove}).fetch();
 
                 // Update the director presence
                 await sails.models.uabdirectors.update({ID: record.ID}, {present: false, since: thetime.toISOString(true)})
@@ -57,7 +57,7 @@ module.exports = {
                     toapprove = true;
 
                 // Clock-ins need a new entry
-                await sails.models.uabtimesheet.create({name: record.name, time_in: thetime.toISOString(true), approved: toapprove}).fetch();
+                await sails.models.uabtimesheet.create({name: record.name, timeIn: thetime.toISOString(true), approved: toapprove}).fetch();
 
                 // Update the director presence
                 await sails.models.uabdirectors.update({ID: record.ID}, {present: true, since: thetime.toISOString(true)})

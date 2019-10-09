@@ -13,7 +13,7 @@ module.exports = {
             description: 'The ID number of the Timesheet being edited.'
         },
 
-        time_in: {
+        timeIn: {
             type: 'string',
             required: true,
             custom: function (value) {
@@ -22,7 +22,7 @@ module.exports = {
             description: 'A moment.js compatible timestamp for when the director clocked in.'
         },
 
-        time_out: {
+        timeOut: {
             type: 'string',
             allowNull: true,
             custom: function (value) {
@@ -56,7 +56,7 @@ module.exports = {
 
         try {
             // Update the timesheet record
-            await sails.models.uabtimesheet.update({ID: inputs.ID}, {time_in: moment(inputs.time_in).toISOString(true), time_out: moment(inputs.time_out).toISOString(true), approved: inputs.approved}).fetch();
+            await sails.models.uabtimesheet.update({ID: inputs.ID}, {timeIn: moment(inputs.timeIn).toISOString(true), timeOut: moment(inputs.timeOut).toISOString(true), approved: inputs.approved}).fetch();
 
             // Force a re-load of all directors to update any possible changes in presence
             await Uabdirectors.updateDirectors();
