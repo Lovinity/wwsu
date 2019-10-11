@@ -1,4 +1,35 @@
-<div class="container-fluid" id="body-dashboard">
+<div class="container-fluid" id="body-connect">
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <button type="button" class="btn btn-success btn-lg" onclick="doRequests()">Log In</button>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid" id="body-comingsoon" style="display: none;">
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Coming Soon
+                            </div>
+                            <div class="mb-0 font-weight-bold text-gray-800">This feature of the DJ Panel has not yet
+                                been programmed. For the time being, please email programming@wwsu1069.org for show
+                                changes / cancellations or show sign-ups, or email marketing@wwsu1069.org if you want a
+                                show promoted.</div>
+                        </div>
+                        <div class="col-auto">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid" id="body-dashboard" style="display: none;">
     <!-- Content Row -->
     <div class="row">
 
@@ -127,7 +158,11 @@
                 <div class="chart-area">
                     <div id="analytics-listenerChart"></div>
                 </div>
-                <p>The greater the online listener to showtime ratio, the better (the more popular your show was). To see listener graphs of individual shows, scroll down to "Show Logs" and click the Logs icon (paper) next to the show you want to view (you may have to click the blue + on the left side if applicable to see it)</p>
+                <p style="max-width: 655px;">The greater the online listener to showtime ratio, the better (the more
+                    popular your show was). To
+                    see listener graphs of individual shows, scroll down to "Show Logs" and click the Logs icon (paper)
+                    next to the show you want to view (you may have to click the blue + on the left side if applicable
+                    to see it)</p>
                 <hr>
             </div>
         </div>
@@ -238,7 +273,8 @@
                     <li>Doing an unscheduled live or remote show decreases reputation significantly.</li>
                     <li>Being absent for a scheduled live or remote show without canceling ahead of time or requesting a
                         re-run decreases your reputation significantly. Excludes optional show days.</li>
-                    <li>Not doing a required top-of-the-hour ID break by :05 after decreases your reputation moderately.</li>
+                    <li>Not doing a required top-of-the-hour ID break by :05 after decreases your reputation moderately.
+                    </li>
                     <li>Canceling your show opposed to requesting a re-run to air decreases your reputation slightly; we
                         prefer a re-run air instead of automation. Excludes optional show days.</li>
                     <li>Starting your show over 10 minutes early or late decreases your reputation slightly; please
@@ -257,18 +293,24 @@
     <div class="modal-content text-dark bg-light-3">
         <div class="modal-body" style="max-height: 640px; overflow: scroll;">
             <p>
-                Experience / XP is a fun and informal measurement of how much you have contributed to WWSU Radio. Directors might choose at their own discretion to give rewards based off of XP. However, the main purpose is for you to see your contributions.
+                Experience / XP is a fun and informal measurement of how much you have contributed to WWSU Radio.
+                Directors might choose at their own discretion to give rewards based off of XP. However, the main
+                purpose is for you to see your contributions.
             </p>
             <p>
                 The following is a list of ways XP is earned:
                 <ul>
                     <li>Live and remote shows earn 1 XP per minute on the air.</li>
-                    <li>Live and remote shows earn 1 XP for every 3 online listener minutes (so encourage people to tune in via wwsu1069.org!)</li>
-                    <li>For live and remote shows, you earn 15 XP every time you do a top of the hour ID break on time.</li>
+                    <li>Live and remote shows earn 1 XP for every 3 online listener minutes (so encourage people to tune
+                        in via wwsu1069.org!)</li>
+                    <li>For live and remote shows, you earn 15 XP every time you do a top of the hour ID break on time.
+                    </li>
                     <li>Prerecorded shows earn 1 XP every 2 minutes on the air.</li>
                     <li>Prerecorded shows earn 1 XP for every 6 online listener minutes.</li>
-                    <li>Prerecorded shows earn 5 XP for every break the system could take because you properly split your audio files.</li>
-                    <li>You earn 10 XP for every Top Add song played via clicking the Top Add button in DJ Controls.</li>
+                    <li>Prerecorded shows earn 5 XP for every break the system could take because you properly split
+                        your audio files.</li>
+                    <li>You earn 10 XP for every Top Add song played via clicking the Top Add button in DJ Controls.
+                    </li>
                     <li>You earn 2 XP every time you send a message to web / mobile listeners.</li>
                     <li>You earn 60 XP for every remote credit you earn.</li>
                 </ul>

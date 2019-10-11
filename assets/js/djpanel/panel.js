@@ -19,6 +19,7 @@ var menu = [
 ]
 
 var containers = [
+  '#body-connect',
   '#body-dashboard',
   '#body-analytics'
 ]
@@ -108,6 +109,16 @@ waitFor(() => {
   DJs.setOnReplace((db) => {
     console.log('DJ replace')
     doRequests()
+  })
+
+  io.socket.on('connect_error', function () {
+    socket._raw.io._reconnection = true
+    socket._raw.io._reconnectionAttempts = Infinity
+  })
+
+  io.socket.on('disconnect', function () {
+    socket._raw.io._reconnection = true
+    socket._raw.io._reconnectionAttempts = Infinity
   })
 
   // Register event handlers
@@ -482,6 +493,30 @@ function doRequests () {
         }
       }
     }
+
+    activateMenu(`menu-dashboard`)
+  })
+
+  noReq.request({ method: 'POST', url: '/announcements/get', data: { type: 'djcontrols' } }, function (body) {
+    // console.log(body);
+    try {
+      var temp = document.querySelector('#dash-announcements')
+      if (temp !== null && body.length > 0) {
+        body.map((announcement) => {
+          if (moment(announcement.starts).isBefore(moment()) && moment(announcement.expires).isAfter(moment())) {
+            temp.innerHTML += `<div class="card mb-4 py-3 border-left-${announcement.level}">
+          <h4>${announcement.title}</h4>
+          <div class="card-body">${announcement.announcement}</div></div>`
+          }
+        })
+      }
+    } catch (e) {
+      console.error(e)
+      iziToast.show({
+        title: 'An error occurred',
+        message: 'Error occurred trying to get announcements. Please try again or contact engineer@wwsu1069.org.'
+      })
+    }
   })
 }
 
@@ -515,6 +550,12 @@ function activateMenu (menuItem) {
       break
     case 'menu-analytics':
       temp = document.querySelector(`#body-analytics`)
+      if (temp !== null) {
+        temp.style.removeProperty('display')
+      }
+      break
+    default:
+      temp = document.querySelector(`#body-comingsoon`)
       if (temp !== null) {
         temp.style.removeProperty('display')
       }
