@@ -35,6 +35,11 @@ module.exports = {
       defaultsTo: ''
     },
 
+    isDescriptionCustom: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
     color: {
       type: 'string',
       defaultsTo: '#D50000'

@@ -27,6 +27,7 @@ module.exports.policies = {
   'attendance/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
   'calendar/*': 'isBanned',
   'calendar/cancel-web': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
+  'calendar/change-topic-web': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
   'calendar/remove': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'config/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'config/categories/get-available': ['isBanned', 'isSocket', 'isAuthorizedHost'],

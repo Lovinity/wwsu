@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - sails.helpers.listeners.analytics(start, end) for getting listener records between start and end. Returned through listeners property in state/automation as well.
  - UAB timesheet system, which was removed in 6.0.0, re-added due to interest in use by UAB.
  - calendar/cancel-web (ID (calendar record), reason (string)) for cancelling shows via the DJ Web Panel.
+ - calendar/change-topic-web (ID (calendar record), topic (string)) for changing the topic of an upcoming show via the DJ Web Panel.
+ - Calendar column isDescriptionCustom, meant to be set to true when calendar/change-topic-web is called for that record. When true, calendar Sync will not update Google Calendar description changes for that record; it will keep the custom set one.
 
 ### Changed
  - Meta.queueFinish time will now include music tracks / openers when starting a broadcast to avoid confusion on the DJ Controls queue countdown. State will still switch to "*_on" after noMeta tracks have been played to trigger the recorder in DJ Controls.

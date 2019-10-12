@@ -507,6 +507,19 @@ function doRequests () {
           })
         }
       }
+
+      // Fill shows for clockwheel
+      var temp = document.querySelector('#clockwheel-show')
+      if (temp !== null) {
+        temp.innerHTML = `<option value="">Choose a show / date to assign a topic or clockwheel...</option>`
+        if (response.calendar.length > 0) {
+          response.calendar.map((calendar) => {
+            if (calendar.active === 1 || calendar.active === 2) {
+              temp.innerHTML += `<option value="${calendar.ID}">(${moment(calendar.start).format('LLL')} - ${moment(calendar.end).format('h:mm A')}) ${calendar.title}</option>`
+            }
+          })
+        }
+      }
     }
 
     activateMenu(`menu-dashboard`)
@@ -798,4 +811,43 @@ function cancelShow () {
     ]
   })
 
+}
+
+function changeTopic () {
+  var showID = document.querySelector('#clockwheel-show').options[ document.querySelector('#clockwheel-show').selectedIndex ].value
+  if (showID === '' || showID === null) { return null }
+  var topic = document.querySelector('#clockwheel-topic').value
+        DJReq.request({ db: DJs.db(), method: 'POST', url: '/calendar/change-topic-web', data: { ID: parseInt(showID), topic: topic } }, function (response) {
+          if (response === 'OK') {
+            iziToast.show({
+              title: `Show topic changed!`,
+              message: `The topic for the show has been changed`,
+              timeout: 10000,
+              close: true,
+              color: 'green',
+              drag: false,
+              position: 'center',
+              closeOnClick: true,
+              overlay: false,
+              zindex: 1000
+            })
+            document.querySelector('#clockwheel-topic').value = ""
+            doRequests()
+          } else {
+            console.dir(response)
+            iziToast.show({
+              title: `Failed to change topic!`,
+              message: `There was an error trying to change the show topic. Please try again or email engineer@wwsu1069.org if this problem continues.`,
+              timeout: 15000,
+              close: true,
+              color: 'red',
+              drag: false,
+              position: 'center',
+              closeOnClick: true,
+              overlay: false,
+              zindex: 1000,
+              maxWidth: 480
+            })
+          }
+        })
 }

@@ -200,6 +200,40 @@
     </div>
 </div>
 
+<div class="container-fluid" id="body-clockwheel" style="display: none;">
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Approach -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Change / Assign Show Topic or Clockwheel</h6>
+            </div>
+            <div class="card-body">
+                <div class="form-group"
+                    title="Choose which upcoming show you wish to change / assign a topic or clockwheel.">
+                    <label for="clockwheel-show">Choose a show to change / assign a topic or clockwheel</label>
+                    <select class="form-control" id="clockwheel-show">
+                        <option value="">Choose a show / date to assign a topic or clockwheel...</option>
+                    </select>
+                </div>
+                <div class="form-group"
+                    title="Specify what you will be talking about / playing on this show, visible on display signs and the website.">
+                    <label for="clockwheel-topic">What will you be playing / talking about on this show? 256 character
+                        limit.</label>
+                    <textarea class="form-control mb-2" id="clockwheel-topic" rows="3" maxlength="256"></textarea>
+                </div>
+                <button type="button" class="btn btn-success btn-lg" onclick="changeTopic()">Change Show Topic</button>
+                <div class="card mb-4 py-3 border-left-info">
+                    <div class="card-body">
+                        Clockwheels are not yet programmed. When programmed, you will be able to specify show segments,
+                        which will be shaded on the DJ Controls clock when you are on the air.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid" id="body-cancel" style="display: none;">
     <!-- Content Row -->
     <div class="row">
@@ -209,6 +243,12 @@
                 <h6 class="m-0 font-weight-bold text-primary">Cancel Upcoming Show</h6>
             </div>
             <div class="card-body">
+                <div class="card mb-4 py-3 border-left-info">
+                    <div class="card-body">
+                        We prefer you instead request a re-run to air when possible instead of cancelling. See "Air a
+                        Re-run".
+                    </div>
+                </div>
                 <div class="form-group" title="Choose which upcoming show you wish to cancel.">
                     <label for="cancel-show">Upcoming Show to Cancel</label>
                     <select class="form-control" id="cancel-show">

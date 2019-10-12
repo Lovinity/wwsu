@@ -532,6 +532,12 @@ module.exports = {
                 await sails.helpers.onesignal.sendEvent(`Playlist: `, temp, `Playlist`, criteria.unique, moment(criteria.start).format('LLL'), false)
               }
             }
+
+            // Do not update descriptions if a custom one was set via the DJ Panel.
+            if (theEvent.isDescriptionCustom) {
+              delete criteriaC.description
+            }
+
             await sails.models.calendar.update({ unique: event.id }, criteriaC).fetch()
           }
 
