@@ -23,7 +23,7 @@ module.exports = {
         sails.log.debug('Controller calendar/cancel-web called.')
         try {
 
-            var cEvent = await sails.models.calendar.updateOne({ ID: inputs.ID, unique: {'!=': null}, or: [ { title: { 'startsWith': `Show: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Remote: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Prerecord: ${this.req.payload.name} - ` } } ] }, { active: -1 }).fetch()
+            var cEvent = await sails.models.calendar.updateOne({ ID: inputs.ID, unique: {'!=': null}, or: [ { title: { 'startsWith': `Show: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Remote: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Prerecord: ${this.req.payload.name} - ` } } ] }, { active: -1 })
 
             if (cEvent) {
                 var dj = cEvent.title
