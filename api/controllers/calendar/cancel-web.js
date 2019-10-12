@@ -74,6 +74,8 @@ module.exports = {
                     await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Prerecord', `${temp}, scheduled for ${moment(cEvent.start).format('LLL')} - ${moment(cEvent.end).format('LT')}, was cancelled via DJ Panel. Please see DJ Controls / logs for the provided reason.`)
                   }
                 })
+
+                return exits.success()
             } else {
                 return exits.error(new Error('No events with the provided ID and authorized DJ were found.'))
             }
