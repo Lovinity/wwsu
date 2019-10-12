@@ -22,7 +22,7 @@ module.exports = {
     sails.log.debug('Helper calendar.sync called.')
 
     // DEFINE VARIABLES
-    var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+    var SCOPES = [ 'https://www.googleapis.com/auth/calendar.readonly' ]
     var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
       process.env.USERPROFILE) + '/.credentials/'
     var TOKEN_PATH = TOKEN_DIR + 'calendar-nodejs-quickstart.json'
@@ -97,7 +97,7 @@ module.exports = {
         try {
           var clientSecret = credentials.installed.client_secret
           var clientId = credentials.installed.client_id
-          var redirectUrl = credentials.installed.redirect_uris[0]
+          var redirectUrl = credentials.installed.redirect_uris[ 0 ]
           var oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUrl)
           // Check if we have previously stored a token.
         } catch (e) {
@@ -241,7 +241,7 @@ module.exports = {
           })
 
           // Generate playlist object
-          playlists[playlist.name] = ({ ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates, duplicateTracks: duplicateTracks.join('<br />') })
+          playlists[ playlist.name ] = ({ ID: playlist.ID, name: playlist.name, duration: duration, duplicates: playlistDuplicates, duplicateTracks: duplicateTracks.join('<br />') })
           return true
         })
         await Promise.all(maps)
@@ -254,11 +254,11 @@ module.exports = {
         // Load the current attendance record into memory
         var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
 
-        djeventsR.map(event => { djevents[event.name] = event })
+        djeventsR.map(event => { djevents[ event.name ] = event })
 
         // Loop through each calendar event
         for (var i = 0; i < events.length; i++) {
-          event = events[i]
+          event = events[ i ]
           var summary
           var temp2
           var temp
@@ -283,7 +283,7 @@ module.exports = {
           }
           criteria.allDay = (moment(criteria.start).isSameOrBefore(moment().startOf('day')) && moment(criteria.end).isSameOrAfter(moment().startOf('day').add(1, 'days')))
           if (event.colorId && event.colorId in colors) {
-            criteria.color = colors[event.colorId].background
+            criteria.color = colors[ event.colorId ].background
           } else if (event.summary.startsWith('Show: ')) {
             criteria.color = '#D50000'
           } else {
@@ -302,7 +302,7 @@ module.exports = {
 
             // Check proper formatting so system can determine show host from show name
             if (temp2.length === 2) {
-              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Show</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[ 0 ]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[ 1 ]}</span>`
               criteria.verify = 'Valid'
               criteria.verifyMessage = `Valid. DJ in yellow, show in green.`
             } else {
@@ -320,7 +320,7 @@ module.exports = {
 
             // Check proper formatting so system can determine broadcast host from broadcastn name
             if (temp2.length === 2) {
-              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span>`
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 255, 0, 0.2);">${temp2[ 0 ]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[ 1 ]}</span>`
               criteria.verify = 'Valid'
               criteria.verifyMessage = `Valid. Host / org in yellow, show name in green.`
             } else {
@@ -367,27 +367,27 @@ module.exports = {
               criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Remote</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
               criteria.verifyMessage = `Invalid; cannot determine host and show. <strong>Ensure the event title separates DJ/host from show name with a space hyphen space (" - ")</strong>.`
-            } else if (typeof playlists[summary] === 'undefined') {
+            } else if (typeof playlists[ summary ] === 'undefined') {
               criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(255, 0, 0, 0.5);">${summary}</span>`
               criteria.verify = 'Invalid'
               criteria.verifyMessage = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
               if (status > 3) { status = 3 }
               issues.push(`Prerecord "${summary}" is invalid; a playlist with this name does not exist in RadioDJ.`)
             } else {
-              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(0, 0, 0, 0.2);"><span style="background: rgba(255, 255, 0, 0.2);">${temp2[0]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[1]}</span></span>`
+              criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Prerecord</span>: <span style="background: rgba(0, 0, 0, 0.2);"><span style="background: rgba(255, 255, 0, 0.2);">${temp2[ 0 ]}</span> - <span style="background: rgba(0, 255, 0, 0.2);">${temp2[ 1 ]}</span></span>`
 
               // Check to see if the length of the playlists are over 15 minutes too short
-              if ((eventLength - 900) >= (playlists[summary].duration * 1.05)) {
+              if ((eventLength - 900) >= (playlists[ summary ].duration * 1.05)) {
                 criteria.verify = 'Check'
-                criteria.verifyMessage = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
+                criteria.verifyMessage = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[ summary ].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[ summary ].duplicates > 0 ? `<strong>There were ${playlists[ summary ].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
 
                 // Check to see if the playlist is over 5 minutes too long
-              } else if ((eventLength + 300) <= (playlists[summary].duration * 1.05)) {
+              } else if ((eventLength + 300) <= (playlists[ summary ].duration * 1.05)) {
                 criteria.verify = 'Check'
-                criteria.verifyMessage = `Valid, but duration exceeds scheduled time. <strong>The prerecord could run over the end time by about ${moment.duration(((playlists[summary].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. If this prerecord runs into another prerecord or show, it may be terminated early. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
-              } else if (playlists[summary].duplicates > 0) {
+                criteria.verifyMessage = `Valid, but duration exceeds scheduled time. <strong>The prerecord could run over the end time by about ${moment.duration(((playlists[ summary ].duration * 1.05) - eventLength), 'seconds').humanize()}</strong>. If this prerecord runs into another prerecord or show, it may be terminated early. ${playlists[ summary ].duplicates > 0 ? `<strong>There were ${playlists[ summary ].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
+              } else if (playlists[ summary ].duplicates > 0) {
                 criteria.verify = 'Check'
-                criteria.verifyMessage = `Valid, but duplicates detected. <strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.`
+                criteria.verifyMessage = `Valid, but duplicates detected. <strong>There were ${playlists[ summary ].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.`
               } else {
                 criteria.verify = 'Valid'
                 criteria.verifyMessage = `Valid; playlist in gray, DJ/handle in yellow, show name in green.`
@@ -403,22 +403,22 @@ module.exports = {
             criteria.verifyMessage = `Invalid; playlist does not exist in RadioDJ. <strong>Please ensure the playlist in red exists in RadioDJ and that you spelled it correctly</strong>.`
 
             // Check to see that playlist exists
-            if (typeof playlists[summary] !== 'undefined') {
+            if (typeof playlists[ summary ] !== 'undefined') {
               criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Playlist</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
 
               // Check to see if the playlist duration is shorter than the event duration
-              if (eventLength <= (playlists[summary].duration * 1.05) && playlists[summary].duplicates === 0) {
+              if (eventLength <= (playlists[ summary ].duration * 1.05) && playlists[ summary ].duplicates === 0) {
                 criteria.verify = 'Valid'
                 criteria.verifyMessage = `Valid; playlist in green.`
-              } else if (playlists[summary].duplicates === 0) {
+              } else if (playlists[ summary ].duplicates === 0) {
                 criteria.verify = 'Check'
-                criteria.verifyMessage = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`
-              } else if (eventLength <= (playlists[summary].duration * 1.05)) {
+                criteria.verifyMessage = `Valid, but duration is shorter than scheduled time. To fix, <strong>add about ${moment.duration((eventLength - (playlists[ summary ].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist.`
+              } else if (eventLength <= (playlists[ summary ].duration * 1.05)) {
                 criteria.verify = 'Check'
-                criteria.verifyMessage = `Valid, but duplicate tracks detected. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped` : ''}`
+                criteria.verifyMessage = `Valid, but duplicate tracks detected. ${playlists[ summary ].duplicates > 0 ? `<strong>There were ${playlists[ summary ].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped` : ''}`
               } else {
                 criteria.verify = 'Check'
-                criteria.verifyMessage = `Valid, but duration is shorter than scheduled time, and duplicate tracks detected. To fix, <strong>add about ${moment.duration((eventLength - (playlists[summary].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[summary].duplicates > 0 ? `<strong>There were ${playlists[summary].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
+                criteria.verifyMessage = `Valid, but duration is shorter than scheduled time, and duplicate tracks detected. To fix, <strong>add about ${moment.duration((eventLength - (playlists[ summary ].duration * 1.05)), 'seconds').humanize()} more audio</strong> to the playlist. ${playlists[ summary ].duplicates > 0 ? `<strong>There were ${playlists[ summary ].duplicates} duplicate tracks detected.</strong> Duplicate tracks will get skipped.` : ''}`
               }
             }
 
@@ -435,16 +435,16 @@ module.exports = {
             criteria.verifyMessage = `Invalid; event with same name does not exist in RadioDJ. <strong>Please ensure there is an event with the same name in RadioDJ.</strong>. The event should trigger a rotation change in RadioDJ when executed.`
 
             // Check to see if the manual event exists in RadioDJ
-            if (typeof djevents[summary] !== 'undefined') {
+            if (typeof djevents[ summary ] !== 'undefined') {
               criteria.verifyTitleHTML = `<span style="background: rgba(0, 0, 255, 0.2);">Genre</span>: <span style="background: rgba(0, 255, 0, 0.2);">${summary}</span>`
 
               // Check to see the event is active, and there is a "Load Rotation" action in the event
-              if (djevents[summary].data.includes('Load Rotation') && djevents[summary].enabled === 'True') {
+              if (djevents[ summary ].data.includes('Load Rotation') && djevents[ summary ].enabled === 'True') {
                 criteria.verify = `Valid`
                 criteria.verifyMessage = `Valid; genre in green.`
 
                 // Event is enabled, but does not have a Load Rotation event
-              } else if (djevents[summary].enabled === 'True') {
+              } else if (djevents[ summary ].enabled === 'True') {
                 criteria.verify = 'Invalid'
                 criteria.verifyMessage = `Invalid; a "Load Rotation" action does not exist in the RadioDJ event. <strong>To ensure rotation changes, make sure the RadioDJ event has a "Load Rotation" action.</strong>`
                 if (status > 3) { status = 3 }
@@ -484,12 +484,12 @@ module.exports = {
           isChanged = false
           for (var key in theEvent) {
             if (Object.prototype.hasOwnProperty.call(theEvent, key)) {
-              if (typeof criteria[key] !== 'undefined' && theEvent[key] !== criteria[key] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`) {
+              if (typeof criteria[ key ] !== 'undefined' && theEvent[ key ] !== criteria[ key ] && key !== 'ID' && key !== 'createdAt' && key !== `updatedAt`) {
                 // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
-                if (key === `start` && moment(theEvent[key]).isSame(moment(criteria[key]))) { continue }
-                if (key === `end` && moment(theEvent[key]).isSame(moment(criteria[key]))) { continue }
-                if (key === `start` && !moment(theEvent[key]).isSame(moment(criteria[key]))) { isChanged = true }
-                if (key === `end` && !moment(theEvent[key]).isSame(moment(criteria[key]))) { isChanged = true }
+                if (key === `start` && moment(theEvent[ key ]).isSame(moment(criteria[ key ]))) { continue }
+                if (key === `end` && moment(theEvent[ key ]).isSame(moment(criteria[ key ]))) { continue }
+                if (key === `start` && !moment(theEvent[ key ]).isSame(moment(criteria[ key ]))) { isChanged = true }
+                if (key === `end` && !moment(theEvent[ key ]).isSame(moment(criteria[ key ]))) { isChanged = true }
 
                 needsUpdate = true
                 break
@@ -502,7 +502,7 @@ module.exports = {
               criteriaC.active = 2
               var dj = criteria.title
               if (dj.includes(' - ') && dj.includes(': ')) {
-                dj = dj.split(' - ')[0]
+                dj = dj.split(' - ')[ 0 ]
                 dj = dj.substring(dj.indexOf(': ') + 2)
               } else {
                 dj = null
@@ -624,7 +624,7 @@ module.exports = {
             maps = cancelled.map(async (cEvent) => {
               var dj = cEvent.title
               if (dj.includes(' - ') && dj.includes(': ')) {
-                dj = dj.split(' - ')[0]
+                dj = dj.split(' - ')[ 0 ]
                 dj = dj.substring(dj.indexOf(': ') + 2)
               } else {
                 dj = null
@@ -708,7 +708,7 @@ module.exports = {
               try {
                 var dj = event.title
                 if (dj.includes(' - ') && dj.includes(': ')) {
-                  dj = dj.split(' - ')[0]
+                  dj = dj.split(' - ')[ 0 ]
                   dj = dj.substring(dj.indexOf(': ') + 2)
                 } else {
                   dj = null
@@ -803,7 +803,7 @@ module.exports = {
 
         // Iterate through each returned event from Google Calendar
         for (var i2 = 0; i2 < events.length; i2++) {
-          event = events[i2]
+          event = events[ i2 ]
           eventIds.push(event.id)
 
           // Skip events without a start time or without an end time or without a summary
@@ -841,14 +841,14 @@ module.exports = {
             isChanged = false
             for (var key2 in theEvent) {
               if (Object.prototype.hasOwnProperty.call(theEvent, key2)) {
-                if (typeof criteria[key2] !== 'undefined' && theEvent[key2] !== criteria[key2] && key2 !== 'ID' && key2 !== 'createdAt' && key2 !== `updatedAt`) {
+                if (typeof criteria[ key2 ] !== 'undefined' && theEvent[ key2 ] !== criteria[ key2 ] && key2 !== 'ID' && key2 !== 'createdAt' && key2 !== `updatedAt`) {
                   // MySQL returns differently for datetimes, so do a secondary check for those keys using moment().
-                  if (key2 === `start` && moment(theEvent[key2]).isSame(moment(criteria[key2]))) { continue }
-                  if (key2 === `end` && moment(theEvent[key2]).isSame(moment(criteria[key2]))) { continue }
+                  if (key2 === `start` && moment(theEvent[ key2 ]).isSame(moment(criteria[ key2 ]))) { continue }
+                  if (key2 === `end` && moment(theEvent[ key2 ]).isSame(moment(criteria[ key2 ]))) { continue }
 
-                  if (key2 === `director` && theEvent[key2] !== criteria[key2]) { isChanged = true }
-                  if (key2 === `start` && !moment(theEvent[key2]).isSame(moment(criteria[key2]))) { isChanged = true }
-                  if (key2 === `end` && !moment(theEvent[key2]).isSame(moment(criteria[key2]))) { isChanged = true }
+                  if (key2 === `director` && theEvent[ key2 ] !== criteria[ key2 ]) { isChanged = true }
+                  if (key2 === `start` && !moment(theEvent[ key2 ]).isSame(moment(criteria[ key2 ]))) { isChanged = true }
+                  if (key2 === `end` && !moment(theEvent[ key2 ]).isSame(moment(criteria[ key2 ]))) { isChanged = true }
 
                   needsUpdate = true
                   break
@@ -877,17 +877,17 @@ module.exports = {
                 var record = await sails.models.timesheet.find({ timeIn: { '!=': null }, name: criteria.director, timeOut: null }).limit(1)
                 if (record.length > 0) {
                   // If the currently clocked in timesheet is not tied to any google calendar events, tie it to this event.
-                  if (record[0].unique === null) {
+                  if (record[ 0 ].unique === null) {
                     // Try to find another record that may have already been created for these hours, and merge it if found.
                     var record2 = await sails.models.timesheet.find({ unique: criteria.unique, approved: { '>': -1 }, timeIn: null, timeOut: null }).limit(1)
-                    if (record2.length > 0) { await sails.models.timesheet.destroy({ ID: record2[0].ID }).fetch() }
+                    if (record2.length > 0) { await sails.models.timesheet.destroy({ ID: record2[ 0 ].ID }).fetch() }
 
-                    await sails.models.timesheet.update({ name: record[0].name, unique: null, timeIn: { '!=': null }, timeOut: null }, { unique: criteria.unique, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true) }).fetch()
+                    await sails.models.timesheet.update({ name: record[ 0 ].name, unique: null, timeIn: { '!=': null }, timeOut: null }, { unique: criteria.unique, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true) }).fetch()
 
                     // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
-                  } else if (record[0].unique !== criteria.unique) {
+                  } else if (record[ 0 ].unique !== criteria.unique) {
                     var updater = await sails.models.timesheet.update({ name: criteria.director, timeIn: { '!=': null }, timeOut: null }, { timeOut: moment().toISOString(true) }).fetch()
-                    await sails.models.timesheet.create({ unique: criteria.unique, name: criteria.director, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true), timeIn: moment().toISOString(true), timeOut: null, approved: updater[0].approved }).fetch()
+                    await sails.models.timesheet.create({ unique: criteria.unique, name: criteria.director, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true), timeIn: moment().toISOString(true), timeOut: null, approved: updater[ 0 ].approved }).fetch()
                   }
                 }
               } catch (e) {

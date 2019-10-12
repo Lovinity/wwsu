@@ -19,9 +19,11 @@ var menu = [
 ]
 
 var containers = [
+  '#body-comingsoon',
   '#body-connect',
   '#body-dashboard',
-  '#body-analytics'
+  '#body-analytics',
+  '#body-cancel'
 ]
 
 jQuery('#modal-dj-logs').iziModal({
@@ -492,6 +494,19 @@ function doRequests () {
           }
         }
       }
+
+      // Fill upcoming shows in cancellation dropdown
+      var temp = document.querySelector('#cancel-show')
+      if (temp !== null) {
+        temp.innerHTML = `<option value="">Choose a show / date to cancel...</option>`
+        if (response.calendar.length > 0) {
+          response.calendar.map((calendar) => {
+            if (calendar.active === 1 || calendar.active === 2) {
+              temp.innerHTML += `<option value="${calendar.ID}">(${moment(calendar.start).format('LLL')} - ${moment(calendar.end).format('h:mm A')}) ${calendar.title}</option>`
+            }
+          })
+        }
+      }
     }
 
     activateMenu(`menu-dashboard`)
@@ -714,4 +729,67 @@ function reputationHelp () {
 
 function xpHelp () {
   jQuery('#modal-help-xp').iziModal('open')
+}
+
+function cancelShow () {
+  var showID = document.querySelector('#cancel-show').options[ document.querySelector('#cancel-show').selectedIndex ].value
+  if (showID === '' || showID === null) { return null }
+  var showName = document.querySelector('#cancel-show').options[ document.querySelector('#cancel-show').selectedIndex ].innerHTML
+  var reason = document.querySelector('#cancel-reason').value
+  iziToast.show({
+    title: `Confirm show cancellation`,
+    message: `Are you sure you want to cancel <strong>${showName}</strong>? THIS CANNOT BE UNDONE`,
+    timeout: 60000,
+    close: true,
+    color: 'yellow',
+    drag: false,
+    position: 'center',
+    closeOnClick: true,
+    overlay: true,
+    zindex: 1000,
+    layout: 2,
+    maxWidth: 480,
+    buttons: [
+      [ '<button>Yes</button>', function (instance, toast, button, e, inputs) {
+        DJReq.request({ db: DJs.db(), method: 'POST', url: '/calendar/cancel-web', data: { ID: parseInt(showID), reason: reason } }, function (response) {
+          if (response === 'OK') {
+            iziToast.show({
+              title: `Show Canceled!`,
+              message: `The show has been canceled.`,
+              timeout: 10000,
+              close: true,
+              color: 'green',
+              drag: false,
+              position: 'center',
+              closeOnClick: true,
+              overlay: false,
+              zindex: 1000
+            })
+            document.querySelector('#cancel-reason').value = ""
+            doRequests()
+          } else {
+            console.dir(response)
+            iziToast.show({
+              title: `Failed to cancel show!`,
+              message: `There was an error trying to cancel the show. Please try again or email engineer@wwsu1069.org if this problem continues.`,
+              timeout: 15000,
+              close: true,
+              color: 'red',
+              drag: false,
+              position: 'center',
+              closeOnClick: true,
+              overlay: false,
+              zindex: 1000,
+              maxWidth: 480
+            })
+          }
+        })
+        instance.hide({}, toast, 'button')
+      } ],
+      [ '<button>No</button>', function (instance, toast, button, e, inputs) {
+        instance.hide({}, toast, 'button')
+      } ]
+    ]
+  })
+
 }

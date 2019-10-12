@@ -200,6 +200,32 @@
     </div>
 </div>
 
+<div class="container-fluid" id="body-cancel" style="display: none;">
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Approach -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Cancel Upcoming Show</h6>
+            </div>
+            <div class="card-body">
+                <div class="form-group" title="Choose which upcoming show you wish to cancel.">
+                    <label for="cancel-show">Upcoming Show to Cancel</label>
+                    <select class="form-control" id="cancel-show">
+                        <option value="">Choose a show / date to cancel...</option>
+                    </select>
+                </div>
+                <div class="form-group"
+                    title="Explain why you are canceling this show. Directors will be notified of your reason.">
+                    <label for="live-topic">Explain why you are canceling your show for the directors to know</label>
+                    <textarea class="form-control mb-2" id="cancel-reason" rows="3" maxlength="512"></textarea>
+                </div>
+                <button type="button" class="btn btn-success btn-lg" onclick="cancelShow()">Cancel Show</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="modal-dj-logs" tabindex="-1" role="dialog">
     <div class="modal-content text-dark bg-light-3">
         <div class="modal-body" style="max-height: 640px; overflow: scroll;" id="dj-show-logs">
