@@ -20,7 +20,7 @@ module.exports = {
       returnData.stats = await sails.helpers.analytics.showtime(this.req.payload.ID)
       returnData.changes = await sails.models.calendar.find({ or: [ { title: { startsWith: `Show: ${this.req.payload.name} - ` } }, { title: { startsWith: `Remote: ${this.req.payload.name} - ` } }, { title: { startsWith: `Prerecord: ${this.req.payload.name} - ` } } ], active: 2 })
       returnData.cancellations = await sails.models.attendance.find({ dj: this.req.payload.ID, happened: -1, scheduledEnd: { '>=': moment().toISOString(true) } })
-      returnData.calendar = await sails.models.calendar.find({ or: [ { title: { 'startsWith': `Show: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Remote: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Prerecord: ${this.req.payload.name} - ` } } ] })
+      returnData.calendar = await sails.models.calendar.find({ or: [ { title: { 'startsWith': `Show: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Remote: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Prerecord: ${this.req.payload.name} - ` } } ] }).sort('start ASC')
 
       return exits.success(returnData)
     } catch (e) {
