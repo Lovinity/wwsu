@@ -569,7 +569,7 @@ function activateMenu (menuItem) {
         temp.style.removeProperty('display')
       }
       break
-    case 'manu-cancel':
+    case 'menu-cancel':
       temp = document.querySelector(`#body-cancel`)
       if (temp !== null) {
         temp.style.removeProperty('display')
