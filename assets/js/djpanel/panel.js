@@ -23,7 +23,8 @@ var containers = [
   '#body-connect',
   '#body-dashboard',
   '#body-analytics',
-  '#body-cancel'
+  '#body-cancel',
+  '#body-clockwheel'
 ]
 
 jQuery('#modal-dj-logs').iziModal({
@@ -86,6 +87,20 @@ jQuery('#modal-help-xp').iziModal({
   zindex: 50
 })
 
+var analyticsTable = jQuery('#analytics-table').DataTable({
+  columns: [
+    { title: "" },
+    { title: "Statistic" },
+    { title: "Semester" },
+    { title: "Lifetime" },
+  ]
+})
+
+var djLogsTable = jQuery('#logs-table').DataTable({
+  responsive: true,
+  "order": [ [ 0, 'desc' ] ]
+})
+
 function waitFor (check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
@@ -144,7 +159,7 @@ function doRequests () {
     } else {
       // Populate DJ statistics and information
 
-      var analyticsTable = []
+      var analyticsTableData = []
 
       // DJ Name
       var temp = document.querySelector('#dj-name')
@@ -152,51 +167,45 @@ function doRequests () {
       djName = response.stats.name
 
       // Live Shows
-      analyticsTable.push([ '<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows) ])
+      analyticsTableData.push([ '<i class="fas fa-microphone" width="32"></i>', 'Live Shows', formatInt(response.stats.semester.shows), formatInt(response.stats.overall.shows) ])
 
       // Prerecords
-      analyticsTable.push([ '<i class="fas fa-compact-disc" width="32"></i>', 'Prerecorded Shows', formatInt(response.stats.semester.prerecords), formatInt(response.stats.overall.prerecords) ])
+      analyticsTableData.push([ '<i class="fas fa-compact-disc" width="32"></i>', 'Prerecorded Shows', formatInt(response.stats.semester.prerecords), formatInt(response.stats.overall.prerecords) ])
 
       // Remotes
-      analyticsTable.push([ '<i class="fas fa-broadcast-tower" width="32"></i>', 'Remote Broadcasts', formatInt(response.stats.semester.remotes), formatInt(response.stats.overall.remotes) ])
+      analyticsTableData.push([ '<i class="fas fa-broadcast-tower" width="32"></i>', 'Remote Broadcasts', formatInt(response.stats.semester.remotes), formatInt(response.stats.overall.remotes) ])
 
       // Showtime
       temp = document.querySelector('#dash-showtime')
       if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) }
-      analyticsTable.push([ '<i class="fas fa-play" width="32"></i>', 'Showtime (Hours)', formatInt(Math.floor((response.stats.semester.showtime / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) ])
+      analyticsTableData.push([ '<i class="fas fa-play" width="32"></i>', 'Showtime (Hours)', formatInt(Math.floor((response.stats.semester.showtime / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.showtime / 60) * 100) / 100) ])
 
       // Listener hours
       temp = document.querySelector('#dash-hours')
       if (temp !== null) { temp.innerHTML = formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) }
-      analyticsTable.push([ '<i class="fas fa-headphones" width="32"></i>', 'Online Listeners (Hours)', formatInt(Math.floor((response.stats.semester.listeners / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) ])
+      analyticsTableData.push([ '<i class="fas fa-headphones" width="32"></i>', 'Online Listeners (Hours)', formatInt(Math.floor((response.stats.semester.listeners / 60) * 100) / 100), formatInt(Math.floor((response.stats.overall.listeners / 60) * 100) / 100) ])
 
       // XP
       temp = document.querySelector('#dash-XP')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.overall.xp) }
-      analyticsTable.push([ '<i class="fas fa-star" width="32"></i>', 'Experience Points (XP) <a href="#" style="padding-left: 1em;" onclick="xpHelp()">What is this?</a>', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp) ])
+      analyticsTableData.push([ '<i class="fas fa-star" width="32"></i>', 'Experience Points (XP) <a href="#" style="padding-left: 1em;" onclick="xpHelp()">What is this?</a>', formatInt(response.stats.semester.xp), formatInt(response.stats.overall.xp) ])
 
       // Remote credits
       temp = document.querySelector('#dash-credits')
       if (temp !== null) { temp.innerHTML = formatInt(response.stats.semester.remoteCredits) }
-      analyticsTable.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits <a href="#" style="padding-left: 1em;" onclick="creditsHelp()">What is this?</a>', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
+      analyticsTableData.push([ '<i class="fas fa-gem" width="32"></i>', 'Remote Credits <a href="#" style="padding-left: 1em;" onclick="creditsHelp()">What is this?</a>', formatInt(response.stats.semester.remoteCredits), formatInt(response.stats.overall.remoteCredits) ])
 
       // Reputation
-      analyticsTable.push([ '<i class="fas fa-smile"></i>', 'Reputation / Responsibility <a href="#" style="padding-left: 1em;" onclick="reputationHelp()">What is this?</a>', `<div class="progress progress-sm mr-2">
+      analyticsTableData.push([ '<i class="fas fa-smile"></i>', 'Reputation / Responsibility <a href="#" style="padding-left: 1em;" onclick="reputationHelp()">What is this?</a>', `<div class="progress progress-sm mr-2">
       <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.semester.reputationPercent}%" aria-valuenow="${response.stats.semester.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>`, `<div class="progress progress-sm mr-2">
     <div class="progress-bar bg-success" role="progressbar" style="width: ${response.stats.overall.reputationPercent}%" aria-valuenow="${response.stats.overall.reputationPercent}" aria-valuemin="0" aria-valuemax="100"></div>
   </div>`])
 
       // Render analytics table
-      jQuery('#analytics-table').DataTable({
-        data: analyticsTable,
-        columns: [
-          { title: "" },
-          { title: "Statistic" },
-          { title: "Semester" },
-          { title: "Lifetime" },
-        ]
-      })
+      analyticsTable.clear()
+      analyticsTable.rows.add(analyticsTableData)
+      analyticsTable.draw()
 
       // Show Notices
       temp = document.querySelector('#dash-show')
@@ -313,7 +322,7 @@ function doRequests () {
             }
           }
 
-          var djLogs = []
+          var djLogsData = []
           response.attendance.sort(compare)
           response.attendance.map(record => {
             if (record.showTime !== null) {
@@ -321,7 +330,7 @@ function doRequests () {
             }
             var theDate = record.actualStart !== null ? record.actualStart : record.scheduledStart
             if (record.scheduledStart === null) {
-              djLogs.push([
+              djLogsData.push([
                 moment(theDate).format('YYYY/MM/DD'),
                 record.event,
                 '',
@@ -336,7 +345,7 @@ function doRequests () {
                 `<button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show"><span aria-hidden="true"><i class="fas fa-file text-dark"></i></span></button>`
               ])
             } else if (moment(record.scheduledStart).isAfter(moment()) && record.happened === 1) {
-              djLogs.push([
+              djLogsData.push([
                 moment(theDate).format('YYYY/MM/DD'),
                 record.event,
                 moment(record.scheduledStart).format('h:mm A'),
@@ -353,7 +362,7 @@ function doRequests () {
             } else if (record.actualStart !== null && record.actualEnd !== null) {
               var tempStart = moment(record.actualStart).format('h:mm A')
               var tempEnd = record.actualEnd !== null ? moment(record.actualEnd).format('h:mm A') : `ONGOING`
-              djLogs.push([
+              djLogsData.push([
                 moment(theDate).format('YYYY/MM/DD'),
                 record.event,
                 moment(record.scheduledStart).format('h:mm A'),
@@ -368,7 +377,7 @@ function doRequests () {
                 `<button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show"><span aria-hidden="true"><i class="fas fa-file text-dark"></i></span></button>`
               ])
             } else if (record.actualStart !== null && record.actualEnd === null) {
-              djLogs.push([
+              djLogsData.push([
                 moment(theDate).format('YYYY/MM/DD'),
                 record.event,
                 moment(record.scheduledStart).format('h:mm A'),
@@ -383,7 +392,7 @@ function doRequests () {
                 `<button type="button" id="dj-show-logs-${record.ID}" onclick="loadLog(${record.ID})" class="close dj-show-logs" aria-label="Show Log" title="View the logs for this show"><span aria-hidden="true"><i class="fas fa-file text-dark"></i></span></button>`
               ])
             } else if (record.happened === 0) {
-              djLogs.push([
+              djLogsData.push([
                 moment(theDate).format('YYYY/MM/DD'),
                 record.event,
                 moment(record.scheduledStart).format('h:mm A'),
@@ -398,7 +407,7 @@ function doRequests () {
                 ``
               ])
             } else if (record.happened === -1) {
-              djLogs.push([
+              djLogsData.push([
                 moment(theDate).format('YYYY/MM/DD'),
                 record.event,
                 moment(record.scheduledStart).format('h:mm A'),
@@ -413,7 +422,7 @@ function doRequests () {
                 ``
               ])
             } else {
-              djLogs.push([
+              djLogsData.push([
                 moment(theDate).format('YYYY/MM/DD'),
                 record.event,
                 moment(record.scheduledStart).format('h:mm A'),
@@ -429,12 +438,11 @@ function doRequests () {
               ])
             }
           })
-          // Render analytics table
-          jQuery('#logs-table').DataTable({
-            data: djLogs,
-            responsive: true,
-            "order": [ [ 0, 'desc' ] ]
-          })
+
+          // Render table
+          djLogsTable.clear()
+          djLogsTable.rows.add(djLogsData)
+          djLogsTable.draw()
 
           temp = document.querySelector('#analytics-listenerChart')
           if (temp !== null) {
@@ -584,6 +592,12 @@ function activateMenu (menuItem) {
       break
     case 'menu-cancel':
       temp = document.querySelector(`#body-cancel`)
+      if (temp !== null) {
+        temp.style.removeProperty('display')
+      }
+      break
+      case 'menu-clockwheel':
+      temp = document.querySelector(`#body-clockwheel`)
       if (temp !== null) {
         temp.style.removeProperty('display')
       }
