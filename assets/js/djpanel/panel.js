@@ -114,13 +114,13 @@ waitFor(() => {
   })
 
   io.socket.on('connect_error', function () {
-    socket._raw.io._reconnection = true
-    socket._raw.io._reconnectionAttempts = Infinity
+    io.socket._raw.io._reconnection = true
+    io.socket._raw.io._reconnectionAttempts = Infinity
   })
 
   io.socket.on('disconnect', function () {
-    socket._raw.io._reconnection = true
-    socket._raw.io._reconnectionAttempts = Infinity
+    io.socket._raw.io._reconnection = true
+    io.socket._raw.io._reconnectionAttempts = Infinity
   })
 
   // Register event handlers
