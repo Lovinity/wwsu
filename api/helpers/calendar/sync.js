@@ -805,6 +805,7 @@ module.exports = {
         // Get all directors in the system so we can error if a nonexisting director is on the calendar
         var directorRecords = await sails.models.directors.find()
         var directors = []
+        var directors2 = []
         directorRecords.map((record) => directors.push(record.name))
 
         // Iterate through each returned event from Google Calendar
@@ -891,7 +892,8 @@ module.exports = {
                     await sails.models.timesheet.update({ name: record[ 0 ].name, unique: null, timeIn: { '!=': null }, timeOut: null }, { unique: criteria.unique, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true) }).fetch()
 
                     // If the currently clocked in timesheet is tied to a different google calendar event, clock that timesheet out and create a new clocked-in timesheet with the current google calendar event.
-                  } else if (record[ 0 ].unique !== criteria.unique) {
+                  } else if (record[ 0 ].unique !== criteria.unique && directors2.indexOf(criteria.director) === -1) {
+                    directors2.push(criteria.director)
                     var updater = await sails.models.timesheet.update({ name: criteria.director, timeIn: { '!=': null }, timeOut: null }, { timeOut: moment().toISOString(true) }).fetch()
                     await sails.models.timesheet.create({ unique: criteria.unique, name: criteria.director, scheduledIn: moment(criteria.start).toISOString(true), scheduledOut: moment(criteria.end).toISOString(true), timeIn: moment().toISOString(true), timeOut: null, approved: updater[ 0 ].approved }).fetch()
                   }
