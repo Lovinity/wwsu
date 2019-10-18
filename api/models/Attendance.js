@@ -61,6 +61,11 @@ module.exports = {
       allowNull: true
     },
 
+    webMessages: {
+      type: 'number',
+      allowNull: true
+    },
+
     missedIDs: {
       type: 'number',
       defaultsTo: 0

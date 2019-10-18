@@ -22,6 +22,7 @@ module.exports = {
         tuneins: 0,
         listeners: 0,
         ratio: 1,
+        messages: 0,
         xp: 0,
         remoteCredits: 0,
         shows: 0,
@@ -40,6 +41,7 @@ module.exports = {
         tuneins: 0,
         listeners: 0,
         ratio: 1,
+        messages: 0,
         xp: 0,
         remoteCredits: 0,
         shows: 0,
@@ -70,6 +72,7 @@ module.exports = {
           tuneins: 0,
           listeners: 0,
           ratio: 1,
+          messages: 0,
           xp: 0,
           remoteCredits: 0,
           shows: 0,
@@ -93,6 +96,7 @@ module.exports = {
           tuneins: 0,
           listeners: 0,
           ratio: 1,
+          messages: 0,
           xp: 0,
           remoteCredits: 0,
           shows: 0,
@@ -150,16 +154,20 @@ module.exports = {
           DJs[record.dj].overall.showtime += record.showTime
           DJs[record.dj].overall.tuneins += record.tuneIns
           DJs[record.dj].overall.listeners += record.listenerMinutes
+          DJs[record.dj].overall.messages += record.webMessages
           DJs[0].overall.showtime += record.showTime
           DJs[0].overall.tuneins += record.tuneIns
           DJs[0].overall.listeners += record.listenerMinutes
+          DJs[0].overall.messages += record.webMessages
           if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
             DJs[record.dj].semester.showtime += record.showTime
             DJs[record.dj].semester.tuneins += record.tuneIns
             DJs[record.dj].semester.listeners += record.listenerMinutes
+            DJs[record.dj].semester.messages += record.webMessages
             DJs[0].semester.showtime += record.showTime
             DJs[0].semester.tuneins += record.tuneIns
             DJs[0].semester.listeners += record.listenerMinutes
+            DJs[0].semester.messages += record.webMessages
           }
         })
     }
