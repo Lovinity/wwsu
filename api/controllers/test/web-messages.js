@@ -17,7 +17,7 @@ module.exports = {
     if (records.length > 0) {
       var maps = records.map(async (record) => {
 
-        var messages = await sails.models.messages.count({ status: 'active', to: [ 'DJ', 'DJ-private', { startsWith: 'website-' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true), '<': moment(record.actualEnd).toISOString(true) } })
+        var messages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true), '<': moment(record.actualEnd).toISOString(true) } })
 
         await sails.models.attendance.update({ ID: record.ID }, { webMessages: messages })
 
