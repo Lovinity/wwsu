@@ -94,7 +94,7 @@ module.exports = {
           updateData.tuneIns = tuneIns
 
           // Calculate web messages
-          updateData.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true), '<': moment(record.actualEnd).toISOString(true) } })
+          updateData.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(currentRecord.actualStart).toISOString(true) } })
 
           // Update the attendance record with the data
           returnData.updatedRecord = await sails.models.attendance.updateOne({ ID: currentID }, updateData)
