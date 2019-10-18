@@ -18,8 +18,8 @@ module.exports = {
       var maps = records.map(async (record) => {
 
         var connections = 0
-        var records2 = await sails.models.listeners.find({ createdAt: { '>=': currentRecord.actualStart }, createdAt: { '<': currentRecord.actualEnd } }).sort('createdAt ASC')
-        var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort('createdAt DESC').limit(1) || 0
+        var records2 = await sails.models.listeners.find({ createdAt: { '>=': record.actualStart }, createdAt: { '<': record.actualEnd } }).sort('createdAt ASC')
+        var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': record.actualStart } }).sort('createdAt DESC').limit(1) || 0
         if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
 
         if (records2.length > 0) {
