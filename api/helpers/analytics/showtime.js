@@ -19,6 +19,7 @@ module.exports = {
       name: 'EVERYONE',
       semester: {
         showtime: 0,
+        tuneins: 0,
         listeners: 0,
         ratio: 1,
         xp: 0,
@@ -36,6 +37,7 @@ module.exports = {
       },
       overall: {
         showtime: 0,
+        tuneins: 0,
         listeners: 0,
         ratio: 1,
         xp: 0,
@@ -65,6 +67,7 @@ module.exports = {
         name: record.name,
         semester: {
           showtime: 0,
+          tuneins: 0,
           listeners: 0,
           ratio: 1,
           xp: 0,
@@ -87,6 +90,7 @@ module.exports = {
         },
         overall: {
           showtime: 0,
+          tuneins: 0,
           listeners: 0,
           ratio: 1,
           xp: 0,
@@ -144,13 +148,17 @@ module.exports = {
         .filter(record => record.dj !== null && typeof DJs[record.dj] !== 'undefined' && record.showTime !== null && record.listenerMinutes !== null)
         .map(record => {
           DJs[record.dj].overall.showtime += record.showTime
+          DJs[record.dj].overall.tuneins += record.tuneIns
           DJs[record.dj].overall.listeners += record.listenerMinutes
           DJs[0].overall.showtime += record.showTime
+          DJs[0].overall.tuneins += record.tuneIns
           DJs[0].overall.listeners += record.listenerMinutes
           if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
             DJs[record.dj].semester.showtime += record.showTime
+            DJs[record.dj].semester.tuneins += record.tuneIns
             DJs[record.dj].semester.listeners += record.listenerMinutes
             DJs[0].semester.showtime += record.showTime
+            DJs[0].semester.tuneins += record.tuneIns
             DJs[0].semester.listeners += record.listenerMinutes
           }
         })

@@ -843,9 +843,9 @@ module.exports.bootstrap = async function (done) {
     }
   })
 
-  // Every minute at second 3, check the online status of the radio streams, and log listener count
+  // Every minute at second 3 and 33, check the online status of the radio streams, and log listener count
   sails.log.verbose(`BOOTSTRAP: scheduling checkRadioStreams CRON.`)
-  cron.schedule('3 * * * * *', async () => {
+  cron.schedule('3,33 * * * * *', async () => {
     sails.log.debug(`CRON checkRadioStreams triggered.`)
     try {
       // SHOUTCAST 2.6

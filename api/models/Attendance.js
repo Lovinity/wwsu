@@ -51,6 +51,11 @@ module.exports = {
       allowNull: true
     },
 
+    tuneIns: {
+      type: 'number',
+      allowNull: true
+    },
+
     listenerMinutes: {
       type: 'number',
       allowNull: true

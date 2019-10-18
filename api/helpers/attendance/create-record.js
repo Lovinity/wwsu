@@ -35,8 +35,8 @@ module.exports = {
         var created = null
 
         if (record.length > 0) {
-          returnData.unique = record[0].unique
-          created = await sails.models.attendance.create({ unique: record[0].unique, dj: sails.models.meta.memory.dj, event: record[0].title, scheduledStart: moment(record[0].start).toISOString(true), scheduledEnd: moment(record[0].end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
+          returnData.unique = record[ 0 ].unique
+          created = await sails.models.attendance.create({ unique: record[ 0 ].unique, dj: sails.models.meta.memory.dj, event: record[ 0 ].title, scheduledStart: moment(record[ 0 ].start).toISOString(true), scheduledEnd: moment(record[ 0 ].end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
         } else {
           created = await sails.models.attendance.create({ dj: sails.models.meta.memory.dj, event: inputs.event, actualStart: moment().toISOString(true) }).fetch()
 
@@ -70,15 +70,17 @@ module.exports = {
           // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
           var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': currentRecord.actualStart } }).sort('createdAt ASC')
           var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort('createdAt DESC').limit(1) || 0
-          if (prevListeners[0]) { prevListeners = prevListeners[0].listeners || 0 }
+          if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
 
-          // Calculate listener minutes
+          // Calculate listener minutes and listener tune-ins
           var prevTime = moment(currentRecord.actualStart)
           var listenerMinutes = 0
+          var tuneIns = 0
 
           if (listenerRecords && listenerRecords.length > 0) {
             listenerRecords.map(listener => {
               listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners
+              if (listener.listeners > prevListeners) { tuneIns += (listener.listeners - prevListeners) }
               prevListeners = listener.listeners
               prevTime = moment(listener.createdAt)
             })
@@ -89,6 +91,7 @@ module.exports = {
 
           listenerMinutes = Math.round(listenerMinutes)
           updateData.listenerMinutes = listenerMinutes
+          updateData.tuneIns = tuneIns
 
           // Update the attendance record with the data
           returnData.updatedRecord = await sails.models.attendance.updateOne({ ID: currentID }, updateData)
