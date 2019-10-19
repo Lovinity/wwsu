@@ -20,7 +20,7 @@ module.exports = {
             var temp = await sails.models.genre.find()
             if (temp.length > 0) {
                 temp.map((genre) => {
-                    returnData.genres[genre.ID] = genre.name
+                    returnData.genres.push({ ID: genre.ID, name: genre.name })
                 })
             }
 
@@ -28,7 +28,7 @@ module.exports = {
             temp = await sails.models.category.find()
             if (temp.length > 0) {
                 temp.map((category) => {
-                    returnData.categories[category.ID] = category.name
+                    returnData.categories.push({ ID: category.ID, name: category.name })
                 })
             }
 
@@ -36,7 +36,11 @@ module.exports = {
             temp = await sails.models.subcategory.find()
             if (temp.length > 0) {
                 temp.map((subcategory) => {
-                    returnData.subcategories[subcategory.ID] = {category: returnData.categories[subcategory.parentid] || "Unknown Category", name: subcategory.name}
+                    var category = `Unknown Category`
+                    returnData.categories
+                        .filter((cat) => cat.ID === subcategory.parentid)
+                        .map((cat) => category = cat.name)
+                    returnData.subcategories.push({ ID: subcategory.ID, category: category, name: subcategory.name })
                 })
             }
 
