@@ -39,7 +39,9 @@ module.exports = {
                     var category = `Unknown Category`
                     returnData.categories
                         .filter((cat) => cat.ID === subcategory.parentid)
-                        .map((cat) => category = cat.name)
+                        .map((cat) => {
+                            category = cat.name
+                        })
                     returnData.subcategories.push({ ID: subcategory.ID, category: category, name: subcategory.name })
                 })
             }
