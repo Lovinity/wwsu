@@ -4,7 +4,7 @@ var Slides
 
 // Slide class for managing a single slide
 class Slide {
-  constructor (data = {}) {
+  constructor(data = {}) {
     this._name = data.name || ''
     this._label = data.label || ''
     this._weight = data.weight || 0
@@ -107,6 +107,7 @@ class Slide {
     this._innerHtml = value
     if (Slides.activeSlide().name === this._name) {
       this._html = `<div id="slide-${this._name}" style="display: inline; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`
+      Slides.showSlide(this._name)
     } else {
       this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`
     }
@@ -156,7 +157,7 @@ Slides = (() => {
   var timeLeft = 0
 
   // Return the Slide class of the currently active slide
-  const activeSlide = () => slides[currentSlide] || {}
+  const activeSlide = () => slides[ currentSlide ] || {}
 
   // Return the number of currently active slides
   const countActive = () => {
@@ -170,7 +171,7 @@ Slides = (() => {
 
   // Return the Slide class of the provided slide name
   const slide = (slideName) => {
-    return slides.filter((_slide) => _slide.name === slideName)[0]
+    return slides.filter((_slide) => _slide.name === slideName)[ 0 ]
   }
 
   const allSlides = () => slides
@@ -210,7 +211,7 @@ Slides = (() => {
 
       var html = ``
       _slides.map((_slide) => {
-        html += `<span class="m-1 chip shadow-4 ${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name ? `bg-light-1 text-dark` : `bg-dark-4 text-white`}"><i class="chip-icon bg-${_slide.color} ${_slide.color === `warning` || _slide.color === `info` || _slide.color === `success` || _slide.color === `urgent` ? `text-dark` : `text-white`}">${typeof slides[currentSlide] !== `undefined` && _slide.name === slides[currentSlide].name && timeLeft !== null && _slides.length > 1 ? timeLeft : ``}</i>${_slide.label}</span>`
+        html += `<span class="m-1 chip shadow-4 ${typeof slides[ currentSlide ] !== `undefined` && _slide.name === slides[ currentSlide ].name ? `bg-light-1 text-dark` : `bg-dark-4 text-white`}"><i class="chip-icon bg-${_slide.color} ${_slide.color === `warning` || _slide.color === `info` || _slide.color === `success` || _slide.color === `urgent` ? `text-dark` : `text-white`}">${typeof slides[ currentSlide ] !== `undefined` && _slide.name === slides[ currentSlide ].name && timeLeft !== null && _slides.length > 1 ? timeLeft : ``}</i>${_slide.label}</span>`
       })
 
       temp.innerHTML = html
@@ -219,6 +220,25 @@ Slides = (() => {
 
   // Add a Slide class into the system
   const newSlide = (data) => {
+    // Check if the slide already exists
+    var done = false
+    var iteration = 0
+    while (!done) {
+      // Found? Remove the old slide and replace it with the new one.
+      if (slides[ iteration ].name === slideName) {
+        done = true
+        slides[ iteration ].remove()
+        slides[ iteration ] = new Slide(data)
+        updateBadges()
+        return null
+      }
+      iteration++
+
+      if (iteration > slides.length) {
+        done = true
+        return null
+      }
+    }
     slides.push(new Slide(data))
     updateBadges()
   }
@@ -232,7 +252,7 @@ Slides = (() => {
           timeLeft = 0
         }
         _slide.remove()
-        delete slides[index]
+        delete slides[ index ]
       }
     })
     updateBadges()
@@ -251,7 +271,7 @@ Slides = (() => {
         var iteration = 0
         var done = false
         while (!done) {
-          if (slides[iteration].name === slideName) {
+          if (slides[ iteration ].name === slideName) {
             done = true
             currentSlide = iteration
             console.log(`currentSlide set to ${iteration}`)
@@ -296,66 +316,7 @@ Slides = (() => {
         console.log(`setting time`)
         timeLeft = activeSlide().displayTime
         updateBadges()
-
-        // Fit content if necessary
-        temp = document.getElementById(`slide-${activeSlide().name}`)
-        temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
-        if (activeSlide().fitContent && temp !== null && temp2 !== null) {
-          console.log(`fitting content`)
-          temp.classList.add('scale-wrapper')
-          temp2.classList.add('scale-content')
-          var pageWidth; var pageHeight
-
-          var basePage = {
-            width: temp.offsetWidth,
-            height: temp.offsetHeight,
-            scale: 1,
-            scaleX: 1,
-            scaleY: 1
-          }
-
-          $(() => {
-            console.log(`fitting content self function`)
-            var $page = $(`#slide-${activeSlide().name}`)
-
-            getPageSize()
-            scalePages($page, pageWidth, pageHeight)
-
-            window.requestAnimationFrame(() => {
-              getPageSize()
-              scalePages($page, pageWidth, pageHeight)
-              setTimeout(() => {
-                getPageSize()
-                scalePages($page, pageWidth, pageHeight)
-              }, 500)
-            })
-
-            function getPageSize () {
-              pageHeight = $(`#slide-${activeSlide().name}`).height()
-              pageWidth = $(`#slide-${activeSlide().name}`).width()
-              console.log(`Page size... height: ${pageHeight}, width: ${pageWidth}`)
-            }
-
-            function scalePages (page, maxWidth, maxHeight) {
-              page.attr('width', `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
-              console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
-              var scaleX = 1; var scaleY = 1
-              scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95
-              scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.95
-              basePage.scaleX = scaleX
-              basePage.scaleY = scaleY
-              basePage.scale = (scaleX > scaleY) ? scaleY : scaleX
-              console.log(`Scale: ${basePage.scale}, X: ${basePage.scaleX}, Y: ${basePage.scaleY}`)
-
-              var newLeftPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).width() * basePage.scale) - maxWidth) / 2))
-              var newTopPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).height() * basePage.scale) - maxHeight) / 2))
-
-              console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`)
-
-              $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;')
-            }
-          })
-        }
+        fitContent()
       }
 
       // Process transitioning out of the current slide
@@ -405,19 +366,19 @@ Slides = (() => {
       if (temp !== null) { temp.style.display = 'inline' }
 
       activeSlide().fn()
-
       timeLeft = activeSlide().displayTime
       updateBadges()
+      fitContent()
     }
   }
 
   const generateBG = () => {
-    var hexValues = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e']
+    var hexValues = [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e' ]
 
     function populate (a) {
       for (var i = 0; i < 6; i++) {
         var x = Math.round(Math.random() * 14)
-        var y = hexValues[x]
+        var y = hexValues[ x ]
         a += y
       }
       return a
@@ -431,6 +392,69 @@ Slides = (() => {
 
     var temp = document.getElementById('bg-canvas')
     if (temp !== null) { temp.style.background = gradient }
+  }
+
+  // Private function for fitting the content of the active slide if the active slide's fitContent = true
+  const fitContent = () => {
+    // Fit content if necessary
+    temp = document.getElementById(`slide-${activeSlide().name}`)
+    temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
+    if (activeSlide().fitContent && temp !== null && temp2 !== null) {
+      console.log(`fitting content`)
+      temp.classList.add('scale-wrapper')
+      temp2.classList.add('scale-content')
+      var pageWidth; var pageHeight
+
+      var basePage = {
+        width: temp.offsetWidth,
+        height: temp.offsetHeight,
+        scale: 1,
+        scaleX: 1,
+        scaleY: 1
+      }
+
+      $(() => {
+        console.log(`fitting content self function`)
+        var $page = $(`#slide-${activeSlide().name}`)
+
+        getPageSize()
+        scalePages($page, pageWidth, pageHeight)
+
+        window.requestAnimationFrame(() => {
+          getPageSize()
+          scalePages($page, pageWidth, pageHeight)
+          setTimeout(() => {
+            getPageSize()
+            scalePages($page, pageWidth, pageHeight)
+          }, 500)
+        })
+
+        function getPageSize () {
+          pageHeight = $(`#slide-${activeSlide().name}`).height()
+          pageWidth = $(`#slide-${activeSlide().name}`).width()
+          console.log(`Page size... height: ${pageHeight}, width: ${pageWidth}`)
+        }
+
+        function scalePages (page, maxWidth, maxHeight) {
+          page.attr('width', `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
+          console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
+          var scaleX = 1; var scaleY = 1
+          scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95
+          scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.95
+          basePage.scaleX = scaleX
+          basePage.scaleY = scaleY
+          basePage.scale = (scaleX > scaleY) ? scaleY : scaleX
+          console.log(`Scale: ${basePage.scale}, X: ${basePage.scaleX}, Y: ${basePage.scaleY}`)
+
+          var newLeftPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).width() * basePage.scale) - maxWidth) / 2))
+          var newTopPos = Math.abs(Math.floor((($(`#content-slide-${activeSlide().name}`).height() * basePage.scale) - maxHeight) / 2))
+
+          console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`)
+
+          $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;')
+        }
+      })
+    }
   }
 
   // Timer for controlling transitions between slides
@@ -462,10 +486,10 @@ Slides = (() => {
             var done = false
             var iteration = 0
             while (!done) {
-              if (activeIndexes[iteration]) {
+              if (activeIndexes[ iteration ]) {
                 console.log(`Qualified ${iteration}`)
                 done = true
-                showSlide(slides[iteration].name)
+                showSlide(slides[ iteration ].name)
               }
               iteration++
 
@@ -487,10 +511,10 @@ Slides = (() => {
           done = false
           iteration = currentSlide + 1
           while (!done) {
-            if (activeIndexes[iteration]) {
+            if (activeIndexes[ iteration ]) {
               console.log(`Qualified ${iteration}`)
               done = true
-              showSlide(slides[iteration].name)
+              showSlide(slides[ iteration ].name)
             }
 
             iteration++
