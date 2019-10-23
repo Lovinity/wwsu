@@ -53,6 +53,7 @@ module.exports = {
             sails.models.status.errorCheck[inputs.name].active = false
             sails.models.status.errorCheck.prevError = moment()
           } catch (unusedE) {
+            sails.models.status.errorCheck[inputs.name].active = false
             sails.models.status.errorCheck[inputs.name].count = sails.models.status.errorCheck[inputs.name].trigger
           }
         }

@@ -201,6 +201,7 @@ module.exports = {
             return resolve(0)
           } catch (e) {
             await sails.helpers.meta.change.with({ changingState: null })
+            sails.log.error(e)
             return reject(e)
           }
         })
