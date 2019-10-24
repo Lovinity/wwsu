@@ -238,15 +238,15 @@ try {
     fn: (slide) => {
       if (calendar.length > 0) {
         calendar
-          .filter((event) => event.name === Meta.show && event.type === 'show' && event.active > 0)
+          .filter((event) => event.name === Meta.show && event.active > 0)
           .map((event) => {
-            var temp1 = document.querySelector(`#calendar-event-${event.ID}`)
+            var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
               temp1.style.borderStyle = 'solid'
               temp1.style.borderWidth = '0.25vw'
               setTimeout(() => {
-                delete temp1.style.borderStyle
-                delete temp1.style.borderWidth
+                temp1.style.removeProperty(`borderStyle`)
+                temp1.style.removeProperty(`borderWidth`)
               }, slide.displayTime * 1000)
             }
           })
@@ -302,13 +302,13 @@ try {
           if (temp1 !== null) {
             temp1.innerHTML = tcalendar[ index ].topic
           }
-          temp1 = document.querySelector(`#calendar-event-${tcalendar[ index ].ID}`)
+          temp1 = document.querySelector(`#${tcalendar[ index ].ID}`)
           if (temp1 !== null) {
             temp1.style.borderStyle = 'solid'
             temp1.style.borderWidth = '0.25vw'
             setTimeout(() => {
-              delete temp1.style.borderStyle
-              delete temp1.style.borderWidth
+              delete temp1.style.removeProperty(`borderStyle`)
+              delete temp1.style.removeProperty(`borderWidth`)
             }, slide.displayTime * 1000)
           }
         }
@@ -502,8 +502,7 @@ function processEas (db) {
     easExtreme = false
 
     prevEas = []
-    var innercontent = document.getElementById('eas-alerts')
-    innercontent.innerHTML = ``
+    var innercontent = ``
 
     // eslint-disable-next-line no-unused-vars
     var makeActive = false
@@ -547,7 +546,7 @@ function processEas (db) {
         if (isLightTheme) {
           color = `rgb(${(color.red / 4) + 191}, ${(color.green / 4) + 191}, ${(color.blue / 4) + 191});`
         }
-        innercontent.innerHTML += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${!isLightTheme ? `bg-dark-4` : `bg-light-1`}">
+        innercontent += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${!isLightTheme ? `bg-dark-4` : `bg-light-1`}">
                         <div class="m-1" style="text-align: center; width: 100%"><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo[ 'alert' ] !== 'undefined') ? dodo[ 'alert' ] : 'Unknown Alert'}</span><br />
                         <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo[ 'starts' ]).isValid() ? moment(dodo[ 'starts' ]).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo[ 'expires' ]).isValid() ? moment(dodo[ 'expires' ]).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
 <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo[ 'counties' ] !== 'undefined') ? dodo[ 'counties' ] : 'Unknown Counties'}</span><br /></div>
@@ -563,11 +562,12 @@ function processEas (db) {
     })
 
     if (prevEas.length === 0) {
-      innercontent.HTML = `<strong class="text-white">No active alerts</strong>`
+      innercontent = `<strong class="text-white">No active alerts</strong>`
     }
 
     Slides.slide(`eas-alerts`).active = makeActive
     Slides.slide(`eas-alerts`).displayTime = displayTime
+    Slides.slide(`eas-alerts`).html = `<h1 style="text-align: center; font-size: 3em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${!isLightTheme ? `#ffffff` : `#000000`}">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`
     checkSlideCounts()
 
     // Do EAS events
@@ -1218,8 +1218,7 @@ function processNowPlaying (response) {
               innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`
             }
           }
-          temp = document.getElementById(`ontheair`)
-          if (temp) { temp.innerHTML = innercontent }
+          Slides.slide(`on-air`).html = `<h1 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1>${innercontent}</div>`
         } else {
           Slides.slide(`on-air`).active = false
           checkSlideCounts()
@@ -1574,7 +1573,7 @@ function createAnnouncement (data) {
       transitionOut: `fadeOut`,
       displayTime: data.displayTime || 15,
       fitContent: true,
-      html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${!isLightTheme ? `text-white bg-dark-2` : `text-dark bg-light-3`}" id="content-attn-${data.ID}">${data.announcement}</div>`
+      html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${!isLightTheme ? `text-white bg-dark-2` : `text-dark bg-light-3`}">${data.announcement}</div>`
     })
   }
 }
@@ -1623,13 +1622,10 @@ darkskyWorker.onmessage = function (e) {
 }
 
 function processWeeklyStats (data) {
-  var temp = document.getElementById(`analytics`)
-  if (temp !== null) {
-    temp.innerHTML = `<p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Top performing shows:</strong></p>
-     <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[ 0 ] ? data.topShows[ 0 ] : 'Unknown'}</strong></li><li>${data.topShows[ 1 ] ? data.topShows[ 1 ] : 'Unknown'}</li><li>${data.topShows[ 2 ] ? data.topShows[ 2 ] : 'Unknown'}</li></ol>
-     <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
-     <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} listener days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages exchanged between DJ and website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p>`
-  }
+  Slides.slide(`weekly-stats`).html = `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content"><p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Top performing shows:</strong></p>
+  <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[ 0 ] ? data.topShows[ 0 ] : 'Unknown'}</strong></li><li>${data.topShows[ 1 ] ? data.topShows[ 1 ] : 'Unknown'}</li><li>${data.topShows[ 2 ] ? data.topShows[ 2 ] : 'Unknown'}</li></ol>
+  <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
+  <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} listener days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages exchanged between DJ and website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p></div>`
 }
 
 function setWeatherSlide (id, show, background, header, icon, body) {

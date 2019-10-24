@@ -392,6 +392,7 @@ Slides = (() => {
     // Fit content if necessary
     temp = document.getElementById(`slide-${activeSlide().name}`)
     temp2 = document.getElementById(`content-slide-${activeSlide().name}`)
+    console.log(`Clecking fitContent`)
     if (activeSlide().fitContent && temp !== null && temp2 !== null) {
       console.log(`fitting content`)
       temp.classList.add('scale-wrapper')

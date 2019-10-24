@@ -15,7 +15,7 @@ try {
     transitionOut: `fadeOut`,
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="directors"></div>`
+    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap"></div>`
   })
 
   // Director hours
@@ -30,7 +30,7 @@ try {
     transitionOut: `fadeOut`,
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-directors"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
   })
 
   // Assistant Director hours
@@ -45,7 +45,7 @@ try {
     transitionOut: `fadeOut`,
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="office-hours-assistants"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
   })
 
   // System Status
@@ -60,7 +60,7 @@ try {
     transitionOut: `fadeOut`,
     displayTime: 15,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1" id="system-status"></div>`
+    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div>`
   })
 
   Slides.newSlide({
@@ -646,8 +646,7 @@ function processStatus (db) {
     statusLine.style.color = 'rgba(255, 255, 255, 1)'
 
     // Update status html
-    var innercontent = document.getElementById('system-status')
-    if (innercontent) { innercontent.innerHTML = statusMarquee }
+    Slides.slide(`system`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${statusMarquee}</div>`
   } catch (e) {
     iziToast.show({
       title: 'An error occurred - Please check the logs',
@@ -666,9 +665,8 @@ function processDirectors (ddb, hdb) {
     var isActive = false
 
     // Update directors html
-    var innercontent = document.getElementById('directors')
+    var innercontent = ``
     var stuff
-    if (innercontent) { innercontent.innerHTML = '' }
 
     Slides.slide(`directors`).displayTime = 5
 
@@ -685,12 +683,10 @@ function processDirectors (ddb, hdb) {
           text1 = 'IN'
           theClass = 'success'
         }
-        if (innercontent) {
-          innercontent.innerHTML += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded shadow-8">
+          innercontent += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded shadow-8">
     <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
     <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
   <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`
-        }
       } catch (e) {
         console.error(e)
         iziToast.show({
@@ -699,6 +695,8 @@ function processDirectors (ddb, hdb) {
         })
       }
     })
+
+    Slides.slide(`directors`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`
 
     // A list of Office Hours for the directors
 
@@ -805,7 +803,7 @@ function processDirectors (ddb, hdb) {
       })
 
     // Director hours slide
-    innercontent = document.getElementById('office-hours-directors')
+    innercontent = ``
 
     stuff = `<div class="row shadow-2 bg-dark-1">
      <div class="col-3 text-info">
@@ -887,10 +885,10 @@ function processDirectors (ddb, hdb) {
     }
 
     Slides.slide(`hours-directors`).active = isActive
-    innercontent.innerHTML = stuff
+    Slides.slide(`hours-directors`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
 
     // Assistant hours slide
-    innercontent = document.getElementById('office-hours-assistants')
+    innercontent = ``
 
     stuff = `<div class="row shadow-2 bg-dark-1">
      <div class="col-3 text-info">
@@ -972,8 +970,7 @@ function processDirectors (ddb, hdb) {
     }
 
     Slides.slide(`hours-assistants`).active = isActive
-
-    innercontent.innerHTML = stuff
+    Slides.slide(`hours-assistants`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
   } catch (e) {
     iziToast.show({
       title: 'An error occurred - Please check the logs',
