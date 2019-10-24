@@ -246,7 +246,7 @@ try {
               ((dom, theSlide) => {
                 setTimeout(() => {
                   dom.classList.remove(`pulsate-alert`)
-                }, theSlide.displayTime)
+                }, theSlide.displayTime - 1)
               })(temp1, slide)
             }
           })
@@ -308,7 +308,7 @@ try {
               ((dom, theSlide) => {
                 setTimeout(() => {
                   dom.classList.remove(`pulsate-alert`)
-                }, theSlide.displayTime)
+                }, theSlide.displayTime - 1)
               })(temp1, slide)
           }
         }
