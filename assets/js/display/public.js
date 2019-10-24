@@ -307,8 +307,8 @@ try {
             temp1.style.borderStyle = 'solid'
             temp1.style.borderWidth = '0.25vw'
             setTimeout(() => {
-              delete temp1.style.removeProperty(`borderStyle`)
-              delete temp1.style.removeProperty(`borderWidth`)
+              temp1.style.removeProperty(`borderStyle`)
+              temp1.style.removeProperty(`borderWidth`)
             }, slide.displayTime * 1000)
           }
         }
@@ -1622,10 +1622,12 @@ darkskyWorker.onmessage = function (e) {
 }
 
 function processWeeklyStats (data) {
-  Slides.slide(`weekly-stats`).html = `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content"><p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Top performing shows:</strong></p>
+  if (!isStudio) {
+    Slides.slide(`weekly-stats`).html = `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content"><p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Top performing shows:</strong></p>
   <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${data.topShows[ 0 ] ? data.topShows[ 0 ] : 'Unknown'}</strong></li><li>${data.topShows[ 1 ] ? data.topShows[ 1 ] : 'Unknown'}</li><li>${data.topShows[ 2 ] ? data.topShows[ 2 ] : 'Unknown'}</li></ol>
   <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${data.topGenre}</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${data.topPlaylist}</span></p>
   <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${Math.round(((data.onAir / 60) / 24) * 1000) / 1000} days (${Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10}% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${Math.round(((data.onAirListeners / 60) / 24) * 1000) / 1000} listener days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${data.tracksLiked}</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages exchanged between DJ and website visitors: ${data.webMessagesExchanged}</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${data.tracksRequested}</span></p></div>`
+  }
 }
 
 function setWeatherSlide (id, show, background, header, icon, body) {
