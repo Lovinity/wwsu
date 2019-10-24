@@ -1211,7 +1211,7 @@ function processNowPlaying (response) {
             </div>`
                 }
                 */
-        if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_') || Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
+        if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_') || Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_') || Meta.state.startsWith('prerecord_')) {
           Slides.slide(`on-air`).active = true
           checkSlideCounts()
           var innercontent = ``
