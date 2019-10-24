@@ -243,7 +243,7 @@ try {
             var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
               temp1.classList.add(`pulsate-alert`)
-              var fn = ((dom, theSlide) => {
+              var fn2 = (function (dom, theSlide) {
                 setTimeout(() => {
                   dom.classList.remove(`pulsate-alert`)
                 }, theSlide.displayTime)
@@ -305,7 +305,7 @@ try {
           temp1 = document.querySelector(`#${tcalendar[ index ].ID}`)
           if (temp1 !== null) {
             temp1.classList.add(`pulsate-alert`)
-            var fn = ((dom, theSlide) => {
+            var fn2 = (function (dom, theSlide) {
               setTimeout(() => {
                 dom.classList.remove(`pulsate-alert`)
               }, theSlide.displayTime)
