@@ -260,7 +260,7 @@ Slides = (() => {
   // Transition to a slide
   const showSlide = (slideName) => {
     timeLeft = null
-    activeSlide().fnEnd()
+    if (activeSlide().fnEnd) { activeSlide().fnEnd() }
     if (slideName !== activeSlide().name) {
       console.log(`Different slide.`)
       // Executed when we are ready to show the slide
