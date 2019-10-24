@@ -235,7 +235,7 @@ try {
     displayTime: 10,
     fitContent: false,
     html: `<h1 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}">On the Air Right Now</h1><div id="ontheair"></div>`,
-    fn: (slide) => {
+    fnStart: (slide) => {
       if (calendar.length > 0) {
         calendar
           .filter((event) => event.name === Meta.show && event.active > 0)
@@ -243,11 +243,18 @@ try {
             var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
               temp1.classList.add(`pulsate-alert`)
-              var fn2 = (function (dom, theSlide) {
-                setTimeout(() => {
-                  dom.classList.remove(`pulsate-alert`)
-                }, theSlide.displayTime)
-              })(temp1, slide)
+            }
+          })
+      }
+    },
+    fnEnd: (slide) => {
+      if (calendar.length > 0) {
+        calendar
+          .filter((event) => event.name === Meta.show && event.active > 0)
+          .map((event) => {
+            var temp1 = document.querySelector(`#${event.ID}`)
+            if (temp1 !== null) {
+              temp1.classList.remove(`pulsate-alert`)
             }
           })
       }
@@ -283,7 +290,7 @@ try {
     fitContent: false,
     reset: true,
     html: `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${!isLightTheme ? `#ffffff` : `#000000`};" id="promote-show-name"></h2><h3 style="text-align: center; font-size: 4vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="promote-show-time"></h3><div style="overflow-y: hidden; font-size: 4.5vh; color: ${!isLightTheme ? `#ffffff` : `#000000`}; height: 45vh;" class="${!isLightTheme ? `bg-dark-4 text-white` : `bg-light-1 text-dark`} p-1 m-1 shadow-8" id="promote-show-topic"></div>`,
-    fn: (slide) => {
+    fnStart: (slide) => {
       slide.displayTime = 10
       var tcalendar = calendar.filter((event) => event.active > 0)
       if (tcalendar.length > 0) {
@@ -305,13 +312,21 @@ try {
           temp1 = document.querySelector(`#${tcalendar[ index ].ID}`)
           if (temp1 !== null) {
             temp1.classList.add(`pulsate-alert`)
-            var fn2 = (function (dom, theSlide) {
-              setTimeout(() => {
-                dom.classList.remove(`pulsate-alert`)
-              }, theSlide.displayTime)
-            })(temp1, slide)
           }
         }
+      }
+    },
+    fnEnd: (slide) => {
+      var temp1 = document.querySelector('#promote-show-name')
+      if (temp1 !== null && calendar.length > 0) {
+        calendar
+          .filter((event) => event.active > 0 && temp1.innerHTML === `<strong>${event.name}</strong>`)
+          .map((event) => {
+            var temp1 = document.querySelector(`#${event.ID}`)
+            if (temp1 !== null) {
+              temp1.classList.remove(`pulsate-alert`)
+            }
+          })
       }
     }
   })

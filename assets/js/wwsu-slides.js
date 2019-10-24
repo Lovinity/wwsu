@@ -20,7 +20,9 @@ class Slide {
     this._transitionOut = data.transitionOut || 'fadeOut'
     this._displayTime = data.displayTime || 14
     this._fitContent = data.fitContent || false
-    this._fn = data.fn || (() => {
+    this._fnStart = data.fnStart || (() => {
+    })
+    this._fnEnd = data.fnEnd || (() => {
     })
 
     var temp = document.getElementById(`slides`)
@@ -135,8 +137,12 @@ class Slide {
     return this._fitContent
   }
 
-  fn () {
-    return this._fn(this)
+  fnStart () {
+    return this._fnStart(this)
+  }
+
+  fnEnd () {
+    return this._fnEnd(this)
   }
 
   remove () {
@@ -254,6 +260,7 @@ Slides = (() => {
   // Transition to a slide
   const showSlide = (slideName) => {
     timeLeft = null
+    activeSlide().fnEnd()
     if (slideName !== activeSlide().name) {
       console.log(`Different slide.`)
       // Executed when we are ready to show the slide
@@ -304,7 +311,7 @@ Slides = (() => {
         $(`#content-slide-${activeSlide().name}`).animateCss(activeSlide().transitionIn, () => {
         })
 
-        activeSlide().fn()
+        activeSlide().fnStart()
 
         console.log(`setting time`)
         timeLeft = activeSlide().displayTime
@@ -358,7 +365,7 @@ Slides = (() => {
       temp = document.getElementById(`slide-${activeSlide().name}`)
       if (temp !== null) { temp.style.display = 'inline' }
 
-      activeSlide().fn()
+      activeSlide().fnStart()
       timeLeft = activeSlide().displayTime
       updateBadges()
       fitContent()
