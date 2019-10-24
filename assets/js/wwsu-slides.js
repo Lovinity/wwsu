@@ -221,26 +221,19 @@ Slides = (() => {
   // Add a Slide class into the system
   const newSlide = (data) => {
     // Check if the slide already exists
-    var done = false
-    var iteration = 0
-    while (!done) {
-      // Found? Remove the old slide and replace it with the new one.
-      if (slides[ iteration ].name === slideName) {
-        done = true
-        slides[ iteration ].remove()
-        slides[ iteration ] = new Slide(data)
+    var changed = false
+    slides
+      .filter((slide) => slide && slide.name === data.name)
+      .map((slide, index) => {
+        changed = true
+        slides[ index ].remove()
+        slides[ index ] = new Slide(data)
         updateBadges()
-        return null
-      }
-      iteration++
-
-      if (iteration > slides.length) {
-        done = true
-        return null
-      }
+      })
+    if (!changed) {
+      slides.push(new Slide(data))
+      updateBadges()
     }
-    slides.push(new Slide(data))
-    updateBadges()
   }
 
   // Remove a slide from the system by slide name
@@ -252,7 +245,7 @@ Slides = (() => {
           timeLeft = 0
         }
         _slide.remove()
-        delete slides[ index ]
+        slides.splice(index, 1)
       }
     })
     updateBadges()
