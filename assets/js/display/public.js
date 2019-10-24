@@ -243,10 +243,10 @@ try {
             var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
               temp1.classList.add(`pulsate-alert`)
-              ((dom, theSlide) => {
+              var fn = ((dom, theSlide) => {
                 setTimeout(() => {
                   dom.classList.remove(`pulsate-alert`)
-                }, theSlide.displayTime - 1)
+                }, theSlide.displayTime)
               })(temp1, slide)
             }
           })
@@ -305,11 +305,11 @@ try {
           temp1 = document.querySelector(`#${tcalendar[ index ].ID}`)
           if (temp1 !== null) {
             temp1.classList.add(`pulsate-alert`)
-              ((dom, theSlide) => {
-                setTimeout(() => {
-                  dom.classList.remove(`pulsate-alert`)
-                }, theSlide.displayTime - 1)
-              })(temp1, slide)
+            var fn = ((dom, theSlide) => {
+              setTimeout(() => {
+                dom.classList.remove(`pulsate-alert`)
+              }, theSlide.displayTime)
+            })(temp1, slide)
           }
         }
       }
