@@ -242,12 +242,12 @@ try {
           .map((event) => {
             var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
-              temp1.style.borderStyle = 'solid'
-              temp1.style.borderWidth = '0.25vw'
-              setTimeout(() => {
-                temp1.style.removeProperty(`borderStyle`)
-                temp1.style.removeProperty(`borderWidth`)
-              }, slide.displayTime * 1000)
+              temp1.classList.add(`pulsate-alert`)
+              ((dom, theSlide) => {
+                setTimeout(() => {
+                  dom.classList.remove(`pulsate-alert`)
+                }, theSlide.displayTime)
+              })(temp1, slide)
             }
           })
       }
@@ -304,12 +304,12 @@ try {
           }
           temp1 = document.querySelector(`#${tcalendar[ index ].ID}`)
           if (temp1 !== null) {
-            temp1.style.borderStyle = 'solid'
-            temp1.style.borderWidth = '0.25vw'
-            setTimeout(() => {
-              temp1.style.removeProperty(`borderStyle`)
-              temp1.style.removeProperty(`borderWidth`)
-            }, slide.displayTime * 1000)
+            temp1.classList.add(`pulsate-alert`)
+              ((dom, theSlide) => {
+                setTimeout(() => {
+                  dom.classList.remove(`pulsate-alert`)
+                }, theSlide.displayTime)
+              })(temp1, slide)
           }
         }
       }
