@@ -320,7 +320,7 @@ try {
       var temp1 = document.querySelector('#promote-show-name')
       if (temp1 !== null && calendar.length > 0) {
         calendar
-          .filter((event) => event.active > 0 && temp1.innerHTML === `<strong>${event.name}</strong>`)
+          .filter((event) => event.active > 0)
           .map((event) => {
             var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
