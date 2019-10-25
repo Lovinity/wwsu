@@ -41,18 +41,20 @@ module.exports = {
         if (records.length > 0) {
           var theStart
           var theEnd
-          records.map((record2) => {
-            if (!theEnd) {
-              theStart = record2.scheduledIn
-            } else {
-              theStart = theEnd
-            }
-            theEnd = record2.scheduledOut
-            var result = (async (recordB, theStartB, theEndB) => {
-              await sails.models.timesheet.update({ ID: recordB.ID }, { timeIn: moment(theStartB).toISOString(true), timeOut: moment(theEndB).toISOString(true), approved: 0 }).fetch()
-            })(record2, theStart, theEnd)
-            return result
-          })
+
+          // Sequential async
+          records.reduce(async (prevReturn, record) => {
+            return await (async (recordB) => {
+              if (!theEnd) {
+                theStart = recordB.scheduledIn
+              } else {
+                theStart = theEnd
+              }
+              theEnd = recordB.scheduledOut
+              recordsX = recordsX.concat(await sails.models.timesheet.update({ ID: recordB.ID }, { timeIn: moment(theStart).toISOString(true), timeOut: moment(theEnd).toISOString(true), approved: 0 }).fetch())
+            })(record)
+          }, null)
+          
           // Add special clock-out entry
           await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '>=': 1 } }, { timeIn: moment(theEnd).toISOString(true), timeOut: thetime.toISOString(true), approved: toapprove }).fetch()
           await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null, name: record.name, approved: { '<': 1 } }, { timeIn: moment(theEnd).toISOString(true), timeOut: thetime.toISOString(true) }).fetch()
@@ -79,8 +81,8 @@ module.exports = {
 
         // Clock-ins need a new entry
         if (calendar.length > 0) {
-          records = await sails.models.timesheet.update({ unique: calendar[0].unique, timeIn: null }, { name: record.name, unique: calendar[0].unique, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
-          if (records.length === 0) { await sails.models.timesheet.create({ name: record.name, unique: calendar[0].unique, scheduledIn: moment(calendar[0].start).toISOString(true), scheduledOut: moment(calendar[0].end).toISOString(true), timeIn: thetime.toISOString(true), approved: toapprove }).fetch() }
+          records = await sails.models.timesheet.update({ unique: calendar[ 0 ].unique, timeIn: null }, { name: record.name, unique: calendar[ 0 ].unique, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
+          if (records.length === 0) { await sails.models.timesheet.create({ name: record.name, unique: calendar[ 0 ].unique, scheduledIn: moment(calendar[ 0 ].start).toISOString(true), scheduledOut: moment(calendar[ 0 ].end).toISOString(true), timeIn: thetime.toISOString(true), approved: toapprove }).fetch() }
         } else {
           await sails.models.timesheet.create({ name: record.name, unique: null, scheduledIn: null, scheduledOut: null, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
         }

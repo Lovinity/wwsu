@@ -1368,24 +1368,25 @@ module.exports.bootstrap = async function (done) {
       try {
         await sails.helpers.meta.change.with({ time: moment().toISOString(true) })
 
-        var records = await sails.models.timesheet.find({ timeIn: { '!=': null }, timeOut: null })
+        var records = await sails.models.timesheet.find({ timeIn: { '!=': null }, timeOut: null }).sort('scheduledIn ASC')
         var recordsX = []
         if (records.length > 0) {
           var theStart
           var theEnd
-          records.map((record) => {
-            // Edge case example: It is 5PM. A director clocks in for 1PM. Director has scheduled hours for 1-3PM and 4-6PM. Ensure there's a record for all in-between hours.
-            if (!theEnd) {
-              theStart = record.scheduledIn
-            } else {
-              theStart = theEnd
-            }
-            theEnd = record.scheduledOut
-            var result = (async (recordB, theStartB, theEndB) => {
-              return recordsX.concat(await sails.models.timesheet.update({ ID: recordB.ID }, { timeIn: moment(theStartB).toISOString(true), timeOut: moment(theEndB).toISOString(true), approved: 0 }).fetch())
-            })(record, theStart, theEnd)
-            return result
-          })
+
+          // Sequential async
+          records.reduce( async (prevReturn, record) => {
+            return await (async (recordB) => {
+              if (!theEnd) {
+                theStart = recordB.scheduledIn
+              } else {
+                theStart = theEnd
+              }
+              theEnd = recordB.scheduledOut
+              recordsX = recordsX.concat(await sails.models.timesheet.update({ ID: recordB.ID }, { timeIn: moment(theStart).toISOString(true), timeOut: moment(theEnd).toISOString(true), approved: 0 }).fetch())
+            })(record)
+          }, null)
+
           // Add special clock-out entry
           recordsX = recordsX.concat(await sails.models.timesheet.update({ timeIn: { '!=': null }, timeOut: null }, { timeIn: moment(theEnd).toISOString(true), timeOut: moment().toISOString(true), approved: 0 }).fetch())
         } else {
@@ -1396,7 +1397,7 @@ module.exports.bootstrap = async function (done) {
         if (recordsX.length > 0) {
           recordsX.map((record) => {
             (async () => {
-              sails.helpers.onesignal.sendMass('accountability-directors', 'Timesheet needs approved in DJ Controls', `${record.name}'s timesheet, ending on ${moment().format('LLLL')}, has been flagged and needs reviewed/approved because the director forgot to clock out at midnight.`)
+              await sails.helpers.onesignal.sendMass('accountability-directors', 'Timesheet needs approved in DJ Controls', `${record.name}'s timesheet, ending on ${moment().format('LLLL')}, has been flagged and needs reviewed/approved because the director forgot to clock out at midnight.`)
             })()
           })
         }
