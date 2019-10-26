@@ -92,22 +92,22 @@ onmessage = function (e) {
       }
 
       // Apparent temperature, cold
-      if (item.currently.apparentTemperature <= -48) {
+      if (item.currently.apparentTemperature <= -35) {
         this.postMessage([`setWeatherSlide`, [`windchill`, true, `#721818`, `Dangerous Wind Chill!`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 10 minutes.`]])
-      } else if (item.currently.apparentTemperature <= -32) {
+      } else if (item.currently.apparentTemperature <= -20) {
         this.postMessage([`setWeatherSlide`, [`windchill`, true, `#702700`, `Very Low Wind Chill!`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 20 minutes.`]])
-      } else if (item.currently.apparentTemperature <= -18) {
+      } else if (item.currently.apparentTemperature <= -5) {
         this.postMessage([`setWeatherSlide`, [`windchill`, true, `#4F3C03`, `Low Wind Chill`, `fa-temperature-low`, `Wind Chill is ${item.currently.apparentTemperature}°F. Frostbite can occur within 30 minutes.`]])
       } else {
         this.postMessage([`setWeatherSlide`, [`windchill`, false]])
       }
 
       // Apparent temperature, hot
-      if (item.currently.apparentTemperature >= 115) {
+      if (item.currently.apparentTemperature >= 120) {
         this.postMessage([`setWeatherSlide`, [`heatindex`, true, `#721818`, `Dangerous Heat Index!`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Heat stroke can occur; stay cool indoors if possible.`]])
-      } else if (item.currently.apparentTemperature >= 103) {
+      } else if (item.currently.apparentTemperature >= 110) {
         this.postMessage([`setWeatherSlide`, [`heatindex`, true, `#702700`, `Very High Heat Index!`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Drink lots of water and take a cooling break every 30 minutes.`]])
-      } else if (item.currently.apparentTemperature >= 91) {
+      } else if (item.currently.apparentTemperature >= 100) {
         this.postMessage([`setWeatherSlide`, [`heatindex`, true, `#4F3C03`, `High Heat Index`, `fa-temperature-high`, `Heat Index is ${item.currently.apparentTemperature}°F. Drink extra water.`]])
       } else {
         this.postMessage([`setWeatherSlide`, [`heatindex`, false]])
