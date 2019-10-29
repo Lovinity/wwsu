@@ -45,7 +45,7 @@ module.exports = {
 
       // If there are no queueUnderwritings breaks, this is an error! Bail.
       if (x === 0) {
-        await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `Underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration. You can do this in DJ Controls under admin menu -> Server Configuration -> Breaks - Hourly`, status: 2 })
+        await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `Underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration. You can do this in DJ Controls under admin menu -> Server Configuration -> Breaks - Hourly`, status: 1 })
         return exits.success()
       }
 
@@ -267,7 +267,7 @@ module.exports = {
 
                     // Use a different algorithm if show filters are specified; based off of an average show length of 2 hours.
                     if (typeof underwriting.mode.show !== `undefined` && underwriting.mode.show.length > 0) {
-                      total = (x * 2) * underwriting.mode.show.length
+                      total = ((2 * 2) * underwriting.mode.show.length) / 7
                     }
 
                     sails.log.debug(`Underwriting ${underwriting.ID}: average breaks in a day is ${total}.`)
@@ -314,7 +314,7 @@ module.exports = {
               sails.log.debug(`Underwriting ${underwriting.ID}: Track disabled / expired.`)
             }
           } else {
-            bad.push(`The set track for underwriting "${underwriting.name}" was not found in RadioDJ; this underwriting will not air. To fix, import the underwriting track to RadioDJ, and then go in DJ Controls under admin menu -> Manage Underwritings, and edit ${underwriting.name}.`)
+            veryBad.push(`The set track for underwriting "${underwriting.name}" was not found in RadioDJ; this underwriting will not air. To fix, import the underwriting track to RadioDJ, and then go in DJ Controls under admin menu -> Manage Underwritings, and edit ${underwriting.name}. This alert will go away on the next break after fixing this.`)
             sails.log.debug(`Underwriting ${underwriting.ID}: Did NOT find song.`)
           }
         })
@@ -354,14 +354,14 @@ module.exports = {
       } else if (bad.length > 0) {
         await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: bad.join(` `), status: 3 })
       } else {
-        await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `No underwritings are significantly behind schedule.`, status: 5 })
+        await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `Underwritings system is operational and all underwritings are within schedule.`, status: 5 })
       }
 
       sails.log.debug(`Finished.`)
 
       return exits.success()
     } catch (e) {
-      await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `Internal Error with the underwritings system. Please check the npm logs.`, status: 2 })
+      await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `Internal Error with the underwritings system. Please check the logs.`, status: 1 })
       return exits.error(e)
     }
   }
