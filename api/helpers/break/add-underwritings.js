@@ -173,7 +173,7 @@ module.exports = {
                 sails.log.debug(`Underwriting ${underwriting.ID}: Next date/time queue: ${next}. Next forced date/time queue: ${nextF}`)
 
                 var ffQueue = false
-                var w = underwriting.weight / 100
+                var w = song.weight / 100
                 var a = song.play_limit
                 var b = song.count_played
                 var chance = 0
