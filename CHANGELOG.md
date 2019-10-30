@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - Meta.queueFinish time will now include music tracks / openers when starting a broadcast to avoid confusion on the DJ Controls queue countdown. State will still switch to "*_on" after noMeta tracks have been played to trigger the recorder in DJ Controls.
+ - In underwritings/add and underwritings/edit, when mode.schedule.schedules is empty array but mode.scheduleForced.schedules is not, mode.schedule.schedules will become null; there should be no 24/7 regular schedule by default if there is at least one forced schedule.
+ - In underwritings/add and underwritings/edit, when mode.scheduleForced.schedules is empty array, it will become null; there should never be 24/7 forced schedule by default.
 
 ### Fixed
  - timesheet/edit bug
