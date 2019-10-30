@@ -106,7 +106,7 @@ module.exports = {
                   if (typeof underwriting.mode.schedule.schedules[ index ].m === `undefined`) { underwriting.mode.schedule.schedules[ index ].m = [] }
                   for (var minute in sails.config.custom.breaks) {
                     if (Object.prototype.hasOwnProperty.call(sails.config.custom.breaks, minute)) {
-                      underwriting.mode.schedule.schedules[ index ].m.push(minute)
+                      underwriting.mode.schedule.schedules[ index ].m.push(parseInt(minute))
                     }
                   }
 
