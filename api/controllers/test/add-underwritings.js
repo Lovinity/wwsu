@@ -8,7 +8,7 @@ module.exports = {
 
   },
 
-  fn: async function () {
+  fn: async function (inputs, exits) {
 
     try {
       // Initialize variables for storing issues encountered with the underwritings
