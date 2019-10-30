@@ -113,6 +113,8 @@ module.exports = {
                 })
               }
 
+              returnData.underwritings[ index ].modifiedSchedule = underwriting.mode.schedule
+
               // If the schedules portion is empty array, then every hour of every day in the week will have a break.
               // If it is null, then there are no breaks.
               if (underwriting.mode.schedule.schedules !== null && underwriting.mode.schedule.schedules.length === 0) {
@@ -133,12 +135,14 @@ module.exports = {
 
               returnData.underwritings[ index ].underwritingBreaks = underwritingBreaks
 
-              // every scheduleForced should have "minute" set to 0 and only 0
+              // every scheduleForced should have "minute" set to 0 and only 0 for one top-of-hour ID break per hour
               if (underwriting.mode.scheduleForced.schedules !== null) {
                 underwriting.mode.scheduleForced.schedules.map((schedule, index) => {
                   underwriting.mode.scheduleForced.schedules[ index ].m = [ 0 ]
                 })
               }
+
+              returnData.underwritings[ index ].modifiedScheduleForced = underwriting.mode.scheduleForced
 
               // Skip this underwriting if it contains any show filters, and none of them are on the air right now.
               if (typeof underwriting.mode.show === `undefined` || underwriting.mode.show.length === 0 || underwriting.mode.show.indexOf(sails.models.meta.memory.show) !== -1) {
@@ -146,7 +150,9 @@ module.exports = {
                 if (underwriting.mode.schedule.schedules !== null) {
                   var schedule = later.schedule(underwriting.mode.schedule)
                   var start = moment(song.date_played).toISOString(false)
+                  returnData.underwritings[ index ].start = start
                   var next = moment(schedule.next(1, start)).toISOString(false)
+                  returnData.underwritings[ index ].next = schedule.next(1, start)
                 } else {
                   var schedule = null
                   var start = null
@@ -155,7 +161,9 @@ module.exports = {
                 if (underwriting.mode.scheduleForced.schedules !== null) {
                   var scheduleF = later.schedule(underwriting.mode.scheduleForced)
                   var startF = moment(song.date_played).toISOString(false)
+                  returnData.underwritings[ index ].startF = startF
                   var nextF = moment(scheduleF.next(1, startF)).toISOString(false)
+                  returnData.underwritings[ index ].nextF = scheduleF.next(1, startF)
                 } else {
                   var scheduleF = null
                   var startF = null
