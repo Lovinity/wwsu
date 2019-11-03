@@ -47,6 +47,16 @@ module.exports = {
   fn: async function (inputs, exits) {
     sails.log.debug('Controller underwritings/add called.')
 
+    // If there are forced schedules, but no regular schedules, treat as forced schedule only rather than forced schedule + 24/7 regular schedule.
+    if (inputs.mode.schedule.schedules.length === 0 && inputs.mode.scheduleForced.schedules.length > 0) {
+      inputs.mode.schedule.schedules = null
+    }
+
+    // Never have 24/7 forced schedules
+    if (inputs.mode.scheduleForced.schedules.length === 0) {
+      inputs.mode.scheduleForced.schedules = null
+    }
+
     try {
       // Add the underwriting to the database
       await sails.models.underwritings.create({ name: inputs.name, trackID: inputs.trackID, mode: inputs.mode }).fetch()
