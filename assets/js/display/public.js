@@ -497,7 +497,7 @@ calendarWorker.onmessage = function (e) {
   var innercontent = document.getElementById('events-today')
   innercontent.innerHTML = e.data[ 0 ]
   calendar = e.data[ 1 ]
-  if (calendar.length > 0 && Meta.state.startsWith('automation_')) {
+  if (e.data[ 2 ] > 0 && Meta.state.startsWith('automation_')) {
     Slides.slide(`show-info`).active = true
   } else {
     Slides.slide(`show-info`).active = false

@@ -109,12 +109,14 @@ class Slide {
     this._innerHtml = value
     if (Slides.activeSlide().name === this._name) {
       this._html = `<div id="slide-${this._name}" style="display: inline; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`
+      var temp = document.getElementById(`content-slide-${this._name}`)
+      if (temp !== null) { temp.innerHTML = value }
       Slides.showSlide(this._name)
     } else {
       this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`
+      var temp = document.getElementById(`content-slide-${this._name}`)
+      if (temp !== null) { temp.innerHTML = value }
     }
-    var temp = document.getElementById(`content-slide-${this._name}`)
-    if (temp !== null) { temp.innerHTML = value }
   }
 
   get transitionIn () {

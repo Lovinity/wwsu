@@ -21,6 +21,7 @@ onmessage = function (e) {
 
   // Run through the events for the next 24 hours and add them to the coming up panel
   var noEvents = true
+  var activeEvents = 0
   e.data[0]
     .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(e.data[1]).add(1, 'days')) && moment(event.end).isAfter(moment(e.data[1])))
     .sort(compare)
@@ -55,6 +56,8 @@ onmessage = function (e) {
         }
         if (event.active === -1) {
           badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`
+        } else {
+          activeEvents++;
         }
         if (event.title.startsWith('Show: ')) {
           stripped = event.title.replace('Show: ', '')
@@ -142,7 +145,7 @@ onmessage = function (e) {
                     </div>`
   }
 
-  this.postMessage([innercontent, today])
+  this.postMessage([innercontent, today, activeEvents])
 }
 
 function hexRgb (hex, options = {}) {
