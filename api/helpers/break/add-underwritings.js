@@ -299,9 +299,9 @@ module.exports = {
 
                     var v = moment(song.end_date).isAfter(moment('2002-01-01 00:00:01'))
 
-                    // Initial chance: 2x % of breaks in a day (4x if end date is set) for one break.
+                    // Initial chance: 4x % of breaks in a day (8x if end date is set) for one break.
                     // We want to average 2 airs per day, 4 if end date is set, for tracks with no spin limit.
-                    chance = v ? (total > 0 ? 1 / (total / 4) : 0) : (total > 0 ? 1 / (total / 2) : 0)
+                    chance = v ? (total > 0 ? 1 / (total / 8) : 0) : (total > 0 ? 1 / (total / 4) : 0)
 
                     sails.log.debug(`Underwriting ${underwriting.ID}: Initial chance is ${chance}.`)
 
