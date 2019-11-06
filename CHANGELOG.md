@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Calendar column isDescriptionCustom, meant to be set to true when calendar/change-topic-web is called for that record. When true, calendar Sync will not update Google Calendar description changes for that record; it will keep the custom set one.
  - Attendance column "tuneIns" which holds the number of times someone tuned in to the radio stream during the show. This stat is also added to DJ analytics.
  - Attendance column "webMessages" which holds the number of web messages sent to or received from web/mobile users. This stat is also added to DJ analytics.
+ - DJ.login will now be returned for djs/get and DJ websockets. However, it will only be a boolean, true if a password was set for the DJ.
 
 ### Changed
  - Meta.queueFinish time will now include music tracks / openers when starting a broadcast to avoid confusion on the DJ Controls queue countdown. State will still switch to "*_on" after noMeta tracks have been played to trigger the recorder in DJ Controls.

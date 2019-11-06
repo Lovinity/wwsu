@@ -23,9 +23,9 @@ module.exports = {
         // Grab DJs
         var records = await sails.models.djs.find()
 
-        // Remove login information from the returned records
-        records = records.map(record => {
-          delete record.login
+        // Return only true or false for login if a login was set for the DJ
+        records = records.map((record, index) => {
+          records[index].login = records[index].login === null ? false : true
           return record
         })
 
@@ -49,6 +49,9 @@ module.exports = {
 
         if (!record || record === null) { return exits.success({}) }
 
+        record.login = record.login === null ? false : true
+
+        returnData.DJ = record
         returnData.XP = await sails.models.xp.find({ dj: inputs.dj })
         returnData.attendance = await sails.models.attendance.find({ dj: inputs.dj })
         returnData.stats = await sails.helpers.analytics.showtime(inputs.dj)
