@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
  - djs/get-web for the DJ Web panel.
- - Meta.showCountdown (boolean); display signs should use this to determine whether or not to display a countdown to when someone goes live (if showCountdown is true).
+ - Meta.countdown; display signs should use this to count down to when a show goes live, if an ISO timestamp is provided (null means do not count down to anything).
  - Meta.queueCalculating (boolean); if true, Meta.queueFinish should be considered inaccurate.
  - "originalStart" and "originalEnd" columns for Calendar; these contain the original start and end times for events for comparison when times are changed.
  - "delaySystem" option to Hosts (can only be set to one host). Used to specify which host is responsible for / connected to the delay system.

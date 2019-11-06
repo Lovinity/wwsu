@@ -274,10 +274,13 @@ module.exports = {
         return moment(value).isValid()
       }
     },
-    showCountdown: {
-      type: 'boolean',
-      defaultsTo: false,
-      description: 'If true, display signs should count down to when the DJ/host goes live.'
+    countdown: {
+      type: 'string',
+      allowNull: true,
+      description: 'An ISO timestamp which to count down on the display signs for shows.',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
     },
     queueMusic: {
       type: 'boolean',
