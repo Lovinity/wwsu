@@ -48,7 +48,7 @@ module.exports = {
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after)
 
         // Queue a sports liner
-        if (typeof sails.config.custom.sportscats[sails.models.meta.memory.show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta.memory.show]['Sports Liners']], 'Bottom', 1) }
+        if (typeof sails.config.custom.sportscats[ sails.models.meta.memory.show ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.sportscats[ sails.models.meta.memory.show ][ 'Sports Liners' ] ], 'Bottom', 1) }
 
         var queueLength = await sails.helpers.songs.calculateQueueLength()
 
@@ -79,10 +79,10 @@ module.exports = {
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.after)
 
             // Queue a show return if there is one
-            if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') {
-              await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Returns']], 'Bottom', 1)
+            if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') {
+              await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Returns' ] ], 'Bottom', 1)
             } else {
-              await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Returns']], 'Bottom', 1)
+              await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Returns' ] ], 'Bottom', 1)
             }
 
             await sails.helpers.meta.change.with({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning' })
@@ -90,6 +90,8 @@ module.exports = {
           case 'sports_break':
             // Queue after break
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after)
+            // Queue a sports liner
+            if (typeof sails.config.custom.sportscats[ sails.models.meta.memory.show ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.sportscats[ sails.models.meta.memory.show ][ 'Sports Liners' ] ], 'Bottom', 1) }
 
             queueLength = await sails.helpers.songs.calculateQueueLength()
 
@@ -109,10 +111,10 @@ module.exports = {
             // Queue after break
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.after)
             // Queue a show return if there is one
-            if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') {
-              await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Returns']], 'Bottom', 1)
+            if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') {
+              await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Returns' ] ], 'Bottom', 1)
             } else {
-              await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Returns']], 'Bottom', 1)
+              await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Returns' ] ], 'Bottom', 1)
             }
             await sails.helpers.meta.change.with({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'remote_returning' })
             break
@@ -120,6 +122,9 @@ module.exports = {
           case 'sportsremote_break_disconnected':
             // Queue after break
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after)
+            // Queue a sports liner
+            if (typeof sails.config.custom.sportscats[ sails.models.meta.memory.show ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.sportscats[ sails.models.meta.memory.show ][ 'Sports Liners' ] ], 'Bottom', 1) }
+
             queueLength = await sails.helpers.songs.calculateQueueLength()
 
             if (queueLength >= sails.config.custom.queueCorrection.sportsReturn) {
