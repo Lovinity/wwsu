@@ -314,8 +314,10 @@ module.exports.bootstrap = async function (done) {
                 // If not an accurate queue count, use previous queue - 1 instead
               } else {
                 queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
+                countDown = (sails.models.status.errorCheck.prevCountdown - 1)
               }
               if (queueLength < 0) { queueLength = 0 }
+              if (countDown < 0) { countDown = 0 }
             } else { // No error wait time [remaining]? Use actual detected queue time.
             }
           } else {
@@ -323,7 +325,9 @@ module.exports.bootstrap = async function (done) {
             change.queueCalculating = true
             // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
             queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
+            countDown = (sails.models.status.errorCheck.prevCountdown - 1)
             if (queueLength < 0) { queueLength = 0 }
+            if (countDown < 0) { countDown = 0 }
           }
 
           // Enable assisted if we are in a live show and just finished playing stuff in the queue
@@ -332,6 +336,7 @@ module.exports.bootstrap = async function (done) {
           }
 
           sails.models.status.errorCheck.prevQueueLength = queueLength
+          sails.models.status.errorCheck.prevCountdown = countDown
 
           // When on queue to go live or return from break, search for the position of the last noMeta track
           var breakQueueLength = -2
