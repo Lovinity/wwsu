@@ -826,7 +826,7 @@ module.exports.bootstrap = async function (done) {
 
         // Process countdown
         if (countDown > 0) {
-          change.countDown = moment().add(countdown, 'seconds').toISOString(true)
+          change.countdown = moment().add(countDown, 'seconds').toISOString(true)
         } else {
           change.countdown = null
         }
