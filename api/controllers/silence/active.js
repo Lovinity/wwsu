@@ -47,7 +47,7 @@ module.exports = {
           .filter((instance) => instance.rest === sails.models.meta.memory.radiodj)
           .map(async (instance) => {
             var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
-            if (status && status.status !== 1) { await sails.helpers.status.change({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.` }) }
+            if (status && status.status !== 1) { await sails.helpers.status.change.with({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 2, data: `Silence detection triggered multiple times. This RadioDJ might not be outputting audio.` }) }
             return true
           })
         await Promise.all(maps)
