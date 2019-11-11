@@ -611,10 +611,12 @@ module.exports = {
             })
             .fetch()
           // Remove one-time calendar subscriptions of calendar events that were destroyed
+          // Also remove clockwheels
           if (destruction.length > 0) {
             destruction.map((record) => {
               (async (recordB) => {
                 await sails.models.subscribers.destroy({ type: 'calendar-once', subtype: recordB.unique }).fetch()
+                await sails.models.clockwheels.destroy({ calendarID: recordB.ID }).fetch()
               })(record)
             })
           }
