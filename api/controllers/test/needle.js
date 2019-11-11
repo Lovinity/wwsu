@@ -17,10 +17,8 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     try {
-      needle('get', inputs.url, {}, { headers: { 'Content-Type': 'application/json' } })
-        .then(async (resp) => {
-          return exits.success(resp.body)
-        })
+      var resp = await needle('get', inputs.url, {}, { headers: { 'Content-Type': 'application/json' } });
+      return exits.success(resp.body);
     } catch (e) {
       return exits.error(e)
     }
