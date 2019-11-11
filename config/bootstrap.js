@@ -240,6 +240,7 @@ module.exports.bootstrap = async function (done) {
         }
       }
 
+
       try {
         // Try to get the current RadioDJ queue.
         var queue = await sails.helpers.rest.getQueue()
@@ -249,6 +250,25 @@ module.exports.bootstrap = async function (done) {
           var theTracks = []
           change.trackID = parseInt(queue[ 0 ].ID)
           change.trackIDSubcat = parseInt(queue[ 0 ].IDSubcat) || 0
+
+          var breakQueueLength = -2
+          var firstNoMeta = 0
+          change.queueMusic = false
+
+          if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
+            breakQueueLength = -1
+            firstNoMeta = -1
+            queue.forEach((track, index) => {
+              if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1) {
+                if (firstNoMeta > -1 && breakQueueLength < 0) {
+                  breakQueueLength = index
+                  change.queueMusic = true
+                }
+              } else if (firstNoMeta < 0) {
+                firstNoMeta = index
+              }
+            })
+          }
 
           // Determine if something is currently playing via whether or not track 0 has ID of 0.
           if (parseInt(queue[ 0 ].ID) === 0) {
@@ -339,22 +359,7 @@ module.exports.bootstrap = async function (done) {
           sails.models.status.errorCheck.prevCountdown = countDown
 
           // When on queue to go live or return from break, search for the position of the last noMeta track
-          var breakQueueLength = -2
-          var firstNoMeta = 0
-          change.queueMusic = false
           if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
-            breakQueueLength = -1
-            firstNoMeta = -1
-            queue.forEach((track, index) => {
-              if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1) {
-                if (firstNoMeta > -1 && breakQueueLength < 0) {
-                  breakQueueLength = index
-                  change.queueMusic = true
-                }
-              } else if (firstNoMeta < 0) {
-                firstNoMeta = index
-              }
-            })
             if (firstNoMeta < 0 && breakQueueLength < 0 && sails.models.status.errorCheck.trueZero <= 0) {
               if (sails.models.meta.memory.state === 'automation_live') {
                 await sails.helpers.meta.change.with({ state: 'live_on' })
