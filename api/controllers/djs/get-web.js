@@ -22,6 +22,12 @@ module.exports = {
       returnData.cancellations = await sails.models.attendance.find({ dj: this.req.payload.ID, happened: -1, scheduledEnd: { '>=': moment().toISOString(true) } })
       returnData.calendar = await sails.models.calendar.find({ or: [ { title: { 'startsWith': `Show: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Remote: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Prerecord: ${this.req.payload.name} - ` } } ] }).sort('start ASC')
 
+      var eventIDs = []
+
+      events.map((event) => eventIDs.push(event.ID))
+
+      returnData.clockwheels = await sails.models.clockwheels.find({ calendarID: eventIDs })
+
       return exits.success(returnData)
     } catch (e) {
       return exits.error(e)
