@@ -235,17 +235,17 @@ module.exports = {
           }
 
           // Do stuff if changing queueFinish and trackFinish
-          if (key === 'queueFinish' || key === 'trackFinish') {
+          if (key === 'queueFinish' || key === 'trackFinish' || key === 'countdown') {
             // Set to null if nothing is playing
             if ((typeof inputs.playing !== 'undefined' && !inputs.playing) || !sails.models.meta.memory.playing) { inputs[key] = null }
 
-            // Do not update queueFinish nor trackFinish if null has not changed
+            // Do not update if null has not changed
             if (inputs[key] === null && sails.models.meta.memory[key] === null) { continue }
 
-            // Do not update queueFinish nor trackFinish if time difference is less than 1 second of what we have in memory.
+            // Do not update if time difference is less than 1 second of what we have in memory.
             if (inputs[key] !== null && (moment(sails.models.meta.memory[key]).diff(inputs[key]) < 1000 && moment(sails.models.meta.memory[key]).diff(inputs[key]) > -1000)) { continue }
 
-            // If we are updating trackFinish or queueFinish, also include current time in update so clients are properly synced.
+            // If we are updating, also include current time in update so clients are properly synced.
             inputs.time = moment().toISOString(true)
             sails.models.meta.memory.time = inputs.time
             push.time = inputs.time
