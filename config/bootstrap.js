@@ -428,6 +428,15 @@ module.exports.bootstrap = async function (done) {
             sails.log.error(e)
             return resolve(e)
           }
+
+          // Do automation system error checking and handling
+          if (queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+            await sails.helpers.error.count('frozen')
+          } else {
+            sails.models.status.errorCheck.prevDuration = queue[ 0 ].Duration
+            sails.models.status.errorCheck.prevElapsed = queue[ 0 ].Elapsed
+            await sails.helpers.error.reset('frozen')
+          }
         }
 
         // Error checks
@@ -706,15 +715,6 @@ module.exports.bootstrap = async function (done) {
             }
 
             await sails.helpers.onesignal.sendMass('accountability-shows', 'Broadcast did not do Top-of-hour ID!', `${sails.models.meta.memory.show} failed to take a required Top of the Hour ID break. This is an FCC violation.`)
-          }
-
-          // Do automation system error checking and handling
-          if (queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
-            await sails.helpers.error.count('frozen')
-          } else {
-            sails.models.status.errorCheck.prevDuration = queue[ 0 ].Duration
-            sails.models.status.errorCheck.prevElapsed = queue[ 0 ].Elapsed
-            await sails.helpers.error.reset('frozen')
           }
 
           // Manage breaks intelligently using track queue length. This gets complicated, so comments explain the process.
