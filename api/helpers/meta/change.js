@@ -202,14 +202,14 @@ module.exports = {
       for (var key in inputs) {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
           // Exit if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value
-          if (typeof sails.models.meta.memory[key] === 'undefined' || sails.models.meta.memory[key] === inputs[key]) {
+          if (typeof sails.models.meta.memory[ key ] === 'undefined' || sails.models.meta.memory[ key ] === inputs[ key ]) {
             continue
           }
 
           // Do stuff if we are changing states, mainly with regards to genres, playlists, and prerecords.
           if (key === 'state') {
             // Enable webchat automatically when going into automation state
-            if (inputs[key] === 'automation_on' || inputs[key] === 'automation_genre' || inputs[key] === 'automation_playlist' || inputs[key] === 'automation_prerecord') { push2.webchat = true }
+            if (inputs[ key ] === 'automation_on' || inputs[ key ] === 'automation_genre' || inputs[ key ] === 'automation_playlist' || inputs[ key ] === 'automation_prerecord') { push2.webchat = true }
           }
 
           if (key === 'listeners' && inputs.listeners > sails.models.meta.memory.listenerPeak) {
@@ -220,8 +220,8 @@ module.exports = {
           // show key
           if (key === 'show') {
             // If show key includes " - ", this means the value before the - is a DJ. Get the DJ ID and update meta with it. Otherwise, set it to null.
-            if (inputs[key] !== null && inputs[key].includes(' - ')) {
-              var tmp = inputs[key].split(' - ')[0]
+            if (inputs[ key ] !== null && inputs[ key ].includes(' - ')) {
+              var tmp = inputs[ key ].split(' - ')[ 0 ]
               var dj = await sails.models.djs.findOrCreate({ name: tmp }, { name: tmp, lastSeen: moment().toISOString(true) })
 
               // Update lastSeen record for the DJ
@@ -237,13 +237,13 @@ module.exports = {
           // Do stuff if changing queueFinish and trackFinish
           if (key === 'queueFinish' || key === 'trackFinish' || key === 'countdown') {
             // Set to null if nothing is playing
-            if ((typeof inputs.playing !== 'undefined' && !inputs.playing) || !sails.models.meta.memory.playing) { inputs[key] = null }
+            if ((typeof inputs.playing !== 'undefined' && !inputs.playing) || !sails.models.meta.memory.playing) { inputs[ key ] = null }
 
             // Do not update if null has not changed
-            if (inputs[key] === null && sails.models.meta.memory[key] === null) { continue }
+            if (inputs[ key ] === null && sails.models.meta.memory[ key ] === null) { continue }
 
             // Do not update if time difference is less than 1 second of what we have in memory.
-            if (inputs[key] !== null && (moment(sails.models.meta.memory[key]).diff(inputs[key]) < 1000 && moment(sails.models.meta.memory[key]).diff(inputs[key]) > -1000)) { continue }
+            if (inputs[ key ] !== null && (moment(sails.models.meta.memory[ key ]).diff(inputs[ key ]) < 1000 && moment(sails.models.meta.memory[ key ]).diff(inputs[ key ]) > -1000)) { continue }
 
             // If we are updating, also include current time in update so clients are properly synced.
             inputs.time = moment().toISOString(true)
@@ -252,8 +252,8 @@ module.exports = {
           }
 
           // Update meta in memory
-          sails.models.meta.memory[key] = inputs[key]
-          push[key] = inputs[key]
+          sails.models.meta.memory[ key ] = inputs[ key ]
+          push[ key ] = inputs[ key ]
         }
       }
 
@@ -270,11 +270,11 @@ module.exports = {
               var requested = await sails.models.requests.update({ songID: sails.models.meta.memory.trackID, played: 0 }, { played: 1 }).fetch()
                 .tolerate(() => {
                 })
-              delete sails.models.requests.pending[sails.models.requests.pending.indexOf(sails.models.meta.memory.trackID)]
-              if (requested && typeof requested[0] !== 'undefined') {
+              delete sails.models.requests.pending[ sails.models.requests.pending.indexOf(sails.models.meta.memory.trackID) ]
+              if (requested && typeof requested[ 0 ] !== 'undefined') {
                 push2.requested = true
-                push2.requestedBy = (requested[0].username === '') ? 'Anonymous' : requested[0].username
-                push2.requestedMessage = requested[0].message
+                push2.requestedBy = (requested[ 0 ].username === '') ? 'Anonymous' : requested[ 0 ].username
+                push2.requestedMessage = requested[ 0 ].message
               }
 
               // If we are finished playing requests, clear request meta
@@ -450,27 +450,12 @@ module.exports = {
             push2.line1 = `${sails.config.custom.meta.prefix.sports}${sails.models.meta.memory.show}`
             push2.line2 = ``
             push2.stream = `WWSU 106.9FM - ${sails.models.meta.memory.show} (LIVE)`
-
-            // Regular automation (should never happen; this is an error!)
-          } else if (sails.models.meta.memory.state.startsWith('automation_') && sails.models.meta.memory.state !== 'automation_playlist' && sails.models.meta.memory.state !== 'automation_genre') {
-            push2.line1 = ``
-            push2.line2 = ``
-
-            // Playlists (should never happen; this is an error!)
-          } else if (sails.models.meta.memory.state === 'automation_playlist') {
-            push2.line1 = ``
-            push2.line2 = `${sails.config.custom.meta.prefix.playlist}${sails.models.meta.memory.playlist}`
-
-            // Genre automation (should never happen; this is an error!)
-          } else if (sails.models.meta.memory.state === 'automation_genre') {
-            push2.line1 = ``
-            push2.line2 = `${sails.config.custom.meta.prefix.genre}${sails.models.meta.memory.genre}`
           }
         }
 
         // Now, push notifications if this is a track request
-        if (push2.requested && typeof requested[0] !== `undefined`) {
-          var subscriptions = await sails.models.subscribers.destroy({ type: `request`, subtype: requested[0].ID }).fetch()
+        if (push2.requested && typeof requested[ 0 ] !== `undefined`) {
+          var subscriptions = await sails.models.subscribers.destroy({ type: `request`, subtype: requested[ 0 ].ID }).fetch()
           var devices = []
           subscriptions.map((subscription) => devices.push(subscription.device))
           if (devices.length > 0) { await sails.helpers.onesignal.send(devices, `request`, `Your Request is Playing!`, await sails.helpers.filterProfane(`${sails.models.meta.memory.trackArtist} - ${sails.models.meta.memory.trackTitle}`) + ` is now playing on WWSU!`, (60 * 15)) }
@@ -479,9 +464,9 @@ module.exports = {
 
       // Cycle through all push2's and update metadata
       for (var key2 in push2) {
-        if (Object.prototype.hasOwnProperty.call(push2, key2) && push2[key2] !== sails.models.meta.memory[key2]) {
-          push[key2] = push2[key2]
-          sails.models.meta.memory[key2] = push2[key2]
+        if (Object.prototype.hasOwnProperty.call(push2, key2) && push2[ key2 ] !== sails.models.meta.memory[ key2 ]) {
+          push[ key2 ] = push2[ key2 ]
+          sails.models.meta.memory[ key2 ] = push2[ key2 ]
         }
       }
 
@@ -490,14 +475,14 @@ module.exports = {
       for (var key3 in push) {
         if (Object.prototype.hasOwnProperty.call(push, key3)) {
           try {
-            if (key3 in sails.models.meta.attributes) { db[key3] = push[key3] }
+            if (key3 in sails.models.meta.attributes) { db[ key3 ] = push[ key3 ] }
           } catch (e) {
             return exits.error(e)
           }
 
           // If we're changing stream meta, push to history array, and send an API call to the stream to update the meta on the stream.
           if (key3 === 'stream') {
-            sails.models.meta.history.unshift(push[key3])
+            sails.models.meta.history.unshift(push[ key3 ])
             sails.models.meta.history = sails.models.meta.history.slice(0, 5)
             // TODO: Put stream metadata updating API query here
           }
