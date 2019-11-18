@@ -24,7 +24,7 @@ module.exports = {
 
       var eventIDs = []
 
-      events.map((event) => eventIDs.push(event.ID))
+      if (returnData.calendar.length > 0) { returnData.calendar.map((event) => eventIDs.push(event.ID)) }
 
       returnData.clockwheels = await sails.models.clockwheels.find({ calendarID: eventIDs })
 
