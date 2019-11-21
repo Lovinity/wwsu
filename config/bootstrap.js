@@ -430,7 +430,7 @@ module.exports.bootstrap = async function (done) {
           }
 
           // Do automation system error checking and handling
-          if (queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+          if (((queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed) || queue.length < 1) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
             await sails.helpers.error.count('frozen')
           } else {
             sails.models.status.errorCheck.prevDuration = queue[ 0 ].Duration
@@ -817,11 +817,6 @@ module.exports.bootstrap = async function (done) {
                 }
               }
             }
-          }
-        } else {
-          // We have no queue... which should never happen because RadioDJ always returns a dummy track in position 0. This is an error.
-          if (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_')) {
-            await sails.helpers.error.count('frozen')
           }
         }
 
