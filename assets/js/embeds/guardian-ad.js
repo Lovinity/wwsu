@@ -62,7 +62,6 @@ waitFor(() => {
                     Meta[ key ] = data[ key ]
                 }
             }
-            doMeta(data)
         } catch (e) {
             console.error(e)
         }
