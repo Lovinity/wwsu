@@ -50,6 +50,7 @@ module.exports.policies = {
   'eas/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'eas/get': 'isBanned',
   'embeds/guardian': 'isBanned',
+  'embeds/guardian-ad': 'isBanned',
   'hosts/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'hosts/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
   listen: true,
