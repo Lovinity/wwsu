@@ -150,7 +150,7 @@ module.exports = {
                 if (underwriting.mode.schedule.schedules !== null) {
                 var schedule = later.schedule(underwriting.mode.schedule)
                 var start = moment(song.date_played).toISOString(false)
-                var next = moment(schedule.next(1, start)).toISOString(false)
+                var next = moment(schedule.next(1, start)).toISOString(true)
                 } else {
                   var schedule = null
                   var start = null
@@ -159,7 +159,7 @@ module.exports = {
                 if (underwriting.mode.scheduleForced.schedules !== null) {
                 var scheduleF = later.schedule(underwriting.mode.scheduleForced)
                 var startF = moment(song.date_played).toISOString(false)
-                var nextF = moment(scheduleF.next(1, startF)).toISOString(false)
+                var nextF = moment(scheduleF.next(1, startF)).toISOString(true)
                 } else {
                   var scheduleF = null
                   var startF = null
