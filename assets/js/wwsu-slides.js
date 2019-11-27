@@ -439,8 +439,9 @@ Slides = (() => {
         }
 
         function scalePages (page, maxWidth, maxHeight) {
-          page.attr('width', `${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
-          console.log(`Page width: ${(($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)}%`)
+          var width = (($(`#content-slide-${activeSlide().name}`).height() / maxHeight) * 80)
+          page.attr('width', `${width}%`)
+          console.log(`Page width: ${width}%`)
           var scaleX = 1; var scaleY = 1
           scaleX = (maxWidth / $(`#content-slide-${activeSlide().name}`).width()) * 0.95
           scaleY = (maxHeight / $(`#content-slide-${activeSlide().name}`).height()) * 0.95
@@ -457,6 +458,11 @@ Slides = (() => {
           $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(' + basePage.scale + ');left:' + newLeftPos + 'px;top:0px;')
         }
       })
+      // Failsafe for fitContent. When it's false, we should always have 1 scale and 100% width.
+    } else {
+      var $page = $(`#slide-${activeSlide().name}`)
+      $page.attr('width', `100%`)
+      $(`#content-slide-${activeSlide().name}`).attr('style', '-webkit-transform:scale(1);left:0px;top:0px;')
     }
   }
 
