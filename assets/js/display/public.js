@@ -238,7 +238,7 @@ try {
     fnStart: (slide) => {
       if (calendar.length > 0) {
         calendar
-          .filter((event) => event.name === Meta.show && event.active > 0)
+          .filter((event) => event.unique === Meta.calendarUnique && event.active > 0)
           .map((event) => {
             var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
@@ -250,7 +250,7 @@ try {
     fnEnd: (slide) => {
       if (calendar.length > 0) {
         calendar
-          .filter((event) => event.name === Meta.show && event.active > 0)
+          .filter((event) => event.unique === Meta.calendarUnique && event.active > 0)
           .map((event) => {
             var temp1 = document.querySelector(`#${event.ID}`)
             if (temp1 !== null) {
