@@ -151,7 +151,7 @@ module.exports = {
                   var schedule = later.schedule(underwriting.mode.schedule)
                   var start = moment(song.date_played).toISOString(false)
                   returnData.underwritings[ index ].start = start
-                  var next = moment(schedule.next(1, start)).toISOString(false)
+                  var next = moment(schedule.next(1, start)).toISOString(true)
                   returnData.underwritings[ index ].next = schedule.next(1, start)
                 } else {
                   var schedule = null
@@ -162,7 +162,7 @@ module.exports = {
                   var scheduleF = later.schedule(underwriting.mode.scheduleForced)
                   var startF = moment(song.date_played).toISOString(false)
                   returnData.underwritings[ index ].startF = startF
-                  var nextF = moment(scheduleF.next(1, startF)).toISOString(false)
+                  var nextF = moment(scheduleF.next(1, startF)).toISOString(true)
                   returnData.underwritings[ index ].nextF = scheduleF.next(1, startF)
                 } else {
                   var scheduleF = null
