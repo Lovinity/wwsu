@@ -89,9 +89,11 @@ class CalendarDb {
             var criteria = {
                 calendarID: calendar.ID,
                 exceptionType: exception.exceptionType || null,
+                overrideCalendarID: exception.overrideCalendarID || null,
                 exceptionReason: exception.exceptionReason || null,
                 exceptionTime: exception.exceptionTime || null,
                 type: exception.type !== null ? exception.type : calendar.type,
+                active: calendar.active,
                 hostDJ: exception.hostDJ !== null ? exception.hostDJ : calendar.hostDJ,
                 cohostDJ1: exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1,
                 cohostDJ2: exception.cohostDJ2 !== null ? exception.cohostDJ2 : calendar.cohostDJ2,
