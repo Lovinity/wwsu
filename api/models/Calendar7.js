@@ -16,13 +16,18 @@ module.exports = {
 
         type: {
             type: 'string',
-            isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking' ],
+            isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking', 'office-hours' ],
             defaultsTo: 'event'
         },
 
         active: {
             type: 'boolean',
             defaultsTo: true,
+        },
+
+        priority: {
+            type: 'number',
+            allowNull: true,
         },
 
         hostDJ: {
@@ -50,15 +55,18 @@ module.exports = {
         },
 
         description: {
-            type: 'string'
+            type: 'string',
+            allowNull: true
         },
 
         logo: {
-            type: 'string'
+            type: 'string',
+            allowNull: true
         },
 
         banner: {
-            type: 'string'
+            type: 'string',
+            allowNull: true
         },
 
         start: {

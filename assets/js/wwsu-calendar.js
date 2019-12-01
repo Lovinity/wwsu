@@ -1,4 +1,17 @@
-/* global moment, later, WWSUdb, TAFFY, iziToast, $ */
+/* global moment, later, WWSUdb, TAFFY, iziToast */
+
+// Require libraries if necessary
+if (!TAFFY) {
+    require('./taffy-min.js');
+}
+
+if (!later) {
+    require('./later-min.js');
+}
+
+if (!WWSUdb) {
+    require('./wwsu.js');
+}
 
 later.date.localTime()
 
@@ -39,10 +52,12 @@ class CalendarDb {
             }
         } catch (e) {
             console.error(e)
-            iziToast.show({
-                title: 'An error occurred - Please check the logs',
-                message: 'Error occurred during the processCalendar function in class CalendarDb.'
-            })
+            if (iziToast) {
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: 'Error occurred during the processCalendar function in class CalendarDb.'
+                })
+            }
         }
     }
 
@@ -72,10 +87,12 @@ class CalendarDb {
             }
         } catch (e) {
             console.error(e)
-            iziToast.show({
-                title: 'An error occurred - Please check the logs',
-                message: 'Error occurred during the processExceptions function in class CalendarDb.'
-            })
+            if (iziToast) {
+                iziToast.show({
+                    title: 'An error occurred - Please check the logs',
+                    message: 'Error occurred during the processExceptions function in class CalendarDb.'
+                })
+            }
         }
     }
 
@@ -93,6 +110,7 @@ class CalendarDb {
                 exceptionReason: exception.exceptionReason || null,
                 exceptionTime: exception.exceptionTime || null,
                 type: exception.type !== null ? exception.type : calendar.type,
+                priority: exception.priority !== null ? exception.priority : (calendar.priority !== null ? calendar.priority : this.getDefaultPriority(calendar)),
                 active: calendar.active,
                 hostDJ: exception.hostDJ !== null ? exception.hostDJ : calendar.hostDJ,
                 cohostDJ1: exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1,
@@ -195,5 +213,60 @@ class CalendarDb {
             }
         })
         return events;
+    }
+
+    whatShouldBePlaying (automationOnly = false) {
+        var events = this.getEvents();
+        if (events.length > 0) {
+            var compare = function (a, b) {
+                try {
+                    if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
+                    if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
+                    if (a.ID < b.ID) { return -1 }
+                    if (a.ID > b.ID) { return 1 }
+                    return 0
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+            events = events.sort(compare);
+
+            var returnData
+            events = events
+                .filter((event) => {
+                    if (automationOnly) {
+                        return (event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end)) && event.active;
+                    } else {
+                        // Allow 5 minutes early for non-automation shows. TODO: Configure this threshold.
+                        return ((event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start))) || ((event.type === 'show' || event.type === 'sports' || event.type === 'remote') && moment().add(5, 'minutes').isSameOrAfter(moment(event.start))) && moment().add(5, 'minutes').isBefore(moment(event.end)) && event.active;
+                    }
+                })
+                .map((event) => {
+                    if (event.priority > 0 && (!returnData || returnData.priority < event.priority))
+                        returnData = event;
+                });
+
+            return returnData;
+        }
+    }
+
+    // TODO: Make this configurable in the server and set it in the class constructor.
+    getDefaultPriority (event) {
+        switch (event.type) {
+            case 'show':
+                return 5;
+            case 'sports':
+                return 10;
+            case 'remote':
+                return 7;
+            case 'prerecord':
+                return 3;
+            case 'genre':
+                return 1;
+            case 'playlist':
+                return 2;
+            default:
+                return 0;
+        }
     }
 }

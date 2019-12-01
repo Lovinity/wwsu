@@ -42,8 +42,13 @@ module.exports = {
 
         type: {
             type: 'string',
-            isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking' ],
+            isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking', 'office-hours' ],
             allowNull: true,
+        },
+
+        priority: {
+            type: 'number',
+            allowNull: true
         },
 
         hostDJ: {
