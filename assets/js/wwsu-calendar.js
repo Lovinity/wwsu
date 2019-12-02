@@ -6,7 +6,11 @@ if (!TAFFY) {
 }
 
 if (!later) {
-    require('./later-min.js');
+    require('./later.min.js');
+}
+
+if (!moment) {
+    require('./moment.min.js');
 }
 
 later.date.localTime()
@@ -101,38 +105,45 @@ class CalendarDb {
             var criteria = {
                 calendarID: calendar.ID,
                 exceptionType: exception.exceptionType || null,
-                overrideCalendarID: exception.overrideCalendarID || null,
+                overrideCalendarID: exception.calendarID || null,
                 exceptionReason: exception.exceptionReason || null,
                 exceptionTime: exception.exceptionTime || null,
-                type: exception.type !== null ? exception.type : calendar.type,
-                priority: exception.priority !== null ? exception.priority : (calendar.priority !== null ? calendar.priority : this.getDefaultPriority(calendar)),
+                type: exception.type && exception.type !== null ? exception.type : calendar.type,
+                priority: exception.priority && exception.priority !== null ? exception.priority : (calendar.priority !== null ? calendar.priority : this.getDefaultPriority(calendar)),
                 active: calendar.active,
-                hostDJ: exception.hostDJ !== null ? exception.hostDJ : calendar.hostDJ,
-                cohostDJ1: exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1,
-                cohostDJ2: exception.cohostDJ2 !== null ? exception.cohostDJ2 : calendar.cohostDJ2,
-                cohostDJ3: exception.cohostDJ3 !== null ? exception.cohostDJ3 : calendar.cohostDJ3,
-                name: exception.name !== null ? exception.name : calendar.name,
-                description: exception.description !== null ? exception.description : calendar.description,
-                logo: exception.logo !== null ? exception.logo : calendar.logo,
-                banner: exception.banner !== null ? exception.banner : calendar.banner,
-                start: exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true),
+                hostDJ: exception.hostDJ && exception.hostDJ !== null ? exception.hostDJ : calendar.hostDJ,
+                cohostDJ1: exception.cohostDJ1 && exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1,
+                cohostDJ2: exception.cohostDJ2 && exception.cohostDJ2 !== null ? exception.cohostDJ2 : calendar.cohostDJ2,
+                cohostDJ3: exception.cohostDJ3 && exception.cohostDJ3 !== null ? exception.cohostDJ3 : calendar.cohostDJ3,
+                name: exception.name && exception.name !== null ? exception.name : calendar.name,
+                description: exception.description && exception.description !== null ? exception.description : calendar.description,
+                logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo,
+                banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner,
+                start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true),
             }
 
             // Calculate end time after forming the object because we must refer to criteria.start
-            criteria.end = exception.duration !== null ? moment(criteria.start).add(exception.duration, 'minutes') : moment(criteria.start).add(calendar.duration, 'minutes');
+            criteria.end = exception.duration && exception.duration !== null ? moment(criteria.start).add(exception.duration, 'minutes').toISOString(true) : moment(criteria.start).add(calendar.duration, 'minutes').toISOString(true);
 
             // This event is within our time range if one or more of the following is true:
-            // A. The event end time is between start and end.
-            // B. The event start time is between start and end.
-            // C. The event start time is before start, and the event end time is after end.
-            if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.end).isSameOrBefore(moment(end))) || (moment(criteria.start).isSameOrAfter(start) && moment(criteria.start).isBefore(end)) || (moment(criteria.start).isBefore(start) && moment(criteria.end).isAfter(end))) {
-                events.push(criteria);
+            // A. Calendar event start is same or before generated event start.
+            // B. Calendar event end is same or after generated event start.
+            // C. The event end time is between start and end.
+            // D. The event start time is between start and end.
+            // E. The event start time is before start, and the event end time is after end.
+            if ((calendar.start !== null && moment(calendar.start).isAfter(moment(criteria.start))) || (calendar.end !== null && moment(calendar.end).isBefore(moment(criteria.start)))) {
+
+            } else {
+                if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.end).isSameOrBefore(moment(end))) || (moment(criteria.start).isSameOrAfter(start) && moment(criteria.start).isBefore(end)) || (moment(criteria.start).isBefore(start) && moment(criteria.end).isAfter(end))) {
+                    events.push(criteria);
+                }
             }
         }
 
-        var results = this.calendar(query);
+        var results = this.calendar(query).get();
 
-        results.map((calendar) => {
+        results.map((calendar, index) => {
+
             var beginAt = start;
             var exceptionIDs = [];
 
@@ -153,6 +164,7 @@ class CalendarDb {
                         calendar.schedule.schedules[ index ].s = [ 0 ];
                 })
 
+
                 // Generate later schedule
                 var schedule = later.schedule(calendar.schedule);
 
@@ -160,12 +172,12 @@ class CalendarDb {
                 while (moment(beginAt).isBefore(moment(end))) {
                     var eventStart = moment(schedule.next(1, beginAt)).toISOString(true);
                     if (!eventStart || eventStart === null) break;
-                    beginAt = eventStart;
+                    beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
 
                     // Get exception if it exists
                     try {
                         var exception = this.exceptions(function () {
-                            return this.calendarID === calendarID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
+                            return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                         }).last() || {};
                         exceptionIDs.push(exception.ID);
                     } catch (e) {
@@ -177,7 +189,7 @@ class CalendarDb {
                 }
 
                 // Now, go through other exceptions which may have been ignored by baseline calendar times
-                exceptions = this.exceptions({ calendarID: calendar.ID })
+                var exceptions = this.exceptions({ calendarID: calendar.ID }).get();
                 exceptions
                     .filter((exception) => {
                         return exceptionIDs.indexOf(exception.ID) === -1 && exception.newTime !== null;
@@ -190,17 +202,18 @@ class CalendarDb {
                 // Get exception if it exists
                 try {
                     var exception = this.exceptions(function () {
-                        return this.calendarID === calendarID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
+                        return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                     }).last() || {};
                     exceptionIDs.push(exception.ID);
                 } catch (e) {
                     var exception = {};
                 }
 
+
                 processRecord(calendar, exception, calendar.schedule.oneTime);
 
                 // Now, go through other exceptions which may have been ignored by baseline calendar times
-                exceptions = this.exceptions({ calendarID: calendar.ID })
+                var exceptions = this.exceptions({ calendarID: calendar.ID }).get();
                 exceptions
                     .filter((exception) => {
                         return exceptionIDs.indexOf(exception.ID) === -1 && exception.newTime !== null;
@@ -232,6 +245,9 @@ class CalendarDb {
             var returnData
             events = events
                 .filter((event) => {
+
+                    if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system') return false;
+
                     if (automationOnly) {
                         return (event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end)) && event.active;
                     } else {
@@ -240,7 +256,7 @@ class CalendarDb {
                     }
                 })
                 .map((event) => {
-                    if (event.priority > 0 && (!returnData || returnData.priority < event.priority))
+                    if ((!returnData || returnData.priority < event.priority))
                         returnData = event;
                 });
 
@@ -251,9 +267,9 @@ class CalendarDb {
     // Check if an event will override other events or get overridden by other events.
     // This should ALWAYS be run before adding calendar or exceptions to the database, AFTER first running verify on the event object.
     checkConflicts (event) {
-        var eventPriority = event.priority !== null ? event.priority : this.getDefaultPriority(event)
+        var eventPriority = event.priority && event.priority !== null ? event.priority : this.getDefaultPriority(event)
         var error;
-        var end = event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || event.start).add(event.duration, 'minutes').toISOString(true);
+        var end = event.end && event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || (event.schedule && event.schedule.oneTime) ? event.schedule.oneTime : undefined || event.start).add(event.duration, 'minutes').toISOString(true);
 
         // No conflict check if the priority is less than 0.
         if (eventPriority < 0) return { overridden: [], overriding: [] };
@@ -264,15 +280,15 @@ class CalendarDb {
         var checkConflictingTime = (start, eventsb) => {
             var beginAt = start;
 
-            if (!eventsb.schedule.schedules[ 0 ]) return false;
+            if (!event.schedule.schedules[ 0 ]) return false;
 
-            eventsb.schedule.schedules.map((schedule, index) => {
+            event.schedule.schedules.map((schedule, index) => {
                 if (!schedule.h)
-                    eventsb.schedule.schedules[ index ].h = [ 0 ];
+                    event.schedule.schedules[ index ].h = [ 0 ];
                 if (!schedule.m)
-                    eventsb.schedule.schedules[ index ].m = [ 0 ];
+                    event.schedule.schedules[ index ].m = [ 0 ];
                 if (!schedule.s)
-                    eventsb.schedule.schedules[ index ].s = [ 0 ];
+                    event.schedule.schedules[ index ].s = [ 0 ];
             });
 
             var schedule = later.schedule(event.schedule);
@@ -280,7 +296,7 @@ class CalendarDb {
             while (moment(beginAt).isBefore(moment(end).add(1, 'days').startOf('day'))) {
                 var eventStart = moment(schedule.next(1, beginAt)).toISOString(true);
                 if (!eventStart || eventStart === null) break;
-                beginAt = eventStart;
+                beginAt = moment(eventStart).add(1, 'minutes');
 
                 var eventEnd = moment(eventStart).add(event.duration, 'minutes');
 
@@ -294,12 +310,11 @@ class CalendarDb {
             }
         }
 
-        var events = this.getEvents(moment(event.newTime || event.start).toISOString(true), event.end ? moment(event.end).toISOString(true) : moment(event.newTime || event.start).add(event.duration, 'minutes').toISOString(true), { active: true });
+        var events = this.getEvents(moment(event.newTime || event.schedule.oneTime || event.start).toISOString(true), end, { active: true });
 
         // Start with events that will get overridden by this event
         var eventsOverridden = events
             .filter((eventb) => {
-
                 // Ignore events that are already canceled or no longer active
                 if (eventb.exceptionType === 'canceled' || eventb.exceptionType === 'canceled-system') return false;
 
@@ -309,7 +324,7 @@ class CalendarDb {
                 var eventbPriority = eventb.priority !== null ? eventb.priority : this.getDefaultPriority(eventb);
                 if (eventbPriority < 0) return false;
                 if (eventPriority === 0 && eventbPriority === 0) return true;
-                if (eventbPriority > 0 && eventbPriority <= eventPriority) return true;
+                if (eventbPriority > 0 && eventbPriority < eventPriority) return true;
                 return false;
             });
 
@@ -349,7 +364,7 @@ class CalendarDb {
                 var eventbPriority = eventb.priority !== null ? eventb.priority : this.getDefaultPriority(eventb);
                 if (eventbPriority < 0) return false;
                 if (eventPriority === 0 && eventbPriority === 0) return false;
-                if (eventbPriority > 0 && eventbPriority > eventPriority) return true;
+                if (eventbPriority > 0 && eventbPriority >= eventPriority) return true;
                 return false;
             });
 
