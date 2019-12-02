@@ -21,13 +21,8 @@ module.exports = {
 
         exceptionType: {
             type: 'string',
-            isIn: ['additional','updated','canceled'],
+            isIn: ['additional','updated','canceled','updated-system','canceled-system'],
             defaultsTo: 'updated'
-        },
-
-        overrideCalendarID: {
-            type: 'number',
-            allowNull: true
         },
 
         exceptionReason: {
@@ -108,6 +103,7 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = { insert: newlyCreatedRecord }
+        sails.models.calendar7.calendardb.processExceptions(data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
         return proceed()
@@ -115,6 +111,7 @@ module.exports = {
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = { update: updatedRecord }
+        sails.models.calendar7.calendardb.processExceptions(data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
         return proceed()
@@ -122,6 +119,7 @@ module.exports = {
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = { remove: destroyedRecord.ID }
+        sails.models.calendar7.calendardb.processExceptions(data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
         return proceed()

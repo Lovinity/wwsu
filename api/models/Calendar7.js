@@ -91,25 +91,30 @@ module.exports = {
 
     },
 
+    calendardb: undefined,
+
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = { insert: newlyCreatedRecord }
+        sails.models.calendar7.calendardb.processCalendar(data);
         sails.log.silly(`calendar socket: ${data}`)
-        sails.sockets.broadcast('calendar', 'calendar', data)
+        sails.sockets.broadcast('calendar7', 'calendar7', data)
         return proceed()
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = { update: updatedRecord }
+        sails.models.calendar7.calendardb.processCalendar(data);
         sails.log.silly(`calendar socket: ${data}`)
-        sails.sockets.broadcast('calendar', 'calendar', data)
+        sails.sockets.broadcast('calendar7', 'calendar7', data)
         return proceed()
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = { remove: destroyedRecord.ID }
+        sails.models.calendar7.calendardb.processCalendar(data);
         sails.log.silly(`calendar socket: ${data}`)
-        sails.sockets.broadcast('calendar', 'calendar', data)
+        sails.sockets.broadcast('calendar7', 'calendar7', data)
         return proceed()
     }
 

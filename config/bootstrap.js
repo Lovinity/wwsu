@@ -10,38 +10,22 @@
  */
 
 module.exports.bootstrap = async function (done) {
-  var cron = require('node-cron')
-  var sh = require('shorthash')
-  const queryString = require('query-string')
-  const DarkSkyApi = require('dark-sky')
-  const cryptoRandomString = require('crypto-random-string')
-  const darksky = new DarkSkyApi(sails.config.custom.darksky.api)
-
-  // By convention, this is a good place to set up fake data during development.
-  //
-  // For example:
-  // ```
-  // // Set up fake development data (or if we already have some, avast)
-  // if (await User.count() > 0) {
-  //   return done();
-  // }
-  //
-  // await User.createEach([
-  //   { emailAddress: 'ry@example.com', fullName: 'Ryan Dahl', },
-  //   { emailAddress: 'rachael@example.com', fullName: 'Rachael Shaw', },
-  //   // etc.
-  // ]);
-  // ```
-
-  // Don't forget to trigger `done()` when this bootstrap function's logic is finished.
-  // (otherwise your server will never lift, since it's waiting on the bootstrap)
-
   // Log that the server was rebooted
   await sails.models.logs.create({ attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', event: '<strong>The Node server was rebooted.</strong>' }).fetch()
     .tolerate((err) => {
       // Don't throw errors, but log them
       sails.log.error(err)
     })
+
+  // Require CalendarDb
+  require('../assets/js/wwsu-calendar.js');
+  
+  var cron = require('node-cron')
+  var sh = require('shorthash')
+  const queryString = require('query-string')
+  const DarkSkyApi = require('dark-sky')
+  const cryptoRandomString = require('crypto-random-string')
+  const darksky = new DarkSkyApi(sails.config.custom.darksky.api)
 
   // Generate token secrets
   sails.log.verbose(`BOOTSTRAP: generating token secrets`)
@@ -55,6 +39,9 @@ module.exports.bootstrap = async function (done) {
 
   // Load darksky
   await sails.models.darksky.findOrCreate({ ID: 1 }, { ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {} })
+
+  // Load calendardb
+  sails.models.calendar7.calendardb = new CalendarDb(await sails.models.calendar7.find(), await sails.models.calendarexceptions.find());
 
   // Load blank sails.models.meta template
   sails.log.verbose(`BOOTSTRAP: Generating sails.models.meta.memory`)
@@ -1446,6 +1433,21 @@ module.exports.bootstrap = async function (done) {
       } catch (e) {
         sails.log.error(e)
         return reject(e)
+      }
+    })
+  })
+
+  // Every day at 11:59:52pm, re-load calendardb cache in case it gets out of sync with the database.
+  sails.log.verbose('BOOTSTRAP: scheduling calendardbCacheSync CRON.')
+  cron.schedule('52 59 23 * * *', () => {
+    return new Promise(async (resolve, reject) => {
+      sails.log.debug('CRON calendardbCacheSync called')
+      try {
+      sails.models.calendar7.calendardb.processCalendar(await sails.models.calendar7.find(), true)
+      sails.models.calendar7.calendardb.processExceptions(await sails.models.calendarexceptions.find(), true);
+      } catch (e) {
+        sails.log.error(e);
+        return reject(e);
       }
     })
   })
