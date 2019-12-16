@@ -105,7 +105,7 @@ class CalendarDb {
             var criteria = {
                 calendarID: calendar.ID,
                 exceptionType: exception.exceptionType || null,
-                overrideCalendarID: exception.calendarID || null,
+                exceptionID: exception.ID || null,
                 exceptionReason: exception.exceptionReason || null,
                 exceptionTime: exception.exceptionTime || null,
                 type: exception.type && exception.type !== null ? exception.type : calendar.type,
@@ -147,6 +147,18 @@ class CalendarDb {
             var beginAt = start;
             var exceptionIDs = [];
 
+            var exceptionCompare = (a, b) => {
+                if (a.exceptionType === 'cancel' && b.exceptionType !== 'cancel') return -1;
+                if (b.exceptionType === 'cancel' && a.exceptionType !== 'cancel') return 1;
+                if (a.exceptionType === 'cancel-system' && b.exceptionType !== 'cancel-system') return -1;
+                if (b.exceptionType === 'cancel-system' && a.exceptionType !== 'cancel-system') return 1;
+                if (a.exceptionType === 'updated' && b.exceptionType !== 'updated') return -1;
+                if (b.exceptionType === 'updated' && a.exceptionType !== 'updated') return 1;
+                if (a.exceptionType === 'updated-system' && b.exceptionType !== 'updated-system') return -1;
+                if (b.exceptionType === 'updated-system' && a.exceptionType !== 'updated-system') return 1;
+                return 0;
+            }
+
             // Recurring calendar events
             if (calendar.schedule.schedules) {
                 var scheduledObj = calendar.schedule;
@@ -168,32 +180,89 @@ class CalendarDb {
                 // Generate later schedule
                 var schedule = later.schedule(calendar.schedule);
 
-                // Keep going until we have reached the end date/time
+                // Loop through each schedule
                 while (moment(beginAt).isBefore(moment(end))) {
+                    var tempExceptions = [];
                     var eventStart = moment(schedule.next(1, beginAt)).toISOString(true);
                     if (!eventStart || eventStart === null) break;
                     beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
 
-                    // Get exception if it exists
+                    // Get exceptions if they exist
                     try {
-                        var exception = this.exceptions(function () {
+                        var exceptions = this.exceptions(function () {
                             return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
-                        }).last() || {};
-                        exceptionIDs.push(exception.ID);
+                        }).get() || [];
+                        if (exceptions.length > 0) {
+                            exceptions.map((exc) => {
+                                exceptionIDs.push(exc.ID);
+                                tempExceptions.push(exc);
+                            })
+                        }
                     } catch (e) {
-                        var exception = {};
+                        console.error(e);
+                        var tempExceptions = [];
                     }
 
-                    // Process the record
-                    processRecord(calendar, exception, eventStart);
+                    if (tempExceptions.length > 0) {
+                        tempExceptions.sort(exceptionCompare);
+                        console.log(`Standard exception`);
+                        console.dir(tempExceptions[ 0 ])
+                        processRecord(calendar, tempExceptions[ 0 ], eventStart);
+                    } else {
+                        processRecord(calendar, {}, eventStart);
+                    }
+                }
+
+                // Process additional exceptions
+                var calendarb = this.exceptions({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                if (calendarb.length > 0) {
+                    // Loop through each additional exception
+                    calendarb.map((cal) => {
+                        var tempExceptions = [];
+                        var eventStart = moment(cal.newTime || cal.exceptionTime).toISOString(true);
+
+                        // Get exceptions to the additional exception if they exist
+                        try {
+                            var exceptions = this.exceptions(function () {
+                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
+                            }).get() || [];
+                            if (exceptions.length > 0) {
+                                exceptions.map((exc) => {
+                                    exceptionIDs.push(exc.ID);
+                                    tempExceptions.push(exc);
+                                })
+                            }
+                        } catch (e) {
+                            var tempExceptions = [];
+                        }
+
+                        // TODO: This is still returning the additional exception in addition to its cancellation; it should only return its cancellation
+                        var tempCal = Object.assign({}, calendar);
+                        Object.assign(tempCal, cal);
+                        Object.assign(tempCal, {
+                            ID: calendar.ID,
+                            start: eventStart,
+                            schedule: {
+                                oneTime: eventStart
+                            }
+                        });
+                        if (tempExceptions.length > 0) {
+                            tempExceptions.sort(exceptionCompare);
+                            console.log(`Additional exception`)
+                            console.dir(tempCal);
+                            console.dir(tempExceptions[ 0 ])
+                            processRecord(tempCal, tempExceptions[ 0 ], eventStart);
+                        } else {
+                            processRecord(tempCal, {}, eventStart);
+                        }
+                    });
                 }
 
                 // Now, go through other exceptions which may have been ignored by baseline calendar times
-                var exceptions = this.exceptions({ calendarID: calendar.ID }).get();
+                var exceptions = this.exceptions(function () {
+                    return this.calendarID === calendar.ID && exceptionIDs.indexOf(this.ID) === -1 && this.newTime !== null;
+                }).get() || [];
                 exceptions
-                    .filter((exception) => {
-                        return exceptionIDs.indexOf(exception.ID) === -1 && exception.newTime !== null;
-                    })
                     .map((exception) => {
                         processRecord(calendar, exception, exception.newTime);
                     })
@@ -201,23 +270,64 @@ class CalendarDb {
             } else if (calendar.schedule.oneTime) { // One-time events
                 // Get exception if it exists
                 try {
+                    var tempExceptions = [];
+                    var exceptionIDs = [];
                     var exception = this.exceptions(function () {
                         return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
-                    }).last() || {};
-                    exceptionIDs.push(exception.ID);
+                    }).get() || [];
+                    if (exceptions.length > 0) {
+                        exceptions.map((exc) => {
+                            exceptionIDs.push(exc.ID);
+                            tempExceptions.push(exc);
+                        })
+                    }
                 } catch (e) {
-                    var exception = {};
+                    var tempExceptions = [];
                 }
 
+                if (tempExceptions.length > 0) {
+                    tempExceptions.sort(exceptionCompare);
+                    processRecord(calendar, tempExceptions[ 0 ], calendar.schedule.oneTime);
+                } else {
+                    processRecord(calendar, {}, calendar.schedule.oneTime);
+                }
 
-                processRecord(calendar, exception, calendar.schedule.oneTime);
+                // Process additional exceptions
+                var calendarb = this.exceptions({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                if (calendarb.length > 0) {
+                    // Loop through each additional exception
+                    calendarb.map((cal) => {
+                        var tempExceptions = [];
+                        var eventStart = moment(cal.newTime || cal.exceptionTime).toISOString(true);
+
+                        // Get exceptions to the additional exception if they exist
+                        try {
+                            var exceptions = this.exceptions(function () {
+                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
+                            }).get() || [];
+                            if (exceptions.length > 0) {
+                                exceptions.map((exc) => {
+                                    exceptionIDs.push(exc.ID);
+                                    tempExceptions.push(exc);
+                                })
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            var tempExceptions = [];
+                        }
+
+                        if (tempExceptions.length > 0) {
+                            tempExceptions.sort(exceptionCompare);
+                            processRecord(calendar, tempExceptions[ 0 ], calendar.schedule.oneTime);
+                        }
+                    });
+                }
 
                 // Now, go through other exceptions which may have been ignored by baseline calendar times
-                var exceptions = this.exceptions({ calendarID: calendar.ID }).get();
+                var exceptions = this.exceptions(function () {
+                    return this.calendarID === calendar.ID && exceptionIDs.indexOf(this.ID) === -1 && this.newTime !== null;
+                }).get() || [];
                 exceptions
-                    .filter((exception) => {
-                        return exceptionIDs.indexOf(exception.ID) === -1 && exception.newTime !== null;
-                    })
                     .map((exception) => {
                         processRecord(calendar, exception, exception.newTime);
                     })
@@ -269,7 +379,7 @@ class CalendarDb {
     checkConflicts (event) {
         var eventPriority = event.priority && event.priority !== null ? event.priority : this.getDefaultPriority(event)
         var error;
-        var end = event.end && event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || (event.schedule && event.schedule.oneTime) ? event.schedule.oneTime : undefined || event.start).add(event.duration, 'minutes').toISOString(true);
+        var end = event.end && event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || (event.schedule && event.schedule.oneTime ? event.schedule.oneTime : undefined) || event.start).add(event.duration, 'minutes').toISOString(true);
 
         // No conflict check if the priority is less than 0.
         if (eventPriority < 0) return { overridden: [], overriding: [] };
@@ -301,13 +411,12 @@ class CalendarDb {
                 var eventEnd = moment(eventStart).add(event.duration, 'minutes');
 
                 if ((moment(eventEnd).isAfter(moment(eventsb.start)) && moment(eventEnd).isSameOrBefore(moment(eventsb.end))) || (moment(eventStart).isSameOrAfter(eventsb.start) && moment(eventStart).isBefore(eventsb.end)) || (moment(eventStart).isBefore(eventsb.start) && moment(eventEnd).isAfter(eventsb.end))) {
-                    if (event.exceptionType === 'additional' && event.calendarID === eventsb.calendarID)
+                    if ((event.exceptionType === 'additional' || event.exceptionType === null) && event.calendarID === eventsb.calendarID)
                         throw new Error("ALREADY_SCHEDULED");
-                    return true;
+                    return eventStart;
                 }
-
-                return false;
             }
+            return false;
         }
 
         var events = this.getEvents(moment(event.newTime || event.schedule.oneTime || event.start).toISOString(true), end, { active: true });
@@ -329,26 +438,32 @@ class CalendarDb {
             });
 
         if (event.newTime || event.schedule.oneTime) {
-            var start = moment(event.newTime || event.schedule.oneTime);
-            var end = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
+            var startb = moment(event.newTime || event.schedule.oneTime);
+            var endb = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
 
             eventsOverridden = eventsOverridden
-                .filter((eventb) => moment(eventb.end).isAfter(moment(start)) && moment(eventb.end).isSameOrBefore(moment(end))) || (moment(eventb.start).isSameOrAfter(start) && moment(eventb.start).isBefore(end)) || (moment(eventb.start).isBefore(start) && moment(eventb.end).isAfter(end));
+                .filter((eventb) => moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb));
         } else if (event.schedule.schedules) {
-            var start = moment(event.start);
+            var startb = moment(event.start);
 
             eventsOverridden = eventsOverridden
-                .filter((eventsb) => {
+                .reduce((newArray = [], eventsb) => {
                     try {
-                        return checkConflictingTime(start, eventsb)
+                        var val = checkConflictingTime(startb, eventsb)
+                        if (val) {
+                            eventsb.overrideTime = val;
+                            newArray.push(eventsb);
+                        }
+                        return newArray;
                     } catch (e) {
                         if (e.message === "ALREADY_SCHEDULED") {
-                            error = "This event override cannot be scheduled; this event is already scheduled within the provided time block."
+                            error = "This event additional time slot cannot be scheduled; this event is already scheduled within the provided time slot."
+                            return newArray;
                         } else {
                             throw e;
                         }
                     }
-                })
+                }, [])
         }
 
         // Now, check for events that will override this one
@@ -369,26 +484,36 @@ class CalendarDb {
             });
 
         if (event.newTime || event.schedule.oneTime) {
-            var start = moment(event.newTime || event.schedule.oneTime);
-            var end = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
+            var startb = moment(event.newTime || event.schedule.oneTime);
+            var endb = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
 
             eventsOverriding = eventsOverriding
-                .filter((eventb) => moment(eventb.end).isAfter(moment(start)) && moment(eventb.end).isSameOrBefore(moment(end))) || (moment(eventb.start).isSameOrAfter(start) && moment(eventb.start).isBefore(end)) || (moment(eventb.start).isBefore(start) && moment(eventb.end).isAfter(end));
+                .filter((eventb) => moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb))
+                    .map((eventb) => {
+                        eventb.overrideTime = moment(startb).toISOString(true);
+                        return eventb;
+                    })
         } else if (event.schedule.schedules) {
-            var start = moment(event.start);
+            var startb = moment(event.start);
 
             eventsOverriding = eventsOverriding
-                .filter((eventsb) => {
+                .reduce((newArray = [], eventsb) => {
                     try {
-                        return checkConflictingTime(start, eventsb)
+                        var val = checkConflictingTime(startb, eventsb)
+                        if (val) {
+                            eventsb.overrideTime = val;
+                            newArray.push(eventsb);
+                        }
+                        return newArray;
                     } catch (e) {
                         if (e.message === "ALREADY_SCHEDULED") {
                             error = "This event additional time slot cannot be scheduled; this event is already scheduled within the provided time slot."
+                            return newArray;
                         } else {
                             throw e;
                         }
                     }
-                })
+                }, [])
         }
 
         return { overridden: eventsOverridden, overriding: eventsOverriding, error };
@@ -434,7 +559,7 @@ class CalendarDb {
             case 'show':
                 return 5;
             case 'sports':
-                return 10;
+                return 9;
             case 'remote':
                 return 7;
             case 'prerecord':

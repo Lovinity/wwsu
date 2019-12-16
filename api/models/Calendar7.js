@@ -71,12 +71,14 @@ module.exports = {
 
         start: {
             type: 'ref',
-            columnType: 'date'
+            columnType: 'date',
+            allowNull: true
         },
 
         end: {
             type: 'ref',
-            columnType: 'date'
+            columnType: 'date',
+            allowNull: true
         },
 
         duration: {
