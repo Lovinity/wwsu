@@ -200,13 +200,10 @@ class CalendarDb {
                         }
                     } catch (e) {
                         console.error(e);
-                        var tempExceptions = [];
                     }
 
                     if (tempExceptions.length > 0) {
                         tempExceptions.sort(exceptionCompare);
-                        console.log(`Standard exception`);
-                        console.dir(tempExceptions[ 0 ])
                         processRecord(calendar, tempExceptions[ 0 ], eventStart);
                     } else {
                         processRecord(calendar, {}, eventStart);
@@ -228,6 +225,7 @@ class CalendarDb {
                             }).get() || [];
                             if (exceptions.length > 0) {
                                 exceptions.map((exc) => {
+                                    exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
                                     tempExceptions.push(exc);
                                 })
@@ -236,7 +234,6 @@ class CalendarDb {
                             var tempExceptions = [];
                         }
 
-                        // TODO: This is still returning the additional exception in addition to its cancellation; it should only return its cancellation
                         var tempCal = Object.assign({}, calendar);
                         Object.assign(tempCal, cal);
                         Object.assign(tempCal, {
@@ -248,31 +245,27 @@ class CalendarDb {
                         });
                         if (tempExceptions.length > 0) {
                             tempExceptions.sort(exceptionCompare);
-                            console.log(`Additional exception`)
-                            console.dir(tempCal);
-                            console.dir(tempExceptions[ 0 ])
                             processRecord(tempCal, tempExceptions[ 0 ], eventStart);
                         } else {
-                            processRecord(tempCal, {}, eventStart);
+                            processRecord(tempCal, {
+                                exceptionType: cal.exceptionType,
+                                ID: cal.ID,
+                                calendarID: cal.calendarID,
+                                exceptionReason: cal.exceptionReason,
+                                exceptionTime: cal.exceptionTime,
+                                newTime: cal.newTime
+                            }, eventStart);
                         }
                     });
                 }
-
-                // Now, go through other exceptions which may have been ignored by baseline calendar times
-                var exceptions = this.exceptions(function () {
-                    return this.calendarID === calendar.ID && exceptionIDs.indexOf(this.ID) === -1 && this.newTime !== null;
-                }).get() || [];
-                exceptions
-                    .map((exception) => {
-                        processRecord(calendar, exception, exception.newTime);
-                    })
 
             } else if (calendar.schedule.oneTime) { // One-time events
                 // Get exception if it exists
                 try {
                     var tempExceptions = [];
                     var exceptionIDs = [];
-                    var exception = this.exceptions(function () {
+                    // Get exceptions if they exist
+                    var exceptions = this.exceptions(function () {
                         return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                     }).get() || [];
                     if (exceptions.length > 0) {
@@ -282,7 +275,7 @@ class CalendarDb {
                         })
                     }
                 } catch (e) {
-                    var tempExceptions = [];
+                    console.error(e);
                 }
 
                 if (tempExceptions.length > 0) {
@@ -303,34 +296,43 @@ class CalendarDb {
                         // Get exceptions to the additional exception if they exist
                         try {
                             var exceptions = this.exceptions(function () {
-                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
+                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
                                 exceptions.map((exc) => {
+                                    exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
                                     tempExceptions.push(exc);
                                 })
                             }
                         } catch (e) {
-                            console.error(e);
                             var tempExceptions = [];
                         }
 
+                        var tempCal = Object.assign({}, calendar);
+                        Object.assign(tempCal, cal);
+                        Object.assign(tempCal, {
+                            ID: calendar.ID,
+                            start: calendar.schedule.oneTime,
+                            schedule: {
+                                oneTime: calendar.schedule.oneTime
+                            }
+                        });
                         if (tempExceptions.length > 0) {
                             tempExceptions.sort(exceptionCompare);
-                            processRecord(calendar, tempExceptions[ 0 ], calendar.schedule.oneTime);
+                            processRecord(tempCal, tempExceptions[ 0 ], calendar.schedule.oneTime);
+                        } else {
+                            processRecord(tempCal, {
+                                exceptionType: cal.exceptionType,
+                                ID: cal.ID,
+                                calendarID: cal.calendarID,
+                                exceptionReason: cal.exceptionReason,
+                                exceptionTime: cal.exceptionTime,
+                                newTime: cal.newTime
+                            }, calendar.schedule.oneTime);
                         }
                     });
                 }
-
-                // Now, go through other exceptions which may have been ignored by baseline calendar times
-                var exceptions = this.exceptions(function () {
-                    return this.calendarID === calendar.ID && exceptionIDs.indexOf(this.ID) === -1 && this.newTime !== null;
-                }).get() || [];
-                exceptions
-                    .map((exception) => {
-                        processRecord(calendar, exception, exception.newTime);
-                    })
             }
         })
         return events;
