@@ -41,7 +41,7 @@ module.exports.bootstrap = async function (done) {
   await sails.models.darksky.findOrCreate({ ID: 1 }, { ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {} })
 
   // Load calendardb
-  sails.models.calendar7.calendardb = new CalendarDb(await sails.models.calendar7.find(), await sails.models.calendarexceptions.find());
+  sails.models.calendar7.calendardb = new CalendarDb(await sails.models.calendar7.find({active: true}), await sails.models.calendarexceptions.find());
 
   // Load blank sails.models.meta template
   sails.log.verbose(`BOOTSTRAP: Generating sails.models.meta.memory`)
@@ -1443,8 +1443,8 @@ module.exports.bootstrap = async function (done) {
     return new Promise(async (resolve, reject) => {
       sails.log.debug('CRON calendardbCacheSync called')
       try {
-      sails.models.calendar7.calendardb.processCalendar(await sails.models.calendar7.find(), true)
-      sails.models.calendar7.calendardb.processExceptions(await sails.models.calendarexceptions.find(), true);
+      sails.models.calendar7.calendardb.query('calendar', await sails.models.calendar7.find({active: true}), true)
+      sails.models.calendar7.calendardb.query('calendarexceptions', await sails.models.calendarexceptions.find(), true);
       } catch (e) {
         sails.log.error(e);
         return reject(e);

@@ -66,6 +66,26 @@ module.exports = {
             allowNull: true
         },
 
+        eventID: {
+            type: 'number',
+            allowNull: true
+        },
+
+        playlistID: {
+            type: 'number',
+            allowNull: true
+        },
+
+        director: {
+            type: 'number',
+            allowNull: true
+        },
+
+        hosts: {
+            type: 'string',
+            allowNull: true
+        },
+
         name: {
             type: 'string',
             allowNull: true
@@ -103,7 +123,7 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = { insert: newlyCreatedRecord }
-        sails.models.calendar7.calendardb.processExceptions(data);
+        sails.models.calendar7.calendardb.query('calendarexceptions', data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
         return proceed()
@@ -111,7 +131,7 @@ module.exports = {
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = { update: updatedRecord }
-        sails.models.calendar7.calendardb.processExceptions(data);
+        sails.models.calendar7.calendardb.query('calendarexceptions', data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
         return proceed()
@@ -119,7 +139,7 @@ module.exports = {
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = { remove: destroyedRecord.ID }
-        sails.models.calendar7.calendardb.processExceptions(data);
+        sails.models.calendar7.calendardb.query('calendarexceptions', data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
         return proceed()

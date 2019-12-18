@@ -66,10 +66,26 @@ module.exports = {
   },
 
   afterUpdate: function (updatedRecord, proceed) {
-    delete updatedRecord.login
+    delete updatedRecord.login;
     var data = { update: updatedRecord }
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
+
+    // Update host data in calendar and calendarExceptions
+    (async() => {
+      var records = await sails.models.calendar7.find({directorID: updatedRecord.ID});
+      if (records.length > 0) {
+        records.map(async (record) => {
+          try {
+            var hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
+            await sails.models.calendar7.update({ID: record.ID}, {hosts: hosts});
+          } catch (e) {
+          }
+        });
+      }
+    })()
+
+    // TODO: Finish this
     return proceed()
   },
 

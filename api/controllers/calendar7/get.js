@@ -11,8 +11,8 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller calendar/get called.')
         try {
-            // Grab events
-            var calendarRecords = await sails.models.calendar7.find()
+            // Grab only active events
+            var calendarRecords = await sails.models.calendar7.find({active: true});
 
             // Subscribe to sockets if applicable
             if (this.req.isSocket) {

@@ -1,8 +1,12 @@
-/* global moment, later, TAFFY, iziToast */
+/* global moment, later, TAFFY, iziToast, WWSUdb */
 
 // Require libraries if necessary
 if (!TAFFY) {
     require('./taffy-min.js');
+}
+
+if (!WWSUdb) {
+    require('./wwsu.js');
 }
 
 if (!later) {
@@ -19,80 +23,21 @@ later.date.localTime()
 class CalendarDb {
 
     // Constructor stores initial calendar and calendarexceptions DB row arrays into TAFFYDB.
-    constructor(calendar = [], exceptions = []) {
-        this.calendar = TAFFY();
-        this.exceptions = TAFFY();
-        this.calendar.insert(calendar);
-        this.exceptions.insert(exceptions);
+    constructor(calendar = [], calendarexceptions = []) {
+        this.calendar = new WWSUdb(TAFFY());
+        this.calendarexceptions = new WWSUdb(TAFFY());
+        this.calendar.db.insert(calendar);
+        this.calendarexceptions.db.insert(calendarexceptions);
     }
 
-    // Websocket function call for changes to Calendar
-    processCalendar (data, replace = false) {
-        try {
-            if (replace) {
-                // Replace with the new data
-                this.calendar = TAFFY()
-                this.calendar.insert(data)
-            } else {
-                for (var key in data) {
-                    if (Object.prototype.hasOwnProperty.call(data, key)) {
-                        switch (key) {
-                            case 'insert':
-                                this.calendar.insert(data[ key ])
-                                break
-                            case 'update':
-                                this.calendar({ ID: data[ key ].ID }).update(data[ key ])
-                                break
-                            case 'remove':
-                                this.calendar({ ID: data[ key ] }).remove()
-                                break
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.error(e)
-            if (iziToast) {
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: 'Error occurred during the processCalendar function in class CalendarDb.'
-                })
-            }
-        }
-    }
-
-    // Websocket function call for changes to CalendarExceptions
-    processExceptions (data, replace = false) {
-        try {
-            if (replace) {
-                // Replace with the new data
-                this.exceptions = TAFFY()
-                this.exceptions.insert(data)
-            } else {
-                for (var key in data) {
-                    if (Object.prototype.hasOwnProperty.call(data, key)) {
-                        switch (key) {
-                            case 'insert':
-                                this.exceptions.insert(data[ key ])
-                                break
-                            case 'update':
-                                this.exceptions({ ID: data[ key ].ID }).update(data[ key ])
-                                break
-                            case 'remove':
-                                this.exceptions({ ID: data[ key ] }).remove()
-                                break
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.error(e)
-            if (iziToast) {
-                iziToast.show({
-                    title: 'An error occurred - Please check the logs',
-                    message: 'Error occurred during the processExceptions function in class CalendarDb.'
-                })
-            }
+    query (db, data, replace = false) {
+        switch (db) {
+            case 'calendar':
+                this.calendar.query(data, replace);
+                break;
+            case 'calendarexceptions':
+                this.calendarexceptions.query(data, replace);
+                break;
         }
     }
 
@@ -115,7 +60,11 @@ class CalendarDb {
                 cohostDJ1: exception.cohostDJ1 && exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1,
                 cohostDJ2: exception.cohostDJ2 && exception.cohostDJ2 !== null ? exception.cohostDJ2 : calendar.cohostDJ2,
                 cohostDJ3: exception.cohostDJ3 && exception.cohostDJ3 !== null ? exception.cohostDJ3 : calendar.cohostDJ3,
-                name: exception.name && exception.name !== null ? exception.name : calendar.name,
+                eventID: exception.eventID && exception.eventID !== null ? exception.eventID : calendar.eventID,
+                playlistID: exception.playlistID && exception.playlistID !== null ? exception.playlistID : calendar.playlistID,
+                director: exception.director && exception.director !== null ? exception.director : calendar.director,
+                hosts: exception.hosts && exception.hosts !== null ? exception.hosts : calendar.hosts || "Unknown Hosts",
+                name: exception.name && exception.name !== null ? exception.name : calendar.name || "Unknown Event",
                 description: exception.description && exception.description !== null ? exception.description : calendar.description,
                 logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo,
                 banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner,
@@ -140,7 +89,7 @@ class CalendarDb {
             }
         }
 
-        var results = this.calendar(query).get();
+        var results = this.calendar.db(query).get();
 
         results.map((calendar, index) => {
 
@@ -189,7 +138,7 @@ class CalendarDb {
 
                     // Get exceptions if they exist
                     try {
-                        var exceptions = this.exceptions(function () {
+                        var exceptions = this.exceptions.db(function () {
                             return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                         }).get() || [];
                         if (exceptions.length > 0) {
@@ -211,7 +160,7 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.exceptions({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                var calendarb = this.exceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -220,7 +169,7 @@ class CalendarDb {
 
                         // Get exceptions to the additional exception if they exist
                         try {
-                            var exceptions = this.exceptions(function () {
+                            var exceptions = this.exceptions.db(function () {
                                 return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
@@ -265,7 +214,7 @@ class CalendarDb {
                     var tempExceptions = [];
                     var exceptionIDs = [];
                     // Get exceptions if they exist
-                    var exceptions = this.exceptions(function () {
+                    var exceptions = this.exceptions.db(function () {
                         return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                     }).get() || [];
                     if (exceptions.length > 0) {
@@ -286,7 +235,7 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.exceptions({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                var calendarb = this.exceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -295,7 +244,7 @@ class CalendarDb {
 
                         // Get exceptions to the additional exception if they exist
                         try {
-                            var exceptions = this.exceptions(function () {
+                            var exceptions = this.exceptions.db(function () {
                                 return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
@@ -527,7 +476,7 @@ class CalendarDb {
 
         // If calendarID is provided, we expect it to be a valid calendar ID.
         if (event.calendarID) {
-            var calendar = this.calendar({ ID: event.calendarID }).first();
+            var calendar = this.calendar.db({ ID: event.calendarID }).first();
             if (!calendar)
                 return false;
         }
