@@ -134,6 +134,10 @@ module.exports = {
         sails.models.calendar7.calendardb.query('calendarexceptions', data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
+
+        // TODO: subscription notifications of changes
+
+
         return proceed()
     },
 
@@ -142,6 +146,10 @@ module.exports = {
         sails.models.calendar7.calendardb.query('calendarexceptions', data);
         sails.log.silly(`calendarexceptions socket: ${data}`)
         sails.sockets.broadcast('calendarexceptions', 'calendarexceptions', data)
+
+        // TODO: subscription notifications of changes
+
+        
         return proceed()
     }
 

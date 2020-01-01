@@ -138,6 +138,8 @@ module.exports = {
             })()
         }
 
+        // TODO: subscription notifications of changes
+
         return proceed()
     },
 
@@ -151,6 +153,8 @@ module.exports = {
         (async () => {
             await sails.helpers.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
         })()
+
+        // TODO: subscription notifications of changes
         
         return proceed()
     }

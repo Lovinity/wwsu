@@ -312,7 +312,7 @@ class CalendarDb {
                     if (automationOnly) {
                         return (event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end)) && event.active;
                     } else {
-                        // Allow 5 minutes early for non-automation shows. TODO: Configure this threshold.
+                        // Allow 5 minutes early for non-automation shows.
                         return ((event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end))) || ((event.type === 'show' || event.type === 'sports' || event.type === 'remote') && moment().add(5, 'minutes').isSameOrAfter(moment(event.start))) && moment().add(5, 'minutes').isBefore(moment(event.end)) && event.active;
                     }
                 })

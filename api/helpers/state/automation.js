@@ -126,7 +126,6 @@ module.exports = {
       }
 
       // Earn XP for sending messages to website visitors
-      // TODO: figure out a way to get host in the event the silence detection triggers, and add back in the "from" in the waterline.
       returnData.messagesWeb = await sails.models.messages.count({ to: { startsWith: 'website' }, createdAt: { '>=': moment(attendance.actualStart).toISOString(true) } })
         .tolerate((err) => {
           // Do not throw for error, but log it

@@ -73,7 +73,7 @@ module.exports = {
 
     // Update host data in calendar and calendarExceptions
     (async() => {
-      var records = await sails.models.calendar7.find({directorID: updatedRecord.ID});
+      var records = await sails.models.calendar7.find({director: updatedRecord.ID});
       if (records.length > 0) {
         records.map(async (record) => {
           try {
@@ -85,7 +85,20 @@ module.exports = {
       }
     })()
 
-    // TODO: Finish this
+    (async() => {
+      var records = await sails.models.calendarexceptions.find({director: updatedRecord.ID});
+      if (records.length > 0) {
+        records.map(async (record) => {
+          try {
+            var hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
+            await sails.models.calendarexceptions.update({ID: record.ID}, {hosts: hosts});
+          } catch (e) {
+          }
+        });
+      }
+    })()
+
+
     return proceed()
   },
 
@@ -93,6 +106,12 @@ module.exports = {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
+
+    // Delete calendar records pertaining to this director by setting their active to false
+    (async() => {
+      await sails.models.calendar7.update({director: destroyedRecord.ID}, {active: false}).fetch();
+    })()
+
     return proceed()
   }
 }

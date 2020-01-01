@@ -473,7 +473,6 @@ module.exports = {
           // Add originalStart and originalEnd to criteriaB. We add it after cloning so the update checker does not check these values
           criteriaB.originalStart = event.start.dateTime || event.start.date
           criteriaB.originalEnd = event.end.dateTime || event.end.date
-          // TODO: Make so that new records do not also trigger an update
 
           // Find existing record of event. If does not exist, create it in the Calendar.
           theEvent = await sails.models.calendar.findOrCreate({ unique: event.id }, criteriaB)
@@ -973,8 +972,8 @@ module.exports = {
           issues = issues.filter((v, i, a) => a.indexOf(v) === i)
           await sails.helpers.status.change.with({ name: 'google-calendar', label: 'Google Calendar', data: issues.join(` `), status: status })
         }
-        return exits.success()
       }
+      return exits.success();
     } catch (e) {
       await sails.helpers.status.change.with({ name: 'google-calendar', label: 'Google Calendar', data: `Google Calendar error: ${breakdance(e.message)}. This is likely a network problem or an issue with Google. Until resolved, modifications to the calendar will not reflect in the system; system will use the calendar stored in memory.`, status: 2 })
       return exits.error(e)

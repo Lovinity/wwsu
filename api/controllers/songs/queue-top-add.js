@@ -1,5 +1,3 @@
-// TODO: rename to queue-top-add
-
 module.exports = {
 
   friendlyName: 'songs / queue-top-add',
