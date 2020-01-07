@@ -259,6 +259,13 @@ module.exports.bootstrap = async function (done) {
         }
       }
 
+      // changingState error check
+      if (sails.models.meta.memory.changingState !== null) {
+        await sails.helpers.error.count('changingStateTookTooLong')
+      } else {
+        await sails.helpers.error.reset('changingStateTookTooLong')
+      }
+
 
       try {
         // Try to get the current RadioDJ queue.

@@ -316,6 +316,33 @@ module.exports = {
           }
         })
       }
+    },
+
+    changingStateTookTooLong: {
+      count: 0,
+      trigger: 60,
+      active: false,
+      fn: function () {
+        // LINT: async required because of sails.js lint
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+          try {
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>changingState took too long (60 seconds); considered node application unstable and forcefully terminated.</strong>` }).fetch()
+              .tolerate((err) => {
+                sails.log.error(err)
+              })
+            await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `changingState Took Too Long (system)` }, { type: 'djcontrols', level: 'warning', title: `changingState Took Too Long (system)`, announcement: `Node application forcefully terminated on ${moment().format('LLLL')} because it was trying to change states for too long (60 seconds). The application likely froze or hung up due to a bug.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+              .tolerate((err) => {
+                sails.log.error(err)
+              })
+            await sails.helpers.onesignal.sendMass('emergencies', 'Node terminated due to ChangingState timeout', `On ${moment().format('LLLL')}, the system terminated Node (and hopefully was rebooted by process manager) because ChangingState took more than 60 seconds (application likely froze/hung). Please see DJ Controls.`)
+            await sails.helpers.meta.change.with({ changingState: null })
+            process.exit(1);
+          } catch (e) {
+            process.exit(1);
+          }
+        })
+      }
     }
 
   },
