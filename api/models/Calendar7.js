@@ -109,7 +109,8 @@ module.exports = {
         },
 
         schedule: {
-            type: 'json'
+            type: 'json',
+            allowNull: true
         },
 
     },

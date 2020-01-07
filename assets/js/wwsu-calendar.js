@@ -1,19 +1,19 @@
 /* global moment, later, TAFFY, iziToast, WWSUdb */
 
 // Require libraries if necessary
-if (!TAFFY) {
+if (typeof TAFFY === 'undefined') {
     require('./taffy-min.js');
 }
 
-if (!WWSUdb) {
+if (typeof WWSUdb === 'undefined') {
     require('./wwsu.js');
 }
 
-if (!later) {
+if (typeof later === 'undefined') {
     require('./later.min.js');
 }
 
-if (!moment) {
+if (typeof moment === 'undefined') {
     require('./moment.min.js');
 }
 
@@ -109,9 +109,61 @@ class CalendarDb {
             }
 
             // Recurring calendar events
-            if (calendar.schedule.schedules) {
-                var scheduledObj = calendar.schedule;
 
+            // For events with null schedule or duration of 0, we only want to process "additional" exceptions and any exceptions to the additional exceptions; ignore the main event.
+            if (calendar.schedule === null || calendar.duration <= 0) {
+                var tempExceptions = [];
+                var exceptionIDs = [];
+                calendar.duration = 0; // Force no duration for empty schedule events.
+
+                // Process additional exceptions
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                if (calendarb.length > 0) {
+                    // Loop through each additional exception
+                    calendarb.map((cal) => {
+                        var tempExceptions = [];
+
+                        // Get exceptions to the additional exception if they exist
+                        try {
+                            var exceptions = this.calendarexceptions.db(function () {
+                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional';
+                            }).get() || [];
+                            if (exceptions.length > 0) {
+                                exceptions.map((exc) => {
+                                    exceptionIDs.push(cal.ID);
+                                    exceptionIDs.push(exc.ID);
+                                    tempExceptions.push(exc);
+                                })
+                            }
+                        } catch (e) {
+                            var tempExceptions = [];
+                        }
+
+                        var tempCal = Object.assign({}, calendar);
+                        Object.assign(tempCal, cal);
+                        Object.assign(tempCal, {
+                            ID: calendar.ID,
+                            start: calendar.start || calendar.createdAt,
+                            schedule: {
+                                oneTime: calendar.start || calendar.createdAt
+                            }
+                        });
+                        if (tempExceptions.length > 0) {
+                            tempExceptions.sort(exceptionCompare);
+                            processRecord(tempCal, tempExceptions[ 0 ], calendar.start || calendar.createdAt);
+                        } else {
+                            processRecord(tempCal, {
+                                exceptionType: cal.exceptionType,
+                                ID: cal.ID,
+                                calendarID: cal.calendarID,
+                                exceptionReason: cal.exceptionReason,
+                                exceptionTime: cal.exceptionTime,
+                                newTime: cal.newTime
+                            }, calendar.start || calendar.createdAt);
+                        }
+                    });
+                }
+            } else if (calendar.schedule.schedules) {
                 // No dice if there is no schedules parameter or if there is no record at index 0
                 if (!calendar.schedule.schedules[ 0 ]) return null;
 
@@ -138,7 +190,7 @@ class CalendarDb {
 
                     // Get exceptions if they exist
                     try {
-                        var exceptions = this.exceptions.db(function () {
+                        var exceptions = this.calendarexceptions.db(function () {
                             return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                         }).get() || [];
                         if (exceptions.length > 0) {
@@ -160,7 +212,7 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.exceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -169,7 +221,7 @@ class CalendarDb {
 
                         // Get exceptions to the additional exception if they exist
                         try {
-                            var exceptions = this.exceptions.db(function () {
+                            var exceptions = this.calendarexceptions.db(function () {
                                 return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
@@ -214,7 +266,7 @@ class CalendarDb {
                     var tempExceptions = [];
                     var exceptionIDs = [];
                     // Get exceptions if they exist
-                    var exceptions = this.exceptions.db(function () {
+                    var exceptions = this.calendarexceptions.db(function () {
                         return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                     }).get() || [];
                     if (exceptions.length > 0) {
@@ -235,16 +287,15 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.exceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
                         var tempExceptions = [];
-                        var eventStart = moment(cal.newTime || cal.exceptionTime).toISOString(true);
 
                         // Get exceptions to the additional exception if they exist
                         try {
-                            var exceptions = this.exceptions.db(function () {
+                            var exceptions = this.calendarexceptions.db(function () {
                                 return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
@@ -489,7 +540,7 @@ class CalendarDb {
             if ((!event.newTime || !event.duration) && event.exceptionType === 'additional') return false;
         } else {
             // If this is a main calendar event, it must have event.schedule and it either must have a schedules or a oneTime property in event.schedule.
-            if (!event.schedule || (!event.schedule.schedules && !event.schedule.oneTime)) return false;
+            if (event.schedule !== null && !event.schedule.schedules && !event.schedule.oneTime) return false;
 
             // If no duration is specified for a main calendar event, this is an invalid event.
             if (!event.duration) return false;
