@@ -19,6 +19,14 @@ module.exports = {
       allowNull: true,
       description: 'The ID of the Attendance record the system is currently running under'
     },
+    attendanceChecked: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when calendar attendance was last checked',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
     show: {
       type: 'string',
       description: 'If someone is on the air, host name - show name, or name of sports for sports broadcasts'

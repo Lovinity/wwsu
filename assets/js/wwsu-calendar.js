@@ -110,6 +110,9 @@ class CalendarDb {
             // Calculate end time after forming the object because we must refer to criteria.start
             criteria.end = exception.duration && exception.duration !== null ? moment(criteria.start).add(exception.duration, 'minutes').toISOString(true) : moment(criteria.start).add(calendar.duration, 'minutes').toISOString(true);
 
+            // Calculate duration
+            criteria.duration = moment(criteria.end).diff(moment(criteria.start), 'minutes');
+
             // This event is within our time range if one or more of the following is true:
             // A. Calendar event start is same or before generated event start.
             // B. Calendar event end is same or after generated event start.

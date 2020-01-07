@@ -34,6 +34,11 @@ module.exports = {
       allowNull: true
     },
 
+    attendanceChecked: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
+
     trackArtist: {
       type: 'string',
       allowNull: true
@@ -111,6 +116,14 @@ module.exports = {
       type: 'number',
       allowNull: true,
       description: 'The ID of the Attendance record the system is currently running under'
+    },
+    attendanceChecked: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when calendar attendance was last checked',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
     },
     show: {
       type: 'string',
