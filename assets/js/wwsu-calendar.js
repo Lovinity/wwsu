@@ -51,6 +51,7 @@ if (typeof require !== undefined) {
     throw new Error('Node.js require() or JQuery required.');
 }
 
+// Use local time instead of UTC for scheduling
 later.date.localTime()
 
 // Class to manage calendar events for WWSU
@@ -64,6 +65,7 @@ class CalendarDb {
         this.calendarexceptions.db.insert(calendarexceptions);
     }
 
+    // Change the data in the in-memory database
     query (db, data, replace = false) {
         switch (db) {
             case 'calendar':
