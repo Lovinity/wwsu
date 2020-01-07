@@ -1,20 +1,54 @@
 /* global moment, later, TAFFY, iziToast, WWSUdb */
 
-// Require libraries if necessary
-if (typeof TAFFY === 'undefined') {
-    require('./taffy-min.js');
-}
+// Require libraries if necessary. Because this script runs both in browser and in node, we need to cover both methods of including scripts.
 
-if (typeof WWSUdb === 'undefined') {
-    require('./wwsu.js');
-}
+// Node require
+if (typeof require !== undefined) {
+    if (typeof TAFFY === 'undefined') {
+        require('./taffy-min.js');
+    }
 
-if (typeof later === 'undefined') {
-    require('./later.min.js');
-}
+    if (typeof WWSUdb === 'undefined') {
+        require('./wwsu.js');
+    }
 
-if (typeof moment === 'undefined') {
-    require('./moment.min.js');
+    if (typeof later === 'undefined') {
+        require('./later.min.js');
+    }
+
+    if (typeof moment === 'undefined') {
+        require('./moment.min.js');
+    }
+
+    // JQuery custom implementation with AJAX
+} else if (typeof $ !== 'undefined' && typeof JQuery !== 'undefined') {
+
+    // Jquery loadscript replacement for require for in-browser use
+    jQuery.loadScript = function (url) {
+        jQuery.ajax({
+            url: url,
+            dataType: 'script',
+            async: false
+        });
+    }
+
+    if (typeof TAFFY === 'undefined') {
+        $.loadScript('./taffy-min.js');
+    }
+
+    if (typeof WWSUdb === 'undefined') {
+        $.loadScript('./wwsu.js');
+    }
+
+    if (typeof later === 'undefined') {
+        $.loadScript('./later.min.js');
+    }
+
+    if (typeof moment === 'undefined') {
+        $.loadScript('./moment.min.js');
+    }
+} else {
+    throw new Error('Node.js require() or JQuery required.');
 }
 
 later.date.localTime()
