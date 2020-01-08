@@ -16,6 +16,14 @@ module.exports = {
     event = inputs.event;
     var hosts = null;
 
+    if (event.director && event.director !== null) {
+      var temp = await sails.models.directors.findOne({ ID: event.director });
+      if (!temp) {
+        return exits.error("Provided director ID does not exist.");
+      } else {
+        hosts = director.name;
+      }
+    }
     if (event.hostDJ && event.hostDJ !== null) {
       var temp = await sails.models.djs.findOne({ ID: event.hostDJ });
       if (!temp) {

@@ -14,11 +14,31 @@ module.exports = {
       autoIncrement: true
     },
 
+    calendarID: {
+      type: 'number',
+      allowNull: true
+    },
+
     unique: {
       type: 'string'
     },
 
     dj: {
+      type: 'number',
+      allowNull: true
+    },
+
+    cohostDJ1: {
+      type: 'number',
+      allowNull: true
+    },
+
+    cohostDJ2: {
+      type: 'number',
+      allowNull: true
+    },
+
+    cohostDJ3: {
       type: 'number',
       allowNull: true
     },

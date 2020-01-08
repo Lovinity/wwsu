@@ -5,19 +5,19 @@ module.exports = {
   description: 'Begin a playlist in the active RadioDJ.',
 
   inputs: {
-    name: {
+    name: { // TODO: Change to event object
       type: 'string',
       required: true,
       description: 'The name of the playlist to begin, as saved in RadioDJ.'
     },
-    type: {
+    type: { // TODO: auto-determine from event.type
       type: 'number',
       defaultsTo: 0,
       min: 0,
       max: 1,
       description: '0 = standard playlist, 1 = prerecord'
     },
-    topic: {
+    topic: { // TODO: auto-determine from event.description
       type: 'string',
       defaultsTo: '',
       description: 'Topic to set on the metadata when this playlist plays (prerecord).'
@@ -27,7 +27,7 @@ module.exports = {
       defaultsTo: false,
       description: 'Set to true if we should ignore the sails.models.meta.changingState conflict check.'
     },
-    forced: {
+    forced: { // TODO: auto-determine from if state is prerecord and current time is 5+ minutes ahead of event.start
       type: 'boolean',
       defaultsTo: false,
       description: 'Set to true if we want the playlist or prerecord to start regardless of what state we are currently in.'

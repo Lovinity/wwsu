@@ -5,7 +5,7 @@ module.exports = {
   description: 'Start a RadioDJ rotation.',
 
   inputs: {
-    event: {
+    event: { // TODO: Change to event object (null = Default rotation)
       type: 'string',
       defaultsTo: 'Default',
       description: 'Name of the manual RadioDJ event to fire to start the rotation.'
