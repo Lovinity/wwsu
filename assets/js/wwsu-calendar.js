@@ -92,10 +92,6 @@ class CalendarDb {
                 type: exception.type && exception.type !== null ? exception.type : calendar.type,
                 priority: exception.priority && exception.priority !== null ? exception.priority : (calendar.priority !== null ? calendar.priority : this.getDefaultPriority(calendar)),
                 active: calendar.active,
-                hostDJ: exception.hostDJ && exception.hostDJ !== null ? exception.hostDJ : calendar.hostDJ,
-                cohostDJ1: exception.cohostDJ1 && exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1,
-                cohostDJ2: exception.cohostDJ2 && exception.cohostDJ2 !== null ? exception.cohostDJ2 : calendar.cohostDJ2,
-                cohostDJ3: exception.cohostDJ3 && exception.cohostDJ3 !== null ? exception.cohostDJ3 : calendar.cohostDJ3,
                 eventID: exception.eventID && exception.eventID !== null ? exception.eventID : calendar.eventID,
                 playlistID: exception.playlistID && exception.playlistID !== null ? exception.playlistID : calendar.playlistID,
                 director: exception.director && exception.director !== null ? exception.director : calendar.director,
@@ -105,6 +101,19 @@ class CalendarDb {
                 logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo,
                 banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner,
                 start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true),
+            }
+
+            // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.
+            if (exception.hostDJ !== null) {
+                criteria.hostDJ = exception.hostDJ;
+                criteria.cohostDJ1 = exception.cohostDJ1;
+                criteria.cohostDJ2 = exception.cohostDJ2;
+                criteria.cohostDJ3 = exception.cohostDJ3;
+            } else {
+                criteria.hostDJ = calendar.hostDJ;
+                criteria.cohostDJ1 = calendar.cohostDJ1;
+                criteria.cohostDJ2 = calendar.cohostDJ2;
+                criteria.cohostDJ3 = calendar.cohostDJ3;
             }
 
             // Calculate end time after forming the object because we must refer to criteria.start

@@ -71,32 +71,32 @@ module.exports = {
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
 
-    // Update host data in calendar and calendarExceptions
-    (async() => {
-      var records = await sails.models.calendar7.find({director: updatedRecord.ID});
-      if (records.length > 0) {
-        records.map(async (record) => {
-          try {
-            var hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
-            await sails.models.calendar7.update({ID: record.ID}, {hosts: hosts});
-          } catch (e) {
-          }
-        });
-      }
-    })()
+      // Update host data in calendar and calendarExceptions
+      (async () => {
+        let records = await sails.models.calendar7.find({ director: updatedRecord.ID });
+        if (records.length > 0) {
+          records.map(async (record) => {
+            try {
+              let hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
+              await sails.models.calendar7.update({ ID: record.ID }, { hosts: hosts });
+            } catch (e) {
+            }
+          });
+        }
+      })()
 
-    (async() => {
-      var records = await sails.models.calendarexceptions.find({director: updatedRecord.ID});
-      if (records.length > 0) {
-        records.map(async (record) => {
-          try {
-            var hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
-            await sails.models.calendarexceptions.update({ID: record.ID}, {hosts: hosts});
-          } catch (e) {
-          }
-        });
-      }
-    })()
+      (async () => {
+        let records = await sails.models.calendarexceptions.find({ director: updatedRecord.ID });
+        if (records.length > 0) {
+          records.map(async (record) => {
+            try {
+              let hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
+              await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts });
+            } catch (e) {
+            }
+          });
+        }
+      })()
 
 
     return proceed()
@@ -107,10 +107,42 @@ module.exports = {
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
 
-    // Delete calendar records pertaining to this director by setting their active to false
-    (async() => {
-      await sails.models.calendar7.update({director: destroyedRecord.ID}, {active: false}).fetch();
-    })()
+      // Deactivate office hours events for this director. Update all other events using this director ID to null director.
+      (async () => {
+        let records = await sails.models.calendar7.find({ director: destroyedRecord.ID });
+        if (records.length > 0) {
+          let maps = records.map(async (record) => {
+            try {
+              if (record.type === 'office-hours') {
+                await sails.models.calendar7.update({ ID: record.ID }, { active: false }).fetch();
+              } else {
+                record.director = null;
+                let hosts = await sails.helpers.calendar7.generateHosts(record);
+                await sails.models.calendar7.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
+              }
+            } catch (e) {
+            }
+          });
+          await Promise.all(maps);
+        }
+
+        let records = await sails.models.calendarexceptions.find({ director: destroyedRecord.ID });
+        if (records.length > 0) {
+          let maps = records.map(async (record) => {
+            try {
+              if (record.type === 'office-hours') {
+                await sails.models.calendarexceptions.destroy({ ID: record.ID }).fetch();
+              } else {
+                record.director = null;
+                let hosts = await sails.helpers.calendar7.generateHosts(record);
+                await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
+              }
+            } catch (e) {
+            }
+          });
+          await Promise.all(maps);
+        }
+      })()
 
     return proceed()
   }

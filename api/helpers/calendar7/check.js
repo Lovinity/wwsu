@@ -275,15 +275,21 @@ module.exports = {
                         });
                 });
 
-                // Director hours
-                eventCheck
+            // Director hours
+            eventCheck
                 .filter((event) => (event.exceptionType === null || (event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')) && event.type === 'office-hours')
                 .map((event) => {
-                    sails.models.timesheet.findOrCreate({ calendarID: event.calendarID, happened: 1, actualStart: { '<=': moment(event.end).toISOString(true) }, or: [ { actualEnd: null }, { actualEnd: { '>': moment(event.start).toISOString(true) } } ] }, { calendarID: event.calendarID, dj: event.hostDJ, cohostDJ1: event.cohostDJ1, cohostDJ2: event.cohostDJ2, cohostDJ3: event.cohostDJ3, happened: 0, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true) })
+                    sails.models.timesheet.findOrCreate({ calendarID: event.calendarID, timeIn: { '<=': moment(event.end).toISOString(true) }, or: [ { actualEnd: null }, { timeOut: { '>': moment(event.start).toISOString(true) } } ] }, { calendarID: event.calendarID, name: event.hosts, approved: 0, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true) })
                         .exec(async (err, record, wasCreated) => {
                             if (err || !wasCreated) { return false }
+
+                            await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: event.hosts, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${event.hosts}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                .tolerate((err) => {
+                                    sails.log.error(err)
+                                })
+                            await sails.helpers.onesignal.sendMass('accountability-directors', 'Director failed to do their hours!', `${event.hosts} failed to show up for their scheduled hours at ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}.`)
                         });
-                    });
+                });
         }
 
         return exits.success();

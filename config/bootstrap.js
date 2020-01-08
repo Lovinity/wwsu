@@ -75,6 +75,26 @@ module.exports.bootstrap = async function (done) {
     await sails.models.calendar7.update({ type: 'sports', name: { nin: sails.config.custom.sports } }, { active: false }).fetch();
   }
 
+  sails.log.verbose(`BOOTSTRAP: Initiating studio booking events in calendar`)
+  await sails.models.calendar7.findOrCreate({ type: 'onair-booking' }, {
+    type: 'onair-booking',
+    active: true,
+    priority: -1,
+    name: "OnAir Studio Bookings",
+    start: moment().toISOString(true),
+    duration: 0,
+    schedule: null
+  });
+  await sails.models.calendar7.findOrCreate({ type: 'prod-booking' }, {
+    type: 'prod-booking',
+    active: true,
+    priority: -1,
+    name: "Production Studio Bookings",
+    start: moment().toISOString(true),
+    duration: 0,
+    schedule: null
+  });
+
   // Load blank sails.models.meta template
   sails.log.verbose(`BOOTSTRAP: Generating sails.models.meta.memory`)
   var temp = {}
