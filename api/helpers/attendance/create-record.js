@@ -1,3 +1,5 @@
+// TODO: This needs re-written for the new calendar system
+
 module.exports = {
 
   friendlyName: 'attendance.createRecord',

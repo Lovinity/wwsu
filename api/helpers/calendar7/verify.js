@@ -75,8 +75,6 @@ module.exports = {
         event.hosts = director.name;
     }
 
-    // TODO: finish this
-
     return exits.success(event);
   }
 

@@ -81,46 +81,9 @@ class CalendarDb {
     getEvents (start = moment().startOf('day').toISOString(true), end = moment().add(1, 'days').startOf('day').toISOString(true), query = {}) {
         var events = [];
 
-        // Function to process a single occurrence of an event with an exception if it exists
-        var processRecord = (calendar, exception, eventStart) => {
-            var criteria = {
-                calendarID: calendar.ID,
-                exceptionType: exception.exceptionType || null,
-                exceptionID: exception.ID || null,
-                exceptionReason: exception.exceptionReason || null,
-                exceptionTime: exception.exceptionTime || null,
-                type: exception.type && exception.type !== null ? exception.type : calendar.type,
-                priority: exception.priority && exception.priority !== null ? exception.priority : (calendar.priority !== null ? calendar.priority : this.getDefaultPriority(calendar)),
-                active: calendar.active,
-                eventID: exception.eventID && exception.eventID !== null ? exception.eventID : calendar.eventID,
-                playlistID: exception.playlistID && exception.playlistID !== null ? exception.playlistID : calendar.playlistID,
-                director: exception.director && exception.director !== null ? exception.director : calendar.director,
-                hosts: exception.hosts && exception.hosts !== null ? exception.hosts : calendar.hosts || "Unknown Hosts",
-                name: exception.name && exception.name !== null ? exception.name : calendar.name || "Unknown Event",
-                description: exception.description && exception.description !== null ? exception.description : calendar.description,
-                logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo,
-                banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner,
-                start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true),
-            }
-
-            // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.
-            if (exception.hostDJ !== null) {
-                criteria.hostDJ = exception.hostDJ;
-                criteria.cohostDJ1 = exception.cohostDJ1;
-                criteria.cohostDJ2 = exception.cohostDJ2;
-                criteria.cohostDJ3 = exception.cohostDJ3;
-            } else {
-                criteria.hostDJ = calendar.hostDJ;
-                criteria.cohostDJ1 = calendar.cohostDJ1;
-                criteria.cohostDJ2 = calendar.cohostDJ2;
-                criteria.cohostDJ3 = calendar.cohostDJ3;
-            }
-
-            // Calculate end time after forming the object because we must refer to criteria.start
-            criteria.end = exception.duration && exception.duration !== null ? moment(criteria.start).add(exception.duration, 'minutes').toISOString(true) : moment(criteria.start).add(calendar.duration, 'minutes').toISOString(true);
-
-            // Calculate duration
-            criteria.duration = moment(criteria.end).diff(moment(criteria.start), 'minutes');
+        // Extension of this.processRecord to also determine if the event falls within the start and end times.
+        var _processRecord = (calendar, exception, eventStart) => {
+            var criteria = this.processRecord(calendar, exception, eventStart);
 
             // This event is within our time range if one or more of the following is true:
             // A. Calendar event start is same or before generated event start.
@@ -145,10 +108,10 @@ class CalendarDb {
             var exceptionIDs = [];
 
             var exceptionCompare = (a, b) => {
-                if (a.exceptionType === 'cancel' && b.exceptionType !== 'cancel') return -1;
-                if (b.exceptionType === 'cancel' && a.exceptionType !== 'cancel') return 1;
-                if (a.exceptionType === 'cancel-system' && b.exceptionType !== 'cancel-system') return -1;
-                if (b.exceptionType === 'cancel-system' && a.exceptionType !== 'cancel-system') return 1;
+                if (a.exceptionType === 'canceled' && b.exceptionType !== 'canceled') return -1;
+                if (b.exceptionType === 'canceled' && a.exceptionType !== 'canceled') return 1;
+                if (a.exceptionType === 'canceled-system' && b.exceptionType !== 'canceled-system') return -1;
+                if (b.exceptionType === 'canceled-system' && a.exceptionType !== 'canceled-system') return 1;
                 if (a.exceptionType === 'updated' && b.exceptionType !== 'updated') return -1;
                 if (b.exceptionType === 'updated' && a.exceptionType !== 'updated') return 1;
                 if (a.exceptionType === 'updated-system' && b.exceptionType !== 'updated-system') return -1;
@@ -180,7 +143,7 @@ class CalendarDb {
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
-                                    tempExceptions.push(exc);
+                                    tempExceptions.push(Object.assign(exc, { exceptionID: cal.ID }));
                                 })
                             }
                         } catch (e) {
@@ -198,9 +161,9 @@ class CalendarDb {
                         });
                         if (tempExceptions.length > 0) {
                             tempExceptions.sort(exceptionCompare);
-                            processRecord(tempCal, tempExceptions[ 0 ], calendar.start || calendar.createdAt);
+                            _processRecord(tempCal, tempExceptions[ 0 ], calendar.start || calendar.createdAt);
                         } else {
-                            processRecord(tempCal, {
+                            _processRecord(tempCal, {
                                 exceptionType: cal.exceptionType,
                                 ID: cal.ID,
                                 calendarID: cal.calendarID,
@@ -253,9 +216,9 @@ class CalendarDb {
 
                     if (tempExceptions.length > 0) {
                         tempExceptions.sort(exceptionCompare);
-                        processRecord(calendar, tempExceptions[ 0 ], eventStart);
+                        _processRecord(calendar, tempExceptions[ 0 ], eventStart);
                     } else {
-                        processRecord(calendar, {}, eventStart);
+                        _processRecord(calendar, {}, eventStart);
                     }
                 }
 
@@ -276,7 +239,7 @@ class CalendarDb {
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
-                                    tempExceptions.push(exc);
+                                    tempExceptions.push(Object.assign(exc, { exceptionID: cal.ID }));
                                 })
                             }
                         } catch (e) {
@@ -294,9 +257,9 @@ class CalendarDb {
                         });
                         if (tempExceptions.length > 0) {
                             tempExceptions.sort(exceptionCompare);
-                            processRecord(tempCal, tempExceptions[ 0 ], eventStart);
+                            _processRecord(tempCal, tempExceptions[ 0 ], eventStart);
                         } else {
-                            processRecord(tempCal, {
+                            _processRecord(tempCal, {
                                 exceptionType: cal.exceptionType,
                                 ID: cal.ID,
                                 calendarID: cal.calendarID,
@@ -329,9 +292,9 @@ class CalendarDb {
 
                 if (tempExceptions.length > 0) {
                     tempExceptions.sort(exceptionCompare);
-                    processRecord(calendar, tempExceptions[ 0 ], calendar.schedule.oneTime);
+                    _processRecord(calendar, tempExceptions[ 0 ], calendar.schedule.oneTime);
                 } else {
-                    processRecord(calendar, {}, calendar.schedule.oneTime);
+                    _processRecord(calendar, {}, calendar.schedule.oneTime);
                 }
 
                 // Process additional exceptions
@@ -350,7 +313,7 @@ class CalendarDb {
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
-                                    tempExceptions.push(exc);
+                                    tempExceptions.push(Object.assign(exc, { exceptionID: cal.ID }));
                                 })
                             }
                         } catch (e) {
@@ -368,9 +331,9 @@ class CalendarDb {
                         });
                         if (tempExceptions.length > 0) {
                             tempExceptions.sort(exceptionCompare);
-                            processRecord(tempCal, tempExceptions[ 0 ], calendar.schedule.oneTime);
+                            _processRecord(tempCal, tempExceptions[ 0 ], calendar.schedule.oneTime);
                         } else {
-                            processRecord(tempCal, {
+                            _processRecord(tempCal, {
                                 exceptionType: cal.exceptionType,
                                 ID: cal.ID,
                                 calendarID: cal.calendarID,
@@ -587,11 +550,11 @@ class CalendarDb {
             // If exception type is additional and no newTime and/or duration provided, this is an invalid event.
             if ((!event.newTime || !event.duration) && event.exceptionType === 'additional') return false;
         } else {
-            // If this is a main calendar event, it must have event.schedule and it either must have a schedules or a oneTime property in event.schedule.
+            // If this is a main calendar event, it must have a schedules or a oneTime property in event.schedule if event.schedule is not null.
             if (event.schedule !== null && !event.schedule.schedules && !event.schedule.oneTime) return false;
 
-            // If no duration is specified for a main calendar event, this is an invalid event.
-            if (!event.duration) return false;
+            // If no duration is specified for a main calendar event, default to 0 (unscheduled).
+            if (!event.duration) event.duration = 0;
 
             // If later.js schedules provided but no end time, this is an invalid event (will result in infinite loops when doing checks).
             if (event.schedule.schedules && (!event.end)) return false;
@@ -622,4 +585,65 @@ class CalendarDb {
                 return -1;
         }
     }
+
+    processRecord (calendar, exception, eventStart) {
+        var criteria = {
+            calendarID: calendar.ID || exception.calendarID, // ID of the main calendar event
+            exceptionID: exception.ID || null, // ID of the exception record, if an exception was applied
+            exceptionExceptionID: exception.exceptionID || null, // If this exception overrides an 'additional' type exception, this is the ID of the exception this exception overrides.
+            exceptionType: exception.exceptionType || null, // If an exception is applied, this is the type (additional, updated, updated-system, canceled, canceled-system)
+            exceptionReason: exception.exceptionReason || null, // If an exception is applied, this is the provided reason for it.
+            exceptionTime: exception.exceptionTime && exception.exceptionTime !== null ? moment(exception.exceptionTime).toISOString(true) : null, // If an exception is applied that overrides an event's start time, this is the event's original start time.
+            type: exception.type && exception.type !== null ? exception.type : calendar.type, // Event type (show, remote, sports, prerecord, genre, playlist, event, onair-booking, prod-booking, office-hours)
+            priority: exception.priority && exception.priority !== null ? exception.priority : (calendar.priority !== null ? calendar.priority : this.getDefaultPriority(calendar)), // Priority of the event. -1 = no conflict detection. 0 and up = overridden by any events scheduled that have the same or higher priority.
+            active: calendar.active, // True if the event is active, false if it is not.
+            eventID: exception.eventID && exception.eventID !== null ? exception.eventID : calendar.eventID, // ID of the radioDJ manual event to fire, for genre events
+            playlistID: exception.playlistID && exception.playlistID !== null ? exception.playlistID : calendar.playlistID, // ID of the playlist to queue, for playlist and prerecord events.
+            director: exception.director && exception.director !== null ? exception.director : calendar.director, // ID of the director, for office-hours events.
+            hosts: exception.hosts && exception.hosts !== null ? exception.hosts : calendar.hosts || "Unknown Hosts", // String of host names based on director and/or DJ IDs.
+            name: exception.name && exception.name !== null ? exception.name : calendar.name || "Unknown Event", // Name of event
+            description: exception.description && exception.description !== null ? exception.description : calendar.description, // Description of event
+            logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo, // URL to the event logo
+            banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner, // URL to the event banner
+            start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true), // Start time of the event
+        }
+
+        // Generate a unique string for this specific event time so we can differentiate recurring events easily.
+        if (criteria.exceptionType === null) {
+            criteria.unique = `${criteria.calendarID}_${criteria.start}`;
+        } else if (criteria.exceptionExceptionID !== null && [ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) === -1) {
+            criteria.unique = `${criteria.exceptionExceptionID}_${criteria.start}_a`;
+        } else if (criteria.exceptionExceptionID !== null && [ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) !== -1) {
+            criteria.unique = `${criteria.exceptionExceptionID}_${criteria.exceptionTime}_a`;
+        } else if ([ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) === -1) {
+            criteria.unique = `${criteria.calendarID}_${criteria.start}`;
+        } else {
+            criteria.unique = `${criteria.calendarID}_${criteria.exceptionTime}`;
+        }
+
+        // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.
+        if (exception.hostDJ !== null) {
+            criteria.hostDJ = exception.hostDJ;
+            criteria.cohostDJ1 = exception.cohostDJ1;
+            criteria.cohostDJ2 = exception.cohostDJ2;
+            criteria.cohostDJ3 = exception.cohostDJ3;
+        } else {
+            criteria.hostDJ = calendar.hostDJ;
+            criteria.cohostDJ1 = calendar.cohostDJ1;
+            criteria.cohostDJ2 = calendar.cohostDJ2;
+            criteria.cohostDJ3 = calendar.cohostDJ3;
+        }
+
+        // Calculate end time after forming the object because we must refer to criteria.start
+        criteria.end = exception.duration && exception.duration !== null ? moment(criteria.start).add(exception.duration, 'minutes').toISOString(true) : moment(criteria.start).add(calendar.duration, 'minutes').toISOString(true);
+
+        // Calculate duration
+        criteria.duration = moment(criteria.end).diff(moment(criteria.start), 'minutes');
+
+        return criteria;
+    }
 }
+
+// If using Node.js, export as a module
+if (typeof require !== 'undefined')
+    module.exports = CalendarDb;

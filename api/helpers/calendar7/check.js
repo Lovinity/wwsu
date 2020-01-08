@@ -204,12 +204,10 @@ module.exports = {
         var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(true);
         if (eventNow) {
             if ((eventNow.type === 'prerecord' || eventNow.type === 'genre') && eventNow.playlistID !== null) {
-                // TODO: Must edit playlist helper before this will work
                 await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
             }
             if (eventNow.type === 'genre' && eventNow.eventID !== null) {
                 try {
-                    // TODO: Must edit helper first before this will work
                     await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
                 } catch (unusedE) {
                     if (sails.models.meta.memory.state === `automation_genre`) { await sails.helpers.genre.start(null, inputs.ignoreChangingState) }

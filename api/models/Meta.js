@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  // Some of the meta should persist, while other meta will not. But we want easy hack-editing (say, to force into a different state upon reboot). So use SQL.
+  // TODO: Changes were made for calendar7. Make sure they reflect in all code.
   datastore: 'nodebase',
   attributes: {
 

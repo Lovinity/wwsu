@@ -1,3 +1,5 @@
+// TODO: re-write for new calendar system
+
 module.exports = {
 
   friendlyName: 'sails.helpers.onesignal.sendEvent',
