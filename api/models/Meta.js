@@ -24,6 +24,21 @@ module.exports = {
       allowNull: true
     },
 
+    cohostDJ1: {
+      type: 'number',
+      allowNull: true
+    },
+
+    cohostDJ2: {
+      type: 'number',
+      allowNull: true
+    },
+
+    cohostDJ3: {
+      type: 'number',
+      allowNull: true
+    },
+
     show: {
       type: 'string',
       allowNull: true
@@ -111,6 +126,21 @@ module.exports = {
       type: 'number',
       allowNull: true,
       description: 'The ID of the DJ currently on the air, or null if not applicable.'
+    },
+    cohostDJ1: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the first cohost DJ on the air, or null if not applicable.'
+    },
+    cohostDJ2: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the second cohost DJ on the air, or null if not applicable.'
+    },
+    cohostDJ3: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the third cohost DJ on the air, or null if not applicable.'
     },
     attendanceID: {
       type: 'number',

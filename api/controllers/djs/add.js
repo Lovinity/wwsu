@@ -9,9 +9,11 @@ module.exports = {
     name: {
       type: 'string',
       required: true,
-      custom: function (value) { // Prevent use of space dash space in names as this will cause problems in the system
+      custom: function (value) { // Prevent use of space dash space, or "; ", in names as this will cause problems in the system
         var temp2 = value.split(' - ')
         if (temp2.length > 1) { return false }
+        var temp3 = value.split("; ")
+        if (temp3.length > 1) { return false }
         return true
       },
       description: 'The DJ to add.'

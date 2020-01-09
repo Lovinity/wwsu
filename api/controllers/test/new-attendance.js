@@ -10,7 +10,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     try {
-      await sails.helpers.attendance.createRecord('Genre: Default')
+      await sails.helpers.attendance.createRecord(null)
       return exits.success()
     } catch (e) {
       return exits.error(e)

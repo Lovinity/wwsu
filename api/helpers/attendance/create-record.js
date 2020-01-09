@@ -1,5 +1,3 @@
-// TODO: This needs re-written for the new calendar system
-
 module.exports = {
 
   friendlyName: 'attendance.createRecord',
@@ -8,9 +6,10 @@ module.exports = {
 
   inputs: {
     event: {
-      type: 'string',
-      description: 'A string specifying the event. Should correlate to the same prefix formatting as used in the calendar. If undefined, the current attendance record will be closed, but a new one will not be created.'
-    }
+      type: 'json',
+      allowNull: true,
+      description: 'Event object triggering the new attendance record. If undefined, the current attendance will be closed, but a new one will not be created. If null, an attendance record for default genre rotation will be started.'
+    },
   },
 
   fn: async function (inputs, exits) {
@@ -24,40 +23,44 @@ module.exports = {
 
       // Add a new attendance record if event is specified.
       if (inputs.event) {
-        // Find a calendar record with the provided event name. Allow up to 10 grace minutes before start time
-        var queryTitle = inputs.event
-        // For sports broadcasts, ignore anything after the sport in case the calendar event contains a " vs.".
-        if (queryTitle.startsWith('Sports: ')) {
-          queryTitle = { startsWith: inputs.event }
+
+        if (inputs.event === null) {
+          inputs.event = {
+            type: 'genre',
+            hosts: "Unknown Hosts",
+            name: "Default Rotation",
+            hostDJ: null,
+            cohostDJ1: null,
+            cohostDJ2: null,
+            cohostDJ3: null,
+          }
         }
-        var record = await sails.models.calendar.find({ title: queryTitle, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
-        sails.log.debug(`sails.models.calendar records found: ${record.length || 0}`)
 
         // Create the new attendance record
         var created = null
 
-        if (record.length > 0) {
+        if (inputs.event.unique && inputs.event.calendarID) {
           returnData.unique = record[ 0 ].unique
-          created = await sails.models.attendance.create({ unique: record[ 0 ].unique, dj: sails.models.meta.memory.dj, event: record[ 0 ].title, scheduledStart: moment(record[ 0 ].start).toISOString(true), scheduledEnd: moment(record[ 0 ].end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
+          created = await sails.models.attendance.create({ calendarID: inputs.event.calendarID, unique: inputs.event.unique, dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, scheduledStart: moment(inputs.event.start).toISOString(true), scheduledEnd: moment(inputs.event.end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
         } else {
-          created = await sails.models.attendance.create({ dj: sails.models.meta.memory.dj, event: inputs.event, actualStart: moment().toISOString(true) }).fetch()
+          created = await sails.models.attendance.create({ unique: "", dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, actualStart: moment().toISOString(true) }).fetch()
 
           // Broadcasts without a calendar ID are unauthorized. Log them!
-          if (inputs.event.startsWith('Show: ') || inputs.event.startsWith('Remote: ') || inputs.event.startsWith('Sports: ')) {
-            await sails.models.logs.create({ attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: inputs.event.replace('Show: ', '').replace('Remote: ', '').replace('Sports: ', ''), event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${inputs.event}`, createdAt: moment().toISOString(true) }).fetch()
+          if (['show', 'sports', 'remote'].indexOf(inputs.event.type) !== -1) {
+            await sails.models.logs.create({ attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`, event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${inputs.event.hosts} - ${inputs.event.name}`, createdAt: moment().toISOString(true) }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${inputs.event} went on the air at ${moment().format('LLL')}; this show was not scheduled to go on the air!`)
+            await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${inputs.event.hosts} - ${inputs.event.name} went on the air at ${moment().format('llll')}; this show was not scheduled to go on the air!`)
           }
         }
 
         returnData.newID = created.ID
 
         // Switch to the new record in the system
-        await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: returnData.unique || null })
+        await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: inputs.event.unique || null, calendarID: inputs.event.calendarID || null })
       } else {
-        await sails.helpers.meta.change.with({ attendanceID: null, calendarUnique: null })
+        await sails.helpers.meta.change.with({ attendanceID: null, calendarUnique: null, calendarID: null })
       }
 
       // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast

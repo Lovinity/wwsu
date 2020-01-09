@@ -16,10 +16,12 @@ module.exports = {
       required: true,
       custom: function (value) {
         var temp2 = value.split(' - ')
-        if (temp2.length === 2) { return true }
-        return false
+        if (temp2.length !== 2) { return false }
+        var temp3 = temp2.split("; ");
+        if (temp3.length > 4) { return false }
+        return true
       },
-      description: 'Name of the broadcast beginning. It must follow the format "Show host - show name".'
+      description: 'Name of the broadcast beginning. It must follow the format "DJ names/handles (each separated with "; ", maximum 4) - show name".'
     },
 
     webchat: {

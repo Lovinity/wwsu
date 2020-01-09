@@ -14,6 +14,21 @@ module.exports = {
       allowNull: true,
       description: 'The ID of the DJ currently on the air, or null if not applicable.'
     },
+    cohostDJ1: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the first cohost DJ on the air, or null if not applicable.'
+    },
+    cohostDJ2: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the second cohost DJ on the air, or null if not applicable.'
+    },
+    cohostDJ3: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the third cohost DJ on the air, or null if not applicable.'
+    },
     attendanceID: {
       type: 'number',
       allowNull: true,
@@ -227,19 +242,40 @@ module.exports = {
 
           // show key
           if (key === 'show') {
-            // If show key includes " - ", this means the value before the - is a DJ. Get the DJ ID and update meta with it. Otherwise, set it to null.
+            // If show key includes " - ", this means the value before the - are DJs, each separated by ;. Get the DJ IDs and update meta with it. Otherwise, set it to null.
             if (inputs[ key ] !== null && inputs[ key ].includes(' - ')) {
               var tmp = inputs[ key ].split(' - ')[ 0 ]
-              var dj = await sails.models.djs.findOrCreate({ name: tmp }, { name: tmp, lastSeen: moment().toISOString(true) })
+              tmp = tmp.split("; ");
 
-              // Update lastSeen record for the DJ
+              if (temp[ 0 ] && temp[ 0 ] !== 'Unknown Hosts')
+                var dj = await sails.models.djs.findOrCreate({ name: tmp[ 0 ] }, { name: tmp[ 0 ], lastSeen: moment().toISOString(true) })
+              if (temp[ 1 ])
+                var dj2 = await sails.models.djs.findOrCreate({ name: tmp[ 1 ] }, { name: tmp[ 1 ], lastSeen: moment().toISOString(true) })
+              if (temp[ 2 ])
+                var dj3 = await sails.models.djs.findOrCreate({ name: tmp[ 2 ] }, { name: tmp[ 2 ], lastSeen: moment().toISOString(true) })
+              if (temp[ 3 ])
+                var dj4 = await sails.models.djs.findOrCreate({ name: tmp[ 3 ] }, { name: tmp[ 3 ], lastSeen: moment().toISOString(true) })
+
+              // Update lastSeen record for the DJs
               if (dj && dj !== null) { await sails.models.djs.update({ ID: dj.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
+              if (dj2 && dj2 !== null) { await sails.models.djs.update({ ID: dj2.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
+              if (dj3 && dj3 !== null) { await sails.models.djs.update({ ID: dj3.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
+              if (dj4 && dj4 !== null) { await sails.models.djs.update({ ID: dj4.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
 
-              sails.models.meta.memory.dj = dj.ID
+              sails.models.meta.memory.dj = dj ? dj.ID || null : null;
+              sails.models.meta.memory.cohostDJ1 = dj2 ? dj2.ID || null : null;
+              sails.models.meta.memory.cohostDJ2 = dj3 ? dj3.ID || null : null;
+              sails.models.meta.memory.cohostDJ3 = dj4 ? dj4.ID || null : null;
             } else {
               sails.models.meta.memory.dj = null
+              sails.models.meta.memory.cohostDJ1 = null;
+              sails.models.meta.memory.cohostDJ2 = null;
+              sails.models.meta.memory.cohostDJ3 = null;
             }
             push.dj = sails.models.meta.memory.dj
+            push.cohostDJ1 = sails.models.meta.memory.cohostDJ1
+            push.cohostDJ2 = sails.models.meta.memory.cohostDJ2
+            push.cohostDJ3 = sails.models.meta.memory.cohostDJ3
           }
 
           // Do stuff if changing queueFinish and trackFinish

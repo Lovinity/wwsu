@@ -390,6 +390,12 @@ class CalendarDb {
     // Check if an event will override other events or get overridden by other events.
     // This should ALWAYS be run before adding calendar or exceptions to the database, AFTER first running verify on the event object.
     checkConflicts (event) {
+
+        // TODO: account for "updated" event exception types
+
+        // No conflict check necessary of schedule is null and newTime is not provided
+        if ((!event.schedule || event.schedule === null) && !event.newTime) return { overridden: [], overriding: [] };
+
         var eventPriority = event.priority && event.priority !== null ? event.priority : this.getDefaultPriority(event)
         var error;
         var end = event.end && event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || (event.schedule && event.schedule.oneTime ? event.schedule.oneTime : undefined) || event.start).add(event.duration, 'minutes').toISOString(true);
@@ -609,16 +615,17 @@ class CalendarDb {
         }
 
         // Generate a unique string for this specific event time so we can differentiate recurring events easily.
+        // Note: The start time in unique strings should be UTC to avoid Daylight Savings complications
         if (criteria.exceptionType === null) {
-            criteria.unique = `${criteria.calendarID}_${criteria.start}`;
+            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}`;
         } else if (criteria.exceptionExceptionID !== null && [ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) === -1) {
-            criteria.unique = `${criteria.exceptionExceptionID}_${criteria.start}_a`;
+            criteria.unique = `${criteria.exceptionExceptionID}_${moment.utc(criteria.start).toISOString(false)}_a`;
         } else if (criteria.exceptionExceptionID !== null && [ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) !== -1) {
-            criteria.unique = `${criteria.exceptionExceptionID}_${criteria.exceptionTime}_a`;
+            criteria.unique = `${criteria.exceptionExceptionID}_${moment.utc(criteria.exceptionTime).toISOString(false)}_a`;
         } else if ([ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) === -1) {
-            criteria.unique = `${criteria.calendarID}_${criteria.start}`;
+            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}`;
         } else {
-            criteria.unique = `${criteria.calendarID}_${criteria.exceptionTime}`;
+            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.exceptionTime).toISOString(false)}`;
         }
 
         // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.

@@ -16,10 +16,12 @@ module.exports = {
       required: true,
       custom: function (value) {
         var temp2 = value.split(' - ')
-        if (temp2.length === 2) { return true }
-        return false
+        if (temp2.length !== 2) { return false }
+        var temp3 = temp2.split("; ");
+        if (temp3.length > 4) { return false }
+        return true
       },
-      description: 'Name of the show beginning. It must follow the format "DJ name/handle - show name".'
+      description: 'Name of the show beginning. It must follow the format "DJ names/handles (each separated with "; ", maximum 4) - show name".'
     },
 
     webchat: {
@@ -76,10 +78,10 @@ module.exports = {
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.start)
 
         // Queue a show opener if applicable
-        if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') {
-          await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Openers']], 'Bottom', 1)
+        if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') {
+          await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Openers' ] ], 'Bottom', 1)
         } else {
-          await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Openers']], 'Bottom', 1)
+          await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Openers' ] ], 'Bottom', 1)
         }
 
         var queueLength = await sails.helpers.songs.calculateQueueLength()

@@ -411,7 +411,21 @@ module.exports.bootstrap = async function (done) {
               if (firstNoMeta < 0 && breakQueueLength < 0 && sails.models.status.errorCheck.trueZero <= 0) {
                 if (sails.models.meta.memory.state === 'automation_live') {
                   await sails.helpers.meta.change.with({ state: 'live_on' })
-                  attendance = await sails.helpers.attendance.createRecord(`Show: ${sails.models.meta.memory.show}`)
+                  var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+                  if (eventNow.type === 'show' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
+                    attendance = await sails.helpers.attendance.createRecord(eventNow)
+                  } else {
+                    var temp = sails.models.meta.memory.show.split(" - ");
+                    attendance = await sails.helpers.attendance.createRecord({
+                      type: 'show',
+                      dj: sails.models.meta.memory.dj,
+                      cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                      cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                      cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                      hosts: temp[ 0 ],
+                      name: temp[ 1 ]
+                    })
+                  }
                   await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>DJ is now live.</strong><br />DJ - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
                     .tolerate((err) => {
                       // Do not throw for errors, but log it.
@@ -421,7 +435,20 @@ module.exports.bootstrap = async function (done) {
                 }
                 if (sails.models.meta.memory.state === 'automation_sports') {
                   await sails.helpers.meta.change.with({ state: 'sports_on' })
-                  attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+                  var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+                  if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
+                    attendance = await sails.helpers.attendance.createRecord(eventNow)
+                  } else {
+                    attendance = await sails.helpers.attendance.createRecord({
+                      type: 'sports',
+                      dj: sails.models.meta.memory.dj,
+                      cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                      cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                      cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                      hosts: "Raider Sports",
+                      name: sails.models.meta.memory.show
+                    })
+                  }
                   await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
                     .tolerate((err) => {
                       // Do not throw for errors, but log it.
@@ -431,7 +458,21 @@ module.exports.bootstrap = async function (done) {
                 }
                 if (sails.models.meta.memory.state === 'automation_remote') {
                   await sails.helpers.meta.change.with({ state: 'remote_on' })
-                  attendance = await sails.helpers.attendance.createRecord(`Remote: ${sails.models.meta.memory.show}`)
+                  var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+                  if (eventNow.type === 'remote' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
+                    attendance = await sails.helpers.attendance.createRecord(eventNow)
+                  } else {
+                    var temp = sails.models.meta.memory.show.split(" - ");
+                    attendance = await sails.helpers.attendance.createRecord({
+                      type: 'remote',
+                      dj: sails.models.meta.memory.dj,
+                      cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                      cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                      cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                      hosts: temp[ 0 ],
+                      name: temp[ 1 ]
+                    })
+                  }
                   await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote broadcast is now on the air.</strong><br />Host - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
                     .tolerate((err) => {
                       // Do not throw for errors, but log it.
@@ -441,7 +482,20 @@ module.exports.bootstrap = async function (done) {
                 }
                 if (sails.models.meta.memory.state === 'automation_sportsremote') {
                   await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
-                  attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+                  var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+                  if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
+                    attendance = await sails.helpers.attendance.createRecord(eventNow)
+                  } else {
+                    attendance = await sails.helpers.attendance.createRecord({
+                      type: 'sports',
+                      dj: sails.models.meta.memory.dj,
+                      cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                      cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                      cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                      hosts: "Raider Sports",
+                      name: sails.models.meta.memory.show
+                    })
+                  }
                   await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
                     .tolerate((err) => {
                       // Do not throw for errors, but log it.
@@ -555,20 +609,34 @@ module.exports.bootstrap = async function (done) {
                     // State switching should be pushed in sockets
                     sails.helpers.meta.change.with({ state: 'prerecord_on' })
                       .then(() => {
-                        sails.helpers.attendance.createRecord(`Prerecord: ${sails.models.meta.memory.playlist}`)
-                          .then((attendance) => {
-                            (async () => {
-                              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord started airing.</strong><br />Prerecord: ${sails.models.meta.memory.playlist}` }).fetch()
-                                .tolerate((err) => {
-                                  // Do not throw for errors, but log it.
-                                  sails.log.error(err)
-                                })
-                            })()
-                            sails.helpers.onesignal.sendEvent(`Prerecord: `, sails.models.meta.memory.playlist, `Prerecorded Show`, attendance.unique)
-                              .then(() => {
-
-                              })
+                        var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+                        if (eventNow.type === 'prerecord' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
+                          var _attendance = sails.helpers.attendance.createRecord(eventNow)
+                        } else {
+                          var temp = sails.models.meta.memory.show.split(" - ");
+                          var _attendance = sails.helpers.attendance.createRecord({
+                            type: 'show',
+                            dj: sails.models.meta.memory.dj,
+                            cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                            cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                            cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                            hosts: temp[ 0 ],
+                            name: temp[ 1 ]
                           })
+                        }
+                        _attendance.then((attendance) => {
+                          (async () => {
+                            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: `<strong>A prerecord started airing.</strong><br />Prerecord: ${sails.models.meta.memory.show}` }).fetch()
+                              .tolerate((err) => {
+                                // Do not throw for errors, but log it.
+                                sails.log.error(err)
+                              })
+                          })()
+                          sails.helpers.onesignal.sendEvent(`Prerecord: `, sails.models.meta.memory.show, `Prerecorded Show`, attendance.unique)
+                            .then(() => {
+
+                            })
+                        })
                       })
                   }
                   // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
@@ -652,7 +720,21 @@ module.exports.bootstrap = async function (done) {
           if (sails.models.meta.memory.state === 'automation_live' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'live_on' })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
-            attendance = await sails.helpers.attendance.createRecord(`Show: ${sails.models.meta.memory.show}`)
+            var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+            if (eventNow.type === 'show' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
+              attendance = await sails.helpers.attendance.createRecord(eventNow)
+            } else {
+              var temp = sails.models.meta.memory.show.split(" - ");
+              attendance = await sails.helpers.attendance.createRecord({
+                type: 'show',
+                dj: sails.models.meta.memory.dj,
+                cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                hosts: temp[ 0 ],
+                name: temp[ 1 ]
+              })
+            }
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>DJ is now live.</strong><br />DJ - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
@@ -664,7 +746,20 @@ module.exports.bootstrap = async function (done) {
           if (sails.models.meta.memory.state === 'automation_sports' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'sports_on' })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
-            attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+            var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+            if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
+              attendance = await sails.helpers.attendance.createRecord(eventNow)
+            } else {
+              attendance = await sails.helpers.attendance.createRecord({
+                type: 'sports',
+                dj: sails.models.meta.memory.dj,
+                cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                hosts: "Raider Sports",
+                name: sails.models.meta.memory.show
+              })
+            }
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
@@ -675,7 +770,21 @@ module.exports.bootstrap = async function (done) {
           // If we are preparing for remote, do some stuff
           if (sails.models.meta.memory.state === 'automation_remote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'remote_on' })
-            attendance = await sails.helpers.attendance.createRecord(`Remote: ${sails.models.meta.memory.show}`)
+            var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+            if (eventNow.type === 'remote' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
+              attendance = await sails.helpers.attendance.createRecord(eventNow)
+            } else {
+              var temp = sails.models.meta.memory.show.split(" - ");
+              attendance = await sails.helpers.attendance.createRecord({
+                type: 'remote',
+                dj: sails.models.meta.memory.dj,
+                cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                hosts: temp[ 0 ],
+                name: temp[ 1 ]
+              })
+            }
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote broadcast is now on the air.</strong><br />Host - Show: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.
@@ -686,7 +795,20 @@ module.exports.bootstrap = async function (done) {
           // If we are preparing for sportsremote, do some stuff if we are playing the stream track
           if (sails.models.meta.memory.state === 'automation_sportsremote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
-            attendance = await sails.helpers.attendance.createRecord(`Sports: ${sails.models.meta.memory.show}`)
+            var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+            if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
+              attendance = await sails.helpers.attendance.createRecord(eventNow)
+            } else {
+              attendance = await sails.helpers.attendance.createRecord({
+                type: 'sports',
+                dj: sails.models.meta.memory.dj,
+                cohostDJ1: sails.models.meta.memory.cohostDJ1,
+                cohostDJ2: sails.models.meta.memory.cohostDJ2,
+                cohostDJ3: sails.models.meta.memory.cohostDJ3,
+                hosts: "Raider Sports",
+                name: sails.models.meta.memory.show
+              })
+            }
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>A remote sports broadcast has started.</strong><br />Sport: ' + sails.models.meta.memory.show + '<br />Topic: ' + sails.models.meta.memory.topic }).fetch()
               .tolerate((err) => {
                 // Do not throw for errors, but log it.

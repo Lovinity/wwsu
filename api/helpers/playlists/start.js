@@ -20,7 +20,7 @@ module.exports = {
   fn: async function (inputs, exits) {
     sails.log.debug('Helper playlists.start called.')
     try {
-      var forced = inputs.event.type === 'prerecord' && sails.models.meta.memory.calendarUnique !== inputs.event.unique && moment().subtract(5, 'minutes').isSameOrAfter(moment(inputs.event.start));
+      var forced = inputs.event.type === 'prerecord' && sails.models.meta.memory.state.startsWith("prerecord_") && sails.models.meta.memory.calendarUnique !== inputs.event.unique && moment().subtract(5, 'minutes').isSameOrAfter(moment(inputs.event.start));
       // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, we're in the middle of changing states and ignoreChangingState is false.
       if (!sails.models.playlists.queuing && (((sails.models.meta.memory.changingState === null || inputs.ignoreChangingState) && ((sails.models.meta.memory.state === 'automation_on' || sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_genre' || forced))))) {
         sails.log.verbose(`Processing helper.`)
@@ -116,7 +116,7 @@ module.exports = {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, true) // Leave requests in the queue for standard playlists.
           await sails.helpers.rest.cmd('EnableAssisted', 0)
-          var attendance = await sails.helpers.attendance.createRecord(`Playlist: ${inputs.event.name}`)
+          var attendance = await sails.helpers.attendance.createRecord(inputs.event)
           await sails.helpers.meta.change.with({ state: 'automation_playlist', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: `${inputs.event.hosts} - ${inputs.event.name}` })
           await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + inputs.event.name, event: '<strong>Playlist started.</strong><br />Playlist in RadioDJ: ' + theplaylist.name }).fetch()
             .tolerate((err) => {

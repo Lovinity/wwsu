@@ -15,7 +15,7 @@ module.exports = {
       type: 'string',
       required: true,
       isIn: sails.config.custom.sports,
-      description: 'Name of the sport that is being broadcasted.'
+      description: 'Name of the sport that is being broadcast.'
     },
 
     webchat: {
