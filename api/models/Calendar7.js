@@ -132,14 +132,18 @@ module.exports = {
         sails.log.silly(`calendar socket: ${data}`)
         sails.sockets.broadcast('calendar7', 'calendar7', data)
 
-        // If setting active to false, delete all exceptions
+        // If setting active to false, delete all exceptions and notify subscribers of a discontinued show
         if (!updatedRecord.active) {
             (async () => {
                 await sails.helpers.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
+                var event = sails.models.calendar7.calendardb.processRecord(updatedRecord, {}, inputs.start);
+                await sails.helpers.onesignal.sendEvent(event, false, false)
+            })()
+        } else {
+            (async () => {
+                await sails.helpers.onesignal.sendEvent(event, false, true)
             })()
         }
-
-        // TODO: subscription notifications of changes
 
         return proceed()
     },
@@ -153,9 +157,9 @@ module.exports = {
         // Remove all calendar exceptions
         (async () => {
             await sails.helpers.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
+            var event = sails.models.calendar7.calendardb.processRecord(destroyedRecord, {}, inputs.start);
+            await sails.helpers.onesignal.sendEvent(event, false, false)
         })()
-
-        // TODO: subscription notifications of changes
         
         return proceed()
     }

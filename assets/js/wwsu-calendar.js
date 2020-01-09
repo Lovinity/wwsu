@@ -615,14 +615,13 @@ class CalendarDb {
         }
 
         // Generate a unique string for this specific event time so we can differentiate recurring events easily.
-        // Note: The start time in unique strings should be UTC to avoid Daylight Savings complications
-        if (criteria.exceptionType === null) {
-            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}`;
-        } else if (criteria.exceptionExceptionID !== null && [ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) === -1) {
-            criteria.unique = `${criteria.exceptionExceptionID}_${moment.utc(criteria.start).toISOString(false)}_a`;
-        } else if (criteria.exceptionExceptionID !== null && [ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) !== -1) {
-            criteria.unique = `${criteria.exceptionExceptionID}_${moment.utc(criteria.exceptionTime).toISOString(false)}_a`;
-        } else if ([ 'updated', 'updated-system' ].indexOf(criteria.exceptionType) === -1) {
+        // Note: The start time in unique strings should be UTC to avoid Daylight Savings complications.
+        // Format: calendarID_originalEventStartTime[_additionalExceptionID]. additionalExceptionID is only provided if we have an additional exception, or an exception of an additional exception, because additional exceptions should be treated as separate events.
+        if (criteria.exceptionType === 'additional') {
+            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}_${criteria.exceptionID}`;
+        } else if (criteria.exceptionExceptionID !== null && criteria.exceptionTime !== null) {
+            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.exceptionTime).toISOString(false)}_${criteria.exceptionExceptionID}`;
+        } else if (criteria.exceptionTime === null) {
             criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}`;
         } else {
             criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.exceptionTime).toISOString(false)}`;

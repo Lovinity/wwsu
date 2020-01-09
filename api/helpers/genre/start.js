@@ -59,7 +59,7 @@ module.exports = {
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await sails.helpers.onesignal.sendEvent(`Genre: `, inputs.event.name, `Genre`, attendance.unique)
+              await sails.helpers.onesignal.sendEvent(inputs.event, true)
             } else {
               attendance = await sails.helpers.attendance.createRecord(null)
               await sails.helpers.meta.change.with({ state: 'automation_on', genre: 'Default', playlistPlayed: moment().toISOString(true) })

@@ -414,6 +414,7 @@ module.exports.bootstrap = async function (done) {
                   var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
                   if (eventNow.type === 'show' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
                     attendance = await sails.helpers.attendance.createRecord(eventNow)
+                    await sails.helpers.onesignal.sendEvent(eventNow, true);
                   } else {
                     var temp = sails.models.meta.memory.show.split(" - ");
                     attendance = await sails.helpers.attendance.createRecord({
@@ -431,13 +432,13 @@ module.exports.bootstrap = async function (done) {
                       // Do not throw for errors, but log it.
                       sails.log.error(err)
                     })
-                  await sails.helpers.onesignal.sendEvent(`Show: `, sails.models.meta.memory.show, `Live Show`, attendance.unique)
                 }
                 if (sails.models.meta.memory.state === 'automation_sports') {
                   await sails.helpers.meta.change.with({ state: 'sports_on' })
                   var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
                   if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
                     attendance = await sails.helpers.attendance.createRecord(eventNow)
+                    await sails.helpers.onesignal.sendEvent(eventNow, true);
                   } else {
                     attendance = await sails.helpers.attendance.createRecord({
                       type: 'sports',
@@ -454,13 +455,13 @@ module.exports.bootstrap = async function (done) {
                       // Do not throw for errors, but log it.
                       sails.log.error(err)
                     })
-                  await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
                 }
                 if (sails.models.meta.memory.state === 'automation_remote') {
                   await sails.helpers.meta.change.with({ state: 'remote_on' })
                   var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
                   if (eventNow.type === 'remote' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
                     attendance = await sails.helpers.attendance.createRecord(eventNow)
+                    await sails.helpers.onesignal.sendEvent(eventNow, true);
                   } else {
                     var temp = sails.models.meta.memory.show.split(" - ");
                     attendance = await sails.helpers.attendance.createRecord({
@@ -478,13 +479,13 @@ module.exports.bootstrap = async function (done) {
                       // Do not throw for errors, but log it.
                       sails.log.error(err)
                     })
-                  await sails.helpers.onesignal.sendEvent(`Remote: `, sails.models.meta.memory.show, `Remote Broadcast`, attendance.unique)
                 }
                 if (sails.models.meta.memory.state === 'automation_sportsremote') {
                   await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
                   var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
                   if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
                     attendance = await sails.helpers.attendance.createRecord(eventNow)
+                    await sails.helpers.onesignal.sendEvent(eventNow, true);
                   } else {
                     attendance = await sails.helpers.attendance.createRecord({
                       type: 'sports',
@@ -501,7 +502,6 @@ module.exports.bootstrap = async function (done) {
                       // Do not throw for errors, but log it.
                       sails.log.error(err)
                     })
-                  await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
                 }
                 if (sails.models.meta.memory.state.includes('_returning')) {
                   switch (sails.models.meta.memory.state) {
@@ -611,7 +611,10 @@ module.exports.bootstrap = async function (done) {
                       .then(() => {
                         var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
                         if (eventNow.type === 'prerecord' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
-                          var _attendance = sails.helpers.attendance.createRecord(eventNow)
+                          _attendance = sails.helpers.attendance.createRecord(eventNow);
+                          (async (_eventNow) => {
+                            await sails.helpers.onesignal.sendEvent(_eventNow, true);
+                          })(eventNow);
                         } else {
                           var temp = sails.models.meta.memory.show.split(" - ");
                           var _attendance = sails.helpers.attendance.createRecord({
@@ -632,10 +635,6 @@ module.exports.bootstrap = async function (done) {
                                 sails.log.error(err)
                               })
                           })()
-                          sails.helpers.onesignal.sendEvent(`Prerecord: `, sails.models.meta.memory.show, `Prerecorded Show`, attendance.unique)
-                            .then(() => {
-
-                            })
                         })
                       })
                   }
@@ -723,6 +722,7 @@ module.exports.bootstrap = async function (done) {
             var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
             if (eventNow.type === 'show' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
               attendance = await sails.helpers.attendance.createRecord(eventNow)
+              await sails.helpers.onesignal.sendEvent(eventNow, true);
             } else {
               var temp = sails.models.meta.memory.show.split(" - ");
               attendance = await sails.helpers.attendance.createRecord({
@@ -740,7 +740,6 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Show: `, sails.models.meta.memory.show, `Live Show`, attendance.unique)
           }
           // If we are preparing for sports, do some stuff if queue is done
           if (sails.models.meta.memory.state === 'automation_sports' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
@@ -749,6 +748,7 @@ module.exports.bootstrap = async function (done) {
             var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
             if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
               attendance = await sails.helpers.attendance.createRecord(eventNow)
+              await sails.helpers.onesignal.sendEvent(eventNow, true);
             } else {
               attendance = await sails.helpers.attendance.createRecord({
                 type: 'sports',
@@ -765,7 +765,6 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
           }
           // If we are preparing for remote, do some stuff
           if (sails.models.meta.memory.state === 'automation_remote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
@@ -773,6 +772,7 @@ module.exports.bootstrap = async function (done) {
             var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
             if (eventNow.type === 'remote' && sails.models.meta.memory.show === `${eventNow.hosts} - ${eventNow.name}`) {
               attendance = await sails.helpers.attendance.createRecord(eventNow)
+              await sails.helpers.onesignal.sendEvent(eventNow, true);
             } else {
               var temp = sails.models.meta.memory.show.split(" - ");
               attendance = await sails.helpers.attendance.createRecord({
@@ -790,7 +790,6 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Remote: `, sails.models.meta.memory.show, `Remote Broadcast`, attendance.unique)
           }
           // If we are preparing for sportsremote, do some stuff if we are playing the stream track
           if (sails.models.meta.memory.state === 'automation_sportsremote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
@@ -798,6 +797,7 @@ module.exports.bootstrap = async function (done) {
             var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
             if (eventNow.type === 'sports' && sails.models.meta.memory.show === eventNow.name.split(" vs.")[ 0 ]) {
               attendance = await sails.helpers.attendance.createRecord(eventNow)
+              await sails.helpers.onesignal.sendEvent(eventNow, true);
             } else {
               attendance = await sails.helpers.attendance.createRecord({
                 type: 'sports',
@@ -814,7 +814,6 @@ module.exports.bootstrap = async function (done) {
                 // Do not throw for errors, but log it.
                 sails.log.error(err)
               })
-            await sails.helpers.onesignal.sendEvent(`Sports: `, sails.models.meta.memory.show, `Sports Broadcast`, attendance.unique)
           }
           // If returning from break, do stuff once queue is empty
           if (sails.models.meta.memory.state.includes('_returning') && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {

@@ -1,80 +1,82 @@
-// TODO: re-write for new calendar system
-
 module.exports = {
 
   friendlyName: 'sails.helpers.onesignal.sendEvent',
 
-  description: 'Send push notifications out for a new show/programming that just went out on the air.',
+  description: 'Send push notifications out for shows / programs that have started or have been changed.',
 
   inputs: {
-    prefix: {
-      type: 'string',
-      required: true,
-      description: `The event prefix that determines the type of event.`
-    },
-
     event: {
-      type: `string`,
-      required: true,
-      description: `The name of the event, without the prefix`
-    },
-
-    type: {
-      type: 'string',
-      required: true,
-      description: `The type of event this is, such as a live show, prerecord, or sports broadcast`
-    },
-
-    googleUnique: {
-      type: `string`,
+      type: 'json',
       allowNull: true,
-      description: `The Google Calendar ID of the event that just started, or null if there is no event.`
+      description: 'Event object triggering the notification. Should be the event exception when updating or canceling.'
     },
-
-    date: {
-      type: 'string',
-      description: `If specified, this notification is a cancellation notice, and this is the date which the event was cancelled for.`
-    },
-
-    cancelled: {
+    started: {
       type: 'boolean',
-      description: 'If true, and date was provided, consider event as cancelled. If false and date provided, consider event as changed date/time.'
+      defaultsTo: true,
+      description: 'If true, this is a notification that the event is on the air rather than updated or canceled.'
+    },
+    newSchedule: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'If true, event object is a main calendar event with a new regular event.schedule (for informing subscribers that the show has a permanent time change).'
+    },
+    removedException: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'If true, the event object, which is an exception, was removed. For example, reversal of cancelations or updates.'
     }
   },
 
   fn: async function (inputs, exits) {
     try {
       var devices = []
+      var records
 
-      // Find and destroy any subscriptions based on single occurrence.
-      if (inputs.googleUnique && inputs.googleUnique !== null) {
-        var records = await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: inputs.googleUnique }).fetch()
+      // Load in any one-time subscribers to this show
+      if (inputs.event.unique) {
+        var records = await sails.models.subscribers.find({ type: `calendar-once`, subtype: inputs.event.unique });
         records.map((record) => devices.push(record.device))
       }
 
-      // Find any recurring subscriptions to the event.
-      records = await sails.models.subscribers.find({ type: `calendar-all`, subtype: [inputs.event, `${inputs.prefix}${inputs.event}`] })
+      // Load in any recurring subscriptions to the event.
+      records = await sails.models.subscribers.find({ type: `calendar-all`, subtype: inputs.event.calendarID });
       records.map((record) => devices.push(record.device))
 
-      // If we have at least 1 person to receive a push notification, continue
-      if (devices.length > 0) {
-        // If date was not specified, this push notification is for a show that went on the air.
-        if (!inputs.date) {
-          await sails.helpers.onesignal.send(devices, `event`, `Subscribed show on the air!`, `${inputs.event} just started on WWSU Radio!`, (60 * 60 * 3))
+      if (inputs.started) {
+        await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} on the air!`, `${inputs.event.hosts} - ${inputs.event.name} just started on WWSU Radio!`, (60 * 60 * 3))
+        // Remove one-time subscriptions
+        if (inputs.event.unique)
+          await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: inputs.event.unique }).fetch()
+      } else if (!inputs.newSchedule && !inputs.removedException) {
+        // Changed date/time
+        if (inputs.event.exceptionType === 'updated' || inputs.event.exceptionType === 'updated-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} changed one of their show times`, `${inputs.event.hosts} - ${inputs.event.name} has changed their ${moment(inputs.event.exceptionTime).format("llll")} show to ${moment(inputs.event.start).format("llll")}`, (60 * 60 * 24 * 7))
+          // Canceled date/time
+        } else if (inputs.event.exceptionType === 'canceled' || inputs.event.exceptionType === 'canceled-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} cancelled one of their show times`, `${inputs.event.hosts} - ${inputs.event.name} was cancelled for ${moment(inputs.event.exceptionTime).format("llll")}.`, (60 * 60 * 24 * 7))
+        }
+      } else if (!inputs.newSchedule && inputs.removedException) {
+        // reversed Changed date/time
+        if (inputs.event.exceptionType === 'updated' || inputs.event.exceptionType === 'updated-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} reversed a previously changed show time`, `${inputs.event.hosts} - ${inputs.event.name} had an updated show time of ${moment(inputs.event.start).format("llll")}. This was changed back to the original time of ${moment(inputs.event.exceptionTime).format("llll")}.`, (60 * 60 * 24 * 7))
+          // reversed Canceled date/time
+        } else if (inputs.event.exceptionType === 'canceled' || inputs.event.exceptionType === 'canceled-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} reversed a cancellation`, `${inputs.event.hosts} - ${inputs.event.name} has un-canceled their show for ${moment(inputs.event.exceptionTime).format("llll")}; it will now air at that time.`, (60 * 60 * 24 * 7))
+        }
+      } else {
+        if (inputs.event.active) {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} has changed!`, `${inputs.event.hosts} - ${inputs.event.name} has changed details about the show, possibly including a new permanent show time. Please go to wwsu1069.org for more information.`, (60 * 60 * 24 * 7))
         } else {
-          // If date specified and cancelled is false, this push notification is to inform subscribers that an event changed date/time
-          if (!inputs.cancelled) {
-            await sails.helpers.onesignal.send(devices, `event`, `Subscribed show changed date/time`, `${inputs.event} will now air at ${inputs.date}.`, (60 * 60 * 24 * 7))
-            // If date specified and cancelled is true, this push notification is to inform subscribers the event was cancelled.
-          } else {
-            await sails.helpers.onesignal.send(devices, `event`, `Subscribed show cancelled`, `${inputs.event} was cancelled for ${inputs.date}.`, (60 * 60 * 24 * 7))
-          }
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} will no longer air on WWSU`, `${inputs.event.hosts} - ${inputs.event.name} has been discontinued on WWSU Radio. We have removed your subscriptions to this show automatically.`, (60 * 60 * 24 * 7))
+          // Remove both recurring and one-time subscribers
+          await sails.models.subscribers.destroy({ type: `calendar-all`, subtype: inputs.event.calendarID }).fetch();
+          await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: { startsWith: `${inputs.event.calendarID}_` } }).fetch();
         }
       }
 
       return exits.success(true)
     } catch (e) {
-      // No erroring if there's an error; just ignore it
+      // No erroring if there's an error; just log it and return false to indicate it was not successful
       sails.log.error(e)
       return exits.success(false)
     }
