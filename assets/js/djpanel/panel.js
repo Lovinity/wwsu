@@ -1,6 +1,7 @@
 /* global WWSUdb, TAFFY, WWSUreq, iziToast, JQuery, Taucharts */
 
 jQuery.noConflict()
+var calendardb = new CalendarDb();
 var DJReq
 var noReq
 var djName
@@ -207,48 +208,89 @@ function doRequests () {
       analyticsTable.rows.add(analyticsTableData)
       analyticsTable.draw()
 
+      var notices = ''
+
       // Show Notices
+      noReq.request({ method: 'POST', url: '/calendar/get', data: {} }, (response2) => {
+
+        if (!response2.calendar || !response2.exceptions)
+          return null;
+
+        calendardb = new CalendarDb(response2.calendar, response2.exceptions);
+        var events = calendardb.getEvents(undefined, moment().add(1, 'years').toISOString(true), [ { hostDJ: response.ID }, { cohostDJ1: response.ID }, { cohostDJ2: response.ID }, { cohostDJ3: response.ID } ]);
+
+        temp = document.querySelector('#dash-show')
+        if (temp !== null) {
+          var worker;
+
+          worker = events.filter((event) => event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system');
+          if (worker.length > 0) {
+            notices += `<div class="card mb-4 py-3 border-left-info">
+          <div class="card-body">
+            The following upcoming shows have been canceled:
+            <ul>`
+            worker.map((item) => {
+              notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong>. Reason: ${item.exceptionReason}</li>`
+            })
+            notices += `</ul>
+          </div>
+          </div>`
+          }
+
+          worker = events.filter((event) => event.exceptionType === 'updated' || event.exceptionType === 'updated-system');
+          if (worker.length > 0) {
+            notices += `<div class="card mb-4 py-3 border-left-info">
+          <div class="card-body">
+            The air date/time for these upcoming shows have been changed:
+            <ul>`
+            worker.map((item) => {
+              notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong> is now to air at <strong>${moment(item.start).format('llll')} - ${moment(item.end).format('llll')}. Reason: ${item.exceptionReason}</li>`
+            })
+            notices += `</ul>
+          </div>
+          </div>`
+          }
+        }
+
+        // Fill upcoming shows in cancellation dropdown
+        var temp = document.querySelector('#cancel-show')
+        if (temp !== null) {
+          temp.innerHTML = `<option value="">Choose a show / date to cancel...</option>`
+          if (events.length > 0) {
+            events
+              .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
+              .map((calendar) => {
+                temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
+              })
+          }
+        }
+
+        // Fill shows for clockwheel
+        var temp = document.querySelector('#clockwheel-show')
+        if (temp !== null) {
+          temp.innerHTML = `<option value="">Choose a show / date to assign a topic or clockwheel...</option>`
+          if (events.length > 0) {
+            events
+              .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
+              .map((calendar) => {
+                temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
+              })
+          }
+        }
+      });
+
       temp = document.querySelector('#dash-show')
       if (temp !== null) {
-        var notices = ''
-
-        if (response.cancellations.length > 0) {
-          notices += `<div class="card mb-4 py-3 border-left-info">
-          <div class="card-body">
-            The following upcoming shows have been canceled, either by you or by a director:
-            <ul>`
-          response.cancellations.map((item) => {
-            notices += `<li><strong>${moment(item.scheduledStart).format('LLL')} - ${moment(item.scheduledEnd).format('h:mm A')}</strong>. Reason: ${item.happenedReason}</li>`
-          })
-          notices += `</ul>
-          </div>
-          </div>`
-        }
-
-        if (response.changes.length > 0) {
-          notices += `<div class="card mb-4 py-3 border-left-info">
-          <div class="card-body">
-            The dates/times for your upcoming shows listed below have been changed, either by you or by a director:
-            <ul>`
-          response.changes.map((item) => {
-            notices += `<li><strong>${moment(item.originalStart).format('LLL')} - ${moment(item.originalEnd).format('h:mm A')}</strong> changed to <strong>${moment(item.start).format('LLL')} - ${moment(item.end).format('h:mm A')}</strong></li>`
-          })
-          notices += `</ul>
-          <p>Please contact a director for more information if you did not make these changes; most likely, a change was made because of a sports broadcast.</strong></p>
-          </div>
-          </div>`
-        }
-
         if (response.stats.semester.missedIDsArray.length > 0) {
           notices += `<div class="card mb-4 py-3 border-left-danger">
           <div class="card-body">
-            This semester, you did not take a required Top of the hour ID break for the show dates listed below (if a show date is listed more the once, you missed an ID more than once).
+            This semester, you did not take a required Top of the hour ID break for the shows/dates listed below (multiple entries = multiple missed IDs):
             <ul>`
           response.stats.semester.missedIDsArray.map((item) => {
-            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+            notices += `<li><strong>${item.name} on ${moment(item.date).format('llll')}</strong></li>`
           })
           notices += `</ul>
-          <p>We are required by the FCC to take a break at the top of every hour. <strong>Not doing the top of the hour break could result in suspension of your show.</strong></p>
+          <p>We are required by the FCC to take a break at the top of every hour. <strong>Not doing the top of the hour break could result in loss of your show.</strong></p>
           </div>
           </div>`
         }
@@ -259,10 +301,10 @@ function doRequests () {
             This semester, you were scheduled to do a show on the following dates / times, but you did not show up nor cancel ahead of time.
             <ul>`
           response.stats.semester.absencesArray.map((item) => {
-            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+            notices += `<li><strong>${item.name} on ${moment(item.date).format('llll')}</strong></li>`
           })
           notices += `</ul>
-          <p>DJs are required to either cancel their show or request a re-run via the "Cancel an Episode" or "Air a re-run" pages on the DJ panel (see the left menu) if they are not doing a show. Repeated unexcused absences may result in suspension of your show. Please contact a director if you canceled a show listed above in advance, or if a show listed above fell within a "shows optional" period.</p>
+          <p>You are required to notify a director in advance when you will not be airing your show. You can also cancel a show via the "Cancel an Episode" page. Repeatedly not showing up to do your show could result in loss of your show.</p>
           </div>
           </div>`
         }
@@ -273,10 +315,10 @@ function doRequests () {
             This semester, you started your show 10+ minutes early or late on the following dates / times.
             <ul>`
           response.stats.semester.offStartArray.map((item) => {
-            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+            notices += `<li><strong>${item.name} on ${moment(item.date).format('llll')}</strong></li>`
           })
           notices += `</ul>
-          <p>In the future, please contact a director or use the "Request a Time Change" page in the DJ panel if you expect to be late for your show, or you want to air your show at a different time. Repeatedly not airing your show on time could result in suspension of your show.</p>
+          <p>Please contact a director if you will be running late or going on the air early. Repeatedly not airing your show on time could result in loss of your show. Please also contact a director if any of these shows should have been excused (you did notify a director, or show fell during an optional shows period).</p>
           </div>
           </div>`
         }
@@ -287,10 +329,10 @@ function doRequests () {
             This semester, you ended your show 10+ minutes early or late on the following dates / times.
             <ul>`
           response.stats.semester.offEndArray.map((item) => {
-            notices += `<li><strong>${moment(item).format('LLL')}</strong></li>`
+            notices += `<li><strong>${item.name} on ${moment(item.date).format('llll')}</strong></li>`
           })
           notices += `</ul>
-          <p>In the future, please contact a director or use the "Request a Time Change" page in the DJ panel if you want to end your show early, or you want to air your show at a different time. Repeatedly not airing your show on time could result in suspension of your show.</p>
+          <p>Please contact a director if you will be ending your show at a different time. Repeatedly not airing your show on time could result in loss of your show. Please also contact a director if any of these shows should have been excused (you did notify a director, or show fell during an optional shows period).</p>
           </div>
           </div>`
         }
@@ -502,32 +544,6 @@ function doRequests () {
           }
         }
       }
-
-      // Fill upcoming shows in cancellation dropdown
-      var temp = document.querySelector('#cancel-show')
-      if (temp !== null) {
-        temp.innerHTML = `<option value="">Choose a show / date to cancel...</option>`
-        if (response.calendar.length > 0) {
-          response.calendar.map((calendar) => {
-            if (calendar.active === 1 || calendar.active === 2) {
-              temp.innerHTML += `<option value="${calendar.ID}">(${moment(calendar.start).format('LLL')} - ${moment(calendar.end).format('h:mm A')}) ${calendar.title}</option>`
-            }
-          })
-        }
-      }
-
-      // Fill shows for clockwheel
-      var temp = document.querySelector('#clockwheel-show')
-      if (temp !== null) {
-        temp.innerHTML = `<option value="">Choose a show / date to assign a topic or clockwheel...</option>`
-        if (response.calendar.length > 0) {
-          response.calendar.map((calendar) => {
-            if (calendar.active === 1 || calendar.active === 2) {
-              temp.innerHTML += `<option value="${calendar.ID}">(${moment(calendar.start).format('LLL')} - ${moment(calendar.end).format('h:mm A')}) ${calendar.title}</option>`
-            }
-          })
-        }
-      }
     }
 
     activateMenu(`menu-dashboard`)
@@ -596,7 +612,7 @@ function activateMenu (menuItem) {
         temp.style.removeProperty('display')
       }
       break
-      case 'menu-clockwheel':
+    case 'menu-clockwheel':
       temp = document.querySelector(`#body-clockwheel`)
       if (temp !== null) {
         temp.style.removeProperty('display')
@@ -765,13 +781,24 @@ function xpHelp () {
 }
 
 function cancelShow () {
-  var showID = document.querySelector('#cancel-show').options[ document.querySelector('#cancel-show').selectedIndex ].value
-  if (showID === '' || showID === null) { return null }
+  var selection = document.querySelector('#cancel-show').options[ document.querySelector('#cancel-show').selectedIndex ].value
+  if (selection === '' || selection === null) { return null }
   var showName = document.querySelector('#cancel-show').options[ document.querySelector('#cancel-show').selectedIndex ].innerHTML
+
+  var selection = selection.split("_");
+  var calendarID = parseInt(selection[ 0 ]);
+  var time = moment(selection[ 1 ]).toISOString(true);
+  var calendarException = false;
+  if (selection[ 2 ]) {
+    calendarID = parseInt(selection[ 2 ]);
+    calendarException = true;
+  }
+
   var reason = document.querySelector('#cancel-reason').value
+
   iziToast.show({
     title: `Confirm show cancellation`,
-    message: `Are you sure you want to cancel <strong>${showName}</strong>? THIS CANNOT BE UNDONE`,
+    message: `Are you sure you want to cancel <strong>${showName}</strong>? Directors and show subscribers will be notified of your cancelation.`,
     timeout: 60000,
     close: true,
     color: 'yellow',
@@ -784,7 +811,7 @@ function cancelShow () {
     maxWidth: 480,
     buttons: [
       [ '<button>Yes</button>', function (instance, toast, button, e, inputs) {
-        DJReq.request({ db: DJs.db(), method: 'POST', url: '/calendar/cancel-web', data: { ID: parseInt(showID), reason: reason } }, function (response) {
+        DJReq.request({ db: DJs.db(), method: 'POST', url: '/calendar/cancel-web', data: { ID: calendarID, start: time, additionalException: calendarException, reason: reason } }, function (response) {
           if (response === 'OK') {
             iziToast.show({
               title: `Show Canceled!`,
@@ -828,40 +855,50 @@ function cancelShow () {
 }
 
 function changeTopic () {
-  var showID = document.querySelector('#clockwheel-show').options[ document.querySelector('#clockwheel-show').selectedIndex ].value
-  if (showID === '' || showID === null) { return null }
+  var selection = document.querySelector('#clockwheel-show').options[ document.querySelector('#clockwheel-show').selectedIndex ].value
+  if (selection === '' || selection === null) { return null }
+
+  var selection = selection.split("_");
+  var calendarID = parseInt(selection[ 0 ]);
+  var time = moment(selection[ 1 ]).toISOString(true);
+  var calendarException = false;
+  if (selection[ 2 ]) {
+    calendarID = parseInt(selection[ 2 ]);
+    calendarException = true;
+  }
   var topic = document.querySelector('#clockwheel-topic').value
-        DJReq.request({ db: DJs.db(), method: 'POST', url: '/calendar/change-topic-web', data: { ID: parseInt(showID), topic: topic } }, function (response) {
-          if (response === 'OK') {
-            iziToast.show({
-              title: `Show topic changed!`,
-              message: `The topic for the show has been changed`,
-              timeout: 10000,
-              close: true,
-              color: 'green',
-              drag: false,
-              position: 'center',
-              closeOnClick: true,
-              overlay: false,
-              zindex: 1000
-            })
-            document.querySelector('#clockwheel-topic').value = ""
-            doRequests()
-          } else {
-            console.dir(response)
-            iziToast.show({
-              title: `Failed to change topic!`,
-              message: `There was an error trying to change the show topic. Please try again or email engineer@wwsu1069.org if this problem continues.`,
-              timeout: 15000,
-              close: true,
-              color: 'red',
-              drag: false,
-              position: 'center',
-              closeOnClick: true,
-              overlay: false,
-              zindex: 1000,
-              maxWidth: 480
-            })
-          }
-        })
+
+  DJReq.request({ db: DJs.db(), method: 'POST', url: '/calendar/change-topic-web', data: { ID: calendarID, start: time, additionalException: calendarException, topic: topic } }, function (response) {
+    if (response === 'OK') {
+      iziToast.show({
+        title: `Show topic changed!`,
+        message: `The topic for the show has been changed`,
+        timeout: 10000,
+        close: true,
+        color: 'green',
+        drag: false,
+        position: 'center',
+        closeOnClick: true,
+        overlay: false,
+        zindex: 1000
+      })
+      document.querySelector('#clockwheel-topic').value = ""
+      doRequests()
+    } else {
+      console.dir(response)
+      iziToast.show({
+        title: `Failed to change topic!`,
+        message: `There was an error trying to change the show topic. Please try again or email engineer@wwsu1069.org if this problem continues.`,
+        timeout: 15000,
+        close: true,
+        color: 'red',
+        drag: false,
+        position: 'center',
+        closeOnClick: true,
+        overlay: false,
+        zindex: 1000,
+        maxWidth: 480
+      })
+    }
+  })
 }

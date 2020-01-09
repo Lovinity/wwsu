@@ -5,7 +5,6 @@ module.exports = {
     description: 'Change the topic for an upcoming show.',
 
     inputs: {
-        // TODO: Change use in DJ Web Panel
         ID: {
             type: 'number',
             required: true,

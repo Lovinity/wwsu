@@ -5,7 +5,6 @@ module.exports = {
     description: 'Cancel an upcoming event from the DJ Panel.',
 
     inputs: {
-        // TODO: Change this use in the DJ web panel
         ID: {
             type: 'number',
             required: true,

@@ -19,7 +19,7 @@ module.exports = {
       // Get records
       var returnData = {logs: [], listeners: []}
       var dj = await sails.models.attendance.findOne({ ID: inputs.attendanceID })
-      if (!dj || dj.dj !== this.req.payload.ID) {
+      if (!dj || (dj.dj !== this.req.payload.ID && dj.cohostDJ1 !== this.req.payload.ID && dj.cohostDJ2 !== this.req.payload.ID && dj.cohostDJ3 !== this.req.payload.ID)) {
         return exits.success(returnData)
       }
 
