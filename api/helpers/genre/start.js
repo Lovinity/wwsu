@@ -20,7 +20,6 @@ module.exports = {
   fn: async function (inputs, exits) {
     sails.log.debug('Helper genre.start called.')
     try {
-      var attendance
 
       // Do not start a genre if we're not in genre rotation or automation.
       if (sails.models.meta.memory.state === 'automation_on' || (sails.models.meta.memory.state === 'automation_genre')) {
@@ -53,7 +52,6 @@ module.exports = {
 
             // If we are going back to default rotation, we don't want to activate genre mode; leave in automation_on mode
             if (inputs.event !== null) {
-              attendance = await sails.helpers.attendance.createRecord(inputs.event)
               await sails.helpers.meta.change.with({ state: 'automation_genre', genre: inputs.event.name, playlistPlayed: moment().toISOString(true) })
               await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Genre started.</strong><br />Genre: ' + inputs.event.name }).fetch()
                 .tolerate((err) => {
@@ -61,7 +59,6 @@ module.exports = {
                 })
               await sails.helpers.onesignal.sendEvent(inputs.event, true)
             } else {
-              attendance = await sails.helpers.attendance.createRecord(null)
               await sails.helpers.meta.change.with({ state: 'automation_on', genre: 'Default', playlistPlayed: moment().toISOString(true) })
               await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Default rotation started.</strong>' }).fetch()
                 .tolerate((err) => {

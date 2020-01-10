@@ -128,7 +128,7 @@ class CalendarDb {
                 calendar.duration = 0; // Force no duration for empty schedule events.
 
                 // Process additional exceptions
-                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: ['additional', 'additional-unscheduled'] }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -137,7 +137,7 @@ class CalendarDb {
                         // Get exceptions to the additional exception if they exist
                         try {
                             var exceptions = this.calendarexceptions.db(function () {
-                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional';
+                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled';
                             }).get() || [];
                             if (exceptions.length > 0) {
                                 exceptions.map((exc) => {
@@ -202,7 +202,7 @@ class CalendarDb {
                     // Get exceptions if they exist
                     try {
                         var exceptions = this.calendarexceptions.db(function () {
-                            return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
+                            return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                         }).get() || [];
                         if (exceptions.length > 0) {
                             exceptions.map((exc) => {
@@ -223,7 +223,7 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: ['additional', 'additional-unscheduled'] }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -233,7 +233,7 @@ class CalendarDb {
                         // Get exceptions to the additional exception if they exist
                         try {
                             var exceptions = this.calendarexceptions.db(function () {
-                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
+                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
                                 exceptions.map((exc) => {
@@ -278,7 +278,7 @@ class CalendarDb {
                     var exceptionIDs = [];
                     // Get exceptions if they exist
                     var exceptions = this.calendarexceptions.db(function () {
-                        return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
+                        return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                     }).get() || [];
                     if (exceptions.length > 0) {
                         exceptions.map((exc) => {
@@ -298,7 +298,7 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: 'additional' }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: ['additional', 'additional-unscheduled'] }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -307,7 +307,7 @@ class CalendarDb {
                         // Get exceptions to the additional exception if they exist
                         try {
                             var exceptions = this.calendarexceptions.db(function () {
-                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
+                                return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
                                 exceptions.map((exc) => {
@@ -430,7 +430,7 @@ class CalendarDb {
                 var eventEnd = moment(eventStart).add(event.duration, 'minutes');
 
                 if ((moment(eventEnd).isAfter(moment(eventsb.start)) && moment(eventEnd).isSameOrBefore(moment(eventsb.end))) || (moment(eventStart).isSameOrAfter(eventsb.start) && moment(eventStart).isBefore(eventsb.end)) || (moment(eventStart).isBefore(eventsb.start) && moment(eventEnd).isAfter(eventsb.end))) {
-                    if ((event.exceptionType === 'additional' || event.exceptionType === null) && event.calendarID === eventsb.calendarID)
+                    if ((event.exceptionType === 'additional' || event.exceptionType === 'additional-unscheduled' || event.exceptionType === null) && event.calendarID === eventsb.calendarID)
                         throw new Error("ALREADY_SCHEDULED");
                     return eventStart;
                 }
@@ -551,10 +551,10 @@ class CalendarDb {
 
         if (event.exceptionType) {
             // If no exceptionTime is provided to indicate the date/time this exception overrides, and type is not additional, this is an invalid event.
-            if (!event.exceptionTime && event.exceptionType !== 'additional') return false;
+            if (!event.exceptionTime && event.exceptionType !== 'additional' && event.exceptionType !== 'additional-unscheduled') return false;
 
             // If exception type is additional and no newTime and/or duration provided, this is an invalid event.
-            if ((!event.newTime || !event.duration) && event.exceptionType === 'additional') return false;
+            if ((!event.newTime || !event.duration) && (event.exceptionType === 'additional' || event.exceptionType !== 'additional-unscheduled')) return false;
         } else {
             // If this is a main calendar event, it must have a schedules or a oneTime property in event.schedule if event.schedule is not null.
             if (event.schedule !== null && !event.schedule.schedules && !event.schedule.oneTime) return false;
@@ -597,7 +597,7 @@ class CalendarDb {
             calendarID: calendar.ID || exception.calendarID, // ID of the main calendar event
             exceptionID: exception.ID || null, // ID of the exception record, if an exception was applied
             exceptionExceptionID: exception.exceptionID || null, // If this exception overrides an 'additional' type exception, this is the ID of the exception this exception overrides.
-            exceptionType: exception.exceptionType || null, // If an exception is applied, this is the type (additional, updated, updated-system, canceled, canceled-system)
+            exceptionType: exception.exceptionType || null, // If an exception is applied, this is the type (additional, additional-unscheduled, updated, updated-system, canceled, canceled-system)
             exceptionReason: exception.exceptionReason || null, // If an exception is applied, this is the provided reason for it.
             exceptionTime: exception.exceptionTime && exception.exceptionTime !== null ? moment(exception.exceptionTime).toISOString(true) : null, // If an exception is applied that overrides an event's start time, this is the event's original start time.
             type: exception.type && exception.type !== null ? exception.type : calendar.type, // Event type (show, remote, sports, prerecord, genre, playlist, event, onair-booking, prod-booking, office-hours)
@@ -617,7 +617,7 @@ class CalendarDb {
         // Generate a unique string for this specific event time so we can differentiate recurring events easily.
         // Note: The start time in unique strings should be UTC to avoid Daylight Savings complications.
         // Format: calendarID_originalEventStartTime[_additionalExceptionID]. additionalExceptionID is only provided if we have an additional exception, or an exception of an additional exception, because additional exceptions should be treated as separate events.
-        if (criteria.exceptionType === 'additional') {
+        if (criteria.exceptionType === 'additional' || criteria.exceptionType === 'additional-unscheduled') {
             criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}_${criteria.exceptionID}`;
         } else if (criteria.exceptionExceptionID !== null && criteria.exceptionTime !== null) {
             criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.exceptionTime).toISOString(false)}_${criteria.exceptionExceptionID}`;

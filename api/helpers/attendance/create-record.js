@@ -44,15 +44,6 @@ module.exports = {
           created = await sails.models.attendance.create({ calendarID: inputs.event.calendarID, unique: inputs.event.unique, dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, scheduledStart: moment(inputs.event.start).toISOString(true), scheduledEnd: moment(inputs.event.end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
         } else {
           created = await sails.models.attendance.create({ unique: "", dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, actualStart: moment().toISOString(true) }).fetch()
-
-          // Broadcasts without a calendar ID are unauthorized. Log them!
-          if (['show', 'sports', 'remote'].indexOf(inputs.event.type) !== -1) {
-            await sails.models.logs.create({ attendanceID: created.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`, event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${inputs.event.hosts} - ${inputs.event.name}`, createdAt: moment().toISOString(true) }).fetch()
-              .tolerate((err) => {
-                sails.log.error(err)
-              })
-            await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${inputs.event.hosts} - ${inputs.event.name} went on the air at ${moment().format('llll')}; this show was not scheduled to go on the air!`)
-          }
         }
 
         returnData.newID = created.ID

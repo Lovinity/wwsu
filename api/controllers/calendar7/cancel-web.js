@@ -67,7 +67,7 @@ module.exports = {
                         }
 
                         // Create a cancellation exception, or change an existing exception to canceled if it exists.
-                        sails.models.calendarexceptions.findOrCreate({ calendarID: inputs.ID, exceptionTime: cEvent.start, exceptionType: { '!=': 'additional' } }, {
+                        sails.models.calendarexceptions.findOrCreate({ calendarID: inputs.ID, exceptionTime: cEvent.start, exceptionType: { 'nin': ['additional', 'additional-unscheduled'] } }, {
                             calendarID: inputs.ID,
                             exceptionType: 'canceled',
                             exceptionReason: inputs.reason,

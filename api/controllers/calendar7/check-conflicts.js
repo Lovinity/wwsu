@@ -18,7 +18,7 @@ module.exports = {
 
         exceptionType: {
             type: 'string',
-            isIn: ['additional','updated','canceled','updated-system','canceled-system']
+            isIn: ['additional','additional-unscheduled','updated','canceled','updated-system','canceled-system']
         },
 
         exceptionTime: {
