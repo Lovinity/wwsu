@@ -499,7 +499,7 @@ module.exports = {
                         .tolerate((err) => {
                           sails.log.error(err)
                         })
-                      await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${inputs.event.hosts} - ${inputs.event.name} went on the air at ${moment().format('llll')}; this show was not scheduled to go on the air!`)
+                      await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${eventNow.hosts} - ${eventNow.name} went on the air at ${moment().format('llll')}; this show was not scheduled to go on the air!`)
                     }
 
                     // Make a log that the broadcast started
