@@ -643,7 +643,7 @@ waitFor(() => {
     calendarWorker.postMessage([ 'calendar', data, false ]);
   })
   Calendar.setOnReplace((db) => {
-    calendarWorker.postMessage([ 'calendar', db().get(), true ]);
+    calendarWorker.postMessage([ 'calendar', db.get(), true ]);
   })
 
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
@@ -658,7 +658,7 @@ waitFor(() => {
     calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
   })
   Calendarexceptions.setOnReplace((db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', db().get(), true ]);
+    calendarWorker.postMessage([ 'calendarexceptions', db.get(), true ]);
   })
 
   // On new directors data, update our directors memory and run the process function.
