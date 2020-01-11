@@ -13,11 +13,11 @@ if (typeof require !== undefined) {
     }
 
     if (typeof later === 'undefined') {
-        var later = require('./later.min.js');
+        var later = require('later');
     }
 
     if (typeof moment === 'undefined') {
-        var moment = require('./moment.min.js');
+        var moment = require('moment');
     }
 
     // JQuery custom implementation with AJAX
