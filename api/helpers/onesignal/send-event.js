@@ -31,6 +31,10 @@ module.exports = {
       var devices = []
       var records
 
+      // No notifications for empty events
+      if (!inputs.event || inputs.event === null)
+        return exits.success(false);
+
       // Load in any one-time subscribers to this show
       if (inputs.event.unique) {
         var records = await sails.models.subscribers.find({ type: `calendar-once`, subtype: inputs.event.unique });
