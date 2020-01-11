@@ -90,9 +90,6 @@ module.exports = {
                 var djeventsR = await sails.models.events.find({ type: 3 })
                 djeventsR.map(_event => { djevents[ _event.ID ] = _event })
 
-                // Load the current attendance record into memory
-                var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
-
                 // Now, check each event
                 sails.log.debug(`Calendar integrity beginning event check of ${events.length} events`);
                 events
