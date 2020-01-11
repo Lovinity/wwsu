@@ -199,6 +199,7 @@ module.exports.bootstrap = async function (done) {
       }
     }
   } catch (unusedE) {
+    sails.log.error(unusedE);
   }
 
   // Load directors.

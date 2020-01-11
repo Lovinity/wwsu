@@ -41,7 +41,6 @@ module.exports = {
                 })
                 .fetch()
             }
-            return true
           })
         await Promise.all(maps)
       }
