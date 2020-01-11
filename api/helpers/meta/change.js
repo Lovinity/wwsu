@@ -441,7 +441,7 @@ module.exports = {
                   }
                   break;
                 case 'automation_genre':
-                  if (!eventNow || eventNow.type !== 'remote' || sails.models.meta.memory.genre !== eventNow.name) {
+                  if (!eventNow || eventNow.type !== 'genre' || sails.models.meta.memory.genre !== eventNow.name) {
                     calendar = await sails.models.calendar.find({ name: sails.models.meta.memory.genre, type: 'genre' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
@@ -460,7 +460,7 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: 'Remote broadcast went on the air outside of their scheduled time!',
+                      exceptionReason: 'Genre went on the air outside of their scheduled time!',
                       newTime: moment().toISOString(true)
                     }).fetch();
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
