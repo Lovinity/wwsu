@@ -45,10 +45,12 @@ module.exports = {
     var data = { update: updatedRecord }
     sails.log.silly(`djs socket: ${data}`)
     sails.sockets.broadcast('djs', 'djs', data)
+    var records;
+    var hosts;
 
       // Update host data in calendar events
       (async () => {
-        var records = await sails.models.calendar.find({
+        records = await sails.models.calendar.find({
           or: [
             { hostDJ: updatedRecord.ID },
             { cohostDJ1: updatedRecord.ID },
@@ -59,7 +61,7 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              var hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
+              hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
               await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
@@ -67,7 +69,7 @@ module.exports = {
         }
       })()
       (async () => {
-        var records = await sails.models.calendarexceptions.find({
+        records = await sails.models.calendarexceptions.find({
           or: [
             { hostDJ: updatedRecord.ID },
             { cohostDJ1: updatedRecord.ID },
@@ -78,7 +80,7 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              var hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
+              hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
               await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
@@ -93,10 +95,14 @@ module.exports = {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`djs socket: ${data}`)
     sails.sockets.broadcast('djs', 'djs', data)
+    var records;
+    var hosts;
+    var maps;
+    var toUpdate;
 
       // Update DJ data in calendar events
       (async () => {
-        let records = await sails.models.calendar.find({
+        records = await sails.models.calendar.find({
           or: [
             { hostDJ: destroyedRecord.ID },
             { cohostDJ1: destroyedRecord.ID },
@@ -105,9 +111,9 @@ module.exports = {
           ]
         });
         if (records.length > 0) {
-          let maps = records.map(async (record) => {
+          maps = records.map(async (record) => {
             try {
-              let toUpdate = {};
+              toUpdate = {};
               if (record.hostDJ === destroyedRecord.ID) {
                 toUpdate.hostDJ = null;
                 record.hostDJ = null;
@@ -133,7 +139,7 @@ module.exports = {
           await Promise.all(maps);
         }
 
-        let records = await sails.models.calendarexceptions.find({
+        records = await sails.models.calendarexceptions.find({
           or: [
             { hostDJ: destroyedRecord.ID },
             { cohostDJ1: destroyedRecord.ID },
@@ -142,9 +148,9 @@ module.exports = {
           ]
         });
         if (records.length > 0) {
-          let maps = records.map(async (record) => {
+          maps = records.map(async (record) => {
             try {
-              let toUpdate = {};
+              toUpdate = {};
               if (record.hostDJ === destroyedRecord.ID) {
                 toUpdate.hostDJ = null;
                 record.hostDJ = null;

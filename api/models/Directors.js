@@ -70,10 +70,11 @@ module.exports = {
     var data = { update: updatedRecord }
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
+    let records;
 
       // Update host data in calendar and calendarExceptions
       (async () => {
-        let records = await sails.models.calendar.find({ director: updatedRecord.ID });
+        records = await sails.models.calendar.find({ director: updatedRecord.ID });
         if (records.length > 0) {
           records.map(async (record) => {
             try {
@@ -86,7 +87,7 @@ module.exports = {
       })()
 
       (async () => {
-        let records = await sails.models.calendarexceptions.find({ director: updatedRecord.ID });
+        records = await sails.models.calendarexceptions.find({ director: updatedRecord.ID });
         if (records.length > 0) {
           records.map(async (record) => {
             try {
@@ -106,12 +107,14 @@ module.exports = {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
+    let records;
+    let maps;
 
       // Deactivate office hours events for this director. Update all other events using this director ID to null director.
       (async () => {
-        let records = await sails.models.calendar.find({ director: destroyedRecord.ID });
+        records = await sails.models.calendar.find({ director: destroyedRecord.ID });
         if (records.length > 0) {
-          let maps = records.map(async (record) => {
+          maps = records.map(async (record) => {
             try {
               if (record.type === 'office-hours') {
                 await sails.models.calendar.update({ ID: record.ID }, { active: false }).fetch();
@@ -126,9 +129,9 @@ module.exports = {
           await Promise.all(maps);
         }
 
-        let records = await sails.models.calendarexceptions.find({ director: destroyedRecord.ID });
+        records = await sails.models.calendarexceptions.find({ director: destroyedRecord.ID });
         if (records.length > 0) {
-          let maps = records.map(async (record) => {
+          maps = records.map(async (record) => {
             try {
               if (record.type === 'office-hours') {
                 await sails.models.calendarexceptions.destroy({ ID: record.ID }).fetch();
