@@ -379,3 +379,9 @@ function waitForElement (theelement, cb) {
     cb(document.querySelector(theelement))
   }
 }
+
+if (typeof require !== 'undefined') {
+  exports.WWSUdb = WWSUdb;
+  exports.WWSUreq = WWSUreq;
+  exports.waitForElement = waitForElement;
+}

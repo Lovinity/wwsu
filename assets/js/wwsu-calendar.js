@@ -5,19 +5,19 @@
 // Node require
 if (typeof require !== undefined) {
     if (typeof TAFFY === 'undefined') {
-        require('./taffy-min.js');
+        var TAFFY = require('./taffy-min.js');
     }
 
     if (typeof WWSUdb === 'undefined') {
-        require('./wwsu.js');
+        var WWSUdb = require('./wwsu.js').WWSUdb;
     }
 
     if (typeof later === 'undefined') {
-        require('./later.min.js');
+        var later = require('./later.min.js');
     }
 
     if (typeof moment === 'undefined') {
-        require('./moment.min.js');
+        var moment = require('./moment.min.js');
     }
 
     // JQuery custom implementation with AJAX
