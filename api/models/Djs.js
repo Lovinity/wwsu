@@ -47,9 +47,11 @@ module.exports = {
     sails.sockets.broadcast('djs', 'djs', data)
     var records;
     var hosts;
+    var temp;
+    var temp2;
 
       // Update host data in calendar events
-      (async () => {
+      temp = (async () => {
         records = await sails.models.calendar.find({
           or: [
             { hostDJ: updatedRecord.ID },
@@ -68,7 +70,7 @@ module.exports = {
           });
         }
       })()
-      (async () => {
+      temp2 = (async () => {
         records = await sails.models.calendarexceptions.find({
           or: [
             { hostDJ: updatedRecord.ID },
@@ -99,9 +101,10 @@ module.exports = {
     var hosts;
     var maps;
     var toUpdate;
+    var temp;
 
       // Update DJ data in calendar events
-      (async () => {
+      temp = (async () => {
         records = await sails.models.calendar.find({
           or: [
             { hostDJ: destroyedRecord.ID },

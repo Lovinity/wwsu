@@ -73,7 +73,6 @@ module.exports = {
     var records;
     var temp;
     var temp2;
-    sails.log.debug(`Director afterUpdate`)
 
       // Update host data in calendar and calendarExceptions
       temp = (async () => {
@@ -103,8 +102,6 @@ module.exports = {
           });
         }
       })()
-
-    sails.log.debug(`Director afterUpdate finished`)
     return proceed()
   },
 

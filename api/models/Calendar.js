@@ -129,16 +129,17 @@ module.exports = {
         sails.models.calendar.calendardb.query('calendar', data);
         sails.log.silly(`calendar socket: ${data}`)
         sails.sockets.broadcast('calendar', 'calendar', data)
+        var temp;
 
         // If setting active to false, delete all exceptions and notify subscribers of a discontinued show
         if (!updatedRecord.active) {
-            (async () => {
+            temp = (async () => {
                 await sails.helpers.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
                 var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, false)
             })()
         } else {
-            (async () => {
+            temp = (async () => {
                 var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, true)
             })()
@@ -152,9 +153,10 @@ module.exports = {
         sails.models.calendar.calendardb.query('calendar', data);
         sails.log.silly(`calendar socket: ${data}`)
         sails.sockets.broadcast('calendar', 'calendar', data)
+        var temp;
 
         // Remove all calendar exceptions
-        (async () => {
+        temp = (async () => {
             await sails.helpers.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
             var event = sails.models.calendar.calendardb.processRecord(destroyedRecord, {}, moment().toISOString(true));
             await sails.helpers.onesignal.sendEvent(event, false, false)
