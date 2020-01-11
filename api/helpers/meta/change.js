@@ -246,13 +246,13 @@ module.exports = {
 
               // Determine who the DJs are and create them if they do not exist
               if (temp[ 0 ] && temp[ 0 ] !== 'Unknown Hosts')
-                var dj = await sails.models.djs.findOrCreate({ name: tmp[ 0 ] }, { name: tmp[ 0 ], lastSeen: moment().toISOString(true) })
+                var dj = await sails.models.djs.findOrCreate({ name: temp[ 0 ] }, { name: temp[ 0 ], lastSeen: moment().toISOString(true) })
               if (temp[ 1 ])
-                var dj2 = await sails.models.djs.findOrCreate({ name: tmp[ 1 ] }, { name: tmp[ 1 ], lastSeen: moment().toISOString(true) })
+                var dj2 = await sails.models.djs.findOrCreate({ name: temp[ 1 ] }, { name: temp[ 1 ], lastSeen: moment().toISOString(true) })
               if (temp[ 2 ])
-                var dj3 = await sails.models.djs.findOrCreate({ name: tmp[ 2 ] }, { name: tmp[ 2 ], lastSeen: moment().toISOString(true) })
+                var dj3 = await sails.models.djs.findOrCreate({ name: temp[ 2 ] }, { name: temp[ 2 ], lastSeen: moment().toISOString(true) })
               if (temp[ 3 ])
-                var dj4 = await sails.models.djs.findOrCreate({ name: tmp[ 3 ] }, { name: tmp[ 3 ], lastSeen: moment().toISOString(true) })
+                var dj4 = await sails.models.djs.findOrCreate({ name: temp[ 3 ] }, { name: temp[ 3 ], lastSeen: moment().toISOString(true) })
 
               // Update lastSeen record for the DJs
               if (dj && dj !== null) { await sails.models.djs.update({ ID: dj.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
