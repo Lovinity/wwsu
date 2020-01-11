@@ -7,11 +7,7 @@ if (typeof require !== undefined) {
     }
 
     if (typeof WWSUdb === 'undefined') {
-        try {
-            var WWSUdb = require('./wwsu.js').WWSUdb;
-        } catch (e) {
-            console.error(e);
-        }
+        var WWSUdb = require('./wwsu.js').WWSUdb;
     }
 
     if (typeof later === 'undefined') {
