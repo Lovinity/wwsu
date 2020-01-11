@@ -1,7 +1,7 @@
 // Require libraries if necessary. Because this script runs both in browser and in node, we need to cover both methods of including scripts.
 
 // Node require
-if (typeof require !== undefined) {
+if (typeof require !== 'undefined') {
     if (typeof TAFFY === 'undefined') {
         var TAFFY = require('./taffy-min.js').taffy;
     }
