@@ -26,9 +26,11 @@ module.exports = {
 
     fn: async function (inputs, exits) {
         if (inputs.checkIntegrity) {
+            sails.log.debug(`Calendar integrity started`);
             var status = 5;
             var issues = [];
             var events = sails.models.calendar.calendardb.getEvents(undefined, moment().add(14, 'days').toISOString(true));
+            sails.log.debug(`Calendar integrity events retrieved for the next 14 days.`);
 
             if (events && events.length > 0) {
                 var playlists = {}
@@ -38,6 +40,7 @@ module.exports = {
                 var playlistsR = await sails.models.playlists.find();
 
                 // Check each playlist for duration and duplicates
+                sails.log.debug(`Calendar integrity playlists map initializing`);
                 maps = playlistsR.map(async playlist => {
                     var playlistSongs = []
                     var playlistDuplicates = 0
@@ -81,15 +84,17 @@ module.exports = {
                     return true
                 });
                 await Promise.all(maps);
+                sails.log.debug(`Calendar integrity playlists map completed.`);
 
                 // Load all manual RadioDJ events into memory
                 var djeventsR = await sails.models.events.find({ type: 3 })
-                djeventsR.map(event => { djevents[ event.ID ] = event })
+                djeventsR.map(_event => { djevents[ _event.ID ] = _event })
 
                 // Load the current attendance record into memory
                 var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
 
                 // Now, check each event
+                sails.log.debug(`Calendar integrity beginning event check of ${events.length} events`);
                 events
                     .filter((event) => event.exceptionType === null || ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1))
                     .map((event) => {
