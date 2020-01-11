@@ -6,10 +6,6 @@ if (typeof require !== 'undefined') {
         var TAFFY = require('./taffy-min.js').taffy;
     }
 
-    if (typeof WWSUdb === 'undefined') {
-        var WWSUdb = require('./wwsu.js').WWSUdb;
-    }
-
     if (typeof later === 'undefined') {
         var later = require('later');
     }
@@ -32,10 +28,6 @@ if (typeof require !== 'undefined') {
 
     if (typeof TAFFY === 'undefined') {
         $.loadScript('./taffy-min.js');
-    }
-
-    if (typeof WWSUdb === 'undefined') {
-        $.loadScript('./wwsu.js');
     }
 
     if (typeof later === 'undefined') {
