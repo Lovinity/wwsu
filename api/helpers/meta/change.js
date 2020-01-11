@@ -224,12 +224,8 @@ module.exports = {
       var manual
       for (var key in inputs) {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
-          // Exit if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value
-          if (typeof sails.models.meta.memory[ key ] === 'undefined' || sails.models.meta.memory[ key ] === inputs[ key ]) {
-            continue
-          }
 
-          // Do stuff if we are changing states, mainly with regards to genres, playlists, and prerecords.
+          // Do stuff if a state is specified (regardless whether or not it was changed)
           if (key === 'state') {
             // Enable webchat automatically when going into automation state
             if (inputs[ key ] === 'automation_on' || inputs[ key ] === 'automation_genre' || inputs[ key ] === 'automation_playlist' || inputs[ key ] === 'automation_prerecord') { push2.webchat = true }
@@ -517,6 +513,11 @@ module.exports = {
                 }
               }
             }
+          }
+
+          // Exit if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value
+          if (typeof sails.models.meta.memory[ key ] === 'undefined' || sails.models.meta.memory[ key ] === inputs[ key ]) {
+            continue
           }
 
           if (key === 'listeners' && inputs.listeners > sails.models.meta.memory.listenerPeak) {
