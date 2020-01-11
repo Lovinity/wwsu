@@ -295,7 +295,7 @@ module.exports = {
             var attendance;
 
             // We do not want to do any of this if initially loading
-            if (!wasUnknown && sails.models.meta.memory.calendarID !== (eventNow === null ? null : eventNow.calendarID)) {
+            if (!wasUnknown) {
               switch (inputs[ key ]) {
                 case 'live_on':
                   if (!eventNow || eventNow.type !== 'show' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
