@@ -23,7 +23,7 @@ module.exports = {
       // Do not start a genre if we're not in genre rotation or automation.
       if (sails.models.meta.memory.state === 'automation_on' || (sails.models.meta.memory.state === 'automation_genre')) {
         // Do not start this genre if it was already started
-        if (sails.models.meta.memory.calendarUnique !== inputs.event.unique) {
+        if (sails.models.meta.memory.calendarUnique !== (inputs.event === null ? null : inputs.event.unique)) {
           // Do not start a genre if we are in the middle of changing states, unless ignoreChangingState was provided true.
           if (sails.models.meta.memory.changingState === null || inputs.ignoreChangingState) {
             // Lock future state changes until we are done if ignoreChangingState is false.

@@ -91,6 +91,11 @@ module.exports = {
       type: 'boolean'
     },
 
+    calendarID: {
+      type: 'number',
+      allowNull: true
+    },
+
     calendarUnique: {
       type: 'string',
       allowNull: true
@@ -237,6 +242,11 @@ module.exports = {
       type: 'string',
       defaultsTo: '',
       description: 'Name of the genre or rotation currently being played, if any'
+    },
+    calendarID: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the calendar event currently airing.'
     },
     playlist: {
       type: 'string',
