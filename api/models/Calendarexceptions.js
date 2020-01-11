@@ -114,7 +114,6 @@ module.exports = {
         newTime: {
             type: 'ref',
             columnType: 'datetime',
-            allowNull: true
         },
 
         duration: {

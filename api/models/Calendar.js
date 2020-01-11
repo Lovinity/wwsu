@@ -94,13 +94,11 @@ module.exports = {
         start: {
             type: 'ref',
             columnType: 'date',
-            allowNull: true
         },
 
         end: {
             type: 'ref',
             columnType: 'date',
-            allowNull: true
         },
 
         duration: {
@@ -111,7 +109,6 @@ module.exports = {
 
         schedule: {
             type: 'json',
-            allowNull: true
         },
 
     },
