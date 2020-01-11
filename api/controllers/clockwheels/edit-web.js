@@ -1,3 +1,5 @@
+// TODO: Modify for new calendar system
+
 module.exports = {
 
     friendlyName: 'clockwheels / edit-web',
@@ -54,7 +56,7 @@ module.exports = {
             if (!clockwheel)
                 return exits.error(new Error('No valid clockwheel matches the provided ID'))
 
-            var event = await sails.models.calendar.findOne({ ID: inputs.calendarID, or: [ { title: { 'startsWith': `Show: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Remote: ${this.req.payload.name} - ` } }, { title: { 'startsWith': `Prerecord: ${this.req.payload.name} - ` } } ], active: { '>=': 0 } })
+            var event = await sails.models.calendar.findOne({ ID: inputs.calendarID, or: [ { hostDJ: this.req.payload.ID, cohostDJ1: this.req.payload.ID, cohostDJ2: this.req.payload.ID, cohostDJ3: this.req.payload.ID } ], active: { '>=': 0 } })
 
             if (!event)
                 return exits.error(new Error('No valid calendar events match the provided calendarID and authorized DJ.'))

@@ -128,7 +128,7 @@ class CalendarDb {
                 calendar.duration = 0; // Force no duration for empty schedule events.
 
                 // Process additional exceptions
-                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: ['additional', 'additional-unscheduled'] }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: [ 'additional', 'additional-unscheduled' ] }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -223,7 +223,7 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: ['additional', 'additional-unscheduled'] }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: [ 'additional', 'additional-unscheduled' ] }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -298,7 +298,7 @@ class CalendarDb {
                 }
 
                 // Process additional exceptions
-                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: ['additional', 'additional-unscheduled'] }).get();
+                var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: [ 'additional', 'additional-unscheduled' ] }).get();
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal) => {
@@ -536,6 +536,36 @@ class CalendarDb {
         }
 
         return { overridden: eventsOverridden, overriding: eventsOverriding, error };
+    }
+
+    // Returns an array of office-hours for directors who should be in the office right now.
+    whoShouldBeIn () {
+        var events = this.getEvents(undefined, undefined, { active: true });
+        if (events.length > 0) {
+            var compare = function (a, b) {
+                try {
+                    if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
+                    if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
+                    if (a.ID < b.ID) { return -1 }
+                    if (a.ID > b.ID) { return 1 }
+                    return 0
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+            events = events.sort(compare);
+
+            events = events
+                .filter((event) => {
+
+                    if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system') return false;
+
+                    // Return directors who are expected to come in in the next 30 minutes as well
+                    return (event.type === 'office-hours' && moment().add(30, 'minutes').isSameOrAfter(moment(event.start))) && moment().isBefore(moment(event.end)) && event.active;
+                });
+
+            return events;
+        }
     }
 
     // Check for validity of an event object. 

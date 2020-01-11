@@ -1,3 +1,5 @@
+// TODO: Modify for new calendar system
+
 module.exports = {
 
   friendlyName: 'sails.models.planner / add-calendar',

@@ -50,14 +50,53 @@ module.exports = {
           var maps = dj
             .filter((record) => record.ID !== inputs.ID)
             .map(async record => {
-            // Update all XP records
-              await sails.models.xp.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
+              var temp;
+              var updatedRecords = {};
+
+              // Update all XP records
+              await sails.models.xp.update({ dj: record.ID }, { dj: inputs.ID }).fetch();
 
               // Update all attendance records
-              await sails.models.attendance.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
+              await sails.models.attendance.update({ dj: record.ID }, { dj: inputs.ID }).fetch();
+              await sails.models.attendance.update({ cohostDJ1: record.ID }, { cohostDJ1: inputs.ID }).fetch();
+              await sails.models.attendance.update({ cohostDJ2: record.ID }, { cohostDJ2: inputs.ID }).fetch();
+              await sails.models.attendance.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
 
-              // Update all listeners records
-              await sails.models.listeners.update({ dj: record.ID }, { dj: inputs.ID }).fetch()
+              // Update all calendar records
+              temp = await sails.models.calendar7.update({ hostDJ: record.ID }, { hostDJ: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+              temp = await sails.models.calendar7.update({ cohostDJ1: record.ID }, { cohostDJ1: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+              temp = await sails.models.calendar7.update({ cohostDJ2: record.ID }, { cohostDJ2: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+              temp = await sails.models.calendar7.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+
+              // Regenerate hosts
+              for (var cal in updatedRecords) {
+                if (Object.prototype.hasOwnProperty.call(updatedRecords, cal)) {
+                  await sails.models.calendar7.update({ ID: cal }, { hosts: await sails.helpers.calendar7.generateHosts(updatedrecords[ cal ]) }).fetch();
+                }
+              }
+
+              updatedRecords = {};
+
+              // Update all calendar exceptions
+              temp = await sails.models.calendarexceptions.update({ hostDJ: record.ID }, { hostDJ: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+              temp = await sails.models.calendarexceptions.update({ cohostDJ1: record.ID }, { cohostDJ1: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+              temp = await sails.models.calendarexceptions.update({ cohostDJ2: record.ID }, { cohostDJ2: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+              temp = await sails.models.calendarexceptions.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
+              temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
+
+              // Regenerate hosts
+              for (var cal in updatedRecords) {
+                if (Object.prototype.hasOwnProperty.call(updatedRecords, cal)) {
+                  await sails.models.calendarexceptions.update({ ID: cal }, { hosts: await sails.helpers.calendar7.generateHosts(updatedrecords[ cal ]) }).fetch();
+                }
+              }
 
               // Update lockToDJ in hosts
               await sails.models.hosts.update({ lockToDJ: record.ID }, { lockToDJ: inputs.ID }).fetch()
@@ -67,6 +106,9 @@ module.exports = {
 
               // Edit meta if necessary
               if (sails.models.meta.memory.dj === record.ID) { sails.helpers.meta.change.with({ dj: inputs.ID }) }
+              if (sails.models.meta.memory.cohostDJ1 === record.ID) { sails.helpers.meta.change.with({ cohostDJ1: inputs.ID }) }
+              if (sails.models.meta.memory.cohostDJ2 === record.ID) { sails.helpers.meta.change.with({ cohostDJ2: inputs.ID }) }
+              if (sails.models.meta.memory.cohostDJ3 === record.ID) { sails.helpers.meta.change.with({ cohostDJ3: inputs.ID }) }
             })
           await Promise.all(maps)
         }
@@ -80,19 +122,6 @@ module.exports = {
 
       // Edit it
       await sails.models.djs.update({ ID: inputs.ID }, criteriaB).fetch()
-
-      // Update subscriptions with new DJ name
-      var tempRecords = await sails.models.subscribers.find({ type: 'calendar-all', subtype: { startsWith: `${djID.name} - ` } })
-      if (tempRecords.length > 0) {
-        tempRecords.map((tmpRecord) => {
-          var splitter = tmpRecord.subtype.split(' - ')
-          var newName = `${inputs.name} - ${splitter[1]}`
-          var re = (async (ID, name) => {
-            await sails.models.subscribers.update({ ID: ID }, { subtype: name })
-          })(tmpRecord.ID, newName)
-          return re
-        })
-      }
 
       return exits.success()
     } catch (e) {

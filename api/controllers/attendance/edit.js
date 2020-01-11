@@ -1,8 +1,8 @@
 module.exports = {
 
-  friendlyName: 'directors / edit',
+  friendlyName: 'attendance / edit',
 
-  description: 'Edit one of the directors in the system.',
+  description: 'Edit the status of an attendance record.',
 
   inputs: {
     ID: {
@@ -13,7 +13,9 @@ module.exports = {
 
     happened: {
       type: 'number',
-      description: 'Change the happening status... 1 = happened, 0 = unexcused absence, -1 = excused cancellation'
+      description: 'Change the happening status... 2 = happened but unscheduled, 1 = happened, 0 = unexcused absence, -1 = excused cancellation',
+      min: -1,
+      max: 2
     },
 
     ignore: {

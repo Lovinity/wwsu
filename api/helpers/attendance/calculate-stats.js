@@ -2,7 +2,7 @@ module.exports = {
 
   friendlyName: 'attendance.calculateStats',
 
-  description: 'Re-calculate weekly analytics and broadcast them through the ',
+  description: 'Re-calculate weekly analytics and broadcast them through the websockets',
 
   inputs: {
 
@@ -59,28 +59,28 @@ module.exports = {
       var f2 = async () => {
         // Go through each record of attendance and populate topShows, onAir, and onAirListeners
         records
-          .filter(attendance => attendance.event.startsWith('Sports:') || attendance.event.startsWith('Show:') || attendance.event.startsWith('Remote:') || attendance.event.startsWith('Prerecord:') || attendance.event.startsWith('Genre:') || attendance.event.startsWith('Playlist:'))
+          .filter(attendance => attendance.calendarID !== null)
           .map(attendance => {
             var show = attendance.event
             show = show.substring(show.indexOf(': ') + 2)
 
             // OnAir programming of Sports, Show, Remote, or Prerecord counts as show time.
-            if (attendance.event.startsWith('Sports:') || attendance.event.startsWith('Show:') || attendance.event.startsWith('Remote:') || attendance.event.startsWith('Prerecord:')) {
+            if (attendance.event.toLowerCase().startsWith('sports:') || attendance.event.toLowerCase().startsWith('show:') || attendance.event.toLowerCase().startsWith('remote:') || attendance.event.toLowerCase().startsWith('prerecord:')) {
               sails.models.attendance.weeklyAnalytics.onAir += attendance.showTime
               sails.models.attendance.weeklyAnalytics.onAirListeners += attendance.listenerMinutes
 
               // Sports broadcasts should not count towards the top 3 shows
-              if (!attendance.event.startsWith('Sports:')) {
+              if (!attendance.event.toLowerCase().startsWith('sports:')) {
                 // Group showTime and listenerMinutes by show; we only want one record per show to use when comparing top shows
                 if (typeof totals[show] === 'undefined') { totals[show] = { showTime: 0, listenerMinutes: 0 } }
                 totals[show].showTime += attendance.showTime
                 totals[show].listenerMinutes += attendance.listenerMinutes
               }
-            } else if (attendance.event.startsWith('Genre:')) {
+            } else if (attendance.event.toLowerCase().startsWith('genre:')) {
               if (typeof totalsG[show] === 'undefined') { totalsG[show] = { showTime: 0, listenerMinutes: 0 } }
               totalsG[show].showTime += attendance.showTime
               totalsG[show].listenerMinutes += attendance.listenerMinutes
-            } else if (attendance.event.startsWith('Playlist:')) {
+            } else if (attendance.event.toLowerCase().startsWith('playlist:')) {
               if (typeof totalsP[show] === 'undefined') { totalsP[show] = { showTime: 0, listenerMinutes: 0 } }
               totalsP[show].showTime += attendance.showTime
               totalsP[show].listenerMinutes += attendance.listenerMinutes

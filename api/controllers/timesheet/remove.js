@@ -22,11 +22,6 @@ module.exports = {
       // Update the timesheet record
       var records = await sails.models.timesheet.destroy({ ID: inputs.ID }).fetch()
 
-      // If there are no more timesheet records for this Google Calendar entry, also remove the director hours entry
-      var IDs = []
-      records.map((record) => IDs.push(record.unique))
-      if (IDs.length > 0) { await sails.models.directorhours.destroy({ unique: IDs }).fetch() }
-
       // Force a re-load of all directors to update any possible changes in presence
       await sails.helpers.directors.update()
 

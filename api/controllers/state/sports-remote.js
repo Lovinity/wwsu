@@ -37,9 +37,9 @@ module.exports = {
 
       // Disallow starting a sports remote broadcast if the host has lockToDJ and there is no scheduled sports broadcast at this time
       if (this.req.payload.lockToDJ !== null) {
-        var record = await sails.models.calendar.find({ title: { startsWith: `Sports: ` }, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
-        if (!record || record.length === 0) {
-          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote sports broadcasts when scheduled. There are no sports broadcasts scheduled at this time.'))
+        var record = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+        if (record.type !== 'sports') {
+          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote sports broadcasts when they are scheduled. None are scheduled at this time.'))
         }
       }
 

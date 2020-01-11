@@ -278,9 +278,9 @@ module.exports = {
             // Add up to 3 track requests if any are pending
             await sails.helpers.requests.queue(3, true, true)
 
-            // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
+            // Re-check and trigger any programs that should begin
             try {
-              await sails.helpers.calendar.sync(true)
+              await sails.helpers.calendar.check(true)
             } catch (unusedE2) {
               // Couldn't load calendar? Fall back to Default automation
               await sails.helpers.genre.start('Default', true)

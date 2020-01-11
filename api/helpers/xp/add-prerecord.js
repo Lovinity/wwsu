@@ -1,3 +1,5 @@
+// TODO: make stats apply to co-hosts
+
 module.exports = {
 
   friendlyName: 'xp.addPrerecord',

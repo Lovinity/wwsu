@@ -48,10 +48,15 @@ module.exports = {
 
         var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day')
         var end = moment(start).add(inputs.duration, 'days')
-        query = { or: [{ scheduledStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } }, { actualStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } }] }
+        query = { or: [ { scheduledStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } }, { actualStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } } ] }
       } else {
         if (inputs.dj && inputs.dj !== null) {
-          query.dj = inputs.dj
+          query.or = [
+            { dj: inputs.dj },
+            { cohostDJ1: inputs.dj },
+            { cohostDJ2: inputs.dj },
+            { cohostDJ3: inputs.dj },
+          ]
         }
 
         if (inputs.event && inputs.event !== null) { query.event = { contains: inputs.event } }

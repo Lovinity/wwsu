@@ -205,15 +205,16 @@ module.exports.bootstrap = async function (done) {
   sails.log.verbose(`BOOTSTRAP: Refreshing directors.`)
   await sails.helpers.directors.update()
 
-  // Load Google sails.models.calendar.
+  // Check calendar events and integrity
   sails.log.verbose(`BOOTSTRAP: Loading calendar events.`)
   await sails.helpers.meta.change.with({ changingState: `Initializing program calendar` })
   try {
-    await sails.helpers.calendar.sync(true)
+    await sails.helpers.calendar.check(true)
     await sails.helpers.meta.change.with({ changingState: null })
   } catch (unusedE) {
     await sails.helpers.meta.change.with({ changingState: null })
   }
+  await sails.helpers.calendar.check(false, true)
 
   // CRON JOBS
 
@@ -586,8 +587,8 @@ module.exports.bootstrap = async function (done) {
             // Switch back to automation
             await sails.helpers.meta.change.with({ changingState: `Ending prerecord`, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
 
-            // Re-load google calendar events to check for, and execute, any playlists/genres/etc that are scheduled.
-            await sails.helpers.calendar.sync(true)
+            // Re-check for programs that should begin.
+            await sails.helpers.calendar.check(true)
 
             await sails.helpers.meta.change.with({ changingState: null })
 
@@ -824,12 +825,24 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  // Every 5 minutes on second 02, update sails.models.calendar.
+  // Every minute on second 02, check the calendar for events that should begin
   sails.log.verbose(`BOOTSTRAP: scheduling updateCalendar CRON.`)
-  cron.schedule('2 */5 * * * *', async () => {
+  cron.schedule('2 * * * * *', async () => {
     sails.log.debug(`CRON updateCalendar triggered.`)
     try {
-      await sails.helpers.calendar.sync()
+      await sails.helpers.calendar.check()
+      return true
+    } catch (e) {
+      sails.log.error(e)
+    }
+  })
+
+  // Every 5 minutes on second 02, check calendar event integrity
+  sails.log.verbose(`BOOTSTRAP: scheduling updateCalendarIntegrity CRON.`)
+  cron.schedule('2 */5 * * * *', async () => {
+    sails.log.debug(`CRON updateCalendarIntegrity triggered.`)
+    try {
+      await sails.helpers.calendar.check(false, true)
       return true
     } catch (e) {
       sails.log.error(e)

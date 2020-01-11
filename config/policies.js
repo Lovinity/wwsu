@@ -35,8 +35,6 @@ module.exports.policies = {
   'darksky/get': 'isBanned',
   'directors/*': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
   'directors/get': 'isBanned',
-  'directors/get-hours': 'isBanned',
-  'directors/remove-hours': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'discipline/acknowledge': true,
   'discipline/edit': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'discipline/get-web': true,

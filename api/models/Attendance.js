@@ -7,7 +7,6 @@
 
 module.exports = {
 
-  // TODO: Changes were made here that should be updated for calendar7 use
   datastore: 'nodebase',
   attributes: {
     ID: {

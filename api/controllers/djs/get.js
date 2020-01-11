@@ -25,7 +25,7 @@ module.exports = {
 
         // Return only true or false for login if a login was set for the DJ
         records = records.map((record, index) => {
-          records[index].login = records[index].login === null ? false : true
+          records[ index ].login = records[ index ].login === null ? false : true
           return record
         })
 
@@ -53,7 +53,14 @@ module.exports = {
 
         returnData.DJ = record
         returnData.XP = await sails.models.xp.find({ dj: inputs.dj })
-        returnData.attendance = await sails.models.attendance.find({ dj: inputs.dj })
+        returnData.attendance = await sails.models.attendance.find({
+          or: [
+            { dj: inputs.dj },
+            { cohostDJ1: inputs.dj },
+            { cohostDJ2: inputs.dj },
+            { cohostDJ3: inputs.dj },
+          ]
+        })
         returnData.stats = await sails.helpers.analytics.showtime(inputs.dj)
 
         return exits.success(returnData)

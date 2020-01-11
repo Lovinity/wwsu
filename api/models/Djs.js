@@ -172,6 +172,24 @@ module.exports = {
 
         // Deactivate any main calendar events that now have no host DJ
         await sails.models.calendar7.update({ type: [ 'show', 'remote', 'prerecord' ], hostDJ: null }, { active: false }).fetch();
+
+        // Update attendance records
+        await sails.models.attendance.update({ dj: inputs.ID }, { dj: null }).fetch()
+        await sails.models.attendance.update({ cohostDJ1: inputs.ID }, { cohostDJ1: null }).fetch()
+        await sails.models.attendance.update({ cohostDJ2: inputs.ID }, { cohostDJ2: null }).fetch()
+        await sails.models.attendance.update({ cohostDJ3: inputs.ID }, { cohostDJ3: null }).fetch()
+
+        // Update lockToDJ in hosts to 0, which means the host cannot start any broadcasts at all
+        await sails.models.hosts.update({ lockToDJ: inputs.ID }, { lockToDJ: 0 }).fetch()
+
+        // Destroy XP records
+        await sails.models.xp.destroy({ dj: inputs.ID }).fetch()
+
+        // Edit meta if necessary
+        if (sails.models.meta.memory.dj === inputs.ID) { await sails.helpers.meta.change.with({ dj: null }) }
+        if (sails.models.meta.memory.cohostDJ1 === inputs.ID) { await sails.helpers.meta.change.with({ cohostDJ1: null }) }
+        if (sails.models.meta.memory.cohostDJ2 === inputs.ID) { await sails.helpers.meta.change.with({ cohostDJ2: null }) }
+        if (sails.models.meta.memory.cohostDJ3 === inputs.ID) { await sails.helpers.meta.change.with({ cohostDJ3: null }) }
       })()
     return proceed()
   }

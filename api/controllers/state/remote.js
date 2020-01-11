@@ -45,16 +45,35 @@ module.exports = {
       // Disallow starting a remote broadcast if the host has lockToDJ and the provided DJ either does not match lockToDJ or is not scheduled to start a remote broadcast
       if (this.req.payload.lockToDJ !== null) {
         var dj = inputs.showname.split(' - ')
-        dj = dj[0]
-        var djRecord = await sails.models.djs.find({ name: dj })
+        var show = dj[1];
+        var djs = dj[0];
+        dj = dj[ 0 ].split("; ");
+        var query = { name: [] };
+        if (dj && dj[ 0 ])
+          query.name.push(dj[ 0 ])
+        if (dj && dj[ 1 ])
+          query.name.push(dj[ 1 ])
+        if (dj && dj[ 2 ])
+          query.name.push(dj[ 2 ])
+        if (dj && dj[ 3 ])
+          query.name.push(dj[ 3 ])
+        var djRecord;
+        if (query.name.length > 0)
+          djRecord = await sails.models.djs.find(query)
         if (!djRecord || djRecord.length === 0) {
-          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided does not exist in the system.'))
-        } else if (djRecord[0].ID !== this.req.payload.lockToDJ) {
-          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided does not match the DJ you are allowed to use.'))
+          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided is not authorized.'))
+        } else {
+          var authorized = false;
+          for (var i = 0; i < djRecord.length; i++) {
+            if (djRecord[ i ] && djRecord[ i ].ID === this.req.payload.lockToDJ)
+              authorized = true;
+          }
+          if (!authorized)
+            return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided is not authorized.'))
         }
 
-        var record = await sails.models.calendar.find({ title: `Remote: ${inputs.showname}`, active: { '>=': 1 }, start: { '<=': moment().add(10, 'minutes').toISOString(true) }, end: { '>=': moment().toISOString(true) } }).limit(1)
-        if (!record || record.length === 0) {
+        var record = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+        if (record.type !== 'remote' || record.hosts !== djs || record.name !== show) {
           return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ and show name you provided is not scheduled to go on the air at this time.'))
         }
       }
@@ -90,10 +109,10 @@ module.exports = {
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.start)
 
         // Queue a show opener if there is one
-        if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') {
-          await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Openers']], 'Bottom', 1)
+        if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') {
+          await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Openers' ] ], 'Bottom', 1)
         } else {
-          await sails.helpers.songs.queue([sails.config.custom.showcats['Default']['Show Openers']], 'Bottom', 1)
+          await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Openers' ] ], 'Bottom', 1)
         }
 
         await sails.helpers.rest.cmd('EnableAssisted', 0)

@@ -16,7 +16,14 @@ module.exports = {
     try {
       var returnData = { ID: this.req.payload.ID, name: this.req.payload.name }
       returnData.XP = await sails.models.xp.find({ dj: this.req.payload.ID })
-      returnData.attendance = await sails.models.attendance.find({ dj: this.req.payload.ID })
+      returnData.attendance = await sails.models.attendance.find({
+        or: [
+          { dj: this.req.payload.ID },
+          { cohostDJ1: this.req.payload.ID },
+          { cohostDJ2: this.req.payload.ID },
+          { cohostDJ3: this.req.payload.ID },
+        ]
+      })
       returnData.stats = await sails.helpers.analytics.showtime(this.req.payload.ID)
 
       return exits.success(returnData)
