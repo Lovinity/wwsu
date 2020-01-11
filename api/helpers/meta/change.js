@@ -286,7 +286,7 @@ module.exports = {
             var attendance;
             switch (inputs[ key ]) {
               case 'live_on':
-                if (eventNow.type !== 'show' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                if (!eventNow || eventNow.type !== 'show' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
                   calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'show' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
@@ -317,7 +317,7 @@ module.exports = {
                 }
                 break;
               case 'remote_on':
-                if (eventNow.type !== 'remote' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                if (!eventNow || eventNow.type !== 'remote' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
                   calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'remote' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
@@ -349,7 +349,7 @@ module.exports = {
                 break;
               case 'sports_on':
               case 'sportsremote_on':
-                if (eventNow.type !== 'sports' || !sails.models.meta.memory.show.startsWith(eventNow.name)) {
+                if (!eventNow || eventNow.type !== 'sports' || !sails.models.meta.memory.show.startsWith(eventNow.name)) {
                   calendar = await sails.models.calendar.find({ name: { startsWith: eventNow.name }, type: 'sports' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
@@ -375,7 +375,7 @@ module.exports = {
                 }
                 break;
               case 'prerecord_on':
-                if (eventNow.type !== 'prerecord' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                if (!eventNow || eventNow.type !== 'prerecord' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
                   calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'prerecord' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
@@ -406,7 +406,7 @@ module.exports = {
                 }
                 break;
               case 'automation_playlist':
-                if (eventNow.type !== 'playlist' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                if (!eventNow || eventNow.type !== 'playlist' || sails.models.meta.memory.show !== `${eventNow.hosts} - ${eventNow.name}`) {
                   calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'playlist' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
@@ -437,7 +437,7 @@ module.exports = {
                 }
                 break;
               case 'automation_genre':
-                if (eventNow.type !== 'remote' || sails.models.meta.memory.genre !== eventNow.name) {
+                if (!eventNow || eventNow.type !== 'remote' || sails.models.meta.memory.genre !== eventNow.name) {
                   calendar = await sails.models.calendar.find({ name: eventNow.name, type: 'genre' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
