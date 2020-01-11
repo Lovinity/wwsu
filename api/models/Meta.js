@@ -101,6 +101,11 @@ module.exports = {
       allowNull: true
     },
 
+    genre: {
+      type: 'string',
+      allowNull: true
+    },
+
     playlistPosition: {
       type: 'number',
       defaultsTo: -1
