@@ -134,12 +134,12 @@ module.exports = {
         if (!updatedRecord.active) {
             (async () => {
                 await sails.helpers.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
-                var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, inputs.start);
+                var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, false)
             })()
         } else {
             (async () => {
-                var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, inputs.start);
+                var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, true)
             })()
         }
@@ -156,7 +156,7 @@ module.exports = {
         // Remove all calendar exceptions
         (async () => {
             await sails.helpers.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
-            var event = sails.models.calendar.calendardb.processRecord(destroyedRecord, {}, inputs.start);
+            var event = sails.models.calendar.calendardb.processRecord(destroyedRecord, {}, moment().toISOString(true));
             await sails.helpers.onesignal.sendEvent(event, false, false)
         })()
         
