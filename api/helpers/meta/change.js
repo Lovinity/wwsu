@@ -101,11 +101,16 @@ module.exports = {
     calendarUnique: {
       type: 'string',
       allowNull: true,
-      description: 'Google Calendar unique ID of the current program.'
+      description: 'Calendar unique ID of the current program.'
     },
     genre: {
       type: 'string',
       description: 'Name of the genre or rotation currently being played, if any'
+    },
+    calendarID: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the calendar event currently being played.'
     },
     playlist: {
       type: 'string',

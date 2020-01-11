@@ -30,7 +30,8 @@ module.exports = {
             if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: `Switching to genre` }) }
 
             // Find the manual RadioDJ event for Node to trigger
-            var event = await sails.models.events.find({ type: 3, ID: inputs.event.eventID, enabled: 'True' })
+            var query = inputs.event !== null ? { type: 3, ID: inputs.event.eventID, enabled: 'True' } : { type: 3, name: "Default", enabled: 'True' };
+            var event = await sails.models.events.find(query);
             sails.log.verbose(`sails.models.events returned ${event.length} matched events, but we're only going to use the first one.`)
             sails.log.silly(event)
 
@@ -46,7 +47,7 @@ module.exports = {
             await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, true) // We want the rotation change to be immediate; clear out any music tracks in the queue. But, leave requested tracks in the queue.
             await sails.helpers.rest.cmd('EnableAssisted', 0)
 
-            await sails.helpers.rest.cmd('RunEvent', event.ID, 5000) // This triggers the change in rotation.
+            await sails.helpers.rest.cmd('RunEvent', event[ 0 ].ID, 5000) // This triggers the change in rotation.
             await sails.helpers.rest.cmd('EnableAutoDJ', 1)
 
             // If we are going back to default rotation, we don't want to activate genre mode; leave in automation_on mode
