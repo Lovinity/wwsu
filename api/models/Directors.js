@@ -70,11 +70,13 @@ module.exports = {
     var data = { update: updatedRecord }
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
-    let records;
+    var records;
+    var temp;
+    var temp2;
     sails.log.debug(`Director afterUpdate`)
 
       // Update host data in calendar and calendarExceptions
-      (async () => {
+      temp = (async () => {
         records = await sails.models.calendar.find({ director: updatedRecord.ID });
         if (records.length > 0) {
           records.map(async (record) => {
@@ -88,7 +90,7 @@ module.exports = {
         }
       })()
 
-      (async () => {
+      temp2 = (async () => {
         records = await sails.models.calendarexceptions.find({ director: updatedRecord.ID });
         if (records.length > 0) {
           records.map(async (record) => {
