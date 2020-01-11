@@ -4,7 +4,7 @@ module.exports = {
 
   description: 'Verify calendar events and exceptions.',
 
-  event: {
+  inputs: {
     event: {
       type: 'json',
       required: true

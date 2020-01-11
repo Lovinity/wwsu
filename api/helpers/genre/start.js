@@ -7,7 +7,6 @@ module.exports = {
   inputs: {
     event: {
       type: 'json',
-      allowNull: true,
       description: 'Event object triggering the genre.'
     },
     ignoreChangingState: {

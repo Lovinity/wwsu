@@ -7,7 +7,6 @@ module.exports = {
   inputs: {
     event: {
       type: 'json',
-      allowNull: true,
       description: 'Event object triggering the new attendance record. If undefined, the current attendance will be closed, but a new one will not be created. If null, an attendance record for default genre rotation will be started.'
     },
     unscheduled: {

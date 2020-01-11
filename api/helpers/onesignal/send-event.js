@@ -7,7 +7,6 @@ module.exports = {
   inputs: {
     event: {
       type: 'json',
-      allowNull: true,
       description: 'Event object triggering the notification. Should be the event exception when updating or canceling.'
     },
     started: {

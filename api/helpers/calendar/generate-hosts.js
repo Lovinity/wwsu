@@ -4,7 +4,7 @@ module.exports = {
 
   description: 'Generate a host string from the provided event.',
 
-  event: {
+  inputs: {
     event: {
       type: 'json',
       required: true
