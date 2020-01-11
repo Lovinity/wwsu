@@ -98,38 +98,38 @@ module.exports = {
                 events
                     .filter((event) => event.exceptionType === null || ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1))
                     .map((event) => {
-                        console.dir(event);
                         switch (event.type) {
                             case 'prerecord':
-                                console.dir(event);
                                 // No playlist was assigned
                                 if (event.playlistID === null) {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Prerecord event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} does not have a playlist assigned to it. This event will not air until fixed!`);
+                                    break;
                                 }
 
                                 // Playlist does not exist in RadioDJ
                                 if (typeof playlists[ event.playlistID ] === 'undefined') {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Prerecord event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has an assigned playlist that does not exist in RadioDJ. This event will not air until an existing playlist is assigned!`);
+                                    break;
                                 }
 
                                 // Playlist is 15 or more minutes too short
-                                if (((event.duration - 15) * 60) >= (playlists[ event.name ].duration * 1.05)) {
+                                if (((event.duration - 15) * 60) >= (playlists[ event.playlistID ].duration * 1.05)) {
                                     if (status > 3) { status = 3 }
-                                    issues.push(`Prerecord playlist "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} is short on content by about ${moment.duration(((event.duration * 60) - (playlists[ event.name ].duration * 1.05)), 'seconds').humanize()}`);
+                                    issues.push(`Prerecord playlist "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} is short on content by about ${moment.duration(((event.duration * 60) - (playlists[ event.playlistID ].duration * 1.05)), 'seconds').humanize()}`);
                                 }
 
                                 // Playlist is 5 or more minutes too long
-                                if (((event.duration + 5) * 60) <= (playlists[ event.name ].duration * 1.05)) {
+                                if (((event.duration + 5) * 60) <= (playlists[ event.playlistID ].duration * 1.05)) {
                                     if (status > 3) { status = 3 }
-                                    issues.push(`Prerecord playlist "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has about ${moment.duration(((playlists[ event.name ].duration * 1.05) - (event.duration * 60)), 'seconds').humanize()} too much content and might be cut off early by other scheduled broadcasts.`);
+                                    issues.push(`Prerecord playlist "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has about ${moment.duration(((playlists[ event.playlistID ].duration * 1.05) - (event.duration * 60)), 'seconds').humanize()} too much content and might be cut off early by other scheduled broadcasts.`);
                                 }
 
                                 // Duplicate tracks
-                                if (playlists[ event.name ].duplicates > 0) {
+                                if (playlists[ event.playlistID ].duplicates > 0) {
                                     if (status > 3) { status = 3 }
-                                    issues.push(`Prerecord playlist "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has ${playlists[ event.name ].duplicates} duplicate tracks which will be skipped.`);
+                                    issues.push(`Prerecord playlist "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has ${playlists[ event.playlistID ].duplicates} duplicate tracks which will be skipped.`);
                                 }
 
                                 break;
@@ -139,30 +139,32 @@ module.exports = {
                                 if (event.playlistID === null) {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} does not have a playlist assigned to it. This event will not air until fixed!`);
+                                    break;
                                 }
 
                                 // Playlist does not exist in RadioDJ
                                 if (typeof playlists[ event.playlistID ] === 'undefined') {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has an assigned playlist that does not exist in RadioDJ. This event will not air until an existing playlist is assigned!`);
+                                    break;
                                 }
 
                                 // Playlist is 15 or more minutes too short
-                                if (((event.duration - 15) * 60) >= (playlists[ event.name ].duration * 1.05)) {
+                                if (((event.duration - 15) * 60) >= (playlists[ event.playlistID ].duration * 1.05)) {
                                     if (status > 3) { status = 3 }
-                                    issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} is short on content by about ${moment.duration(((event.duration * 60) - (playlists[ event.name ].duration * 1.05)), 'seconds').humanize()}`);
+                                    issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} is short on content by about ${moment.duration(((event.duration * 60) - (playlists[ event.playlistID ].duration * 1.05)), 'seconds').humanize()}`);
                                 }
 
                                 // Playlist is 5 or more minutes too long
-                                if (((event.duration + 5) * 60) <= (playlists[ event.name ].duration * 1.05)) {
+                                if (((event.duration + 5) * 60) <= (playlists[ event.playlistID ].duration * 1.05)) {
                                     if (status > 3) { status = 3 }
-                                    issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has about ${moment.duration(((playlists[ event.name ].duration * 1.05) - (event.duration * 60)), 'seconds').humanize()} too much content and might be cut off early by other scheduled broadcasts.`);
+                                    issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has about ${moment.duration(((playlists[ event.playlistID ].duration * 1.05) - (event.duration * 60)), 'seconds').humanize()} too much content and might be cut off early by other scheduled broadcasts.`);
                                 }
 
                                 // Duplicate tracks
-                                if (playlists[ event.name ].duplicates > 0) {
+                                if (playlists[ event.playlistID ].duplicates > 0) {
                                     if (status > 3) { status = 3 }
-                                    issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has ${playlists[ event.name ].duplicates} duplicate tracks which will be skipped.`);
+                                    issues.push(`Playlist event "${event.hosts} - ${event.name}" for ${moment(event.start).format("llll")} has ${playlists[ event.playlistID ].duplicates} duplicate tracks which will be skipped.`);
                                 }
 
                                 break;
@@ -172,16 +174,18 @@ module.exports = {
                                 if (event.eventID === null) {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Genre event "${event.name}" for ${moment(event.start).format("llll")} does not have a RadioDJ event assigned to it. A manual event in RadioDJ with a "Load Rotation" action must be assigned for this genre to trigger in RadioDJ.`);
+                                    break;
                                 }
 
                                 // Assigned event does not exist in RadioDJ
                                 if (typeof djevents[ event.eventID ] === 'undefined') {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Genre event "${event.name}" for ${moment(event.start).format("llll")} has an assigned event that does not exist in RadioDJ. This genre will not air until an existing manual event with a LoadRotation action is assigned!`);
+                                    break;
                                 }
 
                                 // Event does not actually load any rotations
-                                if (!djevents[ event.eventID ].data.includes('Load Rotation') || djevents[ event.eventID ].enabled !== 'True') {
+                                if (!djevents[ event.eventID ].data.includes('Load Rotation')) {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Genre event "${event.name}" for ${moment(event.start).format("llll")} has an assigned RadioDJ event that does not contain a "Load Rotation" action. This genre will not actually trigger a rotation change without a Load Rotation action in the assigned RadioDJ event.`);
                                 }
