@@ -1,119 +1,67 @@
 /* global moment, importScripts */
 
+importScripts(`../../../js/jquery-3.3.1.min.js`)
 importScripts(`../../../js/moment.min.js`)
+importScripts(`../../../js/wwsu.js`)
+importScripts(`../../../js/taffy-min.js`)
+importScripts(`../../../js/later.min.js`)
+importScripts(`../../../js/wwsu-calendar.js`)
+
+var calendardb = new CalendarDb();
 
 onmessage = function (e) {
-  // Define a comparison function that will order calendar events by start time when we run the iteration
-  var compare = function (a, b) {
-    try {
-      if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
-      if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
-      if (a.ID < b.ID) { return -1 }
-      if (a.ID > b.ID) { return 1 }
-      return 0
-    } catch (e) {
-      console.error(e)
-    }
-  }
 
-  var innercontent = ``
-  var today = []
+  if (e.data[ 0 ] === 'calendar' || e.data[ 0 ] === 'calendarexceptions')
+    calendardb.query(e.data[ 0 ], e.data[ 1 ], e.data[ 2 ]);
 
-  // Run through the events for the next 24 hours and add them to the coming up panel
+  var events = calendardb.getEvents();
+
   var noEvents = true
   var activeEvents = 0
-  e.data[0]
-    .filter(event => !event.title.startsWith('Genre:') && !event.title.startsWith('Playlist:') && !event.title.startsWith('OnAir Studio Prerecord Bookings') && moment(event.start).isBefore(moment(e.data[1]).add(1, 'days')) && moment(event.end).isAfter(moment(e.data[1])))
+  events
+    .filter(event => ['genre', 'playlist', 'onair-booking', 'prod-booking', 'office-hours'].indexOf(event.type) === -1 && moment(event.end).isAfter(moment()))
     .sort(compare)
     .map(event => {
       try {
-        // null start or end? Use a default to prevent errors.
-        if (!moment(event.start).isValid()) { event.start = moment(e.data[1]).startOf('day') }
-        if (!moment(event.end).isValid()) { event.end = moment(e.data[1]).add(1, 'days').startOf('day') }
 
         event.startT = moment(event.start).format('MM/DD hh:mm A')
-        event.endT = moment(event.end).format('hh:mm A')
-
-        if (moment(event.end).startOf('day').isAfter(moment(event.start).startOf('day'))) {
-          event.endT = moment(event.end).format('MM/DD hh:mm A')
-        }
+        event.endT = moment(event.end).format('MM/DD hh:mm A')
 
         var color = hexRgb(event.color)
         var line1
         var line2
-        var stripped
         var image
-        var temp
-        var type
-        var eventName
-        if (event.active < 1) { color = hexRgb(`#161616`) }
+
+        if (['canceled', 'canceled-system'].indexOf(event.exceptionType) !== -1) { color = hexRgb(`#161616`) }
         color.red = Math.round(color.red / 3)
         color.green = Math.round(color.green / 3)
         color.blue = Math.round(color.blue / 3)
         var badgeInfo = ``
-        if (event.active === 2) {
-          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TIME UPDATED</strong></span>`
+        if (['updated', 'updated-system'].indexOf(event.exceptionType) !== -1) {
+          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TEMP TIME CHANGE</strong></span>`
         }
-        if (event.active === -1) {
+        if (['canceled', 'canceled-system'].indexOf(event.exceptionType) !== -1) {
           badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`
         } else {
           activeEvents++;
         }
-        if (event.title.startsWith('Show: ')) {
-          stripped = event.title.replace('Show: ', '')
-          eventName = stripped
-          type = 'show'
+        line1 = event.hosts;
+        line2 = event.name;
+        if (event.type === 'show') {
           image = `<i class="fas fa-microphone text-white" style="font-size: 36px;"></i>`
-          temp = stripped.split(' - ')
-          if (temp.length === 2) {
-            line1 = temp[0]
-            line2 = temp[1]
-          } else {
-            line1 = 'Unknown DJ'
-            line2 = temp
-          }
-        } else if (event.title.startsWith('Prerecord: ')) {
-          stripped = event.title.replace('Prerecord: ', '')
-          eventName = stripped
-          type = 'prerecord'
+        } else if (event.type === 'prerecord') {
           image = `<i class="fas fa-play-circle text-white" style="font-size: 36px;"></i>`
-          temp = stripped.split(' - ')
-          if (temp.length === 2) {
-            line1 = temp[0]
-            line2 = temp[1]
-          } else {
-            line1 = 'Unknown DJ'
-            line2 = temp
-          }
-        } else if (event.title.startsWith('Remote: ')) {
-          stripped = event.title.replace('Remote: ', '')
-          eventName = stripped
-          type = 'remote'
+        } else if (event.type === 'remote') {
           image = `<i class="fas fa-broadcast-tower text-white" style="font-size: 36px;"></i>`
-          temp = stripped.split(' - ')
-          if (temp.length === 2) {
-            line1 = temp[0]
-            line2 = temp[1]
-          } else {
-            line1 = 'Unknown Host'
-            line2 = temp
-          }
-        } else if (event.title.startsWith('Sports: ')) {
-          stripped = event.title.replace('Sports: ', '')
-          eventName = stripped
-          type = 'sports'
-          line1 = 'Raider Sports'
-          line2 = stripped
+        } else if (event.type === 'sports') {
           image = `<i class="fas fa-trophy text-white" style="font-size: 36px;"></i>`
         } else {
-          type = 'event'
-          line1 = ''
-          line2 = event.title
           image = `<i class="fas fa-calendar text-white" style="font-size: 36px;"></i>`
         }
+
         color = `rgb(${color.red}, ${color.green}, ${color.blue});`
         innercontent += `
-                    <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh; border-color: #F9D91C;" id="calendar-event-${event.ID}">
+                    <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh; border-color: #F9D91C;" id="calendar-event-${event.unique}">
                         <div class="col-2 text-white">
                             ${image}
                         </div>
@@ -124,7 +72,7 @@ onmessage = function (e) {
                         </div>
                     </div>`
         noEvents = false
-        today.push({ name: eventName, type: type, active: event.active, ID: `calendar-event-${event.ID}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
+        today.push({ name: event.name, type: event.type, active: ['canceled', 'canceled-system'].indexOf(event.exceptionType) === -1, ID: `calendar-event-${event.unique}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
       } catch (e) {
         console.error(e)
         innercontent = `
@@ -145,7 +93,7 @@ onmessage = function (e) {
                     </div>`
   }
 
-  this.postMessage([innercontent, today, activeEvents])
+  this.postMessage([ innercontent, today, activeEvents ])
 }
 
 function hexRgb (hex, options = {}) {
@@ -174,7 +122,7 @@ function hexRgb (hex, options = {}) {
     }
 
     if (hex.length === 3) {
-      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
+      hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ]
     }
 
     const num = parseInt(hex, 16)
@@ -183,7 +131,7 @@ function hexRgb (hex, options = {}) {
     const blue = num & 255
 
     return options.format === 'array'
-      ? [red, green, blue, alpha]
+      ? [ red, green, blue, alpha ]
       : { red, green, blue, alpha }
   } catch (e) {
     console.error(e)

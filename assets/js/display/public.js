@@ -131,6 +131,7 @@ try {
   // Define data sources
   var Meta = { time: moment().toISOString(true), state: 'unknown', countdown: null }
   var Calendar = new WWSUdb(TAFFY())
+  var Calendarexceptions = new WWSUdb(TAFFY())
   var calendar = []
   var calendarWorker = new Worker('../../js/display/workers/publicCalendar.js')
   var Announcements = new WWSUdb(TAFFY())
@@ -152,7 +153,6 @@ try {
 
   // Define additional variables
   var flashInterval = null
-  var processCalendarTimer
   var disconnected = true
   var slides = {}
   // LINT LIES: directorpresent is used.
@@ -477,22 +477,6 @@ function processDirectors (db) {
   }
 }
 
-// Update the calendar slides
-function processCalendar (db) {
-  try {
-    calendarWorker.postMessage([ db.get(), moment(Meta.time).toISOString(true) ])
-  } catch (e) {
-    console.error(e)
-    var innercontent = document.getElementById('events-today')
-    innercontent.innerHTML = `
-        <div class="row m-1" style="font-size: 1.5vh;">
-            <div class="col text-white">
-                <strong>Error fetching events!</strong>
-            </div>
-        </div>`
-  }
-}
-
 calendarWorker.onmessage = function (e) {
   var innercontent = document.getElementById('events-today')
   innercontent.innerHTML = e.data[ 0 ]
@@ -650,28 +634,31 @@ waitFor(() => {
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
   Calendar.assignSocketEvent('calendar', io.socket)
   Calendar.setOnUpdate((data, db) => {
-    clearTimeout(processCalendarTimer)
-    processCalendarTimer = setTimeout(() => {
-      processCalendar(db)
-    }, 5000)
+    calendarWorker.postMessage([ 'calendar', data, false ]);
   })
   Calendar.setOnInsert((data, db) => {
-    clearTimeout(processCalendarTimer)
-    processCalendarTimer = setTimeout(() => {
-      processCalendar(db)
-    }, 5000)
+    calendarWorker.postMessage([ 'calendar', data, false ]);
   })
   Calendar.setOnRemove((data, db) => {
-    clearTimeout(processCalendarTimer)
-    processCalendarTimer = setTimeout(() => {
-      processCalendar(db)
-    }, 5000)
+    calendarWorker.postMessage([ 'calendar', data, false ]);
   })
   Calendar.setOnReplace((db) => {
-    clearTimeout(processCalendarTimer)
-    processCalendarTimer = setTimeout(() => {
-      processCalendar(db)
-    }, 5000)
+    calendarWorker.postMessage([ 'calendar', db().get(), true ]);
+  })
+
+  // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
+  Calendarexceptions.assignSocketEvent('calendarexceptions', io.socket)
+  Calendarexceptions.setOnUpdate((data, db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
+  })
+  Calendarexceptions.setOnInsert((data, db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
+  })
+  Calendarexceptions.setOnRemove((data, db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
+  })
+  Calendarexceptions.setOnReplace((db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', db().get(), true ]);
   })
 
   // On new directors data, update our directors memory and run the process function.
@@ -866,6 +853,7 @@ function eventSocket () {
   console.log('attempting event socket')
   try {
     Calendar.replaceData(noReq, '/calendar/get')
+    Calendarexceptions.replaceData(noReq, '/calendar/get-exceptions')
   } catch (e) {
     console.log(e)
     console.log('FAILED CONNECTION')
@@ -1422,12 +1410,9 @@ function nowPlayingTick () {
   Meta.time = moment(Meta.time).add(1, 'seconds')
   processNowPlaying({})
 
-  // Every 15 minutes, re-process the calendar
-  if (moment(Meta.time).minute() % 15 === 0 && moment(Meta.time).second() < 5) {
-    clearTimeout(processCalendarTimer)
-    processCalendarTimer = setTimeout(() => {
-      processCalendar(Calendar.db())
-    }, 5000)
+  // Every minute, re-process the calendar
+  if (moment(Meta.time).second() === 0) {
+    calendarWorker.postMessage([ 'update' ]);
   }
 }
 

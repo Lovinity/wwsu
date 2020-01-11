@@ -78,7 +78,7 @@ class CalendarDb {
     }
 
     // Get an array of upcoming events based on provided criteria
-    getEvents (start = moment().startOf('day').toISOString(true), end = moment().add(1, 'days').startOf('day').toISOString(true), query = {}) {
+    getEvents (start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}) {
         var events = [];
 
         // Extension of this.processRecord to also determine if the event falls within the start and end times.
@@ -347,7 +347,21 @@ class CalendarDb {
                 }
             }
         })
-        return events;
+
+        // Define a comparison function that will order calendar events by start time when we run the iteration
+        var compare = function (a, b) {
+            try {
+                if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
+                if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
+                if (a.priority < b.priority) { return 1 }
+                if (a.priority > b.priority) { return -1 }
+                return 0
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        return events.sort(compare);
     }
 
     whatShouldBePlaying (automationOnly = false) {
@@ -623,6 +637,25 @@ class CalendarDb {
         }
     }
 
+    getColor (event) {
+        switch (event.type) {
+            case 'show':
+                return "#dc3545";
+            case 'sports':
+                return "#28a745";
+            case 'remote':
+                return "#6f42c1";
+            case 'prerecord':
+                return "#e83e8c";
+            case 'genre':
+                return "#007bff";
+            case 'playlist':
+                return "#17a2b8";
+            default:
+                return "#6c757d";
+        }
+    }
+
     processRecord (calendar, exception, eventStart) {
         var criteria = {
             calendarID: calendar.ID || exception.calendarID, // ID of the main calendar event
@@ -644,6 +677,9 @@ class CalendarDb {
             banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner, // URL to the event banner
             start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true), // Start time of the event
         }
+
+        // Determine event color
+        criteria.color = this.getColor(criteria);
 
         // Generate a unique string for this specific event time so we can differentiate recurring events easily.
         // Note: The start time in unique strings should be UTC to avoid Daylight Savings complications.
