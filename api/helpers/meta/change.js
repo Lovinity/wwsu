@@ -475,7 +475,7 @@ module.exports = {
               var attendance;
 
               // Different event now on the air?
-              if (sails.models.meta.memory.calendarID !== eventNow.calendarID) {
+              if (sails.models.meta.memory.calendarID !== (eventNow === null ? null : eventNow.calendarID)) {
 
                 // Create a new attendance record
                 attendance = await sails.helpers.attendance.createRecord(eventNow);
