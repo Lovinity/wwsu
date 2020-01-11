@@ -1,7 +1,7 @@
 /* global moment, importScripts */
 
 importScripts(`../../../js/moment.min.js`)
-//importScripts(`../../../js/wwsu.js`)
+importScripts(`../../../js/wwsu.js`)
 importScripts(`../../../js/taffy-min.js`)
 importScripts(`../../../js/later.min.js`)
 importScripts(`../../../js/wwsu-calendar.js`)
