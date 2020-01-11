@@ -19,7 +19,6 @@ onmessage = function (e) {
   var activeEvents = 0
   events
     .filter(event => ['genre', 'playlist', 'onair-booking', 'prod-booking', 'office-hours'].indexOf(event.type) === -1 && moment(event.end).isAfter(moment()))
-    .sort(compare)
     .map(event => {
       try {
 
