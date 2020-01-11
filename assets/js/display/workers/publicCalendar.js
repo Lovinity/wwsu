@@ -1,6 +1,5 @@
 /* global moment, importScripts */
 
-importScripts(`../../../js/jquery-3.3.1.min.js`)
 importScripts(`../../../js/moment.min.js`)
 importScripts(`../../../js/wwsu.js`)
 importScripts(`../../../js/taffy-min.js`)
