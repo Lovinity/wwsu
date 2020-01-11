@@ -7,7 +7,11 @@ if (typeof require !== undefined) {
     }
 
     if (typeof WWSUdb === 'undefined') {
-        var WWSUdb = require('./wwsu.js').WWSUdb;
+        try {
+            var WWSUdb = require('./wwsu.js').WWSUdb;
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     if (typeof later === 'undefined') {
@@ -45,8 +49,8 @@ if (typeof require !== undefined) {
     if (typeof moment === 'undefined') {
         $.loadScript('./moment.min.js');
     }
-} else {
-    throw new Error('Node.js require() or JQuery required.');
+} else if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
+    console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
 }
 
 // Use local time instead of UTC for scheduling
