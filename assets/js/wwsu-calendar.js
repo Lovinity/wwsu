@@ -1,5 +1,3 @@
-/* global moment, later, TAFFY, iziToast, WWSUdb */
-
 // Require libraries if necessary. Because this script runs both in browser and in node, we need to cover both methods of including scripts.
 
 // Node require
