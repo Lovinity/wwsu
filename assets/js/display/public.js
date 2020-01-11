@@ -133,7 +133,7 @@ try {
   var Calendar = new WWSUdb(TAFFY())
   var Calendarexceptions = new WWSUdb(TAFFY())
   var calendar = []
-  var calendardb = new CalendarDb();
+  var calendarWorker = new Worker('../../js/display/workers/publicCalendar.js')
   var Announcements = new WWSUdb(TAFFY())
   var Directors = new WWSUdb(TAFFY())
   var Eas = new WWSUdb(TAFFY())
@@ -477,6 +477,17 @@ function processDirectors (db) {
   }
 }
 
+calendarWorker.onmessage = function (e) {
+  var innercontent = document.getElementById('events-today')
+  innercontent.innerHTML = e.data[ 0 ]
+  calendar = e.data[ 1 ]
+  if (e.data[ 2 ] > 0 && Meta.state.startsWith('automation_')) {
+    Slides.slide(`show-info`).active = true
+  } else {
+    Slides.slide(`show-info`).active = false
+  }
+}
+
 // Check for new Eas alerts and push them out when necessary.
 function processEas (db) {
   // Data processing
@@ -623,31 +634,31 @@ waitFor(() => {
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
   Calendar.assignSocketEvent('calendar', io.socket)
   Calendar.setOnUpdate((data, db) => {
-    processCalendar([ 'calendar', data, false ]);
+    calendarWorker.postMessage([ 'calendar', data, false ]);
   })
   Calendar.setOnInsert((data, db) => {
-    processCalendar([ 'calendar', data, false ]);
+    calendarWorker.postMessage([ 'calendar', data, false ]);
   })
   Calendar.setOnRemove((data, db) => {
-    processCalendar([ 'calendar', data, false ]);
+    calendarWorker.postMessage([ 'calendar', data, false ]);
   })
   Calendar.setOnReplace((db) => {
-    processCalendar([ 'calendar', db.get(), true ]);
+    calendarWorker.postMessage([ 'calendar', db.get(), true ]);
   })
 
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
   Calendarexceptions.assignSocketEvent('calendarexceptions', io.socket)
   Calendarexceptions.setOnUpdate((data, db) => {
-    processCalendar([ 'calendarexceptions', data, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
   })
   Calendarexceptions.setOnInsert((data, db) => {
-    processCalendar([ 'calendarexceptions', data, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
   })
   Calendarexceptions.setOnRemove((data, db) => {
-    processCalendar([ 'calendarexceptions', data, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
   })
   Calendarexceptions.setOnReplace((db) => {
-    processCalendar([ 'calendarexceptions', db.get(), true ]);
+    calendarWorker.postMessage([ 'calendarexceptions', db.get(), true ]);
   })
 
   // On new directors data, update our directors memory and run the process function.
@@ -1401,7 +1412,7 @@ function nowPlayingTick () {
 
   // Every minute, re-process the calendar
   if (moment(Meta.time).second() === 0) {
-    processCalendar([ 'update' ]);
+    calendarWorker.postMessage([ 'update' ]);
   }
 }
 
@@ -1630,98 +1641,4 @@ function setWeatherSlide (id, show, background, header, icon, body) {
         weatherSlide[ index ].body = body || slide.body
       }
     })
-}
-
-function processCalendar (e) {
-
-  if (e.data[ 0 ] === 'calendar' || e.data[ 0 ] === 'calendarexceptions')
-    calendardb.query(e.data[ 0 ], e.data[ 1 ], e.data[ 2 ]);
-
-  var events = calendardb.getEvents();
-
-  var noEvents = true
-  var activeEvents = 0
-  events
-    .filter(event => ['genre', 'playlist', 'onair-booking', 'prod-booking', 'office-hours'].indexOf(event.type) === -1 && moment(event.end).isAfter(moment()))
-    .sort(compare)
-    .map(event => {
-      try {
-
-        event.startT = moment(event.start).format('MM/DD hh:mm A')
-        event.endT = moment(event.end).format('MM/DD hh:mm A')
-
-        var color = hexRgb(event.color)
-        var line1
-        var line2
-        var image
-
-        if (['canceled', 'canceled-system'].indexOf(event.exceptionType) !== -1) { color = hexRgb(`#161616`) }
-        color.red = Math.round(color.red / 3)
-        color.green = Math.round(color.green / 3)
-        color.blue = Math.round(color.blue / 3)
-        var badgeInfo = ``
-        if (['updated', 'updated-system'].indexOf(event.exceptionType) !== -1) {
-          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TEMP TIME CHANGE</strong></span>`
-        }
-        if (['canceled', 'canceled-system'].indexOf(event.exceptionType) !== -1) {
-          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`
-        } else {
-          activeEvents++;
-        }
-        line1 = event.hosts;
-        line2 = event.name;
-        if (event.type === 'show') {
-          image = `<i class="fas fa-microphone text-white" style="font-size: 36px;"></i>`
-        } else if (event.type === 'prerecord') {
-          image = `<i class="fas fa-play-circle text-white" style="font-size: 36px;"></i>`
-        } else if (event.type === 'remote') {
-          image = `<i class="fas fa-broadcast-tower text-white" style="font-size: 36px;"></i>`
-        } else if (event.type === 'sports') {
-          image = `<i class="fas fa-trophy text-white" style="font-size: 36px;"></i>`
-        } else {
-          image = `<i class="fas fa-calendar text-white" style="font-size: 36px;"></i>`
-        }
-
-        color = `rgb(${color.red}, ${color.green}, ${color.blue});`
-        innercontent += `
-                    <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh; border-color: #F9D91C;" id="calendar-event-${event.unique}">
-                        <div class="col-2 text-white">
-                            ${image}
-                        </div>
-                        <div class="col-10 text-white">
-                            <strong>${line1}${line1 !== '' ? ` - ` : ``}${line2}</strong><br />
-                            ${event.startT} - ${event.endT}<br />
-                            ${badgeInfo}
-                        </div>
-                    </div>`
-        noEvents = false
-        today.push({ name: event.name, type: event.type, active: ['canceled', 'canceled-system'].indexOf(event.exceptionType) === -1, ID: `calendar-event-${event.unique}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
-      } catch (e) {
-        console.error(e)
-        innercontent = `
-                <div class="row m-1" style="font-size: 1.5vh;">
-                    <div class="col text-white">
-                        <strong>Error fetching events!</strong>
-                    </div>
-                </div>`
-      }
-    })
-
-  if (noEvents) {
-    innercontent = `
-                    <div class="row m-1" style="font-size: 1.5vh;">
-                        <div class="col text-white">
-                            <strong>No events next 24 hours</strong>
-                        </div>
-                    </div>`
-  }
-
-  var innercontent = document.getElementById('events-today');
-  innercontent.innerHTML = innercontent;
-  calendar = today;
-  if (activeEvents > 0 && Meta.state.startsWith('automation_')) {
-    Slides.slide(`show-info`).active = true
-  } else {
-    Slides.slide(`show-info`).active = false
-  }
 }
