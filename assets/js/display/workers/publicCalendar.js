@@ -13,12 +13,15 @@ onmessage = function (e) {
   if (e.data[ 0 ] === 'calendar' || e.data[ 0 ] === 'calendarexceptions')
     calendardb.query(e.data[ 0 ], e.data[ 1 ], e.data[ 2 ]);
 
+  var innercontent = ``;
+  var today = [];
+
   var events = calendardb.getEvents();
 
   var noEvents = true
   var activeEvents = 0
   events
-    .filter(event => ['genre', 'playlist', 'onair-booking', 'prod-booking', 'office-hours'].indexOf(event.type) === -1 && moment(event.end).isAfter(moment()))
+    .filter(event => [ 'genre', 'playlist', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.end).isAfter(moment()))
     .map(event => {
       try {
 
@@ -30,15 +33,15 @@ onmessage = function (e) {
         var line2
         var image
 
-        if (['canceled', 'canceled-system'].indexOf(event.exceptionType) !== -1) { color = hexRgb(`#161616`) }
+        if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) { color = hexRgb(`#161616`) }
         color.red = Math.round(color.red / 3)
         color.green = Math.round(color.green / 3)
         color.blue = Math.round(color.blue / 3)
         var badgeInfo = ``
-        if (['updated', 'updated-system'].indexOf(event.exceptionType) !== -1) {
+        if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1) {
           badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TEMP TIME CHANGE</strong></span>`
         }
-        if (['canceled', 'canceled-system'].indexOf(event.exceptionType) !== -1) {
+        if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
           badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`
         } else {
           activeEvents++;
@@ -70,7 +73,7 @@ onmessage = function (e) {
                         </div>
                     </div>`
         noEvents = false
-        today.push({ name: event.name, type: event.type, active: ['canceled', 'canceled-system'].indexOf(event.exceptionType) === -1, ID: `calendar-event-${event.unique}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
+        today.push({ name: event.name, type: event.type, active: [ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1, ID: `calendar-event-${event.unique}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
       } catch (e) {
         console.error(e)
         innercontent = `
