@@ -308,7 +308,7 @@ module.exports = {
                     if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                   }
                   exception = await sails.models.calendarexceptions.create({
-                    calendarID: newCalendar.ID,
+                    calendarID: calendar.ID,
                     exceptionType: 'additional-unscheduled',
                     exceptionReason: 'Show went on the air outside of their scheduled time!',
                     newTime: moment().toISOString(true)
@@ -339,7 +339,7 @@ module.exports = {
                     if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                   }
                   exception = await sails.models.calendarexceptions.create({
-                    calendarID: newCalendar.ID,
+                    calendarID: calendar.ID,
                     exceptionType: 'additional-unscheduled',
                     exceptionReason: 'Remote broadcast went on the air outside of their scheduled time!',
                     newTime: moment().toISOString(true)
@@ -366,7 +366,7 @@ module.exports = {
                     if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                   }
                   exception = await sails.models.calendarexceptions.create({
-                    calendarID: newCalendar.ID,
+                    calendarID: calendar.ID,
                     exceptionType: 'additional-unscheduled',
                     exceptionReason: 'Sports broadcast went on the air outside of their scheduled time!',
                     newTime: moment().toISOString(true)
@@ -397,7 +397,7 @@ module.exports = {
                     if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                   }
                   exception = await sails.models.calendarexceptions.create({
-                    calendarID: newCalendar.ID,
+                    calendarID: calendar.ID,
                     exceptionType: 'additional-unscheduled',
                     exceptionReason: 'Prerecord went on the air outside of their scheduled time!',
                     newTime: moment().toISOString(true)
@@ -428,7 +428,7 @@ module.exports = {
                     if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                   }
                   exception = await sails.models.calendarexceptions.create({
-                    calendarID: newCalendar.ID,
+                    calendarID: calendar.ID,
                     exceptionType: 'additional-unscheduled',
                     exceptionReason: 'Playlist went on the air outside of their scheduled time!',
                     newTime: moment().toISOString(true)
@@ -454,7 +454,7 @@ module.exports = {
                     if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                   }
                   exception = await sails.models.calendarexceptions.create({
-                    calendarID: newCalendar.ID,
+                    calendarID: calendar.ID,
                     exceptionType: 'additional-unscheduled',
                     exceptionReason: 'Remote broadcast went on the air outside of their scheduled time!',
                     newTime: moment().toISOString(true)
