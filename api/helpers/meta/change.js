@@ -350,7 +350,7 @@ module.exports = {
               case 'sports_on':
               case 'sportsremote_on':
                 if (!eventNow || eventNow.type !== 'sports' || !sails.models.meta.memory.show.startsWith(eventNow.name)) {
-                  calendar = await sails.models.calendar.find({ name: { startsWith: eventNow.name }, type: 'sports' });
+                  calendar = await sails.models.calendar.find({ name: { startsWith: sails.models.meta.memory.show }, type: 'sports' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
                       type: 'sports',
@@ -438,7 +438,7 @@ module.exports = {
                 break;
               case 'automation_genre':
                 if (!eventNow || eventNow.type !== 'remote' || sails.models.meta.memory.genre !== eventNow.name) {
-                  calendar = await sails.models.calendar.find({ name: eventNow.name, type: 'genre' });
+                  calendar = await sails.models.calendar.find({ name: sails.models.meta.memory.genre, type: 'genre' });
                   if (!calendar || !calendar[ 0 ]) {
                     calendar = await sails.models.calendar.create({
                       type: 'genre',

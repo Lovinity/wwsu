@@ -139,6 +139,7 @@ module.exports = {
             })()
         } else {
             (async () => {
+                var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, inputs.start);
                 await sails.helpers.onesignal.sendEvent(event, false, true)
             })()
         }
