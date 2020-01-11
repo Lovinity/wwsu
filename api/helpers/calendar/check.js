@@ -98,9 +98,10 @@ module.exports = {
                 events
                     .filter((event) => event.exceptionType === null || ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1))
                     .map((event) => {
+                        console.dir(event);
                         switch (event.type) {
                             case 'prerecord':
-
+                                console.dir(event);
                                 // No playlist was assigned
                                 if (event.playlistID === null) {
                                     if (status > 2) { status = 2 }

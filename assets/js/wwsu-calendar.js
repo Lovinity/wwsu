@@ -643,7 +643,6 @@ class CalendarDb {
             logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo, // URL to the event logo
             banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner, // URL to the event banner
             start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true), // Start time of the event
-            duration: exception.duration && exception.duration !== null ? exception.duration : calendar.duration // Duration of the event in minutes
         }
 
         // Generate a unique string for this specific event time so we can differentiate recurring events easily.
@@ -677,7 +676,7 @@ class CalendarDb {
 
         // Calculate duration
         criteria.duration = moment(criteria.end).diff(moment(criteria.start), 'minutes');
-        
+
         return criteria;
     }
 }
