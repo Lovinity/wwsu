@@ -480,15 +480,15 @@ module.exports = {
 
                 // Create a new attendance record
                 attendance = await sails.helpers.attendance.createRecord(eventNow);
-                sails.models.meta.memory.attendanceID = attendance.ID;
-                push.attendanceID = attendance.ID;
+                sails.models.meta.memory.attendanceID = attendance.newID;
+                push.attendanceID = attendance.newID;
 
                 if (eventNow !== null) {
                   if ([ 'live_on', 'sports_on', 'remote_on', 'sportsremote_on', 'prerecord_on' ].indexOf(inputs[ key ]) !== -1) {
 
                     // Make a log if the broadcast was unauthorized
                     if (exception) {
-                      await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
+                      await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
                         .tolerate((err) => {
                           sails.log.error(err)
                         })
@@ -496,7 +496,7 @@ module.exports = {
                     }
 
                     // Make a log that the broadcast started
-                    await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
+                    await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
                       .tolerate((err) => {
                         sails.log.error(err)
                       })
