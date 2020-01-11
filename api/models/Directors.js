@@ -82,6 +82,7 @@ module.exports = {
               let hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
               await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
+              sails.log.error(e);
             }
           });
         }
@@ -95,6 +96,7 @@ module.exports = {
               let hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
               await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
+              sails.log.error(e);
             }
           });
         }

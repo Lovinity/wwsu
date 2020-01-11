@@ -12,14 +12,15 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
+    sails.log.debug(`Helper calendar.generateHosts called.`);
 
-    event = inputs.event;
+    var event = inputs.event;
     var hosts = `Unknown Hosts`;
 
     if (event.director && event.director !== null) {
       var temp = await sails.models.directors.findOne({ ID: event.director });
       if (temp) {
-        hosts = director.name;
+        hosts = temp.name;
       }
     }
     if (event.hostDJ && event.hostDJ !== null) {
