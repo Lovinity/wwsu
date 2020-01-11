@@ -8,7 +8,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper discipline.add called.')
+    sails.log.debug('Helper directors.update called.')
     try {
       var names = {}
 
@@ -22,6 +22,7 @@ module.exports = {
         },
         sort: 'timeIn DESC'
       })
+      sails.log.debug(`directors.update records`)
       if (records.length > 0) {
         // Update present and since entries in the Directors database
         var maps = records
@@ -43,7 +44,9 @@ module.exports = {
             }
           })
         await Promise.all(maps)
+        sails.log.debug(`directors.update maps`)
       }
+      sails.log.debug(`directors.update done`)
       return exits.success()
     } catch (e) {
       return exits.error(e)

@@ -71,6 +71,7 @@ module.exports = {
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
     let records;
+    sails.log.debug(`Director afterUpdate`)
 
       // Update host data in calendar and calendarExceptions
       (async () => {
@@ -79,7 +80,7 @@ module.exports = {
           records.map(async (record) => {
             try {
               let hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
-              await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts });
+              await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
           });
@@ -92,14 +93,14 @@ module.exports = {
           records.map(async (record) => {
             try {
               let hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
-              await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts });
+              await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
           });
         }
       })()
 
-
+    sails.log.debug(`Director afterUpdate finished`)
     return proceed()
   },
 
@@ -110,42 +111,40 @@ module.exports = {
     let records;
     let maps;
 
-      // Deactivate office hours events for this director. Update all other events using this director ID to null director.
-      (async () => {
-        records = await sails.models.calendar.find({ director: destroyedRecord.ID });
-        if (records.length > 0) {
-          maps = records.map(async (record) => {
-            try {
-              if (record.type === 'office-hours') {
-                await sails.models.calendar.update({ ID: record.ID }, { active: false }).fetch();
-              } else {
-                record.director = null;
-                let hosts = await sails.helpers.calendar.generateHosts(record);
-                await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
-              }
-            } catch (e) {
+    // Deactivate office hours events for this director. Update all other events using this director ID to null director.
+    (async () => {
+      records = await sails.models.calendar.find({ director: destroyedRecord.ID });
+      if (records.length > 0) {
+        records.map(async (record) => {
+          try {
+            if (record.type === 'office-hours') {
+              await sails.models.calendar.update({ ID: record.ID }, { active: false }).fetch();
+            } else {
+              record.director = null;
+              let hosts = await sails.helpers.calendar.generateHosts(record);
+              await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
             }
-          });
-          await Promise.all(maps);
-        }
+          } catch (e) {
+          }
+        });
+      }
 
-        records = await sails.models.calendarexceptions.find({ director: destroyedRecord.ID });
-        if (records.length > 0) {
-          maps = records.map(async (record) => {
-            try {
-              if (record.type === 'office-hours') {
-                await sails.models.calendarexceptions.destroy({ ID: record.ID }).fetch();
-              } else {
-                record.director = null;
-                let hosts = await sails.helpers.calendar.generateHosts(record);
-                await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
-              }
-            } catch (e) {
+      records = await sails.models.calendarexceptions.find({ director: destroyedRecord.ID });
+      if (records.length > 0) {
+        records.map(async (record) => {
+          try {
+            if (record.type === 'office-hours') {
+              await sails.models.calendarexceptions.destroy({ ID: record.ID }).fetch();
+            } else {
+              record.director = null;
+              let hosts = await sails.helpers.calendar.generateHosts(record);
+              await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
             }
-          });
-          await Promise.all(maps);
-        }
-      })()
+          } catch (e) {
+          }
+        });
+      }
+    })()
 
     return proceed()
   }
