@@ -636,13 +636,13 @@ class CalendarDb {
         // Note: The start time in unique strings should be UTC to avoid Daylight Savings complications.
         // Format: calendarID_originalEventStartTime[_additionalExceptionID]. additionalExceptionID is only provided if we have an additional exception, or an exception of an additional exception, because additional exceptions should be treated as separate events.
         if (criteria.exceptionType === 'additional' || criteria.exceptionType === 'additional-unscheduled') {
-            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}_${criteria.exceptionID}`;
+            criteria.unique = `${criteria.calendarID}-${moment.utc(criteria.start).valueOf()}-${criteria.exceptionID}`;
         } else if (criteria.exceptionExceptionID !== null && criteria.exceptionTime !== null) {
-            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.exceptionTime).toISOString(false)}_${criteria.exceptionExceptionID}`;
+            criteria.unique = `${criteria.calendarID}-${moment.utc(criteria.exceptionTime).valueOf()}-${criteria.exceptionExceptionID}`;
         } else if (criteria.exceptionTime === null) {
-            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.start).toISOString(false)}`;
+            criteria.unique = `${criteria.calendarID}-${moment.utc(criteria.start).valueOf()}`;
         } else {
-            criteria.unique = `${criteria.calendarID}_${moment.utc(criteria.exceptionTime).toISOString(false)}`;
+            criteria.unique = `${criteria.calendarID}-${moment.utc(criteria.exceptionTime).valueOf()}`;
         }
 
         // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.

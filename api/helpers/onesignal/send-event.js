@@ -69,7 +69,7 @@ module.exports = {
           await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} will no longer air on WWSU`, `${inputs.event.hosts} - ${inputs.event.name} has been discontinued on WWSU Radio. We have removed your subscriptions to this show automatically.`, (60 * 60 * 24 * 7))
           // Remove both recurring and one-time subscribers
           await sails.models.subscribers.destroy({ type: `calendar-all`, subtype: inputs.event.calendarID }).fetch();
-          await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: { startsWith: `${inputs.event.calendarID}_` } }).fetch();
+          await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: { startsWith: `${inputs.event.calendarID}-` } }).fetch();
         }
       }
 
