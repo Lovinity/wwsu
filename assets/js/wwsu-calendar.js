@@ -5,7 +5,7 @@
 // Node require
 if (typeof require !== undefined) {
     if (typeof TAFFY === 'undefined') {
-        var TAFFY = require('./taffy-min.js');
+        var TAFFY = require('./taffy-min.js').taffy;
     }
 
     if (typeof WWSUdb === 'undefined') {
