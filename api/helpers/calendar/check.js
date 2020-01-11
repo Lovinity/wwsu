@@ -28,7 +28,7 @@ module.exports = {
         if (inputs.checkIntegrity) {
             var status = 5;
             var issues = [];
-            var events = sails.models.calendar7.calendardb.getEvents(undefined, moment().add(14, 'days').toISOString(true));
+            var events = sails.models.calendar.calendardb.getEvents(undefined, moment().add(14, 'days').toISOString(true));
 
             if (events && events.length > 0) {
                 var playlists = {}
@@ -201,7 +201,7 @@ module.exports = {
         } else {
 
             // Check if it's time to trigger a program, and trigger it if so
-            var eventNow = sails.models.calendar7.calendardb.whatShouldBePlaying(true);
+            var eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(true);
             if (eventNow) {
                 if ((eventNow.type === 'prerecord' || eventNow.type === 'genre') && eventNow.playlistID !== null) {
                     await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
@@ -219,7 +219,7 @@ module.exports = {
             }
 
             // Check to see if any events did not air
-            var eventCheck = sails.models.calendar7.calendardb.getEvents(sails.models.meta.memory.attendanceChecked, moment().toISOString(true));
+            var eventCheck = sails.models.calendar.calendardb.getEvents(sails.models.meta.memory.attendanceChecked, moment().toISOString(true));
             await sails.helpers.meta.change.with({ attendanceChecked: moment().toISOString(true) });
             if (eventCheck && eventCheck.length > 0) {
 

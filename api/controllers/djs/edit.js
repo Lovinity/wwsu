@@ -63,19 +63,19 @@ module.exports = {
               await sails.models.attendance.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
 
               // Update all calendar records
-              temp = await sails.models.calendar7.update({ hostDJ: record.ID }, { hostDJ: inputs.ID }).fetch();
+              temp = await sails.models.calendar.update({ hostDJ: record.ID }, { hostDJ: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
-              temp = await sails.models.calendar7.update({ cohostDJ1: record.ID }, { cohostDJ1: inputs.ID }).fetch();
+              temp = await sails.models.calendar.update({ cohostDJ1: record.ID }, { cohostDJ1: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
-              temp = await sails.models.calendar7.update({ cohostDJ2: record.ID }, { cohostDJ2: inputs.ID }).fetch();
+              temp = await sails.models.calendar.update({ cohostDJ2: record.ID }, { cohostDJ2: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
-              temp = await sails.models.calendar7.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
+              temp = await sails.models.calendar.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
 
               // Regenerate hosts
               for (var cal in updatedRecords) {
                 if (Object.prototype.hasOwnProperty.call(updatedRecords, cal)) {
-                  await sails.models.calendar7.update({ ID: cal }, { hosts: await sails.helpers.calendar7.generateHosts(updatedrecords[ cal ]) }).fetch();
+                  await sails.models.calendar.update({ ID: cal }, { hosts: await sails.helpers.calendar.generateHosts(updatedrecords[ cal ]) }).fetch();
                 }
               }
 
@@ -94,7 +94,7 @@ module.exports = {
               // Regenerate hosts
               for (var cal in updatedRecords) {
                 if (Object.prototype.hasOwnProperty.call(updatedRecords, cal)) {
-                  await sails.models.calendarexceptions.update({ ID: cal }, { hosts: await sails.helpers.calendar7.generateHosts(updatedrecords[ cal ]) }).fetch();
+                  await sails.models.calendarexceptions.update({ ID: cal }, { hosts: await sails.helpers.calendar.generateHosts(updatedrecords[ cal ]) }).fetch();
                 }
               }
 

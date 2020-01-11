@@ -128,21 +128,21 @@ module.exports = {
             }
 
             try {
-                event = await sails.helpers.calendar7.verify(event);
+                event = await sails.helpers.calendar.verify(event);
             } catch (e) {
                 return exits.success(e.message);
             }
 
 
             // Check for event conflicts
-            var conflicts = sails.models.calendar7.calendardb.checkConflicts(event);
+            var conflicts = sails.models.calendar.calendardb.checkConflicts(event);
 
             // If there were errors, exit on the error
             if (conflicts.error)
                 return exits.success(conflicts.error);
 
             // Add the event into the calendar
-            await sails.models.calendar7.create(event).fetch();
+            await sails.models.calendar.create(event).fetch();
 
             // Add cancellations for shows this one will override
             if (conflicts.overridden.length > 0) {

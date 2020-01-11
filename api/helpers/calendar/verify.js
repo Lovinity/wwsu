@@ -14,14 +14,14 @@ module.exports = {
   fn: async function (inputs, exits) {
 
     // Check for proper event formatting
-    event = sails.models.calendar7.calendardb.verify(inputs.event);
+    event = sails.models.calendar.calendardb.verify(inputs.event);
     if (!event) {
       return exits.error("Event is invalid.")
     }
 
     // Populate DJ Names
     try {
-      event.hosts = await sails.helpers.calendar7.generateHosts(event);
+      event.hosts = await sails.helpers.calendar.generateHosts(event);
     } catch (e) {
       return exits.error(e.message);
     }

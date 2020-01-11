@@ -1,5 +1,5 @@
 /**
- * Calendar7.js
+ * calendar.js
  *
  * @description :: Calendar events.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -120,23 +120,23 @@ module.exports = {
     // Websockets standards
     afterCreate: function (newlyCreatedRecord, proceed) {
         var data = { insert: newlyCreatedRecord }
-        sails.models.calendar7.calendardb.query('calendar', data);
+        sails.models.calendar.calendardb.query('calendar', data);
         sails.log.silly(`calendar socket: ${data}`)
-        sails.sockets.broadcast('calendar7', 'calendar7', data)
+        sails.sockets.broadcast('calendar', 'calendar', data)
         return proceed()
     },
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = { update: updatedRecord }
-        sails.models.calendar7.calendardb.query('calendar', data);
+        sails.models.calendar.calendardb.query('calendar', data);
         sails.log.silly(`calendar socket: ${data}`)
-        sails.sockets.broadcast('calendar7', 'calendar7', data)
+        sails.sockets.broadcast('calendar', 'calendar', data)
 
         // If setting active to false, delete all exceptions and notify subscribers of a discontinued show
         if (!updatedRecord.active) {
             (async () => {
                 await sails.helpers.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
-                var event = sails.models.calendar7.calendardb.processRecord(updatedRecord, {}, inputs.start);
+                var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, inputs.start);
                 await sails.helpers.onesignal.sendEvent(event, false, false)
             })()
         } else {
@@ -150,14 +150,14 @@ module.exports = {
 
     afterDestroy: function (destroyedRecord, proceed) {
         var data = { remove: destroyedRecord.ID }
-        sails.models.calendar7.calendardb.query('calendar', data);
+        sails.models.calendar.calendardb.query('calendar', data);
         sails.log.silly(`calendar socket: ${data}`)
-        sails.sockets.broadcast('calendar7', 'calendar7', data)
+        sails.sockets.broadcast('calendar', 'calendar', data)
 
         // Remove all calendar exceptions
         (async () => {
             await sails.helpers.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
-            var event = sails.models.calendar7.calendardb.processRecord(destroyedRecord, {}, inputs.start);
+            var event = sails.models.calendar.calendardb.processRecord(destroyedRecord, {}, inputs.start);
             await sails.helpers.onesignal.sendEvent(event, false, false)
         })()
         

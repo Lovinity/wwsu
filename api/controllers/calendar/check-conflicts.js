@@ -71,13 +71,13 @@ module.exports = {
                 schedule: inputs.schedule
             }
 
-            event = sails.models.calendar7.calendardb.verify(event);
+            event = sails.models.calendar.calendardb.verify(event);
 
             if (!event) {
                 throw new Error("The event is invalid");
             }
 
-            return sails.models.calendar7.calendardb.checkConflicts(event);
+            return sails.models.calendar.calendardb.checkConflicts(event);
 
         } catch (e) {
             return exits.error(e)

@@ -72,7 +72,7 @@ module.exports = {
             return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided is not authorized.'))
         }
 
-        var record = sails.models.calendar7.calendardb.whatShouldBePlaying(false);
+        var record = sails.models.calendar.calendardb.whatShouldBePlaying(false);
         if (record.type !== 'remote' || record.hosts !== djs || record.name !== show) {
           return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ and show name you provided is not scheduled to go on the air at this time.'))
         }

@@ -48,7 +48,7 @@ module.exports = {
 
       // Update host data in calendar events
       (async () => {
-        var records = await sails.models.calendar7.find({
+        var records = await sails.models.calendar.find({
           or: [
             { hostDJ: updatedRecord.ID },
             { cohostDJ1: updatedRecord.ID },
@@ -59,8 +59,8 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              var hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
-              await sails.models.calendar7.update({ ID: record.ID }, { hosts: hosts }).fetch();
+              var hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
+              await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
           });
@@ -78,7 +78,7 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              var hosts = await sails.helpers.calendar7.generateHosts(updatedRecord);
+              var hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
               await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
@@ -96,7 +96,7 @@ module.exports = {
 
       // Update DJ data in calendar events
       (async () => {
-        let records = await sails.models.calendar7.find({
+        let records = await sails.models.calendar.find({
           or: [
             { hostDJ: destroyedRecord.ID },
             { cohostDJ1: destroyedRecord.ID },
@@ -125,8 +125,8 @@ module.exports = {
                 record.cohostDJ3 = null;
               }
 
-              toUpdate.hosts = await sails.helpers.calendar7.generateHosts(record);
-              await sails.models.calendar7.update({ ID: record.ID }, toUpdate).fetch();
+              toUpdate.hosts = await sails.helpers.calendar.generateHosts(record);
+              await sails.models.calendar.update({ ID: record.ID }, toUpdate).fetch();
             } catch (e) {
             }
           });
@@ -162,7 +162,7 @@ module.exports = {
                 record.cohostDJ3 = null;
               }
 
-              toUpdate.hosts = await sails.helpers.calendar7.generateHosts(record);
+              toUpdate.hosts = await sails.helpers.calendar.generateHosts(record);
               await sails.models.calendarexceptions.update({ ID: record.ID }, toUpdate).fetch();
             } catch (e) {
             }
@@ -171,7 +171,7 @@ module.exports = {
         }
 
         // Deactivate any main calendar events that now have no host DJ
-        await sails.models.calendar7.update({ type: [ 'show', 'remote', 'prerecord' ], hostDJ: null }, { active: false }).fetch();
+        await sails.models.calendar.update({ type: [ 'show', 'remote', 'prerecord' ], hostDJ: null }, { active: false }).fetch();
 
         // Update attendance records
         await sails.models.attendance.update({ dj: inputs.ID }, { dj: null }).fetch()

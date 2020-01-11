@@ -43,7 +43,7 @@ module.exports.bootstrap = async function (done) {
 
   // Load calendardb
   sails.log.verbose(`BOOTSTRAP: Initiating calendar`)
-  sails.models.calendar7.calendardb = new CalendarDb(await sails.models.calendar7.find({ active: true }), await sails.models.calendarexceptions.find());
+  sails.models.calendar.calendardb = new CalendarDb(await sails.models.calendar.find({ active: true }), await sails.models.calendarexceptions.find());
 
   if (sails.config.custom.sports) {
     sails.log.verbose(`BOOTSTRAP: Initiating sports events in calendar`)
@@ -51,10 +51,10 @@ module.exports.bootstrap = async function (done) {
     // Add sports into the calendar as a non-scheduled event if they do not exist
     sails.config.custom.sports.map((sport) => {
       (async (_sport) => {
-        sails.models.calendar7.findOrCreate({ type: 'sports', name: sport }, {
+        sails.models.calendar.findOrCreate({ type: 'sports', name: sport }, {
           type: 'sports',
           active: true,
-          priority: sails.models.calendar7.calendardb.getDefaultPriority({ type: 'sports' }),
+          priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'sports' }),
           name: sport,
           start: moment().toISOString(true),
           duration: 0,
@@ -62,9 +62,9 @@ module.exports.bootstrap = async function (done) {
         })
           .exec(async (err, record, wasCreated) => {
             if (!wasCreated)
-              await sails.models.calendar7.update({ ID: record.ID }, {
+              await sails.models.calendar.update({ ID: record.ID }, {
                 active: true,
-                priority: sails.models.calendar7.calendardb.getDefaultPriority({ type: 'sports' }),
+                priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'sports' }),
                 start: moment().toISOString(true)
               }).fetch();
           });
@@ -72,11 +72,11 @@ module.exports.bootstrap = async function (done) {
     });
 
     // De-sctivate main sports events that do not exist in the system configured list of sports
-    await sails.models.calendar7.update({ type: 'sports', name: { nin: sails.config.custom.sports } }, { active: false }).fetch();
+    await sails.models.calendar.update({ type: 'sports', name: { nin: sails.config.custom.sports } }, { active: false }).fetch();
   }
 
   sails.log.verbose(`BOOTSTRAP: Initiating studio booking events in calendar`)
-  await sails.models.calendar7.findOrCreate({ type: 'onair-booking' }, {
+  await sails.models.calendar.findOrCreate({ type: 'onair-booking' }, {
     type: 'onair-booking',
     active: true,
     priority: -1,
@@ -85,7 +85,7 @@ module.exports.bootstrap = async function (done) {
     duration: 0,
     schedule: null
   });
-  await sails.models.calendar7.findOrCreate({ type: 'prod-booking' }, {
+  await sails.models.calendar.findOrCreate({ type: 'prod-booking' }, {
     type: 'prod-booking',
     active: true,
     priority: -1,
@@ -1445,8 +1445,8 @@ module.exports.bootstrap = async function (done) {
     return new Promise(async (resolve, reject) => {
       sails.log.debug('CRON calendardbCacheSync called')
       try {
-        sails.models.calendar7.calendardb.query('calendar', await sails.models.calendar7.find({ active: true }), true)
-        sails.models.calendar7.calendardb.query('calendarexceptions', await sails.models.calendarexceptions.find(), true);
+        sails.models.calendar.calendardb.query('calendar', await sails.models.calendar.find({ active: true }), true)
+        sails.models.calendar.calendardb.query('calendarexceptions', await sails.models.calendarexceptions.find(), true);
       } catch (e) {
         sails.log.error(e);
         return reject(e);

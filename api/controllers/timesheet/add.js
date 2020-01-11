@@ -74,7 +74,7 @@ module.exports = {
         thetime = moment(inputs.timestamp)
 
         // Check if an office hours record exists.
-        var calendar = sails.models.calendar7.calendardb.whoShouldBeIn();
+        var calendar = sails.models.calendar.calendardb.whoShouldBeIn();
         if (calendar.length > 0)
           calendar = calendar.filter((cal) => cal.director === record.ID);
 
