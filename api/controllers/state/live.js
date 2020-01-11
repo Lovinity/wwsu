@@ -17,7 +17,7 @@ module.exports = {
       custom: function (value) {
         var temp2 = value.split(' - ')
         if (temp2.length !== 2) { return false }
-        var temp3 = temp2.split("; ");
+        var temp3 = temp2[ 0 ].split("; ");
         if (temp3.length > 4) { return false }
         return true
       },
