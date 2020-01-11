@@ -122,7 +122,6 @@ module.exports = {
             })
           await loadPlaylist()
           await sails.helpers.rest.cmd('EnableAutoDJ', 1)
-          await sails.helpers.onesignal.sendEvent(inputs.event, true);
           // Prerecords
         } else if (inputs.event.type === 'prerecord') {
           if (forced) {

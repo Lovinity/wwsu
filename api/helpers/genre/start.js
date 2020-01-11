@@ -57,7 +57,6 @@ module.exports = {
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
-              await sails.helpers.onesignal.sendEvent(inputs.event, true)
             } else {
               await sails.helpers.meta.change.with({ state: 'automation_on', genre: 'Default', playlistPlayed: moment().toISOString(true) })
               await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', event: '<strong>Default rotation started.</strong>' }).fetch()
