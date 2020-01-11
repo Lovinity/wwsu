@@ -83,7 +83,6 @@ class CalendarDb {
 
         // Extension of this.processRecord to also determine if the event falls within the start and end times.
         var _processRecord = (calendar, exception, eventStart) => {
-            sails.log.debug(`getEvents _processRecord: Called.`);
             var criteria = this.processRecord(calendar, exception, eventStart);
 
             // This event is within our time range if one or more of the following is true:
@@ -97,16 +96,13 @@ class CalendarDb {
             } else {
                 if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.end).isSameOrBefore(moment(end))) || (moment(criteria.start).isSameOrAfter(start) && moment(criteria.start).isBefore(end)) || (moment(criteria.start).isBefore(start) && moment(criteria.end).isAfter(end))) {
                     events.push(criteria);
-                    sails.log.debug(`getEvents _processRecord: Event ID ${criteria.calendarID} at ${criteria.start} qualifies. Added to array.`);
                 }
             }
         }
 
         var results = this.calendar.db(query).get();
-        sails.log.debug(`getEvents: retrieved ${results.length} calendar events.`);
 
         results.map((calendar, index) => {
-            sails.log.debug(`getEvents: Processing calendar event ${index}`);
 
             var beginAt = start;
             var exceptionIDs = [];
@@ -127,18 +123,15 @@ class CalendarDb {
 
             // For events with null schedule or duration of 0, we only want to process "additional" exceptions and any exceptions to the additional exceptions; ignore the main event.
             if (calendar.schedule === null || calendar.duration <= 0) {
-                sails.log.debug(`getEvents calendar ${index}: Null schedule or 0 duration.`);
                 var tempExceptions = [];
                 var exceptionIDs = [];
                 calendar.duration = 0; // Force no duration for empty schedule events.
 
                 // Process additional exceptions
                 var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: [ 'additional', 'additional-unscheduled' ] }).get();
-                sails.log.debug(`getEvents calendar ${index}: retrieved ${calendarb.length} calendar exceptions.`);
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal, ind) => {
-                        sails.log.debug(`getEvents calendar ${index} exception ${ind}: Processing`);
                         var tempExceptions = [];
 
                         // Get exceptions to the additional exception if they exist
@@ -147,7 +140,6 @@ class CalendarDb {
                                 return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled';
                             }).get() || [];
                             if (exceptions.length > 0) {
-                                sails.log.debug(`getEvents calendar ${index} exception ${ind}: Retrieved ${exceptions.length} additional exceptions.`);
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
@@ -185,7 +177,6 @@ class CalendarDb {
             } else if (calendar.schedule.schedules) {
                 // No dice if there is no schedules parameter or if there is no record at index 0
                 if (!calendar.schedule.schedules[ 0 ]) return null;
-                sails.log.debug(`getEvents calendar ${index}: later.js schedule provided.`);
 
                 // Set defaults in schedule if they don't exist for hour, minute, and second
                 calendar.schedule.schedules.map((schedule, index) => {
@@ -196,7 +187,6 @@ class CalendarDb {
                     if (!schedule.s)
                         calendar.schedule.schedules[ index ].s = [ 0 ];
                 })
-                sails.log.debug(`getEvents calendar ${index}: Polyfilled empty later.js values.`);
 
 
                 // Generate later schedule
@@ -209,7 +199,6 @@ class CalendarDb {
                     if (!eventStart || eventStart === null) break;
                     beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
 
-                    sails.log.debug(`getEvents calendar ${index}: Processing schedule at ${eventStart}`);
 
                     // Get exceptions if they exist
                     try {
@@ -217,7 +206,6 @@ class CalendarDb {
                             return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                         }).get() || [];
                         if (exceptions.length > 0) {
-                            sails.log.debug(`getEvents calendar ${index} at ${eventStart}: Retrieved ${exceptions.length} non-additional exceptions.`);
                             exceptions.map((exc) => {
                                 exceptionIDs.push(exc.ID);
                                 tempExceptions.push(exc);
@@ -237,11 +225,9 @@ class CalendarDb {
 
                 // Process additional exceptions
                 var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: [ 'additional', 'additional-unscheduled' ] }).get();
-                sails.log.debug(`getEvents calendar ${index} at ${eventStart}: Retrieved ${calendarb.length} additional exceptions.`);
                 if (calendarb.length > 0) {
                     // Loop through each additional exception
                     calendarb.map((cal, ind) => {
-                        sails.log.debug(`getEvents calendar ${index} at ${eventStart} exception ${ind}: Processing`);
                         var tempExceptions = [];
                         var eventStart = moment(cal.newTime || cal.exceptionTime).toISOString(true);
 
@@ -251,7 +237,6 @@ class CalendarDb {
                                 return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(eventStart), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
-                                sails.log.debug(`getEvents calendar ${index} at ${eventStart} exception ${ind}: Retrieved ${exceptions.length} exceptions.`);
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
@@ -288,7 +273,6 @@ class CalendarDb {
                 }
 
             } else if (calendar.schedule.oneTime) { // One-time events
-                sails.log.debug(`getEvents calendar ${index}: One-time schedule provided.`);
                 // Get exception if it exists
                 try {
                     var tempExceptions = [];
@@ -298,7 +282,6 @@ class CalendarDb {
                         return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                     }).get() || [];
                     if (exceptions.length > 0) {
-                        sails.log.debug(`getEvents calendar ${index}: Retrieved ${exceptions.length} non-addditional exceptions.`);
                         exceptions.map((exc) => {
                             exceptionIDs.push(exc.ID);
                             tempExceptions.push(exc);
@@ -318,11 +301,9 @@ class CalendarDb {
                 // Process additional exceptions
                 var calendarb = this.calendarexceptions.db({ calendarID: calendar.ID, exceptionType: [ 'additional', 'additional-unscheduled' ] }).get();
                 if (calendarb.length > 0) {
-                    sails.log.debug(`getEvents calendar ${index}: Retrieved ${exceptions.length} addditional exceptions.`);
                     // Loop through each additional exception
                     calendarb.map((cal, ind) => {
                         var tempExceptions = [];
-                        sails.log.debug(`getEvents calendar ${index} exception ${ind}: Processing.`);
 
                         // Get exceptions to the additional exception if they exist
                         try {
@@ -330,7 +311,6 @@ class CalendarDb {
                                 return this.calendarID === calendar.ID && this.exceptionType !== 'additional' && this.exceptionType !== 'additional-unscheduled' && this.exceptionTime !== null && moment(this.exceptionTime).isSame(moment(calendar.schedule.oneTime), 'minute');
                             }).get() || [];
                             if (exceptions.length > 0) {
-                                sails.log.debug(`getEvents calendar ${index} exception ${ind}: Retrieved ${exceptions.length} exceptions.`);
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
@@ -644,7 +624,6 @@ class CalendarDb {
     }
 
     processRecord (calendar, exception, eventStart) {
-        sails.log.debug(`processRecord: Called.`);
         var criteria = {
             calendarID: calendar.ID || exception.calendarID, // ID of the main calendar event
             exceptionID: exception.ID || null, // ID of the exception record, if an exception was applied
@@ -664,6 +643,7 @@ class CalendarDb {
             logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo, // URL to the event logo
             banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner, // URL to the event banner
             start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true), // Start time of the event
+            duration: exception.duration && exception.duration !== null ? exception.duration : calendar.duration // Duration of the event in minutes
         }
 
         // Generate a unique string for this specific event time so we can differentiate recurring events easily.
@@ -697,8 +677,7 @@ class CalendarDb {
 
         // Calculate duration
         criteria.duration = moment(criteria.end).diff(moment(criteria.start), 'minutes');
-
-        sails.log.debug(`processRecord: Finished.`);
+        
         return criteria;
     }
 }
