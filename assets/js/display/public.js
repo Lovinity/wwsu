@@ -296,7 +296,7 @@ try {
       if (tcalendar.length > 0) {
         var index = Math.floor(Math.random() * tcalendar.length)
         if (typeof tcalendar[ index ] !== 'undefined') {
-          slide.displayTime = 10 + Math.floor(tcalendar[ index ].topic.length / 20)
+          slide.displayTime = tcalendar[ index ].topic !== null ? 10 + Math.floor(tcalendar[ index ].topic.length / 20) : 0;
           var temp1 = document.querySelector('#promote-show-name')
           if (temp1 !== null) {
             temp1.innerHTML = `<strong>${tcalendar[ index ].name}</strong>`
