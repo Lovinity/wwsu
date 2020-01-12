@@ -27,7 +27,7 @@ var shouldScroll = false
 var skipIt = -1
 var blocked = false
 var firstTime = true
-var Calendar = TAFFY()
+var calendardb = new CalendarDb();
 var Subscriptions = TAFFY()
 // LINT LIES: this variable is used.
 // eslint-disable-next-line no-unused-vars
@@ -400,6 +400,10 @@ waitFor(() => {
     processCalendar(data)
   })
 
+  io.socket.on('calendarexceptions', (data) => {
+    processCalendarExceptions(data)
+  })
+
   // On meta changes, process meta
   io.socket.on('discipline', (data) => {
     io.socket.disconnect()
@@ -626,6 +630,16 @@ function calendarSocket () {
       processCalendar(body, true)
     } catch (unusedE) {
       setTimeout(calendarSocket, 10000)
+    }
+  })
+}
+
+function calendarExceptionsSocket () {
+  io.socket.post('/calendar/get-exceptions', {}, function serverResponded (body) {
+    try {
+      processCalendarExceptions(body, true)
+    } catch (unusedE) {
+      setTimeout(calendarExceptionsSocket, 10000)
     }
   })
 }
@@ -1268,36 +1282,13 @@ function addAnnouncement (announcement) {
 
 // When new calendar data is received, update the information in memory.
 function processCalendar (data, replace = false) {
-  try {
-    // Run data processing
-    if (replace) {
-      Calendar = TAFFY()
-      Calendar.insert(data)
-      updateCalendar()
-    } else {
-      for (var key in data) {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
-          switch (key) {
-            case 'insert':
-              Calendar.insert(data[ key ])
-              break
-            case 'update':
-              Calendar({ ID: data[ key ].ID }).update(data[ key ])
-              break
-            case 'remove':
-              Calendar({ ID: data[ key ] }).remove()
-              break
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.error(e)
-    iziToast.show({
-      title: 'An error occurred - Please check the logs',
-      message: 'Error occurred during the call of processCalendar.'
-    })
-  }
+  calendardb.query('calendar', data, replace);
+  updateCalendar();
+}
+
+function processCalendarExceptions (data, replace = false) {
+  calendardb.query('calendarexceptions', data, replace);
+  updateCalendar();
 }
 
 // Actually reflect the changes on the website
@@ -1313,21 +1304,11 @@ function updateCalendar () {
     var calendarOptions = document.getElementById('calendar-select')
     var selectedOption = parseInt(calendarOptions.options[ calendarOptions.selectedIndex ].value || 0) || 0
 
-    // Define a comparison function that will order calendar events by start time when we run the iteration
-    var compare = function (a, b) {
-      try {
-        if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
-        if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
-        if (a.ID < b.ID) { return -1 }
-        if (a.ID > b.ID) { return 1 }
-        return 0
-      } catch (unusedE) {
-      }
-    }
+    var events = calendardb.getEvents(undefined, moment().add(7, 'days'));
 
-    // Run through every event in memory, sorted by the comparison function, and add appropriate ones into our formatted calendar variable.
-    Calendar().get().sort(compare)
-      .filter(event => (event.title.startsWith('Show:') || event.title.startsWith('Genre:') || event.title.startsWith('Playlist:') || event.title.startsWith('Prerecord:') || event.title.startsWith('Remote:') || event.title.startsWith('Sports:') || event.title.startsWith('Podcast:')) && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
+    // Run through every event in memory and add appropriate ones into our formatted calendar variable.
+    events
+      .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
       .map(event => {
         try {
           var line1
@@ -1337,84 +1318,36 @@ function updateCalendar () {
           var image
           var temp
           var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878')
-          if (event.active < 1) { finalColor = hexRgb('#161616') }
+          if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) { finalColor = hexRgb('#161616') }
           finalColor.red = Math.round(finalColor.red / 2)
           finalColor.green = Math.round(finalColor.green / 2)
           finalColor.blue = Math.round(finalColor.blue / 2)
           var badgeInfo
-          if (event.active === 2) {
-            badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">TIME CHANGED</span>`
+          if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1) {
+            badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">TEMP TIME CHANGE</span>`
           }
-          if (event.active === -1) {
+          if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
             badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`
           }
-          if (event.title.startsWith('Show: ')) {
-            stripped = event.title.replace('Show: ', '')
-            eventType = 'SHOW'
+          eventType = event.type.toUpperCase();
+          line1 = event.hosts;
+          line2 = event.name;
+          if (event.type === 'show') {
             image = `<i class="fas fa-microphone text-primary" style="font-size: 96px;"></i>`
-            temp = stripped.split(' - ')
-            if (temp.length === 2) {
-              line1 = temp[ 0 ]
-              line2 = temp[ 1 ]
-            } else {
-              line1 = 'Unknown DJ'
-              line2 = temp
-            }
-          } else if (event.title.startsWith('Prerecord: ')) {
-            stripped = event.title.replace('Prerecord: ', '')
-            eventType = 'PRERECORD'
+          } else if (event.type === 'prerecord') {
             image = `<i class="fas fa-play-circle text-primary" style="font-size: 96px;"></i>`
-            temp = stripped.split(' - ')
-            if (temp.length === 2) {
-              line1 = temp[ 0 ]
-              line2 = temp[ 1 ]
-            } else {
-              line1 = 'Unknown DJ'
-              line2 = temp
-            }
-          } else if (event.title.startsWith('Remote: ')) {
-            stripped = event.title.replace('Remote: ', '')
-            eventType = 'REMOTE'
+          } else if (event.type === 'remote') {
             image = `<i class="fas fa-broadcast-tower text-purple" style="font-size: 96px;"></i>`
-            temp = stripped.split(' - ')
-            if (temp.length === 2) {
-              line1 = temp[ 0 ]
-              line2 = temp[ 1 ]
-            } else {
-              line1 = 'Unknown Host'
-              line2 = temp
-            }
-          } else if (event.title.startsWith('Sports: ')) {
-            stripped = event.title.replace('Sports: ', '')
-            eventType = 'SPORTS'
-            line1 = 'Raider Sports'
-            line2 = stripped
+          } else if (event.type === 'sports') {
             image = `<i class="fas fa-trophy text-success" style="font-size: 96px;"></i>`
-          } else if (event.title.startsWith('Playlist: ')) {
-            stripped = event.title.replace('Playlist: ', '')
-            eventType = event.active > -1 ? 'PLAYLIST' : `CANCELED`
+          } else if (event.type === 'playlist') {
             image = `<i class="fas fa-list text-info" style="font-size: 96px;"></i>`
-            temp = stripped.split(' - ')
-            if (temp.length === 2) {
-              line1 = temp[ 0 ]
-              line2 = temp[ 1 ]
-            } else {
-              line1 = ''
-              line2 = temp
-            }
-          } else if (event.title.startsWith('Genre: ')) {
-            stripped = event.title.replace('Genre: ', '')
-            eventType = 'GENRE'
-            line1 = ''
-            line2 = stripped
+          } else if (event.type === 'genre') {
             image = `<i class="fas fa-music text-info" style="font-size: 96px;"></i>`
           } else {
-            eventType = 'EVENT'
-            line1 = ''
-            line2 = event.title
             image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`
           }
-          caldata.innerHTML += `<div id="calendar-event-${event.ID}" onclick="displayEventInfo(${event.ID})" onkeydown="displayEventInfo(${event.ID})" tabindex="0" style="width: 190px; position: relative;${event.active < 1 ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${event.active < 1 ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
+          caldata.innerHTML += `<div id="calendar-event-${event.unique}" onclick="displayEventInfo(${event.unique})" onkeydown="displayEventInfo(${event.unique})" tabindex="0" style="width: 190px; position: relative;${[ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1 && moment().isBefore(moment(event.end)) ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${[ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1 && moment().isBefore(moment(event.end)) ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo || ``}
              <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em;">${line1}</span><br><span class="text-dark" style="font-size: 1.25em;">${line2}</span><br /><span class="text-dark" style="font-size: 1em;">${moment(event.start).format('hh:mm A')} - ${moment(event.end).format('hh:mm A')}</span></div>`
@@ -1427,7 +1360,7 @@ function updateCalendar () {
         }
       })
 
-    for (var i = 1; i < 28; i++) {
+    for (var i = 1; i < 7; i++) {
       var temp0 = document.querySelector(`#calendar-select-${i}`)
       if (temp0 !== null) { temp0.innerHTML = moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`) }
     }
@@ -1477,7 +1410,25 @@ function hexRgb (hex, options = {}) {
 // Used in HTML
 // eslint-disable-next-line no-unused-vars
 function displayEventInfo (showID) {
-  var item = Calendar({ ID: parseInt(showID) }).first()
+  var events = calendardb.getEvents(undefined, moment().add(7, 'days'));
+  events.filter((event) => event.unique === showID);
+  if (events.length === 0) {
+    iziToast.show({
+      title: `Error`,
+      message: `There was an error trying to load that event, sorry.`,
+      color: 'red',
+      zindex: 100,
+      maxWidth: 640,
+      layout: 2,
+      closeOnClick: true,
+      position: 'center',
+      buttons: buttons,
+      timeout: 10000,
+      overlay: false
+    })
+    return null;
+  }
+  var item = events[ 0 ]
   var buttons = []
   var subtypefilter = []
   var message = `<p><strong>Starts: ${moment(item.start).format('LLL')}</strong></p>
@@ -1490,18 +1441,8 @@ function displayEventInfo (showID) {
   } else if (device !== null) {
     // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
 
-    subtypefilter.push(item.title)
-    // For show, prerecord, and remote events... filter for all 3 types, and also for the non-prefix version.
-    if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
-      var temp = item.title.replace('Show: ', '').replace('Prerecord: ', '').replace('Remote: ', '')
-      subtypefilter.push(`Show: ${temp}`)
-      subtypefilter.push(`Prerecord: ${temp}`)
-      subtypefilter.push(`Remote: ${temp}`)
-      subtypefilter.push(temp)
-    }
-
     // Check the number of subscriptions
-    var subscribed = Subscriptions([ { type: `calendar-once`, subtype: item.unique }, { type: `calendar-all`, subtype: subtypefilter } ]).get().length
+    var subscribed = Subscriptions([ { type: `calendar-once`, subtype: item.unique }, { type: `calendar-all`, subtype: item.calendarID } ]).get().length
 
     if (subscribed === 0) {
       message += `<hr><p>To receive a ${isMobile ? `push` : ``} notification when this event goes on the air for this specific date/time, click "Subscribe One-Time".</p>
@@ -1514,14 +1455,7 @@ function displayEventInfo (showID) {
         }, true ],
         [ '<button><b>Subscribe All Times</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
-
-          // For shows, remotes, and prerecords... subscribe to events regardless of prefix
-          if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
-            var temp = item.title.replace('Show: ', '').replace('Prerecord: ', '').replace('Remote: ', '')
-            subscribe(`calendar-all`, temp)
-          } else {
-            subscribe(`calendar-all`, item.title)
-          }
+          subscribe(`calendar-all`, item.calendarID)
         } ]
       ]
     } else {
@@ -1530,12 +1464,7 @@ function displayEventInfo (showID) {
         [ '<button><b>Unsubscribe</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
           // For shows, remotes, and prerecords... unsubscribe from events regardless of prefix
-          if ((item.title.startsWith('Show:') || item.title.startsWith('Prerecord:') || item.title.startsWith('Remote:'))) {
-            var temp = item.title.replace('Show: ', '').replace('Prerecord: ', '').replace('Remote: ', '')
-            unsubscribe(item.unique, temp)
-          } else {
-            unsubscribe(item.unique, item.title)
-          }
+          unsubscribe(item.unique, item.calendarID)
         }, true ]
       ]
     }
