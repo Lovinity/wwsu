@@ -32,11 +32,6 @@ module.exports = {
             defaultsTo: 'event'
         },
 
-        active: {
-            type: 'boolean',
-            defaultsTo: true,
-        },
-
         priority: {
             type: 'number',
             allowNull: true,
@@ -132,7 +127,6 @@ module.exports = {
                 exceptionReason: inputs.exceptionReason,
                 exceptionTime: inputs.exceptionTime,
                 type: inputs.type,
-                active: inputs.active,
                 priority: inputs.priority,
                 hostDJ: inputs.hostDJ,
                 cohostDJ1: inputs.cohostDJ1,
