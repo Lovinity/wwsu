@@ -63,7 +63,7 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
+              hosts = await sails.helpers.calendar.generateHosts(record);
               await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
@@ -82,7 +82,7 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
+              hosts = await sails.helpers.calendar.generateHosts(record);
               await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }

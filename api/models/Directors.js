@@ -80,7 +80,7 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              let hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
+              let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
               await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
               sails.log.error(e);
@@ -94,7 +94,7 @@ module.exports = {
         if (records.length > 0) {
           records.map(async (record) => {
             try {
-              let hosts = await sails.helpers.calendar.generateHosts(updatedRecord);
+              let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
               await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
               sails.log.error(e);
@@ -122,7 +122,7 @@ module.exports = {
               await sails.models.calendar.update({ ID: record.ID }, { active: false }).fetch();
             } else {
               record.director = null;
-              let hosts = await sails.helpers.calendar.generateHosts(record);
+              let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
               await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
             }
           } catch (e) {
@@ -138,7 +138,7 @@ module.exports = {
               await sails.models.calendarexceptions.destroy({ ID: record.ID }).fetch();
             } else {
               record.director = null;
-              let hosts = await sails.helpers.calendar.generateHosts(record);
+              let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
               await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
             }
           } catch (e) {
