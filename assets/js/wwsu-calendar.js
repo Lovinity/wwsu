@@ -159,21 +159,8 @@ class CalendarDb {
                         });
                         if (tempExceptions.length > 0) {
                             tempExceptions.sort(exceptionCompare);
-                            console.log(`tempexceptions`);
-                            console.dir(tempCal);
-                            console.dir(tempExceptions[0]);
                             _processRecord(tempCal, tempExceptions[ 0 ], calendar.start || calendar.createdAt);
                         } else {
-                            console.log(`no tempexceptions`);
-                            console.dir(tempCal);
-                            console.dir({
-                                exceptionType: cal.exceptionType,
-                                ID: cal.ID,
-                                calendarID: cal.calendarID,
-                                exceptionReason: cal.exceptionReason,
-                                exceptionTime: cal.exceptionTime,
-                                newTime: cal.newTime
-                            });
                             _processRecord(tempCal, {
                                 exceptionType: cal.exceptionType,
                                 ID: cal.ID,
@@ -505,10 +492,10 @@ class CalendarDb {
 
         if (event.newTime || event.schedule.oneTime) {
             var startb = moment(event.newTime || event.schedule.oneTime);
-            var endb = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
+            var endb = moment(event.newTime || event.schedule.oneTime).add(_event.duration, 'minutes');
 
             eventsOverridden = eventsOverridden
-                .filter((eventb) => moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb));
+                .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)));
             console.log(`${eventsOverridden.length} events getting overridden (final)`);
         } else if (event.schedule.schedules) {
             var startb = moment(event.start);
@@ -557,7 +544,7 @@ class CalendarDb {
             var endb = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
 
             eventsOverriding = eventsOverriding
-                .filter((eventb) => moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb))
+                .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)))
                     .map((eventb) => {
                         eventb.overrideTime = moment(startb).toISOString(true);
                         return eventb;
