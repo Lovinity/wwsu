@@ -166,7 +166,7 @@ module.exports = {
                 return exits.success(conflicts.error);
 
             // Add the event into the calendar
-            await sails.models.calendar.create(event).fetch();
+            await sails.models.calendarexceptions.create(event).fetch();
 
             // Add cancellations for shows this one will override
             if (conflicts.overridden.length > 0) {
