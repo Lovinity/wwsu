@@ -134,7 +134,7 @@ module.exports = {
                 cohostDJ3: inputs.cohostDJ3,
                 eventID: inputs.eventID,
                 playlistID: inputs.playlistID,
-                director: inputs,director,
+                director: inputs.director,
                 name: inputs.name,
                 description: inputs.description,
                 logo: inputs.logo,
