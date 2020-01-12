@@ -362,9 +362,18 @@ class CalendarDb {
         // No conflict check necessary of schedule is null and newTime is not provided
         if ((!event.schedule || event.schedule === null) && !event.newTime) return { overridden: [], overriding: [] };
 
-        var eventPriority = event.priority && event.priority !== null ? event.priority : this.getDefaultPriority(event)
+        if (event.calendarID) {
+            var calendar = this.calendar.db({ ID: event.calendarID }).first();
+            if (!calendar)
+                return false;
+            var _event = this.processRecord(calendar, event, event.newTime !== null ? event.newTime : event.exceptionTime);
+        } else {
+            var _event = this.processRecord(calendar, {}, moment().toISOString(true));
+        }
+
+        var eventPriority = _event.priority;
         var error;
-        var end = event.end && event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || (event.schedule && event.schedule.oneTime ? event.schedule.oneTime : undefined) || event.start).add(event.duration, 'minutes').toISOString(true);
+        var end = event.end && event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || (event.schedule && event.schedule.oneTime ? event.schedule.oneTime : undefined) || event.start).add(_event.duration, 'minutes').toISOString(true);
 
         // No conflict check if the priority is less than 0.
         if (eventPriority < 0) return { overridden: [], overriding: [] };
@@ -404,7 +413,7 @@ class CalendarDb {
             return false;
         }
 
-        var events = this.getEvents(moment(event.newTime || event.schedule.oneTime || event.start).toISOString(true), end, { active: true });
+        var events = this.getEvents(moment(event.newTime || event.exceptionTime || event.schedule.oneTime || event.start).toISOString(true), end, { active: true });
 
         // Start with events that will get overridden by this event
         var eventsOverridden = events

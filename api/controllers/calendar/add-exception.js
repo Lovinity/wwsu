@@ -20,7 +20,7 @@ module.exports = {
         },
         exceptionReason: {
             type: 'string',
-            required: true
+            defaultsTo: ''
         },
         exceptionTime: {
             type: 'ref',
@@ -29,7 +29,7 @@ module.exports = {
         type: {
             type: 'string',
             isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking', 'office-hours' ],
-            defaultsTo: 'event'
+            allowNull: true
         },
 
         priority: {
@@ -74,7 +74,7 @@ module.exports = {
 
         name: {
             type: 'string',
-            required: true
+            allowNull: true
         },
 
         description: {
@@ -104,7 +104,7 @@ module.exports = {
 
         duration: {
             type: 'number',
-            min: 0,
+            min: 1,
             required: true
         },
 

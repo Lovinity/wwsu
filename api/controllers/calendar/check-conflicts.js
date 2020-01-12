@@ -9,7 +9,6 @@ module.exports = {
         type: {
             type: 'string',
             isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking', 'office-hours' ],
-            defaultsTo: 'event'
         },
 
         calendarID: {
