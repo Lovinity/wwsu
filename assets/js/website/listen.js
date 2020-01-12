@@ -1478,7 +1478,7 @@ function displayEventInfo (showID) {
     ]
   }
   iziToast.show({
-    title: item.title,
+    title: `${item.hosts} - ${item.name}`,
     message: message,
     color: 'white',
     zindex: 100,
