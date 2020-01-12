@@ -1411,7 +1411,7 @@ function hexRgb (hex, options = {}) {
 // eslint-disable-next-line no-unused-vars
 function displayEventInfo (showID) {
   var events = calendardb.getEvents(undefined, moment().add(7, 'days'));
-  events.filter((event) => event.unique === showID);
+  events = events.filter((event) => event.unique === showID);
   if (events.length === 0) {
     iziToast.show({
       title: `Error`,

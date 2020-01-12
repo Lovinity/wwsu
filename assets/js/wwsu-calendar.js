@@ -467,7 +467,7 @@ class CalendarDb {
             return false;
         }
 
-        var events = this.getEvents(moment(event.newTime || event.exceptionTime || event.schedule.oneTime || event.start).toISOString(true), end, { active: true });
+        var events = this.getEvents(moment(event.newTime || event.exceptionTime || event.schedule.oneTime || event.start).subtract(1, 'days').toISOString(true), end, { active: true });
 
         console.log(`${events.length} events received.`);
 
