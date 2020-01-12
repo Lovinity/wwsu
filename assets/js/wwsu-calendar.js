@@ -149,7 +149,12 @@ class CalendarDb {
                         }
 
                         var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, cal);
+                        for (var stuff in cal) {
+                            if (Object.prototype.hasOwnProperty.call(cal, stuff)) {
+                                if (cal[ stuff ] !== null)
+                                    tempCal[ stuff ] = cal[ stuff ];
+                            }
+                        }
                         Object.assign(tempCal, {
                             ID: calendar.ID,
                             start: calendar.start || calendar.createdAt,
@@ -246,7 +251,12 @@ class CalendarDb {
                         }
 
                         var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, cal);
+                        for (var stuff in cal) {
+                            if (Object.prototype.hasOwnProperty.call(cal, stuff)) {
+                                if (cal[ stuff ] !== null)
+                                    tempCal[ stuff ] = cal[ stuff ];
+                            }
+                        }
                         Object.assign(tempCal, {
                             ID: calendar.ID,
                             start: eventStart,
@@ -320,7 +330,12 @@ class CalendarDb {
                         }
 
                         var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, cal);
+                        for (var stuff in cal) {
+                            if (Object.prototype.hasOwnProperty.call(cal, stuff)) {
+                                if (cal[ stuff ] !== null)
+                                    tempCal[ stuff ] = cal[ stuff ];
+                            }
+                        }
                         Object.assign(tempCal, {
                             ID: calendar.ID,
                             start: calendar.schedule.oneTime,
@@ -407,7 +422,6 @@ class CalendarDb {
         // TODO: account for "updated" event exception types
 
         // No conflict check necessary of schedule is null and newTime is not provided
-        console.dir(event);
         if ((!event.schedule || event.schedule === null) && !event.newTime) return { overridden: [], overriding: [] };
 
         if (event.calendarID) {
@@ -418,22 +432,16 @@ class CalendarDb {
         } else {
             var _event = this.processRecord(calendar, {}, moment().toISOString(true));
         }
-        console.dir(_event);
 
         var eventPriority = _event.priority;
         var error;
         var end = event.end && event.end !== null ? moment(event.end).toISOString(true) : moment(event.newTime || (event.schedule && event.schedule.oneTime ? event.schedule.oneTime : undefined) || event.start).add(_event.duration, 'minutes').toISOString(true);
-
-        console.log(`Priority: ${eventPriority}`);
-        console.log(`End: ${end}`);
 
         // No conflict check if the priority is less than 0.
         if (eventPriority < 0) return { overridden: [], overriding: [] };
 
         // No conflict check if this event is a canceled type exception
         if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system') return { overridden: [], overriding: [] };
-
-        console.log(`Continuing`);
 
         var checkConflictingTime = (start, eventsb) => {
             var beginAt = start;
@@ -469,8 +477,6 @@ class CalendarDb {
 
         var events = this.getEvents(moment(event.newTime || event.exceptionTime || event.schedule.oneTime || event.start).subtract(1, 'days').toISOString(true), end, { active: true });
 
-        console.log(`${events.length} events received.`);
-
         // Start with events that will get overridden by this event
         var eventsOverridden = events
             .filter((eventb) => {
@@ -487,16 +493,12 @@ class CalendarDb {
                 return false;
             });
 
-        console.log(`${eventsOverridden.length} events getting overridden (initial)`);
-        console.dir(eventsOverridden);
-
         if (event.newTime || event.schedule.oneTime) {
             var startb = moment(event.newTime || event.schedule.oneTime);
             var endb = moment(event.newTime || event.schedule.oneTime).add(_event.duration, 'minutes');
 
             eventsOverridden = eventsOverridden
                 .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)));
-            console.log(`${eventsOverridden.length} events getting overridden (final)`);
         } else if (event.schedule.schedules) {
             var startb = moment(event.start);
 
@@ -518,7 +520,6 @@ class CalendarDb {
                         }
                     }
                 }, [])
-            console.log(`${eventsOverridden.length} events getting overridden (final)`);
         }
 
         // Now, check for events that will override this one
@@ -537,7 +538,6 @@ class CalendarDb {
                 if (eventbPriority > 0 && eventbPriority >= eventPriority) return true;
                 return false;
             });
-        console.log(`${eventsOverriding.length} events overriding this one (initial)`);
 
         if (event.newTime || event.schedule.oneTime) {
             var startb = moment(event.newTime || event.schedule.oneTime);
@@ -545,11 +545,10 @@ class CalendarDb {
 
             eventsOverriding = eventsOverriding
                 .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)))
-                    .map((eventb) => {
-                        eventb.overrideTime = moment(startb).toISOString(true);
-                        return eventb;
-                    })
-            console.log(`${eventsOverriding.length} events overriding this one (final)`);
+                .map((eventb) => {
+                    eventb.overrideTime = moment(startb).toISOString(true);
+                    return eventb;
+                })
         } else if (event.schedule.schedules) {
             var startb = moment(event.start);
 
@@ -571,7 +570,6 @@ class CalendarDb {
                         }
                     }
                 }, [])
-            console.log(`${eventsOverriding.length} events overriding this one (final)`);
         }
 
         return { overridden: eventsOverridden, overriding: eventsOverriding, error };
@@ -721,14 +719,14 @@ class CalendarDb {
         // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.
         if (exception.hostDJ !== null) {
             criteria.hostDJ = exception.hostDJ;
-            criteria.cohostDJ1 = exception.cohostDJ1;
-            criteria.cohostDJ2 = exception.cohostDJ2;
-            criteria.cohostDJ3 = exception.cohostDJ3;
+            criteria.cohostDJ1 = exception.cohostDJ1 || null;
+            criteria.cohostDJ2 = exception.cohostDJ2 || null;
+            criteria.cohostDJ3 = exception.cohostDJ3 || null;
         } else {
-            criteria.hostDJ = calendar.hostDJ;
-            criteria.cohostDJ1 = calendar.cohostDJ1;
-            criteria.cohostDJ2 = calendar.cohostDJ2;
-            criteria.cohostDJ3 = calendar.cohostDJ3;
+            criteria.hostDJ = calendar.hostDJ || null;
+            criteria.cohostDJ1 = calendar.cohostDJ1 || null;
+            criteria.cohostDJ2 = calendar.cohostDJ2 || null;
+            criteria.cohostDJ3 = calendar.cohostDJ3 || null;
         }
 
         // Calculate end time after forming the object because we must refer to criteria.start

@@ -148,12 +148,13 @@ module.exports = {
                     (async (override2) => {
                         var ovr = {
                             calendarID: override2.calendarID,
+                            exceptionID: override2.exceptionID,
                             exceptionType: 'canceled-system',
                             exceptionReason: `${inputs.name} (${inputs.type}) was scheduled during this event's time and has a higher priority.`,
                             exceptionTime: override2.start,
                         }
                         await sails.models.calendarexceptions.create(ovr).fetch();
-                    }, override);
+                    })(override);
                 })
             }
 
@@ -162,13 +163,14 @@ module.exports = {
                 conflicts.overriding.map((override) => {
                     (async (override2) => {
                         var ovr = {
-                            calendarID: inputs.calendarID,
+                            calendarID: override2.calendarID,
+                            exceptionID: override2.exceptionID,
                             exceptionType: 'canceled-system',
                             exceptionReason: `${override2.name} (${override2.type}) was scheduled during this event's time and has a higher priority.`,
                             exceptionTime: override2.overrideTime || override2.start,
                         }
                         await sails.models.calendarexceptions.create(ovr).fetch();
-                    }, override);
+                    })(override);
                 })
             }
 

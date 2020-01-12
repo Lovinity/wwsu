@@ -1,5 +1,5 @@
 if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
-    throw new Error('wwsu-calendar requires TAFFY, WWSUdb, later, and moment.');
+    console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
 }
 
 // Use local time instead of UTC for scheduling
@@ -102,7 +102,12 @@ class CalendarDb {
                         }
 
                         var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, cal);
+                        for (var stuff in cal) {
+                            if (Object.prototype.hasOwnProperty.call(cal, stuff)) {
+                                if (cal[ stuff ] !== null)
+                                    tempCal[ stuff ] = cal[ stuff ];
+                            }
+                        }
                         Object.assign(tempCal, {
                             ID: calendar.ID,
                             start: calendar.start || calendar.createdAt,
@@ -199,7 +204,12 @@ class CalendarDb {
                         }
 
                         var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, cal);
+                        for (var stuff in cal) {
+                            if (Object.prototype.hasOwnProperty.call(cal, stuff)) {
+                                if (cal[ stuff ] !== null)
+                                    tempCal[ stuff ] = cal[ stuff ];
+                            }
+                        }
                         Object.assign(tempCal, {
                             ID: calendar.ID,
                             start: eventStart,
@@ -273,7 +283,12 @@ class CalendarDb {
                         }
 
                         var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, cal);
+                        for (var stuff in cal) {
+                            if (Object.prototype.hasOwnProperty.call(cal, stuff)) {
+                                if (cal[ stuff ] !== null)
+                                    tempCal[ stuff ] = cal[ stuff ];
+                            }
+                        }
                         Object.assign(tempCal, {
                             ID: calendar.ID,
                             start: calendar.schedule.oneTime,
@@ -413,7 +428,7 @@ class CalendarDb {
             return false;
         }
 
-        var events = this.getEvents(moment(event.newTime || event.exceptionTime || event.schedule.oneTime || event.start).toISOString(true), end, { active: true });
+        var events = this.getEvents(moment(event.newTime || event.exceptionTime || event.schedule.oneTime || event.start).subtract(1, 'days').toISOString(true), end, { active: true });
 
         // Start with events that will get overridden by this event
         var eventsOverridden = events
@@ -433,10 +448,10 @@ class CalendarDb {
 
         if (event.newTime || event.schedule.oneTime) {
             var startb = moment(event.newTime || event.schedule.oneTime);
-            var endb = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
+            var endb = moment(event.newTime || event.schedule.oneTime).add(_event.duration, 'minutes');
 
             eventsOverridden = eventsOverridden
-                .filter((eventb) => moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb));
+                .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)));
         } else if (event.schedule.schedules) {
             var startb = moment(event.start);
 
@@ -482,11 +497,11 @@ class CalendarDb {
             var endb = moment(event.newTime || event.schedule.oneTime).add(event.duration, 'minutes');
 
             eventsOverriding = eventsOverriding
-                .filter((eventb) => moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb))
-                    .map((eventb) => {
-                        eventb.overrideTime = moment(startb).toISOString(true);
-                        return eventb;
-                    })
+                .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)))
+                .map((eventb) => {
+                    eventb.overrideTime = moment(startb).toISOString(true);
+                    return eventb;
+                })
         } else if (event.schedule.schedules) {
             var startb = moment(event.start);
 
@@ -657,14 +672,14 @@ class CalendarDb {
         // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.
         if (exception.hostDJ !== null) {
             criteria.hostDJ = exception.hostDJ;
-            criteria.cohostDJ1 = exception.cohostDJ1;
-            criteria.cohostDJ2 = exception.cohostDJ2;
-            criteria.cohostDJ3 = exception.cohostDJ3;
+            criteria.cohostDJ1 = exception.cohostDJ1 || null;
+            criteria.cohostDJ2 = exception.cohostDJ2 || null;
+            criteria.cohostDJ3 = exception.cohostDJ3 || null;
         } else {
-            criteria.hostDJ = calendar.hostDJ;
-            criteria.cohostDJ1 = calendar.cohostDJ1;
-            criteria.cohostDJ2 = calendar.cohostDJ2;
-            criteria.cohostDJ3 = calendar.cohostDJ3;
+            criteria.hostDJ = calendar.hostDJ || null;
+            criteria.cohostDJ1 = calendar.cohostDJ1 || null;
+            criteria.cohostDJ2 = calendar.cohostDJ2 || null;
+            criteria.cohostDJ3 = calendar.cohostDJ3 || null;
         }
 
         // Calculate end time after forming the object because we must refer to criteria.start
