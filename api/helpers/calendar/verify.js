@@ -21,7 +21,11 @@ module.exports = {
 
     // Populate DJ Names
     try {
-      event.hosts = await sails.helpers.calendar.generateHosts(event);
+      if (!event.exceptionType || event.exceptionType === null || event.hostDJ !== null || event.cohostDJ1 !== null || event.cohostDJ2 !== null || event.cohostDJ3 !== null || event.director !== null) {
+        event.hosts = await sails.helpers.calendar.generateHosts(event);
+      } else {
+        event.hosts = null;
+      }
     } catch (e) {
       return exits.error(e.message);
     }
