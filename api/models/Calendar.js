@@ -134,7 +134,7 @@ module.exports = {
         // If setting active to false, delete all exceptions and notify subscribers of a discontinued show
         if (!updatedRecord.active) {
             temp = (async () => {
-                await sails.models.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
+                await sails.helpers.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
                 var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, false)
             })()
@@ -157,7 +157,7 @@ module.exports = {
 
         // Remove all calendar exceptions
         temp = (async () => {
-            await sails.models.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
+            await sails.helpers.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
             var event = sails.models.calendar.calendardb.processRecord(destroyedRecord, {}, moment().toISOString(true));
             await sails.helpers.onesignal.sendEvent(event, false, false)
         })()
