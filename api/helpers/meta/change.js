@@ -230,20 +230,16 @@ module.exports = {
       for (var key in inputs) {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
 
-          // Do stuff if a state is specified (regardless whether or not it was changed)
-          if (key === 'state') {
+          // If a show is specified and defers from the one in memory, retrieve the IDs of all the DJs in the provided show name if applicable, and update meta with them.
+          // This also creates new DJs if they do not exist, and updates the "last seen" time stamp.
+          if (key === 'show' && sails.models.meta.memory[ key ] !== inputs[ key ]) {
 
-            var wasUnknown = sails.models.meta.memory.state === 'unknown';
+            // Immediately update memory with new show to prevent cron job double-whammies.
+            sails.models.meta.memory.show = inputs[ key ];
+            push.show = inputs[ key ];
 
-            // Immediately update memory with new state to prevent cron job double-whammies.
-            sails.models.meta.memory.state = inputs[ key ];
-            push.state = inputs[ key ];
-
-            // Enable webchat automatically when going into automation state
-            if (inputs[ key ] === 'automation_on' || inputs[ key ] === 'automation_genre' || inputs[ key ] === 'automation_playlist' || inputs[ key ] === 'automation_prerecord') { push2.webchat = true }
-
-            // If show key includes " - ", this means the value before the - are DJs, each separated by ;. Get the DJ IDs and update meta with it. Otherwise, set it to null.
-            var show = (typeof inputs.show !== 'undefined' ? inputs.show : sails.models.meta.memory.show);
+            var show = inputs.show;
+            var temp = [ "Unknown Hosts" ];
             if (show !== null && show.includes(' - ')) {
 
               // Split DJ and show
@@ -283,6 +279,33 @@ module.exports = {
             push.cohostDJ1 = sails.models.meta.memory.cohostDJ1
             push.cohostDJ2 = sails.models.meta.memory.cohostDJ2
             push.cohostDJ3 = sails.models.meta.memory.cohostDJ3
+          }
+
+
+          // Do stuff if a state was provided
+          if (key === 'state') {
+
+            // Determine if the state changed from unknown.
+            var wasUnknown = sails.models.meta.memory.state === 'unknown';
+
+            // Immediately update memory with new state to prevent cron job double-whammies.
+            sails.models.meta.memory.state = inputs[ key ];
+            push.state = inputs[ key ];
+
+            // Enable webchat automatically when going into automation state
+            if (inputs[ key ] === 'automation_on' || inputs[ key ] === 'automation_genre' || inputs[ key ] === 'automation_playlist' || inputs[ key ] === 'automation_prerecord') { push2.webchat = true }
+
+            // Determine hosts and show name from either a provided show or the current show
+            var show = (typeof inputs.show !== 'undefined' ? inputs.show : sails.models.meta.memory.show);
+            var _show = show.split(" - ");
+            var hosts = "Unknown Hosts";
+            var name = "Unknown Show";
+            if (_show.length > 1) {
+              hosts = _show[ 0 ];
+              name = _show[ 1 ];
+            } else {
+              name = _show[ 0 ];
+            }
 
             // This block of code does several things when starting a new show / broadcast / playlist / prerecord / genre:
             // 1. Determine if the current show is scheduled to be on the air.
@@ -290,16 +313,21 @@ module.exports = {
             // 3. Check if there's a main calendar event for the provided show. If not, create one.
             // 4. Also create an 'additional-unauthorized' calendar exception for this air.
             var calendar;
+
+            // Get the event that should be on the air right now
             var eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(false);
+
             var exception;
             var attendance;
 
-            // We do not want to do any of this if initially loading
+            // We do not want to do any of this if initially loading from an unknown state
             if (!wasUnknown) {
               switch (inputs[ key ]) {
                 case 'live_on':
+                  // Current program is not supposed to be on the air
                   if (!eventNow || eventNow.type !== 'show' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
-                    calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'show' });
+                    calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'show' });
+                    // Create a new main calendar event if it does not exist for this show
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
                         type: 'show',
@@ -309,28 +337,31 @@ module.exports = {
                         cohostDJ1: dj2 ? dj2.ID || null : null,
                         cohostDJ2: dj3 ? dj3.ID || null : null,
                         cohostDJ3: dj4 ? dj4.ID || null : null,
-                        hosts: temp.join("; "),
-                        name: show,
+                        hosts: hosts,
+                        name: name,
                         duration: 0,
                         schedule: null,
                         start: moment().toISOString(true)
                       }).fetch();
+                      // If a calendar event does exist, use the first one returned and also re-activate it if it was deactivated.
                     } else {
                       calendar = calendar[ 0 ];
                       if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                     }
+                    // Add an exception indicating this was an unscheduled broadcast.
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
                       exceptionReason: `Show ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}`,
                       newTime: moment().toISOString(true)
                     }).fetch();
+                    // Update the eventNow object with the new calendar + additional exception for when we process attendance further down
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
                   break;
                 case 'remote_on':
                   if (!eventNow || eventNow.type !== 'remote' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
-                    calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'remote' });
+                    calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'remote' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
                         type: 'remote',
@@ -340,8 +371,8 @@ module.exports = {
                         cohostDJ1: dj2 ? dj2.ID || null : null,
                         cohostDJ2: dj3 ? dj3.ID || null : null,
                         cohostDJ3: dj4 ? dj4.ID || null : null,
-                        hosts: temp.join("; "),
-                        name: show,
+                        hosts: hosts,
+                        name: name,
                         duration: 0,
                         schedule: null,
                         start: moment().toISOString(true)
@@ -361,14 +392,14 @@ module.exports = {
                   break;
                 case 'sports_on':
                 case 'sportsremote_on':
-                  if (!eventNow || eventNow.type !== 'sports' || !show.startsWith(eventNow.name)) {
-                    calendar = await sails.models.calendar.find({ name: { startsWith: show }, type: 'sports' });
+                  if (!eventNow || eventNow.type !== 'sports' || eventNow.name.startsWith(name)) {
+                    calendar = await sails.models.calendar.find({ name: { startsWith: name }, type: 'sports' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
                         type: 'sports',
                         active: true,
                         priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'sports' }),
-                        name: show,
+                        name: name,
                         duration: 0,
                         schedule: null,
                         start: moment().toISOString(true)
@@ -388,7 +419,7 @@ module.exports = {
                   break;
                 case 'prerecord_on':
                   if (!eventNow || eventNow.type !== 'prerecord' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
-                    calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'prerecord' });
+                    calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'prerecord' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
                         type: 'prerecord',
@@ -398,8 +429,8 @@ module.exports = {
                         cohostDJ1: dj2 ? dj2.ID || null : null,
                         cohostDJ2: dj3 ? dj3.ID || null : null,
                         cohostDJ3: dj4 ? dj4.ID || null : null,
-                        hosts: temp.join("; "),
-                        name: show,
+                        hosts: hosts,
+                        name: name,
                         duration: 0,
                         schedule: null,
                         start: moment().toISOString(true)
@@ -419,7 +450,7 @@ module.exports = {
                   break;
                 case 'automation_playlist':
                   if (!eventNow || eventNow.type !== 'playlist' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
-                    calendar = await sails.models.calendar.find({ hostDJ: dj ? dj.ID || null : null, name: show, type: 'playlist' });
+                    calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'playlist' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
                         type: 'playlist',
@@ -429,8 +460,8 @@ module.exports = {
                         cohostDJ1: dj2 ? dj2.ID || null : null,
                         cohostDJ2: dj3 ? dj3.ID || null : null,
                         cohostDJ3: dj4 ? dj4.ID || null : null,
-                        hosts: temp.join("; "),
-                        name: show,
+                        hosts: hosts,
+                        name: name,
                         duration: 0,
                         schedule: null,
                         start: moment().toISOString(true)
@@ -456,6 +487,7 @@ module.exports = {
                         type: 'genre',
                         active: true,
                         priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'genre' }),
+                        hosts: "Unknown Hosts",
                         name: (typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre),
                         duration: 0,
                         schedule: null,
@@ -485,12 +517,21 @@ module.exports = {
               // Different event now on the air?
               if (sails.models.meta.memory.calendarID !== (eventNow === null ? null : eventNow.calendarID)) {
 
-                // Create a new attendance record
+                // Create a new attendance record and update meta with the new attendance ID
                 attendance = await sails.helpers.attendance.createRecord(eventNow);
                 sails.models.meta.memory.attendanceID = attendance.newID;
                 push.attendanceID = attendance.newID;
 
+                // Make a log that the broadcast started
+                await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
+                  .tolerate((err) => {
+                    sails.log.error(err)
+                  })
+
+                // If the eventNow object is not null
                 if (eventNow !== null) {
+
+                  // We don't care about genres nor playlists for airing
                   if ([ 'live_on', 'sports_on', 'remote_on', 'sportsremote_on', 'prerecord_on' ].indexOf(inputs[ key ]) !== -1) {
 
                     // Make a log if the broadcast was unauthorized
@@ -501,12 +542,6 @@ module.exports = {
                         })
                       await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${eventNow.hosts} - ${eventNow.name} went on the air at ${moment().format('llll')}; this show was not scheduled to go on the air!`)
                     }
-
-                    // Make a log that the broadcast started
-                    await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
-                      .tolerate((err) => {
-                        sails.log.error(err)
-                      })
 
                     // Let subscribers know this show is now on the air
                     await sails.helpers.onesignal.sendEvent(eventNow, true);
@@ -528,7 +563,7 @@ module.exports = {
             }
           }
 
-          // Exit if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value
+          // Exit at this point if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value
           if (typeof sails.models.meta.memory[ key ] === 'undefined' || sails.models.meta.memory[ key ] === inputs[ key ]) {
             continue
           }
