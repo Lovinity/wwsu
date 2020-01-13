@@ -107,7 +107,7 @@ module.exports = {
             var event = {
                 type: inputs.type,
                 active: inputs.active,
-                priority: inputs.priority,
+                priority: inputs.priority && inputs.priority !== null ? inputs.priority : sails.models.calendar.calendardb.getDefaultPriority({type: inputs.type}),
                 hostDJ: inputs.hostDJ,
                 cohostDJ1: inputs.cohostDJ1,
                 cohostDJ2: inputs.cohostDJ2,
