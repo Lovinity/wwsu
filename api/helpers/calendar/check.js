@@ -284,7 +284,7 @@ module.exports = {
                 eventCheck
                     .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.exceptionType === null || (event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system'))) && event.type === 'office-hours')
                     .map((event) => {
-                        sails.models.timesheet.findOrCreate({ calendarID: event.calendarID, timeIn: { '<=': moment(event.end).toISOString(true) }, or: [ { actualEnd: null }, { timeOut: { '>': moment(event.start).toISOString(true) } } ] }, { calendarID: event.calendarID, name: event.hosts, approved: 0, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true) })
+                        sails.models.timesheet.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, name: event.hosts, approved: 0, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true) })
                             .exec(async (err, record, wasCreated) => {
                                 if (err || !wasCreated) { return false }
 
