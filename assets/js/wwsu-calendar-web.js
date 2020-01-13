@@ -383,7 +383,7 @@ class CalendarDb {
                 return false;
             var _event = this.processRecord(calendar, event, event.newTime !== null ? event.newTime : event.exceptionTime);
         } else {
-            var _event = this.processRecord(calendar, {}, moment().toISOString(true));
+            var _event = this.processRecord(event, { calendarID: null }, moment().toISOString(true));
         }
 
         var eventPriority = _event.priority;
@@ -440,9 +440,10 @@ class CalendarDb {
                 if ((event.exceptionType === 'updated' || event.exceptionType === 'updated-system') && event.calendarID === eventb.calendarID && moment(event.exceptionTime).isSame(eventb.start, 'minute')) return false;
 
                 var eventbPriority = eventb.priority !== null ? eventb.priority : this.getDefaultPriority(eventb);
-                if (eventbPriority < 0) return false;
-                if (eventPriority === 0 && eventbPriority === 0) return true;
-                if (eventbPriority > 0 && eventbPriority < eventPriority) return true;
+
+                if (eventbPriority < 0) return false; // Will not get overridden if other event priority is less than 0
+                if (eventPriority === 0) return false; // Will not get overridden if this event's priority is 0.
+                if (eventbPriority > 0 && eventbPriority < eventPriority) return true; // WILL get overridden if other event's priority is less than this one.
                 return false;
             });
 
@@ -486,9 +487,11 @@ class CalendarDb {
                 if ((event.exceptionType === 'updated' || event.exceptionType === 'updated-system') && event.calendarID === eventb.calendarID && moment(event.exceptionTime).isSame(eventb.start, 'minute')) return false;
 
                 var eventbPriority = eventb.priority !== null ? eventb.priority : this.getDefaultPriority(eventb);
-                if (eventbPriority < 0) return false;
-                if (eventPriority === 0 && eventbPriority === 0) return false;
-                if (eventbPriority > 0 && eventbPriority >= eventPriority) return true;
+
+                if (eventbPriority < 0) return false; // Will not override if the other event's priority is less than 0.
+                if (eventPriority === 0 && eventbPriority === 0) return true; // WILL override if both this event and the other event's priority is 0.
+                if (eventPriority === 0 && eventbPriority !== 0) return false // Will NOT override if this event's priority is 0 but the other event is not priority 0.
+                if (eventbPriority > 0 && eventbPriority >= eventPriority) return true; // WILL override if the other event's priority is greater than or equal to this one.
                 return false;
             });
 
