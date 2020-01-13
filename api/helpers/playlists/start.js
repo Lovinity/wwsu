@@ -21,7 +21,7 @@ module.exports = {
     try {
       var forced = inputs.event.type === 'prerecord' && sails.models.meta.memory.state.startsWith("prerecord_") && sails.models.meta.memory.calendarUnique !== inputs.event.unique && moment().subtract(5, 'minutes').isSameOrAfter(moment(inputs.event.start));
       // Do not start the playlist if one is in the process of being queued, we're not in a proper automation state, we're in the middle of changing states and ignoreChangingState is false.
-      if (!sails.models.playlists.queuing && (((sails.models.meta.memory.changingState === null || inputs.ignoreChangingState) && ((sails.models.meta.memory.state === 'automation_on' || sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_genre' || forced))))) {
+      if (!sails.models.playlists.queuing && sails.models.meta.memory.calendarUnique !== inputs.event.unique && (((sails.models.meta.memory.changingState === null || inputs.ignoreChangingState) && ((sails.models.meta.memory.state === 'automation_on' || sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_genre' || forced))))) {
         sails.log.verbose(`Processing helper.`)
         sails.models.playlists.queuing = true // Mark that the playlist is being queued, to avoid app conflicts.
 
