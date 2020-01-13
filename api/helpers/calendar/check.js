@@ -234,7 +234,7 @@ module.exports = {
                 eventCheck
                     .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.exceptionType === null || (event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system'))) && [ 'show', 'sports', 'prerecord', 'remote', 'playlist' ].indexOf(event.type) !== -1)
                     .map((event) => {
-                        sails.models.attendance.findOrCreate({ calendarID: event.calendarID, happened: 1, actualStart: { '<=': moment(event.end).toISOString(true) }, or: [ { actualEnd: null }, { actualEnd: { '>': moment(event.start).toISOString(true) } } ] }, { calendarID: event.calendarID, unique: event.unique, dj: event.hostDJ, cohostDJ1: event.cohostDJ1, cohostDJ2: event.cohostDJ2, cohostDJ3: event.cohostDJ3, event: `${event.type}: ${event.hosts} - ${event.name}`, happened: 0, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true) })
+                        sails.models.attendance.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, dj: event.hostDJ, cohostDJ1: event.cohostDJ1, cohostDJ2: event.cohostDJ2, cohostDJ3: event.cohostDJ3, event: `${event.type}: ${event.hosts} - ${event.name}`, happened: 0, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true) })
                             .exec(async (err, record, wasCreated) => {
                                 if (err || !wasCreated) { return false }
 
