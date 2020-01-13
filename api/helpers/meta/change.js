@@ -515,7 +515,7 @@ module.exports = {
               var attendance;
 
               // Different event now on the air?
-              if (sails.models.meta.memory.calendarID !== (eventNow === null ? null : eventNow.calendarID)) {
+              if (sails.models.meta.memory.calendarUnique !== (eventNow === null ? null : eventNow.unique)) {
 
                 // Create a new attendance record and update meta with the new attendance ID
                 attendance = await sails.helpers.attendance.createRecord(eventNow);
@@ -547,18 +547,18 @@ module.exports = {
                     await sails.helpers.onesignal.sendEvent(eventNow, true);
                   }
                 }
+              }
 
-                if (eventNow !== null) {
-                  sails.models.meta.memory.calendarID = eventNow.calendarID;
-                  sails.models.meta.memory.calendarUnique = eventNow.unique;
-                  push.calendarID = eventNow.calendarID;
-                  push.calendarUnique = eventNow.unique;
-                } else {
-                  sails.models.meta.memory.calendarID = null;
-                  sails.models.meta.memory.calendarUnique = null;
-                  push.calendarID = null;
-                  push.calendarUnique = null;
-                }
+              if (eventNow !== null) {
+                sails.models.meta.memory.calendarID = eventNow.calendarID;
+                sails.models.meta.memory.calendarUnique = eventNow.unique;
+                push.calendarID = eventNow.calendarID;
+                push.calendarUnique = eventNow.unique;
+              } else {
+                sails.models.meta.memory.calendarID = null;
+                sails.models.meta.memory.calendarUnique = null;
+                push.calendarID = null;
+                push.calendarUnique = null;
               }
             }
           }
