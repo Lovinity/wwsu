@@ -210,7 +210,7 @@ module.exports = {
             // Check if it's time to trigger a program, and trigger it if so
             var eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(true);
             if (eventNow) {
-                if ((eventNow.type === 'prerecord' || eventNow.type === 'genre') && eventNow.playlistID !== null) {
+                if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
                     await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
                 }
                 if (eventNow.type === 'genre' && eventNow.eventID !== null) {
