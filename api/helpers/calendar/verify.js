@@ -47,7 +47,6 @@ module.exports = {
           event.description = `${summary} takes on ${summary2}`;
         break;
       case 'prerecord':
-      case 'genre':
         if (event.type === 'prerecord' && (!event.hostDJ || event.hostDJ === null))
           return exits.error("Prerecords require a host DJ to be specified.");
         var playlist = await sails.models.playlists.findOne({ ID: event.playlistID })
