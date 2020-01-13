@@ -430,7 +430,7 @@ class CalendarDb {
                 return false;
             var _event = this.processRecord(calendar, event, event.newTime !== null ? event.newTime : event.exceptionTime);
         } else {
-            var _event = this.processRecord(calendar, {}, moment().toISOString(true));
+            var _event = this.processRecord(event, { calendarID: null }, moment().toISOString(true));
         }
 
         var eventPriority = _event.priority;
