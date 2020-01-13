@@ -213,70 +213,73 @@ function doRequests () {
       // Show Notices
       noReq.request({ method: 'POST', url: '/calendar/get', data: {} }, (response2) => {
 
-        if (!response2.calendar || !response2.exceptions)
-          return null;
+        noReq.request({ method: 'POST', url: '/calendar/get-exceptions', data: {} }, (response3) => {
 
-        calendardb = new CalendarDb(response2.calendar, response2.exceptions);
-        var events = calendardb.getEvents(undefined, moment().add(1, 'years').toISOString(true), [ { hostDJ: response.ID }, { cohostDJ1: response.ID }, { cohostDJ2: response.ID }, { cohostDJ3: response.ID } ]);
+          if (!response2 || !response3)
+            return null;
 
-        temp = document.querySelector('#dash-show')
-        if (temp !== null) {
-          var worker;
+          calendardb = new CalendarDb(response2, response3);
+          var events = calendardb.getEvents(undefined, moment().add(1, 'years').toISOString(true), [ { hostDJ: response.ID }, { cohostDJ1: response.ID }, { cohostDJ2: response.ID }, { cohostDJ3: response.ID } ]);
 
-          worker = events.filter((event) => event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system');
-          if (worker.length > 0) {
-            notices += `<div class="card mb-4 py-3 border-left-info">
+          temp = document.querySelector('#dash-show')
+          if (temp !== null) {
+            var worker;
+
+            worker = events.filter((event) => event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system');
+            if (worker.length > 0) {
+              notices += `<div class="card mb-4 py-3 border-left-info">
           <div class="card-body">
             The following upcoming shows have been canceled:
             <ul>`
-            worker.map((item) => {
-              notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong>. Reason: ${item.exceptionReason}</li>`
-            })
-            notices += `</ul>
+              worker.map((item) => {
+                notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong>. Reason: ${item.exceptionReason}</li>`
+              })
+              notices += `</ul>
           </div>
           </div>`
-          }
+            }
 
-          worker = events.filter((event) => event.exceptionType === 'updated' || event.exceptionType === 'updated-system');
-          if (worker.length > 0) {
-            notices += `<div class="card mb-4 py-3 border-left-info">
+            worker = events.filter((event) => event.exceptionType === 'updated' || event.exceptionType === 'updated-system');
+            if (worker.length > 0) {
+              notices += `<div class="card mb-4 py-3 border-left-info">
           <div class="card-body">
             The air date/time for these upcoming shows have been changed:
             <ul>`
-            worker.map((item) => {
-              notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong> is now to air at <strong>${moment(item.start).format('llll')} - ${moment(item.end).format('llll')}. Reason: ${item.exceptionReason}</li>`
-            })
-            notices += `</ul>
+              worker.map((item) => {
+                notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong> is now to air at <strong>${moment(item.start).format('llll')} - ${moment(item.end).format('llll')}. Reason: ${item.exceptionReason}</li>`
+              })
+              notices += `</ul>
           </div>
           </div>`
+            }
           }
-        }
 
-        // Fill upcoming shows in cancellation dropdown
-        var temp = document.querySelector('#cancel-show')
-        if (temp !== null) {
-          temp.innerHTML = `<option value="">Choose a show / date to cancel...</option>`
-          if (events.length > 0) {
-            events
-              .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
-              .map((calendar) => {
-                temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
-              })
+          // Fill upcoming shows in cancellation dropdown
+          var temp = document.querySelector('#cancel-show')
+          if (temp !== null) {
+            temp.innerHTML = `<option value="">Choose a show / date to cancel...</option>`
+            if (events.length > 0) {
+              events
+                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
+                .map((calendar) => {
+                  temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
+                })
+            }
           }
-        }
 
-        // Fill shows for clockwheel
-        var temp = document.querySelector('#clockwheel-show')
-        if (temp !== null) {
-          temp.innerHTML = `<option value="">Choose a show / date to assign a topic or clockwheel...</option>`
-          if (events.length > 0) {
-            events
-              .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
-              .map((calendar) => {
-                temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
-              })
+          // Fill shows for clockwheel
+          var temp = document.querySelector('#clockwheel-show')
+          if (temp !== null) {
+            temp.innerHTML = `<option value="">Choose a show / date to assign a topic or clockwheel...</option>`
+            if (events.length > 0) {
+              events
+                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
+                .map((calendar) => {
+                  temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
+                })
+            }
           }
-        }
+        });
       });
 
       temp = document.querySelector('#dash-show')

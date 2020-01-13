@@ -523,7 +523,7 @@ module.exports = {
                 push.attendanceID = attendance.newID;
 
                 // Make a log that the broadcast started
-                await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
+                await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />Topic: ${inputs.topic}`, createdAt: moment().toISOString(true) }).fetch()
                   .tolerate((err) => {
                     sails.log.error(err)
                   })
