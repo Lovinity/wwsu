@@ -223,7 +223,7 @@ module.exports = {
                         triggered = true;
                         (async (eventNowb) => {
                             try {
-                                await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
+                                await sails.helpers.genre.start(eventNowb, inputs.ignoreChangingState);
                             } catch (unusedE) {
 
                             }
