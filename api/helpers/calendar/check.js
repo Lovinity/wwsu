@@ -215,14 +215,19 @@ module.exports = {
                 if (eventNow) {
                     if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
                         triggered = true;
-                        await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
+                        (async (eventNowb) => {
+                            await sails.helpers.playlists.start(eventNowb, inputs.ignoreChangingState);
+                        })(eventNow)
                     }
                     if (eventNow.type === 'genre' && eventNow.eventID !== null) {
                         triggered = true;
-                        try {
-                            await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
-                        } catch (unusedE) {
-                        }
+                        (async (eventNowb) => {
+                            try {
+                                await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
+                            } catch (unusedE) {
+
+                            }
+                        })(eventNow)
                     }
                 }
             })
