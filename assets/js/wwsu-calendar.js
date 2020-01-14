@@ -377,11 +377,14 @@ class CalendarDb {
         return events.sort(compare);
     }
 
+    // Return an array of programming that is allowed to be on the air right now
     whatShouldBePlaying (automationOnly = false) {
         var events = this.getEvents(undefined, undefined, { active: true });
         if (events.length > 0) {
             var compare = function (a, b) {
                 try {
+                    if (a.priority > b.priority) { return -1 };
+                    if (a.priority < b.priority) { return 1 };
                     if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
                     if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
                     if (a.ID < b.ID) { return -1 }
@@ -393,8 +396,9 @@ class CalendarDb {
             }
             events = events.sort(compare);
 
-            var returnData
-            events = events
+            var returnData = [];
+
+            returnData = events
                 .filter((event) => {
 
                     if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system') return false;
@@ -405,13 +409,11 @@ class CalendarDb {
                         // Allow 5 minutes early for non-automation shows.
                         return ((event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end))) || ((event.type === 'show' || event.type === 'sports' || event.type === 'remote') && moment().add(5, 'minutes').isSameOrAfter(moment(event.start))) && moment().add(5, 'minutes').isBefore(moment(event.end)) && event.active;
                     }
-                })
-                .map((event) => {
-                    if ((!returnData || returnData.priority < event.priority))
-                        returnData = event;
                 });
 
             return returnData;
+        } else {
+            return [];
         }
     }
 
@@ -605,6 +607,8 @@ class CalendarDb {
                 });
 
             return events;
+        } else {
+            return [];
         }
     }
 

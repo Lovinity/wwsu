@@ -73,7 +73,8 @@ module.exports = {
         }
 
         var record = sails.models.calendar.calendardb.whatShouldBePlaying(false);
-        if (record.type !== 'remote' || record.hosts !== djs || record.name !== show) {
+        record = record.filter((event) => event.type === 'remote' && record.hosts === djs && record.name === show);
+        if (record.length < 1) {
           return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ and show name you provided is not scheduled to go on the air at this time.'))
         }
       }

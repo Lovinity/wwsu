@@ -315,7 +315,8 @@ module.exports = {
             var calendar;
 
             // Get the event that should be on the air right now
-            var eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(false);
+            var _eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(false);
+            var eventNow;
 
             var exception;
             var attendance;
@@ -325,7 +326,8 @@ module.exports = {
               switch (inputs[ key ]) {
                 case 'live_on':
                   // Current program is not supposed to be on the air
-                  if (!eventNow || eventNow.type !== 'show' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                  eventNow = _eventNow.filter((event) => event.type === 'show' && show === `${event.hosts} - ${event.name}`);
+                  if (eventNow.length < 1) {
                     calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'show' });
                     // Create a new main calendar event if it does not exist for this show
                     if (!calendar || !calendar[ 0 ]) {
@@ -360,7 +362,8 @@ module.exports = {
                   }
                   break;
                 case 'remote_on':
-                  if (!eventNow || eventNow.type !== 'remote' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                  eventNow = _eventNow.filter((event) => event.type === 'remote' && show === `${event.hosts} - ${event.name}`);
+                  if (eventNow.length < 1) {
                     calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'remote' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
@@ -392,7 +395,8 @@ module.exports = {
                   break;
                 case 'sports_on':
                 case 'sportsremote_on':
-                  if (!eventNow || eventNow.type !== 'sports' || eventNow.name.startsWith(name)) {
+                  eventNow = _eventNow.filter((event) => event.type === 'sports' && event.name.startsWith(name));
+                  if (eventNow.length < 1) {
                     calendar = await sails.models.calendar.find({ name: { startsWith: name }, type: 'sports' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
@@ -418,7 +422,8 @@ module.exports = {
                   }
                   break;
                 case 'prerecord_on':
-                  if (!eventNow || eventNow.type !== 'prerecord' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                  eventNow = _eventNow.filter((event) => event.type === 'prerecord' && show === `${event.hosts} - ${event.name}`);
+                  if (eventNow.length < 1) {
                     calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'prerecord' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
@@ -449,7 +454,8 @@ module.exports = {
                   }
                   break;
                 case 'automation_playlist':
-                  if (!eventNow || eventNow.type !== 'playlist' || show !== `${eventNow.hosts} - ${eventNow.name}`) {
+                  eventNow = _eventNow.filter((event) => event.type === 'playlist' && show === `${event.hosts} - ${event.name}`);
+                  if (eventNow.length < 1) {
                     calendar = await sails.models.calendar.find({ hosts: hosts, name: name, type: 'playlist' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
@@ -480,7 +486,8 @@ module.exports = {
                   }
                   break;
                 case 'automation_genre':
-                  if (!eventNow || eventNow.type !== 'genre' || eventNow.name !== (typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre)) {
+                  eventNow = _eventNow.filter((event) => event.type === 'genre' && event.name === (typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre));
+                  if (eventNow.length < 1) {
                     calendar = await sails.models.calendar.find({ name: (typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre), type: 'genre' });
                     if (!calendar || !calendar[ 0 ]) {
                       calendar = await sails.models.calendar.create({
@@ -501,7 +508,7 @@ module.exports = {
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
                       exceptionReason: `Genre ${(typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre)} went on the air outside of scheduled time! ${JSON.stringify(eventNow)}`,
-                      newTime: moment().toISOString(true)
+                      newTime: moment().toISOString(true),
                     }).fetch();
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
@@ -510,6 +517,10 @@ module.exports = {
                 case 'automation_break':
                   eventNow = null;
                   break;
+              }
+
+              if (eventNow[ 0 ]) {
+                eventNow = eventNow[ 0 ];
               }
 
               var attendance;

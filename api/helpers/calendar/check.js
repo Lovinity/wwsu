@@ -208,20 +208,25 @@ module.exports = {
         } else {
 
             // Check if it's time to trigger a program, and trigger it if so
-            var eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(true);
-            if (eventNow) {
-                if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
-                    await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
-                }
-                if (eventNow.type === 'genre' && eventNow.eventID !== null) {
-                    try {
-                        await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
-                    } catch (unusedE) {
-                        if (sails.models.meta.memory.state === `automation_genre`) { await sails.helpers.genre.start(null, inputs.ignoreChangingState) }
+            var _eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(true);
+            var triggered = false;
+            _eventNow.map((eventNow) => {
+                if (triggered) return null;
+                if (eventNow) {
+                    if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
+                        triggered = true;
+                        await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
+                    }
+                    if (eventNow.type === 'genre' && eventNow.eventID !== null) {
+                        triggered = true;
+                        try {
+                            await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
+                        } catch (unusedE) {
+                        }
                     }
                 }
-            } else {
-                // Trigger default genre if nothing is scheduled
+            })
+            if (!triggered) {
                 await sails.helpers.genre.start(null, inputs.ignoreChangingState);
             }
 
