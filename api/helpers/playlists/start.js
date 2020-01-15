@@ -26,7 +26,7 @@ module.exports = {
         sails.models.playlists.queuing = true // Mark that the playlist is being queued, to avoid app conflicts.
 
         // For prerecords, if it already aired, do not air it again.
-        if (!forced && inputs.event.type === 'prerecord') {
+        if (!forced) {
           var records = await sails.models.attendance.count({ unique: inputs.event.unique, or: [ { happened: { '<': 1 } }, { actualStart: { '!=': null } } ] });
           if (!records || records < 1)
             return exits.success();
