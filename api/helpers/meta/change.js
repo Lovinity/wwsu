@@ -364,7 +364,7 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Show ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}`,
+                      exceptionReason: `Show ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)} ${JSON.stringify(_eventNow)}`,
                       newTime: moment().toISOString(true)
                     }).fetch();
                     // Update the eventNow object with the new calendar + additional exception for when we process attendance further down
@@ -397,7 +397,7 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Remote broadcast ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}`,
+                      exceptionReason: `Remote broadcast ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
                       newTime: moment().toISOString(true)
                     }).fetch();
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
@@ -425,7 +425,7 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Sports broadcast ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}`,
+                      exceptionReason: `Sports broadcast ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
                       newTime: moment().toISOString(true)
                     }).fetch();
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
@@ -457,7 +457,7 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Prerecord ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}`,
+                      exceptionReason: `Prerecord ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
                       newTime: moment().toISOString(true)
                     }).fetch();
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
@@ -489,7 +489,7 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Playlist ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}`,
+                      exceptionReason: `Playlist ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
                       newTime: moment().toISOString(true)
                     }).fetch();
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
@@ -517,7 +517,7 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Genre ${(typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre)} went on the air outside of scheduled time! ${JSON.stringify(eventNow)}`,
+                      exceptionReason: `Genre ${(typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre)} went on the air outside of scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
                       newTime: moment().toISOString(true),
                     }).fetch();
                     eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
