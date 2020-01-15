@@ -101,6 +101,11 @@ module.exports = {
       allowNull: true
     },
 
+    playlistID: {
+      type: 'number',
+      allowNull: true,
+    },
+
     playlist: {
       type: 'string',
       allowNull: true
@@ -247,6 +252,11 @@ module.exports = {
       type: 'number',
       allowNull: true,
       description: 'The ID of the calendar event currently airing.'
+    },
+    playlistID: {
+      type: 'number',
+      allowNull: true,
+      description: 'ID of the playlist currently running'
     },
     playlist: {
       type: 'string',

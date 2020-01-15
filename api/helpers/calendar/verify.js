@@ -47,12 +47,11 @@ module.exports = {
           event.description = `${summary} takes on ${summary2}`;
         break;
       case 'prerecord':
-        if (event.type === 'prerecord' && (!event.hostDJ || event.hostDJ === null))
+        if (!event.hostDJ || event.hostDJ === null)
           return exits.error("Prerecords require a host DJ to be specified.");
         var playlist = await sails.models.playlists.findOne({ ID: event.playlistID })
         if (!playlist)
           return exits.error("The provided playlist ID does not exist.");
-        event.name = playlist.name;
         break;
       case 'show':
       case 'remote':
@@ -62,14 +61,15 @@ module.exports = {
           return exits.error("This event type requires a host DJ to be specified.");
         break;
       case 'genre':
+        if (!event.eventID || event.eventID === null)
+          return exits.error("Genres require a RadioDJ event ID to be specified.");
         var rotation = await sails.models.events.findOne({ ID: event.eventID });
         if (!rotation)
-          return exits.error("A RadioDJ event with the provided name does not exist.");
+          return exits.error("A RadioDJ event with the provided ID does not exist.");
         if (rotation.enabled !== 'True')
           return exits.error("The provided radioDJ event is not enabled. Please enable it first.");
         if (!rotation.data.includes('Load Rotation'))
           return exits.error(`The provided radioDJ event does not contain a "Load Rotation" action. This is required to change the genre rotation.`);
-        event.name = rotation.name;
         break;
       case 'office-hours':
         var director = await sails.models.directors.findOne({ ID: event.director });

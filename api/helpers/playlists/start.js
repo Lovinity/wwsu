@@ -115,7 +115,7 @@ module.exports = {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, true) // Leave requests in the queue for standard playlists.
           await sails.helpers.rest.cmd('EnableAssisted', 0)
-          await sails.helpers.meta.change.with({ state: 'automation_playlist', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: `${inputs.event.hosts} - ${inputs.event.name}` })
+          await sails.helpers.meta.change.with({ state: 'automation_playlist', playlist: inputs.event.name, playlistID: theplaylist.ID, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: `${inputs.event.hosts} - ${inputs.event.name}` })
           await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + inputs.event.name, event: '<strong>Playlist started.</strong><br />Playlist in RadioDJ: ' + theplaylist.name }).fetch()
             .tolerate((err) => {
               sails.log.error(err)
@@ -133,7 +133,7 @@ module.exports = {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false)
           await sails.helpers.rest.cmd('EnableAssisted', 0)
-          await sails.helpers.meta.change.with({ state: 'automation_prerecord', playlist: theplaylist.name, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: `${inputs.event.hosts} - ${inputs.event.name}`, topic: await sails.helpers.truncateText(inputs.event.description, 256) })
+          await sails.helpers.meta.change.with({ state: 'automation_prerecord', playlist: inputs.event.name, playlistID: theplaylist.ID, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: `${inputs.event.hosts} - ${inputs.event.name}`, topic: await sails.helpers.truncateText(inputs.event.description, 256) })
           await loadPlaylist()
 
           // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.

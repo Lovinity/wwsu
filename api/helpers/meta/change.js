@@ -112,6 +112,11 @@ module.exports = {
       allowNull: true,
       description: 'The ID of the calendar event currently being played.'
     },
+    playlistID: {
+      type: 'number',
+      allowNull: true,
+      description: 'ID of the playlist currently running'
+    },
     playlist: {
       type: 'string',
       allowNull: true,
@@ -230,9 +235,14 @@ module.exports = {
       for (var key in inputs) {
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
 
+          // Exit at this point if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value (except for state, which we always want to run even if it did not change)
+          if (typeof sails.models.meta.memory[ key ] === 'undefined' || (sails.models.meta.memory[ key ] === inputs[ key ] && key !== 'state')) {
+            continue
+          }
+
           // If a show is specified and defers from the one in memory, retrieve the IDs of all the DJs in the provided show name if applicable, and update meta with them.
           // This also creates new DJs if they do not exist, and updates the "last seen" time stamp.
-          if (key === 'show' && sails.models.meta.memory[ key ] !== inputs[ key ]) {
+          if (key === 'show') {
 
             // Immediately update memory with new show to prevent cron job double-whammies.
             sails.models.meta.memory.show = inputs[ key ];
@@ -574,11 +584,6 @@ module.exports = {
             }
           }
 
-          // Exit at this point if the key provided does not exist in sails.models.meta.A, or if the value in inputs did not change from the current value
-          if (typeof sails.models.meta.memory[ key ] === 'undefined' || sails.models.meta.memory[ key ] === inputs[ key ]) {
-            continue
-          }
-
           if (key === 'listeners' && inputs.listeners > sails.models.meta.memory.listenerPeak) {
             sails.models.meta.memory.listenerPeak = inputs.listeners
             push.listenerPeak = inputs.listeners
@@ -608,7 +613,7 @@ module.exports = {
       }
 
       // Changes in certain meta should warrant a re-processing of nowplaying metadata information
-      if (typeof push.dj !== 'undefined' || typeof push.state !== 'undefined' || typeof push.playlist !== 'undefined' || typeof push.genre !== 'undefined' || typeof push.trackArtist !== 'undefined' || typeof push.trackTitle !== 'undefined' || typeof push.trackID !== 'undefined') {
+      if (typeof push.show !== 'undefined' || typeof push.state !== 'undefined' || typeof push.playlist !== 'undefined' || typeof push.genre !== 'undefined' || typeof push.trackArtist !== 'undefined' || typeof push.trackTitle !== 'undefined' || typeof push.trackID !== 'undefined') {
         // New track playing in automation?
         if (sails.models.meta.memory.trackID !== 0) {
           // Always reset trackstamp when something plays in automation
@@ -661,7 +666,7 @@ module.exports = {
               push2.percent = 0
             } else {
               push2.line1 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.automation}${sails.models.meta.memory.trackArtist || 'Unknown Artist'} - ${sails.models.meta.memory.trackTitle || 'Unknown Title'}`)
-              push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'}`) : `${sails.config.custom.meta.prefix.playlist}${sails.models.meta.memory.playlist}`
+              push2.line2 = push2.requested ? await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'}`) : `${sails.config.custom.meta.prefix.playlist}${sails.models.meta.memory.show}`
               push2.stream = await sails.helpers.filterProfane(`${sails.models.meta.memory.trackArtist} - ${sails.models.meta.memory.trackTitle} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
             }
 

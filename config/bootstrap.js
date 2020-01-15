@@ -469,15 +469,15 @@ module.exports.bootstrap = async function (done) {
       }
 
       // If we do not know active playlist, we need to populate the info
-      if (sails.models.meta.memory.playlist !== null && sails.models.meta.memory.playlist !== '' && sails.models.playlists.active.tracks.length <= 0 && (sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+      if (sails.models.meta.memory.playlistID !== null && sails.models.playlists.active.tracks.length <= 0 && (sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state.startsWith('prerecord_'))) {
         try {
-          theplaylist = await sails.models.playlists.findOne({ name: sails.models.meta.memory.playlist })
+          theplaylist = await sails.models.playlists.findOne({ ID: sails.models.meta.memory.playlistID })
             .tolerate(() => {
             })
           if (typeof theplaylist !== 'undefined') {
             // LINT: RadioDJ table
             // eslint-disable-next-line camelcase
-            playlistTracks = await sails.models.playlists_list.find({ pID: sails.models.playlists.active.ID })
+            playlistTracks = await sails.models.playlists_list.find({ pID: sails.models.meta.memory.playlistID })
               .tolerate(() => {
               })
             sails.models.playlists.active.tracks = []
@@ -487,7 +487,7 @@ module.exports.bootstrap = async function (done) {
               })
             }
           } else {
-            await sails.helpers.meta.change.with({ playlist: null })
+            await sails.helpers.meta.change.with({ playlist: null, playlistID: null })
           }
         } catch (e) {
           sails.log.error(e)

@@ -93,7 +93,7 @@ module.exports = {
                 // Now, check each event
                 sails.log.debug(`Calendar integrity beginning event check of ${events.length} events`);
                 events
-                    .filter((event) => event.exceptionType === null || ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1))
+                    .filter((event) => (event.exceptionType === null || ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1)) && moment(event.end).isAfter(moment()))
                     .map((event) => {
                         switch (event.type) {
                             case 'prerecord':
@@ -194,6 +194,20 @@ module.exports = {
                                 }
 
                                 break;
+
+                            case 'office-hours':
+
+                                if (event.director === null) {
+                                    if (status > 2) { status = 2 }
+                                    issues.push(`Director hours "${event.name}" for ${moment(event.start).format("llll")} does not have a director ID assigned to it. A director must be assigned to office hour events. Please fix or remove.`);
+                                    break;
+                                }
+
+                                if (await sails.models.directors.count({ID: event.director}) === 0) {
+                                    if (status > 2) { status = 2 }
+                                    issues.push(`Director hours "${event.name}" for ${moment(event.start).format("llll")} were assigned a director that does not exist in the system. Please fix this or remove the office hours.`);
+                                    break;
+                                }
                         }
                     });
 
