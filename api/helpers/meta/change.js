@@ -536,7 +536,7 @@ module.exports = {
               var attendance;
 
               // Different event now on the air?
-              if (sails.models.meta.memory.calendarUnique !== (eventNow === null ? null : eventNow.unique)) {
+              if (eventNow && sails.models.meta.memory.calendarUnique !== (eventNow === null ? null : eventNow.unique)) {
 
                 // Create a new attendance record and update meta with the new attendance ID
                 attendance = await sails.helpers.attendance.createRecord(eventNow);
@@ -550,7 +550,7 @@ module.exports = {
                   })
 
                 // If the eventNow object is not null
-                if (eventNow !== null) {
+                if (eventNow && eventNow !== null) {
 
                   // We don't care about genres nor playlists for airing
                   if ([ 'live_on', 'sports_on', 'remote_on', 'sportsremote_on', 'prerecord_on' ].indexOf(inputs[ key ]) !== -1) {
@@ -570,7 +570,7 @@ module.exports = {
                 }
               }
 
-              if (eventNow !== null) {
+              if (eventNow && eventNow !== null) {
                 sails.models.meta.memory.calendarID = eventNow.calendarID;
                 sails.models.meta.memory.calendarUnique = eventNow.unique;
                 push.calendarID = eventNow.calendarID;
