@@ -529,7 +529,7 @@ module.exports = {
                   break;
               }
 
-              if (eventNow[ 0 ]) {
+              if (eventnow !== null && eventNow[ 0 ]) {
                 eventNow = eventNow[ 0 ];
               }
 
