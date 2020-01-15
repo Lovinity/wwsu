@@ -529,7 +529,7 @@ module.exports = {
                   break;
               }
 
-              if (eventnow !== null && eventNow[ 0 ]) {
+              if (eventNow instanceof Array && eventNow[ 0 ]) {
                 eventNow = eventNow[ 0 ];
               }
 
