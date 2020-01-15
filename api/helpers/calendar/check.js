@@ -90,6 +90,9 @@ module.exports = {
                 var djeventsR = await sails.models.events.find({ type: 3 })
                 djeventsR.map(_event => { djevents[ _event.ID ] = _event })
 
+                // Load directors into memory
+                var directors = await sails.models.directors.find();
+
                 // Now, check each event
                 sails.log.debug(`Calendar integrity beginning event check of ${events.length} events`);
                 events
@@ -202,8 +205,8 @@ module.exports = {
                                     issues.push(`Director hours "${event.name}" for ${moment(event.start).format("llll")} does not have a director ID assigned to it. A director must be assigned to office hour events. Please fix or remove.`);
                                     break;
                                 }
-
-                                if (await sails.models.directors.count({ID: event.director}) === 0) {
+                                var _director = directors.filter((director) => director.ID === event.directorID);
+                                if (_director.length < 1) {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Director hours "${event.name}" for ${moment(event.start).format("llll")} were assigned a director that does not exist in the system. Please fix this or remove the office hours.`);
                                     break;
