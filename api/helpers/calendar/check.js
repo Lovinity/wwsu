@@ -252,7 +252,6 @@ module.exports = {
                 await sails.helpers.genre.start(null, inputs.ignoreChangingState);
             }
 
-            /*
             // Check to see if any events did not air
             var eventCheck = sails.models.calendar.calendardb.getEvents(moment(sails.models.meta.memory.attendanceChecked).subtract(1, 'days').toISOString(true), moment().toISOString(true));
             await sails.helpers.meta.change.with({ attendanceChecked: moment().toISOString(true) });
@@ -324,7 +323,6 @@ module.exports = {
                             });
                     });
             }
-            */
         }
 
         return exits.success();

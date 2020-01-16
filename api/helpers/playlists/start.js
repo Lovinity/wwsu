@@ -24,14 +24,12 @@ module.exports = {
       if (!sails.models.playlists.queuing && sails.models.meta.memory.calendarUnique !== inputs.event.unique && (((sails.models.meta.memory.changingState === null || inputs.ignoreChangingState) && ((sails.models.meta.memory.state === 'automation_on' || sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_genre' || forced))))) {
         sails.log.verbose(`Processing helper.`)
 
-        /*
         // For prerecords, if it already aired, do not air it again.
         if (!forced) {
           var records = await sails.models.attendance.count({ unique: inputs.event.unique, or: [ { happened: { '<': 1 } }, { actualStart: { '!=': null } } ] });
-          if (!records || records < 1)
+          if (!records || records > 0)
             return exits.success();
         }
-        */
 
         sails.models.playlists.queuing = true // Mark that the playlist is being queued, to avoid app conflicts.
 
