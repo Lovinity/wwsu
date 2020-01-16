@@ -361,14 +361,14 @@ module.exports = {
                       if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                     }
                     // Add an exception indicating this was an unscheduled broadcast.
-                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Show ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)} ${JSON.stringify(_eventNow)}`,
+                      exceptionReason: `Show ${show} went on the air outside of their scheduled time!`,
                       newTime: moment().toISOString(true),
                       duration: 60
                     }).fetch();
+                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
                   break;
                 case 'remote_on':
@@ -394,14 +394,14 @@ module.exports = {
                       calendar = calendar[ 0 ];
                       if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                     }
-                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Remote broadcast ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
+                      exceptionReason: `Remote broadcast ${show} went on the air outside of their scheduled time!`,
                       newTime: moment().toISOString(true),
                       duration: 60
                     }).fetch();
+                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
                   break;
                 case 'sports_on':
@@ -423,14 +423,14 @@ module.exports = {
                       calendar = calendar[ 0 ];
                       if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                     }
-                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Sports broadcast ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
+                      exceptionReason: `Sports broadcast ${show} went on the air outside of their scheduled time!`,
                       newTime: moment().toISOString(true),
                       duration: 60
                     }).fetch();
+                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
                   break;
                 case 'prerecord_on':
@@ -460,10 +460,11 @@ module.exports = {
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Prerecord ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
+                      exceptionReason: `Prerecord ${show} went on the air outside of their scheduled time!`,
                       newTime: moment().toISOString(true),
                       duration: 60
                     }).fetch();
+                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
                   break;
                 case 'automation_playlist':
@@ -489,14 +490,14 @@ module.exports = {
                       calendar = calendar[ 0 ];
                       if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                     }
-                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Playlist ${show} went on the air outside of their scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
+                      exceptionReason: `Playlist ${show} went on the air outside of their scheduled time!`,
                       newTime: moment().toISOString(true),
                       duration: 60
                     }).fetch();
+                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
                   break;
                 case 'automation_genre':
@@ -518,14 +519,14 @@ module.exports = {
                       calendar = calendar[ 0 ];
                       if (!calendar.active) await sails.models.calendar.update({ ID: calendar.ID }, { active: true }).fetch();
                     }
-                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                     exception = await sails.models.calendarexceptions.create({
                       calendarID: calendar.ID,
                       exceptionType: 'additional-unscheduled',
-                      exceptionReason: `Genre ${(typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre)} went on the air outside of scheduled time! ${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`,
+                      exceptionReason: `Genre ${(typeof inputs.genre !== 'undefined' ? inputs.genre : sails.models.meta.memory.genre)} went on the air outside of scheduled time!`,
                       newTime: moment().toISOString(true),
                       duration: 60
                     }).fetch();
+                    eventNow = sails.models.calendar.calendardb.processRecord(calendar, exception, moment().toISOString(true));
                   }
                   break;
                 case 'automation_on':
@@ -562,7 +563,7 @@ module.exports = {
 
                     // Make a log if the broadcast was unauthorized
                     if (exception) {
-                      await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
+                      await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`, createdAt: moment().toISOString(true) }).fetch()
                         .tolerate((err) => {
                           sails.log.error(err)
                         })
