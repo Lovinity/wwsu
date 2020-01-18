@@ -295,6 +295,9 @@ module.exports.bootstrap = async function (done) {
         if (sails.models.meta.memory.changingState === null) {
           queue = await sails.helpers.rest.getQueue()
 
+          if (!queue[ 0 ])
+            throw new Error("Queue returned 0 tracks.");
+
           try {
             sails.log.silly(`queueCheck executed.`)
             var theTracks = []
