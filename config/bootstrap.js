@@ -209,13 +209,13 @@ module.exports.bootstrap = async function (done) {
   // Check calendar events and integrity
   sails.log.verbose(`BOOTSTRAP: Loading calendar events.`)
   await sails.helpers.meta.change.with({ changingState: `Initializing program calendar` })
+  await sails.helpers.calendar.check(false, true)
   try {
     await sails.helpers.calendar.check(true)
     await sails.helpers.meta.change.with({ changingState: null })
   } catch (unusedE) {
     await sails.helpers.meta.change.with({ changingState: null })
   }
-  await sails.helpers.calendar.check(false, true)
 
   // CRON JOBS
 
