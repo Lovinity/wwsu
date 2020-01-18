@@ -226,7 +226,6 @@ module.exports = {
 
             // Check if it's time to trigger a program, and trigger it if so
             var _eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(true);
-            console.dir(_eventNow);
             var triggered = false;
             _eventNow.map((eventNow) => {
                 if (triggered) return null;

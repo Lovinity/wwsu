@@ -39,10 +39,10 @@ module.exports = {
                 returnData.cohostDJ3 = await sails.models.djs.findOrCreate({ name: temp[ 3 ] }, { name: temp[ 3 ], lastSeen: moment().toISOString(true) })
 
             // Update lastSeen record for the DJs
-            if (returnData.dj !== null) { await sails.models.djs.update({ ID: dj.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
-            if (returnData.cohostDJ1 !== null) { await sails.models.djs.update({ ID: dj2.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
-            if (returnData.cohostDJ2 !== null) { await sails.models.djs.update({ ID: dj3.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
-            if (returnData.cohostDJ3 !== null) { await sails.models.djs.update({ ID: dj4.ID }, { lastSeen: moment().toISOString(true) }).fetch() }
+            if (returnData.dj !== null) { await sails.models.djs.update({ ID: returnData.dj }, { lastSeen: moment().toISOString(true) }).fetch() }
+            if (returnData.cohostDJ1 !== null) { await sails.models.djs.update({ ID: returnData.cohostDJ1 }, { lastSeen: moment().toISOString(true) }).fetch() }
+            if (returnData.cohostDJ2 !== null) { await sails.models.djs.update({ ID: returnData.cohostDJ2 }, { lastSeen: moment().toISOString(true) }).fetch() }
+            if (returnData.cohostDJ3 !== null) { await sails.models.djs.update({ ID: returnData.cohostDJ3 }, { lastSeen: moment().toISOString(true) }).fetch() }
         }
 
         await sails.helpers.meta.change.with(returnData);
