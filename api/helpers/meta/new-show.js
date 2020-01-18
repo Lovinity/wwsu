@@ -12,6 +12,7 @@ module.exports = {
         var toUpdate = {};
 
         var name = sails.models.meta.memory.show;
+        var show = sails.models.meta.memory.show;
         var hosts = "Unknown Hosts";
         if (name.includes(' - ')) { // Split hosts and show
             name = sails.models.meta.memory.show.split(' - ')[ 1 ]
