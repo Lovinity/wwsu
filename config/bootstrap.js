@@ -416,15 +416,19 @@ module.exports.bootstrap = async function (done) {
               if (firstNoMeta < 0 && breakQueueLength < 0 && sails.models.status.errorCheck.trueZero <= 0) {
                 if (sails.models.meta.memory.state === 'automation_live') {
                   await sails.helpers.meta.change.with({ state: 'live_on' });
+                  await sails.helpers.meta.newShow();
                 }
                 if (sails.models.meta.memory.state === 'automation_sports') {
                   await sails.helpers.meta.change.with({ state: 'sports_on' })
+                  await sails.helpers.meta.newShow();
                 }
                 if (sails.models.meta.memory.state === 'automation_remote') {
                   await sails.helpers.meta.change.with({ state: 'remote_on' })
+                  await sails.helpers.meta.newShow();
                 }
                 if (sails.models.meta.memory.state === 'automation_sportsremote') {
                   await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
+                  await sails.helpers.meta.newShow();
                 }
                 if (sails.models.meta.memory.state.includes('_returning')) {
                   switch (sails.models.meta.memory.state) {
@@ -532,6 +536,7 @@ module.exports.bootstrap = async function (done) {
                     // State switching should be pushed in sockets
                     sails.helpers.meta.change.with({ state: 'prerecord_on' })
                       .then(() => {
+                        sails.helpers.meta.newShow();
                       })
                   }
                   // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
@@ -615,19 +620,23 @@ module.exports.bootstrap = async function (done) {
           if (sails.models.meta.memory.state === 'automation_live' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'live_on' })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
+            await sails.helpers.meta.newShow();
           }
           // If we are preparing for sports, do some stuff if queue is done
           if (sails.models.meta.memory.state === 'automation_sports' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'sports_on' })
             await sails.helpers.rest.cmd('EnableAssisted', 1)
+            await sails.helpers.meta.newShow();
           }
           // If we are preparing for remote, do some stuff
           if (sails.models.meta.memory.state === 'automation_remote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'remote_on' })
+            await sails.helpers.meta.newShow();
           }
           // If we are preparing for sportsremote, do some stuff if we are playing the stream track
           if (sails.models.meta.memory.state === 'automation_sportsremote' && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
             await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
+            await sails.helpers.meta.newShow();
           }
           // If returning from break, do stuff once queue is empty
           if (sails.models.meta.memory.state.includes('_returning') && queueLength <= 0 && sails.models.status.errorCheck.trueZero <= 0) {
