@@ -632,7 +632,7 @@ class CalendarDb {
             if (!event.exceptionTime && event.exceptionType !== 'additional' && event.exceptionType !== 'additional-unscheduled') return false;
 
             // If exception type is additional and no newTime and/or duration provided, this is an invalid event.
-            if ((!event.newTime || !event.duration) && (event.exceptionType === 'additional' || event.exceptionType !== 'additional-unscheduled')) return false;
+            if ((!event.newTime || !event.duration) && (event.exceptionType === 'additional' || event.exceptionType === 'additional-unscheduled')) return false;
         } else {
             // If this is a main calendar event, it must have a schedules or a oneTime property in event.schedule if event.schedule is not null.
             if (event.schedule !== null && !event.schedule.schedules && !event.schedule.oneTime) return false;
@@ -703,6 +703,10 @@ class CalendarDb {
             eventID: exception.eventID && exception.eventID !== null ? exception.eventID : calendar.eventID, // ID of the radioDJ manual event to fire, for genre events
             playlistID: exception.playlistID && exception.playlistID !== null ? exception.playlistID : calendar.playlistID, // ID of the playlist to queue, for playlist and prerecord events.
             director: exception.director && exception.director !== null ? exception.director : calendar.director, // ID of the director, for office-hours events.
+            hostDJ: exception.hostDJ && exception.hostDJ !== null ? exception.hostDJ : calendar.hostDJ, // ID of the host DJ
+            cohostDJ1: exception.cohostDJ1 && exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1, // ID of the first co-host DJ
+            cohostDJ2: exception.cohostDJ2 && exception.cohostDJ2 !== null ? exception.cohostDJ2 : calendar.cohostDJ2, // ID of the second co-host DJ
+            cohostDJ3: exception.cohostDJ3 && exception.cohostDJ3 !== null ? exception.cohostDJ3 : calendar.cohostDJ3, // ID of the third co-host DJ
             hosts: exception.hosts && exception.hosts !== null ? exception.hosts : calendar.hosts || "Unknown Hosts", // String of host names based on director and/or DJ IDs.
             name: exception.name && exception.name !== null ? exception.name : calendar.name || "Unknown Event", // Name of event
             description: exception.description && exception.description !== null ? exception.description : calendar.description, // Description of event
