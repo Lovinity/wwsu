@@ -253,6 +253,9 @@ module.exports = {
             }
 
             // Check to see if any events did not air
+
+            /* Still not working. Disabled for now.
+
             var eventCheck = sails.models.calendar.calendardb.getEvents(moment(sails.models.meta.memory.attendanceChecked).subtract(1, 'days').toISOString(true), moment().toISOString(true));
             await sails.helpers.meta.change.with({ attendanceChecked: moment().toISOString(true) });
             if (eventCheck && eventCheck.length > 0) {
@@ -323,6 +326,7 @@ module.exports = {
                             });
                     });
             }
+            */
         }
 
         return exits.success();
