@@ -1452,9 +1452,9 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  // Every day at 11:59:52pm, re-load calendardb cache in case it gets out of sync with the database.
+  // Every hour at xx:59:52, re-load calendardb cache in case it gets out of sync with the database.
   sails.log.verbose('BOOTSTRAP: scheduling calendardbCacheSync CRON.')
-  cron.schedule('52 59 23 * * *', () => {
+  cron.schedule('52 59 * * * *', () => {
     return new Promise(async (resolve, reject) => {
       sails.log.debug('CRON calendardbCacheSync called')
       try {
