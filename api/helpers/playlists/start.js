@@ -27,7 +27,7 @@ module.exports = {
         // For prerecords, if it already aired, do not air it again.
         if (!forced) {
           var records = await sails.models.attendance.count({ unique: inputs.event.unique, or: [ { happened: { '<': 1 } }, { actualStart: { '!=': null } } ] });
-          if (!records || records > 0)
+          if (records && records > 0)
             return exits.success();
         }
 
