@@ -8,7 +8,8 @@ module.exports = {
     str: {
       type: 'string',
       defaultsTo: '',
-      description: 'The string to truncate'
+      description: 'The string to truncate',
+      allowNull: true
     },
 
     strLength: {
@@ -28,6 +29,8 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     sails.log.debug('Helper truncateText called.')
+
+    if (inputs.str === null) return "";
 
     if (inputs.str.length > inputs.strLength) {
       return exits.success(inputs.str.substring(0, inputs.strLength - inputs.ending.length) + inputs.ending)
