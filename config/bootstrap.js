@@ -536,7 +536,8 @@ module.exports.bootstrap = async function (done) {
                     // State switching should be pushed in sockets
                     sails.helpers.meta.change.with({ state: 'prerecord_on' })
                       .then(() => {
-                        sails.helpers.meta.newShow();
+                        sails.helpers.meta.newShow()
+                          .then(() => { });
                       })
                   }
                   // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
