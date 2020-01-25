@@ -242,11 +242,6 @@ module.exports = {
 
         var attendance;
 
-        await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />Topic: ${sails.models.meta.memory.topic}<br />${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`, createdAt: moment().toISOString(true) }).fetch()
-        .tolerate((err) => {
-            sails.log.error(err)
-        })
-
         // Different event now on the air?
         if (eventNow && sails.models.meta.memory.calendarUnique !== eventNow.unique) {
 
@@ -255,6 +250,10 @@ module.exports = {
             toUpdate.attendanceID = attendance.newID;
 
             // Make a log that the broadcast started
+            await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />Topic: ${sails.models.meta.memory.topic}<br />${JSON.stringify(eventNow)}  ${JSON.stringify(_eventNow)}`, createdAt: moment().toISOString(true) }).fetch()
+            .tolerate((err) => {
+                sails.log.error(err)
+            })
 
             // If the eventNow object is not null
             if (eventNow && eventNow !== null) {
