@@ -165,8 +165,6 @@ module.exports = {
           await sails.helpers.meta.changeDjs(`${inputs.event.hosts} - ${inputs.event.name}`);
           sails.log.verbose(`playlists.start: Changing Meta`);
           await sails.helpers.meta.change.with({ state: 'automation_prerecord', playlist: inputs.event.name, playlistID: theplaylist.ID, playlistPosition: -1, playlistPlayed: moment().toISOString(true), show: `${inputs.event.hosts} - ${inputs.event.name}`, topic: await sails.helpers.truncateText(inputs.event.description, 256) })
-          sails.log.verbose(`playlists.start: Starting new show`);
-          await sails.helpers.meta.newShow();
           await loadPlaylist()
 
           // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.
