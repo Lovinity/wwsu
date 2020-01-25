@@ -28,7 +28,10 @@ module.exports = {
         if (!forced) {
           var records = await sails.models.attendance.count({ unique: inputs.event.unique, or: [ { happened: { '<': 1 } }, { actualStart: { '!=': null } } ] });
           if (records && records > 0)
+          {
+            sails.log.verbose(`EXIT: Event already happened`);
             return exits.success();
+          }
         }
 
         sails.models.playlists.queuing = true // Mark that the playlist is being queued, to avoid app conflicts.
@@ -173,7 +176,7 @@ module.exports = {
     } catch (e) {
       if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
       sails.models.playlists.queuing = false
-      sails.log.error(e);
+      console.error(e);
       return exits.error(e)
     }
   }
