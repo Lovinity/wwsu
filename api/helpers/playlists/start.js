@@ -173,6 +173,7 @@ module.exports = {
     } catch (e) {
       if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
       sails.models.playlists.queuing = false
+      sails.log.error(e);
       return exits.error(e)
     }
   }
