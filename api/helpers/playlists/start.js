@@ -155,8 +155,11 @@ module.exports = {
                 sails.log.error(err)
               })
           }
+          sails.log.verbose(`playlists.start: Disable autodj`);
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
+          sails.log.verbose(`playlists.start: Remove tracks`);
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false)
+          sails.log.verbose(`playlists.start: Disable assisted`);
           await sails.helpers.rest.cmd('EnableAssisted', 0)
           sails.log.verbose(`playlists.start: Changing DJs`);
           await sails.helpers.meta.changeDjs(`${inputs.event.hosts} - ${inputs.event.name}`);

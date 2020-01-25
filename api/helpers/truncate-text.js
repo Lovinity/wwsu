@@ -30,7 +30,7 @@ module.exports = {
   fn: async function (inputs, exits) {
     sails.log.debug('Helper truncateText called.')
 
-    if (inputs.str === null) return "";
+    if (inputs.str === null) return exits.success("");
 
     if (inputs.str.length > inputs.strLength) {
       return exits.success(inputs.str.substring(0, inputs.strLength - inputs.ending.length) + inputs.ending)
