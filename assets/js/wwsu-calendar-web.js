@@ -656,10 +656,6 @@ class CalendarDb {
             eventID: exception.eventID && exception.eventID !== null ? exception.eventID : calendar.eventID, // ID of the radioDJ manual event to fire, for genre events
             playlistID: exception.playlistID && exception.playlistID !== null ? exception.playlistID : calendar.playlistID, // ID of the playlist to queue, for playlist and prerecord events.
             director: exception.director && exception.director !== null ? exception.director : calendar.director, // ID of the director, for office-hours events.
-            hostDJ: exception.hostDJ && exception.hostDJ !== null ? exception.hostDJ : calendar.hostDJ, // ID of the host DJ
-            cohostDJ1: exception.cohostDJ1 && exception.cohostDJ1 !== null ? exception.cohostDJ1 : calendar.cohostDJ1, // ID of the first co-host DJ
-            cohostDJ2: exception.cohostDJ2 && exception.cohostDJ2 !== null ? exception.cohostDJ2 : calendar.cohostDJ2, // ID of the second co-host DJ
-            cohostDJ3: exception.cohostDJ3 && exception.cohostDJ3 !== null ? exception.cohostDJ3 : calendar.cohostDJ3, // ID of the third co-host DJ
             hosts: exception.hosts && exception.hosts !== null ? exception.hosts : calendar.hosts || "Unknown Hosts", // String of host names based on director and/or DJ IDs.
             name: exception.name && exception.name !== null ? exception.name : calendar.name || "Unknown Event", // Name of event
             description: exception.description && exception.description !== null ? exception.description : calendar.description, // Description of event
@@ -685,8 +681,8 @@ class CalendarDb {
         }
 
         // If the host DJ for the exception is set, use the entire set of DJ hosts for the exception. Otherwise, use the set from the main calendar event.
-        if (exception.hostDJ !== null) {
-            criteria.hostDJ = exception.hostDJ;
+        if (exception.hostDJ && exception.hostDJ !== null) {
+            criteria.hostDJ = exception.hostDJ || null;
             criteria.cohostDJ1 = exception.cohostDJ1 || null;
             criteria.cohostDJ2 = exception.cohostDJ2 || null;
             criteria.cohostDJ3 = exception.cohostDJ3 || null;
