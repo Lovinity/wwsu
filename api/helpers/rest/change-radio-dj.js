@@ -5,7 +5,10 @@ module.exports = {
   description: 'Change which RadioDJ instance is the active one.',
 
   inputs: {
-
+    instance: {
+      type: 'string',
+      description: 'The REST address to the RadioDJ that should be activated. If not specified, one will be chosen from a list of good-status RadioDJs.'
+    }
   },
 
   fn: async function (inputs, exits) {
@@ -24,6 +27,9 @@ module.exports = {
       // If there is at least one healthy inactive RadioDJ, choose one randomly to switch to
       if (healthyRadioDJs.length > 0) {
         var changeTo = await sails.helpers.pickRandom(healthyRadioDJs)
+        // Overwrite randomly chosen RadioDJ if one was specified
+        if (inputs.instance)
+          changeTo = { item: { rest: inputs.instance } };
         await sails.helpers.meta.change.with({ radiodj: changeTo.item.rest })
 
         // Otherwise, check to see if the active RadioDJ is still status 5

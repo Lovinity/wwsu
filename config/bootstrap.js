@@ -394,7 +394,7 @@ module.exports.bootstrap = async function (done) {
               } else { // No error wait time [remaining]? Use actual detected queue time.
               }
             } else {
-              sails.models.status.errorCheck.trueZero = 3 // Wait up to 3 seconds before considering the queue accurate
+              sails.models.status.errorCheck.trueZero = 3 // Wait up to 5 seconds before considering the queue accurate
               change.queueCalculating = true
               // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
               queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
@@ -569,7 +569,7 @@ module.exports.bootstrap = async function (done) {
 
         try {
           // Finished the playlist? Go back to automation.
-          if (thePosition === -1 && sails.models.status.errorCheck.trueZero <= 0 && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null) {
+          if (thePosition === -1 && sails.models.status.errorCheck.trueZero <= 0 && ((queue[ 0 ].Duration > 0 && queue[ 0 ].Elapsed < queue[ 0 ].Duration && queue[ 0 ].Elapsed > 0) || (queue[ 0 ].Duration <= 0 && queue[ 0 ].Elapsed > 0)) && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null) {
             await sails.helpers.meta.change.with({ changingState: `Ending playlist` })
             switch (sails.models.meta.memory.state) {
               case 'automation_playlist':
@@ -901,9 +901,9 @@ module.exports.bootstrap = async function (done) {
     }
   })
 
-  // Every minute at second 4, check all RadioDJs for connectivity.
+  // Every minute at second 4 and 34, check all RadioDJs for connectivity.
   sails.log.verbose(`BOOTSTRAP: scheduling checkRadioDJs CRON.`)
-  cron.schedule('4 * * * * *', () => {
+  cron.schedule('4,34 * * * * *', () => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON checkRadioDJs triggered.`)
@@ -935,7 +935,7 @@ module.exports.bootstrap = async function (done) {
                       await sails.helpers.rest.cmd('ClearPlaylist', 1)
                       await sails.helpers.error.post(queue)
                     }
-                    // If this RadioDJ is inactive, check to see if it is playing anything and send a stop command if so.
+                    // If this RadioDJ is inactive, check to see if it is playing anything
                     if (sails.models.meta.memory.radiodj !== radiodj.rest) {
                       var automation = []
                       if (resp.body.name === 'ArrayOfSongData') {
@@ -950,14 +950,26 @@ module.exports.bootstrap = async function (done) {
                         automation.push(theTrack)
                       }
 
-                      // If this if condition passes, the RadioDJ is playing when it shouldn't be. Stop it!
+                      // If this if condition passes, the RadioDJ is playing.
                       if (typeof automation[ 0 ] !== 'undefined' && parseInt(automation[ 0 ].ID) !== 0) {
-                        try {
-                          // LINT: Necessary needle parameters
-                          // eslint-disable-next-line camelcase
-                          var resp2 = await needle('get', radiodj.rest + '/opt?auth=' + sails.config.custom.rest.auth + '&command=StopPlayer&arg=1', {}, { open_timeout: 10000, response_timeout: 10000, read_timeout: 10000, headers: { 'Content-Type': 'application/json' } });
-                        } catch (unusedE3) {
-                          // Ignore errors
+                        // If the active radioDJ is playing something too, we should stop the inactive RadioDJ.
+                        if (sails.models.meta.memory.queueFinish !== null) {
+                          try {
+                            // LINT: Necessary needle parameters
+                            // eslint-disable-next-line camelcase
+                            var resp2 = await needle('get', radiodj.rest + '/opt?auth=' + sails.config.custom.rest.auth + '&command=StopPlayer&arg=1', {}, { open_timeout: 10000, response_timeout: 10000, read_timeout: 10000, headers: { 'Content-Type': 'application/json' } });
+                          } catch (unusedE3) {
+                            // Ignore errors
+                          }
+                          // If the active RadioDJ is NOT playing anything, we should switch the active RadioDJ to the one playing something.
+                        } else if (sails.models.meta.memory.changingState === null) {
+                          await sails.helpers.meta.change.with({ changingState: `Switching radioDJ instances` })
+                          await sails.helpers.rest.cmd('EnableAssisted', 1, 0)
+                          await sails.helpers.rest.cmd('EnableAutoDJ', 1, 0)
+                          await sails.helpers.rest.cmd('StopPlayer', 0, 0)
+                          await sails.helpers.rest.changeRadioDj(radiodj.rest)
+                          await sails.helpers.error.post()
+                          await sails.helpers.meta.change.with({ changingState: null })
                         }
                       }
                     }
