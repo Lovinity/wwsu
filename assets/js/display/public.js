@@ -662,13 +662,13 @@ waitFor(() => {
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
   Calendar.assignSocketEvent('calendar', io.socket)
   Calendar.setOnUpdate((data, db) => {
-    calendarWorker.postMessage([ 'calendar', data, false ]);
+    calendarWorker.postMessage([ 'calendar', {update: data}, false ]);
   })
   Calendar.setOnInsert((data, db) => {
-    calendarWorker.postMessage([ 'calendar', data, false ]);
+    calendarWorker.postMessage([ 'calendar', {insert: data}, false ]);
   })
   Calendar.setOnRemove((data, db) => {
-    calendarWorker.postMessage([ 'calendar', data, false ]);
+    calendarWorker.postMessage([ 'calendar', {remove: data}, false ]);
   })
   Calendar.setOnReplace((db) => {
     calendarWorker.postMessage([ 'calendar', db.get(), true ]);
@@ -677,13 +677,13 @@ waitFor(() => {
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
   Calendarexceptions.assignSocketEvent('calendarexceptions', io.socket)
   Calendarexceptions.setOnUpdate((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', {update: data}, false ]);
   })
   Calendarexceptions.setOnInsert((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', {insert: data}, false ]);
   })
   Calendarexceptions.setOnRemove((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', data, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', {remove: data}, false ]);
   })
   Calendarexceptions.setOnReplace((db) => {
     calendarWorker.postMessage([ 'calendarexceptions', db.get(), true ]);
