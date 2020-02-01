@@ -593,6 +593,7 @@ module.exports.bootstrap = async function (done) {
         }
       } else {
         queue = sails.models.meta.automation;
+        change.playing = sails.models.meta.memory.playing;
         sails.models.status.errorCheck.queueWait -= 1;
         if (sails.models.meta.memory.playing) {
           queueLength = sails.models.status.errorCheck.prevQueueLength - 1;
