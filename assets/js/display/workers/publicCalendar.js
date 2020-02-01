@@ -39,7 +39,7 @@ onmessage = function (e) {
         color.blue = Math.round(color.blue / 3)
         var badgeInfo = ``
         if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1) {
-          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>TEMP TIME CHANGE</strong></span>`
+          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CHANGED</strong></span>`
         }
         if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
           badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`

@@ -556,8 +556,8 @@ function onlineSocket (doOneSignal = false) {
       if (device === null && !isMobile) {
         temp.innerHTML = 'Show Prompt'
         temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`
-        temp.onclick = () => OneSignal.showNativePrompt()
-        temp.onkeydown = () => OneSignal.showNativePrompt()
+        temp.onclick = () => OneSignal.showSlidedownPrompt({force: true})
+        temp.onkeydown = () => OneSignal.showSlidedownPrompt({force: true})
       } else {
         temp.innerHTML = 'Subscribe'
         temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
@@ -886,8 +886,8 @@ function doMeta (response) {
             if (device === null && !isMobile) {
               temp2.innerHTML = 'Show Prompt'
               temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`
-              temp2.onclick = () => OneSignal.showNativePrompt()
-              temp2.onkeydown = () => OneSignal.showNativePrompt()
+              temp2.onclick = () => OneSignal.showSlidedownPrompt({force: true})
+              temp2.onkeydown = () => OneSignal.showSlidedownPrompt({force: true})
             } else {
               temp2.innerHTML = 'Subscribe'
               temp4.innerHTML = `Click "Subscribe" to receive notifications when this show is on the air.`
@@ -939,8 +939,8 @@ function doMeta (response) {
             if (device === null && !isMobile) {
               temp2.innerHTML = 'Show Prompt'
               temp4.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`
-              temp2.onclick = () => OneSignal.showNativePrompt()
-              temp2.onkeydown = () => OneSignal.showNativePrompt()
+              temp2.onclick = () => OneSignal.showSlidedownPrompt({force: true})
+              temp2.onkeydown = () => OneSignal.showSlidedownPrompt({force: true})
             } else {
               temp2.innerHTML = 'Subscribe'
               temp4.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
@@ -1475,7 +1475,7 @@ function displayEventInfo (showID) {
     buttons = [
       [ '<button><b>Show Prompt</b></button>', function (instance, toast) {
         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
-        OneSignal.showNativePrompt()
+        OneSignal.showSlidedownPrompt({force: true})
       }, true ]
     ]
   }
