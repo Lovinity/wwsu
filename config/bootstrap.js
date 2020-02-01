@@ -228,6 +228,7 @@ module.exports.bootstrap = async function (done) {
       sails.log.debug(`CRON checks triggered.`)
 
       var queueLength = 0
+      var trackLength = 0
       var countDown = 0
       var theplaylist
       var playlistTracks
@@ -291,8 +292,8 @@ module.exports.bootstrap = async function (done) {
       var queue = []
 
       // Only re-fetch the queue once every 5-10 seconds or when the system intelligently determines it is necessary to keep a real-time eye on the queue.
-      // Should check whenever queue length < 2 and something is playing, or time to check (every 5 seconds), or the genre might have run out of music, or there is not an accurate queue count, or something triggered for a queue check (such as duplicate track removal or change in state).
-      if ((sails.models.status.errorCheck.prevQueueLength < 2 && sails.models.meta.memory.playing) || sails.models.status.errorCheck.queueWait < 1 || (sails.models.meta.memory.state === 'automation_genre' && sails.models.status.errorCheck.prevQueueLength <= 20) || sails.models.status.errorCheck.trueZero > 0) {
+      // Should check whenever track length < 2 and something is playing, or time to check (every 5 seconds), or the genre might have run out of music, or there is not an accurate queue count, or something triggered for a queue check (such as duplicate track removal or change in state).
+      if ((sails.models.status.errorCheck.prevTrackLength < 2 && sails.models.meta.memory.playing) || sails.models.status.errorCheck.queueWait < 1 || (sails.models.meta.memory.state === 'automation_genre' && sails.models.status.errorCheck.prevQueueLength <= 20) || sails.models.status.errorCheck.trueZero > 0) {
         try {
           if (sails.models.meta.memory.changingState === null) {
 
@@ -336,13 +337,15 @@ module.exports.bootstrap = async function (done) {
               if (parseInt(queue[ 0 ].ID) === 0) {
                 change.playing = false
                 change.trackFinish = null
+                trackLength = 0
               } else {
                 change.playing = true
                 change.trackArtist = queue[ 0 ].Artist || null
                 change.trackTitle = queue[ 0 ].Title || null
                 change.trackAlbum = queue[ 0 ].Album || null
                 change.trackLabel = queue[ 0 ].Label || null
-                change.trackFinish = moment().add(parseFloat(queue[ 0 ].Duration) - parseFloat(queue[ 0 ].Elapsed), 'seconds').toISOString(true)
+                trackLength = parseFloat(queue[ 0 ].Duration) - parseFloat(queue[ 0 ].Elapsed);
+                change.trackFinish = moment().add(trackLength, 'seconds').toISOString(true)
               }
 
               // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
@@ -397,9 +400,11 @@ module.exports.bootstrap = async function (done) {
                     // If not an accurate queue count, use previous queue - 1 instead
                   } else {
                     queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
+                    trackLength = (sails.models.status.errorCheck.prevTrackLength - 1)
                     countDown = (sails.models.status.errorCheck.prevCountdown - 1)
                   }
                   if (queueLength < 0) { queueLength = 0 }
+                  if (trackLength < 0) { trackLength = 0 }
                   if (countDown < 0) { countDown = 0 }
                 } else { // No error wait time [remaining]? Use actual detected queue time.
                 }
@@ -408,8 +413,10 @@ module.exports.bootstrap = async function (done) {
                 change.queueCalculating = true
                 // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
                 queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
+                trackLength = (sails.models.status.errorCheck.prevTrackLength - 1)
                 countDown = (sails.models.status.errorCheck.prevCountdown - 1)
                 if (queueLength < 0) { queueLength = 0 }
+                if (trackLength < 0) { trackLength = 0 }
                 if (countDown < 0) { countDown = 0 }
               }
 
@@ -419,6 +426,7 @@ module.exports.bootstrap = async function (done) {
               }
 
               sails.models.status.errorCheck.prevQueueLength = queueLength
+              sails.models.status.errorCheck.prevTrackLength = trackLength
               sails.models.status.errorCheck.prevCountdown = countDown
 
               // When we are waiting to begin a broadcast, switch to the on state when all noMeta tracks have finished.
@@ -597,8 +605,10 @@ module.exports.bootstrap = async function (done) {
         sails.models.status.errorCheck.queueWait -= 1;
         if (sails.models.meta.memory.playing) {
           queueLength = sails.models.status.errorCheck.prevQueueLength - 1;
+          trackLength = sails.models.status.errorCheck.prevTrackLength - 1;
           countDown = countDown <= 0 ? 0 : queueLength;
           sails.models.status.errorCheck.prevQueueLength = queueLength;
+          sails.models.status.errorCheck.prevTrackLength = trackLength;
           sails.models.status.errorCheck.prevCountdown = countDown;
           sails.models.status.errorCheck.prevElapsed += 1;
         }

@@ -90,6 +90,7 @@ module.exports = {
 
     // Used for queue length error detecting and trueZero
     prevQueueLength: 0,
+    prevTrackLength: 0,
     prevCountdown: 0,
 
     // Used for determining when to re-fetch RadioDJ queue
