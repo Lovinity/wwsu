@@ -231,7 +231,7 @@ module.exports.bootstrap = async function (done) {
       var countDown = 0
       var theplaylist
       var playlistTracks
-      var change = { queueFinish: null, trackFinish: null } // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
+      var change = {} // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
       //
       // Skip all checks and use default meta template if sails.config.custom.lofi = true
       if (sails.config.custom.lofi) {
@@ -290,17 +290,22 @@ module.exports.bootstrap = async function (done) {
 
       var queue = []
 
-      // Only re-fetch the queue once every 5 seconds or when the system intelligently determines it is necessary to keep a real-time eye on the queue.
+      // Only re-fetch the queue once every 5-10 seconds or when the system intelligently determines it is necessary to keep a real-time eye on the queue.
       // Should check whenever queue length < 2 and something is playing, or time to check (every 5 seconds), or the genre might have run out of music, or there is not an accurate queue count, or something triggered for a queue check (such as duplicate track removal or change in state).
       if ((sails.models.status.errorCheck.prevQueueLength < 2 && sails.models.meta.memory.playing) || sails.models.status.errorCheck.queueWait < 1 || (sails.models.meta.memory.state === 'automation_genre' && sails.models.status.errorCheck.prevQueueLength <= 20) || sails.models.status.errorCheck.trueZero > 0) {
         try {
           if (sails.models.meta.memory.changingState === null) {
+
             queue = await sails.helpers.rest.getQueue()
 
             if (!queue[ 0 ])
               throw new Error("Queue returned 0 tracks.");
 
-            sails.models.status.errorCheck.queueWait = 5;
+            if (sails.models.meta.memory.playing) {
+              sails.models.status.errorCheck.queueWait = 10;
+            } else {
+              sails.models.status.errorCheck.queueWait = 5;
+            }
 
             try {
               sails.log.silly(`queueCheck executed.`)
