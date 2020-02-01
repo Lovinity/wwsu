@@ -19,6 +19,7 @@ module.exports = {
     if (sails.models.songs.pending.length > 0) {
       var maps = sails.models.songs.pending.map(async (track, index) => {
         await sails.helpers.rest.cmd('LoadTrackToTop', track, 10000)
+        sails.models.status.errorCheck.queueWait = 0;
         if (inputs.queue) { await sails.helpers.rest.checkQueue(track) }
         // wait.for.time(1);
         delete sails.models.songs.pending[index]

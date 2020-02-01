@@ -288,191 +288,314 @@ module.exports.bootstrap = async function (done) {
         await sails.helpers.error.reset('changingStateTookTooLong')
       }
 
+      var queue = []
 
-      try {
-        // Try to get the current RadioDJ queue.
-        var queue = []
-        if (sails.models.meta.memory.changingState === null) {
-          queue = await sails.helpers.rest.getQueue()
+      // Only re-fetch the queue once every 5 seconds or when the system intelligently determines it is necessary to keep a real-time eye on the queue.
+      // Should check whenever queue length < 2 and something is playing, or time to check (every 5 seconds), or the genre might have run out of music, or there is not an accurate queue count, or something triggered for a queue check (such as duplicate track removal or change in state).
+      if ((sails.models.status.errorCheck.prevQueueLength < 2 && sails.models.meta.memory.playing) || sails.models.status.errorCheck.queueWait < 1 || (sails.models.meta.memory.state === 'automation_genre' && sails.models.status.errorCheck.prevQueueLength <= 20) || sails.models.status.errorCheck.trueZero > 0) {
+        try {
+          if (sails.models.meta.memory.changingState === null) {
+            queue = await sails.helpers.rest.getQueue()
 
-          if (!queue[ 0 ])
-            throw new Error("Queue returned 0 tracks.");
+            if (!queue[ 0 ])
+              throw new Error("Queue returned 0 tracks.");
 
-          try {
-            sails.log.silly(`queueCheck executed.`)
-            var theTracks = []
-            change.trackID = parseInt(queue[ 0 ].ID)
-            change.trackIDSubcat = parseInt(queue[ 0 ].IDSubcat) || 0
+            sails.models.status.errorCheck.queueWait = 5;
 
-            var breakQueueLength = -2
-            var firstNoMeta = 0
-            change.queueMusic = false
+            try {
+              sails.log.silly(`queueCheck executed.`)
+              var theTracks = []
+              change.trackID = parseInt(queue[ 0 ].ID)
+              change.trackIDSubcat = parseInt(queue[ 0 ].IDSubcat) || 0
 
-            if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
-              breakQueueLength = -1
-              firstNoMeta = -1
-              queue.forEach((track, index) => {
-                if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1) {
-                  if (firstNoMeta > -1 && breakQueueLength < 0) {
-                    breakQueueLength = index
-                    change.queueMusic = true
+              var breakQueueLength = -2
+              var firstNoMeta = 0
+              change.queueMusic = false
+
+              if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
+                breakQueueLength = -1
+                firstNoMeta = -1
+                queue.forEach((track, index) => {
+                  if (sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(parseInt(track.IDSubcat)) === -1) {
+                    if (firstNoMeta > -1 && breakQueueLength < 0) {
+                      breakQueueLength = index
+                      change.queueMusic = true
+                    }
+                  } else if (firstNoMeta < 0) {
+                    firstNoMeta = index
                   }
-                } else if (firstNoMeta < 0) {
-                  firstNoMeta = index
+                })
+              }
+
+              // Determine if something is currently playing via whether or not track 0 has ID of 0.
+              if (parseInt(queue[ 0 ].ID) === 0) {
+                change.playing = false
+                change.trackFinish = null
+              } else {
+                change.playing = true
+                change.trackArtist = queue[ 0 ].Artist || null
+                change.trackTitle = queue[ 0 ].Title || null
+                change.trackAlbum = queue[ 0 ].Album || null
+                change.trackLabel = queue[ 0 ].Label || null
+                change.trackFinish = moment().add(parseFloat(queue[ 0 ].Duration) - parseFloat(queue[ 0 ].Elapsed), 'seconds').toISOString(true)
+              }
+
+              // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
+              if (sails.models.meta.memory.changingState === null) {
+                sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`)
+                await sails.helpers.asyncForEach(queue, (track, index) => {
+                  // eslint-disable-next-line promise/param-names
+                  return new Promise((resolve2) => {
+                    var title = `${track.Artist} - ${track.Title}`
+                    // If there is a duplicate, remove the track, store for later queuing if necessary.
+                    // Also, calculate length of the queue
+                    if (theTracks.indexOf(title) > -1) {
+                      sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[ theTracks.indexOf(title) ]}. Removing!`)
+                      if (track.TrackType !== 'Music') { sails.models.songs.pending.push(track.ID) }
+                      sails.models.status.errorCheck.queueWait = 0;
+                      sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1)
+                        .then(() => {
+                          theTracks = []
+                          sails.helpers.rest.getQueue()
+                            .then((theQueue) => {
+                              queue = theQueue
+                              queueLength = 0
+                              return resolve2(true)
+                            })
+                        })
+                    } else {
+                      theTracks.push(title)
+                      queueLength += (track.Duration - track.Elapsed)
+                      if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1)) {
+                        countDown += (track.Duration - track.Elapsed)
+                      }
+                      return resolve2(false)
+                    }
+                  })
+                })
+              }
+
+              /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
+           * This results in false transitions in system state. Run a check to detect if the queuelength deviated by more than 2 seconds since last run.
+           * If so, we assume this was an error, so do not treat it as accurate, and trigger a 3 second error resolution wait.
+           */
+              if (queueLength > (sails.models.status.errorCheck.prevQueueLength - 3) || sails.models.status.errorCheck.trueZero > 0) {
+                // If the detected queueLength gets bigger, assume the issue resolved itself and immediately mark the queuelength as accurate
+                if (queueLength > (sails.models.status.errorCheck.prevQueueLength)) {
+                  sails.models.status.errorCheck.trueZero = 0
+                  change.queueCalculating = false
+                } else if (sails.models.status.errorCheck.trueZero > 0) {
+                  sails.models.status.errorCheck.trueZero -= 1
+                  if (sails.models.status.errorCheck.trueZero < 1) {
+                    sails.models.status.errorCheck.trueZero = 0
+                    change.queueCalculating = false
+                    // If not an accurate queue count, use previous queue - 1 instead
+                  } else {
+                    queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
+                    countDown = (sails.models.status.errorCheck.prevCountdown - 1)
+                  }
+                  if (queueLength < 0) { queueLength = 0 }
+                  if (countDown < 0) { countDown = 0 }
+                } else { // No error wait time [remaining]? Use actual detected queue time.
                 }
-              })
+              } else {
+                sails.models.status.errorCheck.trueZero = 3 // Wait up to 5 seconds before considering the queue accurate
+                change.queueCalculating = true
+                // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
+                queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
+                countDown = (sails.models.status.errorCheck.prevCountdown - 1)
+                if (queueLength < 0) { queueLength = 0 }
+                if (countDown < 0) { countDown = 0 }
+              }
+
+              // Enable assisted if we are in a live show and just finished playing stuff in the queue
+              if ((sails.models.meta.memory.state === 'live_on' || sails.models.meta.memory.state === 'sports_on') && queueLength <= 0 && sails.models.status.errorCheck.prevQueueLength > 0) {
+                await sails.helpers.rest.cmd('EnableAssisted', 1)
+              }
+
+              sails.models.status.errorCheck.prevQueueLength = queueLength
+              sails.models.status.errorCheck.prevCountdown = countDown
+
+              // When we are waiting to begin a broadcast, switch to the on state when all noMeta tracks have finished.
+              if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
+                if (firstNoMeta < 0 && breakQueueLength < 0 && sails.models.status.errorCheck.trueZero <= 0) {
+                  if (sails.models.meta.memory.state === 'automation_live') {
+                    await sails.helpers.meta.change.with({ state: 'live_on' });
+                    await sails.helpers.meta.newShow();
+                  }
+                  if (sails.models.meta.memory.state === 'automation_sports') {
+                    await sails.helpers.meta.change.with({ state: 'sports_on' })
+                    await sails.helpers.meta.newShow();
+                  }
+                  if (sails.models.meta.memory.state === 'automation_remote') {
+                    await sails.helpers.meta.change.with({ state: 'remote_on' })
+                    await sails.helpers.meta.newShow();
+                  }
+                  if (sails.models.meta.memory.state === 'automation_sportsremote') {
+                    await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
+                    await sails.helpers.meta.newShow();
+                  }
+                  if (sails.models.meta.memory.state.includes('_returning')) {
+                    switch (sails.models.meta.memory.state) {
+                      case 'live_returning':
+                        await sails.helpers.meta.change.with({ state: 'live_on' })
+                        break
+                      case 'remote_returning':
+                        await sails.helpers.meta.change.with({ state: 'remote_on' })
+                        break
+                      case 'sports_returning':
+                        await sails.helpers.meta.change.with({ state: 'sports_on' })
+                        break
+                      case 'sportsremote_returning':
+                        await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
+                        break
+                    }
+                  }
+                }
+              } else {
+                countDown = 0
+              }
+
+            } catch (e) {
+              sails.models.status.errorCheck.queueWait = 0;
+              sails.log.error(e)
+              return resolve(e)
             }
 
-            // Determine if something is currently playing via whether or not track 0 has ID of 0.
-            if (parseInt(queue[ 0 ].ID) === 0) {
-              change.playing = false
-              change.trackFinish = null
+            // Do automation system error checking and handling
+            if (((queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed) || queue.length < 1) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+              await sails.helpers.error.count('frozen')
+              sails.models.status.errorCheck.queueWait = 0;
             } else {
-              change.playing = true
-              change.trackArtist = queue[ 0 ].Artist || null
-              change.trackTitle = queue[ 0 ].Title || null
-              change.trackAlbum = queue[ 0 ].Album || null
-              change.trackLabel = queue[ 0 ].Label || null
-              change.trackFinish = moment().add(parseFloat(queue[ 0 ].Duration) - parseFloat(queue[ 0 ].Elapsed), 'seconds').toISOString(true)
+              sails.models.status.errorCheck.prevDuration = queue[ 0 ].Duration
+              sails.models.status.errorCheck.prevElapsed = queue[ 0 ].Elapsed
+              await sails.helpers.error.reset('frozen')
             }
 
-            // Remove duplicate tracks (ONLY remove one since cron goes every second; so one is removed each second). Do not remove any duplicates if changing states.
-            if (sails.models.meta.memory.changingState === null) {
-              sails.log.debug(`Calling asyncForEach in cron checks for removing duplicate tracks`)
-              await sails.helpers.asyncForEach(queue, (track, index) => {
+            // If we are in automation_genre, check to see if the queue is less than 20 seconds. If so, the genre rotation may be out of tracks to play.
+            // In that case, flip to automation_on with Default rotation.
+            if (sails.models.meta.memory.state === 'automation_genre' && queueLength <= 20) {
+              await sails.helpers.error.count('genreEmpty')
+            } else {
+              await sails.helpers.error.reset('genreEmpty')
+            }
+
+            // Playlist maintenance
+            var thePosition = -1
+            if ((sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_prerecord' || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+              // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
+              sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`)
+              var playingTrack = false
+              await sails.helpers.asyncForEach(queue, (autoTrack, index) => {
                 // eslint-disable-next-line promise/param-names
                 return new Promise((resolve2) => {
-                  var title = `${track.Artist} - ${track.Title}`
-                  // If there is a duplicate, remove the track, store for later queuing if necessary.
-                  // Also, calculate length of the queue
-                  if (theTracks.indexOf(title) > -1) {
-                    sails.log.debug(`Track ${track.ID} on index ${index} is a duplicate of index (${theTracks[ theTracks.indexOf(title) ]}. Removing!`)
-                    if (track.TrackType !== 'Music') { sails.models.songs.pending.push(track.ID) }
-                    sails.helpers.rest.cmd('RemovePlaylistTrack', index - 1)
-                      .then(() => {
-                        theTracks = []
-                        sails.helpers.rest.getQueue()
-                          .then((theQueue) => {
-                            queue = theQueue
-                            queueLength = 0
-                            return resolve2(true)
-                          })
-                      })
-                  } else {
-                    theTracks.push(title)
-                    queueLength += (track.Duration - track.Elapsed)
-                    if (index < breakQueueLength || (breakQueueLength < 0 && firstNoMeta > -1)) {
-                      countDown += (track.Duration - track.Elapsed)
+                  try {
+                    for (var i = 0; i < sails.models.playlists.active.tracks.length; i++) {
+                      var name = sails.models.playlists.active.tracks[ i ]
+                      if (name === parseInt(autoTrack.ID)) {
+                        // Waiting for the playlist to begin, and it has begun? Switch states.
+                        if (sails.models.meta.memory.state === 'automation_prerecord' && index === 0 && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null && sails.models.status.errorCheck.trueZero <= 0) {
+                          // State switching should be pushed in sockets
+                          sails.helpers.meta.change.with({ state: 'prerecord_on' })
+                            .then(() => {
+                              sails.helpers.meta.newShow()
+                                .then(() => { });
+                            })
+                        }
+                        // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
+                        if (index === 0) {
+                          playingTrack = true
+                          if (sails.models.meta.memory.state === 'prerecord_break' && sails.models.status.errorCheck.trueZero <= 0) {
+                            (async () => {
+                              await sails.helpers.meta.change.with({ state: `prerecord_on` })
+                            })()
+                          }
+                        } else if (index > 0 && sails.models.meta.memory.state === 'prerecord_on' && !playingTrack && sails.models.status.errorCheck.trueZero <= 0) {
+                          (async () => {
+                            await sails.helpers.meta.change.with({ state: `prerecord_break` })
+                          })()
+                        }
+                        if (thePosition === -1 || i < thePosition) {
+                          thePosition = i
+                        }
+                        break
+                      }
                     }
+                    return resolve2(false)
+                  } catch (e) {
+                    sails.log.error(e)
                     return resolve2(false)
                   }
                 })
               })
-            }
 
-            /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
-         * This results in false transitions in system state. Run a check to detect if the queuelength deviated by more than 2 seconds since last run.
-         * If so, we assume this was an error, so do not treat it as accurate, and trigger a 3 second error resolution wait.
-         */
-            if (queueLength > (sails.models.status.errorCheck.prevQueueLength - 3) || sails.models.status.errorCheck.trueZero > 0) {
-              // If the detected queueLength gets bigger, assume the issue resolved itself and immediately mark the queuelength as accurate
-              if (queueLength > (sails.models.status.errorCheck.prevQueueLength)) {
-                sails.models.status.errorCheck.trueZero = 0
-                change.queueCalculating = false
-              } else if (sails.models.status.errorCheck.trueZero > 0) {
-                sails.models.status.errorCheck.trueZero -= 1
-                if (sails.models.status.errorCheck.trueZero < 1) {
-                  sails.models.status.errorCheck.trueZero = 0
-                  change.queueCalculating = false
-                  // If not an accurate queue count, use previous queue - 1 instead
-                } else {
-                  queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
-                  countDown = (sails.models.status.errorCheck.prevCountdown - 1)
-                }
-                if (queueLength < 0) { queueLength = 0 }
-                if (countDown < 0) { countDown = 0 }
-              } else { // No error wait time [remaining]? Use actual detected queue time.
-              }
-            } else {
-              sails.models.status.errorCheck.trueZero = 3 // Wait up to 5 seconds before considering the queue accurate
-              change.queueCalculating = true
-              // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
-              queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
-              countDown = (sails.models.status.errorCheck.prevCountdown - 1)
-              if (queueLength < 0) { queueLength = 0 }
-              if (countDown < 0) { countDown = 0 }
-            }
-
-            // Enable assisted if we are in a live show and just finished playing stuff in the queue
-            if ((sails.models.meta.memory.state === 'live_on' || sails.models.meta.memory.state === 'sports_on') && queueLength <= 0 && sails.models.status.errorCheck.prevQueueLength > 0) {
-              await sails.helpers.rest.cmd('EnableAssisted', 1)
-            }
-
-            sails.models.status.errorCheck.prevQueueLength = queueLength
-            sails.models.status.errorCheck.prevCountdown = countDown
-
-            // When we are waiting to begin a broadcast, switch to the on state when all noMeta tracks have finished.
-            if ((sails.models.meta.memory.state.includes('_returning') || sails.models.meta.memory.state === 'automation_live' || sails.models.meta.memory.state === 'automation_remote' || sails.models.meta.memory.state === 'automation_sports' || sails.models.meta.memory.state === 'automation_sportsremote')) {
-              if (firstNoMeta < 0 && breakQueueLength < 0 && sails.models.status.errorCheck.trueZero <= 0) {
-                if (sails.models.meta.memory.state === 'automation_live') {
-                  await sails.helpers.meta.change.with({ state: 'live_on' });
-                  await sails.helpers.meta.newShow();
-                }
-                if (sails.models.meta.memory.state === 'automation_sports') {
-                  await sails.helpers.meta.change.with({ state: 'sports_on' })
-                  await sails.helpers.meta.newShow();
-                }
-                if (sails.models.meta.memory.state === 'automation_remote') {
-                  await sails.helpers.meta.change.with({ state: 'remote_on' })
-                  await sails.helpers.meta.newShow();
-                }
-                if (sails.models.meta.memory.state === 'automation_sportsremote') {
-                  await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
-                  await sails.helpers.meta.newShow();
-                }
-                if (sails.models.meta.memory.state.includes('_returning')) {
+              try {
+                // Finished the playlist? Go back to automation.
+                if (thePosition === -1 && sails.models.status.errorCheck.trueZero <= 0 && ((queue[ 0 ].Duration > 0 && queue[ 0 ].Elapsed < queue[ 0 ].Duration && queue[ 0 ].Elapsed > 0) || (queue[ 0 ].Duration <= 0 && queue[ 0 ].Elapsed > 0)) && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null) {
+                  await sails.helpers.meta.change.with({ changingState: `Ending playlist` })
                   switch (sails.models.meta.memory.state) {
-                    case 'live_returning':
-                      await sails.helpers.meta.change.with({ state: 'live_on' })
+                    case 'automation_playlist':
+                      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A playlist finished airing.</strong>` }).fetch()
+                        .tolerate((err) => {
+                          // Do not throw for errors, but log it.
+                          sails.log.error(err)
+                        })
                       break
-                    case 'remote_returning':
-                      await sails.helpers.meta.change.with({ state: 'remote_on' })
-                      break
-                    case 'sports_returning':
-                      await sails.helpers.meta.change.with({ state: 'sports_on' })
-                      break
-                    case 'sportsremote_returning':
-                      await sails.helpers.meta.change.with({ state: 'sportsremote_on' })
+                    case 'prerecord_on':
+                    case 'prerecord_break':
+                      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
+                        .tolerate((err) => {
+                          // Do not throw for errors, but log it.
+                          sails.log.error(err)
+                        })
+                      await sails.helpers.xp.addPrerecord()
                       break
                   }
+                  await sails.helpers.rest.cmd('EnableAssisted', 0)
+
+                  // Add up to 3 track requests if any are pending
+                  await sails.helpers.requests.queue(3, true, true)
+
+                  // Switch back to automation
+                  await sails.helpers.meta.change.with({ changingState: `Ending prerecord`, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
+
+                  // Re-check for programs that should begin.
+                  await sails.helpers.calendar.check(true)
+
+                  await sails.helpers.meta.change.with({ changingState: null })
+
+                  // Did not finish the playlist? Ensure the position is updated in meta.
+                } else if (thePosition !== -1) {
+                  if (thePosition !== sails.models.meta.memory.playlistPosition) {
+                    change.playlistPosition = thePosition
+                  }
                 }
+              } catch (e) {
+                await sails.helpers.meta.change.with({ changingState: null })
+                sails.log.error(e)
               }
-            } else {
-              countDown = 0
             }
-
-          } catch (e) {
-            sails.log.error(e)
-            return resolve(e)
           }
 
-          // Do automation system error checking and handling
-          if (((queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed) || queue.length < 1) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
-            await sails.helpers.error.count('frozen')
-          } else {
-            sails.models.status.errorCheck.prevDuration = queue[ 0 ].Duration
-            sails.models.status.errorCheck.prevElapsed = queue[ 0 ].Elapsed
-            await sails.helpers.error.reset('frozen')
-          }
+          // Error checks
+          await sails.helpers.error.reset('queueFail')
+          await sails.helpers.error.count('stationID', true)
+        } catch (e) {
+          sails.models.status.errorCheck.queueWait = 0;
+          await sails.helpers.error.count('queueFail')
+          sails.log.error(e)
+          return resolve(e)
         }
-
-        // Error checks
-        await sails.helpers.error.reset('queueFail')
-        await sails.helpers.error.count('stationID', true)
-      } catch (e) {
-        await sails.helpers.error.count('queueFail')
-        sails.log.error(e)
-        return resolve(e)
+      } else {
+        queue = sails.models.meta.automation;
+        sails.models.status.errorCheck.queueWait -= 1;
+        if (sails.models.meta.memory.playing) {
+          queueLength = sails.models.status.errorCheck.prevQueueLength - 1;
+          countDown = countDown <= 0 ? 0 : queueLength;
+          sails.models.status.errorCheck.prevQueueLength = queueLength;
+          sails.models.status.errorCheck.prevCountdown = countDown;
+          sails.models.status.errorCheck.prevElapsed += 1;
+        }
       }
 
       // If we do not know active playlist, we need to populate the info
@@ -501,14 +624,6 @@ module.exports.bootstrap = async function (done) {
         }
       }
 
-      // If we are in automation_genre, check to see if the queue is less than 20 seconds. If so, the genre rotation may be out of tracks to play.
-      // In that case, flip to automation_on with Default rotation.
-      if (sails.models.meta.memory.state === 'automation_genre' && queueLength <= 20) {
-        await sails.helpers.error.count('genreEmpty')
-      } else {
-        await sails.helpers.error.reset('genreEmpty')
-      }
-
       // Clear manual metadata if it is old
       if (sails.models.meta.memory.trackStamp !== null && (moment().isAfter(moment(sails.models.meta.memory.trackStamp).add(sails.config.custom.meta.clearTime, 'minutes')) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_'))) {
         change.trackStamp = null
@@ -516,102 +631,6 @@ module.exports.bootstrap = async function (done) {
         change.trackTitle = null
         change.trackAlbum = null
         change.trackLabel = null
-      }
-
-      // Playlist maintenance
-      var thePosition = -1
-      if ((sails.models.meta.memory.state === 'automation_playlist' || sails.models.meta.memory.state === 'automation_prerecord' || sails.models.meta.memory.state.startsWith('prerecord_'))) {
-        // Go through each track in the queue and see if it is a track from our playlist. If so, log the lowest number as the position in our playlist
-        sails.log.debug(`Calling asyncForEach in cron checks for checking if any tracks in queue are a part of an active playlist`)
-        var playingTrack = false
-        await sails.helpers.asyncForEach(queue, (autoTrack, index) => {
-          // eslint-disable-next-line promise/param-names
-          return new Promise((resolve2) => {
-            try {
-              for (var i = 0; i < sails.models.playlists.active.tracks.length; i++) {
-                var name = sails.models.playlists.active.tracks[ i ]
-                if (name === parseInt(autoTrack.ID)) {
-                  // Waiting for the playlist to begin, and it has begun? Switch states.
-                  if (sails.models.meta.memory.state === 'automation_prerecord' && index === 0 && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null && sails.models.status.errorCheck.trueZero <= 0) {
-                    // State switching should be pushed in sockets
-                    sails.helpers.meta.change.with({ state: 'prerecord_on' })
-                      .then(() => {
-                        sails.helpers.meta.newShow()
-                          .then(() => { });
-                      })
-                  }
-                  // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
-                  if (index === 0) {
-                    playingTrack = true
-                    if (sails.models.meta.memory.state === 'prerecord_break' && sails.models.status.errorCheck.trueZero <= 0) {
-                      (async () => {
-                        await sails.helpers.meta.change.with({ state: `prerecord_on` })
-                      })()
-                    }
-                  } else if (index > 0 && sails.models.meta.memory.state === 'prerecord_on' && !playingTrack && sails.models.status.errorCheck.trueZero <= 0) {
-                    (async () => {
-                      await sails.helpers.meta.change.with({ state: `prerecord_break` })
-                    })()
-                  }
-                  if (thePosition === -1 || i < thePosition) {
-                    thePosition = i
-                  }
-                  break
-                }
-              }
-              return resolve2(false)
-            } catch (e) {
-              sails.log.error(e)
-              return resolve2(false)
-            }
-          })
-        })
-
-        try {
-          // Finished the playlist? Go back to automation.
-          if (thePosition === -1 && sails.models.status.errorCheck.trueZero <= 0 && ((queue[ 0 ].Duration > 0 && queue[ 0 ].Elapsed < queue[ 0 ].Duration && queue[ 0 ].Elapsed > 0) || (queue[ 0 ].Duration <= 0 && queue[ 0 ].Elapsed > 0)) && !sails.models.playlists.queuing && sails.models.meta.memory.changingState === null) {
-            await sails.helpers.meta.change.with({ changingState: `Ending playlist` })
-            switch (sails.models.meta.memory.state) {
-              case 'automation_playlist':
-                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A playlist finished airing.</strong>` }).fetch()
-                  .tolerate((err) => {
-                    // Do not throw for errors, but log it.
-                    sails.log.error(err)
-                  })
-                break
-              case 'prerecord_on':
-              case 'prerecord_break':
-                await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
-                  .tolerate((err) => {
-                    // Do not throw for errors, but log it.
-                    sails.log.error(err)
-                  })
-                await sails.helpers.xp.addPrerecord()
-                break
-            }
-            await sails.helpers.rest.cmd('EnableAssisted', 0)
-
-            // Add up to 3 track requests if any are pending
-            await sails.helpers.requests.queue(3, true, true)
-
-            // Switch back to automation
-            await sails.helpers.meta.change.with({ changingState: `Ending prerecord`, state: 'automation_on', genre: '', show: '', topic: '', playlist: null, playlistPosition: 0 })
-
-            // Re-check for programs that should begin.
-            await sails.helpers.calendar.check(true)
-
-            await sails.helpers.meta.change.with({ changingState: null })
-
-            // Did not finish the playlist? Ensure the position is updated in meta.
-          } else if (thePosition !== -1) {
-            if (thePosition !== sails.models.meta.memory.playlistPosition) {
-              change.playlistPosition = thePosition
-            }
-          }
-        } catch (e) {
-          await sails.helpers.meta.change.with({ changingState: null })
-          sails.log.error(e)
-        }
       }
 
       try {

@@ -92,6 +92,9 @@ module.exports = {
     prevQueueLength: 0,
     prevCountdown: 0,
 
+    // Used for determining when to re-fetch RadioDJ queue
+    queueWait: 0,
+
     // Used for determining if RadioDJ froze.
     prevDuration: 0,
     prevElapsed: 0,

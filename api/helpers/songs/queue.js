@@ -87,6 +87,7 @@ module.exports = {
               queuedtracks++
               sails.log.verbose(`Queued ${thesong.ID}`)
               await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID)
+              sails.models.status.errorCheck.queueWait = 0;
               if (inputs.queue) { await sails.helpers.rest.checkQueue(thesong.ID) }
             }
           }
@@ -111,6 +112,7 @@ module.exports = {
               queuedtracks++
               sails.log.verbose(`Queued ${thesong.ID}`)
               await sails.helpers.rest.cmd('LoadTrackTo' + inputs.position, thesong.ID)
+              sails.models.status.errorCheck.queueWait = 0;
               if (inputs.queue) { await sails.helpers.rest.checkQueue(thesong.ID) }
             }
           }
