@@ -78,7 +78,7 @@ module.exports = {
             await sails.helpers.calendar.check(true)
           } catch (unusedE2) {
             // Couldn't load calendar? Fall back to Default automation
-            await sails.helpers.genre.start('Default', true)
+            await sails.helpers.genre.start(null, true)
           }
 
           // Enable Auto DJ

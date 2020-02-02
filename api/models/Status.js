@@ -287,7 +287,7 @@ module.exports = {
               await sails.helpers.calendar.check(true)
             } catch (unusedE2) {
               // Couldn't load calendar? Fall back to Default automation
-              await sails.helpers.genre.start('Default', true)
+              await sails.helpers.genre.start(null, true)
             }
 
             await sails.helpers.meta.change.with({ changingState: null })
@@ -311,7 +311,7 @@ module.exports = {
         return new Promise(async (resolve, reject) => {
           try {
             await sails.helpers.meta.change.with({ changingState: `Switching to automation via genreEmpty` })
-            await sails.helpers.genre.start('Default', true)
+            await sails.helpers.genre.start(null, true)
             await sails.helpers.meta.change.with({ changingState: null })
             return resolve(0)
           } catch (e) {

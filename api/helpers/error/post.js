@@ -38,11 +38,7 @@ module.exports = {
         // eslint-disable-next-line no-return-await
         maps = reQueue.map(async (queueItem) => await sails.helpers.rest.cmd('LoadTrackToBottom', queueItem))
         await Promise.all(maps)
-        if (sails.models.meta.memory.state === 'automation_genre') {
-          await sails.helpers.genre.start(sails.models.meta.memory.genre, true)
-        } else {
-          await sails.helpers.genre.start('Default', true)
-        }
+        await sails.helpers.calendar.check(true);
 
         await sails.helpers.rest.cmd('EnableAutoDJ', 1)
         // When in playlist or prerecord, queue an ID and restart the playlist/prerecord
