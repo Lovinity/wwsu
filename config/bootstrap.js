@@ -876,9 +876,7 @@ module.exports.bootstrap = async function (done) {
 
   // Every minute on second 02, check the calendar for events that should begin
   sails.log.verbose(`BOOTSTRAP: scheduling updateCalendar CRON.`)
-
   cron.schedule('2 * * * * *', async () => {
-    /*
     sails.log.debug(`CRON updateCalendar triggered.`)
     try {
       await sails.helpers.calendar.check()
@@ -886,13 +884,11 @@ module.exports.bootstrap = async function (done) {
     } catch (e) {
       sails.log.error(e)
     }
-    */
   })
 
   // Every 5 minutes on second 02, check calendar event integrity
   sails.log.verbose(`BOOTSTRAP: scheduling updateCalendarIntegrity CRON.`)
   cron.schedule('2 */5 * * * *', async () => {
-    /*
     sails.log.debug(`CRON updateCalendarIntegrity triggered.`)
     try {
       await sails.helpers.calendar.check(false, true)
@@ -900,13 +896,11 @@ module.exports.bootstrap = async function (done) {
     } catch (e) {
       sails.log.error(e)
     }
-    */
   })
 
   // Every minute at second 3 and 33, check the online status of the radio streams, and log listener count
   sails.log.verbose(`BOOTSTRAP: scheduling checkRadioStreams CRON.`)
   cron.schedule('3,33 * * * * *', async () => {
-    /*
     sails.log.debug(`CRON checkRadioStreams triggered.`)
     // SHOUTCAST 2.6
     try {
@@ -940,13 +934,11 @@ module.exports.bootstrap = async function (done) {
       sails.log.error(e)
       return false
     }
-    */
   })
 
   // Every minute at second 4 and 34, check all RadioDJs for connectivity.
   sails.log.verbose(`BOOTSTRAP: scheduling checkRadioDJs CRON.`)
   cron.schedule('4,34 * * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON checkRadioDJs triggered.`)
@@ -1033,13 +1025,11 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // Every minute at second 5, check for connectivity to the website.
   sails.log.verbose(`BOOTSTRAP: scheduling checkWebsite CRON.`)
   cron.schedule('5 * * * * *', async () => {
-    /*
     sails.log.debug(`CRON checkWebsite triggered.`)
     try {
       var resp = await needle('get', sails.config.custom.website, {}, { headers: { 'Content-Type': 'application/json' } });
@@ -1052,13 +1042,11 @@ module.exports.bootstrap = async function (done) {
       await sails.helpers.status.change.with({ name: `website`, label: `Website`, data: `Error checking the status of the ${sails.config.custom.website} website. The website might be offline. Please check server logs.`, status: 2 })
       sails.log.error(e)
     }
-    */
   })
 
   // Every minute on second 06, get NWS alerts for configured counties.
   sails.log.verbose(`BOOTSTRAP: scheduling EAS CRON.`)
   cron.schedule('6 * * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
@@ -1105,13 +1093,11 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // Every minute at second 07, check to see if our databases are active and functional
   sails.log.verbose(`BOOTSTRAP: scheduling checkDB CRON.`)
   cron.schedule('7 * * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async () => {
       // TODO: More accurate way to test database.
@@ -1220,13 +1206,11 @@ module.exports.bootstrap = async function (done) {
         return null
       }
     })
-    */
   })
 
   // Every 5 minutes at second 08, reload the subcategory IDs in configuration, in case changes were made in RadioDJ
   sails.log.verbose(`BOOTSTRAP: scheduling reloadSubcats CRON.`)
   cron.schedule('8 */5 * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON reloadSubcats called.`)
@@ -1240,13 +1224,11 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // Every minute at second 9, count the number of tracks disabled because they are invalid / corrupt / not accessible, and update Music Library status.
   sails.log.verbose(`BOOTSTRAP: scheduling disabledTracks CRON.`)
   cron.schedule('9 * * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON disabledTracks called.`)
@@ -1273,13 +1255,11 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // Every minute at second 10, prune out sails.models.recipients that have been offline for 4 or more hours.
   sails.log.verbose(`BOOTSTRAP: scheduling sails.models.recipientsCheck CRON.`)
   cron.schedule('10 * * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON sails.models.recipientsCheck called.`)
@@ -1298,13 +1278,11 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // Every fifth minute at second 11, refresh sails.models.darksky weather information
   sails.log.verbose(`BOOTSTRAP: scheduling darksky CRON.`)
   cron.schedule('11 */5 * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON darksky called.`)
@@ -1327,13 +1305,11 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // every hour at second 12, check all noFade tracks and remove any fading.
   sails.log.verbose(`BOOTSTRAP: scheduling checkNoFadeAndNegativeDuration CRON.`)
   cron.schedule('12 0 * * * *', () => {
-    /*
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON checkNoFadeAndNegativeDuration called.`)
@@ -1372,13 +1348,11 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // every minute at second 13, check for certain statuses
   sails.log.verbose(`BOOTSTRAP: scheduling checkStatuses CRON.`)
   cron.schedule('13 * * * * *', () => {
-    /*
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON checkStatuses called.`)
       try {
@@ -1395,7 +1369,6 @@ module.exports.bootstrap = async function (done) {
         return reject(e)
       }
     })
-    */
   })
 
   // Every minute at second 15, check server memory and CPU use.
