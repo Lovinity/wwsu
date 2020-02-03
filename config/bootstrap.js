@@ -238,7 +238,7 @@ module.exports.bootstrap = async function (done) {
       // Skip all checks and use default meta template if sails.config.custom.lofi = true
       if (sails.config.custom.lofi) {
         try {
-          change = sails.models.meta.template
+          change = sails.models.meta.memoryDefault
           change.time = moment().toISOString(true)
           await sails.helpers.meta.change.with(change)
         } catch (e) {
