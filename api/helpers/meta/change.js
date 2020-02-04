@@ -507,11 +507,13 @@ module.exports = {
       // Clone our changes due to a Sails discrepancy
       var criteria = _.cloneDeep(db)
 
-      // Update meta in the database
-      await sails.models.meta.update({ ID: 1 }, criteria)
-        .tolerate((err) => {
-          sails.log.error(err)
-        })
+      // Update meta in the database, but only if lofi is disabled.
+      if (!sails.config.custom.lofi) {
+        await sails.models.meta.update({ ID: 1 }, criteria)
+          .tolerate((err) => {
+            sails.log.error(err)
+          })
+      }
 
       // Do not push empty (no) changes through websockets
       if (_.isEmpty(push)) { return exits.success() }
