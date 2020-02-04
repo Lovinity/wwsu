@@ -728,7 +728,7 @@ calendarWorker.onmessage = function (e) {
     for (var director in calendar) {
       if (Object.prototype.hasOwnProperty.call(calendar, director)) {
         isActive = true
-        var temp = Directors.db({ID: director}) || null
+        var temp = Directors.db({ID: director}).first() || null
         Slides.slide(`hours-directors`).displayTime += 3
         stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
      <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
@@ -813,7 +813,7 @@ calendarWorker.onmessage = function (e) {
     for (var director2 in asstcalendar) {
       if (Object.prototype.hasOwnProperty.call(asstcalendar, director2)) {
         isActive = true
-        var temp2 = Directors.db({ID: director2}) || null
+        var temp2 = Directors.db({ID: director2}).first() || null
         Slides.slide(`hours-assistants`).displayTime += 3
         stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
      <div class="col-3 shadow-2" style="background-color: ${temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
