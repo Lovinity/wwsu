@@ -2,21 +2,6 @@
 
 try {
   // Define default slide templates
-  // Directors
-  // DEPRECATED
-  Slides.newSlide({
-    name: `directors`,
-    label: `Directors`,
-    weight: 1000000,
-    isSticky: false,
-    color: `primary`,
-    active: false,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
-    displayTime: 5,
-    fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap"></div>`
-  })
 
   // Director hours
   Slides.newSlide({
@@ -77,23 +62,11 @@ try {
     html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
   })
 
-  Slides.newSlide({
-    name: `eas-nationwide-test`,
-    label: `EAS Nationwide Test 2:20PM`,
-    weight: 800000,
-    isSticky: true,
-    color: `danger`,
-    active: false,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
-    displayTime: 60,
-    fitContent: true,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">EAS Nationwide Test at 2:20 PM!</h1><span style="color: #FFFFFF; font-size: 1.5em;">At least one WWSU personnel is to report to the OnAir studio to monitor the blue SAGE Digital ENDEC during the test at 2:20 PM.<br />The following items need to be monitored:<br /><ul><li>Three chirps at the beginning of the test</li><li>8-10 second "alert tone"</li><li>Automated, audible, understandable voice "This is a Nationwide Test of the Emergency Alert System..."</li><li>Three short chirps at the end of the test.</li></ul><p>Patrick is in charge of monitoring the test and reporting the results to the FCC.<br />If they are not in the station during the test, please report the status of the above information to them.</span>`
-  })
-
   // Define data variables
   var Directors = new WWSUdb(TAFFY())
-  var Directorhours = new WWSUdb(TAFFY())
+  var Calendar = new WWSUdb(TAFFY())
+  var Calendarexceptions = new WWSUdb(TAFFY())
+  var calendarWorker = new Worker('../../js/display/workers/publicCalendarDirectors.js')
   var Announcements = new WWSUdb(TAFFY())
   var Meta = { time: moment().toISOString() }
   var Status = new WWSUdb(TAFFY())
@@ -120,7 +93,7 @@ try {
   var officeHoursTimer
   var directorNotify
 
-  var colors = ['#FF0000', '#00FF00', '#0000FF']; var color = 0; var delay = 300000; var scrollDelay = 15000
+  var colors = [ '#FF0000', '#00FF00', '#0000FF' ]; var color = 0; var delay = 300000; var scrollDelay = 15000
 
   // burnGuard is a periodic line that sweeps across the screen to prevent burn-in. Define / construct it.
   var $burnGuard = $('<div>').attr('id', 'burnGuard').css({
@@ -162,7 +135,7 @@ try {
 function burnGuardAnimate () {
   try {
     color = ++color % 3
-    var rColor = colors[color]
+    var rColor = colors[ color ]
     $burnGuard.css({
       left: '0px',
       'background-color': rColor
@@ -195,8 +168,8 @@ $.fn.extend({
       }
 
       for (var t in animations) {
-        if (el.style[t] !== undefined) {
-          return animations[t]
+        if (el.style[ t ] !== undefined) {
+          return animations[ t ]
         }
       }
     })(document.createElement('div'))
@@ -241,7 +214,8 @@ waitFor(() => {
 
   // Assign socket events to data classes
   Directors.assignSocketEvent('directors', io.socket)
-  Directorhours.assignSocketEvent('directorhours', io.socket)
+  Calendar.assignSocketEvent('calendar', io.socket)
+  Calendarexceptions.assignSocketEvent('calendarexceptions', io.socket)
   Announcements.assignSocketEvent('announcements', io.socket)
   Status.assignSocketEvent('status', io.socket)
 
@@ -251,54 +225,43 @@ waitFor(() => {
   Status.setOnRemove((data, db) => processStatus(db))
   Status.setOnReplace((db) => processStatus(db))
 
-  Directors.setOnUpdate(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Directors.setOnUpdate((data, db) => {
+    calendarWorker.postMessage([ 'update' ]);
   })
-  Directors.setOnInsert(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Directors.setOnInsert((data, db) => {
+    calendarWorker.postMessage([ 'update' ]);
   })
-  Directors.setOnRemove(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Directors.setOnRemove((data, db) => {
+    calendarWorker.postMessage([ 'update' ]);
   })
-  Directors.setOnReplace(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Directors.setOnReplace((db) => {
+    calendarWorker.postMessage([ 'update' ]);
   })
 
-  Directorhours.setOnUpdate(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Calendar.setOnUpdate((data, db) => {
+    calendarWorker.postMessage([ 'calendar', { update: data }, false ]);
   })
-  Directorhours.setOnInsert(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Calendar.setOnInsert((data, db) => {
+    calendarWorker.postMessage([ 'calendar', { insert: data }, false ]);
   })
-  Directorhours.setOnRemove(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Calendar.setOnRemove((data, db) => {
+    calendarWorker.postMessage([ 'calendar', { remove: data }, false ]);
   })
-  Directorhours.setOnReplace(() => {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  Calendar.setOnReplace((db) => {
+    calendarWorker.postMessage([ 'calendar', db.get(), true ]);
+  })
+
+  Calendarexceptions.setOnUpdate((data, db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', { update: data }, false ]);
+  })
+  Calendarexceptions.setOnInsert((data, db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', { insert: data }, false ]);
+  })
+  Calendarexceptions.setOnRemove((data, db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', { remove: data }, false ]);
+  })
+  Calendarexceptions.setOnReplace((db) => {
+    calendarWorker.postMessage([ 'calendarexceptions', db.get(), true ]);
   })
 
   // Do stuff when announcements changes are made
@@ -330,7 +293,7 @@ waitFor(() => {
     try {
       for (var key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
-          Meta[key] = data[key]
+          Meta[ key ] = data[ key ]
 
           // Do a status update if a state change was returned; this could impact power saving mode
           if (key === 'state') { processStatus(Status.db()) }
@@ -339,30 +302,6 @@ waitFor(() => {
             clearInterval(clockTimer)
             clearTimeout(clockTimer)
             clockTimer = setInterval(clockTick, 1000)
-          }
-
-          if (key === 'trackID') {
-            // April Fool's
-            if (parseInt(data[key]) >= 74255 && parseInt(data[key]) <= 74259) {
-              setTimeout(() => {
-                iziToast.show({
-                  title: '',
-                  message: `<img src="../../images/giphy.gif">`,
-                  timeout: 25000,
-                  close: true,
-                  color: 'blue',
-                  drag: false,
-                  position: 'center',
-                  closeOnClick: true,
-                  pauseOnHover: false,
-                  overlay: true,
-                  zindex: 250,
-                  layout: 2,
-                  image: ``,
-                  maxWidth: 480
-                })
-              }, 9500)
-            }
           }
         }
       }
@@ -380,6 +319,7 @@ waitFor(() => {
     onlineSocket()
     metaSocket()
     directorSocket()
+    eventSocket()
     statusSocket()
     announcementsSocket()
     // Remove the lost connection overlay
@@ -394,6 +334,7 @@ waitFor(() => {
   onlineSocket()
   metaSocket()
   directorSocket()
+  eventSocket()
   statusSocket()
   announcementsSocket()
   if (disconnected) {
@@ -442,26 +383,9 @@ function clockTick () {
     directorNotify = false
   }
 
-  // EAS Nationwide Test
-  if (moment(Meta.time).format('YYYY-MM-DD HH') === '2019-08-07 14' && moment(Meta.time).minute() >= 10 && moment(Meta.time).minute() < 30) {
-    if (!Slides.slide(`eas-nationwide-test`).active) {
-      Slides.slide(`eas-nationwide-test`).active = true
-    }
-    if (moment(Meta.time).second() === 0 && moment(Meta.time).minute() < 20) {
-      responsiveVoice.speak(`Attention all directors! Attention all directors! The Nationwide Emergency Alert System test will commence at 2:20 PM. At least one WWSU personnel must be present for this test. Please review the internal display sign for instructions. This message will repeat every minute until 2:20 PM.`)
-    }
-  } else {
-    if (Slides.slide(`eas-nationwide-test`).active) {
-      Slides.slide(`eas-nationwide-test`).active = false
-    }
-  }
-
   // Refresh hours every midnight
-  if (moment(Meta.time).hour() === 0 && moment(Meta.time).minute() === 0 && moment(Meta.time).second() < 5) {
-    clearTimeout(officeHoursTimer)
-    officeHoursTimer = setTimeout(() => {
-      processDirectors(Directors.db(), Directorhours.db())
-    }, 5000)
+  if (moment(Meta.time).hour() === 0 && moment(Meta.time).minute() === 0 && moment(Meta.time).second() < 3) {
+    calendarWorker.postMessage([ 'update' ]);
   }
 }
 
@@ -656,57 +580,21 @@ function processStatus (db) {
   }
 }
 
-// Mark if a director is present or not
-function processDirectors (ddb, hdb) {
-  try {
-    directorpresent = false
-    var directors = {}
-    var doShade = false
-    var isActive = false
+// Update display when worker returns new data for calendar, but do so on a 3-second time out.
+calendarWorker.onmessage = function (e) {
 
-    // Update directors html
-    var innercontent = ``
-    var stuff
+  // Set / reset 3-second timer so we are not updating on literally every update pushed through sockets
+  clearTimeout(officeHoursTimer)
+  officeHoursTimer = setTimeout(() => {
 
-    Slides.slide(`directors`).displayTime = 5
+    var directorHours = e.data[ 0 ];
+    var tasks = e.data[ 1 ];
 
-    ddb.each((dodo) => {
-      try {
-        directors[dodo.name] = dodo
-        if (dodo.present) { directorpresent = true }
-        Slides.slide(`directors`).displayTime += 1
-        var color = 'rgba(211, 47, 47, 0.8)'
-        var text1 = 'OUT'
-        var theClass = 'danger'
-        if (dodo.present) {
-          color = 'rgba(56, 142, 60, 0.8)'
-          text1 = 'IN'
-          theClass = 'success'
-        }
-          innercontent += `<div style="width: 132px; position: relative; background-color: ${color}" class="m-2 text-white rounded shadow-8">
-    <div class="p-1 text-center" style="width: 100%;">${dodo.avatar !== null && dodo.avatar !== '' ? `<img src="${dodo.avatar}" width="64" class="rounded-circle">` : jdenticon.toSvg(`Director ${dodo.name}`, 64)}</div>
-    <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
-  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${dodo.name}</span><br><span style="font-size: 0.8em;">${dodo.position}</span></div>`
-      } catch (e) {
-        console.error(e)
-        iziToast.show({
-          title: 'An error occurred - Please check the logs',
-          message: `Error occurred in Directors iteration in doSlide.`
-        })
-      }
-    })
-
-    Slides.slide(`directors`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Directors</h1><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`
-
-    // A list of Office Hours for the directors
-
-    // Define a comparison function that will order calendar events by start time when we run the iteration
+    // Sort director hours by start time
     var compare = function (a, b) {
       try {
         if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
         if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
-        if (a.ID < b.ID) { return -1 }
-        if (a.ID > b.ID) { return 1 }
         return 0
       } catch (e) {
         console.error(e)
@@ -717,43 +605,46 @@ function processDirectors (ddb, hdb) {
       }
     }
 
-    // Prepare the formatted calendar variable for our formatted events
+    // Format office hours
     var calendar = {}
     var asstcalendar = {}
-    hdb.get()
-      .filter(event => !moment(event.start).isAfter(moment(Meta.time).add(7, 'days').startOf('day')))
+
+    Directors.db({assistant: false}).each((director) => {
+      calendar[ director.ID ] = {}
+      calendar[ director.ID ][ 0 ] = ``
+      calendar[ director.ID ][ 1 ] = ``
+      calendar[ director.ID ][ 2 ] = ``
+      calendar[ director.ID ][ 3 ] = ``
+      calendar[ director.ID ][ 4 ] = ``
+      calendar[ director.ID ][ 5 ] = ``
+      calendar[ director.ID ][ 6 ] = ``
+    });
+
+    Directors.db({assistant: true}).each((director) => {
+      asstcalendar[ director.ID ] = {}
+      asstcalendar[ director.ID ][ 0 ] = ``
+      asstcalendar[ director.ID ][ 1 ] = ``
+      asstcalendar[ director.ID ][ 2 ] = ``
+      asstcalendar[ director.ID ][ 3 ] = ``
+      asstcalendar[ director.ID ][ 4 ] = ``
+      asstcalendar[ director.ID ][ 5 ] = ``
+      asstcalendar[ director.ID ][ 6 ] = ``
+    });
+
+    directorHours
       .sort(compare)
       .map(event => {
-        var temp = directors[event.director]
 
-        // No temp record? Exit immediately.
+        // First, get the director
+        var temp = Directors.db({ ID: event.director });
+
+        // No temp record? Exit immediately. Also, default to assistant director = true if it is not provided.
         if (typeof temp === `undefined`) { return null }
         var assistant
         if (typeof temp.assistant !== 'undefined') {
           assistant = temp.assistant
         } else {
           assistant = true
-        }
-        // Format calendar for the director
-        if (!assistant && typeof calendar[event.director] === 'undefined') {
-          calendar[event.director] = {}
-          calendar[event.director][0] = ``
-          calendar[event.director][1] = ``
-          calendar[event.director][2] = ``
-          calendar[event.director][3] = ``
-          calendar[event.director][4] = ``
-          calendar[event.director][5] = ``
-          calendar[event.director][6] = ``
-        }
-        if (assistant && typeof asstcalendar[event.director] === 'undefined') {
-          asstcalendar[event.director] = {}
-          asstcalendar[event.director][0] = ``
-          asstcalendar[event.director][1] = ``
-          asstcalendar[event.director][2] = ``
-          asstcalendar[event.director][3] = ``
-          asstcalendar[event.director][4] = ``
-          asstcalendar[event.director][5] = ``
-          asstcalendar[event.director][6] = ``
         }
 
         // null start or end? Use a default to prevent errors.
@@ -785,19 +676,19 @@ function processDirectors (ddb, hdb) {
             }
 
             var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`
-            if (event.active === 0) {
+            if (moment().isAfter(moment(event.end))) {
               endText = `<strike><span class="text-white-50">${event.startT} - ${event.endT}</span></strike>`
             }
-            if (event.active === 2) {
+            if ([ "updated", "updated-system" ].indexOf(event.exceptionType) !== -1) {
               endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`
             }
-            if (event.active === -1) {
+            if ([ "canceled", "canceled-system" ].indexOf(event.exceptionType) !== -1) {
               endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`
             }
 
             // Push the final products into our formatted variable
-            if (!assistant) { calendar[event.director][i] += `<div class="m-1 text-white" style="${bg || ``}">${endText}</div>` }
-            if (assistant) { asstcalendar[event.director][i] += `<div class="m-1 text-white" style="${bg || ``}">${endText}</div>` }
+            if (!assistant) { calendar[ event.director ][ i ] += `<div class="m-1 text-white" style="${bg || ``}">${endText}</div>` }
+            if (assistant) { asstcalendar[ event.director ][ i ] += `<div class="m-1 text-white" style="${bg || ``}">${endText}</div>` }
           }
         }
       })
@@ -837,17 +728,17 @@ function processDirectors (ddb, hdb) {
     for (var director in calendar) {
       if (Object.prototype.hasOwnProperty.call(calendar, director)) {
         isActive = true
-        var temp = directors[director] || null
+        var temp = Directors.db({ID: director}) || null
         Slides.slide(`hours-directors`).displayTime += 3
         stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
      <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
-                ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director}`, 48)}
+                ${temp.avatar && temp.avatar !== '' ? `<img src="${temp.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${temp.name}`, 48)}
     </div>
     <div class="col-8">
-      <span class="text-white">${director}</span><br />
+      <span class="text-white">${temp.name}</span><br />
       <span class="text-warning" style="font-size: 0.8em;">${temp.position}</span><br />
       ${temp.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
     </div>
@@ -855,25 +746,25 @@ function processDirectors (ddb, hdb) {
 </div>
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][0]}
+     ${calendar[ director ][ 0 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][1]}
+     ${calendar[ director ][ 1 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][2]}
+     ${calendar[ director ][ 2 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][3]}
+     ${calendar[ director ][ 3 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][4]}
+     ${calendar[ director ][ 4 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][5]}
+     ${calendar[ director ][ 5 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][6]}
+     ${calendar[ director ][ 6 ]}
      </div>
      </div>`
         if (doShade) {
@@ -922,17 +813,17 @@ function processDirectors (ddb, hdb) {
     for (var director2 in asstcalendar) {
       if (Object.prototype.hasOwnProperty.call(asstcalendar, director2)) {
         isActive = true
-        var temp2 = directors[director2] || null
+        var temp2 = Directors.db({ID: director2}) || null
         Slides.slide(`hours-assistants`).displayTime += 3
         stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
      <div class="col-3 shadow-2" style="background-color: ${temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
                 <div class="container">
   <div class="row">
     <div class="col-4">
-                ${temp2.avatar && temp2.avatar !== '' ? `<img src="${temp2.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${director2}`, 48)}
+                ${temp2.avatar && temp2.avatar !== '' ? `<img src="${temp2.avatar}" width="48" class="rounded-circle">` : jdenticon.toSvg(`Director ${temp2.name}`, 48)}
     </div>
     <div class="col-8">
-      <span class="text-white">${director2}</span><br />
+      <span class="text-white">${temp2.name}</span><br />
       <span class="text-warning" style="font-size: 0.8em;">${temp2.position}</span><br />
       ${temp2.present ? `<span class="text-success"><strong>IN</strong></span>` : `<span class="text-danger"><strong>OUT</strong></span>`}
     </div>
@@ -940,25 +831,25 @@ function processDirectors (ddb, hdb) {
 </div>
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][0]}
+     ${asstcalendar[ director2 ][ 0 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][1]}
+     ${asstcalendar[ director2 ][ 1 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][2]}
+     ${asstcalendar[ director2 ][ 2 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][3]}
+     ${asstcalendar[ director2 ][ 3 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][4]}
+     ${asstcalendar[ director2 ][ 4 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][5]}
+     ${asstcalendar[ director2 ][ 5 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][6]}
+     ${asstcalendar[ director2 ][ 6 ]}
      </div>
      </div>`
         if (doShade) {
@@ -971,13 +862,8 @@ function processDirectors (ddb, hdb) {
 
     Slides.slide(`hours-assistants`).active = isActive
     Slides.slide(`hours-assistants`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
-  } catch (e) {
-    iziToast.show({
-      title: 'An error occurred - Please check the logs',
-      message: 'Error occurred during the call of office hours slide.'
-    })
-    console.error(e)
-  }
+
+  }, 3000);
 }
 
 function onlineSocket () {
@@ -996,11 +882,22 @@ function directorSocket () {
   console.log('attempting director socket')
   try {
     Directors.replaceData(noReq, '/directors/get')
-    Directorhours.replaceData(noReq, '/directors/get-hours')
   } catch (e) {
     console.error(e)
     console.log('FAILED DIRECTORS CONNECTION')
     setTimeout(directorSocket, 10000)
+  }
+}
+
+function eventSocket () {
+  console.log('attempting event socket')
+  try {
+    Calendar.replaceData(noReq, '/calendar/get')
+    Calendarexceptions.replaceData(noReq, '/calendar/get-exceptions')
+  } catch (e) {
+    console.log(e)
+    console.log('FAILED CONNECTION')
+    setTimeout(eventSocket, 10000)
   }
 }
 
@@ -1012,7 +909,7 @@ function metaSocket () {
       var temp = body
       for (var key in temp) {
         if (Object.prototype.hasOwnProperty.call(temp, key)) {
-          Meta[key] = temp[key]
+          Meta[ key ] = temp[ key ]
           if (key === 'time') {
             clearInterval(clockTimer)
             clearTimeout(clockTimer)
