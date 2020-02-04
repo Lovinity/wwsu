@@ -609,8 +609,9 @@ calendarWorker.onmessage = function (e) {
     var calendar = {}
     var asstcalendar = {}
 
-    Directors.db({assistant: false}).each((director) => {
+    Directors.db({ assistant: false }).each((director) => {
       calendar[ director.ID ] = {}
+      calendar[ director.ID ][ 'director' ] = director;
       calendar[ director.ID ][ 0 ] = ``
       calendar[ director.ID ][ 1 ] = ``
       calendar[ director.ID ][ 2 ] = ``
@@ -620,8 +621,9 @@ calendarWorker.onmessage = function (e) {
       calendar[ director.ID ][ 6 ] = ``
     });
 
-    Directors.db({assistant: true}).each((director) => {
+    Directors.db({ assistant: true }).each((director) => {
       asstcalendar[ director.ID ] = {}
+      asstcalendar[ director.ID ][ 'director' ] = director;
       asstcalendar[ director.ID ][ 0 ] = ``
       asstcalendar[ director.ID ][ 1 ] = ``
       asstcalendar[ director.ID ][ 2 ] = ``
@@ -728,7 +730,7 @@ calendarWorker.onmessage = function (e) {
     for (var director in calendar) {
       if (Object.prototype.hasOwnProperty.call(calendar, director)) {
         isActive = true
-        var temp = Directors.db({ID: director}).first() || null
+        var temp = calendar[ director ].director;
         Slides.slide(`hours-directors`).displayTime += 3
         stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
      <div class="col-3 shadow-2" style="background-color: ${temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
@@ -813,7 +815,7 @@ calendarWorker.onmessage = function (e) {
     for (var director2 in asstcalendar) {
       if (Object.prototype.hasOwnProperty.call(asstcalendar, director2)) {
         isActive = true
-        var temp2 = Directors.db({ID: director2}).first() || null
+        var temp2 = asstcalendar[ director2 ].director;
         Slides.slide(`hours-assistants`).displayTime += 3
         stuff += `<div class="row shadow-2 ${doShade ? `bg-dark-3` : `bg-dark-2`}">
      <div class="col-3 shadow-2" style="background-color: ${temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`};">
