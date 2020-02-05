@@ -205,7 +205,7 @@ module.exports = {
                                     issues.push(`Director hours "${event.name}" for ${moment(event.start).format("llll")} does not have a director ID assigned to it. A director must be assigned to office hour events. Please fix or remove.`);
                                     break;
                                 }
-                                var _director = directors.filter((director) => director.ID === event.directorID);
+                                var _director = directors.filter((director) => director.ID === event.director);
                                 if (_director.length < 1) {
                                     if (status > 2) { status = 2 }
                                     issues.push(`Director hours "${event.name}" for ${moment(event.start).format("llll")} were assigned a director that does not exist in the system. Please fix this or remove the office hours.`);
