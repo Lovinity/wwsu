@@ -15,7 +15,7 @@ try {
     transitionOut: `fadeOut`,
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`
   })
 
   // Assistant Director hours
@@ -30,7 +30,7 @@ try {
     transitionOut: `fadeOut`,
     displayTime: 5,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`
   })
 
   // System Status
@@ -678,13 +678,10 @@ calendarWorker.onmessage = function (e) {
             }
 
             var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`
-            if (moment().isAfter(moment(event.end))) {
-              endText = `<strike><span class="text-white-50">${event.startT} - ${event.endT}</span></strike>`
-            }
-            if ([ "updated", "updated-system" ].indexOf(event.exceptionType) !== -1) {
+            if ([ "updated", "updated-system", "additional", "additional-unscheduled" ].indexOf(event.exceptionType) !== -1) {
               endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`
             }
-            if ([ "canceled", "canceled-system" ].indexOf(event.exceptionType) !== -1) {
+            if ([ "canceled", "canceled-system", "canceled-changed" ].indexOf(event.exceptionType) !== -1) {
               endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`
             }
 
@@ -778,7 +775,7 @@ calendarWorker.onmessage = function (e) {
     }
 
     Slides.slide(`hours-directors`).active = isActive
-    Slides.slide(`hours-directors`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    Slides.slide(`hours-directors`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`
 
     // Assistant hours slide
     innercontent = ``
@@ -863,7 +860,7 @@ calendarWorker.onmessage = function (e) {
     }
 
     Slides.slide(`hours-assistants`).active = isActive
-    Slides.slide(`hours-assistants`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: Updated office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: Canceled office hours.</span><span class="text-white-50"><strike>9AM - 5PM</strike></span>: Passed office hours.</span></p>`
+    Slides.slide(`hours-assistants`).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`
 
   }, 3000);
 }

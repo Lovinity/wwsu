@@ -1320,13 +1320,16 @@ function updateCalendar () {
           var image
           var temp
           var finalColor = (typeof event.color !== 'undefined' && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(event.color)) ? hexRgb(event.color) : hexRgb('#787878')
-          if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) { finalColor = hexRgb('#161616') }
+          if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1) { finalColor = hexRgb('#161616') }
           finalColor.red = Math.round(finalColor.red / 2)
           finalColor.green = Math.round(finalColor.green / 2)
           finalColor.blue = Math.round(finalColor.blue / 2)
           var badgeInfo
-          if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1) {
-            badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">TEMP TIME CHANGE</span>`
+          if ([ 'canceled-changed' ].indexOf(event.exceptionType) !== -1) {
+            badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">RESCHEDULED</span>`
+          }
+          if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+            badgeInfo = `<span class="notification badge badge-warning shadow-2" style="font-size: 1em;">UPDATED TIME</span>`
           }
           if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
             badgeInfo = `<span class="notification badge badge-danger shadow-2" style="font-size: 1em;">CANCELED</span>`
@@ -1349,7 +1352,7 @@ function updateCalendar () {
           } else {
             image = `<i class="fas fa-calendar text-secondary" style="font-size: 96px;"></i>`
           }
-          caldata.innerHTML += `<div id="calendar-event-${event.unique}" onclick="displayEventInfo('${event.unique}')" onkeydown="displayEventInfo('${event.unique}')" tabindex="0" style="width: 190px; position: relative;${[ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1 || moment().isAfter(moment(event.end)) ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${[ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1 || moment().isAfter(moment(event.end)) ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
+          caldata.innerHTML += `<div id="calendar-event-${event.unique}" onclick="displayEventInfo('${event.unique}')" onkeydown="displayEventInfo('${event.unique}')" tabindex="0" style="width: 190px; position: relative;${[ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1 || moment().isAfter(moment(event.end)) ? ` background-color: #969696;` : ``}" class="m-2 text-dark rounded shadow-8${[ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1 || moment().isAfter(moment(event.end)) ? `` : ` bg-light-1`}" title="Click for more information about ${line1} - ${line2} and to subscribe / unsubscribe from notifications.">
              <div class="p-1 text-center" style="width: 100%;">${image}
              ${badgeInfo || ``}
              <div class="m-1" style="text-align: center;"><span class="text-dark" style="font-size: 0.8em;">${eventType}</span><br><span class="text-dark" style="font-size: 1em;">${line1}</span><br><span class="text-dark" style="font-size: 1.25em;">${line2}</span><br /><span class="text-dark" style="font-size: 1em;">${moment(event.start).format('hh:mm A')} - ${moment(event.end).format('hh:mm A')}</span></div>`
@@ -1435,6 +1438,7 @@ function displayEventInfo (showID) {
   var subtypefilter = []
   var message = `<p><strong>Starts: ${moment(item.start).format('LLL')}</strong></p>
                         <p><strong>Ends: ${moment(item.end).format('LLL')}</strong></p>
+                        ${item.exceptionType === 'canceled-changed' ? `<p><strong>${item.exceptionReason}</strong></p>` : ``}
                         <p>${item.description}</p>`
 
   // If a device ID was provided from the WWSU mobile app

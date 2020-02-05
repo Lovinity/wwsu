@@ -96,7 +96,7 @@ module.exports = {
                 // Now, check each event
                 sails.log.debug(`Calendar integrity beginning event check of ${events.length} events`);
                 events
-                    .filter((event) => (event.exceptionType === null || ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1)) && moment(event.end).isAfter(moment()))
+                    .filter((event) => (event.exceptionType === null || ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) === -1)) && moment(event.end).isAfter(moment()))
                     .map((event) => {
                         switch (event.type) {
                             case 'prerecord':
@@ -262,7 +262,7 @@ module.exports = {
 
                 // Radio shows
                 eventCheck
-                    .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.exceptionType === null || (event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system'))) && [ 'show', 'sports', 'prerecord', 'remote', 'playlist' ].indexOf(event.type) !== -1)
+                    .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.exceptionType === null || (event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system' && event.exceptionType !== 'canceled-changed'))) && [ 'show', 'sports', 'prerecord', 'remote', 'playlist' ].indexOf(event.type) !== -1)
                     .map((event) => {
                         sails.models.attendance.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, dj: event.hostDJ, cohostDJ1: event.cohostDJ1, cohostDJ2: event.cohostDJ2, cohostDJ3: event.cohostDJ3, event: `${event.type}: ${event.hosts} - ${event.name}`, happened: 0, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true) })
                             .exec(async (err, record, wasCreated) => {
@@ -312,7 +312,7 @@ module.exports = {
 
                 // Director hours
                 eventCheck
-                    .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.exceptionType === null || (event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system'))) && event.type === 'office-hours')
+                    .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.exceptionType === null || (event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system' && event.exceptionType !== 'canceled-changed'))) && event.type === 'office-hours')
                     .map((event) => {
                         sails.models.timesheet.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, name: event.hosts, approved: 0, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true) })
                             .exec(async (err, record, wasCreated) => {

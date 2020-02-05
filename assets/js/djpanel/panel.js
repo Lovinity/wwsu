@@ -225,7 +225,7 @@ function doRequests () {
           if (temp !== null) {
             var worker;
 
-            worker = events.filter((event) => event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system');
+            worker = events.filter((event) => event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system' || event.exceptionType === 'canceled-changed');
             if (worker.length > 0) {
               notices += `<div class="card mb-4 py-3 border-left-info">
           <div class="card-body">
@@ -260,7 +260,7 @@ function doRequests () {
             temp.innerHTML = `<option value="">Choose a show / date to cancel...</option>`
             if (events.length > 0) {
               events
-                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
+                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system' && event.exceptionType !== 'canceled-changed')
                 .map((calendar) => {
                   temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
                 })
@@ -273,7 +273,7 @@ function doRequests () {
             temp.innerHTML = `<option value="">Choose a show / date to assign a topic or clockwheel...</option>`
             if (events.length > 0) {
               events
-                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system')
+                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system' && event.exceptionType !== 'canceled-changed')
                 .map((calendar) => {
                   temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
                 })

@@ -33,17 +33,20 @@ onmessage = function (e) {
         var line2
         var image
 
-        if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) { color = hexRgb(`#161616`) }
+        if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1) { color = hexRgb(`#161616`) }
         color.red = Math.round(color.red / 3)
         color.green = Math.round(color.green / 3)
         color.blue = Math.round(color.blue / 3)
         var badgeInfo = ``
-        if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1) {
-          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CHANGED</strong></span>`
+        if ([ 'canceled-changed' ].indexOf(event.exceptionType) !== -1) {
+          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>${event.exceptionReason}</strong></span>`
+        }
+        if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+          badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>Updated Time (temporary)</strong></span>`
         }
         if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
           badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`
-        } else {
+        } else if (event.exceptionType !== 'canceled-changed') {
           activeEvents++;
         }
         line1 = event.hosts;
@@ -73,7 +76,7 @@ onmessage = function (e) {
                         </div>
                     </div>`
         noEvents = false
-        today.push({ name: event.name, type: event.type, active: [ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) === -1, ID: `calendar-event-${event.unique}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
+        today.push({ name: event.name, type: event.type, active: [ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) === -1, ID: `calendar-event-${event.unique}`, topic: event.description, time: `${event.startT} - ${event.endT}` })
       } catch (e) {
         console.error(e)
         innercontent = `

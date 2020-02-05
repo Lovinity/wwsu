@@ -51,7 +51,7 @@ module.exports = {
             }
 
             // Create or update an updated type calendar exception with the new description if authorized and event was not already canceled.
-            if (cEvent && cEvent.type !== 'canceled' && cEvent.type !== 'canceled-system' && cEvent.hostDJ === this.req.payload.ID) {
+            if (cEvent && cEvent.type !== 'canceled' && cEvent.type !== 'canceled-system' && cEvent.type !== 'canceled-changed' && cEvent.hostDJ === this.req.payload.ID) {
                 sails.models.calendarexceptions.findOrCreate({calendarID: cEvent.calendarID, exceptionTime: cEvent.start}, {
                     calendarID: inputs.ID,
                     exceptionType: 'updated',

@@ -114,6 +114,8 @@ class CalendarDb {
                 if (b.exceptionType === 'updated' && a.exceptionType !== 'updated') return 1;
                 if (a.exceptionType === 'updated-system' && b.exceptionType !== 'updated-system') return -1;
                 if (b.exceptionType === 'updated-system' && a.exceptionType !== 'updated-system') return 1;
+                if (a.exceptionType === 'canceled-changed' && b.exceptionType !== 'canceled-changed') return -1;
+                if (b.exceptionType === 'canceled-changed' && a.exceptionType !== 'canceled-changed') return 1;
                 return 0;
             }
 
@@ -141,6 +143,12 @@ class CalendarDb {
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
+
+                                    // For updated records, add a canceled-changed record into the events so people know the original time was changed.
+                                    if (["updated", "updated-system"].indexOf(exc.exceptionType) !== -1 && exc.newTime !== null) {
+                                        _processRecord(cal, {calendarID: calendar.ID, exceptionID: cal.ID, exceptionType: 'canceled-changed', exceptionReason: `Rescheduled to ${moment(exc.newTime).format("lll")}`}, exc.exceptionTime);
+                                    }
+
                                     tempExceptions.push(Object.assign(exc, { exceptionID: cal.ID }));
                                 })
                             }
@@ -212,6 +220,11 @@ class CalendarDb {
                             exceptions.map((exc) => {
                                 exceptionIDs.push(exc.ID);
                                 tempExceptions.push(exc);
+
+                                // For updated records, add a canceled-changed record into the events so people know the original time was changed.
+                                if (["updated", "updated-system"].indexOf(exc.exceptionType) !== -1 && exc.newTime !== null) {
+                                    _processRecord(calendar, {calendarID: calendar.ID, exceptionType: 'canceled-changed', exceptionReason: `Rescheduled to ${moment(exc.newTime).format("lll")}`}, exc.exceptionTime);
+                                }
                             })
                         }
                     } catch (e) {
@@ -243,6 +256,12 @@ class CalendarDb {
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
+
+                                    // For updated records, add a canceled-changed record into the events so people know the original time was changed.
+                                    if (["updated", "updated-system"].indexOf(exc.exceptionType) !== -1 && exc.newTime !== null) {
+                                        _processRecord(cal, {calendarID: calendar.ID, exceptionID: cal.ID, exceptionType: 'canceled-changed', exceptionReason: `Rescheduled to ${moment(exc.newTime).format("lll")}`}, exc.exceptionTime);
+                                    }
+
                                     tempExceptions.push(Object.assign(exc, { exceptionID: cal.ID }));
                                 })
                             }
@@ -293,6 +312,11 @@ class CalendarDb {
                         exceptions.map((exc) => {
                             exceptionIDs.push(exc.ID);
                             tempExceptions.push(exc);
+
+                            // For updated records, add a canceled-changed record into the events so people know the original time was changed.
+                            if (["updated", "updated-system"].indexOf(exc.exceptionType) !== -1 && exc.newTime !== null) {
+                                _processRecord(cal, {calendarID: calendar.ID, exceptionType: 'canceled-changed', exceptionReason: `Rescheduled to ${moment(exc.newTime).format("lll")}`}, exc.exceptionTime);
+                            }
                         })
                     }
                 } catch (e) {
@@ -322,6 +346,12 @@ class CalendarDb {
                                 exceptions.map((exc) => {
                                     exceptionIDs.push(cal.ID);
                                     exceptionIDs.push(exc.ID);
+
+                                    // For updated records, add a canceled-changed record into the events so people know the original time was changed.
+                                    if (["updated", "updated-system"].indexOf(exc.exceptionType) !== -1 && exc.newTime !== null) {
+                                        _processRecord(cal, {calendarID: calendar.ID, exceptionID: cal.ID, exceptionType: 'canceled-changed', exceptionReason: `Rescheduled to ${moment(exc.newTime).format("lll")}`}, exc.exceptionTime);
+                                    }
+
                                     tempExceptions.push(Object.assign(exc, { exceptionID: cal.ID }));
                                 })
                             }
@@ -401,7 +431,7 @@ class CalendarDb {
             events
                 .filter((event) => {
 
-                    if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system') return false;
+                    if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system' || event.exceptionType === 'canceled-changed') return false;
 
                     if (automationOnly) {
                         return (event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end));
@@ -447,7 +477,7 @@ class CalendarDb {
         if (eventPriority < 0) return { overridden: [], overriding: [] };
 
         // No conflict check if this event is a canceled type exception
-        if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system') return { overridden: [], overriding: [] };
+        if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system' || event.exceptionType === 'canceled-changed') return { overridden: [], overriding: [] };
 
         var checkConflictingTime = (start, eventsb) => {
             var beginAt = start;
@@ -487,7 +517,7 @@ class CalendarDb {
         var eventsOverridden = events
             .filter((eventb) => {
                 // Ignore events that are already canceled or no longer active
-                if (eventb.exceptionType === 'canceled' || eventb.exceptionType === 'canceled-system') return false;
+                if (eventb.exceptionType === 'canceled' || eventb.exceptionType === 'canceled-system' || eventb.exceptionType === 'canceled-changed') return false;
 
                 // Ignore events that will get updated by this one
                 if ((event.exceptionType === 'updated' || event.exceptionType === 'updated-system') && event.calendarID === eventb.calendarID && moment(event.exceptionTime).isSame(eventb.start, 'minute')) return false;
@@ -534,7 +564,7 @@ class CalendarDb {
             .filter((eventb) => {
 
                 // Ignore events that are already canceled or no longer active
-                if (eventb.exceptionType === 'canceled' || eventb.exceptionType === 'canceled-system') return false;
+                if (eventb.exceptionType === 'canceled' || eventb.exceptionType === 'canceled-system' || eventb.exceptionType === 'canceled-changed') return false;
 
                 // Ignore events that will get updated by this one
                 if ((event.exceptionType === 'updated' || event.exceptionType === 'updated-system') && event.calendarID === eventb.calendarID && moment(event.exceptionTime).isSame(eventb.start, 'minute')) return false;
@@ -604,7 +634,7 @@ class CalendarDb {
             events = events
                 .filter((event) => {
 
-                    if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system') return false;
+                    if (event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system' || event.exceptionType === 'canceled-changed') return false;
 
                     // Return directors who are expected to come in in the next 30 minutes as well
                     return (event.type === 'office-hours' && moment().add(30, 'minutes').isSameOrAfter(moment(event.start))) && moment().isBefore(moment(event.end)) && event.active;
@@ -708,6 +738,7 @@ class CalendarDb {
             description: exception.description && exception.description !== null ? exception.description : calendar.description, // Description of event
             logo: exception.logo && exception.logo !== null ? exception.logo : calendar.logo, // URL to the event logo
             banner: exception.banner && exception.banner !== null ? exception.banner : calendar.banner, // URL to the event banner
+            newTime: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : null, // If an exception is applied that overrides an event's start time, this is the event's new start time.
             start: exception.newTime && exception.newTime !== null ? moment(exception.newTime).toISOString(true) : moment(eventStart).toISOString(true), // Start time of the event
         }
 
