@@ -638,7 +638,7 @@ calendarWorker.onmessage = function (e) {
       .map(event => {
 
         // First, get the director
-        var temp = Directors.db({ ID: event.director });
+        var temp = Directors.db({ ID: event.director }).first();
 
         // No temp record? Exit immediately. Also, default to assistant director = true if it is not provided.
         if (typeof temp === `undefined`) { return null }
