@@ -230,7 +230,7 @@ module.exports.bootstrap = async function (done) {
 
       var queueLength = 0
       var trackLength = 0
-      var countDown = 0
+      var countDown = 0;
       var theplaylist
       var playlistTracks
       var change = {} // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
@@ -607,7 +607,7 @@ module.exports.bootstrap = async function (done) {
         if (sails.models.meta.memory.playing) {
           queueLength = sails.models.status.errorCheck.prevQueueLength - 1;
           trackLength = sails.models.status.errorCheck.prevTrackLength - 1;
-          countDown = countDown <= 0 ? 0 : queueLength;
+          countDown = sails.models.status.errorCheck.prevCountdown - 1;
           sails.models.status.errorCheck.prevQueueLength = queueLength;
           sails.models.status.errorCheck.prevTrackLength = trackLength;
           sails.models.status.errorCheck.prevCountdown = countDown;
