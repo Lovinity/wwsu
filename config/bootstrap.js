@@ -467,6 +467,7 @@ module.exports.bootstrap = async function (done) {
                   }
                 }
               } else {
+                sails.models.status.errorCheck.prevCountdown = 0
                 countDown = 0
               }
 
