@@ -126,18 +126,24 @@ module.exports = {
 
     afterUpdate: function (updatedRecord, proceed) {
         var data = { update: updatedRecord }
-        sails.models.calendar.calendardb.query('calendar', data);
-        sails.log.silly(`calendar socket: ${data}`)
-        sails.sockets.broadcast('calendar', 'calendar', data)
         var temp;
 
-        // If setting active to false, delete all exceptions and notify subscribers of a discontinued show
+        // If setting active to false, treat as deletion in web sockets and delete all exceptions and notify subscribers of a discontinued show
         if (!updatedRecord.active) {
+            var data = { remove: updatedRecord.ID }
+            sails.models.calendar.calendardb.query('calendar', data);
+            sails.log.silly(`calendar socket: ${data}`)
+            sails.sockets.broadcast('calendar', 'calendar', data)
             temp = (async () => {
                 await sails.helpers.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
                 var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, false)
             })()
+        } else {
+            var data = { update: updatedRecord }
+            sails.models.calendar.calendardb.query('calendar', data);
+            sails.log.silly(`calendar socket: ${data}`)
+            sails.sockets.broadcast('calendar', 'calendar', data)
         }
 
         return proceed()
