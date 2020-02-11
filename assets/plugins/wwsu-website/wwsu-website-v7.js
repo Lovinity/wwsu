@@ -9,11 +9,17 @@ try {
     var Meta = { time: moment().toISOString(true), history: [], webchat: true, state: 'unknown' }
     var likedTracks = [];
     var announcementIDs = [];
+    var messageIDs = [];
     var navigation = new WWSUNavigation();
     var calendardb = new CalendarDb();
+    var newMessages = 0;
+    var client = '';
+    var automationpost = ``;
+    var Subscriptions = TAFFY();
+    var blocked = false;
 
     // Operation Variables
-    var firsttime = false;
+    var firstTime = true;
 
     // oneSignal Variables
     var onlineSocketDone = false;
@@ -92,7 +98,16 @@ $(document).ready(function () {
 
         // Initialize menu items
         navigation.addItem('#nav-nowplaying', '#section-nowplaying', '', true);
+        navigation.addItem('#nav-chat', '#section-chat', '/chat', false, () => {
+            newMessages = 0;
+            updateNewMessages();
+        });
         navigation.addItem('#nav-schedule', '#section-schedule', '/schedule');
+
+        // Add change event for chat-nickname
+        $('#chat-nickname').change(function () {
+            socket.post('/recipients/edit-web', { label: $(this).val() }, function serverResponded () { })
+        });
 
     } catch (e) {
         console.error(e);
@@ -115,7 +130,7 @@ $(document).ready(function () {
 
 // Socket connect
 socket.on('connect', () => {
-    doSockets(firsttime);
+    doSockets(firstTime);
 });
 
 // Disconnection; try to re-connect
@@ -289,11 +304,11 @@ function doSockets (firsttime = false) {
             tracksLikedSocket()
             metaSocket()
             announcementsSocket()
-            //messagesSocket()
             calendarSocket()
             calendarExceptionsSocket()
             //loadGenres()
-            //onlineSocket()
+            onlineSocket()
+            messagesSocket()
         })
         // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
     } else {
@@ -302,11 +317,11 @@ function doSockets (firsttime = false) {
             tracksLikedSocket()
             metaSocket()
             announcementsSocket()
-            //messagesSocket()
             calendarSocket()
             calendarExceptionsSocket()
             //loadGenres()
-            //onlineSocket(true)
+            onlineSocket(true)
+            messagesSocket()
         })
     }
 }
@@ -789,7 +804,7 @@ function updateCalendar () {
     selectedOption = parseInt(selectedOption);
 
     // Process events for the next 7 days
-    var events = calendardb.getEvents(moment().add(selectedOption, 'days'), moment().add(selectedOption + 1, 'days'));
+    var events = calendardb.getEvents(moment().add(selectedOption, 'days').startOf('day'), moment().add(selectedOption + 1, 'days').startOf('day'));
 
     var html = '';
 
@@ -875,9 +890,356 @@ function updateCalendar () {
             }
         })
 
-        $('#schedule-events').html(html);
+    $('#schedule-events').html(html);
 
     for (var i = 1; i < 7; i++) {
         $(`#schedule-select-${i}`).html(moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
     }
+}
+
+
+
+
+/*
+    CHAT FUNCTIONS
+*/
+
+
+// When a new message is received, process it.
+socket.on('messages', (data) => {
+    try {
+        for (var key in data) {
+            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                switch (key) {
+                    case 'insert':
+                        addMessage(data[ key ], firstTime)
+                        break
+                    case 'remove':
+                        $(`#msg-${data[ key ]} .direct-chat-text`).html(`XXX This message was deleted XXX`)
+                        break
+                }
+            }
+        }
+    } catch (unusedE) {
+    }
+})
+
+/**
+ * Updates all new message counts with the number of unread DJ messages
+ */
+function updateNewMessages () {
+    $('.chat-newmessages').html(newMessages);
+    if (newMessages < 1) {
+        $('.chat-newmessages').removeClass('bg-danger');
+        $('.chat-newmessages').addClass('bg-secondary');
+    } else {
+        $('.chat-newmessages').addClass('bg-danger');
+        $('.chat-newmessages').removeClass('bg-secondary');
+    }
+}
+
+/**
+ * Hit the messages endpoint and subscribe to receiving messages.
+ */
+function messagesSocket () {
+    socket.post('/messages/get-web', {}, function serverResponded (body) {
+        //console.log(body);
+        try {
+            body
+                .filter(message => messageIDs.indexOf(message.ID) === -1)
+                .map(message => addMessage(message, firstTime))
+            firstTime = false
+        } catch (e) {
+            console.error(e);
+            setTimeout(messagesSocket, 10000)
+        }
+    })
+}
+
+/**
+ * TODO: Process a new message in the chat and notifications.
+ * 
+ * @param {object} data Data object for the message from WWSU
+ * @param {boolean} firsttime Whether or not this message was added on initial load (if true, no toast notification will display)
+ */
+function addMessage (data, firsttime = false) {
+
+    // Note the ID; used to determine new messages upon reconnection of a socket disconnect
+    messageIDs.push(data.ID);
+
+    // Private website message
+    if (data.to.startsWith('website-')) {
+        $('#chat-messages').append(`<div class="direct-chat-msg" id="msg-${data.ID}">
+        <div class="direct-chat-infos clearfix">
+          <span class="direct-chat-name float-left">${data.fromFriendly} (Private Message)</span>
+          <span class="direct-chat-timestamp float-right">${moment(data.createdAt).format('hh:mm A')}</span>
+        </div>
+        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(data.from, 40)}</div>
+        <div class="direct-chat-text bg-danger">
+            ${data.message}
+        </div>
+      </div>`);
+        if (!firsttime) {
+            $(document).Toasts('create', {
+                class: 'bg-success',
+                title: 'Private Message from WWSU',
+                autohide: true,
+                delay: 15000,
+                body: data.message,
+                icon: 'fas fa-comments fa-lg',
+            })
+        }
+        newMessages++;
+        updateNewMessages();
+
+        // Public website message for all visitors
+    } else if (data.to === 'website') {
+        $('#chat-messages').append(`<div class="direct-chat-msg" id="msg-${data.ID}">
+        <div class="direct-chat-infos clearfix">
+          <span class="direct-chat-name float-left">${data.fromFriendly}</span>
+          <span class="direct-chat-timestamp float-right">${moment(data.createdAt).format('hh:mm A')}</span>
+        </div>
+        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(data.from, 40)}</div>
+        <div class="direct-chat-text bg-success">
+            ${data.message}
+        </div>
+      </div>`);
+        if (!firsttime) {
+            $(document).Toasts('create', {
+                class: 'bg-success',
+                title: 'Message from WWSU',
+                autohide: true,
+                delay: 15000,
+                body: data.message,
+                icon: 'fas fa-comments fa-lg',
+            })
+        }
+        newMessages++;
+        updateNewMessages();
+
+        // Private message sent from visitor
+    } else if (data.to === 'DJ-private' && data.from !== client) {
+        $('#chat-messages').append(`<div class="direct-chat-msg" id="msg-${data.ID}">
+        <div class="direct-chat-infos clearfix">
+          <span class="direct-chat-name float-left">${data.fromFriendly}</span>
+          <span class="direct-chat-timestamp float-right">${moment(data.createdAt).format('hh:mm A')}</span>
+        </div>
+        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(data.from, 40)}</div>
+        <div class="direct-chat-text bg-secondary">
+            ${data.message}
+        </div>
+      </div>`);
+        if (!firsttime) {
+            $(document).Toasts('create', {
+                class: 'bg-success',
+                title: 'Message',
+                subtitle: data.fromFriendly,
+                autohide: true,
+                delay: 15000,
+                body: data.message,
+                icon: 'fas fa-comments fa-lg',
+            })
+        }
+
+    } else if (data.from === client) {
+        $('#chat-messages').append(`<div class="direct-chat-msg right">
+        <div class="direct-chat-infos clearfix">
+          <span class="direct-chat-name float-right">YOU${data.to === 'DJ-private' ? ` (Private Message)` : ``}</span>
+          <span class="direct-chat-timestamp float-left">${moment(data.createdAt).format('hh:mm A')}</span>
+        </div>
+        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(data.from, 40)}</div>
+        <div class="direct-chat-text bg-success">
+            ${data.message}
+        </div>
+      </div>`);
+
+        // All other messages
+    } else {
+        $('#chat-messages').append(`<div class="direct-chat-msg" id="msg-${data.ID}">
+        <div class="direct-chat-infos clearfix">
+          <span class="direct-chat-name float-left">${data.fromFriendly}</span>
+          <span class="direct-chat-timestamp float-right">${moment(data.createdAt).format('hh:mm A')}</span>
+        </div>
+        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(data.from, 40)}</div>
+        <div class="direct-chat-text bg-secondary">
+            ${data.message}
+        </div>
+      </div>`);
+    }
+}
+
+/**
+ * Send whatever is in the message box as a message.
+ * 
+ * @param {boolean} privateMsg Is this message to be sent privately?
+ */
+function sendMessage (privateMsg = false) {
+    if (blocked) { return null }
+    socket.post('/messages/send-web', { message: $('#chat-message').val(), nickname: $('#chat-nickname').val(), private: privateMsg }, function serverResponded (response) {
+        try {
+            if (response !== 'OK') {
+                $(document).Toasts('create', {
+                    class: 'bg-warning',
+                    title: 'Message Rejected',
+                    body: 'WWSU rejected your message. This could be because you are sending messages too fast, or you are banned from sending messages.',
+                    icon: 'fas fa-skull-crossbones fa-lg',
+                });
+                return null
+            }
+            $('#chat-message').val('');
+        } catch (e) {
+            console.error(e);
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Error sending message',
+                body: 'There was an error sending your message. Please report this to engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+        }
+    })
+}
+
+
+
+
+/*
+    ONLINE FUNCTIONS
+*/
+
+
+
+
+/**
+ * Register this client as online with WWSU, and get client info.
+ * 
+ * @param {boolean} doOneSignal Should we initialize OneSignal?
+ */
+function onlineSocket (doOneSignal = false) {
+    socket.post('/recipients/add-web', { device: device }, function serverResponded (body) {
+        try {
+            $('#chat-nickname').val(body.label.replace('Web ', '').match(/\(([^)]+)\)/)[ 1 ])
+            client = body.host;
+            onlineSocketDone = true
+            automationpost = ``
+            doMeta({ webchat: Meta.webchat, state: Meta.state })
+            if (doOneSignal) {
+                OneSignal.push(() => {
+                    OneSignal.init({
+                        appId: '150c0123-e224-4e5b-a8b2-fc202d78e2f1',
+                        autoResubscribe: true
+                    })
+
+                    notificationsSupported = OneSignal.isPushNotificationsSupported()
+
+                    OneSignal.isPushNotificationsEnabled().then((isEnabled) => {
+                        if (isEnabled) {
+                            OneSignal.getUserId().then((userId) => {
+                                device = userId
+                                onlineSocket()
+                            })
+                        } else {
+                            device = null
+                            onlineSocket()
+                        }
+                    })
+
+                    OneSignal.on('notificationPermissionChange', (permissionChange) => {
+                        var currentPermission = permissionChange.to
+                        if (currentPermission === 'granted' && device === null) {
+                            OneSignal.getUserId().then((userId) => {
+                                device = userId
+                                onlineSocket()
+                            })
+                        } else if (currentPermission === 'denied' && device !== null) {
+                            device = null
+                            onlineSocket()
+                        }
+                    })
+
+                    // On changes to web notification subscriptions; update subscriptions and device.
+                    OneSignal.on('subscriptionChange', (isSubscribed) => {
+                        if (isSubscribed && device === null) {
+                            OneSignal.getUserId().then((userId) => {
+                                device = userId
+                                onlineSocket()
+                            })
+                        } else if (!isSubscribed && device !== null) {
+                            device = null
+                            onlineSocket()
+                        }
+                    })
+                })
+            }
+        } catch (e) {
+            console.error(e);
+            setTimeout(onlineSocket, 10000)
+        }
+    })
+
+    if (device && device !== null) {
+        socket.post('/subscribers/get-web', { device: device }, function serverResponded (body) {
+            try {
+                Subscriptions = TAFFY()
+                Subscriptions.insert(body)
+                doMeta({ state: Meta.state })
+            } catch (unusedE) {
+                setTimeout(metaSocket, 10000)
+            }
+        })
+    }
+
+    /* TODO
+    var temp = document.querySelector(`#track-info-subscribe`)
+    if (temp !== null) {
+        if (device === null && !isMobile) {
+            temp.style.display = 'block'
+        } else {
+            temp.style.display = 'none'
+        }
+    }
+
+    temp = document.querySelector(`#chat-subscribe`)
+    if (temp !== null) {
+        if (device === null && !isMobile) {
+            temp.style.display = 'block'
+        } else {
+            temp.style.display = 'none'
+        }
+    }
+
+    temp = document.querySelector(`#show-subscribe-button`)
+    var temp2 = document.querySelector(`#show-subscribe-instructions`)
+    if (temp !== null) {
+        if (notificationsSupported || isMobile) {
+            if (device === null && !isMobile) {
+                temp.innerHTML = 'Show Prompt'
+                temp2.innerHTML = `First, click "Show Prompt" and allow notifications. Then when the button turns to "Subscribe", click it again.`
+                temp.onclick = () => OneSignal.showSlidedownPrompt({ force: true })
+                temp.onkeydown = () => OneSignal.showSlidedownPrompt({ force: true })
+            } else {
+                temp.innerHTML = 'Subscribe'
+                temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
+                temp.onclick = () => {
+                    if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
+                        subscribe(`calendar-all`, Meta.show)
+                    } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
+                        subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                    }
+                }
+                temp.onkeydown = () => {
+                    if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
+                        subscribe(`calendar-all`, Meta.show)
+                    } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
+                        subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                    }
+                }
+            }
+        } else {
+            temp.innerHTML = 'Not Supported'
+            temp2.innerHTML = `Sorry, push notifications are not supported on your browser at this time. Stay tuned as we will be releasing a WWSU Mobile app in the future!`
+            temp.onclick = () => { }
+            temp.onkeydown = () => { }
+        }
+    }
+    */
 }

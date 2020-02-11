@@ -6,9 +6,17 @@ class WWSUNavigation {
         this.elements = [];
     }
 
-    // Add a new menu item to the class, along with click and keypress events
-    addItem (dom, section, url, defaultItem = false) {
-        this.elements.push({ dom, section, url });
+    /**
+     * Add a menu item to the controller
+     * 
+     * @param {string} dom DOM query string for the navigation item
+     * @param {string} section DOM query string for the section that should be visible when this menu is active, and invisible when it is not
+     * @param {string} url Relative URL for this menu item
+     * @param {boolean} defaultItem Set to true to make this the default menu activated. Defaults to false
+     * @param {function} callback Function with no parameters called when this menu becomes active. Defaults to empty function.
+     */
+    addItem (dom, section, url, defaultItem = false, callback = () => {}) {
+        this.elements.push({ dom, section, url, callback });
 
         if (defaultItem) {
             $(dom).addClass("active");
@@ -43,6 +51,7 @@ class WWSUNavigation {
             .map((element) => {
                 $(element.dom).addClass("active");
                 $(element.section).css("display", "");
+                element.callback();
             });
     }
 }

@@ -34,6 +34,8 @@
   <script src="plugins/moment/moment.min.js"></script>
   <!-- Later -->
   <script src="plugins/later/js/later.min.js"></script>
+  <!-- Jdenticon -->
+  <script src="plugins/jdenticon/js/jdenticon.min.js"></script>
 
   <!--WWSU-->
   <script src="plugins/sails.io/sails.io.js" autoConnect="false"></script>
@@ -82,6 +84,16 @@
                 <i class="nav-icon fas fa-play-circle"></i>
                 <p>
                   Now Playing
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="nav-chat" title="Chat with the DJ">
+                <i class="nav-icon fas fa-comments"></i>
+                <p>
+                  Chat with DJ
+                  <span class="badge badge-secondary right chat-newmessages" title="New Messages">0</span>
                 </p>
               </a>
             </li>
@@ -164,6 +176,53 @@
             </table>
           </div>
           <!-- /.card-body -->
+        </div>
+      </section>
+
+      <section id="section-chat">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12">
+                <h1 class="m-0 text-dark">Chat with the DJ</h1>
+              </div><!-- /.col -->
+            </div><!-- /.row -->
+          </div><!-- /.container-fluid -->
+        </div>
+
+        <div class="card card-sucress cardutline direct-chat direct-chat-success p-1 m-3">
+          <div class="card-header">
+            <h3 class="card-title">Chat</h3>
+
+            <div class="card-tools">
+              <span data-toggle="tooltip" title="New Messages" class="badge bg-secondary chat-newmessages">0</span>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <!-- Conversations are loaded here -->
+            <div class="direct-chat-messages" id="chat-messages" style="height: 50vh;">
+              <!--Chat messages go here-->
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="input-group m-2">
+              <span class="input-group-prepend">
+                <span class="input-group-text">Nickname</span>
+              </span>
+              <input type="text" name="chat-nickname" id="chat-nickname" placeholder="" class="form-control">
+            </div>
+            <div class="input-group m-2">
+              <textarea name="chat-message" id="chat-message" rows="3" placeholder="Type Message ..."
+                class="form-control"></textarea>
+            </div>
+            <div class="input-group m-2">
+              <button type="submit" class="btn btn-success" onclick="sendMessage()" tabindex="0">Send Public</button>
+              <button type="submit" class="btn btn-danger" onclick="sendMessage(true)" tabindex="0">Send Private</button>
+            </div>
+          </div>
+          <!-- /.card-footer-->
         </div>
       </section>
 
