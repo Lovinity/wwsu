@@ -1,4 +1,4 @@
-/* global iziToast, moment */
+/* global moment */
 
 /**
  * WWSUdb manages data from the WWSU websockets
@@ -368,6 +368,39 @@ class WWSUreq {
   }
 }
 
+// Class for loading scripts in web pages dynamically
+class WWSUScriptLoader {
+
+  constructor() {
+      this.loadedScripts = [];
+  }
+
+  loadScript (filename, filetype) {
+      if (this.loadedScripts.indexOf(filename) === -1) {
+          this._loadScript(filename, filetype);
+          this.loadedScripts.push(filename);
+      }
+  }
+
+  // Do not call this directly unless you want to avoid duplicate script loading checks!
+  _loadScript (filename, filetype) {
+      if (filetype === "js") { //if filename is a external JavaScript file
+          var fileref = document.createElement('script')
+          fileref.setAttribute("type", "text/javascript")
+          fileref.setAttribute("src", filename)
+      }
+      else if (filetype === "css") { //if filename is an external CSS file
+          var fileref = document.createElement("link")
+          fileref.setAttribute("rel", "stylesheet")
+          fileref.setAttribute("type", "text/css")
+          fileref.setAttribute("href", filename)
+      }
+      if (typeof fileref !== "undefined")
+          document.getElementsByTagName("head")[ 0 ].appendChild(fileref)
+  }
+
+}
+
 // Use this function to wait for an element to exist. Calls back the cb when it exists, providing the DOM as a parameter.
 // eslint-disable-next-line no-unused-vars
 function waitForElement (theelement, cb) {
@@ -384,4 +417,5 @@ if (typeof require !== 'undefined') {
   exports.WWSUdb = WWSUdb;
   exports.WWSUreq = WWSUreq;
   exports.waitForElement = waitForElement;
+  exports.WWSUScriptLoader = WWSUScriptLoader;
 }
