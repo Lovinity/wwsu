@@ -315,7 +315,7 @@ class CalendarDb {
 
                             // For updated records, add a canceled-changed record into the events so people know the original time was changed.
                             if (["updated", "updated-system"].indexOf(exc.exceptionType) !== -1 && exc.newTime !== null) {
-                                _processRecord(cal, {calendarID: calendar.ID, exceptionType: 'canceled-changed', exceptionReason: `Rescheduled to ${moment(exc.newTime).format("lll")}`}, exc.exceptionTime);
+                                _processRecord(calendar, {calendarID: calendar.ID, exceptionType: 'canceled-changed', exceptionReason: `Rescheduled to ${moment(exc.newTime).format("lll")}`}, exc.exceptionTime);
                             }
                         })
                     }

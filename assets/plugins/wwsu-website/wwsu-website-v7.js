@@ -1,79 +1,108 @@
-// Initialize sails.js socket connection to WWSU
-io.sails.url = 'https://server.wwsu1069.org'
-io.sails.query = `host=21b1dd149aeac1f8cc2e8174dce0494e9ae60b9f746be71319ac6c3476968e00` // TODO: Remove when live
-var socket = io.sails.connect()
-var noReq = new WWSUreq(socket, '21b1dd149aeac1f8cc2e8174dce0494e9ae60b9f746be71319ac6c3476968e00') // TODO: Remove host string when live
+try {
+    // Initialize sails.js socket connection to WWSU
+    io.sails.url = 'https://server.wwsu1069.org'
+    io.sails.query = `host=21b1dd149aeac1f8cc2e8174dce0494e9ae60b9f746be71319ac6c3476968e00` // TODO: Remove when live
+    var socket = io.sails.connect()
+    var noReq = new WWSUreq(socket, '21b1dd149aeac1f8cc2e8174dce0494e9ae60b9f746be71319ac6c3476968e00') // TODO: Remove host string when live
 
-// WWSU Variables
-var Meta = { time: moment().toISOString(true), history: [], webchat: true, state: 'unknown' }
-var likedTracks = [];
-var announcementIDs = [];
+    // WWSU Variables
+    var Meta = { time: moment().toISOString(true), history: [], webchat: true, state: 'unknown' }
+    var likedTracks = [];
+    var announcementIDs = [];
+    var navigation = new WWSUNavigation();
+    var calendardb = new CalendarDb();
 
-// Operation Variables
-var firsttime = false;
+    // Operation Variables
+    var firsttime = false;
 
-// oneSignal Variables
-var device = getUrlParameter(`device`)
-var isMobile = device !== null
+    // oneSignal Variables
+    var onlineSocketDone = false;
+    var device = getUrlParameter(`device`);
+    var isMobile = device !== null;
+    var notificationsSupported = false;
+    var OneSignal;
 
-// Timers
-var clockTimer; // Used for ticking Meta.time
+    // Timers
+    var clockTimer; // Used for ticking Meta.time
+
+} catch (e) {
+    console.error(e);
+    $(document).Toasts('create', {
+        class: 'bg-danger',
+        title: 'Error initializing',
+        body: 'There was an error initializing the website. Please report this to engineer@wwsu1069.org.',
+        icon: 'fas fa-skull-crossbones fa-lg',
+    });
+}
 
 // Tasks to perform when the website is fully loaded
 $(document).ready(function () {
+    try {
+        // Initialize the web player
+        if (document.querySelector('#nativeflashradio')) {
+            $('#nativeflashradio').flashradio({
+                token: 'dGZzd2ZzL3h4dHYyMTc6L3BzaAE=',
+                userinterface: 'small',
+                backgroundcolor: '#263238',
+                themecolor: '#d31e38',
+                themefontcolor: '#ffffff',
+                startvolume: '75',
+                radioname: 'WWSU 106.9 FM',
+                scroll: 'auto',
+                autoplay: 'false',
+                useanalyzer: 'real',
+                analyzertype: '4',
+                usecover: 'true',
+                usestreamcorsproxy: 'false',
+                affiliatetoken: '1000lIPN',
+                debug: 'false',
+                ownsongtitleurl: '',
+                radiocover: '',
+                songgooglefontname: '',
+                songfontname: '',
+                titlegooglefontname: '',
+                titlefontname: '',
+                corsproxy: 'https://html5radioplayer2us.herokuapp.com/?q=',
+                streamprefix: '/stream',
+                mountpoint: '',
+                radiouid: '',
+                apikey: '',
+                streamid: '1',
+                streampath: '/live',
+                streamtype: 'other',
+                streamurl: 'https://server.wwsu1069.org',
+                songinformationinterval: '600000'
+            })
+        }
 
-    // Initialize the web player
-    if (document.querySelector('#nativeflashradio')) {
-        $('#nativeflashradio').flashradio({
-            token: 'dGZzd2ZzL3h4dHYyMTc6L3BzaAE=',
-            userinterface: 'small',
-            backgroundcolor: '#263238',
-            themecolor: '#d31e38',
-            themefontcolor: '#ffffff',
-            startvolume: '75',
-            radioname: 'WWSU 106.9 FM',
-            scroll: 'auto',
-            autoplay: 'false',
-            useanalyzer: 'real',
-            analyzertype: '4',
-            usecover: 'true',
-            usestreamcorsproxy: 'false',
-            affiliatetoken: '1000lIPN',
-            debug: 'false',
-            ownsongtitleurl: '',
-            radiocover: '',
-            songgooglefontname: '',
-            songfontname: '',
-            titlegooglefontname: '',
-            titlefontname: '',
-            corsproxy: 'https://html5radioplayer2us.herokuapp.com/?q=',
-            streamprefix: '/stream',
-            mountpoint: '',
-            radiouid: '',
-            apikey: '',
-            streamid: '1',
-            streampath: '/live',
-            streamtype: 'other',
-            streamurl: 'https://server.wwsu1069.org',
-            songinformationinterval: '600000'
+        // Add accessibility properties to flash player
+        waitForElement('#nativeflashradioplaystopcontainer', (element) => {
+            $('#nativeflashradioplaystopcontainer').attr('tabindex', 0)
         })
+        waitForElement('#nativeflashradiovolumegrab', (element) => {
+            $('#nativeflashradiovolumegrab').attr('tabindex', 0)
+            $('#nativeflashradiovolumegrab').attr('alt', 'Change Volume')
+        })
+        waitForElement('#nativeflashradiovolumehit', (element) => {
+            $('#nativeflashradiovolumehit').attr('alt', 'Volume')
+        })
+        waitForElement('#nativeflashradioimagehit1', (element) => {
+            $('#nativeflashradioimagehit1').attr('alt', 'logo')
+        })
+
+        // Initialize menu items
+        navigation.addItem('#nav-nowplaying', '#section-nowplaying', '', true);
+        navigation.addItem('#nav-schedule', '#section-schedule', '/schedule');
+
+    } catch (e) {
+        console.error(e);
+        $(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'Error in document.ready',
+            body: 'There was an error in the document.ready function. Please report this to engineer@wwsu1069.org.',
+            icon: 'fas fa-skull-crossbones fa-lg',
+        });
     }
-
-    // Add accessibility properties to flash player
-    waitForElement('#nativeflashradioplaystopcontainer', (element) => {
-        $('#nativeflashradioplaystopcontainer').attr('tabindex', 0)
-    })
-    waitForElement('#nativeflashradiovolumegrab', (element) => {
-        $('#nativeflashradiovolumegrab').attr('tabindex', 0)
-        $('#nativeflashradiovolumegrab').attr('alt', 'Change Volume')
-    })
-    waitForElement('#nativeflashradiovolumehit', (element) => {
-        $('#nativeflashradiovolumehit').attr('alt', 'Volume')
-    })
-    waitForElement('#nativeflashradioimagehit1', (element) => {
-        $('#nativeflashradioimagehit1').attr('alt', 'logo')
-    })
-
 });
 
 
@@ -112,10 +141,77 @@ socket.on('disconnect', () => {
  * @returns {?string} Value of the URL parameter being fetched, or null if not set.
  */
 function getUrlParameter (name) {
-    name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
-    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
-    var results = regex.exec(window.location.search)
-    return results === null ? null : decodeURIComponent(results[ 1 ].replace(/\+/g, ' '))
+    try {
+        name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
+        var results = regex.exec(window.location.search)
+        return results === null ? null : decodeURIComponent(results[ 1 ].replace(/\+/g, ' '))
+    } catch (e) {
+        console.error(e);
+        $(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'Error in getUrlParameter function',
+            body: 'There was an error in the getUrlParameter function. Please report this to engineer@wwsu1069.org.',
+            icon: 'fas fa-skull-crossbones fa-lg',
+        });
+    }
+}
+
+/**
+ * Convert a hexadecimal color into its RGBA values.
+ * 
+ * @param {string} hex A hexadecimal color
+ * @param {object} options options.format: specify "array" to return as [red, green, blue, alpha] instead of object
+ * @returns {object || array} {red, green, blue, alpha} or [red, green, blue, alpha] values
+ */
+function hexRgb (hex, options = {}) {
+
+    // function-specific values
+    var hexChars = 'a-f\\d'
+    var match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`
+    var match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`
+    var nonHexChars = new RegExp(`[^#${hexChars}]`, 'gi')
+    var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i')
+
+    try {
+        if (typeof hex !== 'string' || nonHexChars.test(hex) || !validHexSize.test(hex)) {
+            throw new TypeError('Expected a valid hex string')
+        }
+
+        hex = hex.replace(/^#/, '')
+        let alpha = 255
+
+        if (hex.length === 8) {
+            alpha = parseInt(hex.slice(6, 8), 16) / 255
+            hex = hex.substring(0, 6)
+        }
+
+        if (hex.length === 4) {
+            alpha = parseInt(hex.slice(3, 4).repeat(2), 16) / 255
+            hex = hex.substring(0, 3)
+        }
+
+        if (hex.length === 3) {
+            hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ]
+        }
+
+        const num = parseInt(hex, 16)
+        const red = num >> 16
+        const green = (num >> 8) & 255
+        const blue = num & 255
+
+        return options.format === 'array'
+            ? [ red, green, blue, alpha ]
+            : { red, green, blue, alpha }
+    } catch (e) {
+        console.error(e)
+        $(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'hexrgb error',
+            body: 'There was an error in the hexrgb function. Please report this to engineer@wwsu1069.org.',
+            icon: 'fas fa-skull-crossbones fa-lg',
+        });
+    }
 }
 
 
@@ -123,6 +219,18 @@ function getUrlParameter (name) {
 /*
     DISCIPLINE FUNCTIONS
 */
+
+
+
+
+socket.on('discipline', (data) => {
+    socket.disconnect()
+    $('#modal-discipline-title').html(`Disciplinary action issued - Disconnected from WWSU`);
+    $('#modal-discipline-body').html(`<p>Disciplinary action was issued against you for the following reason: ${data.message}.</p>
+<p>A ${data.action} was issued against you, and you may no longer use WWSU's services until the discipline expires.</p>
+<p>Please contact gm@wwsu1069.org if you have any questions or concerns.</p>`);
+    $('#modal-discipline').modal({ backdrop: 'static', keyboard: false });
+})
 
 /**
  * Check if this client has an active discipline on WWSU's API, and if so, display the #modal-discipline.
@@ -182,8 +290,8 @@ function doSockets (firsttime = false) {
             metaSocket()
             announcementsSocket()
             //messagesSocket()
-            //calendarSocket()
-            //calendarExceptionsSocket()
+            calendarSocket()
+            calendarExceptionsSocket()
             //loadGenres()
             //onlineSocket()
         })
@@ -195,8 +303,8 @@ function doSockets (firsttime = false) {
             metaSocket()
             announcementsSocket()
             //messagesSocket()
-            //calendarSocket()
-            //calendarExceptionsSocket()
+            calendarSocket()
+            calendarExceptionsSocket()
             //loadGenres()
             //onlineSocket(true)
         })
@@ -601,5 +709,175 @@ function addAnnouncement (announcement) {
             body: announcement.announcement,
             icon: 'fas fa-bullhorn fa-lg',
         })
+    }
+}
+
+
+
+
+/*
+    CALENDAR / SCHEDULE FUNCTIONS
+*/
+
+
+
+socket.on('calendar', (data) => {
+    processCalendar(data)
+})
+
+socket.on('calendarexceptions', (data) => {
+    processCalendarExceptions(data)
+})
+
+/**
+ * Process calendar records.
+ * 
+ * @param {object} data Data received from WWSU according to websocket standards.
+ * @param {boolean} replace Mark true if data is an array of records that should replace the database entirely.
+ */
+function processCalendar (data, replace = false) {
+    calendardb.query('calendar', data, replace);
+    updateCalendar();
+}
+
+/**
+ * Process calendar exception records.
+ * 
+ * @param {object} data Data received from WWSU according to websocket standards.
+ * @param {boolean} replace Mark true if data is an array of records that should replace the database entirely.
+ */
+function processCalendarExceptions (data, replace = false) {
+    calendardb.query('calendarexceptions', data, replace);
+    updateCalendar();
+}
+
+/**
+ * Hit the calendar WWSU endpoint and subscribe to socket events.
+ */
+function calendarSocket () {
+    socket.post('/calendar/get', {}, function serverResponded (body) {
+        try {
+            processCalendar(body, true)
+        } catch (unusedE) {
+            setTimeout(calendarSocket, 10000)
+        }
+    })
+}
+
+/**
+ * Hit the calendar exceptions WWSU endpoint and subscribe to socket events.
+ */
+function calendarExceptionsSocket () {
+    socket.post('/calendar/get-exceptions', {}, function serverResponded (body) {
+        try {
+            processCalendarExceptions(body, true)
+        } catch (unusedE) {
+            setTimeout(calendarExceptionsSocket, 10000)
+        }
+    })
+}
+
+
+/**
+ * Re-process calendar events
+ */
+function updateCalendar () {
+    $('#schedule-events').html('');
+
+    // Get the value of the currently selected calendar item
+    var selectedOption = $('#schedule-select').children("option:selected").val();
+    selectedOption = parseInt(selectedOption);
+
+    // Process events for the next 7 days
+    var events = calendardb.getEvents(moment().add(selectedOption, 'days'), moment().add(selectedOption + 1, 'days'));
+
+    var html = '';
+
+    // Run through every event in memory and add appropriate ones into our formatted calendar variable.
+    events
+        .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
+        .map(event => {
+            try {
+                var colorClass = `secondary`;
+                var iconClass = 'far fa-calendar-alt';
+
+                switch (event.type) {
+                    case 'genre':
+                    case 'playlist':
+                        colorClass = 'primary';
+                        iconClass = 'fas fa-music';
+                        break;
+                    case 'show':
+                        colorClass = 'danger';
+                        iconClass = 'fas fa-microphone';
+                        break;
+                    case 'sports':
+                        colorClass = 'success';
+                        iconClass = 'fas fa-basketball-ball';
+                        break;
+                    case 'remote':
+                        colorClass = 'purple';
+                        iconClass = 'fas fa-broadcast-tower';
+                        break;
+                    case 'prerecord':
+                        colorClass = 'pink';
+                        iconClass = 'fas fa-play-circle';
+                        break;
+                }
+
+                if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1) { colorClass = 'dark' }
+
+                var badgeInfo
+                if ([ 'canceled-changed' ].indexOf(event.exceptionType) !== -1) {
+                    badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
+                }
+                if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+                    badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
+                }
+                if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
+                    badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
+                }
+
+                var shouldBeDark = [ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1 || moment().isAfter(moment(event.end))
+
+                html += `<div class="col-md-4 col-lg-3">
+                <div class="p-2 card card-${colorClass} card-outline${shouldBeDark ? ` bg-secondary` : ``}">
+                  <div class="card-body box-profile">
+                    <div class="text-center">
+                    ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="../../uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
+                    </div>
+    
+                    <h3 class="profile-username text-center">${event.name}</h3>
+    
+                    <p class="${!shouldBeDark ? `text-muted ` : ``}text-center">${event.hosts}</p>
+    
+                    <ul class="list-group list-group-unbordered mb-3 text-center">
+                    ${badgeInfo ? `<li class="list-group-item${shouldBeDark ? ` bg-secondary` : ``}">
+                    <b>${badgeInfo}</b>
+                  </li>` : ``}
+                    <li class="list-group-item${shouldBeDark ? ` bg-secondary` : ``}">
+                        <b>${moment(event.start).format('hh:mm A')} - ${moment(event.end).format('hh:mm A')}</b>
+                    </li>
+                    </ul>
+    
+                    <a href="#" class="btn btn-primary btn-block" onclick="displayEventInfo('${event.unique}')" onkeydown="displayEventInfo('${event.unique}')" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications."><b>More Info / Notifications</b></a>
+                  </div>
+                </div>
+              </div>`
+            } catch (e) {
+                console.error(e)
+                $(document).Toasts('create', {
+                    class: 'bg-danger',
+                    title: 'calendar error',
+                    body: 'There was an error in the updateCalendar function, event mapping. Please report this to engineer@wwsu1069.org.',
+                    icon: 'fas fa-skull-crossbones fa-lg',
+                });
+            }
+        })
+
+        $('#schedule-events').html(html);
+
+    for (var i = 1; i < 7; i++) {
+        $(`#schedule-select-${i}`).html(moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
     }
 }
