@@ -36,6 +36,8 @@
   <script src="plugins/later/js/later.min.js"></script>
   <!-- Jdenticon -->
   <script src="plugins/jdenticon/js/jdenticon.min.js"></script>
+  <!--OneSignal-->
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
 
   <!--WWSU-->
   <script src="plugins/sails.io/sails.io.js" autoConnect="false"></script>
@@ -147,8 +149,9 @@
               </li>
             </ul>
 
-            <a href="#" class="btn btn-primary btn-block subscribe-button"
-              title="Receive push notifications when this program goes on the air." tabindex="0"><b>Subscribe</b></a>
+            <a href="#" class="btn btn-primary btn-block subscribe-button-all"
+              title="Receive push notifications when this program goes on the air." tabindex="0"><b>Subscribe All
+                Times</b></a>
           </div>
           <!-- /.card-body -->
         </div>
@@ -198,31 +201,40 @@
               <span data-toggle="tooltip" title="New Messages" class="badge bg-secondary chat-newmessages">0</span>
             </div>
           </div>
-          <!-- /.card-header -->
           <div class="card-body">
-            <!-- Conversations are loaded here -->
+            <div class="callout callout-secondary chat-status">
+              <h5>Not Connected</h5>
+
+              <p>You are not yet connected to the chat system.</p>
+            </div>
+
             <div class="direct-chat-messages" id="chat-messages" style="height: 50vh;">
               <!--Chat messages go here-->
             </div>
-          </div>
-
-          <div class="card-footer">
             <div class="input-group m-2">
-              <span class="input-group-prepend">
-                <span class="input-group-text">Nickname</span>
-              </span>
+              <label for="chat-nickname">Nickname</label>
               <input type="text" name="chat-nickname" id="chat-nickname" placeholder="" class="form-control">
             </div>
             <div class="input-group m-2">
-              <textarea name="chat-message" id="chat-message" rows="3" placeholder="Type Message ..."
-                class="form-control"></textarea>
+              <label for="chat-message">Message</label>
+              <textarea name="chat-message" id="chat-message" maxlength="1024" rows="3" placeholder="Type Message ..."
+                class="form-control chat-blocker"></textarea>
             </div>
             <div class="input-group m-2">
-              <button type="submit" class="btn btn-success" onclick="sendMessage()" tabindex="0">Send Public</button>
-              <button type="submit" class="btn btn-danger" onclick="sendMessage(true)" tabindex="0">Send Private</button>
+              <button type="submit" class="btn btn-success chat-blocker" onclick="sendMessage()" tabindex="0">Send
+                Public</button>
+              <button type="submit" class="btn btn-danger chat-blocker" onclick="sendMessage(true)" tabindex="0">Send
+                Private</button>
             </div>
           </div>
-          <!-- /.card-footer-->
+          <div class="card-footer">
+            <div class="callout callout-warning">
+              <h5>IP Addresses are Logged</h5>
+
+              <p>Do not send any harassing nor threatening messages. You agree your IP address will be logged with every
+                message sent, and you could be banned from WWSU's website for sending harmful messages.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -269,6 +281,35 @@
           </div>
         </div>
 
+        <div class="modal fade" id="modal-eventinfo" aria-hidden="true" style="display: none;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Event Information</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+              <div class="modal-body" id="modal-eventinfo-body">
+                <!--Event Info goes here-->
+              </div>
+              <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="0">Close</button>
+                <button type="button" class="btn btn-info subscribe-button-once"
+                  title="Receive a push notification when this event, only for this date/time, airs, changes time, or cancels."
+                  tabindex="0" id="modal-eventinfo-subscribe-once">Subscribe One-Time</button>
+                <button type="button" class="btn btn-primary subscribe-button-all"
+                  title="Receive a push notification when this event goes on the air any time, or when a change is made to this event's schedule."
+                  id="modal-eventinfo-subscribe-all">Subscribe All Times</button>
+                <button type="button" class="btn btn-danger"
+                  title="Do not receive any push notifications for this event anymore." id="modal-eventinfo-unsubscribe"
+                  style="display: none;">Unsubscribe All Times</button>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
       </section>
 
       <!-- Add 65 px to the end of the body because of the sticky footer-->
@@ -277,7 +318,7 @@
     <!-- /.content-wrapper -->
 
     <!--Modals-->
-    <div class="modal fade" id="modal-discipline">
+    <div class="modal fade" id="modal-discipline" aria-hidden="true" style="display: none;">
       <div class="modal-dialog">
         <div class="modal-content bg-danger">
           <div class="modal-header">

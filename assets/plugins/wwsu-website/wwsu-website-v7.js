@@ -102,7 +102,9 @@ $(document).ready(function () {
             newMessages = 0;
             updateNewMessages();
         });
-        navigation.addItem('#nav-schedule', '#section-schedule', '/schedule');
+        navigation.addItem('#nav-schedule', '#section-schedule', '/schedule', false, () => {
+            updateCalendar();
+        });
 
         // Add change event for chat-nickname
         $('#chat-nickname').change(function () {
@@ -416,51 +418,31 @@ function doMeta (response) {
                 body: `<p>${Meta.line1}</p><p>${Meta.line2}</p>`,
                 icon: 'fas fa-play fa-lg',
             })
-
-            // Refresh calendar each time a new track is given
-            // TODO
-            //updateCalendar()
         }
 
-        // TODO: If a false was returned for web chatting, then disable it
-        /*
-        if ('webchat' in response && !response.webchat && messageText) {
+        if ('webchat' in response && !response.webchat) {
             blocked = true
-            messageText.style.display = 'none'
-            sendButton.disabled = true
-            sendButtonP.disabled = true
-            if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-danger shadow-4 text-light"><h4>Chat Status: Disabled</h4>The host of the current show, or a director, has disabled the chat. Please try again after the show has ended.</div>` }
-            if (shouldScroll && document.querySelector('#messages')) {
-                $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
-            }
+            $('.chat-status').html(`<h5>Chat Status: Disabled</h5>
+            <p>Either the current DJ disabled the chat for their show, or directors have temporarily disabled the chat globally.</p>`);
+            $('.chat-blocker').prop('disabled', true);
         }
-        */
 
-        /* TODO
         // If a state change was returned, process it by informing the client whether or not there is probably a DJ at the studio to read messages
-        if ('state' in response) {
+        if ('state' in response && Meta.webchat) {
             if (response.state.startsWith('automation_') || Meta.state === 'unknown') {
                 if (automationpost !== 'automation') {
-                    temp = document.getElementById('msg-state')
-                    if (temp) { temp.remove() }
-                    if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-default shadow-4 text-light"><h4>Chat Status: Off the Air</h4>No one is on the air at this time. There might not be anyone in the studio at this time to read your message.</div>` }
-                    if (shouldScroll && document.querySelector('#messages')) {
-                        $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
-                    }
+                    $('.chat-status').html(`<h5>Chat Status: Inactive</h5>
+                    <p>No shows are airing right now. Your message will likely not be seen by a DJ.</p>`);
                     automationpost = 'automation'
                 }
-                temp = document.querySelector(`#show-subscribe`)
-                if (temp !== null) { temp.style.display = 'none' }
             } else if (response.state.startsWith('prerecord_')) {
                 if (automationpost !== response.show) {
-                    temp = document.getElementById('msg-state')
-                    if (temp) { temp.remove() }
-                    if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-warning shadow-4 text-light"><h4>Chat Status: Prerecord</h4>The current show airing is prerecorded. There might not be anyone in the studio at this time to read your message.</div>` }
-                    automationpost = response.show
-                    if (shouldScroll && document.querySelector('#messages')) {
-                        $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
-                    }
+                    automationpost = response.show;
+                    $('.chat-status').html(`<h5>Chat Status: Prerecord</h5>
+                    <p>The show airing now is prerecorded. There might not be anyone in the studio to see your messages.</p>`);
                 }
+
+                /* TODO
                 temp = document.querySelector(`#show-subscribe`)
                 temp2 = document.querySelector(`#show-subscribe-button`)
                 temp3 = document.querySelector(`#show-subscribe-name`)
@@ -504,16 +486,15 @@ function doMeta (response) {
                         temp2.onkeydown = () => { }
                     }
                 }
+                */
             } else {
                 if (automationpost !== response.show) {
-                    temp = document.getElementById('msg-state')
-                    if (temp) { temp.remove() }
-                    if (notificationsStatus && onlineSocketDone) { notificationsStatus.innerHTML = `<div class="p-3 bs-callout bs-callout-success shadow-4 text-light"><h4>Chat Status: Enabled</h4>The show airing now is live. Your messages should be received by the DJ / host.</div>` }
+                    $('.chat-status').html(`<h5>Chat Status: Active</h5>
+                    <p>Your messages should be received by the DJ / host.</p>`);
                     automationpost = response.show
-                    if (shouldScroll && document.querySelector('#messages')) {
-                        $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000)
-                    }
                 }
+
+                /* TODO
                 temp = document.querySelector(`#show-subscribe`)
                 temp2 = document.querySelector(`#show-subscribe-button`)
                 temp3 = document.querySelector(`#show-subscribe-name`)
@@ -557,23 +538,15 @@ function doMeta (response) {
                         temp2.onkeydown = () => { }
                     }
                 }
+                */
             }
         }
-        */
 
-        /* TODO
         // Unblock webchat if chats are allowed
         if (Meta.webchat) {
             blocked = false
-            if (messageText && onlineSocketDone) {
-                messageText.style.removeProperty('display')
-                sendButton.disabled = false
-                sendButtonP.disabled = false
-            }
-            temp = document.getElementById('msg-disabled')
-            if (temp) { temp.remove() }
+            $('.chat-blocker').prop('disabled', false);
         }
-        */
 
         // If a track ID change was passed, do some stuff in recent tracks
         if (typeof response.history !== 'undefined') {
@@ -897,12 +870,287 @@ function updateCalendar () {
     }
 }
 
+/**
+ * Display a modal with more information about the given event, and a chance to subscribe or unsubscribe.
+ * 
+ * @param {string} showID Unique ID of the event to show
+ */
+function displayEventInfo (showID) {
+    var events = calendardb.getEvents(undefined, moment().add(7, 'days'));
+
+    events = events.filter((event) => event.unique === showID);
+    if (events.length === 0) {
+        $(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'calendar error',
+            subtitle: showID,
+            body: 'There was an error trying to load that event. Please report this to engineer@wwsu1069.org.',
+            icon: 'fas fa-skull-crossbones fa-lg',
+        });
+        return null;
+    }
+    var event = events[ 0 ]
+    var colorClass = `secondary`;
+    var iconClass = 'far fa-calendar-alt';
+
+    switch (event.type) {
+        case 'genre':
+        case 'playlist':
+            colorClass = 'primary';
+            iconClass = 'fas fa-music';
+            break;
+        case 'show':
+            colorClass = 'danger';
+            iconClass = 'fas fa-microphone';
+            break;
+        case 'sports':
+            colorClass = 'success';
+            iconClass = 'fas fa-basketball-ball';
+            break;
+        case 'remote':
+            colorClass = 'purple';
+            iconClass = 'fas fa-broadcast-tower';
+            break;
+        case 'prerecord':
+            colorClass = 'pink';
+            iconClass = 'fas fa-play-circle';
+            break;
+    }
+
+    if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1) { colorClass = 'dark' }
+
+    var badgeInfo
+    if ([ 'canceled-changed' ].indexOf(event.exceptionType) !== -1) {
+        badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
+    }
+    if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+        badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
+    }
+    if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
+        badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
+    }
+
+    $('#modal-eventinfo-body').html(`<div class="p-2 card card-${colorClass} card-outline">
+      <div class="card-body box-profile">
+        <div class="text-center">
+        ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="../../uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
+        </div>
+
+        <h3 class="profile-username text-center">${event.name}</h3>
+
+        <p class="text-muted text-center">${event.hosts}</p>
+
+        <ul class="list-group list-group-unbordered mb-3">
+        ${badgeInfo ? `<li class="list-group-item text-center">
+        <p><b>${badgeInfo}</b></p>
+        ${event.exceptionReason !== null ? `<p><strong>${event.exceptionReason}</strong></p>` : ``}
+      </li>` : ``}
+        <li class="list-group-item text-center">
+            <b>${[ 'canceled', 'canceled-system', 'canceled-updated' ].indexOf(event.exceptionType) !== -1 ? `Original Time: ` : ``}${moment(event.start).format('lll')} - ${moment(event.end).format('hh:mm A')}</b>
+        </li>
+        <li class="list-group-item">
+        ${event.banner !== null ? `<img class="img-fluid" src="../../uploads/calendar/banner/${event.banner}" alt="Show Banner">` : ``}
+        </li>
+        <li class="list-group-item">
+            ${event.description !== null ? event.description : ``}
+        </li>
+        </ul>
+      </div>
+    </div>`);
+
+    // If a device ID was provided from the WWSU mobile app
+    if (!notificationsSupported && !isMobile) {
+        $('#modal-eventinfo-subscribe-once').css('display', 'none');
+        $('#modal-eventinfo-unsubscribe').css('display', '');
+        $('#modal-eventinfo-subscribe-all').css('display', 'none');
+        $('#modal-eventinfo-unsubscribe').prop('disabled', true);
+        $('#modal-eventinfo-unsubscribe').html(`Browser does not support notifications`);
+    } else if (device !== null) {
+        // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
+
+        // Check the number of subscriptions
+        var subscribed = Subscriptions([ { type: `calendar-once`, subtype: event.unique }, { type: `calendar-all`, subtype: event.calendarID } ]).get().length
+
+        if (subscribed === 0) {
+            $('#modal-eventinfo-subscribe-once').css('display', '');
+            $('#modal-eventinfo-unsubscribe').css('display', 'none');
+            $('#modal-eventinfo-subscribe-all').css('display', '');
+            $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
+            $('#modal-eventinfo-unsubscribe').prop('disabled', false);
+            $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
+
+            $(`#modal-eventinfo-subscribe-once`).click((event) => {
+                subscribe(`calendar-once`, event.unique);
+                $('#modal-eventinfo').modal('hide');
+            });
+            $(`#modal-eventinfo-subscribe-once`).keypress((event) => {
+                if (event.which === 13) {
+                    subscribe(`calendar-once`, event.unique);
+                    $('#modal-eventinfo').modal('hide');
+                }
+            })
+            $(`#modal-eventinfo-subscribe-all`).click((event) => {
+                subscribe(`calendar-all`, event.calendarID);
+                $('#modal-eventinfo').modal('hide');
+            });
+            $(`#modal-eventinfo-subscribe-all`).keypress((event) => {
+                if (event.which === 13) {
+                    subscribe(`calendar-all`, event.calendarID);
+                    $('#modal-eventinfo').modal('hide');
+                }
+            })
+        } else {
+            $('#modal-eventinfo-subscribe-once').css('display', 'none');
+            $('#modal-eventinfo-unsubscribe').css('display', '');
+            $('#modal-eventinfo-subscribe-all').css('display', 'none');
+            $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
+            $('#modal-eventinfo-unsubscribe').prop('disabled', false);
+            $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
+
+            $(`#modal-eventinfo-unsubscribe`).click((event) => {
+                unsubscribe(event.unique, event.calendarID);
+                $('#modal-eventinfo').modal('hide');
+            });
+            $(`#modal-eventinfo-unsubscribe`).keypress((event) => {
+                if (event.which === 13) {
+                    unsubscribe(event.unique, event.calendarID);
+                    $('#modal-eventinfo').modal('hide');
+                }
+            })
+        }
+    } else if (!isMobile) {
+        $('#modal-eventinfo-subscribe-once').css('display', 'none');
+        $('#modal-eventinfo-unsubscribe').css('display', 'none');
+        $('#modal-eventinfo-subscribe-all').css('display', '');
+        $('#modal-eventinfo-subscribe-all').html(`Prompt for Notifications`);
+        $('#modal-eventinfo-unsubscribe').prop('disabled', false);
+        $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
+
+        $(`#modal-eventinfo-subscribe-all`).click((event) => {
+            OneSignal.showSlidedownPrompt({ force: true })
+            $('#modal-eventinfo').modal('hide');
+        });
+        $(`#modal-eventinfo-subscribe-all`).keypress((event) => {
+            if (event.which === 13) {
+                OneSignal.showSlidedownPrompt({ force: true })
+                $('#modal-eventinfo').modal('hide');
+            }
+        })
+    }
+
+    $('#modal-eventinfo').modal('show');
+}
+
+/**
+ * Subscribe to push notifications for an event.
+ * 
+ * @param {string} type calendar-once for one-time subscription, or calendar-all for permanent subscription.
+ * @param {string} subtype event.unique if one-time subscription, or calendarID if permanent subscription.
+ */
+function subscribe (type, subtype) {
+    socket.post('/subscribers/add', { device: device, type: type, subtype: subtype }, function serverResponded (response) {
+        try {
+            if (response !== 'OK') {
+                $(document).Toasts('create', {
+                    class: 'bg-warning',
+                    title: 'Subscription failed',
+                    body: 'Unable to subscribe you to that event at this time. Please contact engineer@wwsu1069.org.',
+                    icon: 'fas fa-skull-crossbones fa-lg',
+                });
+            } else {
+                $(document).Toasts('create', {
+                    class: 'bg-success',
+                    title: 'Subscribed!',
+                    autohide: true,
+                    delay: 30000,
+                    body: '<p>You were successfully subscribed! You will be notified through your web browser when the event goes on the air or the time changes / is canceled.</p><p>You may stop receiving notifications if you go longer than a month without visiting the WWSU listener corner.</p>',
+                    icon: 'fas fa-bell fa-lg',
+                });
+                Subscriptions.insert({ type: type, subtype: subtype })
+            }
+        } catch (e) {
+            console.error(e);
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Subscription failed',
+                body: 'Unable to subscribe you to that event at this time. Please contact engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+        }
+    })
+}
+
+/**
+ * Stop receiving push notifications for an event
+ * 
+ * @param {string} ID event.unique to unsubscribe from
+ * @param {string} event calendarID to unsubscribe from
+ */
+function unsubscribe (ID, event) {
+    socket.post('/subscribers/remove', { device: device, type: `calendar-once`, subtype: ID }, function serverResponded (response) {
+        try {
+            if (response !== 'OK') {
+                $(document).Toasts('create', {
+                    class: 'bg-warning',
+                    title: 'Un-subscription failed',
+                    body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact engineer@wwsu1069.org.',
+                    icon: 'fas fa-skull-crossbones fa-lg',
+                });
+            } else {
+                socket.post('/subscribers/remove', { device: device, type: `calendar-all`, subtype: event }, function serverResponded (response) {
+                    try {
+                        if (response !== 'OK') {
+                            $(document).Toasts('create', {
+                                class: 'bg-warning',
+                                title: 'Un-subscription failed',
+                                body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact engineer@wwsu1069.org.',
+                                icon: 'fas fa-skull-crossbones fa-lg',
+                            });
+                        } else {
+                            $(document).Toasts('create', {
+                                class: 'bg-success',
+                                title: 'Un-subscribed!',
+                                autohide: true,
+                                delay: 15000,
+                                body: '<p>You successfully un-subscribed from that event and will no longer receive any notifications for it unless you subscribe again.</p>',
+                                icon: 'fas fa-bell-slash fa-lg',
+                            });
+                            Subscriptions({ type: `calendar-once`, subtype: ID }).remove()
+                            Subscriptions({ type: `calendar-all`, subtype: event }).remove()
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        $(document).Toasts('create', {
+                            class: 'bg-danger',
+                            title: 'Un-subscription failed',
+                            body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact engineer@wwsu1069.org.',
+                            icon: 'fas fa-skull-crossbones fa-lg',
+                        });
+                    }
+                })
+            }
+        } catch (e) {
+            console.error(e);
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Un-subscription failed',
+                body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+        }
+    })
+}
+
+
 
 
 
 /*
     CHAT FUNCTIONS
 */
+
+
+
 
 
 // When a new message is received, process it.
@@ -1075,12 +1323,25 @@ function addMessage (data, firsttime = false) {
  */
 function sendMessage (privateMsg = false) {
     if (blocked) { return null }
+    if ($('#chat-message').val().length < 1) {
+        $(document).Toasts('create', {
+            class: 'bg-warning',
+            title: 'Message Rejected',
+            autohide: true,
+            delay: 10000,
+            body: 'You did not type a message to send.',
+            icon: 'fas fa-skull-crossbones fa-lg',
+        });
+        return null;
+    }
     socket.post('/messages/send-web', { message: $('#chat-message').val(), nickname: $('#chat-nickname').val(), private: privateMsg }, function serverResponded (response) {
         try {
             if (response !== 'OK') {
                 $(document).Toasts('create', {
                     class: 'bg-warning',
                     title: 'Message Rejected',
+                    autohide: true,
+                    delay: 15000,
                     body: 'WWSU rejected your message. This could be because you are sending messages too fast, or you are banned from sending messages.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
