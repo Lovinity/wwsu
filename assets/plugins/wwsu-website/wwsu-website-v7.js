@@ -17,6 +17,7 @@ try {
     var Subscriptions = TAFFY();
     var blocked = false;
     var skipIt = 0;
+    var viewingEvent = {};
 
     // Operation Variables
     var firstTime = true;
@@ -111,6 +112,38 @@ $(document).ready(function () {
         $('#chat-nickname').change(function () {
             socket.post('/recipients/edit-web', { label: $(this).val() }, function serverResponded () { })
         });
+
+        // Add click events for subscription buttons
+        $(`#modal-eventinfo-subscribe-once`).click((e) => {
+            subscribe(`calendar-once`, viewingEvent.unique);
+            $('#modal-eventinfo').modal('hide');
+        });
+        $(`#modal-eventinfo-subscribe-once`).keypress((e) => {
+            if (e.which === 13) {
+                subscribe(`calendar-once`, viewingEvent.unique);
+                $('#modal-eventinfo').modal('hide');
+            }
+        })
+        $(`#modal-eventinfo-subscribe-all`).click((e) => {
+            subscribe(`calendar-all`, viewingEvent.calendarID);
+            $('#modal-eventinfo').modal('hide');
+        });
+        $(`#modal-eventinfo-subscribe-all`).keypress((e) => {
+            if (e.which === 13) {
+                subscribe(`calendar-all`, viewingEvent.calendarID);
+                $('#modal-eventinfo').modal('hide');
+            }
+        })
+        $(`#modal-eventinfo-unsubscribe`).click((e) => {
+            unsubscribe(event.unique, viewingEvent.calendarID);
+            $('#modal-eventinfo').modal('hide');
+        });
+        $(`#modal-eventinfo-unsubscribe`).keypress((e) => {
+            if (e.which === 13) {
+                unsubscribe(event.unique, viewingEvent.calendarID);
+                $('#modal-eventinfo').modal('hide');
+            }
+        })
 
     } catch (e) {
         console.error(e);
@@ -945,6 +978,7 @@ function displayEventInfo (showID) {
         return null;
     }
     var event = events[ 0 ]
+    viewingEvent = event;
     var colorClass = `secondary`;
     var iconClass = 'far fa-calendar-alt';
 
@@ -1033,27 +1067,6 @@ function displayEventInfo (showID) {
             $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
             $('#modal-eventinfo-unsubscribe').prop('disabled', false);
             $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
-
-            $(`#modal-eventinfo-subscribe-once`).click((e) => {
-                subscribe(`calendar-once`, event.unique);
-                $('#modal-eventinfo').modal('hide');
-            });
-            $(`#modal-eventinfo-subscribe-once`).keypress((e) => {
-                if (e.which === 13) {
-                    subscribe(`calendar-once`, event.unique);
-                    $('#modal-eventinfo').modal('hide');
-                }
-            })
-            $(`#modal-eventinfo-subscribe-all`).click((e) => {
-                subscribe(`calendar-all`, event.calendarID);
-                $('#modal-eventinfo').modal('hide');
-            });
-            $(`#modal-eventinfo-subscribe-all`).keypress((e) => {
-                if (e.which === 13) {
-                    subscribe(`calendar-all`, event.calendarID);
-                    $('#modal-eventinfo').modal('hide');
-                }
-            })
         } else {
             $('#modal-eventinfo-subscribe-once').css('display', 'none');
             $('#modal-eventinfo-unsubscribe').css('display', '');
@@ -1061,17 +1074,6 @@ function displayEventInfo (showID) {
             $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
             $('#modal-eventinfo-unsubscribe').prop('disabled', false);
             $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
-
-            $(`#modal-eventinfo-unsubscribe`).click((e) => {
-                unsubscribe(event.unique, event.calendarID);
-                $('#modal-eventinfo').modal('hide');
-            });
-            $(`#modal-eventinfo-unsubscribe`).keypress((e) => {
-                if (e.which === 13) {
-                    unsubscribe(event.unique, event.calendarID);
-                    $('#modal-eventinfo').modal('hide');
-                }
-            })
         }
     } else if (!isMobile) {
         $('#modal-eventinfo-subscribe-once').css('display', 'none');
