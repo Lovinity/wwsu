@@ -1034,22 +1034,22 @@ function displayEventInfo (showID) {
             $('#modal-eventinfo-unsubscribe').prop('disabled', false);
             $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
 
-            $(`#modal-eventinfo-subscribe-once`).click((event) => {
+            $(`#modal-eventinfo-subscribe-once`).click((e) => {
                 subscribe(`calendar-once`, event.unique);
                 $('#modal-eventinfo').modal('hide');
             });
-            $(`#modal-eventinfo-subscribe-once`).keypress((event) => {
-                if (event.which === 13) {
+            $(`#modal-eventinfo-subscribe-once`).keypress((e) => {
+                if (e.which === 13) {
                     subscribe(`calendar-once`, event.unique);
                     $('#modal-eventinfo').modal('hide');
                 }
             })
-            $(`#modal-eventinfo-subscribe-all`).click((event) => {
+            $(`#modal-eventinfo-subscribe-all`).click((e) => {
                 subscribe(`calendar-all`, event.calendarID);
                 $('#modal-eventinfo').modal('hide');
             });
-            $(`#modal-eventinfo-subscribe-all`).keypress((event) => {
-                if (event.which === 13) {
+            $(`#modal-eventinfo-subscribe-all`).keypress((e) => {
+                if (e.which === 13) {
                     subscribe(`calendar-all`, event.calendarID);
                     $('#modal-eventinfo').modal('hide');
                 }
@@ -1062,12 +1062,12 @@ function displayEventInfo (showID) {
             $('#modal-eventinfo-unsubscribe').prop('disabled', false);
             $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
 
-            $(`#modal-eventinfo-unsubscribe`).click((event) => {
+            $(`#modal-eventinfo-unsubscribe`).click((e) => {
                 unsubscribe(event.unique, event.calendarID);
                 $('#modal-eventinfo').modal('hide');
             });
-            $(`#modal-eventinfo-unsubscribe`).keypress((event) => {
-                if (event.which === 13) {
+            $(`#modal-eventinfo-unsubscribe`).keypress((e) => {
+                if (e.which === 13) {
                     unsubscribe(event.unique, event.calendarID);
                     $('#modal-eventinfo').modal('hide');
                 }

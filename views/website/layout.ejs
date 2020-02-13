@@ -49,6 +49,7 @@
   <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js"></script>
   <script src="/plugins/wwsu-website/wwsu-website-v7.js"></script>
 </head>
+
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
   <div class="wrapper">
 
@@ -339,30 +340,28 @@
           </div>
 
           <div class="card-body">
-            <form role="form">
-              <div class="row">
-                <div class="col-md-5">
-                  <div class="form-group">
-                    <label>Artist or Title</label>
-                    <input type="text" class="form-control" id="request-name" placeholder="Enter ...">
-                  </div>
-                </div>
-                <div class="col-md-5">
-                  <div class="form-group">
-                    <label>Filter by genre</label>
-                    <select class="form-control" id="request-genre">
-                      <option value="0">Any Genre</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-2">
-                  <div class="form-group">
-                    <button class="btn btn-primary" onclick="loadTracks(0)" onkeydown="loadTracks(0)" tabindex="0"
-                      title="Search for tracks">Search</button>
-                  </div>
+            <div class="row">
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label>Artist or Title</label>
+                  <input type="text" class="form-control" id="request-name" placeholder="Enter ...">
                 </div>
               </div>
-            </form>
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label>Filter by genre</label>
+                  <select class="form-control" id="request-genre">
+                    <option value="0">Any Genre</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <div class="form-group">
+                  <button class="btn btn-primary" onclick="loadTracks(0)" onkeydown="loadTracks(0)" tabindex="0"
+                    title="Search for tracks">Search</button>
+                </div>
+              </div>
+            </div>
 
             <table class="table table-striped">
               <thead>
