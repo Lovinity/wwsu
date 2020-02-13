@@ -1058,7 +1058,7 @@ function displayEventInfo (showID) {
         // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
 
         // Check the number of subscriptions
-        var subscribed = Subscriptions([ { type: `calendar-once`, subtype: event.unique }, { type: `calendar-all`, subtype: strval(event.calendarID) } ]).get().length
+        var subscribed = Subscriptions([ { type: `calendar-once`, subtype: event.unique }, { type: `calendar-all`, subtype: `${event.calendarID}` } ]).get().length
 
         if (subscribed === 0) {
             $('#modal-eventinfo-subscribe-once').css('display', '');
