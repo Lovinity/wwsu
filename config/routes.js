@@ -57,32 +57,27 @@ module.exports.routes = {
     view: 'website/home',
     locals: {
       layout: 'layout',
-      startPage: '#nav-nowplaying'
     }
   },
 
   'GET /chat': {
-    view: 'website/home',
+    view: 'website/chat',
     locals: {
       layout: 'layout',
-      startPage: '#nav-chat',
-      startPage: '#nav-nowplaying'
     }
   },
 
   'GET /schedule': {
-    view: 'website/home',
+    view: 'website/schedule',
     locals: {
       layout: 'layout',
-      startPage: '#nav-schedule'
     }
   },
 
   'GET /request': {
-    view: 'website/home',
+    view: 'website/request',
     locals: {
       layout: 'layout',
-      startPage: '#nav-request'
     }
   },
 
