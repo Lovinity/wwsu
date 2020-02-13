@@ -4,6 +4,14 @@ class WWSUNavigation {
 
     constructor() {
         this.elements = [];
+        this.activeMenu = ``;
+
+        window.onpopstate = function(e){
+            if(e.state){
+                $('body').html(e.state.html);
+                document.title = e.state.pageTitle;
+            }
+        };
     }
 
     /**
@@ -15,8 +23,8 @@ class WWSUNavigation {
      * @param {boolean} defaultItem Set to true to make this the default menu activated. Defaults to false
      * @param {function} callback Function with no parameters called when this menu becomes active. Defaults to empty function.
      */
-    addItem (dom, section, url, defaultItem = false, callback = () => {}) {
-        this.elements.push({ dom, section, url, callback });
+    addItem (dom, section, title, url, defaultItem = false, callback = () => {}) {
+        this.elements.push({ dom, section, title, url, callback });
 
         if (defaultItem) {
             $(dom).addClass("active");
@@ -34,10 +42,15 @@ class WWSUNavigation {
                 this.processMenu(dom);
             }
         })
+
+        if (this.activeMenu === dom) {
+            this.processMenu(dom);
+        }
     }
 
     // Cycle through all added navigation items and activate the one provided in dom
     processMenu (dom) {
+        this.activeMenu = dom;
 
         // De-activate all menu items and hide all their sections
         this.elements.forEach((element) => {
@@ -51,6 +64,7 @@ class WWSUNavigation {
             .map((element) => {
                 $(element.dom).addClass("active");
                 $(element.section).css("display", "");
+                window.history.pushState({"html": $('body').html(), "pageTitle":element.title},"", element.url);
                 element.callback();
             });
     }

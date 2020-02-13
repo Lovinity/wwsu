@@ -1,9 +1,8 @@
 try {
     // Initialize sails.js socket connection to WWSU
     io.sails.url = 'https://server.wwsu1069.org'
-    io.sails.query = `host=21b1dd149aeac1f8cc2e8174dce0494e9ae60b9f746be71319ac6c3476968e00` // TODO: Remove when live
     var socket = io.sails.connect()
-    var noReq = new WWSUreq(socket, '21b1dd149aeac1f8cc2e8174dce0494e9ae60b9f746be71319ac6c3476968e00') // TODO: Remove host string when live
+    var noReq = new WWSUreq(socket, null)
 
     // WWSU Variables
     var Meta = { time: moment().toISOString(true), history: [], webchat: true, state: 'unknown' }
@@ -98,15 +97,15 @@ $(document).ready(function () {
         })
 
         // Initialize menu items
-        navigation.addItem('#nav-nowplaying', '#section-nowplaying', '', true);
-        navigation.addItem('#nav-chat', '#section-chat', '/chat', false, () => {
+        navigation.addItem('#nav-nowplaying', '#section-nowplaying', 'Now Playing - WWSU 106.9 FM', '/', true);
+        navigation.addItem('#nav-chat', '#section-chat', 'Chat with DJ - WWSU 106.9 FM', '/chat', false, () => {
             newMessages = 0;
             updateNewMessages();
         });
-        navigation.addItem('#nav-schedule', '#section-schedule', '/schedule', false, () => {
+        navigation.addItem('#nav-schedule', '#section-schedule', 'Schedule - WWSU 106.9 FM', '/schedule', false, () => {
             updateCalendar();
         });
-        navigation.addItem('#nav-request', '#section-request', '/request', false);
+        navigation.addItem('#nav-request', '#section-request', 'Track Requests - WWSU 106.9 FM', '/request', false);
 
         // Add change event for chat-nickname
         $('#chat-nickname').change(function () {
@@ -888,7 +887,7 @@ function updateCalendar () {
                 <div class="p-2 card card-${colorClass} card-outline${shouldBeDark ? ` bg-secondary` : ``}">
                   <div class="card-body box-profile">
                     <div class="text-center">
-                    ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
+                    ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
                     </div>
     
                     <h3 class="profile-username text-center">${event.name}</h3>
@@ -989,7 +988,7 @@ function displayEventInfo (showID) {
     $('#modal-eventinfo-body').html(`<div class="p-2 card card-${colorClass} card-outline">
       <div class="card-body box-profile">
         <div class="text-center">
-        ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
+        ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
         </div>
 
         <h3 class="profile-username text-center">${event.name}</h3>
@@ -1005,7 +1004,7 @@ function displayEventInfo (showID) {
             <b>${[ 'canceled', 'canceled-system', 'canceled-updated' ].indexOf(event.exceptionType) !== -1 ? `Original Time: ` : ``}${moment(event.start).format('lll')} - ${moment(event.end).format('hh:mm A')}</b>
         </li>
         <li class="list-group-item">
-        ${event.banner !== null ? `<img class="img-fluid" src="uploads/calendar/banner/${event.banner}" alt="Show Banner">` : ``}
+        ${event.banner !== null ? `<img class="img-fluid" src="/uploads/calendar/banner/${event.banner}" alt="Show Banner">` : ``}
         </li>
         <li class="list-group-item">
             ${event.description !== null ? event.description : ``}
