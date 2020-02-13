@@ -46,4 +46,42 @@ module.exports.routes = {
   //  ║║║║╚═╗║
   //  ╩ ╩╩╚═╝╚═╝
 
+  'GET /': {
+    view: 'website/home',
+    locals: {
+      layout: 'layout',
+    }
+  },
+
+  'GET /listen': {
+    view: 'website/home',
+    locals: {
+      layout: 'layout'
+    }
+  },
+
+  'GET /chat': {
+    view: 'website/home',
+    locals: {
+      layout: 'layout',
+      startPage: '#nav-chat'
+    }
+  },
+
+  'GET /schedule': {
+    view: 'website/home',
+    locals: {
+      layout: 'layout',
+      startPage: '#nav-schedule'
+    }
+  },
+
+  'GET /request': {
+    view: 'website/home',
+    locals: {
+      layout: 'layout',
+      startPage: '#nav-request'
+    }
+  },
+
 }

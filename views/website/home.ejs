@@ -1,0 +1,455 @@
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+    <div class="wrapper">
+  
+      <!-- Navbar -->
+      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" title="Display / Hide Side Menu"><i
+                class="fas fa-bars"></i></a>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.navbar -->
+  
+      <!-- Main Sidebar Container -->
+      <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="https://wwsu1069.org" class="brand-link">
+          <img src="images/display/logo_true.png" alt="WWSU Logo" class="brand-image img-circle bg-white elevation-3"
+            style="opacity: .8">
+          <span class="brand-text font-weight-light">WWSU 106.9 FM</span>
+        </a>
+  
+        <!-- Sidebar -->
+        <div class="sidebar">
+  
+          <!-- Sidebar Menu -->
+          <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+  
+              <!-- Add icons to the links using the .nav-icon class
+                 with font-awesome or any other icon font library -->
+              <li class="nav-item">
+                <a href="#" class="nav-link" id="nav-nowplaying" title="Now Playing">
+                  <i class="nav-icon fas fa-play-circle"></i>
+                  <p>
+                    Now Playing
+                  </p>
+                </a>
+              </li>
+  
+              <li class="nav-item">
+                <a href="#" class="nav-link" id="nav-chat" title="Chat with the DJ">
+                  <i class="nav-icon fas fa-comments"></i>
+                  <p>
+                    Chat with DJ
+                    <span class="badge badge-secondary right chat-newmessages" title="New Messages">0</span>
+                  </p>
+                </a>
+              </li>
+  
+              <li class="nav-item">
+                <a href="#" class="nav-link" id="nav-schedule" title="Program Schedule">
+                  <i class="nav-icon far fa-calendar-alt"></i>
+                  <p>
+                    Schedule
+                  </p>
+                </a>
+              </li>
+  
+              <li class="nav-item">
+                <a href="#" class="nav-link" id="nav-request" title="Request a Track">
+                  <i class="nav-icon fas fa-file-audio"></i>
+                  <p>
+                    Request a Track
+                  </p>
+                </a>
+              </li>
+  
+            </ul>
+          </nav>
+          <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+      </aside>
+  
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+  
+        <section id="section-nowplaying">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Now Playing on WWSU 106.9 FM</h1>
+                </div><!-- /.col -->
+              </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+          </div>
+  
+          <!-- Now Playing Box -->
+          <div class="card card-primary card-outline p-1 m-3">
+            <div class="card-body box-profile">
+              <div class="text-center nowplaying-icon" style="font-size: 5rem;">
+                <i class="profile-user-img img-fluid img-circle fas fa-play-circle bg-primary"></i>
+              </div>
+  
+              <h3 class="profile-username text-center nowplaying-line1"></h3>
+  
+              <p class="text-muted text-center nowplaying-line2"></p>
+  
+              <ul class="list-group list-group-unbordered mb-3">
+                <li class="list-group-item nowplaying-topic">
+                </li>
+                <li class="list-group-item">
+                  <small>Due to internet stream delay, now playing information may be up to 30 seconds fast.</small>
+                </li>
+              </ul>
+  
+              <a href="#" class="btn btn-primary btn-block subscribe-button-all"
+                title="Receive push notifications when this program goes on the air." tabindex="0"><b>Subscribe All
+                  Times</b></a>
+            </div>
+            <!-- /.card-body -->
+          </div>
+  
+          <!-- Recently Played-->
+          <div class="card p-1 m-3">
+            <div class="card-header">
+              <h3 class="card-title">Recently Played</h3>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-striped projects">
+                <thead>
+                  <tr>
+                    <th style="width: 75%">
+                      Track Name
+                    </th>
+                    <th style="width: 25%">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="nowplaying-recentlyplayed">
+                  <!-- Recent tracks are populated here-->
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+        </section>
+  
+        <section id="section-chat">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Chat with the DJ</h1>
+                </div><!-- /.col -->
+              </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+          </div>
+  
+          <div class="card card-sucress cardutline direct-chat direct-chat-success p-1 m-3">
+            <div class="card-header">
+              <h3 class="card-title">Chat</h3>
+  
+              <div class="card-tools">
+                <span data-toggle="tooltip" title="New Messages" class="badge bg-secondary chat-newmessages">0</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="callout callout-secondary chat-status">
+                <h5>Not Connected</h5>
+  
+                <p>You are not yet connected to the chat system.</p>
+              </div>
+  
+              <div class="direct-chat-messages" id="chat-messages" style="height: 50vh;">
+                <!--Chat messages go here-->
+              </div>
+              <div class="input-group m-2">
+                <label for="chat-nickname">Nickname</label>
+                <input type="text" name="chat-nickname" id="chat-nickname" placeholder="" class="form-control">
+              </div>
+              <div class="input-group m-2">
+                <label for="chat-message">Message</label>
+                <textarea name="chat-message" id="chat-message" maxlength="1024" rows="3" placeholder="Type Message ..."
+                  class="form-control chat-blocker"></textarea>
+              </div>
+              <div class="input-group m-2">
+                <button type="submit" class="btn btn-success chat-blocker" onclick="sendMessage()" tabindex="0">Send
+                  Public</button>
+                <button type="submit" class="btn btn-danger chat-blocker" onclick="sendMessage(true)" tabindex="0">Send
+                  Private</button>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="callout callout-warning">
+                <h5>IP Addresses are Logged</h5>
+  
+                <p>Do not send any harassing nor threatening messages. You agree your IP address will be logged with every
+                  message sent, and you could be banned from WWSU's website for sending harmful messages.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+  
+        <section id="section-schedule">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Upcoming Program Schedule</h1>
+                </div><!-- /.col -->
+              </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+          </div>
+  
+          <!-- Schedule Date Selector-->
+          <div class="card p-1 m-3">
+            <div class="card-header">
+              <h3 class="card-title">
+                Choose a Date
+              </h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="form-group">
+                <label>Date</label>
+                <select class="form-control" id="schedule-select" onchange="updateCalendar()">
+                  <option value="0" id="schedule-select-0">Today</option>
+                  <option value="1" id="schedule-select-1">Day 2</option>
+                  <option value="2" id="schedule-select-2">Day 3</option>
+                  <option value="3" id="schedule-select-3">Day 4</option>
+                  <option value="4" id="schedule-select-4">Day 5</option>
+                  <option value="5" id="schedule-select-5">Day 6</option>
+                  <option value="6" id="schedule-select-6">Day 7</option>
+                </select>
+              </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+  
+          <!-- Schedule Events -->
+          <div class="container-fluid">
+            <div class="row" id="schedule-events">
+              <!-- Events are populated here by Javascript -->
+            </div>
+          </div>
+  
+          <div class="modal fade" id="modal-eventinfo" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Event Information</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+                <div class="modal-body" id="modal-eventinfo-body">
+                  <!--Event Info goes here-->
+                </div>
+                <div class="modal-footer justify-content-between">
+                  <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="0">Close</button>
+                  <button type="button" class="btn btn-info subscribe-button-once"
+                    title="Receive a push notification when this event, only for this date/time, airs, changes time, or cancels."
+                    tabindex="0" id="modal-eventinfo-subscribe-once">Subscribe One-Time</button>
+                  <button type="button" class="btn btn-primary subscribe-button-all"
+                    title="Receive a push notification when this event goes on the air any time, or when a change is made to this event's schedule."
+                    id="modal-eventinfo-subscribe-all">Subscribe All Times</button>
+                  <button type="button" class="btn btn-danger"
+                    title="Do not receive any push notifications for this event anymore." id="modal-eventinfo-unsubscribe"
+                    style="display: none;">Unsubscribe All Times</button>
+                </div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
+        </section>
+  
+        <section id="section-request">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Request a Track</h1>
+                </div><!-- /.col -->
+              </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+          </div>
+  
+          <div class="card p-1 m-3">
+            <div class="card-header">
+              <h3 class="card-title">Browse Tracks</h3>
+            </div>
+  
+            <div class="card-body">
+              <form role="form">
+                <div class="row">
+                  <div class="col-md-5">
+                    <div class="form-group">
+                      <label>Artist or Title</label>
+                      <input type="text" class="form-control" id="request-name" placeholder="Enter ...">
+                    </div>
+                  </div>
+                  <div class="col-md-5">
+                    <div class="form-group">
+                      <label>Filter by genre</label>
+                      <select class="form-control" id="request-genre">
+                        <option value="0">Any Genre</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <button class="btn btn-primary" onclick="loadTracks(0)" onkeydown="loadTracks(0)" tabindex="0"
+                        title="Search for tracks">Search</button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+  
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Artist - Title</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="request-table">
+                </tbody>
+              </table>
+              <button type="button" class="btn btn-outline-danger disabled" id="request-more-none">No More Tracks</button>
+              <button type="button" class="btn btn-primary" id="request-more" style="display: none;"
+                onclick="loadTracks()" onkeydown="loadTracks()" tabindex="0">Load More Tracks</button>
+            </div>
+  
+            <div class="card-footer">
+              <div class="callout callout-warning">
+                <h5>Request Limits</h5>
+  
+                <p>Each IP may request up to 10 tracks per day, reset at midnight ET.</p>
+              </div>
+              <div class="callout callout-info">
+                <h5>When do requests play?</h5>
+  
+                <p>Up to 3 requests play every break during automation music. When a broadcast is airing, it is up to DJ
+                  discretion. If a DJ does not air a request during their show, it will play the next time we are in
+                  automation music.</p>
+              </div>
+              <div class="callout callout-info">
+                <h5>Do we not have the track you want?</h5>
+  
+                <p>Contact music@wwsu1069.org and let us know if there is a track you would like us to check out and add
+                  to our system.</p>
+              </div>
+            </div>
+          </div>
+  
+          <div class="modal fade" id="modal-trackinfo" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Track Information</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col"><strong>Name</strong></th>
+                        <th scope="col"><strong>Value</strong></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Track ID</td>
+                        <td id="track-info-ID"></td>
+                      </tr>
+                      <tr>
+                        <td>Status</td>
+                        <td id="track-info-status"></td>
+                      </tr>
+                      <tr>
+                        <td>Artist</td>
+                        <td id="track-info-artist"></td>
+                      </tr>
+                      <tr>
+                        <td>Title</td>
+                        <td id="track-info-title"></td>
+                      </tr>
+                      <tr>
+                        <td>Album</td>
+                        <td id="track-info-album"></td>
+                      </tr>
+                      <tr>
+                        <td>Genre</td>
+                        <td id="track-info-genre"></td>
+                      </tr>
+                      <tr>
+                        <td>Duration</td>
+                        <td id="track-info-duration"></td>
+                      </tr>
+                      <tr>
+                        <td>Date Last Played</td>
+                        <td id="track-info-lastplayed"></td>
+                      </tr>
+                      <tr>
+                        <td>Track Limits</td>
+                        <td id="track-info-limits"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="modal-footer justify-content-between" id="track-info-request">
+  
+                </div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
+        </section>
+  
+        <!-- Add 65 px to the end of the body because of the sticky footer-->
+        <div style="height: 65px;"></div>
+      </div>
+      <!-- /.content-wrapper -->
+  
+      <!--Modals-->
+      <div class="modal fade" id="modal-discipline" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+          <div class="modal-content bg-danger">
+            <div class="modal-header">
+              <h4 class="modal-title" id="modal-discipline-title">Disciplinary Notice</h4>
+            </div>
+            <div class="modal-body" id="modal-discipline-body">
+              <p></p>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-outline-light" id="modal-discipline-acknowledge">Acknowledge</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+      <!-- /.modal -->
+  
+      <!-- Main Footer -->
+      <footer class="main-footer">
+        <div id="nativeflashradio" style="height:65px; width:100%;"></div>
+      </footer>
+    </div>
+
+
+    <script>
+        navigation.processMenu("<%= startPage %>");
+    </script>
+  </body>
