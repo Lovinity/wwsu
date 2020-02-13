@@ -49,35 +49,35 @@ module.exports.routes = {
   'GET /': {
     view: 'website/home',
     locals: {
-      layout: 'layout',
+      layout: 'website/layout',
     }
   },
 
   'GET /listen': {
     view: 'website/home',
     locals: {
-      layout: 'layout',
+      layout: 'website/layout',
     }
   },
 
   'GET /chat': {
     view: 'website/chat',
     locals: {
-      layout: 'layout',
+      layout: 'website/layout',
     }
   },
 
   'GET /schedule': {
     view: 'website/schedule',
     locals: {
-      layout: 'layout',
+      layout: 'website/layout',
     }
   },
 
   'GET /request': {
     view: 'website/request',
     locals: {
-      layout: 'layout',
+      layout: 'website/layout',
     }
   },
 
