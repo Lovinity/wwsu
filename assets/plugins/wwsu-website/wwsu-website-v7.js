@@ -1615,7 +1615,11 @@ function requestTrack (trackID) {
 function onlineSocket (doOneSignal = false) {
     socket.post('/recipients/add-web', { device: device }, function serverResponded (body) {
         try {
-            $('#chat-nickname').val(body.label.replace('Web ', '').match(/\(([^)]+)\)/)[ 1 ])
+            try {
+                $('#chat-nickname').val(body.label.replace('Web ', '').match(/\(([^)]+)\)/)[ 1 ])
+            } catch (e2) {
+                $('#chat-nickname').val(body.label);
+            }
             client = body.host;
             onlineSocketDone = true
             automationpost = ``
