@@ -56,7 +56,8 @@ module.exports.routes = {
   'GET /listen': {
     view: 'website/home',
     locals: {
-      layout: 'layout'
+      layout: 'layout',
+      startPage: '#nav-nowplaying'
     }
   },
 
@@ -64,7 +65,8 @@ module.exports.routes = {
     view: 'website/home',
     locals: {
       layout: 'layout',
-      startPage: '#nav-chat'
+      startPage: '#nav-chat',
+      startPage: '#nav-nowplaying'
     }
   },
 
