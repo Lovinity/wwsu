@@ -135,12 +135,12 @@ $(document).ready(function () {
             }
         })
         $(`#modal-eventinfo-unsubscribe`).click((e) => {
-            unsubscribe(event.unique, viewingEvent.calendarID);
+            unsubscribe(viewingEvent.unique, viewingEvent.calendarID);
             $('#modal-eventinfo').modal('hide');
         });
         $(`#modal-eventinfo-unsubscribe`).keypress((e) => {
             if (e.which === 13) {
-                unsubscribe(event.unique, viewingEvent.calendarID);
+                unsubscribe(viewingEvent.unique, viewingEvent.calendarID);
                 $('#modal-eventinfo').modal('hide');
             }
         })
