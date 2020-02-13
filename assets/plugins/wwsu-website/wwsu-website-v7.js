@@ -1173,7 +1173,7 @@ function unsubscribe (ID, event) {
                                 icon: 'fas fa-bell-slash fa-lg',
                             });
                             Subscriptions({ type: `calendar-once`, subtype: ID }).remove()
-                            Subscriptions({ type: `calendar-all`, subtype: event }).remove()
+                            Subscriptions({ type: `calendar-all`, subtype: `${event}` }).remove()
                         }
                     } catch (e) {
                         console.error(e);
