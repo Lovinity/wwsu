@@ -32,6 +32,8 @@
   <script src="plugins/taffy/js/taffy-min.js"></script>
   <!-- Moment -->
   <script src="plugins/moment/moment.min.js"></script>
+  <!-- Moment Duration Format -->
+  <script src="plugins/moment-duration-format/js/moment-duration-format.js"></script>
   <!-- Later -->
   <script src="plugins/later/js/later.min.js"></script>
   <!-- Jdenticon -->
@@ -105,6 +107,15 @@
                 <i class="nav-icon far fa-calendar-alt"></i>
                 <p>
                   Schedule
+                </p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="nav-request" title="Request a Track">
+                <i class="nav-icon fas fa-file-audio"></i>
+                <p>
+                  Request a Track
                 </p>
               </a>
             </li>
@@ -304,6 +315,152 @@
                 <button type="button" class="btn btn-danger"
                   title="Do not receive any push notifications for this event anymore." id="modal-eventinfo-unsubscribe"
                   style="display: none;">Unsubscribe All Times</button>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
+      </section>
+
+      <section id="section-request">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12">
+                <h1 class="m-0 text-dark">Request a Track</h1>
+              </div><!-- /.col -->
+            </div><!-- /.row -->
+          </div><!-- /.container-fluid -->
+        </div>
+
+        <div class="card p-1 m-3">
+          <div class="card-header">
+            <h3 class="card-title">Browse Tracks</h3>
+          </div>
+
+          <div class="card-body">
+            <form role="form">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="form-group">
+                    <label>Artist or Title</label>
+                    <input type="text" class="form-control" id="request-name" placeholder="Enter ...">
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <div class="form-group">
+                    <label>Filter by genre</label>
+                    <select class="form-control" id="request-genre">
+                      <option value="0">Any Genre</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <button class="btn btn-primary" onclick="loadTracks(0)" onkeydown="loadTracks(0)" tabindex="0"
+                      title="Search for tracks">Search</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Artist - Title</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="request-table">
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-outline-danger disabled" id="request-more-none">No More Tracks</button>
+            <button type="button" class="btn btn-primary" id="request-more" style="display: none;"
+              onclick="loadTracks()" onkeydown="loadTracks()" tabindex="0">Load More Tracks</button>
+          </div>
+
+          <div class="card-footer">
+            <div class="callout callout-warning">
+              <h5>Request Limits</h5>
+
+              <p>Each IP may request up to 10 tracks per day, reset at midnight ET.</p>
+            </div>
+            <div class="callout callout-info">
+              <h5>When do requests play?</h5>
+
+              <p>Up to 3 requests play every break during automation music. When a broadcast is airing, it is up to DJ
+                discretion. If a DJ does not air a request during their show, it will play the next time we are in
+                automation music.</p>
+            </div>
+            <div class="callout callout-info">
+              <h5>Do we not have the track you want?</h5>
+
+              <p>Contact music@wwsu1069.org and let us know if there is a track you would like us to check out and add
+                to our system.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="modal-trackinfo" aria-hidden="true" style="display: none;">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Track Information</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col"><strong>Name</strong></th>
+                      <th scope="col"><strong>Value</strong></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Track ID</td>
+                      <td id="track-info-ID"></td>
+                    </tr>
+                    <tr>
+                      <td>Status</td>
+                      <td id="track-info-status"></td>
+                    </tr>
+                    <tr>
+                      <td>Artist</td>
+                      <td id="track-info-artist"></td>
+                    </tr>
+                    <tr>
+                      <td>Title</td>
+                      <td id="track-info-title"></td>
+                    </tr>
+                    <tr>
+                      <td>Album</td>
+                      <td id="track-info-album"></td>
+                    </tr>
+                    <tr>
+                      <td>Genre</td>
+                      <td id="track-info-genre"></td>
+                    </tr>
+                    <tr>
+                      <td>Duration</td>
+                      <td id="track-info-duration"></td>
+                    </tr>
+                    <tr>
+                      <td>Date Last Played</td>
+                      <td id="track-info-lastplayed"></td>
+                    </tr>
+                    <tr>
+                      <td>Track Limits</td>
+                      <td id="track-info-limits"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="modal-footer justify-content-between" id="track-info-request">
+
               </div>
             </div>
             <!-- /.modal-content -->

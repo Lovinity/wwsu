@@ -17,6 +17,7 @@ try {
     var automationpost = ``;
     var Subscriptions = TAFFY();
     var blocked = false;
+    var skipIt = 0;
 
     // Operation Variables
     var firstTime = true;
@@ -105,6 +106,7 @@ $(document).ready(function () {
         navigation.addItem('#nav-schedule', '#section-schedule', '/schedule', false, () => {
             updateCalendar();
         });
+        navigation.addItem('#nav-request', '#section-request', '/request', false);
 
         // Add change event for chat-nickname
         $('#chat-nickname').change(function () {
@@ -231,6 +233,17 @@ function hexRgb (hex, options = {}) {
     }
 }
 
+/**
+ * Escape HTML for use in the web page.
+ * 
+ * @param {string} str The HTML to escape
+ */
+function escapeHTML (str) {
+    var div = document.createElement('div')
+    div.appendChild(document.createTextNode(str))
+    return div.innerHTML
+}
+
 
 
 /*
@@ -308,7 +321,7 @@ function doSockets (firsttime = false) {
             announcementsSocket()
             calendarSocket()
             calendarExceptionsSocket()
-            //loadGenres()
+            loadGenres()
             onlineSocket()
             messagesSocket()
         })
@@ -321,7 +334,7 @@ function doSockets (firsttime = false) {
             announcementsSocket()
             calendarSocket()
             calendarExceptionsSocket()
-            //loadGenres()
+            loadGenres()
             onlineSocket(true)
             messagesSocket()
         })
@@ -557,7 +570,7 @@ function doMeta (response) {
                 ${track.track}
                 </td>
                 <td>
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}` : ``}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}` : likedTracks.indexOf(track.track) === -1 ? `<button type="button" class="btn btn-info btn-small" tabindex="0" title="Tell the DJ you enjoy this track." onclick="likeTrack('${escapeHTML(track.track)}');" onkeydown="likeTrack('${escapeHTML(track.track)}');">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}
                 </td>
                 </tr>`
             }));
@@ -597,50 +610,93 @@ function tracksLikedSocket () {
 /**
  * Mark a track as liked through the WWSU API.
  * 
- * @param {integer} trackID The ID number of the track to like
+ * @param {integer || string} trackID The ID number of the track to like, or a string of the track artist - name if the track was played manually.
  */
 function likeTrack (trackID) {
-    socket.post('/songs/like', { trackID: trackID }, function serverResponded (response) {
-        try {
-            if (response !== 'OK') {
+    // If trackID is a string, send the like as a message to the DJ instead
+    if (isNaN(trackID)) {
+        if (blocked) return null;
+        socket.post('/messages/send-web', { message: `(System Message) This person liked a track you played: ${trackID}`, nickname: $('#chat-nickname').val(), private: false }, function serverResponded (response) {
+            try {
+                if (response !== 'OK') {
+                    $(document).Toasts('create', {
+                        class: 'bg-warning',
+                        title: 'Message Rejected',
+                        autohide: true,
+                        delay: 15000,
+                        body: 'WWSU rejected your message telling the DJ you like that track. This could be because you are sending messages too fast, or you are banned from sending messages.',
+                        icon: 'fas fa-skull-crossbones fa-lg',
+                    });
+                    return null
+                } else {
+                    likedTracks.push(trackID)
+
+                    $(document).Toasts('create', {
+                        class: 'bg-success',
+                        title: 'Track Liked',
+                        subtitle: trackID,
+                        autohide: true,
+                        delay: 10000,
+                        body: `<p>You successfully notified the DJ you liked that track!</p>`,
+                        icon: 'fas fa-music fa-lg',
+                    })
+
+                    // Re-process meta so the recent tracks list is updated
+                    doMeta({ history: Meta.history });
+                }
+            } catch (e) {
+                console.error(e);
                 $(document).Toasts('create', {
-                    class: 'bg-warning',
-                    title: 'Could Not Like Track',
-                    subtitle: trackID,
-                    autohide: true,
-                    delay: 10000,
-                    body: `<p>There was a problem liking that track. Most likely, this track played over 30 minutes ago and cannot be liked.</p>`,
-                    icon: 'fas fa-music fa-lg',
-                })
-            } else {
-
-                likedTracks.push(trackID)
-
-                $(document).Toasts('create', {
-                    class: 'bg-success',
-                    title: 'Track Liked',
-                    subtitle: trackID,
-                    autohide: true,
-                    delay: 10000,
-                    body: `<p>You successfully liked a track!</p><p>Tracks people like will play more often on WWSU.</p>`,
-                    icon: 'fas fa-music fa-lg',
-                })
-
-                // Re-process meta so the recent tracks list is updated
-                doMeta({ history: Meta.history });
+                    class: 'bg-danger',
+                    title: 'Error sending message',
+                    body: 'There was an error telling the DJ you liked that track. Please report this to engineer@wwsu1069.org.',
+                    icon: 'fas fa-skull-crossbones fa-lg',
+                });
             }
-        } catch (unusedE) {
-            $(document).Toasts('create', {
-                class: 'bg-danger',
-                title: 'Track Liking Error',
-                subtitle: trackID,
-                autohide: true,
-                delay: 10000,
-                body: `<p>There was a problem liking that track. Please contact engineer@wwsu1069.org if you are having problems liking any tracks.</p>`,
-                icon: 'fas fa-music fa-lg',
-            })
-        }
-    })
+        })
+    } else {
+        socket.post('/songs/like', { trackID: trackID }, function serverResponded (response) {
+            try {
+                if (response !== 'OK') {
+                    $(document).Toasts('create', {
+                        class: 'bg-warning',
+                        title: 'Could Not Like Track',
+                        subtitle: trackID,
+                        autohide: true,
+                        delay: 10000,
+                        body: `<p>There was a problem liking that track. Most likely, this track played over 30 minutes ago and cannot be liked.</p>`,
+                        icon: 'fas fa-music fa-lg',
+                    })
+                } else {
+
+                    likedTracks.push(trackID)
+
+                    $(document).Toasts('create', {
+                        class: 'bg-success',
+                        title: 'Track Liked',
+                        subtitle: trackID,
+                        autohide: true,
+                        delay: 10000,
+                        body: `<p>You successfully liked a track!</p><p>Tracks people like will play more often on WWSU.</p>`,
+                        icon: 'fas fa-music fa-lg',
+                    })
+
+                    // Re-process meta so the recent tracks list is updated
+                    doMeta({ history: Meta.history });
+                }
+            } catch (unusedE) {
+                $(document).Toasts('create', {
+                    class: 'bg-danger',
+                    title: 'Track Liking Error',
+                    subtitle: trackID,
+                    autohide: true,
+                    delay: 10000,
+                    body: `<p>There was a problem liking that track. Please contact engineer@wwsu1069.org if you are having problems liking any tracks.</p>`,
+                    icon: 'fas fa-music fa-lg',
+                })
+            }
+        })
+    }
 }
 
 
@@ -832,7 +888,7 @@ function updateCalendar () {
                 <div class="p-2 card card-${colorClass} card-outline${shouldBeDark ? ` bg-secondary` : ``}">
                   <div class="card-body box-profile">
                     <div class="text-center">
-                    ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="../../uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
+                    ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
                     </div>
     
                     <h3 class="profile-username text-center">${event.name}</h3>
@@ -933,7 +989,7 @@ function displayEventInfo (showID) {
     $('#modal-eventinfo-body').html(`<div class="p-2 card card-${colorClass} card-outline">
       <div class="card-body box-profile">
         <div class="text-center">
-        ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="../../uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
+        ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
         </div>
 
         <h3 class="profile-username text-center">${event.name}</h3>
@@ -949,7 +1005,7 @@ function displayEventInfo (showID) {
             <b>${[ 'canceled', 'canceled-system', 'canceled-updated' ].indexOf(event.exceptionType) !== -1 ? `Original Time: ` : ``}${moment(event.start).format('lll')} - ${moment(event.end).format('hh:mm A')}</b>
         </li>
         <li class="list-group-item">
-        ${event.banner !== null ? `<img class="img-fluid" src="../../uploads/calendar/banner/${event.banner}" alt="Show Banner">` : ``}
+        ${event.banner !== null ? `<img class="img-fluid" src="uploads/calendar/banner/${event.banner}" alt="Show Banner">` : ``}
         </li>
         <li class="list-group-item">
             ${event.description !== null ? event.description : ``}
@@ -1364,6 +1420,188 @@ function sendMessage (privateMsg = false) {
 
 
 /*
+    REQUEST FUNCTIONS
+*/
+
+
+
+/**
+ * Re-load the available genres to filter by in the track request system.
+ */
+function loadGenres () {
+    socket.post('/songs/get-genres', {}, function serverResponded (response) {
+        try {
+            var html = `<option value="0">Any Genre</option>`
+            response.map(subcat => {
+                html += `<option value="${subcat.ID}">${subcat.name}</option>`
+            })
+            $('#request-genre').html(html);
+        } catch (e) {
+            console.error(e);
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Error loading genres for request system',
+                body: 'There was an error loading the available genres to filter by in the request system. Please report this to engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+        }
+    })
+}
+
+/**
+ * Load tracks into the track request table.
+ * 
+ * @param {integer} skip Start at the provided track number.
+ */
+function loadTracks (skip = skipIt) {
+    var query = { search: $('#request-name').val(), skip: skip, limit: 50, ignoreDisabled: true, ignoreNonMusic: true }
+    var selectedOption = $('#request-genre').children("option:selected").val();
+    if (selectedOption !== '0') { query.genre = parseInt(selectedOption) }
+    var html = ``;
+    socket.post('/songs/get', query, function serverResponded (response) {
+        try {
+            // response = JSON.parse(response);
+            if (response === 'false' || !response) {
+                skipIt = 0
+                $('#request-more-none').css('display', '');
+                $('#request-more').css('display', 'none');
+            } else if (response.length > 0) {
+                skipIt += 50
+                $('#request-more-none').css('display', 'none');
+                $('#request-more').css('display', '');
+
+                response.map(track => {
+                    html += `<tr class="${track.enabled !== 1 ? 'bg-dark' : ''}">
+            <td>${track.artist} - ${track.title}${track.enabled !== 1 ? ' (DISABLED)' : ''}</td>
+            <td>
+            ${track.enabled === 1 ? `<button type="button" class="btn btn-success" onclick="loadTrackInfo(${track.ID})" onkeydown="loadTrackInfo(${track.ID})" title="Get more info, or request, ${escapeHTML(track.artist)} - ${escapeHTML(track.title)}}">Info / Request</button>` : `<button type="button" class="btn btn-info" onclick="loadTrackInfo(${track.ID})" onkeydown="loadTrackInfo(${track.ID})" title="Get more info about ${escapeHTML(track.artist)} - ${escapeHTML(track.title)}}.">Info</button>`}
+            </td>
+          </tr>`;
+                })
+
+                if (skip === 0) {
+                    $('#request-table').html(html)
+                } else {
+                    $('#request-table').append(html)
+                }
+
+            } else if (response.length === 0) {
+                loadTracks(skip + 50)
+            }
+        } catch (e) {
+            console.error(e);
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Error loading tracks for request system',
+                body: 'There was an error loading the tracks for the request system. Please report this to engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+        }
+    })
+}
+
+/**
+ * Get more information about a track and display it in a modal.
+ * 
+ * @param {integer} trackID ID of the track to get more information.
+ */
+function loadTrackInfo (trackID) {
+    socket.post('/songs/get', { ID: trackID, ignoreSpins: true }, function serverResponded (response) {
+        try {
+            $('#track-info-ID').html(response[ 0 ].ID)
+            $('#track-info-status').html(response[ 0 ].enabled === 1 ? 'Enabled' : 'Disabled')
+            document.getElementById('track-info-status').className = `bg-${response[ 0 ].enabled === 1 ? 'success' : 'dark'}`
+            $('#track-info-artist').html(response[ 0 ].artist)
+            $('#track-info-title').html(response[ 0 ].title)
+            $('#track-info-album').html(response[ 0 ].album)
+            $('#track-info-genre').html(response[ 0 ].genre)
+            $('#track-info-duration').html(moment.duration(response[ 0 ].duration, 'seconds').format('HH:mm:ss'))
+            $('#track-info-lastplayed').html(moment(response[ 0 ].date_played).isAfter('2002-01-01 00:00:01') ? moment(response[ 0 ].date_played).format('LLLL') : 'Unknown')
+            $('#track-info-limits').html(`<ul>
+              ${response[ 0 ].limit_action > 0 && response[ 0 ].count_played < response[ 0 ].play_limit ? `<li>Track has ${response[ 0 ].play_limit - response[ 0 ].count_played} spins left</li>` : ``}
+              ${response[ 0 ].limit_action > 0 && response[ 0 ].count_played >= response[ 0 ].play_limit ? `<li>Track expired (reached spin limit)</li>` : ``}
+              ${moment(response[ 0 ].start_date).isAfter() ? `<li>Track cannot be played until ${moment(response[ 0 ].start_date).format('LLLL')}</li>` : ``}
+              ${moment(response[ 0 ].end_date).isBefore() && moment(response[ 0 ].end_date).isAfter('2002-01-01 00:00:01') ? `<li>Track expired on ${moment(response[ 0 ].end_date).format('LLLL')}</li>` : ``}
+              </ul>`)
+
+            if (response[ 0 ].request.requestable) {
+                $('#track-info-request').html(`<div class="form-group">
+                                      <h6>Request this Track</h6>
+                                      <label for="track-request-name">Name (optional; displayed when the request plays)</label>
+                                      <input type="text" class="form-control" id="track-request-name" tabindex="0">
+                                      <label for="track-request-message">Message for the DJ (optional)</label>
+                                      <textarea class="form-control" id="track-request-message" rows="2" tabindex="0"></textarea>
+                                      </div>                    
+                                      <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0" onclick="requestTrack(${response[ 0 ].ID})" onkeydown="requestTrack(${response[ 0 ].ID})">Place Request</button></div>`)
+            } else {
+                $('#track-info-request').html(`<div class="callout callout-${response[ 0 ].request.listDiv}">
+                          ${response[ 0 ].request.message}
+                      </div>`)
+            }
+
+            $('#modal-trackinfo').modal('show');
+        } catch (e) {
+            console.error(e);
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Error loading track information',
+                subtitle: trackID,
+                body: 'There was an error loading track information. Please report this to engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+        }
+    })
+}
+
+/**
+ * Place a track request to WWSU.
+ * 
+ * @param {integer} trackID ID of the track to request
+ */
+function requestTrack (trackID) {
+    var data = { ID: trackID, name: $('#track-request-name').val(), message: $('#track-request-message').val() }
+    if (device !== null) { data.device = device }
+    socket.post('/requests/place', data, function serverResponded (response) {
+        try {
+            if (response.requested) {
+                $(document).Toasts('create', {
+                    class: 'bg-success',
+                    title: 'Request Placed',
+                    subtitle: trackID,
+                    autohide: true,
+                    delay: 10000,
+                    body: `Your request has been placed!`,
+                    icon: 'fas fa-file-audio fa-lg',
+                })
+            } else {
+                $(document).Toasts('create', {
+                    class: 'bg-warning',
+                    title: 'Request was not placed!',
+                    subtitle: trackID,
+                    autohide: true,
+                    delay: 10000,
+                    body: `WWSU rejected your track request. The track may already be in the queue or might not be requestable at this time.`,
+                    icon: 'fas fa-file-audio fa-lg',
+                })
+            }
+            $('#modal-trackinfo').modal('hide');
+        } catch (e) {
+            console.error(e);
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Error placing track request',
+                subtitle: trackID,
+                body: 'There was an error placing the track request. Please report this to engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+        }
+    })
+}
+
+
+
+
+/*
     ONLINE FUNCTIONS
 */
 
@@ -1408,10 +1646,26 @@ function onlineSocket (doOneSignal = false) {
                         var currentPermission = permissionChange.to
                         if (currentPermission === 'granted' && device === null) {
                             OneSignal.getUserId().then((userId) => {
+                                $(document).Toasts('create', {
+                                    class: 'bg-success',
+                                    title: 'Notifications Enabled',
+                                    autohide: true,
+                                    delay: 15000,
+                                    body: '<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>',
+                                    icon: 'fas fa-bell fa-lg',
+                                });
                                 device = userId
                                 onlineSocket()
                             })
                         } else if (currentPermission === 'denied' && device !== null) {
+                            $(document).Toasts('create', {
+                                class: 'bg-success',
+                                title: 'Notifications Disabled',
+                                autohide: true,
+                                delay: 15000,
+                                body: '<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>',
+                                icon: 'fas fa-bell-slash fa-lg',
+                            });
                             device = null
                             onlineSocket()
                         }
@@ -1421,10 +1675,26 @@ function onlineSocket (doOneSignal = false) {
                     OneSignal.on('subscriptionChange', (isSubscribed) => {
                         if (isSubscribed && device === null) {
                             OneSignal.getUserId().then((userId) => {
+                                $(document).Toasts('create', {
+                                    class: 'bg-success',
+                                    title: 'Notifications Enabled',
+                                    autohide: true,
+                                    delay: 15000,
+                                    body: '<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>',
+                                    icon: 'fas fa-bell fa-lg',
+                                });
                                 device = userId
                                 onlineSocket()
                             })
                         } else if (!isSubscribed && device !== null) {
+                            $(document).Toasts('create', {
+                                class: 'bg-success',
+                                title: 'Notifications Disabled',
+                                autohide: true,
+                                delay: 15000,
+                                body: '<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>',
+                                icon: 'fas fa-bell-slash fa-lg',
+                            });
                             device = null
                             onlineSocket()
                         }

@@ -153,3 +153,4 @@ config
 /api/controllers/directors/load.js
 /api/controllers/events/load.js
 /config.cfg
+uploads
