@@ -46,6 +46,11 @@ module.exports = {
       type: 'string',
       description: 'If someone is on the air, host name - show name, or name of sports for sports broadcasts'
     },
+    showLogo: {
+      type: 'string',
+      allowNull: true,
+      description: 'File name of the logo of the current broadcast (assets/uploads/calendar/logo)'
+    },
     track: {
       type: 'string',
       description: 'Currently playing track either in automation or manually logged'

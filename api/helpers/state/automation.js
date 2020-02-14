@@ -86,7 +86,7 @@ module.exports = {
 
           // We are going to break
         } else {
-          await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_break', show: '', track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+          await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_break', show: '', showLogo: null, track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
           attendance = await sails.helpers.attendance.createRecord(null)
         }
 

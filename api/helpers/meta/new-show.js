@@ -251,9 +251,9 @@ module.exports = {
 
             // Make a log that the broadcast started
             await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />Topic: ${sails.models.meta.memory.topic}`, createdAt: moment().toISOString(true) }).fetch()
-            .tolerate((err) => {
-                sails.log.error(err)
-            })
+                .tolerate((err) => {
+                    sails.log.error(err)
+                })
 
             // If the eventNow object is not null
             if (eventNow && eventNow !== null) {
@@ -292,9 +292,11 @@ module.exports = {
         if (eventNow && eventNow !== null) {
             toUpdate.calendarID = eventNow.calendarID;
             toUpdate.calendarUnique = eventNow.calendarUnique;
+            toUpdate.showLogo = eventNow.logo;
         } else {
             toUpdate.calendarID = null;
             toUpdate.calendarUnique = null;
+            toUpdate.showLogo = null;
         }
 
         await sails.helpers.meta.change.with(toUpdate);

@@ -437,13 +437,14 @@ function doMeta (response) {
 
             // Update now playing icon
             if (Meta.state.startsWith('live_') || Meta.state.startsWith('prerecord_')) {
-                $('.nowplaying-icon').html(`<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger"></i>`);
+                $('.nowplaying-icon').html(`${Meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${Meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger"></i>`}`);
             }
             if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                $('.nowplaying-icon').html(`<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success"></i>`);
+                $('.nowplaying-icon').html(`${Meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-success" src="/uploads/calendar/logo/${Meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success"></i>`}`);
             }
             if (Meta.state.startsWith('remote_')) {
                 $('.nowplaying-icon').html(`<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple"></i>`);
+                $('.nowplaying-icon').html(`${Meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-purple" src="/uploads/calendar/logo/${Meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple"></i>`}`);
             }
             if (Meta.state.startsWith('automation_') || Meta.state === 'unknown') {
                 $('.nowplaying-icon').html(`<i class="profile-user-img img-fluid img-circle fas fa-music bg-primary"></i>`);
