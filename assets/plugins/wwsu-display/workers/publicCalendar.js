@@ -1,10 +1,10 @@
 /* global moment, importScripts */
 
-importScripts(`../../../js/moment.min.js`)
-importScripts(`../../../js/wwsu.js`)
-importScripts(`../../../js/taffy-min.js`)
-importScripts(`../../../js/later.min.js`)
-importScripts(`../../../js/wwsu-calendar-web.js`)
+importScripts(`../../../plugins/moment/moment.min.js`)
+importScripts(`../../../plugins/wwsu-sails/js/wwsu.js`)
+importScripts(`../../../plugins/taffy/js/taffy-min.js`)
+importScripts(`../../../plugins/later/js/later.min.js`)
+importScripts(`../../../plugins/wwsu-calendar/js/wwsu-calendar-web.js`)
 
 var calendardb = new CalendarDb();
 

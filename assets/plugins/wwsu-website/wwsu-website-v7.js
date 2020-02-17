@@ -172,8 +172,8 @@ socket.on('connect', () => {
 // Disconnection; try to re-connect
 socket.on('disconnect', () => {
     try {
-        io.socket._raw.io._reconnection = true
-        io.socket._raw.io._reconnectionAttempts = Infinity
+        socket._raw.io._reconnection = true
+        socket._raw.io._reconnectionAttempts = Infinity
     } catch (unusedE) {
     }
 })

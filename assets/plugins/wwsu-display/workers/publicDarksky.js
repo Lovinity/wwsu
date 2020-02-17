@@ -1,7 +1,7 @@
 
 /* global moment, importScripts */
 
-importScripts(`../../../js/moment.min.js`)
+importScripts(`../../../plugins/moment/moment.min.js`)
 
 onmessage = function (e) {
   e.data[0].map((item) => {
