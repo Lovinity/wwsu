@@ -6,7 +6,7 @@ class WWSUMeta {
     constructor(socket, request) {
         this.endpoint = '/meta/get';
 
-        this.meta = { time: moment().toISOString(true), history: [], webchat: true, state: 'unknown' }
+        this._meta = { time: moment().toISOString(true), history: [], webchat: true, state: 'unknown' }
         this.events = new EventEmitter();
         this.request = request;
 
@@ -18,11 +18,11 @@ class WWSUMeta {
         socket.on('meta', (data) => {
             for (var key in data) {
                 if (Object.prototype.hasOwnProperty.call(data, key)) {
-                    this.meta[ key ] = data[ key ]
+                    this._meta[ key ] = data[ key ]
                 }
             }
             this.resetTick();
-            this.events.emitEvent('newMeta', [data, this.meta]);
+            this.events.emitEvent('newMeta', [data, this._meta]);
         })
 
         this.init();
@@ -34,10 +34,10 @@ class WWSUMeta {
             try {
                 for (var key in body) {
                     if (Object.prototype.hasOwnProperty.call(body, key)) {
-                        this.meta[ key ] = body[ key ]
+                        this._meta[ key ] = body[ key ]
                     }
                 }
-                this.events.emitEvent('newMeta', [body, this.meta]);
+                this.events.emitEvent('newMeta', [body, this._meta]);
             } catch (e) {
                 setTimeout(this.init, 10000);
             }
@@ -50,14 +50,14 @@ class WWSUMeta {
     }
 
     get meta() {
-        return this.meta;
+        return this._meta;
     }
 
     resetTick() {
         clearInterval(this.tick);
         this.tick = setInterval(() => {
-            this.meta.time = moment(this.meta.time).add(1, 'seconds');
-            this.events.emitEvent('metaTick', [this.meta]);
+            this._meta.time = moment(this._meta.time).add(1, 'seconds');
+            this.events.emitEvent('metaTick', [this._meta]);
         }, 1000);
     }
 
