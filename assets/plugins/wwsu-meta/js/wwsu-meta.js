@@ -37,6 +37,7 @@ class WWSUMeta {
                         this._meta[ key ] = body[ key ]
                     }
                 }
+                this.resetTick();
                 this.events.emitEvent('newMeta', [body, this._meta]);
             } catch (e) {
                 setTimeout(this.init, 10000);
@@ -51,6 +52,11 @@ class WWSUMeta {
 
     get meta() {
         return this._meta;
+    }
+
+    // Caution: Does not actually manipulate meta; only pretends to in newMeta event call for use in refreshing stuff manually.
+    set meta(data = {}) {
+        this.events.emitEvent('newMeta', [data, this._meta]);
     }
 
     resetTick() {

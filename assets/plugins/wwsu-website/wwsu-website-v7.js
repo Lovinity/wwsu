@@ -584,7 +584,7 @@ function tracksLikedSocket () {
     socket.post('/songs/get-liked', {}, function serverResponded (body) {
         try {
             likedTracks = body
-            do_meta({ history: _meta.history })
+            meta.meta = { history: meta.meta.history }
         } catch (unusedE) {
             setTimeout(tracksLikedSocket, 10000)
         }
@@ -626,7 +626,7 @@ function likeTrack (trackID) {
                     })
 
                     // Re-process meta so the recent tracks list is updated
-                    do_meta({ history: _meta.history });
+                    meta.meta = { history: meta.meta.history };
                 }
             } catch (e) {
                 console.error(e);
@@ -666,7 +666,7 @@ function likeTrack (trackID) {
                     })
 
                     // Re-process meta so the recent tracks list is updated
-                    do_meta({ history: _meta.history });
+                    meta.meta = { history: meta.meta.history };
                 }
             } catch (unusedE) {
                 $(document).Toasts('create', {
@@ -1577,7 +1577,7 @@ function onlineSocket (doOneSignal = false) {
             client = body.host;
             onlineSocketDone = true
             automationpost = ``
-            do_meta({ webchat: _meta.webchat, state: _meta.state })
+            meta.meta = { webchat: meta.meta.webchat, state: meta.meta.state }
             if (doOneSignal) {
                 OneSignal.push(() => {
                     OneSignal.init({
@@ -1669,7 +1669,7 @@ function onlineSocket (doOneSignal = false) {
             try {
                 Subscriptions = TAFFY()
                 Subscriptions.insert(body)
-                do_meta({ state: _meta.state })
+                meta.meta = { state: meta.meta.state };
             } catch (unusedE) {
                 setTimeout(metaSocket, 10000)
             }
