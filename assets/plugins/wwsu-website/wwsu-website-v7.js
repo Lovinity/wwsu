@@ -722,7 +722,7 @@ function announcementsSocket () {
  * @param {object} announcement Announcement object received from WWSU API.
  */
 function addAnnouncement (announcement) {
-    if (moment(_meta.time).isAfter(moment(announcement.starts)) && moment(_meta.time).isBefore(moment(announcement.expires))) {
+    if (moment(meta.meta.time).isAfter(moment(announcement.starts)) && moment(meta.meta.time).isBefore(moment(announcement.expires))) {
         var color = 'bg-light'
         if (announcement.level === 'success') { color = 'bg-success' }
         if (announcement.level === 'danger' || announcement.level === 'urgent') { color = 'bg-danger' }
@@ -823,7 +823,7 @@ function updateCalendar () {
 
     // Run through every event in memory and add appropriate ones into our formatted calendar variable.
     events
-        .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(_meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(_meta.time).startOf(`day`).add(selectedOption, `days`)))
+        .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(meta.meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(meta.meta.time).startOf(`day`).add(selectedOption, `days`)))
         .map(event => {
             try {
                 var colorClass = `secondary`;
@@ -906,7 +906,7 @@ function updateCalendar () {
     $('#schedule-events').html(html);
 
     for (var i = 1; i < 7; i++) {
-        $(`#schedule-select-${i}`).html(moment(_meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
+        $(`#schedule-select-${i}`).html(moment(meta.meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
     }
 }
 
@@ -1708,17 +1708,17 @@ function onlineSocket (doOneSignal = false) {
                 temp.innerHTML = 'Subscribe'
                 temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
                 temp.onclick = () => {
-                    if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
-                        subscribe(`calendar-all`, _meta.show)
-                    } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
-                        subscribe(`calendar-all`, `Sports: ${_meta.show}`)
+                    if (meta.meta.state.startsWith('live_') || meta.meta.state.startsWith('remote_')) {
+                        subscribe(`calendar-all`, meta.meta.show)
+                    } else if (meta.meta.state.startsWith('sports_') || meta.meta.state.startsWith('sportsremote_')) {
+                        subscribe(`calendar-all`, `Sports: ${meta.meta.show}`)
                     }
                 }
                 temp.onkeydown = () => {
-                    if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
-                        subscribe(`calendar-all`, _meta.show)
-                    } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
-                        subscribe(`calendar-all`, `Sports: ${_meta.show}`)
+                    if (meta.meta.state.startsWith('live_') || meta.meta.state.startsWith('remote_')) {
+                        subscribe(`calendar-all`, meta.meta.show)
+                    } else if (meta.meta.state.startsWith('sports_') || meta.meta.state.startsWith('sportsremote_')) {
+                        subscribe(`calendar-all`, `Sports: ${meta.meta.show}`)
                     }
                 }
             }
