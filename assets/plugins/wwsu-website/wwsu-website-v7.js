@@ -1,3 +1,5 @@
+/* global WWSUreq, WWSUmeta, WWSUnavigation, CalendarDb */
+
 try {
     // Initialize sails.js socket connection to WWSU
     io.sails.url = 'https://server.wwsu1069.org'
@@ -5,7 +7,7 @@ try {
     var noReq = new WWSUreq(socket, null)
 
     // WWSU Variables
-    var Meta = { time: moment().toISOString(true), history: [], webchat: true, state: 'unknown' }
+    var meta = new WWSUMeta(socket, noReq);
     var likedTracks = [];
     var announcementIDs = [];
     var messageIDs = [];
@@ -28,9 +30,6 @@ try {
     var isMobile = device !== null;
     var notificationsSupported = false;
     var OneSignal;
-
-    // Timers
-    var clockTimer; // Used for ticking Meta.time
 
 } catch (e) {
     console.error(e);
@@ -349,7 +348,7 @@ function doSockets (firsttime = false) {
     if (isMobile || !firsttime || (!isMobile && device !== null)) {
         checkDiscipline(() => {
             tracksLikedSocket()
-            metaSocket()
+            meta.init();
             announcementsSocket()
             calendarSocket()
             calendarExceptionsSocket()
@@ -362,7 +361,7 @@ function doSockets (firsttime = false) {
         OneSignal = window.OneSignal || []
         checkDiscipline(() => {
             tracksLikedSocket()
-            metaSocket()
+            meta.init();
             announcementsSocket()
             calendarSocket()
             calendarExceptionsSocket()
@@ -379,44 +378,7 @@ function doSockets (firsttime = false) {
     META FUNCTIONS
 */
 
-
-
-
-// On meta changes, process meta
-socket.on('meta', (data) => {
-    for (var key in data) {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
-            Meta[ key ] = data[ key ]
-        }
-    }
-    doMeta(data)
-})
-
-/**
- * Hits meta/get and subscribes to meta socket.
- */
-function metaSocket () {
-    socket.post('/meta/get', {}, function serverResponded (body) {
-        // console.log(body);
-        try {
-            for (var key in body) {
-                if (Object.prototype.hasOwnProperty.call(body, key)) {
-                    Meta[ key ] = body[ key ]
-                }
-            }
-            doMeta(body)
-        } catch (unusedE) {
-            setTimeout(metaSocket, 10000)
-        }
-    })
-}
-
-/**
- * Process new meta received.
- * 
- * @param {object} response The new meta that was received from the API
- */
-function doMeta (response) {
+meta.on('newMeta', (response, _meta) => {
     try {
 
         var temp
@@ -425,35 +387,28 @@ function doMeta (response) {
         var temp4
         var subscribed
 
-        // Reset Meta.time ticker
-        if (typeof response.time !== 'undefined') {
-            clearInterval(clockTimer)
-            clearTimeout(clockTimer)
-            clockTimer = setInterval(clockTick, 1000)
-        }
-
         // Update meta, if new meta was provided
         if ('line1' in response || 'line2' in response) {
 
             // Update now playing icon
-            if (Meta.state.startsWith('live_') || Meta.state.startsWith('prerecord_')) {
-                $('.nowplaying-icon').html(`${Meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${Meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger"></i>`}`);
+            if (_meta.state.startsWith('live_') || _meta.state.startsWith('prerecord_')) {
+                $('.nowplaying-icon').html(`${_meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger"></i>`}`);
             }
-            if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                $('.nowplaying-icon').html(`${Meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-success" src="/uploads/calendar/logo/${Meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success"></i>`}`);
+            if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
+                $('.nowplaying-icon').html(`${_meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-success" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success"></i>`}`);
             }
-            if (Meta.state.startsWith('remote_')) {
+            if (_meta.state.startsWith('remote_')) {
                 $('.nowplaying-icon').html(`<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple"></i>`);
-                $('.nowplaying-icon').html(`${Meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-purple" src="/uploads/calendar/logo/${Meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple"></i>`}`);
+                $('.nowplaying-icon').html(`${_meta.showLogo !== null ? `<img class="profile-user-img img-fluid img-circle bg-purple" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple"></i>`}`);
             }
-            if (Meta.state.startsWith('automation_') || Meta.state === 'unknown') {
+            if (_meta.state.startsWith('automation_') || _meta.state === 'unknown') {
                 $('.nowplaying-icon').html(`<i class="profile-user-img img-fluid img-circle fas fa-music bg-primary"></i>`);
             }
 
             // Update now playing text
-            $('.nowplaying-line1').html(Meta.line1);
-            $('.nowplaying-line2').html(Meta.line2);
-            $('.nowplaying-topic').html(Meta.topic);
+            $('.nowplaying-line1').html(_meta.line1);
+            $('.nowplaying-line2').html(_meta.line2);
+            $('.nowplaying-topic').html(_meta.topic);
 
             // Display a 10-second toast
             $(document).Toasts('create', {
@@ -461,7 +416,7 @@ function doMeta (response) {
                 title: 'Now Playing',
                 autohide: true,
                 delay: 10000,
-                body: `<p>${Meta.line1}</p><p>${Meta.line2}</p>`,
+                body: `<p>${_meta.line1}</p><p>${_meta.line2}</p>`,
                 icon: 'fas fa-play fa-lg',
             })
         }
@@ -474,8 +429,8 @@ function doMeta (response) {
         }
 
         // If a state change was returned, process it by informing the client whether or not there is probably a DJ at the studio to read messages
-        if ('state' in response && Meta.webchat) {
-            if (response.state.startsWith('automation_') || Meta.state === 'unknown') {
+        if ('state' in response && _meta.webchat) {
+            if (response.state.startsWith('automation_') || _meta.state === 'unknown') {
                 if (automationpost !== 'automation') {
                     $('.chat-status').html(`<h5>Chat Status: Inactive</h5>
                     <p>No shows are airing right now. Your message will likely not be seen by a DJ.</p>`);
@@ -494,13 +449,13 @@ function doMeta (response) {
                 temp3 = document.querySelector(`#show-subscribe-name`)
                 temp4 = document.querySelector(`#show-subscribe-instructions`)
                 if (temp !== null) {
-                    subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length
+                    subscribed = Subscriptions({ type: `calendar-all`, subtype: _meta.state.startsWith('sports') ? `Sports: ${_meta.show}` : _meta.show }).get().length
                     if (subscribed === 0) {
                         temp.style.display = 'block'
                     } else {
                         temp.style.display = 'none'
                     }
-                    temp3.innerHTML = Meta.show
+                    temp3.innerHTML = _meta.show
                     if (notificationsSupported || isMobile) {
                         if (device === null && !isMobile) {
                             temp2.innerHTML = 'Show Prompt'
@@ -511,17 +466,17 @@ function doMeta (response) {
                             temp2.innerHTML = 'Subscribe'
                             temp4.innerHTML = `Click "Subscribe" to receive notifications when this show is on the air.`
                             temp2.onclick = () => {
-                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                                    subscribe(`calendar-all`, Meta.show)
-                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                                    subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                                if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
+                                    subscribe(`calendar-all`, _meta.show)
+                                } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
+                                    subscribe(`calendar-all`, `Sports: ${_meta.show}`)
                                 }
                             }
                             temp2.onkeydown = () => {
-                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                                    subscribe(`calendar-all`, Meta.show)
-                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                                    subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                                if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
+                                    subscribe(`calendar-all`, _meta.show)
+                                } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
+                                    subscribe(`calendar-all`, `Sports: ${_meta.show}`)
                                 }
                             }
                         }
@@ -546,13 +501,13 @@ function doMeta (response) {
                 temp3 = document.querySelector(`#show-subscribe-name`)
                 temp4 = document.querySelector(`#show-subscribe-instructions`)
                 if (temp !== null) {
-                    subscribed = Subscriptions({ type: `calendar-all`, subtype: Meta.state.startsWith('sports') ? `Sports: ${Meta.show}` : Meta.show }).get().length
+                    subscribed = Subscriptions({ type: `calendar-all`, subtype: _meta.state.startsWith('sports') ? `Sports: ${_meta.show}` : _meta.show }).get().length
                     if (subscribed === 0) {
                         temp.style.display = 'block'
                     } else {
                         temp.style.display = 'none'
                     }
-                    temp3.innerHTML = Meta.show
+                    temp3.innerHTML = _meta.show
                     if (notificationsSupported || isMobile) {
                         if (device === null && !isMobile) {
                             temp2.innerHTML = 'Show Prompt'
@@ -563,17 +518,17 @@ function doMeta (response) {
                             temp2.innerHTML = 'Subscribe'
                             temp4.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
                             temp2.onclick = () => {
-                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                                    subscribe(`calendar-all`, Meta.show)
-                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                                    subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                                if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
+                                    subscribe(`calendar-all`, _meta.show)
+                                } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
+                                    subscribe(`calendar-all`, `Sports: ${_meta.show}`)
                                 }
                             }
                             temp2.onkeydown = () => {
-                                if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                                    subscribe(`calendar-all`, Meta.show)
-                                } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                                    subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                                if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
+                                    subscribe(`calendar-all`, _meta.show)
+                                } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
+                                    subscribe(`calendar-all`, `Sports: ${_meta.show}`)
                                 }
                             }
                         }
@@ -589,7 +544,7 @@ function doMeta (response) {
         }
 
         // Unblock webchat if chats are allowed
-        if (Meta.webchat) {
+        if (_meta.webchat) {
             blocked = false
             $('.chat-blocker').prop('disabled', false);
         }
@@ -612,11 +567,7 @@ function doMeta (response) {
     } catch (e) {
         console.error(e)
     }
-}
-
-function clockTick () {
-    Meta.time = moment(Meta.time).add(1, 'seconds')
-}
+});
 
 
 
@@ -633,7 +584,7 @@ function tracksLikedSocket () {
     socket.post('/songs/get-liked', {}, function serverResponded (body) {
         try {
             likedTracks = body
-            doMeta({ history: Meta.history })
+            do_meta({ history: _meta.history })
         } catch (unusedE) {
             setTimeout(tracksLikedSocket, 10000)
         }
@@ -675,7 +626,7 @@ function likeTrack (trackID) {
                     })
 
                     // Re-process meta so the recent tracks list is updated
-                    doMeta({ history: Meta.history });
+                    do_meta({ history: _meta.history });
                 }
             } catch (e) {
                 console.error(e);
@@ -715,7 +666,7 @@ function likeTrack (trackID) {
                     })
 
                     // Re-process meta so the recent tracks list is updated
-                    doMeta({ history: Meta.history });
+                    do_meta({ history: _meta.history });
                 }
             } catch (unusedE) {
                 $(document).Toasts('create', {
@@ -771,7 +722,7 @@ function announcementsSocket () {
  * @param {object} announcement Announcement object received from WWSU API.
  */
 function addAnnouncement (announcement) {
-    if (moment(Meta.time).isAfter(moment(announcement.starts)) && moment(Meta.time).isBefore(moment(announcement.expires))) {
+    if (moment(_meta.time).isAfter(moment(announcement.starts)) && moment(_meta.time).isBefore(moment(announcement.expires))) {
         var color = 'bg-light'
         if (announcement.level === 'success') { color = 'bg-success' }
         if (announcement.level === 'danger' || announcement.level === 'urgent') { color = 'bg-danger' }
@@ -872,7 +823,7 @@ function updateCalendar () {
 
     // Run through every event in memory and add appropriate ones into our formatted calendar variable.
     events
-        .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(Meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(Meta.time).startOf(`day`).add(selectedOption, `days`)))
+        .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(_meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(_meta.time).startOf(`day`).add(selectedOption, `days`)))
         .map(event => {
             try {
                 var colorClass = `secondary`;
@@ -955,7 +906,7 @@ function updateCalendar () {
     $('#schedule-events').html(html);
 
     for (var i = 1; i < 7; i++) {
-        $(`#schedule-select-${i}`).html(moment(Meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
+        $(`#schedule-select-${i}`).html(moment(_meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
     }
 }
 
@@ -1626,7 +1577,7 @@ function onlineSocket (doOneSignal = false) {
             client = body.host;
             onlineSocketDone = true
             automationpost = ``
-            doMeta({ webchat: Meta.webchat, state: Meta.state })
+            do_meta({ webchat: _meta.webchat, state: _meta.state })
             if (doOneSignal) {
                 OneSignal.push(() => {
                     OneSignal.init({
@@ -1718,7 +1669,7 @@ function onlineSocket (doOneSignal = false) {
             try {
                 Subscriptions = TAFFY()
                 Subscriptions.insert(body)
-                doMeta({ state: Meta.state })
+                do_meta({ state: _meta.state })
             } catch (unusedE) {
                 setTimeout(metaSocket, 10000)
             }
@@ -1757,17 +1708,17 @@ function onlineSocket (doOneSignal = false) {
                 temp.innerHTML = 'Subscribe'
                 temp2.innerHTML = `Click "Subscribe" to receive notifications when this show goes on the air.`
                 temp.onclick = () => {
-                    if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                        subscribe(`calendar-all`, Meta.show)
-                    } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                        subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                    if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
+                        subscribe(`calendar-all`, _meta.show)
+                    } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
+                        subscribe(`calendar-all`, `Sports: ${_meta.show}`)
                     }
                 }
                 temp.onkeydown = () => {
-                    if (Meta.state.startsWith('live_') || Meta.state.startsWith('remote_')) {
-                        subscribe(`calendar-all`, Meta.show)
-                    } else if (Meta.state.startsWith('sports_') || Meta.state.startsWith('sportsremote_')) {
-                        subscribe(`calendar-all`, `Sports: ${Meta.show}`)
+                    if (_meta.state.startsWith('live_') || _meta.state.startsWith('remote_')) {
+                        subscribe(`calendar-all`, _meta.show)
+                    } else if (_meta.state.startsWith('sports_') || _meta.state.startsWith('sportsremote_')) {
+                        subscribe(`calendar-all`, `Sports: ${_meta.show}`)
                     }
                 }
             }
