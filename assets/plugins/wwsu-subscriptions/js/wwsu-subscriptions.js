@@ -58,8 +58,8 @@ class WWSUSubscriptions {
                         body: '<p>You were successfully subscribed! You will be notified through your web browser when the event goes on the air or the time changes / is canceled.</p><p>You may stop receiving notifications if you go longer than a month without visiting the WWSU listener corner.</p>',
                         icon: 'fas fa-bell fa-lg',
                     });
-                    this.subscriptions.insert({ type, subtype });
-                    this.events.emitEvent('newSubscription', [ { type, subtype }, this.subscriptions().get() ]);
+                    this.subscriptions.insert({ type, subtype: `${subtype}` });
+                    this.events.emitEvent('newSubscription', [ { type, subtype: `${subtype}` }, this.subscriptions().get() ]);
                 }
             } catch (e) {
                 console.error(e);
@@ -103,8 +103,8 @@ class WWSUSubscriptions {
                                     icon: 'fas fa-bell-slash fa-lg',
                                 });
                                 this.subscriptions({ type: `calendar-once`, subtype: `${event}` }).remove();
-                                this.subscriptions({ type: `calendar-all`, subtype: ID }).remove();
-                                this.events.emitEvent('removedSubscription', [ event, ID, this.subscriptions().get() ]);
+                                this.subscriptions({ type: `calendar-all`, subtype: `${ID}` }).remove();
+                                this.events.emitEvent('removedSubscription', [ `${event}`, `${ID}`, this.subscriptions().get() ]);
                             }
                         } catch (e) {
                             console.error(e);
