@@ -503,7 +503,7 @@ class WWSUutil {
   waitForElement (theelement, cb) {
     console.log(theelement)
     if (!document.querySelector(theelement)) {
-      window.requestAnimationFrame(() => waitForElement(theelement, cb))
+      window.requestAnimationFrame(() => this.waitForElement(theelement, cb))
     } else {
       // eslint-disable-next-line callback-return
       cb(document.querySelector(theelement))
