@@ -42,7 +42,7 @@ class WWSUMeta {
             } catch (e) {
                 setTimeout(this.init, 10000);
             }
-        })
+        });
     }
 
     // Event handler. Supported events: newMeta([updatedMeta, entireMeta]), metaTick([entireMeta])

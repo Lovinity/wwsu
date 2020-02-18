@@ -1,4 +1,4 @@
-/* global WWSUreq, WWSUmeta, WWSUnavigation, CalendarDb */
+/* global WWSUreq, WWSUmeta, WWSUnavigation, CalendarDb, WWSUutil, WWSUSubscriptions */
 
 try {
     // Initialize sails.js socket connection to WWSU
@@ -8,6 +8,7 @@ try {
 
     // WWSU Variables
     var meta = new WWSUMeta(socket, noReq);
+    var wwsuutil = new WWSUutil();
     var likedTracks = [];
     var announcementIDs = [];
     var messageIDs = [];
@@ -16,17 +17,22 @@ try {
     var newMessages = 0;
     var client = '';
     var automationpost = ``;
-    var Subscriptions = TAFFY();
     var blocked = false;
     var skipIt = 0;
     var viewingEvent = {};
+
+    // subscriptions
+    var subscriptions = new WWSUSubscriptions(socket, noReq);
+    subscriptions.on('subscriptions', (subscriptions) => {
+        meta.meta = { state: meta.meta.state };
+    });
 
     // Operation Variables
     var firstTime = true;
 
     // oneSignal Variables
     var onlineSocketDone = false;
-    var device = getUrlParameter(`device`);
+    var device = wwsuutil.getUrlParameter(`device`);
     var isMobile = device !== null;
     var notificationsSupported = false;
     var OneSignal;
@@ -82,17 +88,17 @@ $(document).ready(function () {
         }
 
         // Add accessibility properties to flash player
-        waitForElement('#nativeflashradioplaystopcontainer', (element) => {
+        wwsuutil.waitForElement('#nativeflashradioplaystopcontainer', (element) => {
             $('#nativeflashradioplaystopcontainer').attr('tabindex', 0)
         })
-        waitForElement('#nativeflashradiovolumegrab', (element) => {
+        wwsuutil.waitForElement('#nativeflashradiovolumegrab', (element) => {
             $('#nativeflashradiovolumegrab').attr('tabindex', 0)
             $('#nativeflashradiovolumegrab').attr('alt', 'Change Volume')
         })
-        waitForElement('#nativeflashradiovolumehit', (element) => {
+        wwsuutil.waitForElement('#nativeflashradiovolumehit', (element) => {
             $('#nativeflashradiovolumehit').attr('alt', 'Volume')
         })
-        waitForElement('#nativeflashradioimagehit1', (element) => {
+        wwsuutil.waitForElement('#nativeflashradioimagehit1', (element) => {
             $('#nativeflashradioimagehit1').attr('alt', 'logo')
         })
 
@@ -176,105 +182,6 @@ socket.on('disconnect', () => {
     } catch (unusedE) {
     }
 })
-
-
-
-/*
-    UTILITY FUNCTIONS
-*/
-
-
-/**
- * Get the value of the specified URL parameter
- * 
- * @param {string} name Name of URL parameter to fetch
- * @returns {?string} Value of the URL parameter being fetched, or null if not set.
- */
-function getUrlParameter (name) {
-    try {
-        name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
-        var results = regex.exec(window.location.search)
-        return results === null ? null : decodeURIComponent(results[ 1 ].replace(/\+/g, ' '))
-    } catch (e) {
-        console.error(e);
-        $(document).Toasts('create', {
-            class: 'bg-danger',
-            title: 'Error in getUrlParameter function',
-            body: 'There was an error in the getUrlParameter function. Please report this to engineer@wwsu1069.org.',
-            icon: 'fas fa-skull-crossbones fa-lg',
-        });
-    }
-}
-
-/**
- * Convert a hexadecimal color into its RGBA values.
- * 
- * @param {string} hex A hexadecimal color
- * @param {object} options options.format: specify "array" to return as [red, green, blue, alpha] instead of object
- * @returns {object || array} {red, green, blue, alpha} or [red, green, blue, alpha] values
- */
-function hexRgb (hex, options = {}) {
-
-    // function-specific values
-    var hexChars = 'a-f\\d'
-    var match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`
-    var match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`
-    var nonHexChars = new RegExp(`[^#${hexChars}]`, 'gi')
-    var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i')
-
-    try {
-        if (typeof hex !== 'string' || nonHexChars.test(hex) || !validHexSize.test(hex)) {
-            throw new TypeError('Expected a valid hex string')
-        }
-
-        hex = hex.replace(/^#/, '')
-        let alpha = 255
-
-        if (hex.length === 8) {
-            alpha = parseInt(hex.slice(6, 8), 16) / 255
-            hex = hex.substring(0, 6)
-        }
-
-        if (hex.length === 4) {
-            alpha = parseInt(hex.slice(3, 4).repeat(2), 16) / 255
-            hex = hex.substring(0, 3)
-        }
-
-        if (hex.length === 3) {
-            hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ]
-        }
-
-        const num = parseInt(hex, 16)
-        const red = num >> 16
-        const green = (num >> 8) & 255
-        const blue = num & 255
-
-        return options.format === 'array'
-            ? [ red, green, blue, alpha ]
-            : { red, green, blue, alpha }
-    } catch (e) {
-        console.error(e)
-        $(document).Toasts('create', {
-            class: 'bg-danger',
-            title: 'hexrgb error',
-            body: 'There was an error in the hexrgb function. Please report this to engineer@wwsu1069.org.',
-            icon: 'fas fa-skull-crossbones fa-lg',
-        });
-    }
-}
-
-/**
- * Escape HTML for use in the web page.
- * 
- * @param {string} str The HTML to escape
- */
-function escapeHTML (str) {
-    var div = document.createElement('div')
-    div.appendChild(document.createTextNode(str))
-    return div.innerHTML
-}
-
 
 
 /*
@@ -558,7 +465,7 @@ meta.on('newMeta', (response, _meta) => {
                 ${track.track}
                 </td>
                 <td>
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}` : likedTracks.indexOf(track.track) === -1 ? `<button type="button" class="btn btn-info btn-small" tabindex="0" title="Tell the DJ you enjoy this track." onclick="likeTrack('${escapeHTML(track.track)}');" onkeydown="likeTrack('${escapeHTML(track.track)}');">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}` : likedTracks.indexOf(track.track) === -1 ? `<button type="button" class="btn btn-info btn-small" tabindex="0" title="Tell the DJ you enjoy this track." onclick="likeTrack('${wwsuutil.escapeHTML(track.track)}');" onkeydown="likeTrack('${wwsuutil.escapeHTML(track.track)}');">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}
                 </td>
                 </tr>`
             }));
@@ -1010,7 +917,7 @@ function displayEventInfo (showID) {
         // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
 
         // Check the number of subscriptions
-        var subscribed = Subscriptions([ { type: `calendar-once`, subtype: event.unique }, { type: `calendar-all`, subtype: `${event.calendarID}` } ]).get().length
+        var subscribed = subscriptions.countSubscribed(event.unique, event.calendarID);
 
         if (subscribed === 0) {
             $('#modal-eventinfo-subscribe-once').css('display', '');
@@ -1057,36 +964,7 @@ function displayEventInfo (showID) {
  * @param {string} subtype event.unique if one-time subscription, or calendarID if permanent subscription.
  */
 function subscribe (type, subtype) {
-    socket.post('/subscribers/add', { device: device, type: type, subtype: subtype }, function serverResponded (response) {
-        try {
-            if (response !== 'OK') {
-                $(document).Toasts('create', {
-                    class: 'bg-warning',
-                    title: 'Subscription failed',
-                    body: 'Unable to subscribe you to that event at this time. Please contact engineer@wwsu1069.org.',
-                    icon: 'fas fa-skull-crossbones fa-lg',
-                });
-            } else {
-                $(document).Toasts('create', {
-                    class: 'bg-success',
-                    title: 'Subscribed!',
-                    autohide: true,
-                    delay: 30000,
-                    body: '<p>You were successfully subscribed! You will be notified through your web browser when the event goes on the air or the time changes / is canceled.</p><p>You may stop receiving notifications if you go longer than a month without visiting the WWSU listener corner.</p>',
-                    icon: 'fas fa-bell fa-lg',
-                });
-                Subscriptions.insert({ type: type, subtype: subtype })
-            }
-        } catch (e) {
-            console.error(e);
-            $(document).Toasts('create', {
-                class: 'bg-danger',
-                title: 'Subscription failed',
-                body: 'Unable to subscribe you to that event at this time. Please contact engineer@wwsu1069.org.',
-                icon: 'fas fa-skull-crossbones fa-lg',
-            });
-        }
-    })
+    subscriptions.subscribe(type, subtype);
 }
 
 /**
@@ -1096,58 +974,7 @@ function subscribe (type, subtype) {
  * @param {string} event calendarID to unsubscribe from
  */
 function unsubscribe (ID, event) {
-    socket.post('/subscribers/remove', { device: device, type: `calendar-once`, subtype: ID }, function serverResponded (response) {
-        try {
-            if (response !== 'OK') {
-                $(document).Toasts('create', {
-                    class: 'bg-warning',
-                    title: 'Un-subscription failed',
-                    body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact engineer@wwsu1069.org.',
-                    icon: 'fas fa-skull-crossbones fa-lg',
-                });
-            } else {
-                socket.post('/subscribers/remove', { device: device, type: `calendar-all`, subtype: event }, function serverResponded (response) {
-                    try {
-                        if (response !== 'OK') {
-                            $(document).Toasts('create', {
-                                class: 'bg-warning',
-                                title: 'Un-subscription failed',
-                                body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact engineer@wwsu1069.org.',
-                                icon: 'fas fa-skull-crossbones fa-lg',
-                            });
-                        } else {
-                            $(document).Toasts('create', {
-                                class: 'bg-success',
-                                title: 'Un-subscribed!',
-                                autohide: true,
-                                delay: 15000,
-                                body: '<p>You successfully un-subscribed from that event and will no longer receive any notifications for it unless you subscribe again.</p>',
-                                icon: 'fas fa-bell-slash fa-lg',
-                            });
-                            Subscriptions({ type: `calendar-once`, subtype: ID }).remove()
-                            Subscriptions({ type: `calendar-all`, subtype: `${event}` }).remove()
-                        }
-                    } catch (e) {
-                        console.error(e);
-                        $(document).Toasts('create', {
-                            class: 'bg-danger',
-                            title: 'Un-subscription failed',
-                            body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact engineer@wwsu1069.org.',
-                            icon: 'fas fa-skull-crossbones fa-lg',
-                        });
-                    }
-                })
-            }
-        } catch (e) {
-            console.error(e);
-            $(document).Toasts('create', {
-                class: 'bg-danger',
-                title: 'Un-subscription failed',
-                body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact engineer@wwsu1069.org.',
-                icon: 'fas fa-skull-crossbones fa-lg',
-            });
-        }
-    })
+    subscriptions.unsubscribe(ID, event);
 }
 
 
@@ -1427,7 +1254,7 @@ function loadTracks (skip = skipIt) {
                     html += `<tr class="${track.enabled !== 1 ? 'bg-dark' : ''}">
             <td>${track.artist} - ${track.title}${track.enabled !== 1 ? ' (DISABLED)' : ''}</td>
             <td>
-            ${track.enabled === 1 ? `<button type="button" class="btn btn-success" onclick="loadTrackInfo(${track.ID})" onkeydown="loadTrackInfo(${track.ID})" title="Get more info, or request, ${escapeHTML(track.artist)} - ${escapeHTML(track.title)}}">Info / Request</button>` : `<button type="button" class="btn btn-info" onclick="loadTrackInfo(${track.ID})" onkeydown="loadTrackInfo(${track.ID})" title="Get more info about ${escapeHTML(track.artist)} - ${escapeHTML(track.title)}}.">Info</button>`}
+            ${track.enabled === 1 ? `<button type="button" class="btn btn-success" onclick="loadTrackInfo(${track.ID})" onkeydown="loadTrackInfo(${track.ID})" title="Get more info, or request, ${wwsuutil.escapeHTML(track.artist)} - ${wwsuutil.escapeHTML(track.title)}}">Info / Request</button>` : `<button type="button" class="btn btn-info" onclick="loadTrackInfo(${track.ID})" onkeydown="loadTrackInfo(${track.ID})" title="Get more info about ${wwsuutil.escapeHTML(track.artist)} - ${wwsuutil.escapeHTML(track.title)}}.">Info</button>`}
             </td>
           </tr>`;
                 })
@@ -1665,15 +1492,7 @@ function onlineSocket (doOneSignal = false) {
     })
 
     if (device && device !== null) {
-        socket.post('/subscribers/get-web', { device: device }, function serverResponded (body) {
-            try {
-                Subscriptions = TAFFY()
-                Subscriptions.insert(body)
-                meta.meta = { state: meta.meta.state };
-            } catch (unusedE) {
-                setTimeout(metaSocket, 10000)
-            }
-        })
+        subscriptions.init(device);
     }
 
     /* TODO

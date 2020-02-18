@@ -13,7 +13,7 @@ class WWSUdb {
      * @memberof WWSUdb
      */
 
-  constructor (db) {
+  constructor(db) {
     this._db = db
 
     this.onInsert = () => {
@@ -96,16 +96,16 @@ class WWSUdb {
         if (Object.prototype.hasOwnProperty.call(query, key)) {
           switch (key) {
             case 'insert':
-              this._db.insert(query[key])
-              this.onInsert(query[key], this._db())
+              this._db.insert(query[ key ])
+              this.onInsert(query[ key ], this._db())
               break
             case 'update':
-              this._db({ ID: query[key].ID }).update(query[key])
-              this.onUpdate(query[key], this._db())
+              this._db({ ID: query[ key ].ID }).update(query[ key ])
+              this.onUpdate(query[ key ], this._db())
               break
             case 'remove':
-              this._db({ ID: query[key] }).remove()
-              this.onRemove(query[key], this._db())
+              this._db({ ID: query[ key ] }).remove()
+              this.onRemove(query[ key ], this._db())
               break
           }
         }
@@ -137,7 +137,7 @@ class WWSUdb {
 // Class for managing requests and authorization to WWSU's API
 // eslint-disable-next-line no-unused-vars
 class WWSUreq {
-  constructor (socket, host, usernameField = null, authPath = null, authName = null) {
+  constructor(socket, host, usernameField = null, authPath = null, authName = null) {
     this.socket = socket
     this.host = host
     this.authPath = authPath
@@ -272,7 +272,7 @@ class WWSUreq {
             Authorization: 'Bearer ' + this.token
           }
         } else {
-          opts.headers['Authorization'] = 'Bearer ' + this.token
+          opts.headers[ 'Authorization' ] = 'Bearer ' + this.token
         }
       }
 
@@ -323,10 +323,10 @@ class WWSUreq {
 
   // We need to log in; display a login window via iziToast. opts.db should have objects of current users (including a key named after this.usernameField) that can be authenticated
   _promptLogin (opts, cb) {
-    var selection = [`<option value="">--SELECT A USER--</option>`]
+    var selection = [ `<option value="">--SELECT A USER--</option>` ]
     if (opts.db !== null) {
       opts.db.each((user) => {
-        selection.push(`<option value="${user[`${this.usernameField}`]}">${user[`${this.usernameField}`]}</option>`)
+        selection.push(`<option value="${user[ `${this.usernameField}` ]}">${user[ `${this.usernameField}` ]}</option>`)
       })
     }
 
@@ -348,21 +348,21 @@ class WWSUreq {
       drag: false,
       closeOnClick: false,
       inputs: [
-        [`<select>${selection.join('')}</select>`, 'change', function (instance, toast, select, e) {
-          username = select.options[select.selectedIndex].value
-        }, true],
-        [`<input type="password">`, 'keyup', function (instance, toast, input, e) {
+        [ `<select>${selection.join('')}</select>`, 'change', function (instance, toast, select, e) {
+          username = select.options[ select.selectedIndex ].value
+        }, true ],
+        [ `<input type="password">`, 'keyup', function (instance, toast, input, e) {
           password = input.value
-        }, true]
+        }, true ]
       ],
       buttons: [
-        ['<button><b>Authorize</b></button>', function (instance, toast) {
+        [ '<button><b>Authorize</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
           cb(username, password)
-        }],
-        ['<button><b>Cancel</b></button>', function (instance, toast) {
+        } ],
+        [ '<button><b>Cancel</b></button>', function (instance, toast) {
           instance.hide({ transitionOut: 'fadeOut' }, toast, 'button')
-        }]
+        } ]
       ]
     })
   }
@@ -372,50 +372,148 @@ class WWSUreq {
 class WWSUScriptLoader {
 
   constructor() {
-      this.loadedScripts = [];
+    this.loadedScripts = [];
   }
 
   loadScript (filename, filetype) {
-      if (this.loadedScripts.indexOf(filename) === -1) {
-          this._loadScript(filename, filetype);
-          this.loadedScripts.push(filename);
-      }
+    if (this.loadedScripts.indexOf(filename) === -1) {
+      this._loadScript(filename, filetype);
+      this.loadedScripts.push(filename);
+    }
   }
 
   // Do not call this directly unless you want to avoid duplicate script loading checks!
   _loadScript (filename, filetype) {
-      if (filetype === "js") { //if filename is a external JavaScript file
-          var fileref = document.createElement('script')
-          fileref.setAttribute("type", "text/javascript")
-          fileref.setAttribute("src", filename)
-      }
-      else if (filetype === "css") { //if filename is an external CSS file
-          var fileref = document.createElement("link")
-          fileref.setAttribute("rel", "stylesheet")
-          fileref.setAttribute("type", "text/css")
-          fileref.setAttribute("href", filename)
-      }
-      if (typeof fileref !== "undefined")
-          document.getElementsByTagName("head")[ 0 ].appendChild(fileref)
+    if (filetype === "js") { //if filename is a external JavaScript file
+      var fileref = document.createElement('script')
+      fileref.setAttribute("type", "text/javascript")
+      fileref.setAttribute("src", filename)
+    }
+    else if (filetype === "css") { //if filename is an external CSS file
+      var fileref = document.createElement("link")
+      fileref.setAttribute("rel", "stylesheet")
+      fileref.setAttribute("type", "text/css")
+      fileref.setAttribute("href", filename)
+    }
+    if (typeof fileref !== "undefined")
+      document.getElementsByTagName("head")[ 0 ].appendChild(fileref)
   }
 
 }
 
-// Use this function to wait for an element to exist. Calls back the cb when it exists, providing the DOM as a parameter.
-// eslint-disable-next-line no-unused-vars
-function waitForElement (theelement, cb) {
-  console.log(theelement)
-  if (!document.querySelector(theelement)) {
-    window.requestAnimationFrame(() => waitForElement(theelement, cb))
-  } else {
-    // eslint-disable-next-line callback-return
-    cb(document.querySelector(theelement))
+class WWSUutil {
+
+/**
+ * Get the value of the specified URL parameter
+ * 
+ * @param {string} name Name of URL parameter to fetch
+ * @returns {?string} Value of the URL parameter being fetched, or null if not set.
+ */
+  getUrlParameter (name) {
+    try {
+      name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
+      var results = regex.exec(window.location.search)
+      return results === null ? null : decodeURIComponent(results[ 1 ].replace(/\+/g, ' '))
+    } catch (e) {
+      console.error(e);
+      $(document).Toasts('create', {
+        class: 'bg-danger',
+        title: 'Error in getUrlParameter function',
+        body: 'There was an error in the getUrlParameter function. Please report this to engineer@wwsu1069.org.',
+        icon: 'fas fa-skull-crossbones fa-lg',
+      });
+    }
+  }
+
+  /**
+  * Convert a hexadecimal color into its RGBA values.
+  * 
+  * @param {string} hex A hexadecimal color
+  * @param {object} options options.format: specify "array" to return as [red, green, blue, alpha] instead of object
+  * @returns {object || array} {red, green, blue, alpha} or [red, green, blue, alpha] values
+  */
+  hexRgb (hex, options = {}) {
+
+    // function-specific values
+    var hexChars = 'a-f\\d'
+    var match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`
+    var match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`
+    var nonHexChars = new RegExp(`[^#${hexChars}]`, 'gi')
+    var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, 'i')
+
+    try {
+      if (typeof hex !== 'string' || nonHexChars.test(hex) || !validHexSize.test(hex)) {
+        throw new TypeError('Expected a valid hex string')
+      }
+
+      hex = hex.replace(/^#/, '')
+      let alpha = 255
+
+      if (hex.length === 8) {
+        alpha = parseInt(hex.slice(6, 8), 16) / 255
+        hex = hex.substring(0, 6)
+      }
+
+      if (hex.length === 4) {
+        alpha = parseInt(hex.slice(3, 4).repeat(2), 16) / 255
+        hex = hex.substring(0, 3)
+      }
+
+      if (hex.length === 3) {
+        hex = hex[ 0 ] + hex[ 0 ] + hex[ 1 ] + hex[ 1 ] + hex[ 2 ] + hex[ 2 ]
+      }
+
+      const num = parseInt(hex, 16)
+      const red = num >> 16
+      const green = (num >> 8) & 255
+      const blue = num & 255
+
+      return options.format === 'array'
+        ? [ red, green, blue, alpha ]
+        : { red, green, blue, alpha }
+    } catch (e) {
+      console.error(e)
+      $(document).Toasts('create', {
+        class: 'bg-danger',
+        title: 'hexrgb error',
+        body: 'There was an error in the hexrgb function. Please report this to engineer@wwsu1069.org.',
+        icon: 'fas fa-skull-crossbones fa-lg',
+      });
+    }
+  }
+
+  /**
+  * Escape HTML for use in the web page.
+  * 
+  * @param {string} str The HTML to escape
+  */
+  escapeHTML (str) {
+    var div = document.createElement('div')
+    div.appendChild(document.createTextNode(str))
+    return div.innerHTML
+  }
+
+  /**
+   * Call a function when an element exists on the document.
+   * 
+   * @param {string} theelement DOM query string of the element to wait for until it exists
+   * @param {function} cb Function to call when the element exists
+   */
+  waitForElement (theelement, cb) {
+    console.log(theelement)
+    if (!document.querySelector(theelement)) {
+      window.requestAnimationFrame(() => waitForElement(theelement, cb))
+    } else {
+      // eslint-disable-next-line callback-return
+      cb(document.querySelector(theelement))
+    }
   }
 }
 
 if (typeof require !== 'undefined') {
   exports.WWSUdb = WWSUdb;
   exports.WWSUreq = WWSUreq;
-  exports.waitForElement = waitForElement;
   exports.WWSUScriptLoader = WWSUScriptLoader;
+  exports.WWSUutil = WWSUutil;
 }
