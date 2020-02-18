@@ -7,8 +7,7 @@ class WWSUSubscriptions {
 
     constructor(socket, request) {
         this.endpoint = { get: '/subscribers/get-web', subscribe: '/subscribers/add', unsubscribe: '/subscribers/remove' };
-        this.
-            this.request = request;
+        this.request = request;
         this.events = new EventEmitter();
         this.device = null;
 
