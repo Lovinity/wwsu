@@ -59,7 +59,7 @@ class WWSUSubscriptions {
                         icon: 'fas fa-bell fa-lg',
                     });
                     this.subscriptions.insert({ type, subtype });
-                    this.events.emitEvent('newSubscription', [ { type, subtype }, this.subscriptions.get() ]);
+                    this.events.emitEvent('newSubscription', [ { type, subtype }, this.subscriptions().get() ]);
                 }
             } catch (e) {
                 console.error(e);
@@ -104,7 +104,7 @@ class WWSUSubscriptions {
                                 });
                                 this.subscriptions({ type: `calendar-once`, subtype: `${event}` }).remove();
                                 this.subscriptions({ type: `calendar-all`, subtype: ID }).remove();
-                                this.events.emitEvent('removedSubscription', [ unique, ID, this.subscriptions.get() ]);
+                                this.events.emitEvent('removedSubscription', [ unique, ID, this.subscriptions().get() ]);
                             }
                         } catch (e) {
                             console.error(e);
