@@ -104,7 +104,7 @@ class WWSUSubscriptions {
                                 });
                                 this.subscriptions({ type: `calendar-once`, subtype: `${event}` }).remove();
                                 this.subscriptions({ type: `calendar-all`, subtype: ID }).remove();
-                                this.events.emitEvent('removedSubscription', [ unique, ID, this.subscriptions().get() ]);
+                                this.events.emitEvent('removedSubscription', [ event, ID, this.subscriptions().get() ]);
                             }
                         } catch (e) {
                             console.error(e);
