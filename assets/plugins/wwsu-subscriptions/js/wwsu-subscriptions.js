@@ -35,7 +35,7 @@ class WWSUSubscriptions {
 
     // Count and return the number of subscriptions to an event (both unique and calendar as a whole)
     countSubscribed (unique, calendar) {
-        return this.subscriptions([ { type: `calendar-once`, subtype: unique }, { type: `calendar-all`, subtype: `${calendar}` } ]).get().length;
+        return this.subscriptions([ { type: `calendar-once`, subtype: `${unique}` }, { type: `calendar-all`, subtype: `${calendar}` } ]).get().length;
     }
 
     // Subscribe to an event
@@ -102,9 +102,9 @@ class WWSUSubscriptions {
                                     body: '<p>You successfully un-subscribed from that event and will no longer receive any notifications for it unless you subscribe again.</p>',
                                     icon: 'fas fa-bell-slash fa-lg',
                                 });
-                                this.subscriptions({ type: `calendar-once`, subtype: `${event}` }).remove();
-                                this.subscriptions({ type: `calendar-all`, subtype: `${ID}` }).remove();
-                                this.events.emitEvent('removedSubscription', [ `${event}`, `${ID}`, this.subscriptions().get() ]);
+                                this.subscriptions({ type: `calendar-once`, subtype: `${ID}` }).remove();
+                                this.subscriptions({ type: `calendar-all`, subtype: `${event}` }).remove();
+                                this.events.emitEvent('removedSubscription', [ `${ID}`, `${event}`, this.subscriptions().get() ]);
                             }
                         } catch (e) {
                             console.error(e);
