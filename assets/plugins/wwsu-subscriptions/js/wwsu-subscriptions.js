@@ -3,10 +3,14 @@
 // This class manages calendar subscriptions
 
 // TODO: fix removal to allow removing unique or ID individually.
-class WWSUSubscriptions {
+class WWSUsubscriptions {
 
     constructor(socket, request) {
-        this.endpoint = { get: '/subscribers/get-web', subscribe: '/subscribers/add', unsubscribe: '/subscribers/remove' };
+        this.endpoints = { 
+            get: '/subscribers/get-web', 
+            subscribe: '/subscribers/add', 
+            unsubscribe: '/subscribers/remove' 
+        };
         this.request = request;
         this.events = new EventEmitter();
         this.device = null;
@@ -17,7 +21,7 @@ class WWSUSubscriptions {
     // Initialize subscriptions with the provided device ID, or null if no device
     init (device = null) {
         this.device = device;
-        this.request.request({ method: 'POST', url: this.endpoint.get, data: { device: device } }, (body) => {
+        this.request.request({ method: 'POST', url: this.endpoints.get, data: { device: device } }, (body) => {
             try {
                 this.subscriptions = TAFFY()
                 this.subscriptions.insert(body)
@@ -40,7 +44,7 @@ class WWSUSubscriptions {
 
     // Subscribe to an event
     subscribe (type, subtype) {
-        this.request.request({ method: 'POST', url: this.endpoint.subscribe, data: { device: this.device, type, subtype } }, (response) => {
+        this.request.request({ method: 'POST', url: this.endpoints.subscribe, data: { device: this.device, type, subtype } }, (response) => {
             try {
                 if (response !== 'OK') {
                     $(document).Toasts('create', {
@@ -74,7 +78,7 @@ class WWSUSubscriptions {
     }
 
     unsubscribe (ID, event) {
-        this.request.request({ method: 'POST', url: this.endpoint.unsubscribe, data: { device: this.device, type: `calendar-once`, subtype: ID } }, (response) => {
+        this.request.request({ method: 'POST', url: this.endpoints.unsubscribe, data: { device: this.device, type: `calendar-once`, subtype: ID } }, (response) => {
             try {
                 if (response !== 'OK') {
                     $(document).Toasts('create', {
@@ -84,7 +88,7 @@ class WWSUSubscriptions {
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 } else {
-                    this.request.request({ method: 'POST', url: this.endpoint.unsubscribe, data: { device: this.device, type: `calendar-all`, subtype: event } }, (response2) => {
+                    this.request.request({ method: 'POST', url: this.endpoints.unsubscribe, data: { device: this.device, type: `calendar-all`, subtype: event } }, (response2) => {
                         try {
                             if (response !== 'OK') {
                                 $(document).Toasts('create', {

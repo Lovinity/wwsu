@@ -1,4 +1,4 @@
-/* global WWSUreq, WWSUmeta, WWSUnavigation, CalendarDb, WWSUutil, WWSUSubscriptions */
+/* global WWSUreq, WWSUmeta, WWSUnavigation, CalendarDb, WWSUutil, WWSUsubscriptions, WWSUlikedtracks */
 
 try {
     // Initialize sails.js socket connection to WWSU
@@ -9,7 +9,18 @@ try {
     // WWSU Variables
     var meta = new WWSUMeta(socket, noReq);
     var wwsuutil = new WWSUutil();
-    var likedTracks = [];
+
+    var likedtracks = new WWSUlikedtracks(socket, noReq);
+    likedtracks.on('init', () => {
+        meta.meta = meta.meta.history;
+    });
+    likedtracks.on('likedTrack', () => {
+        meta.meta = meta.meta.history;
+    });
+    likedtracks.on('likedTrackManual', () => {
+        meta.meta = meta.meta.history;
+    });
+
     var announcementIDs = [];
     var messageIDs = [];
     var navigation = new WWSUNavigation();
@@ -22,7 +33,7 @@ try {
     var viewingEvent = {};
 
     // subscriptions
-    var subscriptions = new WWSUSubscriptions(socket, noReq);
+    var subscriptions = new WWSUsubscriptions(socket, noReq);
     subscriptions.on('subscriptions', (subscriptions) => {
         meta.meta = { state: meta.meta.state };
     });
@@ -254,7 +265,7 @@ function doSockets (firsttime = false) {
     // Mobile devices and web devices where device parameter was passed, start sockets immediately.
     if (isMobile || !firsttime || (!isMobile && device !== null)) {
         checkDiscipline(() => {
-            tracksLikedSocket()
+            likedtracks.init()
             meta.init();
             announcementsSocket()
             calendarSocket()
@@ -267,7 +278,7 @@ function doSockets (firsttime = false) {
     } else {
         OneSignal = window.OneSignal || []
         checkDiscipline(() => {
-            tracksLikedSocket()
+            likedtracks.init()
             meta.init();
             announcementsSocket()
             calendarSocket()
@@ -465,7 +476,7 @@ meta.on('newMeta', (response, _meta) => {
                 ${track.track}
                 </td>
                 <td>
-                ${track.likable && track.ID !== 0 ? `${likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}` : likedTracks.indexOf(track.track) === -1 ? `<button type="button" class="btn btn-info btn-small" tabindex="0" title="Tell the DJ you enjoy this track." onclick="likeTrack('${wwsuutil.escapeHTML(track.track)}');" onkeydown="likeTrack('${wwsuutil.escapeHTML(track.track)}');">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}
+                ${track.likable && track.ID !== 0 ? `${likedTracks.likedTracks.indexOf(track.ID) === -1 ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}` : likedTracks.likedTracks.indexOf(track.track) === -1 ? `<button type="button" class="btn btn-info btn-small" tabindex="0" title="Tell the DJ you enjoy this track." onclick="likeTrack('${wwsuutil.escapeHTML(track.track)}');" onkeydown="likeTrack('${wwsuutil.escapeHTML(track.track)}');">Like Track</button>` : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`}
                 </td>
                 </tr>`
             }));
@@ -483,111 +494,13 @@ meta.on('newMeta', (response, _meta) => {
     TRACK LIKING FUNCTIONS
 */
 
-
-/**
- * Fetch the tracks liked by this user.
- */
-function tracksLikedSocket () {
-    socket.post('/songs/get-liked', {}, function serverResponded (body) {
-        try {
-            likedTracks = body
-            meta.meta = { history: meta.meta.history }
-        } catch (unusedE) {
-            setTimeout(tracksLikedSocket, 10000)
-        }
-    })
-}
-
 /**
  * Mark a track as liked through the WWSU API.
  * 
  * @param {integer || string} trackID The ID number of the track to like, or a string of the track artist - name if the track was played manually.
  */
 function likeTrack (trackID) {
-    // If trackID is a string, send the like as a message to the DJ instead
-    if (isNaN(trackID)) {
-        if (blocked) return null;
-        socket.post('/messages/send-web', { message: `(System Message) This person liked a track you played: ${trackID}`, nickname: $('#chat-nickname').val(), private: false }, function serverResponded (response) {
-            try {
-                if (response !== 'OK') {
-                    $(document).Toasts('create', {
-                        class: 'bg-warning',
-                        title: 'Message Rejected',
-                        autohide: true,
-                        delay: 15000,
-                        body: 'WWSU rejected your message telling the DJ you like that track. This could be because you are sending messages too fast, or you are banned from sending messages.',
-                        icon: 'fas fa-skull-crossbones fa-lg',
-                    });
-                    return null
-                } else {
-                    likedTracks.push(trackID)
-
-                    $(document).Toasts('create', {
-                        class: 'bg-success',
-                        title: 'Track Liked',
-                        subtitle: trackID,
-                        autohide: true,
-                        delay: 10000,
-                        body: `<p>You successfully notified the DJ you liked that track!</p>`,
-                        icon: 'fas fa-music fa-lg',
-                    })
-
-                    // Re-process meta so the recent tracks list is updated
-                    meta.meta = { history: meta.meta.history };
-                }
-            } catch (e) {
-                console.error(e);
-                $(document).Toasts('create', {
-                    class: 'bg-danger',
-                    title: 'Error sending message',
-                    body: 'There was an error telling the DJ you liked that track. Please report this to engineer@wwsu1069.org.',
-                    icon: 'fas fa-skull-crossbones fa-lg',
-                });
-            }
-        })
-    } else {
-        socket.post('/songs/like', { trackID: trackID }, function serverResponded (response) {
-            try {
-                if (response !== 'OK') {
-                    $(document).Toasts('create', {
-                        class: 'bg-warning',
-                        title: 'Could Not Like Track',
-                        subtitle: trackID,
-                        autohide: true,
-                        delay: 10000,
-                        body: `<p>There was a problem liking that track. Most likely, this track played over 30 minutes ago and cannot be liked.</p>`,
-                        icon: 'fas fa-music fa-lg',
-                    })
-                } else {
-
-                    likedTracks.push(trackID)
-
-                    $(document).Toasts('create', {
-                        class: 'bg-success',
-                        title: 'Track Liked',
-                        subtitle: trackID,
-                        autohide: true,
-                        delay: 10000,
-                        body: `<p>You successfully liked a track!</p><p>Tracks people like will play more often on WWSU.</p>`,
-                        icon: 'fas fa-music fa-lg',
-                    })
-
-                    // Re-process meta so the recent tracks list is updated
-                    meta.meta = { history: meta.meta.history };
-                }
-            } catch (unusedE) {
-                $(document).Toasts('create', {
-                    class: 'bg-danger',
-                    title: 'Track Liking Error',
-                    subtitle: trackID,
-                    autohide: true,
-                    delay: 10000,
-                    body: `<p>There was a problem liking that track. Please contact engineer@wwsu1069.org if you are having problems liking any tracks.</p>`,
-                    icon: 'fas fa-music fa-lg',
-                })
-            }
-        })
-    }
+    likedtracks.likeTrack(trackID);
 }
 
 
