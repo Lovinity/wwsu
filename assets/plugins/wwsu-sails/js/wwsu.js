@@ -15,7 +15,33 @@ class WWSUdb {
      */
   constructor(db) {
     this._db = db || TAFFY();
-    this.events = new EventEmitter();
+
+    if (typeof EventEmitter !== 'undefined') {
+      this.events = new EventEmitter();
+    } else { // polyfill
+      this.events = {
+        emitEvent: (event, args) => {
+          switch (event) {
+            case 'insert':
+              this.events.doInsert(args[ 0 ], args[ 1 ]);
+              break;
+            case 'update':
+              this.events.doUpdate(args[ 0 ], args[ 1 ]);
+              break;
+            case 'remove':
+              this.events.doRemove(args[ 0 ], args[ 1 ]);
+              break;
+            case 'replace':
+              this.events.doReplace(args[ 0 ]);
+              break;
+          }
+        },
+        doInsert: () => { },
+        doUpdate: () => { },
+        doRemove: () => { },
+        doReplace: () => { }
+      };
+    }
   }
 
   /**
@@ -25,7 +51,24 @@ class WWSUdb {
    * @param {function} fn Function to call when this event is triggered
    */
   on (event, fn) {
-    this.events.on(event, fn);
+    if (typeof EventEmitter !== 'undefined') {
+      this.events.on(event, fn);
+    } else {
+      switch (event) {
+        case 'insert':
+          this.events.doInsert = fn;
+          break;
+        case 'update':
+          this.events.doUpdate = fn;
+          break;
+        case 'remove':
+          this.events.doRemove = fn;
+          break;
+        case 'replace':
+          this.events.doReplace = fn;
+          break;
+      }
+    }
   }
 
   // POLYFILL

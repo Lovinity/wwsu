@@ -18,7 +18,6 @@ module.exports.bootstrap = async function (done) {
     })
 
   // Require CalendarDb
-  const EventEmitter = require('../assets/plugins/eventemitter/js/EventEmitter.min.js');
   const CalendarDb = require('../assets/plugins/wwsu-calendar/js/wwsu-calendar.js');
 
   var cron = require('node-cron')
