@@ -10,6 +10,7 @@ try {
     var meta = new WWSUMeta(socket, noReq);
     var wwsuutil = new WWSUutil();
 
+    // Liked Tracks
     var likedtracks = new WWSUlikedtracks(socket, noReq);
     likedtracks.on('init', () => {
         meta.meta = meta.meta.history;
@@ -21,7 +22,24 @@ try {
         meta.meta = meta.meta.history;
     });
 
+    // Announcements
     var announcementIDs = [];
+    var announcements = new WWSUannouncements(socket, noReq, `website`);
+    announcements.on('insert', (record, db) => {
+        if (announcementIDs.indexOf(record.ID) === -1) {
+            announcementIDs.push(record.ID);
+            addAnnouncement(record);
+        }
+    })
+    announcements.on('replace', (db) => {
+        db.get().map((record) => {
+            if (announcementIDs.indexOf(record.ID) === -1) {
+                announcementIDs.push(record.ID);
+                addAnnouncement(record);
+            }
+        });
+    })
+
     var messageIDs = [];
     var navigation = new WWSUNavigation();
     var calendardb = new CalendarDb();
@@ -265,9 +283,9 @@ function doSockets (firsttime = false) {
     // Mobile devices and web devices where device parameter was passed, start sockets immediately.
     if (isMobile || !firsttime || (!isMobile && device !== null)) {
         checkDiscipline(() => {
-            likedtracks.init()
+            likedtracks.init();
             meta.init();
-            announcementsSocket()
+            announcements.init();
             calendarSocket()
             calendarExceptionsSocket()
             loadGenres()
@@ -278,9 +296,9 @@ function doSockets (firsttime = false) {
     } else {
         OneSignal = window.OneSignal || []
         checkDiscipline(() => {
-            likedtracks.init()
+            likedtracks.init();
             meta.init();
-            announcementsSocket()
+            announcements.init();
             calendarSocket()
             calendarExceptionsSocket()
             loadGenres()
@@ -511,30 +529,7 @@ function likeTrack (trackID) {
 
 
 
-socket.on('announcements', (data) => {
-    try {
-        if (announcementIDs.indexOf(data.ID) === -1) {
-            addAnnouncement(data)
-        }
-    } catch (unusedE) {
-    }
-})
 
-/**
- * Get website announcements and subscribe to sockets for website announcements.
- */
-function announcementsSocket () {
-    socket.post('/announcements/get', { type: 'website' }, function serverResponded (body) {
-        // console.log(body);
-        try {
-            body
-                .filter(announcement => announcementIDs.indexOf(announcement.ID) === -1)
-                .map(announcement => addAnnouncement(announcement))
-        } catch (unusedE) {
-            setTimeout(announcementsSocket, 10000)
-        }
-    })
-}
 
 /**
  * Display an announcement if it was not already displayed.

@@ -1,4 +1,4 @@
-/* global moment */
+/* global moment, EventEmitter, TAFFY */
 
 /**
  * WWSUdb manages data from the WWSU websockets
@@ -7,23 +7,24 @@
  */
 // eslint-disable-next-line no-unused-vars
 class WWSUdb {
+
   /**
      *Creates an instance of WWSUdb.
-     * @param {TAFFYDB} db A TAFFYDB instance to use for this database
      * @memberof WWSUdb
      */
+  constructor() {
+    this._db = TAFFY();
+    this.events = new EventEmitter();
+  }
 
-  constructor(db) {
-    this._db = db
-
-    this.onInsert = () => {
-    }
-    this.onUpdate = () => {
-    }
-    this.onRemove = () => {
-    }
-    this.onReplace = () => {
-    }
+  /**
+   * Add an event listener.
+   * 
+   * @param {string} event Event triggered
+   * @param {function} fn Function to call when this event is triggered
+   */
+  on (event, fn) {
+    this.events.on(event, fn);
   }
 
   /**
@@ -34,46 +35,6 @@ class WWSUdb {
      */
   get db () {
     return this._db
-  }
-
-  /**
-     * Sets a function to execute when a record is inserted via query
-     *
-     * @param {function} fn Function to execute whenever a record is inserted. First parameter is the record inserted. Second parameter is all the records in the database.
-     * @memberof WWSUdb
-     */
-  setOnInsert (fn) {
-    this.onInsert = fn
-  }
-
-  /**
-     * Sets a function to execute when a record is updated via query.
-     *
-     * @param {function} fn Function to execute when a record is updated. First parameter is the updated record. Second parameter is all the records in the database.
-     * @memberof WWSUdb
-     */
-  setOnUpdate (fn) {
-    this.onUpdate = fn
-  }
-
-  /**
-     * Sets a function to execute when a record is removed via query.
-     *
-     * @param {function} fn Function to execute when a record is removed. First parameter is the ID of the removed record. Second parameter is all the records in the database.
-     * @memberof WWSUdb
-     */
-  setOnRemove (fn) {
-    this.onRemove = fn
-  }
-
-  /**
-     * Sets a function to execute when the data in the database is replaced via query with replace = true, or replaceData.
-     *
-     * @param {function} fn Function to execute when the database is replaced. Parameter is all the records in the database.
-     * @memberof WWSUdb
-     */
-  setOnReplace (fn) {
-    this.onReplace = fn
   }
 
   /**
@@ -88,7 +49,7 @@ class WWSUdb {
       if (query.constructor === Array) {
         this._db().remove()
         this._db.insert(query)
-        this.onReplace(this._db())
+        this.events.emitEvent('replace', [ this._db() ]);
       }
       return null
     } else {
@@ -97,15 +58,15 @@ class WWSUdb {
           switch (key) {
             case 'insert':
               this._db.insert(query[ key ])
-              this.onInsert(query[ key ], this._db())
+              this.events.emitEvent('insert', [ query[ key ], this._db() ]);
               break
             case 'update':
               this._db({ ID: query[ key ].ID }).update(query[ key ])
-              this.onUpdate(query[ key ], this._db())
+              this.events.emitEvent('update', [ query[ key ], this._db() ]);
               break
             case 'remove':
               this._db({ ID: query[ key ] }).remove()
-              this.onRemove(query[ key ], this._db())
+              this.events.emitEvent('remove', [ query[ key ], this._db() ]);
               break
           }
         }
@@ -403,12 +364,12 @@ class WWSUScriptLoader {
 
 class WWSUutil {
 
-/**
- * Get the value of the specified URL parameter
- * 
- * @param {string} name Name of URL parameter to fetch
- * @returns {?string} Value of the URL parameter being fetched, or null if not set.
- */
+  /**
+   * Get the value of the specified URL parameter
+   * 
+   * @param {string} name Name of URL parameter to fetch
+   * @returns {?string} Value of the URL parameter being fetched, or null if not set.
+   */
   getUrlParameter (name) {
     try {
       name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]')
@@ -508,6 +469,24 @@ class WWSUutil {
       // eslint-disable-next-line callback-return
       cb(document.querySelector(theelement))
     }
+  }
+}
+
+/* global WWSUdb */
+
+// This class manages announcements from WWSU.
+class WWSUannouncements {
+
+  constructor(socket, noReq, type) {
+    this.endpoints = {
+      get: '/announcements/get'
+    };
+    this.data = {
+      get: { type: type }
+    };
+    this.requests = {
+      no: noReq
+    };
   }
 }
 

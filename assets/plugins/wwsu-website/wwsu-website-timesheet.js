@@ -1,4 +1,4 @@
-/* global moment, WWSUdb, TAFFY, WWSUreq, $, iziToast */
+/* global moment, WWSUdirectors, WWSUtimesheet, WWSUreq, $, iziToast */
 
 /*
  * DIRECTORS
@@ -68,38 +68,6 @@ class Director {
     this._since = value
   }
 }
-
-// Directors variables
-var Directors = []
-var directorsdb = new WWSUdb(TAFFY())
-
-// Add database event handlers
-directorsdb.setOnInsert((data) => {
-  Directors[data.ID] = new Director(data)
-})
-
-directorsdb.setOnUpdate((data) => {
-  if (typeof Directors[data.ID] === `undefined`) {
-    Directors[data.ID] = new Director(data)
-  } else {
-    for (var key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        Directors[data.ID][key] = data[key]
-      }
-    }
-  }
-})
-
-directorsdb.setOnRemove((data) => {
-  if (typeof Directors[data] !== `undefined`) { delete Directors[data] }
-})
-
-directorsdb.setOnReplace((db) => {
-  Directors = []
-  db.each((director) => {
-    Directors[director.ID] = new Director(director)
-  })
-})
 
 /*
  * TIMESHEETS
@@ -187,17 +155,55 @@ class Timesheet {
   }
 }
 
+// connect the socket
+var socket = io.sails.connect()
+
+// Create request objects
+var noReq = new WWSUreq(socket, null)
+var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director', 'Administrator Director')
+
 // Directors variables
-var Timesheets = []
-var timesheetsdb = new WWSUdb(TAFFY())
+var Directors = []
+var directorsdb = new WWSUdirectors(socket, noReq);
 
 // Add database event handlers
-timesheetsdb.setOnInsert((data) => {
+directorsdb.on('insert', (data) => {
+  Directors[data.ID] = new Director(data)
+})
+
+directorsdb.on('update', (data) => {
+  if (typeof Directors[data.ID] === `undefined`) {
+    Directors[data.ID] = new Director(data)
+  } else {
+    for (var key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        Directors[data.ID][key] = data[key]
+      }
+    }
+  }
+})
+
+directorsdb.on('remove', (data) => {
+  if (typeof Directors[data] !== `undefined`) { delete Directors[data] }
+})
+
+directorsdb.on('replace', (db) => {
+  Directors = []
+  db.each((director) => {
+    Directors[director.ID] = new Director(director)
+  })
+})
+
+var Timesheets = []
+var timesheetsdb = new WWSUtimesheet(socket, noReq);
+
+// Add database event handlers
+timesheetsdb.on('insert', (data) => {
   Timesheets[data.ID] = new Timesheet(data)
   filterDate()
 })
 
-timesheetsdb.setOnUpdate((data) => {
+timesheetsdb.on('update', (data) => {
   if (typeof Timesheets[data.ID] === `undefined`) {
     Timesheets[data.ID] = new Timesheet(data)
   } else {
@@ -210,12 +216,12 @@ timesheetsdb.setOnUpdate((data) => {
   filterDate()
 })
 
-timesheetsdb.setOnRemove((data) => {
+timesheetsdb.on('remove', (data) => {
   if (typeof Timesheets[data] !== `undefined`) { delete Timesheets[data] }
   filterDate()
 })
 
-timesheetsdb.setOnReplace((db) => {
+timesheetsdb.on('replace', (db) => {
   Timesheets = []
   db.each((timesheet) => {
     Timesheets[timesheet.ID] = new Timesheet(timesheet)
@@ -225,23 +231,13 @@ timesheetsdb.setOnReplace((db) => {
 
 var timesheets = []
 
-// connect the socket
-var socket = io.sails.connect()
-
-// Create request objects
-var noReq = new WWSUreq(socket, null)
-var adminDirectorReq = new WWSUreq(socket, null, 'name', '/auth/admin-director', 'Administrator Director')
-
 // Register event handlers
 socket.on('connect', () => {
   checkDiscipline(() => {
-    directorsdb.replaceData(noReq, '/directors/get')
-    timesheetsdb.replaceData(noReq, '/timesheet/get')
+    directorsdb.init()
+    timesheetsdb.init()
   })
 })
-
-directorsdb.assignSocketEvent('directors', socket)
-timesheetsdb.assignSocketEvent('timesheet', socket)
 
 $(document).ready(() => {
   document.querySelector(`#options-timesheets-records`).addEventListener('click', (e) => {
