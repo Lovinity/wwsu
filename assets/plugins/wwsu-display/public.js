@@ -107,6 +107,17 @@ class Scoreboard {
 }
 
 try {
+  // Sounds
+  var sounds = {
+    goingonair: new Howl({src: ['/sounds/display/goingonair.mp3']}),
+    displaymessage: new Howl({src: ['/sounds/display/displaymessage.mp3']}),
+    lifethreatening: new Howl({src: ['/sounds/display/lifethreatening.mp3']}),
+    live: new Howl({src: ['/sounds/display/live.mp3']}),
+    remote: new Howl({src: ['/sounds/display/remote.mp3']}),
+    severeeas: new Howl({src: ['/sounds/display/severeeas.mp3']}),
+    sports: new Howl({src: ['/sounds/display/sports.mp3']})
+  }
+
   // Create a new scoreboard class
   var ascoreboard = new Scoreboard('#scoreboard', '#score-wsu', '#score-opp', '#num-wsu', '#num-opp', '#text-wsu', '#text-opp')
 
@@ -736,7 +747,7 @@ waitFor(() => {
           balloon: true,
           zindex: 999
         })
-        if (!isStudio) { responsiveVoice.speak(`Attention guests! There is a new message. ${data[ key ].message}`) }
+        if (!isStudio) { sounds.displaymessage.play() }
       }
     }
   })
@@ -973,7 +984,7 @@ function doEas () {
                     <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[ 0 ][ 'counties' ] !== 'undefined') ? newEas[ 0 ][ 'counties' ] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`
-        if (isLightTheme) { responsiveVoice.speak(`Attention! A ${alert} is in effect for the counties of ${(typeof newEas[ 0 ][ 'counties' ] !== 'undefined') ? newEas[ 0 ][ 'counties' ] : 'Unknown Counties'}. This is in effect until ${moment(newEas[ 0 ][ 'expires' ]).isValid() ? moment(newEas[ 0 ][ 'expires' ]).format('LLL') : 'UNKNOWN'}.`) }
+        if (isLightTheme) { sounds.severeeas.play() }
         if (easExtreme) {
           easAlert.style.display = 'inline'
           easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`
@@ -1042,7 +1053,7 @@ function doEas () {
           voiceCount++
           if (voiceCount > 179) {
             voiceCount = 0
-            if (!isStudio) { responsiveVoice.speak(`Danger! Danger! Life threatening alerts are in effect. Seek shelter immediately.`) }
+            if (!isStudio) { sounds.lifethreatening.play() }
           }
         }, 250)
       }, 1000)
@@ -1358,11 +1369,11 @@ function processNowPlaying (response) {
           countdowntext = document.getElementById('countdown-text')
           countdownclock = document.getElementById('countdown-clock')
           countdowntext.innerHTML = `<span class="text-danger">${temp[ 0 ]}</span><br />is going live in`
-          if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[ 0 ]} is about to go on the air on WWSU radio: ${temp[ 1 ]}.`) }
+          if (!isStudio) { sounds.live.play() }
         }
         countdownclock.innerHTML = countDown
         if (countDown <= 10) {
-          if (!queueReminder && isStudio) { responsiveVoice.speak(`Attention! Going live in less than 10 seconds.`) }
+          if (!queueReminder && isStudio) { sounds.goingonair.play() }
           queueReminder = true
           if (!isStudio) {
             $('#dj-alert').css('background-color', '#F44336')
@@ -1387,7 +1398,7 @@ function processNowPlaying (response) {
           countdowntext = document.getElementById('countdown-text')
           countdownclock = document.getElementById('countdown-clock')
           countdowntext.innerHTML = 'Remote Broadcast starting in'
-          if (!isStudio) { responsiveVoice.speak(`Attention guests! ${temp[ 0 ]} is about to remotely go on the air on WWSU radio: ${temp[ 1 ]}.`) }
+          if (!isStudio) { sounds.remote.play() }
         }
         countdownclock.innerHTML = countDown
         // Sports broadcast about to begin
@@ -1404,12 +1415,12 @@ function processNowPlaying (response) {
           countdowntext = document.getElementById('countdown-text')
           countdownclock = document.getElementById('countdown-clock')
           countdowntext.innerHTML = `<span class="text-success">${Meta.show}</span><br />about to broadcast in`
-          if (!isStudio) { responsiveVoice.speak(`Raider Up! ${Meta.show} is about to go on the air on WWSU Radio.`) }
+          if (!isStudio) { sounds.sports.play() }
         }
         countdownclock.innerHTML = countDown
         if (Meta.state === 'automation_sports' || Meta.state.startsWith('sports_')) {
           if (countDown <= 10) {
-            if (!queueReminder && isStudio) { responsiveVoice.speak(`Attention! Producer is going live in less than 10 seconds`) }
+            if (!queueReminder && isStudio) { sounds.goingonair.play() }
             queueReminder = true
             if (!isStudio) {
               $('#dj-alert').css('background-color', '#4CAF50')

@@ -1,4 +1,4 @@
-/* global moment, iziToast, responsiveVoice, jdenticon, Slides, WWSUdb, TAFFY, $, WWSUreq */
+/* global moment, iziToast, jdenticon, Slides, WWSUdb, TAFFY, $, WWSUreq, Howl */
 
 try {
   // Define default slide templates
@@ -61,6 +61,15 @@ try {
     fitContent: true,
     html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
   })
+
+  // Define sounds
+  var sounds = {
+    clockOut: new Howl({src: ['/sounds/display/clockout.mp3']}),
+    critical: new Howl({src: ['/sounds/display/critical.mp3']}),
+    disconnected: new Howl({src: ['/sounds/display/disconnected.mp3']}),
+    warning: new Howl({src: ['/sounds/display/warning.mp3']}),
+    ping: new Howl({src: ['/sounds/display/ping.mp3']})
+  }
 
   // Define data variables
   var Directors = new WWSUdb(TAFFY())
@@ -376,7 +385,7 @@ function clockTick () {
         directorMentions.push(director.name)
       })
       Slides.slide(`director-clockout`).active = true
-      responsiveVoice.speak(`Attention all directors! Attention all directors! It is almost midnight. Any director who is still clocked in needs to clock out before midnight, and re-clock in after midnight. Guests in the lobby, please inform any directors still in the office about this. The following directors, if any, are still clocked in and need to clock out now: ${directorMentions.join(', ')}.`)
+      sounds.clockOut.play();
     }
   } else if (directorNotify) {
     Slides.slide(`director-clockout`).active = false
@@ -386,6 +395,10 @@ function clockTick () {
   // Refresh hours every midnight
   if (moment(Meta.time).hour() === 0 && moment(Meta.time).minute() === 0 && moment(Meta.time).second() < 3) {
     calendarWorker.postMessage([ 'update' ]);
+  }
+
+  if (moment(Meta.time).second() === 0 && globalStatus < 2) {
+    sounds.ping.play();
   }
 }
 
@@ -494,7 +507,7 @@ function processStatus (db) {
         statusLine.innerHTML = 'No connection to WWSU! The server might be offline and WWSU not functional'
         if (globalStatus !== prevStatus) {
           offlineTimer = setTimeout(() => {
-            responsiveVoice.speak('Attention! The display sign has been disconnected from the server for over 3 minutes. This could indicate a network problem, the server crashed, or the server is having difficulty rebooting.')
+            sounds.disconnected.play();
           }, 180000)
         }
         // Flash screen for major outages every second
@@ -512,7 +525,7 @@ function processStatus (db) {
         color = 'rgba(244, 67, 54, 0.5)'
         statusLine.innerHTML = 'WWSU is critically unstable and is not functioning properly!'
         clearTimeout(offlineTimer)
-        if (globalStatus !== prevStatus) { responsiveVoice.speak('Warning! Warning! The WWSU system is in a critically unstable state. Please review the display sign and take action immediately to fix the problems.') }
+        if (globalStatus !== prevStatus) { sounds.critical.play() }
         // Flash screen for major outages every second
         flashInterval = setInterval(() => {
           $('html, body').css('background-color', '#D32F2F')
@@ -528,7 +541,7 @@ function processStatus (db) {
         color = 'rgba(245, 124, 0, 0.5)'
         statusLine.innerHTML = 'WWSU is experiencing issues that may impact operation'
         clearTimeout(offlineTimer)
-        if (globalStatus !== prevStatus) { responsiveVoice.speak('Attention! The WWSU system is encountering issues at this time that need addressed.') }
+        if (globalStatus !== prevStatus) { sounds.warning.play() }
         // Flash screen for partial outages every 5 seconds
         // Flash screen for major outages every second
         flashInterval = setInterval(() => {
