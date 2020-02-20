@@ -530,24 +530,6 @@ class WWSUutil {
   }
 }
 
-/* global WWSUdb */
-
-// This class manages announcements from WWSU.
-class WWSUannouncements {
-
-  constructor(socket, noReq, type) {
-    this.endpoints = {
-      get: '/announcements/get'
-    };
-    this.data = {
-      get: { type: type }
-    };
-    this.requests = {
-      no: noReq
-    };
-  }
-}
-
 if (typeof require !== 'undefined') {
   exports.WWSUdb = WWSUdb;
   exports.WWSUreq = WWSUreq;
