@@ -12,7 +12,7 @@ class WWSUdb {
      *Creates an instance of WWSUdb.
      * @memberof WWSUdb
      */
-  constructor() {
+  constructor(db) {
     this._db = TAFFY();
     this.events = new EventEmitter();
   }
@@ -25,6 +25,20 @@ class WWSUdb {
    */
   on (event, fn) {
     this.events.on(event, fn);
+  }
+
+  // POLYFILL
+  setOnInsert (fn) {
+    this.on('insert', fn);
+  }
+  setOnUpdate(fn) {
+    this.on('update', fn);
+  }
+  setOnRemove(fn) {
+    this.on('remove', fn);
+  }
+  setOnReplace(fn) {
+    this.on('replace', fn);
   }
 
   /**
