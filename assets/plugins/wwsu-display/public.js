@@ -109,13 +109,13 @@ class Scoreboard {
 try {
   // Sounds
   var sounds = {
-    goingonair: new Howl({src: ['/sounds/display/goingonair.mp3']}),
-    displaymessage: new Howl({src: ['/sounds/display/displaymessage.mp3']}),
-    lifethreatening: new Howl({src: ['/sounds/display/lifethreatening.mp3']}),
-    live: new Howl({src: ['/sounds/display/live.mp3']}),
-    remote: new Howl({src: ['/sounds/display/remote.mp3']}),
-    severeeas: new Howl({src: ['/sounds/display/severeeas.mp3']}),
-    sports: new Howl({src: ['/sounds/display/sports.mp3']})
+    goingonair: new Howl({ src: [ '/sounds/display/goingonair.mp3' ] }),
+    displaymessage: new Howl({ src: [ '/sounds/display/displaymessage.mp3' ] }),
+    lifethreatening: new Howl({ src: [ '/sounds/display/lifethreatening.mp3' ] }),
+    live: new Howl({ src: [ '/sounds/display/live.mp3' ] }),
+    remote: new Howl({ src: [ '/sounds/display/remote.mp3' ] }),
+    severeeas: new Howl({ src: [ '/sounds/display/severeeas.mp3' ] }),
+    sports: new Howl({ src: [ '/sounds/display/sports.mp3' ] })
   }
 
   // Create a new scoreboard class
@@ -218,32 +218,31 @@ try {
   wrapper.height = window.innerHeight
 
   // Teamsters strike
-  if (isStudio)
-    {
-        Slides.newSlide({
-            name: `teamsters`,
-            label: `Teamsters Strike`,
-            weight: -999999,
-            isSticky: true,
-            color: `danger`,
-            active: false, // TODO: Change to true when/if they go on strike
-            transitionIn: `fadeIn`,
-            transitionOut: `fadeOut`,
-            displayTime: 14,
-            fitContent: false,
-            html: ``,
-            reset: false
-        });
+  if (isStudio) {
+    Slides.newSlide({
+      name: `teamsters`,
+      label: `Teamsters Strike`,
+      weight: -999999,
+      isSticky: true,
+      color: `danger`,
+      active: false, // TODO: Change to true when/if they go on strike
+      transitionIn: `fadeIn`,
+      transitionOut: `fadeOut`,
+      displayTime: 14,
+      fitContent: false,
+      html: ``,
+      reset: false
+    });
 
-        setInterval(() => { // TODO: Set appropriate dates if Teamsters go on strike
-            Slides.slide(`teamsters`).html = `
+    setInterval(() => { // TODO: Set appropriate dates if Teamsters go on strike
+      Slides.slide(`teamsters`).html = `
             <h1 style="text-align: center; font-size: 3em; color: #FF7878">Teamsters Strike</h1>
             <div style="text-align: center; font-size: 6em; 4px 8px 6px rgba(0,0,0,0.3);" id="teamsters-day" class="rounded bg-danger text-white shadow-8">Day ${(parseInt(moment(Meta.time).diff(moment("2019-01-22 00:00:00"), 'days')) + 1)}</div>
             <div style="text-align: center; font-size: 3em; color: #ffff78; 2px 4px 3px rgba(0,0,0,0.3);" id="teamsters-total">Total: ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("hh:mm:ss")}</div>
             ${directorpresent ? `<div style="text-align: center; font-size: 4em; color: #FFFFFF; 2px 4px 3px rgba(0,0,0,0.3);" class="m-3" id="teamsters-strike2">Has the strike impacted you?</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="teamsters-strike2">Come in to make a quick recording.</div>` : ``}`;
-        }, 1000);
+    }, 1000);
 
-    }
+  }
 
   if (!isStudio) {
     Slides.newSlide({
@@ -673,13 +672,13 @@ waitFor(() => {
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
   Calendar.assignSocketEvent('calendar', io.socket)
   Calendar.setOnUpdate((data, db) => {
-    calendarWorker.postMessage([ 'calendar', {update: data}, false ]);
+    calendarWorker.postMessage([ 'calendar', { update: data }, false ]);
   })
   Calendar.setOnInsert((data, db) => {
-    calendarWorker.postMessage([ 'calendar', {insert: data}, false ]);
+    calendarWorker.postMessage([ 'calendar', { insert: data }, false ]);
   })
   Calendar.setOnRemove((data, db) => {
-    calendarWorker.postMessage([ 'calendar', {remove: data}, false ]);
+    calendarWorker.postMessage([ 'calendar', { remove: data }, false ]);
   })
   Calendar.setOnReplace((db) => {
     calendarWorker.postMessage([ 'calendar', db.get(), true ]);
@@ -688,13 +687,13 @@ waitFor(() => {
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
   Calendarexceptions.assignSocketEvent('calendarexceptions', io.socket)
   Calendarexceptions.setOnUpdate((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', {update: data}, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', { update: data }, false ]);
   })
   Calendarexceptions.setOnInsert((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', {insert: data}, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', { insert: data }, false ]);
   })
   Calendarexceptions.setOnRemove((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', {remove: data}, false ]);
+    calendarWorker.postMessage([ 'calendarexceptions', { remove: data }, false ]);
   })
   Calendarexceptions.setOnReplace((db) => {
     calendarWorker.postMessage([ 'calendarexceptions', db.get(), true ]);
@@ -984,7 +983,7 @@ function doEas () {
                     <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[ 0 ][ 'counties' ] !== 'undefined') ? newEas[ 0 ][ 'counties' ] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`
-        if (isLightTheme) { sounds.severeeas.play() }
+        if (!isStudio) { sounds.severeeas.play() }
         if (easExtreme) {
           easAlert.style.display = 'inline'
           easAlert.innerHTML += `<h2 style="text-align: center; font-size: 2em;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`
