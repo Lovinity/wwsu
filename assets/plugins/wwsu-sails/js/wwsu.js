@@ -10,10 +10,11 @@ class WWSUdb {
 
   /**
      *Creates an instance of WWSUdb.
+     * @param {TAFFY} db TAFFY DB to use
      * @memberof WWSUdb
      */
   constructor(db) {
-    this._db = TAFFY();
+    this._db = db || TAFFY();
     this.events = new EventEmitter();
   }
 
@@ -31,13 +32,13 @@ class WWSUdb {
   setOnInsert (fn) {
     this.on('insert', fn);
   }
-  setOnUpdate(fn) {
+  setOnUpdate (fn) {
     this.on('update', fn);
   }
-  setOnRemove(fn) {
+  setOnRemove (fn) {
     this.on('remove', fn);
   }
-  setOnReplace(fn) {
+  setOnReplace (fn) {
     this.on('replace', fn);
   }
 
