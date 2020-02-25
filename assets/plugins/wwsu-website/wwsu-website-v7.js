@@ -287,7 +287,7 @@ function doSockets (firsttime = false) {
             meta.init();
             announcements.init();
             calendarSocket()
-            calendarExceptionsSocket()
+            calendarScheduleSocket()
             loadGenres()
             onlineSocket()
             messagesSocket()
@@ -300,7 +300,7 @@ function doSockets (firsttime = false) {
             meta.init();
             announcements.init();
             calendarSocket()
-            calendarExceptionsSocket()
+            calendarScheduleSocket()
             loadGenres()
             onlineSocket(true)
             messagesSocket()
@@ -568,8 +568,8 @@ socket.on('calendar', (data) => {
     processCalendar(data)
 })
 
-socket.on('calendarexceptions', (data) => {
-    processCalendarExceptions(data)
+socket.on('schedule', (data) => {
+    processCalendarSchedule(data)
 })
 
 /**
@@ -589,8 +589,8 @@ function processCalendar (data, replace = false) {
  * @param {object} data Data received from WWSU according to websocket standards.
  * @param {boolean} replace Mark true if data is an array of records that should replace the database entirely.
  */
-function processCalendarExceptions (data, replace = false) {
-    calendardb.query('calendarexceptions', data, replace);
+function processCalendarSchedule (data, replace = false) {
+    calendardb.query('schedule', data, replace);
     updateCalendar();
 }
 
@@ -608,14 +608,14 @@ function calendarSocket () {
 }
 
 /**
- * Hit the calendar exceptions WWSU endpoint and subscribe to socket events.
+ * Hit the calendar schedule WWSU endpoint and subscribe to socket events.
  */
-function calendarExceptionsSocket () {
-    socket.post('/calendar/get-exceptions', {}, function serverResponded (body) {
+function calendarEScheduleSocket () {
+    socket.post('/calendar/get-schedule', {}, function serverResponded (body) {
         try {
-            processCalendarExceptions(body, true)
+            processCalendarSchedule(body, true)
         } catch (unusedE) {
-            setTimeout(calendarExceptionsSocket, 10000)
+            setTimeout(calendarScheduleSocket, 10000)
         }
     })
 }
@@ -668,20 +668,20 @@ function updateCalendar () {
                         break;
                 }
 
-                if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1) { colorClass = 'dark' }
+                if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1) { colorClass = 'dark' }
 
                 var badgeInfo
-                if ([ 'canceled-changed' ].indexOf(event.exceptionType) !== -1) {
+                if ([ 'canceled-changed' ].indexOf(event.scheduleType) !== -1) {
                     badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
                 }
-                if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+                if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && (event.newTime !== null || event.duration !== null)) {
                     badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
                 }
-                if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
+                if ([ 'canceled', 'canceled-system' ].indexOf(event.scheduleType) !== -1) {
                     badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
                 }
 
-                var shouldBeDark = [ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1 || moment().isAfter(moment(event.end))
+                var shouldBeDark = [ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1 || moment().isAfter(moment(event.end))
 
                 html += `<div class="col-md-4 col-lg-3">
                 <div class="p-2 card card-${colorClass} card-outline${shouldBeDark ? ` bg-secondary` : ``}">
@@ -773,16 +773,16 @@ function displayEventInfo (showID) {
             break;
     }
 
-    if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.exceptionType) !== -1) { colorClass = 'dark' }
+    if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1) { colorClass = 'dark' }
 
     var badgeInfo
-    if ([ 'canceled-changed' ].indexOf(event.exceptionType) !== -1) {
+    if ([ 'canceled-changed' ].indexOf(event.scheduleType) !== -1) {
         badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
     }
-    if ([ 'updated', 'updated-system' ].indexOf(event.exceptionType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+    if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && (event.newTime !== null || event.duration !== null)) {
         badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
     }
-    if ([ 'canceled', 'canceled-system' ].indexOf(event.exceptionType) !== -1) {
+    if ([ 'canceled', 'canceled-system' ].indexOf(event.scheduleType) !== -1) {
         badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
     }
 
@@ -799,10 +799,10 @@ function displayEventInfo (showID) {
         <ul class="list-group list-group-unbordered mb-3">
         ${badgeInfo ? `<li class="list-group-item text-center">
         <p><b>${badgeInfo}</b></p>
-        ${event.exceptionReason !== null ? `<p><strong>${event.exceptionReason}</strong></p>` : ``}
+        ${event.scheduleReason !== null ? `<p><strong>${event.scheduleReason}</strong></p>` : ``}
       </li>` : ``}
         <li class="list-group-item text-center">
-            <b>${[ 'canceled', 'canceled-system', 'canceled-updated' ].indexOf(event.exceptionType) !== -1 ? `Original Time: ` : ``}${moment(event.start).format('lll')} - ${moment(event.end).format('hh:mm A')}</b>
+            <b>${[ 'canceled', 'canceled-system', 'canceled-updated' ].indexOf(event.scheduleType) !== -1 ? `Original Time: ` : ``}${moment(event.start).format('lll')} - ${moment(event.end).format('hh:mm A')}</b>
         </li>
         <li class="list-group-item">
         ${event.banner !== null ? `<img class="img-fluid" src="/uploads/calendar/banner/${event.banner}" alt="Show Banner">` : ``}

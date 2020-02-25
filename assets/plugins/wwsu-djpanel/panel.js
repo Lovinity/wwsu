@@ -213,7 +213,7 @@ function doRequests () {
       // Show Notices
       noReq.request({ method: 'POST', url: '/calendar/get', data: {} }, (response2) => {
 
-        noReq.request({ method: 'POST', url: '/calendar/get-exceptions', data: {} }, (response3) => {
+        noReq.request({ method: 'POST', url: '/calendar/get-schedule', data: {} }, (response3) => {
 
           if (!response2 || !response3)
             return null;
@@ -225,28 +225,28 @@ function doRequests () {
           if (temp !== null) {
             var worker;
 
-            worker = events.filter((event) => event.exceptionType === 'canceled' || event.exceptionType === 'canceled-system' || event.exceptionType === 'canceled-changed');
+            worker = events.filter((event) => event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system' || event.scheduleType === 'canceled-changed');
             if (worker.length > 0) {
               notices += `<div class="card mb-4 py-3 border-left-info">
           <div class="card-body">
             The following upcoming shows have been canceled:
             <ul>`
               worker.map((item) => {
-                notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong>. Reason: ${item.exceptionReason}</li>`
+                notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.originalTime).format('llll')}</strong>. Reason: ${item.scheduleReason}</li>`
               })
               notices += `</ul>
           </div>
           </div>`
             }
 
-            worker = events.filter((event) => event.exceptionType === 'updated' || event.exceptionType === 'updated-system');
+            worker = events.filter((event) => event.scheduleType === 'updated' || event.scheduleType === 'updated-system');
             if (worker.length > 0) {
               notices += `<div class="card mb-4 py-3 border-left-info">
           <div class="card-body">
             The air date/time for these upcoming shows have been changed:
             <ul>`
               worker.map((item) => {
-                notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.exceptionTime).format('llll')}</strong> is now to air at <strong>${moment(item.start).format('llll')} - ${moment(item.end).format('llll')}. Reason: ${item.exceptionReason}</li>`
+                notices += `<li><strong>${item.hosts} - ${item.name} on ${moment(item.originalTime).format('llll')}</strong> is now to air at <strong>${moment(item.start).format('llll')} - ${moment(item.end).format('llll')}. Reason: ${item.scheduleReason}</li>`
               })
               notices += `</ul>
           </div>
@@ -260,7 +260,7 @@ function doRequests () {
             temp.innerHTML = `<option value="">Choose a show / date to cancel...</option>`
             if (events.length > 0) {
               events
-                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system' && event.exceptionType !== 'canceled-changed')
+                .filter((event) => event.hostDJ === response.ID && event.scheduleType !== 'canceled' && event.scheduleType !== 'canceled-system' && event.scheduleType !== 'canceled-changed')
                 .map((calendar) => {
                   temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
                 })
@@ -273,7 +273,7 @@ function doRequests () {
             temp.innerHTML = `<option value="">Choose a show / date to assign a topic or clockwheel...</option>`
             if (events.length > 0) {
               events
-                .filter((event) => event.hostDJ === response.ID && event.exceptionType !== 'canceled' && event.exceptionType !== 'canceled-system' && event.exceptionType !== 'canceled-changed')
+                .filter((event) => event.hostDJ === response.ID && event.scheduleType !== 'canceled' && event.scheduleType !== 'canceled-system' && event.scheduleType !== 'canceled-changed')
                 .map((calendar) => {
                   temp.innerHTML += `<option value="${calendar.unique}">${calendar.hosts} - ${calendar.name} (${moment(calendar.start).format('llll')} - ${moment(calendar.end).format('llll')})</option>`
                 })

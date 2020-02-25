@@ -74,7 +74,7 @@ module.exports = {
     var temp;
     var temp2;
 
-      // Update host data in calendar and calendarExceptions
+      // Update host data in calendar and schedule
       temp = (async () => {
         records = await sails.models.calendar.find({ director: updatedRecord.ID });
         if (records.length > 0) {
@@ -90,12 +90,12 @@ module.exports = {
       })()
 
       temp2 = (async () => {
-        records = await sails.models.calendarexceptions.find({ director: updatedRecord.ID });
+        records = await sails.models.schedule.find({ director: updatedRecord.ID });
         if (records.length > 0) {
           records.map(async (record) => {
             try {
               let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
-              await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
+              await sails.models.schedule.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
               sails.log.error(e);
             }
@@ -130,16 +130,16 @@ module.exports = {
         });
       }
 
-      records = await sails.models.calendarexceptions.find({ director: destroyedRecord.ID });
+      records = await sails.models.schedule.find({ director: destroyedRecord.ID });
       if (records.length > 0) {
         records.map(async (record) => {
           try {
             if (record.type === 'office-hours') {
-              await sails.models.calendarexceptions.destroy({ ID: record.ID }).fetch();
+              await sails.models.schedule.destroy({ ID: record.ID }).fetch();
             } else {
               record.director = null;
               let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
-              await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
+              await sails.models.schedule.update({ ID: record.ID }, { hosts: hosts, director: null }).fetch();
             }
           } catch (e) {
           }

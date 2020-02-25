@@ -74,7 +74,7 @@ try {
   // Define data variables
   var Directors = new WWSUdb(TAFFY())
   var Calendar = new WWSUdb(TAFFY())
-  var Calendarexceptions = new WWSUdb(TAFFY())
+  var Schedule = new WWSUdb(TAFFY())
   var calendarWorker = new Worker('../../plugins/wwsu-display/workers/publicCalendarDirectors.js')
   var Announcements = new WWSUdb(TAFFY())
   var Meta = { time: moment().toISOString() }
@@ -224,7 +224,7 @@ waitFor(() => {
   // Assign socket events to data classes
   Directors.assignSocketEvent('directors', io.socket)
   Calendar.assignSocketEvent('calendar', io.socket)
-  Calendarexceptions.assignSocketEvent('calendarexceptions', io.socket)
+  Schedule.assignSocketEvent('schedule', io.socket)
   Announcements.assignSocketEvent('announcements', io.socket)
   Status.assignSocketEvent('status', io.socket)
 
@@ -260,17 +260,17 @@ waitFor(() => {
     calendarWorker.postMessage([ 'calendar', db.get(), true ]);
   })
 
-  Calendarexceptions.setOnUpdate((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', { update: data }, false ]);
+  Schedule.setOnUpdate((data, db) => {
+    calendarWorker.postMessage([ 'schedule', { update: data }, false ]);
   })
-  Calendarexceptions.setOnInsert((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', { insert: data }, false ]);
+  Schedule.setOnInsert((data, db) => {
+    calendarWorker.postMessage([ 'schedule', { insert: data }, false ]);
   })
-  Calendarexceptions.setOnRemove((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', { remove: data }, false ]);
+  Schedule.setOnRemove((data, db) => {
+    calendarWorker.postMessage([ 'schedule', { remove: data }, false ]);
   })
-  Calendarexceptions.setOnReplace((db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', db.get(), true ]);
+  Schedule.setOnReplace((db) => {
+    calendarWorker.postMessage([ 'schedule', db.get(), true ]);
   })
 
   // Do stuff when announcements changes are made
@@ -691,10 +691,10 @@ calendarWorker.onmessage = function (e) {
             }
 
             var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`
-            if ([ "updated", "updated-system", "additional", "additional-unscheduled" ].indexOf(event.exceptionType) !== -1) {
+            if ([ "updated", "updated-system", "additional", "additional-unscheduled" ].indexOf(event.scheduleType) !== -1) {
               endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`
             }
-            if ([ "canceled", "canceled-system", "canceled-changed" ].indexOf(event.exceptionType) !== -1) {
+            if ([ "canceled", "canceled-system", "canceled-changed" ].indexOf(event.scheduleType) !== -1) {
               endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`
             }
 
@@ -905,7 +905,7 @@ function eventSocket () {
   console.log('attempting event socket')
   try {
     Calendar.replaceData(noReq, '/calendar/get')
-    Calendarexceptions.replaceData(noReq, '/calendar/get-exceptions')
+    Schedule.replaceData(noReq, '/calendar/get-schedule')
   } catch (e) {
     console.log(e)
     console.log('FAILED CONNECTION')

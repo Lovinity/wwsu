@@ -2,7 +2,7 @@ module.exports = {
 
   friendlyName: 'calendar.verify',
 
-  description: 'Verify calendar events and exceptions.',
+  description: 'Verify calendar events and schedules.',
 
   inputs: {
     event: {
@@ -21,7 +21,7 @@ module.exports = {
 
     // Populate DJ Names
     try {
-      if (!event.exceptionType || event.exceptionType === null || event.hostDJ !== null || event.cohostDJ1 !== null || event.cohostDJ2 !== null || event.cohostDJ3 !== null || event.director !== null) {
+      if (!event.scheduleType || event.scheduleType === null || inputs.event.hostDJ !== null || inputs.event.cohostDJ1 !== null || inputs.event.cohostDJ2 !== null || inputs.event.cohostDJ3 !== null || inputs.event.director !== null) {
         event.hosts = await sails.helpers.calendar.generateHosts(event);
       } else {
         event.hosts = null;
@@ -59,6 +59,9 @@ module.exports = {
       case 'onair-booking':
         if (!event.hostDJ || event.hostDJ === null)
           return exits.error("This event type requires a host DJ to be specified.");
+        var finder = await sails.models.djs.findOne({ ID: event.hostDJ });
+        if (!finder)
+          return exits.error("The provided host DJ ID does not exist.");
         break;
       case 'genre':
         if (!event.eventID || event.eventID === null)

@@ -10,7 +10,7 @@ var calendardb = new CalendarDb();
 
 onmessage = function (e) {
 
-  if (e.data[ 0 ] === 'calendar' || e.data[ 0 ] === 'calendarexceptions')
+  if (e.data[ 0 ] === 'calendar' || e.data[ 0 ] === 'schedule')
     calendardb.query(e.data[ 0 ], e.data[ 1 ], e.data[ 2 ]);
 
   var directorHours = [];

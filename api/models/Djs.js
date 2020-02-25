@@ -71,7 +71,7 @@ module.exports = {
         }
       })()
       temp2 = (async () => {
-        records = await sails.models.calendarexceptions.find({
+        records = await sails.models.schedule.find({
           or: [
             { hostDJ: updatedRecord.ID },
             { cohostDJ1: updatedRecord.ID },
@@ -83,7 +83,7 @@ module.exports = {
           records.map(async (record) => {
             try {
               hosts = await sails.helpers.calendar.generateHosts(record);
-              await sails.models.calendarexceptions.update({ ID: record.ID }, { hosts: hosts }).fetch();
+              await sails.models.schedule.update({ ID: record.ID }, { hosts: hosts }).fetch();
             } catch (e) {
             }
           });
@@ -142,7 +142,7 @@ module.exports = {
           await Promise.all(maps);
         }
 
-        records = await sails.models.calendarexceptions.find({
+        records = await sails.models.schedule.find({
           or: [
             { hostDJ: destroyedRecord.ID },
             { cohostDJ1: destroyedRecord.ID },
@@ -172,7 +172,7 @@ module.exports = {
               }
 
               toUpdate.hosts = await sails.helpers.calendar.generateHosts(record);
-              await sails.models.calendarexceptions.update({ ID: record.ID }, toUpdate).fetch();
+              await sails.models.schedule.update({ ID: record.ID }, toUpdate).fetch();
             } catch (e) {
             }
           });

@@ -1,3 +1,5 @@
+// TODO: FIX THIS WITH NEW CALENDAR SYSTEM
+
 module.exports = {
 
     friendlyName: 'Calendar / change-topic-web',
@@ -40,10 +42,10 @@ module.exports = {
             if (!inputs.additionalException) {
                 cRecord = await sails.models.calendar.findOne({ ID: inputs.ID });
                 if (!cRecord) return exits.error('The provided ID was not found in calendar events.');
-                cException = await sails.models.calendarexceptions.findOne({ calendarID: inputs.ID, exceptionTime: inputs.start });
+                cException = await sails.models.schedule.findOne({ calendarID: inputs.ID, originalTime: inputs.start });
                 cEvent = sails.models.calendar.calendardb.processRecord(cRecord, cException || {}, inputs.start);
             } else {
-                cException = await sails.models.calendarexceptions.findOne({ type: 'additional', ID: inputs.ID });
+                cException = await sails.models.schedule.findOne({ type: 'additional', ID: inputs.ID });
                 if (!cException) return exits.error('The provided ID was not found in calendar exceptions of type additional.');
                 cRecord = await sails.models.calendar.findOne({ ID: cExceptions.calendarID });
                 if (!cRecord) return exits.error('The provided ID was not found in calendar events.');
@@ -52,17 +54,17 @@ module.exports = {
 
             // Create or update an updated type calendar exception with the new description if authorized and event was not already canceled.
             if (cEvent && cEvent.type !== 'canceled' && cEvent.type !== 'canceled-system' && cEvent.type !== 'canceled-changed' && cEvent.hostDJ === this.req.payload.ID) {
-                sails.models.calendarexceptions.findOrCreate({calendarID: cEvent.calendarID, exceptionTime: cEvent.start}, {
+                sails.models.schedule.findOrCreate({calendarID: cEvent.calendarID, originalTime: cEvent.start}, {
                     calendarID: inputs.ID,
-                    exceptionType: 'updated',
-                    exceptionReason: `Changed by DJ in DJ web panel`,
-                    exceptionTime: cEvent.start,
+                    scheduleType: 'updated',
+                    scheduleReason: `Changed by DJ in DJ web panel`,
+                    originalTime: cEvent.start,
                     description: inputs.topic
                 }).exec(async (err2, record2, wasCreated2) => {
                     if (!err2 && !wasCreated2) {
-                        await sails.models.calendarexceptions.update({ID: record2.ID}, {
-                            exceptionType: 'updated',
-                            exceptionReason: `Changed by DJ in DJ web panel`,
+                        await sails.models.schedule.update({ID: record2.ID}, {
+                            scheduleType: 'updated',
+                            scheduleReason: `Changed by DJ in DJ web panel`,
                             description: inputs.topic
                         }).fetch();
                     }

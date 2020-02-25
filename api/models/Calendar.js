@@ -7,7 +7,6 @@
 
 module.exports = {
     datastore: 'nodebase',
-    tableName: 'calendar7', // Temporary; remove when working and other calendar table was deleted.
     attributes: {
 
         ID: {
@@ -91,26 +90,15 @@ module.exports = {
             allowNull: true
         },
 
-        start: {
+        startDate: {
             type: 'ref',
             columnType: 'date',
         },
 
-        end: {
+        endDate: {
             type: 'ref',
             columnType: 'date',
-        },
-
-        duration: {
-            type: 'number',
-            min: 0,
-            defaultsTo: 60
-        },
-
-        schedule: {
-            type: 'json',
-        },
-
+        }
     },
 
     calendardb: undefined,
@@ -128,14 +116,14 @@ module.exports = {
         var data = { update: updatedRecord }
         var temp;
 
-        // If setting active to false, treat as deletion in web sockets and delete all exceptions and notify subscribers of a discontinued show
+        // If setting active to false, treat as deletion in web sockets and delete all schedules and notify subscribers of a discontinued show
         if (!updatedRecord.active) {
             var data = { remove: updatedRecord.ID }
             sails.models.calendar.calendardb.query('calendar', data);
             sails.log.silly(`calendar socket: ${data}`)
             sails.sockets.broadcast('calendar', 'calendar', data)
             temp = (async () => {
-                await sails.helpers.calendarexceptions.destroy({ calendarID: updatedRecord.ID }).fetch();
+                await sails.helpers.schedule.destroy({ calendarID: updatedRecord.ID }).fetch();
                 var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, false)
             })()
@@ -156,9 +144,9 @@ module.exports = {
         sails.sockets.broadcast('calendar', 'calendar', data)
         var temp;
 
-        // Remove all calendar exceptions
+        // Remove all calendar schedules
         temp = (async () => {
-            await sails.helpers.calendarexceptions.destroy({ calendarID: destroyedRecord.ID }).fetch();
+            await sails.helpers.schedule.destroy({ calendarID: destroyedRecord.ID }).fetch();
             var event = sails.models.calendar.calendardb.processRecord(destroyedRecord, {}, moment().toISOString(true));
             await sails.helpers.onesignal.sendEvent(event, false, false)
         })()

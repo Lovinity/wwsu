@@ -1,3 +1,5 @@
+// TODO: FIX THIS WITH NEW CALENDAR SYSTEM
+
 module.exports = {
 
     friendlyName: 'Calendar / cancel-web',
@@ -39,10 +41,10 @@ module.exports = {
             if (!inputs.additionalException) {
                 cRecord = await sails.models.calendar.findOne({ ID: inputs.ID });
                 if (!cRecord) return exits.error('The provided ID was not found in calendar events.');
-                cException = await sails.models.calendarexceptions.findOne({ calendarID: inputs.ID, exceptionTime: inputs.start });
+                cException = await sails.models.schedule.findOne({ calendarID: inputs.ID, originalTime: inputs.start });
                 cEvent = sails.models.calendar.calendardb.processRecord(cRecord, cException || {}, inputs.start);
             } else {
-                cException = await sails.models.calendarexceptions.findOne({ type: 'additional', ID: inputs.ID });
+                cException = await sails.models.schedule.findOne({ type: 'additional', ID: inputs.ID });
                 if (!cException) return exits.error('The provided ID was not found in calendar exceptions of type additional.');
                 cRecord = await sails.models.calendar.findOne({ ID: cExceptions.calendarID });
                 if (!cRecord) return exits.error('The provided ID was not found in calendar events.');
@@ -67,16 +69,16 @@ module.exports = {
                         }
 
                         // Create a cancellation exception, or change an existing exception to canceled if it exists.
-                        sails.models.calendarexceptions.findOrCreate({ calendarID: inputs.ID, exceptionTime: cEvent.start, exceptionType: { 'nin': ['additional', 'additional-unscheduled'] } }, {
+                        sails.models.schedule.findOrCreate({ calendarID: inputs.ID, originalTime: cEvent.start, scheduleType: { 'nin': ['additional', 'additional-unscheduled'] } }, {
                             calendarID: inputs.ID,
-                            exceptionType: 'canceled',
-                            exceptionReason: inputs.reason,
-                            exceptionTime: cEvent.start
+                            scheduleType: 'canceled',
+                            scheduleReason: inputs.reason,
+                            originalTime: cEvent.start
                         }).exec(async (err2, record2, wasCreated2) => {
                             if (!err2 && !wasCreated2) {
-                                await sails.models.calendarexceptions.update({ ID: record2.ID }, {
-                                    exceptionType: 'canceled',
-                                    exceptionReason: inputs.reason
+                                await sails.models.schedule.update({ ID: record2.ID }, {
+                                    scheduleType: 'canceled',
+                                    scheduleReason: inputs.reason
                                 }).fetch();
                             }
 

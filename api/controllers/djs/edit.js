@@ -81,20 +81,20 @@ module.exports = {
 
               updatedRecords = {};
 
-              // Update all calendar exceptions
-              temp = await sails.models.calendarexceptions.update({ hostDJ: record.ID }, { hostDJ: inputs.ID }).fetch();
+              // Update all calendar schedules
+              temp = await sails.models.schedule.update({ hostDJ: record.ID }, { hostDJ: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
-              temp = await sails.models.calendarexceptions.update({ cohostDJ1: record.ID }, { cohostDJ1: inputs.ID }).fetch();
+              temp = await sails.models.schedule.update({ cohostDJ1: record.ID }, { cohostDJ1: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
-              temp = await sails.models.calendarexceptions.update({ cohostDJ2: record.ID }, { cohostDJ2: inputs.ID }).fetch();
+              temp = await sails.models.schedule.update({ cohostDJ2: record.ID }, { cohostDJ2: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
-              temp = await sails.models.calendarexceptions.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
+              temp = await sails.models.schedule.update({ cohostDJ3: record.ID }, { cohostDJ3: inputs.ID }).fetch();
               temp.map((tmp) => updatedRecords[ tmp.ID ] = tmp);
 
               // Regenerate hosts
               for (var cal in updatedRecords) {
                 if (Object.prototype.hasOwnProperty.call(updatedRecords, cal)) {
-                  await sails.models.calendarexceptions.update({ ID: cal }, { hosts: await sails.helpers.calendar.generateHosts(updatedrecords[ cal ]) }).fetch();
+                  await sails.models.schedule.update({ ID: cal }, { hosts: await sails.helpers.calendar.generateHosts(updatedrecords[ cal ]) }).fetch();
                 }
               }
 

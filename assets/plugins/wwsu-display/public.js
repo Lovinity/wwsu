@@ -142,7 +142,7 @@ try {
   // Define data sources
   var Meta = { time: moment().toISOString(true), state: 'unknown', countdown: null }
   var Calendar = new WWSUdb(TAFFY())
-  var Calendarexceptions = new WWSUdb(TAFFY())
+  var Schedule = new WWSUdb(TAFFY())
   var calendar = []
   var calendarWorker = new Worker('../../plugins/wwsu-display/workers/publicCalendar.js')
   var Announcements = new WWSUdb(TAFFY())
@@ -685,18 +685,18 @@ waitFor(() => {
   })
 
   // On new calendar data, update our calendar memory and run the process function in the next 5 seconds.
-  Calendarexceptions.assignSocketEvent('calendarexceptions', io.socket)
-  Calendarexceptions.setOnUpdate((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', { update: data }, false ]);
+  Schedule.assignSocketEvent('schedule', io.socket)
+  Schedule.setOnUpdate((data, db) => {
+    calendarWorker.postMessage([ 'schedule', { update: data }, false ]);
   })
-  Calendarexceptions.setOnInsert((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', { insert: data }, false ]);
+  Schedule.setOnInsert((data, db) => {
+    calendarWorker.postMessage([ 'schedule', { insert: data }, false ]);
   })
-  Calendarexceptions.setOnRemove((data, db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', { remove: data }, false ]);
+  Schedule.setOnRemove((data, db) => {
+    calendarWorker.postMessage([ 'schedule', { remove: data }, false ]);
   })
-  Calendarexceptions.setOnReplace((db) => {
-    calendarWorker.postMessage([ 'calendarexceptions', db.get(), true ]);
+  Schedule.setOnReplace((db) => {
+    calendarWorker.postMessage([ 'schedule', db.get(), true ]);
   })
 
   // On new directors data, update our directors memory and run the process function.
@@ -891,7 +891,7 @@ function eventSocket () {
   console.log('attempting event socket')
   try {
     Calendar.replaceData(noReq, '/calendar/get')
-    Calendarexceptions.replaceData(noReq, '/calendar/get-exceptions')
+    Schedule.replaceData(noReq, '/calendar/get-schedule')
   } catch (e) {
     console.log(e)
     console.log('FAILED CONNECTION')

@@ -43,7 +43,7 @@ module.exports.bootstrap = async function (done) {
 
   // Load calendardb
   sails.log.verbose(`BOOTSTRAP: Initiating calendar`)
-  sails.models.calendar.calendardb = new CalendarDb(await sails.models.calendar.find({ active: true }), await sails.models.calendarexceptions.find());
+  sails.models.calendar.calendardb = new CalendarDb(await sails.models.calendar.find({ active: true }), await sails.models.schedule.find());
 
   if (sails.config.custom.sports) {
     sails.log.verbose(`BOOTSTRAP: Initiating sports events in calendar`)
@@ -56,24 +56,52 @@ module.exports.bootstrap = async function (done) {
           active: true,
           priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'sports' }),
           name: sport,
-          start: moment().toISOString(true),
-          duration: 0,
-          schedule: null
+          startDate: moment().toISOString(true),
         })
           .exec(async (err, record, wasCreated) => {
             if (!wasCreated)
               await sails.models.calendar.update({ ID: record.ID }, {
                 active: true,
                 priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'sports' }),
-                start: moment().toISOString(true)
+                startDate: moment().toISOString(true)
               }).fetch();
           });
       })(sport);
     });
 
-    // De-sctivate main sports events that do not exist in the system configured list of sports
+    // De-activate main sports events that do not exist in the system configured list of sports
     await sails.models.calendar.update({ type: 'sports', name: { nin: sails.config.custom.sports } }, { active: false }).fetch();
   }
+
+  // Add directors in the calendar
+  sails.log.verbose(`BOOTSTRAP: Initiating director events in calendar`)
+  var records = await sails.models.directors.find();
+  var IDs = [];
+  records.map((director) => {
+    IDs.push(director.ID);
+    (async (_director) => {
+      sails.models.calendar.findOrCreate({ type: 'office-hours', director: director.ID }, {
+        type: 'office-hours',
+        active: true,
+        priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'office-hours' }),
+        hosts: director.name,
+        name: director.name,
+        director: director.ID,
+        startDate: moment().toISOString(true),
+      })
+        .exec(async (err, record, wasCreated) => {
+          if (!wasCreated)
+            await sails.models.calendar.update({ ID: record.ID }, {
+              active: true,
+              priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'office-hours' }),
+              startDate: moment().toISOString(true)
+            }).fetch();
+        });
+    })(director);
+  });
+
+  // De-activate directors that do not exist anymore.
+  await sails.models.calendar.update({ type: 'office-hours', director: { nin: IDs } }, { active: false }).fetch();
 
   sails.log.verbose(`BOOTSTRAP: Initiating studio booking events in calendar`)
   await sails.models.calendar.findOrCreate({ type: 'onair-booking' }, {
@@ -1111,7 +1139,7 @@ module.exports.bootstrap = async function (done) {
         // LINT: RadioDJ tables cannot be changed
         // eslint-disable-next-line camelcase
         var checksRadioDJ = [ sails.models.category, sails.models.events, sails.models.genre, sails.models.history, sails.models.playlists, sails.models.playlists_list, sails.models.requests, sails.models.settings, sails.models.subcategory ]
-        var checksNodebase = [ sails.models.announcements, sails.models.calendar, sails.models.clockwheels, sails.models.discipline, sails.models.eas, sails.models.subscribers, sails.models.planner, sails.models.underwritings, sails.models.attendance, sails.models.darksky, sails.models.listeners, sails.models.djs, sails.models.hosts, sails.models.logs, sails.models.messages, sails.models.meta, sails.models.nodeusers, sails.models.timesheet, sails.models.directors, sails.models.songsliked, sails.models.sports, sails.models.xp ]
+        var checksNodebase = [ sails.models.announcements, sails.models.calendar, sails.models.clockwheels, sails.models.discipline, sails.models.eas, sails.models.subscribers, sails.models.planner, sails.models.underwritings, sails.models.attendance, sails.models.darksky, sails.models.listeners, sails.models.djs, sails.models.hosts, sails.models.logs, sails.models.messages, sails.models.meta, sails.models.nodeusers, sails.models.timesheet, sails.models.directors, sails.models.songsliked, sails.models.sports, sails.models.xp, sails.models.schedule ]
         // Memory checks
         var checkStatus = { data: ``, status: 5 }
         sails.log.debug(`CHECK: DB Memory`)
@@ -1509,7 +1537,7 @@ module.exports.bootstrap = async function (done) {
       sails.log.debug('CRON calendardbCacheSync called')
       try {
         sails.models.calendar.calendardb.query('calendar', await sails.models.calendar.find({ active: true }), true)
-        sails.models.calendar.calendardb.query('calendarexceptions', await sails.models.calendarexceptions.find(), true);
+        sails.models.calendar.calendardb.query('schedule', await sails.models.schedule.find(), true);
       } catch (e) {
         sails.log.error(e);
         return reject(e);

@@ -52,29 +52,25 @@ module.exports = {
           await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: inputs.event.unique }).fetch()
       } else if (!inputs.newSchedule && !inputs.removedException) {
         // Changed date/time
-        if (inputs.event.exceptionType === 'updated' || inputs.event.exceptionType === 'updated-system') {
-          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} changed one of their show times`, `${inputs.event.hosts} - ${inputs.event.name} has changed their ${moment(inputs.event.exceptionTime).format("llll")} show to ${moment(inputs.event.start).format("llll")}`, (60 * 60 * 24 * 7))
+        if (inputs.event.scheduleType === 'updated' || inputs.event.scheduleType === 'updated-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} changed one of their show times`, `${inputs.event.hosts} - ${inputs.event.name} has changed their ${moment(inputs.event.originalTime).format("llll")} show to ${moment(inputs.event.start).format("llll")}`, (60 * 60 * 24 * 7))
           // Canceled date/time
-        } else if (inputs.event.exceptionType === 'canceled' || inputs.event.exceptionType === 'canceled-system') {
-          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} cancelled one of their show times`, `${inputs.event.hosts} - ${inputs.event.name} was cancelled for ${moment(inputs.event.exceptionTime).format("llll")}.`, (60 * 60 * 24 * 7))
+        } else if (inputs.event.scheduleType === 'canceled' || inputs.event.scheduleType === 'canceled-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} cancelled one of their show times`, `${inputs.event.hosts} - ${inputs.event.name} was cancelled for ${moment(inputs.event.originalTime).format("llll")}.`, (60 * 60 * 24 * 7))
         }
       } else if (!inputs.newSchedule && inputs.removedException) {
         // reversed Changed date/time
-        if (inputs.event.exceptionType === 'updated' || inputs.event.exceptionType === 'updated-system') {
-          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} reversed a previously changed show time`, `${inputs.event.hosts} - ${inputs.event.name} had an updated show time of ${moment(inputs.event.start).format("llll")}. This was changed back to the original time of ${moment(inputs.event.exceptionTime).format("llll")}.`, (60 * 60 * 24 * 7))
+        if (inputs.event.scheduleType === 'updated' || inputs.event.scheduleType === 'updated-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} reversed a previously changed show time`, `${inputs.event.hosts} - ${inputs.event.name} had an updated show time of ${moment(inputs.event.start).format("llll")}. This was changed back to the original time of ${moment(inputs.event.originalTime).format("llll")}.`, (60 * 60 * 24 * 7))
           // reversed Canceled date/time
-        } else if (inputs.event.exceptionType === 'canceled' || inputs.event.exceptionType === 'canceled-system') {
-          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} reversed a cancellation`, `${inputs.event.hosts} - ${inputs.event.name} has un-canceled their show for ${moment(inputs.event.exceptionTime).format("llll")}; it will now air at that time.`, (60 * 60 * 24 * 7))
+        } else if (inputs.event.scheduleType === 'canceled' || inputs.event.scheduleType === 'canceled-system') {
+          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} reversed a cancellation`, `${inputs.event.hosts} - ${inputs.event.name} has un-canceled their show for ${moment(inputs.event.originalTime).format("llll")}; it will now air at that time.`, (60 * 60 * 24 * 7))
         }
-      } else {
-        if (inputs.event.active) {
-          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} has changed!`, `${inputs.event.hosts} - ${inputs.event.name} has changed details about the show, possibly including a new permanent show time. Please go to wwsu1069.org for more information.`, (60 * 60 * 24 * 7))
-        } else {
-          await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} will no longer air on WWSU`, `${inputs.event.hosts} - ${inputs.event.name} has been discontinued on WWSU Radio. We have removed your subscriptions to this show automatically.`, (60 * 60 * 24 * 7))
-          // Remove both recurring and one-time subscribers
-          await sails.models.subscribers.destroy({ type: `calendar-all`, subtype: inputs.event.calendarID }).fetch();
-          await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: { startsWith: `${inputs.event.calendarID}-` } }).fetch();
-        }
+      } else if (!inputs.event.active) {
+        await sails.helpers.onesignal.send(devices, `event`, `${inputs.event.hosts} - ${inputs.event.name} will no longer air on WWSU`, `${inputs.event.hosts} - ${inputs.event.name} has been discontinued on WWSU Radio. We have removed your subscriptions to this show automatically.`, (60 * 60 * 24 * 7))
+        // Remove both recurring and one-time subscribers
+        await sails.models.subscribers.destroy({ type: `calendar-all`, subtype: inputs.event.calendarID }).fetch();
+        await sails.models.subscribers.destroy({ type: `calendar-once`, subtype: { startsWith: `${inputs.event.calendarID}-` } }).fetch();
       }
 
       return exits.success(true)
