@@ -189,7 +189,7 @@ module.exports = {
     // Subtract 5 score for every unignored unexcused absence (ignore = 0, happened = 0).
     // Subtract 1 score for every unignored cancellation (ignore = 0, happened = -1).
     // Subtract 2 score for every missed top of the hour ID break.
-    // Combine records with the same Google Calendar unique ID as one show. That way, accidental sign-offs sign-ons are not counted as two separate shows.
+    // Combine records with the same unique ID as one show. That way, accidental sign-offs sign-ons are not counted as two separate shows.
     var process3 = async () => {
       var attendanceIDs = {}
       var attendanceIDs2 = []
@@ -222,7 +222,7 @@ module.exports = {
 
           // Now, combine records in case of accidental end show / start a new show within the same scheduled time block
           if (record.unique !== null && record.unique !== ``) {
-            // Combine records with the same Google Calendar unique ID
+            // Combine records with the same unique ID
             if (record.unique in unique) {
               if (record.actualStart !== null && (moment(record.actualStart).isBefore(moment(unique[ record.unique ].actualStart)) || unique[ record.unique ].actualStart === null)) { unique[ record.unique ].actualStart = record.actualStart }
               if (record.actualEnd !== null && (moment(record.actualEnd).isAfter(moment(unique[ record.unique ].actualEnd)) || unique[ record.unique ].actualEnd === null)) { unique[ record.unique ].actualEnd = record.actualEnd }

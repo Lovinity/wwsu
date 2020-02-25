@@ -166,16 +166,6 @@ var defaultConfig = {
 
   hostSecret: '', // A random secret key used for generating hashes for public hosts / web mobile visitors. CHANGING THIS WILL INVALIDATE ACTIVE DISCIPLINE.
 
-  GoogleAPI: {
-    // ID of the Google Calendar used for show programming and WWSU events. Must have API access.
-    calendarId: '',
-
-    // ID of the Google Calendar containing the office hours for directors. Must have API access.
-    // NOTE: Every event in this calendar should have its title as the name of the director the hours are for, as used on the system.
-    // For example, if George Carlin works Fridays 4pm-8pm, an event for Friday 4pm-8pm should be created on the calendar with the title "George Carlin".
-    directorHoursId: ''
-  },
-
   // Used for oneSignal push notifications
   onesignal: {
     rest: ``,

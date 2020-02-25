@@ -1,8 +1,6 @@
 var fs = require('fs')
 var readline = require('readline')
-var { OAuth2Client } = require('google-auth-library')
 var breakdance = require('breakdance')
-var { google } = require('googleapis')
 
 module.exports = {
 
