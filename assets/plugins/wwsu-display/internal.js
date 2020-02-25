@@ -691,7 +691,7 @@ calendarWorker.onmessage = function (e) {
             }
 
             var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`
-            if ([ "updated", "updated-system", "additional", "additional-unscheduled" ].indexOf(event.scheduleType) !== -1) {
+            if ([ "updated", "updated-system", "unscheduled", null ].indexOf(event.scheduleType) !== -1) {
               endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`
             }
             if ([ "canceled", "canceled-system", "canceled-changed" ].indexOf(event.scheduleType) !== -1) {

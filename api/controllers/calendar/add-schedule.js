@@ -15,7 +15,7 @@ module.exports = {
         },
         scheduleType: {
             type: 'string',
-            isIn: [ 'additional', 'additional-unscheduled', 'updated', 'canceled', 'updated-system', 'canceled-system' ],
+            isIn: [ 'unscheduled', 'updated', 'canceled', 'updated-system', 'canceled-system' ],
             required: true
         },
         scheduleReason: {
@@ -28,7 +28,7 @@ module.exports = {
         },
         type: {
             type: 'string',
-            isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking', 'office-hours' ],
+            isIn: [ 'show', 'sports', 'remote', 'prerecord', 'genre', 'playlist', 'event', 'onair-booking', 'prod-booking', 'office-hours', 'task' ],
             allowNull: true
         },
 
