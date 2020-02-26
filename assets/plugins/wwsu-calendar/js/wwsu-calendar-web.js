@@ -8,7 +8,7 @@ later.date.localTime()
 // Class to manage calendar events for WWSU
 class CalendarDb {
 
-    // Constructor stores initial calendar and schedule DB row arrays into TAFFYDB.
+    // Constructor stores initial calendar and calendarexceptions DB row arrays into TAFFYDB.
     constructor(calendar = [], schedule = []) {
         this.calendar = new WWSUdb(TAFFY());
         this.schedule = new WWSUdb(TAFFY());
@@ -123,7 +123,7 @@ class CalendarDb {
                 // Next, process recurring schedules if hours is not null (if hours is null, we should never process this even if DW or M is not null)
                 if (schedule.recurH && schedule.recurH.length > 0) {
                     // Null value denote all values for Days of Week
-                    if (!schedule.recurDW) schedule.recurDW = [];
+                    if (!schedule.recurDW || schedule.recurDW.length === 0) schedule.recurDW = [1,2,3,4,5,6,7];
 
                     // Format minute into an array for proper processing in later.js
                     if (!schedule.recurM) schedule.recurM = 0;
@@ -238,7 +238,7 @@ class CalendarDb {
     }
 
     // Check if an event will override other events or get overridden by other events.
-    // This should ALWAYS be run before adding calendar or schedules to the database, AFTER first running verify on the event object.
+    // This should ALWAYS be run before adding calendar or exceptions to the database, AFTER first running verify on the event object.
     checkConflicts (event) {
 
         // No conflict check necessary if there is no schedules or duration defined
@@ -330,7 +330,7 @@ class CalendarDb {
             var beginAt = start;
 
             // Null value denote all values for Days of Week
-            if (!event.recurDW) event.recurDW = [];
+            if (!event.recurDW || event.recurDW.length === 0) event.recurDW = [1,2,3,4,5,6,7];
 
             // Format minute into an array for proper processing in later.js
             if (!event.recurM) event.recurM = 0;
@@ -417,7 +417,7 @@ class CalendarDb {
         }
 
         // If a recurring schedule is provided, check that.
-        if (event.recurH) {
+        if (event.recurH && event.recurH.length > 0) {
             var startb = moment(event.startDate);
 
             temp = eventsOverridden
@@ -543,7 +543,7 @@ class CalendarDb {
         }
 
         // Check for recurring schedule conflicts if specified
-        if (event.recurH) {
+        if (event.recurH && event.recurH.length > 0) {
             temp = eventsOverriding
                 .reduce((newArray = [], eventsb) => {
                     try {
@@ -572,7 +572,7 @@ class CalendarDb {
         eventsOverriding = conflicts;
 
         // Now, determine for each event override if we should cancel or update.
-        // Also, this translates the overriding event objects into the current event with schedules applied.
+        // Also, this translates the overriding event objects into the current event with exceptions applied.
         eventsOverriding = eventsOverriding.map((eventb) => {
             var eventc = {
                 calendarID: _event.calendarID,
@@ -647,7 +647,7 @@ class CalendarDb {
     }
 
     // Check for validity of an event object. 
-    // This should ALWAYS be run before adding calendar or schedules to the database.
+    // This should ALWAYS be run before adding calendar or exceptions to the database.
     verify (event) {
 
         var tempCal = {};
