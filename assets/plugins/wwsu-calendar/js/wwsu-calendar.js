@@ -717,7 +717,7 @@ class CalendarDb {
         // If scheduleID is provided, we expect it to be a valid schedule ID, otherwise the event is invalid.
         if (event.scheduleID) {
             var schedule = this.schedule.db({ ID: event.scheduleID }).first();
-            if (schedule) {
+            if (!schedule) {
                 return 'The provided scheduleID does not exist.';
             } else { // polyfill information
                 for (var stuff in schedule) {
