@@ -84,9 +84,9 @@ module.exports.bootstrap = async function (done) {
         type: 'office-hours',
         active: true,
         priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'office-hours' }),
-        hosts: director.name,
-        name: director.name,
-        director: director.ID,
+        hosts: _director.name,
+        name: _director.name,
+        director: _director.ID,
         startDate: moment().toISOString(true),
       })
         .exec(async (err, record, wasCreated) => {
@@ -214,7 +214,7 @@ module.exports.bootstrap = async function (done) {
     sails.log.silly(meta)
     await sails.helpers.meta.change.with(meta)
     if (meta.playlist !== null && meta.playlist !== '') {
-      var theplaylist = await sails.models.playlists.findOne({ name: meta.playlist })
+      var theplaylist = await sails.models.playlists.findOne({ ID: meta.playlistID })
       // LINT: RadioDJ table; is not camel cased
       // eslint-disable-next-line camelcase
       var playlistTracks = await sails.models.playlists_list.find({ pID: theplaylist.ID })
