@@ -17,6 +17,8 @@ module.exports = {
     event = sails.models.calendar.calendardb.verify(inputs.event);
     if (!event) {
       return exits.error("Event is invalid.")
+    } else if (typeof event === 'string') {
+      return exits.error(event);
     }
 
     // Populate DJ Names
