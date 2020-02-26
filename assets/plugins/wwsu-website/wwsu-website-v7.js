@@ -287,7 +287,7 @@ function doSockets (firsttime = false) {
             meta.init();
             announcements.init();
             calendarSocket()
-            calendarScheduleSocket()
+            scheduleSocket()
             loadGenres()
             onlineSocket()
             messagesSocket()
@@ -300,7 +300,7 @@ function doSockets (firsttime = false) {
             meta.init();
             announcements.init();
             calendarSocket()
-            calendarScheduleSocket()
+            scheduleSocket()
             loadGenres()
             onlineSocket(true)
             messagesSocket()
@@ -569,7 +569,7 @@ socket.on('calendar', (data) => {
 })
 
 socket.on('schedule', (data) => {
-    processCalendarSchedule(data)
+    processSchedule(data)
 })
 
 /**
@@ -589,7 +589,7 @@ function processCalendar (data, replace = false) {
  * @param {object} data Data received from WWSU according to websocket standards.
  * @param {boolean} replace Mark true if data is an array of records that should replace the database entirely.
  */
-function processCalendarSchedule (data, replace = false) {
+function processSchedule (data, replace = false) {
     calendardb.query('schedule', data, replace);
     updateCalendar();
 }
@@ -610,12 +610,12 @@ function calendarSocket () {
 /**
  * Hit the calendar schedule WWSU endpoint and subscribe to socket events.
  */
-function calendarEScheduleSocket () {
+function scheduleSocket () {
     socket.post('/calendar/get-schedule', {}, function serverResponded (body) {
         try {
-            processCalendarSchedule(body, true)
+            processSchedule(body, true)
         } catch (unusedE) {
-            setTimeout(calendarScheduleSocket, 10000)
+            setTimeout(scheduleSocket, 10000)
         }
     })
 }
