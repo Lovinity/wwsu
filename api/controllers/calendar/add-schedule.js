@@ -217,14 +217,14 @@ module.exports = {
             }
 
             // Check for event conflicts
-            var conflicts = sails.models.calendar.calendardb.checkConflicts(event.event);
+            var conflicts = sails.models.calendar.calendardb.checkConflicts(event);
 
             // If there were errors, exit on the error
             if (conflicts.error)
                 return exits.success(conflicts.error);
 
             // Add the initial event into the calendar
-            var record = await sails.models.schedule.create(event.event).fetch();
+            var record = await sails.models.schedule.create(event).fetch();
 
             // Add overrides for shows this one will override
             if (conflicts.overridden.length > 0) {

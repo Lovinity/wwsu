@@ -119,7 +119,7 @@ module.exports = {
             }
 
             // Add the event into the calendar
-            await sails.models.calendar.create(event.event).fetch();
+            await sails.models.calendar.create(event).fetch();
 
             // Success
             return exits.success();
