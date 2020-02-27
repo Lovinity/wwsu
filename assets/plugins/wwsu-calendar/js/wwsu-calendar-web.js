@@ -726,7 +726,7 @@ class CalendarDb {
         // If no startDate provided, default to current date.
         if (!tempCal.startDate) event.startDate = moment().toISOString(true);
 
-        return event;
+        return { event, tempCal };
     }
 
     // Conflict detection: -1 = no conflict detection. 0 = no conflict detection except other 0 priorities. 1-10, conflict detection with priorities same or lower (except for -1 and 0).

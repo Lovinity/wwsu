@@ -147,7 +147,7 @@ class WWSUdb {
   // Assign a socket event to this database. The socket should return data following the standards specified in the query function's query parameter,
   // except replaceData should be used instead when replacing the data in the entire database.
   assignSocketEvent (event, socket) {
-    socket.on(event, (data) => {
+    this.on(event, (data) => {
       this.query(data, false)
     })
   }

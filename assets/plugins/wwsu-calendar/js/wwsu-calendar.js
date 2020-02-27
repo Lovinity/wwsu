@@ -170,7 +170,7 @@ class CalendarDb {
                 // Next, process recurring schedules if hours is not null (if hours is null, we should never process this even if DW or M is not null)
                 if (schedule.recurH && schedule.recurH.length > 0) {
                     // Null value denote all values for Days of Week
-                    if (!schedule.recurDW || schedule.recurDW.length === 0) schedule.recurDW = [1,2,3,4,5,6,7];
+                    if (!schedule.recurDW || schedule.recurDW.length === 0) schedule.recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
 
                     // Format minute into an array for proper processing in later.js
                     if (!schedule.recurM) schedule.recurM = 0;
@@ -377,7 +377,7 @@ class CalendarDb {
             var beginAt = start;
 
             // Null value denote all values for Days of Week
-            if (!event.recurDW || event.recurDW.length === 0) event.recurDW = [1,2,3,4,5,6,7];
+            if (!event.recurDW || event.recurDW.length === 0) event.recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
 
             // Format minute into an array for proper processing in later.js
             if (!event.recurM) event.recurM = 0;
@@ -773,7 +773,7 @@ class CalendarDb {
         // If no startDate provided, default to current date.
         if (!tempCal.startDate) event.startDate = moment().toISOString(true);
 
-        return event;
+        return { event, tempCal };
     }
 
     // Conflict detection: -1 = no conflict detection. 0 = no conflict detection except other 0 priorities. 1-10, conflict detection with priorities same or lower (except for -1 and 0).
