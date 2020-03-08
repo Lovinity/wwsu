@@ -111,6 +111,7 @@ class WWSUdb {
       }
       return null
     } else {
+      console.log(query);
       for (var key in query) {
         if (Object.prototype.hasOwnProperty.call(query, key)) {
           switch (key) {
