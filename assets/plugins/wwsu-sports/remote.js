@@ -38,15 +38,15 @@ var changeData = (data) => {
   }
 }
 
-sportsdb.setOnInsert((data) => {
+sportsdb.on('insert', (data) => {
   changeData(data)
 })
 
-sportsdb.setOnUpdate((data) => {
+sportsdb.on('update', (data) => {
   changeData(data)
 })
 
-sportsdb.setOnReplace((db) => {
+sportsdb.on('replace', (data) => {
   db.each((record) => {
     changeData(record)
   })
