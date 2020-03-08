@@ -104,6 +104,8 @@ class WWSUdb {
      */
   query (query, replace = false) {
     if (replace) {
+      console.log('replace');
+      console.dir(query);
       if (query.constructor === Array) {
         this._db().remove()
         this._db.insert(query)
@@ -111,7 +113,8 @@ class WWSUdb {
       }
       return null
     } else {
-      console.log(query);
+      console.log('query');
+      console.dir(query);
       for (var key in query) {
         if (Object.prototype.hasOwnProperty.call(query, key)) {
           switch (key) {
@@ -148,7 +151,9 @@ class WWSUdb {
   // Assign a socket event to this database. The socket should return data following the standards specified in the query function's query parameter,
   // except replaceData should be used instead when replacing the data in the entire database.
   assignSocketEvent (event, socket) {
-    this.on(event, (data) => {
+    socket.on(event, (data) => {
+      console.log('socket event ' + event);
+      console.dir(data);
       this.query(data, false)
     })
   }
