@@ -46,7 +46,7 @@ sportsdb.on('update', (data) => {
   changeData(data)
 })
 
-sportsdb.on('replace', (data) => {
+sportsdb.on('replace', (db) => {
   db.each((record) => {
     changeData(record)
   })
