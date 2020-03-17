@@ -73,7 +73,7 @@ module.exports = {
         }
 
         var record = sails.models.calendar.calendardb.whatShouldBePlaying(false);
-        record = record.filter((event) => event.type === 'remote' && record.hosts === djs && record.name === show);
+        record = record.filter((event) => event.type === 'remote' && event.hosts === djs && event.name === show);
         if (record.length < 1) {
           return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ and show name you provided is not scheduled to go on the air at this time.'))
         }
@@ -105,7 +105,7 @@ module.exports = {
         await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
-        sails.models.status.errorCheck.prevID = moment()
+        sails.models.status.errorCheck.prevID = moment().toISOString(true);
         await sails.helpers.error.count('stationID')
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.start)
 
