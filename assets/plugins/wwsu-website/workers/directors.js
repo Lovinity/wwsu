@@ -30,8 +30,8 @@ onmessage = function (e) {
       .sort(compare)
       .map((hour) => {
         if (typeof directors[hour.director] !== 'undefined') {
-          if (!moment(hour.start).isValid()) { hour.start = moment(e.data[2]).startOf('day') }
-          if (!moment(hour.end).isValid()) { hour.end = moment(e.data[2]).add(1, 'days').startOf('day') }
+          if (!DateTime.fromISO(hour.start).isValid) { hour.start = moment(e.data[2]).startOf('day') }
+          if (!DateTime.fromISO(hour.end).isValid) { hour.end = moment(e.data[2]).add(1, 'days').startOf('day') }
 
           hour.startT = moment(hour.start).format('ddd MM/DD hh:mm A')
           hour.endT = moment(hour.end).format('hh:mm A')

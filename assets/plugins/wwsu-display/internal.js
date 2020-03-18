@@ -663,8 +663,8 @@ calendarWorker.onmessage = function (e) {
         }
 
         // null start or end? Use a default to prevent errors.
-        if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day') }
-        if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day') }
+        if (!DateTime.fromISO(event.start).isValid) { event.start = moment(Meta.time).startOf('day') }
+        if (!DateTime.fromISO(event.end).isValid) { event.end = moment(Meta.time).add(1, 'days').startOf('day') }
 
         // Cycle through each day of the week, and add in director hours
         for (var i = 0; i < 7; i++) {

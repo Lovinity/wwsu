@@ -42,19 +42,19 @@ module.exports = {
     starts: {
       type: 'string',
       custom: function (value) {
-        return value === null || moment(value).isValid()
+        return value === null || DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the announcement starts. Recommended ISO string.`
+      description: `ISO string of when the announcement starts.`
     },
 
     expires: {
       type: 'string',
       custom: function (value) {
-        return value === null || moment(value).isValid()
+        return value === null || DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the announcement expires. Defaults to the year 3000. Recommended ISO string.`
+      description: `ISO string of when the announcement expires. Defaults to the year 3000.`
     }
 
   },

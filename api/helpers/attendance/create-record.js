@@ -45,9 +45,9 @@ module.exports = {
 
         if (inputs.event.unique && inputs.event.calendarID) {
           returnData.unique = inputs.event.unique
-          created = await sails.models.attendance.create({ calendarID: inputs.event.calendarID, unique: inputs.event.unique, dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, happened: inputs.unscheduled ? 2 : 1, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, scheduledStart: moment(inputs.event.start).toISOString(true), scheduledEnd: moment(inputs.event.end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
+          created = await sails.models.attendance.create({ calendarID: inputs.event.calendarID, unique: inputs.event.unique, dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, happened: inputs.unscheduled ? 2 : 1, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, scheduledStart: inputs.event.start, scheduledEnd: inputs.event.end, actualStart: DateTime.local().toISO() }).fetch()
         } else {
-          created = await sails.models.attendance.create({ unique: "", dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, happened: inputs.unscheduled ? 2 : 1, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, actualStart: moment().toISOString(true) }).fetch()
+          created = await sails.models.attendance.create({ unique: "", dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, happened: inputs.unscheduled ? 2 : 1, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, actualStart: DateTime.local().toISO() }).fetch()
         }
 
         returnData.newID = created.ID
@@ -55,7 +55,7 @@ module.exports = {
         // Switch to the new record in the system
         await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: inputs.event.unique || null, calendarID: inputs.event.calendarID || null })
       } else {
-        var created = await sails.models.attendance.create({ unique: "", happened: 1, event: `genre: Unknown Hosts - Default Rotation`, actualStart: moment().toISOString(true) }).fetch()
+        var created = await sails.models.attendance.create({ unique: "", happened: 1, event: `genre: Unknown Hosts - Default Rotation`, actualStart: DateTime.local().toISO() }).fetch()
         await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: null, calendarID: null })
       }
 
@@ -66,7 +66,7 @@ module.exports = {
 
         if (currentRecord) {
           // Pre-load update data
-          var updateData = { showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true) }
+          var updateData = { showTime: DateTime.local().diff(DateTime.fromISO(currentRecord.actualStart)).as('minutes'), listenerMinutes: 0, actualEnd: DateTime.local().toISO() }
 
           // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
           var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': currentRecord.actualStart } }).sort('createdAt ASC')
@@ -74,28 +74,28 @@ module.exports = {
           if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
 
           // Calculate listener minutes and listener tune-ins
-          var prevTime = moment(currentRecord.actualStart)
+          var prevTime = DateTime.fromISO(currentRecord.actualStart)
           var listenerMinutes = 0
           var tuneIns = 0
 
           if (listenerRecords && listenerRecords.length > 0) {
             listenerRecords.map(listener => {
-              listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners
+              listenerMinutes += (DateTime.fromISO(listener.createdAt).diff(prevTime).as('minutes')) * prevListeners
               if (listener.listeners > prevListeners) { tuneIns += (listener.listeners - prevListeners) }
               prevListeners = listener.listeners
-              prevTime = moment(listener.createdAt)
+              prevTime = DateTime.fromISO(listener.createdAt)
             })
           }
 
           // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-          listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners
+          listenerMinutes += (DateTime.local().diff(prevTime).as('minutes')) * prevListeners
 
           listenerMinutes = Math.round(listenerMinutes)
           updateData.listenerMinutes = listenerMinutes
           updateData.tuneIns = tuneIns
 
           // Calculate web messages
-          updateData.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(currentRecord.actualStart).toISOString(true) } })
+          updateData.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': currentRecord.actualStart } })
 
           // Update the attendance record with the data
           returnData.updatedRecord = await sails.models.attendance.updateOne({ ID: currentID }, updateData)

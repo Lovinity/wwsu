@@ -72,17 +72,20 @@ module.exports = {
      */
   errorCheck: {
 
-    // This contains a moment timestamp of when the previous triggered error happened.
-    prevError: null,
+    // This contains an ISO timestamp of when the previous triggered error happened.
+    prevError: DateTime.fromSQL('2002-01-01 00:00:00').toISO(),
 
-    // Contains a moment timestamp of when the most recent station ID was queued.
-    prevID: null,
+    // This contains the ISO timestamp of then the last silence alarm was triggered.
+    prevSilence: DateTime.fromSQL('2002-01-01 00:00:00').toISO(),
 
-    // moment stamp of when the most recent PSA break was queued.
-    prevBreak: null,
+    // Contains an ISO timestamp of when the most recent station ID was queued.
+    prevID: DateTime.fromSQL('2002-01-01 00:00:00').toISO(),
 
-    // moment stamp of when the most recent standard liner was queued.
-    prevLiner: null,
+    // ISO stamp of when the most recent PSA break was queued.
+    prevBreak: DateTime.fromSQL('2002-01-01 00:00:00').toISO(),
+
+    // ISO stamp of when the most recent standard liner was queued.
+    prevLiner: DateTime.fromSQL('2002-01-01 00:00:00').toISO(),
 
     // Used for determining if we have a sudden jump in queue time in RadioDJ
     trueZero: 0,

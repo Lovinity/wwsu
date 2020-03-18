@@ -13,7 +13,7 @@ module.exports = {
 
     try {
       // Get stats for the last 7 days
-      var earliest = moment().subtract(1, 'weeks')
+      var earliest = DateTime.local().minus({ weeks: 1 })
 
       // Prepare with a clean template
       sails.models.attendance.weeklyAnalytics = {
@@ -52,7 +52,7 @@ module.exports = {
         sails.models.attendance.weeklyAnalytics.tracksRequested = await sails.models.requests.count({ createdAt: { '>=': earliest.toISOString(true) } })
 
         // Grab count of webMessagesExchanged
-        sails.models.attendance.weeklyAnalytics.webMessagesExchanged = await sails.models.messages.count({ status: 'active', or: [{ from: { startsWith: 'website' } }, { to: { startsWith: 'website' } }], createdAt: { '>=': earliest.toISOString(true) } })
+        sails.models.attendance.weeklyAnalytics.webMessagesExchanged = await sails.models.messages.count({ status: 'active', or: [ { from: { startsWith: 'website' } }, { to: { startsWith: 'website' } } ], createdAt: { '>=': earliest.toISOString(true) } })
       }
 
       // Prepare parallel function 2
@@ -72,18 +72,18 @@ module.exports = {
               // Sports broadcasts should not count towards the top 3 shows
               if (!attendance.event.toLowerCase().startsWith('sports:')) {
                 // Group showTime and listenerMinutes by show; we only want one record per show to use when comparing top shows
-                if (typeof totals[show] === 'undefined') { totals[show] = { showTime: 0, listenerMinutes: 0 } }
-                totals[show].showTime += attendance.showTime
-                totals[show].listenerMinutes += attendance.listenerMinutes
+                if (typeof totals[ show ] === 'undefined') { totals[ show ] = { showTime: 0, listenerMinutes: 0 } }
+                totals[ show ].showTime += attendance.showTime
+                totals[ show ].listenerMinutes += attendance.listenerMinutes
               }
             } else if (attendance.event.toLowerCase().startsWith('genre:')) {
-              if (typeof totalsG[show] === 'undefined') { totalsG[show] = { showTime: 0, listenerMinutes: 0 } }
-              totalsG[show].showTime += attendance.showTime
-              totalsG[show].listenerMinutes += attendance.listenerMinutes
+              if (typeof totalsG[ show ] === 'undefined') { totalsG[ show ] = { showTime: 0, listenerMinutes: 0 } }
+              totalsG[ show ].showTime += attendance.showTime
+              totalsG[ show ].listenerMinutes += attendance.listenerMinutes
             } else if (attendance.event.toLowerCase().startsWith('playlist:')) {
-              if (typeof totalsP[show] === 'undefined') { totalsP[show] = { showTime: 0, listenerMinutes: 0 } }
-              totalsP[show].showTime += attendance.showTime
-              totalsP[show].listenerMinutes += attendance.listenerMinutes
+              if (typeof totalsP[ show ] === 'undefined') { totalsP[ show ] = { showTime: 0, listenerMinutes: 0 } }
+              totalsP[ show ].showTime += attendance.showTime
+              totalsP[ show ].listenerMinutes += attendance.listenerMinutes
             }
           })
 
@@ -91,7 +91,7 @@ module.exports = {
         var totalsA = []
         for (var item in totals) {
           if (Object.prototype.hasOwnProperty.call(totals, item)) {
-            totalsA.push({ name: item, showTime: totals[item].showTime, listenerMinutes: totals[item].listenerMinutes })
+            totalsA.push({ name: item, showTime: totals[ item ].showTime, listenerMinutes: totals[ item ].listenerMinutes })
           }
         }
 
@@ -108,27 +108,27 @@ module.exports = {
         totalsA = []
         for (var item2 in totalsG) {
           if (Object.prototype.hasOwnProperty.call(totalsG, item2)) {
-            totalsA.push({ name: item2, showTime: totalsG[item2].showTime, listenerMinutes: totalsG[item2].listenerMinutes })
+            totalsA.push({ name: item2, showTime: totalsG[ item2 ].showTime, listenerMinutes: totalsG[ item2 ].listenerMinutes })
           }
         }
 
         // Use the first one as our top genre
-        if (totalsA.length > 0) { sails.models.attendance.weeklyAnalytics.topGenre = totalsA.sort(compare)[0].name }
+        if (totalsA.length > 0) { sails.models.attendance.weeklyAnalytics.topGenre = totalsA.sort(compare)[ 0 ].name }
 
         // Convert our playlist data into an array so we can sort it
         totalsA = []
         for (var item3 in totalsP) {
           if (Object.prototype.hasOwnProperty.call(totalsP, item3)) {
-            totalsA.push({ name: item3, showTime: totalsP[item3].showTime, listenerMinutes: totalsP[item3].listenerMinutes })
+            totalsA.push({ name: item3, showTime: totalsP[ item3 ].showTime, listenerMinutes: totalsP[ item3 ].listenerMinutes })
           }
         }
 
         // Use the first one as our top playlist
-        if (totalsA.length > 0) { sails.models.attendance.weeklyAnalytics.topPlaylist = totalsA.sort(compare)[0].name }
+        if (totalsA.length > 0) { sails.models.attendance.weeklyAnalytics.topPlaylist = totalsA.sort(compare)[ 0 ].name }
       }
 
       // Execute our parallel functions and wait for them to resolve.
-      await Promise.all([f1(), f2()])
+      await Promise.all([ f1(), f2() ])
 
       // Broadcast socket
       sails.sockets.broadcast('analytics-weekly-dj', 'analytics-weekly-dj', sails.models.attendance.weeklyAnalytics)

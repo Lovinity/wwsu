@@ -8,19 +8,19 @@ module.exports = {
     start: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       required: true,
-      description: `moment() parsable string of the earliest point in time to get listener counts (system may return one record before this time as a baseline). Recommended ISO string.`
+      description: `ISO string of the earliest point in time to get listener counts (system may return one record before this time as a baseline).`
     },
 
     end: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       required: true,
-      description: `moment() parsable string of the latest point in time to get listener counts. Recommended ISO string.`
+      description: `ISO string of the latest point in time to get listener counts.`
     }
   },
 

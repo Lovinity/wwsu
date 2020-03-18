@@ -15,6 +15,11 @@ global['moment'] = require('moment')
 require('moment-duration-format')
 global['needle'] = require('needle')
 
+const { DateTime, Duration, Interval } = require("luxon");
+global['DateTime'] = DateTime;
+global['Duration'] = Duration;
+global['Interval'] = Interval;
+
 // Create a config factory store; we are not using easy-config-store directly because it does not have a deleteProperty handler.
 const config = (() => {
   let defaultCfg

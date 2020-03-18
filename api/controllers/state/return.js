@@ -41,8 +41,8 @@ module.exports = {
       if (sails.models.meta.memory.state.includes('halftime')) {
         // Queue a legal ID
         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
-        sails.models.status.errorCheck.prevID = moment()
-        sails.models.status.errorCheck.prevBreak = moment()
+        sails.models.status.errorCheck.prevID = DateTime.local().toISO()
+        sails.models.status.errorCheck.prevBreak = DateTime.local().toISO()
         await sails.helpers.error.count('stationID')
 
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.after)
@@ -65,12 +65,12 @@ module.exports = {
 
         // Change state
         if (sails.models.meta.memory.state === 'sportsremote_halftime' || sails.models.meta.memory.state === 'sportsremote_halftime_disconnected') {
-          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ queueFinish: DateTime.local().plus({seconds: queueLength}).toISO(), state: 'sportsremote_returning', lastID: DateTime.local().toISO() })
         } else {
-          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ queueFinish: DateTime.local().plus({seconds: queueLength}).toISO(), state: 'sports_returning', lastID: DateTime.local().toISO() })
         }
       } else {
-        sails.models.status.errorCheck.prevBreak = moment()
+        sails.models.status.errorCheck.prevBreak = DateTime.local().toISO()
 
         // Do stuff depending on the state
         switch (sails.models.meta.memory.state) {
@@ -85,7 +85,7 @@ module.exports = {
               await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Returns' ] ], 'Bottom', 1)
             }
 
-            await sails.helpers.meta.change.with({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'live_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: DateTime.local().plus({seconds: await sails.helpers.songs.calculateQueueLength()}).toISO(), state: 'live_returning' })
             break
           case 'sports_break':
             // Queue after break
@@ -104,7 +104,7 @@ module.exports = {
             }
 
             // await sails.helpers.error.count('sportsReturnQueue');
-            await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: DateTime.local().plus({seconds: queueLength}).toISO(), state: 'sports_returning' })
             break
           case 'remote_break':
           case 'remote_break_disconnected':
@@ -116,7 +116,7 @@ module.exports = {
             } else {
               await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Returns' ] ], 'Bottom', 1)
             }
-            await sails.helpers.meta.change.with({ queueFinish: moment().add(await sails.helpers.songs.calculateQueueLength(), 'seconds').toISOString(true), state: 'remote_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: DateTime.local().plus({seconds: await sails.helpers.songs.calculateQueueLength()}).toISO(), state: 'remote_returning' })
             break
           case 'sportsremote_break':
           case 'sportsremote_break_disconnected':
@@ -136,7 +136,7 @@ module.exports = {
             }
 
             // await sails.helpers.error.count('sportsReturnQueue');
-            await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning' })
+            await sails.helpers.meta.change.with({ queueFinish: DateTime.local().plus({seconds: queueLength}).toISO(), state: 'sportsremote_returning' })
             break
         }
       }

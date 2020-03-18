@@ -1,5 +1,3 @@
-/* global moment, sails, Timesheet */
-
 module.exports = {
 
     friendlyName: 'Uab / Timesheet / Get',
@@ -10,10 +8,10 @@ module.exports = {
         date: {
             type: 'string',
             custom: function (value) {
-                return moment(value).isValid();
+                return DateTime.fromISO(value).isValid;
             },
             allowNull: true,
-            description: `moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.`
+            description: `ISO string of a date that falls within the week to get timesheet entries. Defaults to now.`
         }
     },
 
@@ -33,13 +31,13 @@ module.exports = {
             }
 
             // Get a range of one week
-            var start = inputs.date !== null ? moment(inputs.date).startOf('week') : moment().startOf('week');
-            var end = moment(start).add(1, 'weeks');
+            var start = inputs.date !== null ? DateTime.fromISO(inputs.date).startOf('week') : DateTime.local().startOf('week');
+            var end = start.plus({weeks: 1});
 
             // Get timesheet records
             var records = await sails.models.uabtimesheet.find({or: [
-                    {timeIn: {'>=': start.toISOString(true), '<': end.toISOString(true)}},
-                    {timeOut: {'>=': start.toISOString(true), '<': end.toISOString(true)}}
+                    {timeIn: {'>=': start.toISO(), '<': end.toISO()}},
+                    {timeOut: {'>=': start.toISO(), '<': end.toISO()}}
                 ]}).sort('timeIn ASC');
             sails.log.verbose(`Returned Timesheet records: ${records.length}`);
             sails.log.silly(records);

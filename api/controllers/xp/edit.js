@@ -37,10 +37,10 @@ module.exports = {
     date: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `If provided, the moment() parsable string of a date in which the XP was earned will be modified to this.`
+      description: `If provided, the ISO string of a date in which the XP was earned will be modified to this.`
     }
   },
 

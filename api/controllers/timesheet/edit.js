@@ -16,18 +16,18 @@ module.exports = {
       type: 'string',
       required: true,
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
-      description: 'A moment.js compatible timestamp for when the director clocked in.'
+      description: 'An ISO string for when the director clocked in.'
     },
 
     timeOut: {
       type: 'string',
       allowNull: true,
       custom: function (value) {
-        return value === null || value === '' || moment(value).isValid()
+        return value === null || value === '' || DateTime.fromISO(value).isValid
       },
-      description: 'A moment.js compatible timestamp for when the director clocked out. Use null or blank string to indicate the director is still clocked in.'
+      description: 'An ISO String for when the director clocked out. Use null or blank string to indicate the director is still clocked in.'
     },
 
     approved: {
@@ -56,7 +56,7 @@ module.exports = {
 
     try {
       // Update the timesheet record
-      var records = await sails.models.timesheet.update({ ID: inputs.ID }, { timeIn: moment(inputs.timeIn).toISOString(true), timeOut: moment(inputs.timeOut).toISOString(true), approved: inputs.approved }).fetch()
+      var records = await sails.models.timesheet.update({ ID: inputs.ID }, { timeIn: inputs.timeIn, timeOut: inputs.timeOut, approved: inputs.approved }).fetch()
 
       // Force a re-load of all directors to update any possible changes in presence
       await sails.helpers.directors.update()

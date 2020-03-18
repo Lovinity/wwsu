@@ -1,3 +1,5 @@
+// TODO: Update with luxon
+
 var later = require('later')
 later.date.localTime()
 
@@ -45,7 +47,7 @@ module.exports = {
         var toQueue = []
 
         // Calculate online listener time statistics
-        var records = await sails.models.attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, createdAt: { '>=': moment().subtract(7, 'days').toISOString(true) } })
+        var records = await sails.models.attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, createdAt: { '>=': DateTime.local().minus({days: 7}).toISO() } })
         var peak = 0
         var showTime = 0
         var listenerMinutes = 0

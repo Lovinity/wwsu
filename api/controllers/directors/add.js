@@ -46,7 +46,7 @@ module.exports = {
 
     try {
       // Add the director and bcrypt the login
-      await sails.models.directors.create({ name: inputs.name, login: bcrypt.hashSync(inputs.login, 10), admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: moment().toISOString() }).fetch()
+      await sails.models.directors.create({ name: inputs.name, login: bcrypt.hashSync(inputs.login, 10), admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: DateTime.local().toISO() }).fetch()
       return exits.success()
     } catch (e) {
       return exits.error(e)

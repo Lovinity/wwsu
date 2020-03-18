@@ -5,6 +5,8 @@
   "description": "Core backend for WWSU Radio operations",
   "keywords": [],
   "dependencies": {
+    "@rschedule/core": "^1.0.2",
+    "@rschedule/luxon-date-adapter": "^1.0.2",
     "@sailshq/connect-redis": "^3.2.1",
     "@sailshq/lodash": "^3.10.4",
     "@sailshq/socket.io-redis": "^5.2.0",
@@ -17,6 +19,7 @@
     "he": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
     "later": "^1.2.0",
+    "luxon": "^1.22.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
     "needle": "^2.4.0",

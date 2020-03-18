@@ -12,28 +12,28 @@ module.exports = {
     var months = {}
 
     for (var i = 12; i > 0; i--) {
-      var start = moment().subtract(i, 'months')
-      var end = moment().subtract(i - 1, 'months')
+      var start = DateTime.local().minus({months: i})
+      var end = DateTime.local().minus({months: i - 1})
 
-      months[moment(start).format('MMMM YYYY')] = { streamHits: 0, listenerHoursTotal: 0, listenerHoursShows: 0, listenerToShowtimeRatioTotal: 0, listenerToShowtimeRatioShows: 0, tracksLiked: 0, webMessages: 0, requestsPlaced: 0 }
+      months[start.toFormat('MMMM yyyy')] = { streamHits: 0, listenerHoursTotal: 0, listenerHoursShows: 0, listenerToShowtimeRatioTotal: 0, listenerToShowtimeRatioShows: 0, tracksLiked: 0, webMessages: 0, requestsPlaced: 0 }
 
-      var records = await sails.models.listeners.find({ createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } }).sort(`createdAt ASC`)
+      var records = await sails.models.listeners.find({ createdAt: { '>=': start.toISO(), '<': end.toISO() } }).sort(`createdAt ASC`)
       var prevAmount = 0
       records.map((record) => {
         if (record.listeners > prevAmount) {
-          months[moment(start).format('MMMM YYYY')].streamHits += (record.listeners - prevAmount)
+          months[start.toFormat('MMMM yyyy')].streamHits += (record.listeners - prevAmount)
         }
         prevAmount = record.listeners
       })
-      months[moment(start).format('MMMM YYYY')].listenerHoursTotal = await sails.models.attendance.sum('listenerMinutes', { createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } }) / 60
-      var showTime = await sails.models.attendance.sum('showTime', { createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } }) / 60
-      months[moment(start).format('MMMM YYYY')].listenerToShowtimeRatioTotal = (showTime > 0) ? months[moment(start).format('MMMM YYYY')].listenerHoursTotal / showTime : 0
-      months[moment(start).format('MMMM YYYY')].listenerHoursShows = await sails.models.attendance.sum('listenerMinutes', { dj: { '!=': null }, createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } }) / 60
-      var showTimeB = await sails.models.attendance.sum('showTime', { dj: { '!=': null }, createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } }) / 60
-      months[moment(start).format('MMMM YYYY')].listenerToShowtimeRatioShows = (showTime > 0) ? months[moment(start).format('MMMM YYYY')].listenerHoursShows / showTimeB : 0
-      months[moment(start).format('MMMM YYYY')].tracksLiked = await sails.models.songsliked.count({ createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } })
-      months[moment(start).format('MMMM YYYY')].webMessages = await sails.models.messages.count({ or: [{ from: { startsWith: 'website-' } }, { to: ['DJ', 'DJ-private'] }], createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } })
-      months[moment(start).format('MMMM YYYY')].requestsPlaced = await sails.models.requests.count({ createdAt: { '>=': moment(start).toISOString(true), '<': moment(end).toISOString(true) } })
+      months[start.toFormat('MMMM yyyy')].listenerHoursTotal = await sails.models.attendance.sum('listenerMinutes', { createdAt: { '>=': start.toISO(), '<': end.toISO() } }) / 60
+      var showTime = await sails.models.attendance.sum('showTime', { createdAt: { '>=': start.toISO(), '<': end.toISO() } }) / 60
+      months[start.toFormat('MMMM yyyy')].listenerToShowtimeRatioTotal = (showTime > 0) ? months[start.toFormat('MMMM yyyy')].listenerHoursTotal / showTime : 0
+      months[start.toFormat('MMMM yyyy')].listenerHoursShows = await sails.models.attendance.sum('listenerMinutes', { dj: { '!=': null }, createdAt: { '>=': start.toISO(), '<': end.toISO() } }) / 60
+      var showTimeB = await sails.models.attendance.sum('showTime', { dj: { '!=': null }, createdAt: { '>=': start.toISO(), '<': end.toISO() } }) / 60
+      months[start.toFormat('MMMM yyyy')].listenerToShowtimeRatioShows = (showTime > 0) ? months[start.toFormat('MMMM yyyy')].listenerHoursShows / showTimeB : 0
+      months[start.toFormat('MMMM yyyy')].tracksLiked = await sails.models.songsliked.count({ createdAt: { '>=': start.toISO(), '<': end.toISO() } })
+      months[start.toFormat('MMMM yyyy')].webMessages = await sails.models.messages.count({ or: [{ from: { startsWith: 'website-' } }, { to: ['DJ', 'DJ-private'] }], createdAt: { '>=': start.toISO(), '<': end.toISO() } })
+      months[start.toFormat('MMMM yyyy')].requestsPlaced = await sails.models.requests.count({ createdAt: { '>=': start.toISO(), '<': end.toISO() } })
     }
 
     return exits.success(months)

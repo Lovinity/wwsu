@@ -62,7 +62,7 @@ module.exports = {
         await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
-        sails.models.status.errorCheck.prevID = moment()
+        sails.models.status.errorCheck.prevID = DateTime.local().toISO()
         await sails.helpers.error.count('stationID')
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.start)
 
@@ -86,7 +86,7 @@ module.exports = {
         // await sails.helpers.error.count('sportsQueue');
 
         // Change meta
-        await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_sports', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat })
+        await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, queueFinish: DateTime.local().plus({seconds: queueLength}).toISO(), state: 'automation_sports', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: DateTime.local().toISO(), webchat: inputs.webchat })
       } else {
         // Otherwise, just update metadata but do not do anything else
         await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })

@@ -8,10 +8,10 @@ module.exports = {
     date: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of a date to get logs.`
+      description: `ISO string of a date to get logs.`
     },
     duration: {
       type: 'number',
@@ -46,9 +46,9 @@ module.exports = {
           sails.log.verbose('Request was a socket. Joining attendance.')
         }
 
-        var start = inputs.date && inputs.date !== null ? moment(inputs.date).startOf('day') : moment().startOf('day')
-        var end = moment(start).add(inputs.duration, 'days')
-        query = { or: [ { scheduledStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } }, { actualStart: { '>=': start.toISOString(true), '<': end.toISOString(true) } } ] }
+        var start = inputs.date && inputs.date !== null ? DateTime.fromISO(inputs.date).startOf('day') : DateTime.local().startOf('day')
+        var end = start.plus({days: inputs.duration});
+        query = { or: [ { scheduledStart: { '>=': start.toISO(), '<': end.toISO() } }, { actualStart: { '>=': start.toISO(), '<': end.toISO() } } ] }
       } else {
         if (inputs.dj && inputs.dj !== null) {
           query.or = [
@@ -70,8 +70,8 @@ module.exports = {
         var compare = function (a, b) {
           var theDateA = a.actualStart !== null ? a.actualStart : a.scheduledStart
           var theDateB = b.actualStart !== null ? b.actualStart : b.scheduledStart
-          if (moment(theDateA).valueOf() < moment(theDateB).valueOf()) { return -1 }
-          if (moment(theDateA).valueOf() > moment(theDateB).valueOf()) { return 1 }
+          if (DateTime.fromISO(theDateA).valueOf() < DateTime.fromISO(theDateB).valueOf()) { return -1 }
+          if (DateTime.fromISO(theDateA).valueOf() > DateTime.fromISO(theDateB).valueOf()) { return 1 }
           if (a.ID > b.ID) { return 1 }
           if (b.ID > a.ID) { return -1 }
           return 0

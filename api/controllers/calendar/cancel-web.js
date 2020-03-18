@@ -15,7 +15,7 @@ module.exports = {
         start: {
             type: 'string',
             required: true,
-            custom: (value) => moment(value).isValid()
+            custom: (value) => DateTime.fromISO(value).isValid
         },
         additionalException: {
             type: 'boolean',
@@ -55,7 +55,7 @@ module.exports = {
             if (cEvent && cEvent.type !== 'canceled' && cEvent.hostDJ === this.req.payload.ID) {
 
                 // Make an attendance record if it does not already exist
-                sails.models.attendance.findOrCreate({ unique: cEvent.unique }, { calendarID: cEvent.calendarID, unique: cEvent.unique, dj: cEvent.hostDJ, cohostDJ1: cEvent.cohostDJ1, cohostDJ2: cEvent.cohostDJ2, cohostDJ3: cEvent.cohostDJ3, event: `${cEvent.type}: ${cEvent.hosts} - ${cEvent.name}`, happened: -1, happenedReason: inputs.reason, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true) })
+                sails.models.attendance.findOrCreate({ unique: cEvent.unique }, { calendarID: cEvent.calendarID, unique: cEvent.unique, dj: cEvent.hostDJ, cohostDJ1: cEvent.cohostDJ1, cohostDJ2: cEvent.cohostDJ2, cohostDJ3: cEvent.cohostDJ3, event: `${cEvent.type}: ${cEvent.hosts} - ${cEvent.name}`, happened: -1, happenedReason: inputs.reason, scheduledStart: cEvent.start, scheduledEnd: cEvent.end })
                     .exec(async (err, attendance, wasCreated) => {
                         var temp
                         if (err) {
@@ -65,7 +65,7 @@ module.exports = {
 
                         // Or update the attendance record if one already exists for this event
                         if (!wasCreated) {
-                            attendance = await sails.models.attendance.update({ ID: attendance.ID, happened: 1 }, { happened: -1, happenedReason: inputs.reason, scheduledStart: moment(cEvent.start).toISOString(true), scheduledEnd: moment(cEvent.end).toISOString(true) }).fetch();
+                            attendance = await sails.models.attendance.update({ ID: attendance.ID, happened: 1 }, { happened: -1, happenedReason: inputs.reason, scheduledStart: cEvent.start, scheduledEnd: cEvent.end }).fetch();
                         }
 
                         // Create a cancellation exception, or change an existing exception to canceled if it exists.
@@ -88,25 +88,25 @@ module.exports = {
 
                             // Make logs and push out notifications
                             if (record3.type === 'show') {
-                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Show was canceled via DJ Panel!</strong><br />Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
+                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Show was canceled via DJ Panel!</strong><br />Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${DateTime.fromISO(record3.start).toFormat('ff')} - ${DateTime.fromISO(record3.end).toFormat('ff')}<br />Reason: ${inputs.reason}`, createdAt: DateTime.local().toISO() }).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err)
                                     })
-                                await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Show', `${record3.hosts} - ${record3.name}, scheduled for ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
+                                await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Show', `${record3.hosts} - ${record3.name}, scheduled for ${DateTime.fromISO(record3.start).toFormat('ff')} - ${DateTime.fromISO(record3.end).toFormat('ff')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
                             }
                             if (record3.type === 'remote') {
-                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Remote broadcast was canceled via DJ Panel!</strong><br />Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
+                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Remote broadcast was canceled via DJ Panel!</strong><br />Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${DateTime.fromISO(record3.start).toFormat('ff')} - ${DateTime.fromISO(record3.end).toFormat('ff')}<br />Reason: ${inputs.reason}`, createdAt: DateTime.local().toISO() }).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err)
                                     })
-                                await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Remote', `${record3.hosts} - ${record3.name}, scheduled for ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
+                                await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Remote', `${record3.hosts} - ${record3.name}, scheduled for ${DateTime.fromISO(record3.start).toFormat('ff')} - ${DateTime.fromISO(record3.end).toFormat('ff')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
                             }
                             if (record3.type === 'prerecord') {
-                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Prerecord was canceled via DJ Panel!</strong><br />Prerecord: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
+                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Prerecord was canceled via DJ Panel!</strong><br />Prerecord: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${DateTime.fromISO(record3.start).toFormat('ff')} - ${DateTime.fromISO(record3.end).toFormat('ff')}<br />Reason: ${inputs.reason}`, createdAt: DateTime.local().toISO() }).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err)
                                     })
-                                await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Prerecord', `${record3.hosts} - ${record3.name}, scheduled for ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
+                                await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Prerecord', `${record3.hosts} - ${record3.name}, scheduled for ${DateTime.fromISO(record3.start).toFormat('ff')} - ${DateTime.fromISO(record3.end).toFormat('ff')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
                             }
                         });
                     });

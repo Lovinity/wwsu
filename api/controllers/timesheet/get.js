@@ -8,10 +8,10 @@ module.exports = {
     date: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.`
+      description: `ISO string of a date that falls within the week to get timesheet entries. Defaults to now.`
     },
     fourteenDays: {
       type: 'boolean',
@@ -33,21 +33,21 @@ module.exports = {
       }
 
       // Get a range of one week
-      var start = inputs.date !== null ? moment(inputs.date).startOf('week') : moment().startOf('week')
-      var end = moment(start).add(1, 'weeks')
+      var start = inputs.date !== null ? DateTime.fromISO(inputs.date).startOf('week') : DateTime.local().startOf('week');
+      var end = start.plus({weeks: 1});
 
       // ...or a range of 14 days if fourteenDays is true
       if (inputs.fourteenDays) {
-        start = moment(inputs.date).subtract(7, 'days')
-        end = moment(inputs.date).add(7, 'days')
+        start = inputs.date !== null ? DateTime.fromISO(inputs.date).minus({weeks: 1}) : DateTime.local().minus({weeks: 1});
+        end = start.plus({weeks: 2});
       }
 
       // Get timesheet records
       var records = await sails.models.timesheet.find({ or: [
-        { timeIn: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { timeOut: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { timeIn: null, timeOut: null, scheduledIn: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { timeIn: null, timeOut: null, scheduledOut: { '>=': start.toISOString(true), '<': end.toISOString(true) } }
+        { timeIn: { '>=': start.toISO(), '<': end.toISO() } },
+        { timeOut: { '>=': start.toISO(), '<': end.toISO() } },
+        { timeIn: null, timeOut: null, scheduledIn: { '>=': start.toISO(), '<': end.toISO() } },
+        { timeIn: null, timeOut: null, scheduledOut: { '>=': start.toISO(), '<': end.toISO() } }
       ] }).sort([{ timeIn: 'ASC' }, { scheduledIn: 'ASC' }])
       sails.log.verbose(`Returned Timesheet records: ${records.length}`)
       sails.log.silly(records)

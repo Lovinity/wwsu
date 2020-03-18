@@ -105,7 +105,7 @@ module.exports = {
         await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false)
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
-        sails.models.status.errorCheck.prevID = moment().toISOString(true);
+        sails.models.status.errorCheck.prevID = DateTime.local().toISO();
         await sails.helpers.error.count('stationID')
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.start)
 
@@ -133,7 +133,7 @@ module.exports = {
           queueLength = await sails.helpers.songs.calculateQueueLength()
         }
         await sails.helpers.meta.changeDjs(inputs.showname);
-        await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_remote', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat })
+        await sails.helpers.meta.change.with({ queueFinish: DateTime.local().plus({seconds: queueLength}).toISO(), state: 'automation_remote', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: DateTime.local().toISO(), webchat: inputs.webchat })
       } else {
         // Otherwise, just update metadata but do not do anything else
         await sails.helpers.meta.changeDjs(inputs.showname);

@@ -25,8 +25,8 @@ onmessage = function (e) {
     .map(event => {
       var title
       // null start or end? Use a default to prevent errors.
-      if (!moment(event.start).isValid()) { event.start = moment(e.data[1]).startOf('day') }
-      if (!moment(event.end).isValid()) { event.end = moment(e.data[1]).add(1, 'days').startOf('day') }
+      if (!DateTime.fromISO(event.start).isValid) { event.start = moment(e.data[1]).startOf('day') }
+      if (!DateTime.fromISO(event.end).isValid) { event.end = moment(e.data[1]).add(1, 'days').startOf('day') }
 
       event.startT = moment(event.start).format('ddd MM/DD hh:mm A')
       event.endT = moment(event.end).format('hh:mm A')

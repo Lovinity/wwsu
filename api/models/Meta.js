@@ -171,7 +171,7 @@ module.exports = {
       allowNull: true,
       description: 'ISO timestamp of when calendar attendance was last checked',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     show: {
@@ -224,7 +224,7 @@ module.exports = {
       allowNull: true,
       description: 'ISO timestamp of when manual track meta was added',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     history: {
@@ -283,7 +283,7 @@ module.exports = {
       allowNull: true,
       description: 'ISO timestamp of when the playlist was started',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     topic: {
@@ -317,7 +317,7 @@ module.exports = {
       defaultsTo: moment().toISOString(true),
       description: 'ISO string of the current WWSU time. NOTE: time is only pushed periodically in websockets. Clients should keep their own time ticker in sync with this value.',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     listeners: {
@@ -335,7 +335,7 @@ module.exports = {
       allowNull: true,
       description: 'An ISO timestamp of when the queue is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     queueCalculating: {
@@ -348,7 +348,7 @@ module.exports = {
       allowNull: true,
       description: 'An ISO timestamp of when the current track is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     countdown: {
@@ -356,7 +356,7 @@ module.exports = {
       allowNull: true,
       description: 'An ISO timestamp which to count down on the display signs for shows.',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     queueMusic: {
@@ -379,7 +379,7 @@ module.exports = {
       allowNull: true,
       description: 'An ISO timestamp of when the last top of hour ID break was taken.',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       }
     },
     delaySystem: {

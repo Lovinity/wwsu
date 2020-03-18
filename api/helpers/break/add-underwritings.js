@@ -57,7 +57,7 @@ module.exports = {
         var toQueue = []
 
         // Calculate online listener time statistics
-        var records = await sails.models.attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, createdAt: { '>=': moment().subtract(7, 'days').toISOString(true) } })
+        var records = await sails.models.attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, createdAt: { '>=': DateTime.local().minus({weeks: 1}).toISOString(true) } })
         var peak = 0
         var showTime = 0
         var listenerMinutes = 0
@@ -79,9 +79,9 @@ module.exports = {
         // Set up other variables that do not need re-loading on each underwriting check
 
         // For "now", add 10 minutes because top of the hour ID breaks may queue up to 10 minutes early.
-        var now = moment().add(10, 'minutes').toISOString(true)
+        var now = DateTime.local().plus({minutes: 10})
 
-        sails.log.debug(`Now time: ${now}`)
+        sails.log.debug(`Now time: ${now.toISO()}`)
 
         var c = sails.models.listeners.memory.listeners
 
@@ -94,7 +94,7 @@ module.exports = {
             sails.log.debug(`Underwriting ${underwriting.ID}: Found song.`)
 
             // Ignore this underwriting if the associated track is expired or disabled
-            if (song.enabled === 1 && moment(song.start_date).isSameOrBefore(moment()) && (moment(song.end_date).isSameOrBefore(moment('2002-01-02 00:00:02')) || moment().isBefore(moment(song.end_date))) && (song.play_limit === 0 || song.count_played < song.play_limit)) {
+            if (song.enabled === 1 && DateTime.fromISO(song.start_date) <= DateTime.local() && (DateTime.fromISO(song.end_date) <= DateTime.fromSQL('2002-01-02 00:00:02') || DateTime.local() < DateTime.fromISO(song.end_date)) && (song.play_limit === 0 || song.count_played < song.play_limit)) {
               sails.log.debug(`Underwriting ${underwriting.ID}: Track enabled.`)
 
               // We want to calculate how many breaks the underwriting will go through in a week
@@ -149,8 +149,8 @@ module.exports = {
                 // Determine the next date/time this underwriting is allowed to queue.
                 if (underwriting.mode.schedule.schedules !== null) {
                 var schedule = later.schedule(underwriting.mode.schedule)
-                var start = moment(song.date_played).toISOString(false)
-                var next = moment(schedule.next(1, start)).toISOString(true)
+                var start = DateTime.fromISO(song.date_played)
+                var next = DateTime.fromISO(schedule.next(1, start));
                 } else {
                   var schedule = null
                   var start = null

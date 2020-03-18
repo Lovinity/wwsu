@@ -14,7 +14,7 @@ module.exports = {
     level: {
       type: 'string',
       required: true,
-      isIn: ['danger', 'warning', 'info', 'trivial'],
+      isIn: [ 'danger', 'warning', 'info', 'trivial' ],
       description: 'Announcement warning level. Must be danger, warning, info, or trivial.'
     },
 
@@ -40,19 +40,19 @@ module.exports = {
     starts: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the announcement starts. Defaults to now. Recommended ISO string.`
+      description: `ISO string of when the announcement starts.`
     },
 
     expires: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the announcement expires. Defaults to the year 3000. Recommended ISO string.`
+      description: `ISO string of when the announcement expires.`
     }
 
   },
@@ -62,7 +62,7 @@ module.exports = {
 
     try {
       // Add the announcement to the database
-      await sails.models.announcements.create({ type: inputs.type, level: inputs.level, title: inputs.title, announcement: inputs.announcement, displayTime: inputs.displayTime, starts: inputs.starts !== null && typeof inputs.starts !== 'undefined' ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), expires: inputs.expires !== null && typeof inputs.expires !== 'undefined' ? moment(inputs.expires).toISOString(true) : moment({ year: 3000 }).toISOString(true) }).fetch()
+      await sails.models.announcements.create({ type: inputs.type, level: inputs.level, title: inputs.title, announcement: inputs.announcement, displayTime: inputs.displayTime, starts: inputs.starts !== null && typeof inputs.starts !== 'undefined' ? inputs.starts : DateTime.local().toISO(), expires: inputs.expires !== null && typeof inputs.expires !== 'undefined' ? inputs.expires : DateTime.fromObject({ year: 3000 }).toISO() }).fetch()
 
       return exits.success()
     } catch (e) {

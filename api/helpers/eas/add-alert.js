@@ -34,18 +34,18 @@ module.exports = {
     starts: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert starts. Recommended ISO string.`
+      description: `ISO string of when the alert starts.`
     },
     expires: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert expires. Recommended ISO string.`
+      description: `ISO string of when the alert expires.`
     },
     color: {
       type: 'string',

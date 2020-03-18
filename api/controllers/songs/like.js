@@ -26,7 +26,7 @@ module.exports = {
       var query = { IP: fromIP, ID: inputs.trackID }
 
       // If config specifies users can like tracks multiple times, add a date condition.
-      if (sails.config.custom.songsliked.limit > 0) { query.createdAt = { '>=': moment().subtract(sails.config.custom.songsliked.limit, 'days').toISOString(true) } }
+      if (sails.config.custom.songsliked.limit > 0) { query.createdAt = { '>=': DateTime.local().minus({days: sails.config.custom.songsliked.limit}).toISO() } }
 
       // First, check if the client already liked the track recently. Error if it cannot be liked again at this time.
       var records = await sails.models.songsliked.count(query)
@@ -34,7 +34,7 @@ module.exports = {
 
       // Next, check to see this track ID actually played recently. We will allow a 30-minute grace. Any tracks not played within the last 30 minutes cannot be liked.
       var canLike = false
-      records = await sails.models.history.find({ createdAt: { '>=': moment().subtract(30, 'minutes').toISOString(true) } }).sort('createdAt DESC')
+      records = await sails.models.history.find({ createdAt: { '>=': DateTime.local().minus({minutes: 30}).toISO() } }).sort('createdAt DESC')
       if (records && records.length > 0) {
         records
           .filter(song => song.trackID === inputs.trackID)
@@ -49,7 +49,7 @@ module.exports = {
       if (sails.config.custom.songsliked.priorityBump !== 0) { await sails.models.songs.update({ ID: inputs.trackID }, { weight: track.weight + sails.config.custom.songsliked.priorityBump }) }
 
       // Log the request
-      await sails.models.logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: `track-like`, event: `<strong>A track was liked!</strong><br />Track: ${track.artist} - ${track.title} (ID ${inputs.trackID})`, createdAt: moment().toISOString(true) }).fetch()
+      await sails.models.logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: `track-like`, event: `<strong>A track was liked!</strong><br />Track: ${track.artist} - ${track.title} (ID ${inputs.trackID})` }).fetch()
         .tolerate((err) => {
           sails.log.error(err)
         })

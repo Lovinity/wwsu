@@ -33,10 +33,10 @@ module.exports = {
     date: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of a date in which the XP was earned. Defaults to now.`
+      description: `ISO string of a date in which the XP was earned. Defaults to now.`
     }
   },
 
@@ -55,9 +55,9 @@ module.exports = {
 
       // Process the records depending on whether we have a single dj, or an array in djArray.
       if ((!inputs.djs || inputs.djs.length <= 0)) {
-        records.push({ dj: inputs.dj, type: inputs.type, subtype: inputs.subtype, description: inputs.description, amount: inputs.amount, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) })
+        records.push({ dj: inputs.dj, type: inputs.type, subtype: inputs.subtype, description: inputs.description, amount: inputs.amount, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? inputs.date : DateTime.local().toISO() })
       } else {
-        inputs.djs.map(dj => records.push({ dj: dj, type: inputs.type, subtype: inputs.subtype, description: inputs.description, amount: inputs.amount, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }))
+        inputs.djs.map(dj => records.push({ dj: dj, type: inputs.type, subtype: inputs.subtype, description: inputs.description, amount: inputs.amount, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? inputs.date : DateTime.local().toISO() }))
       }
 
       // Add the records

@@ -65,31 +65,31 @@ module.exports = {
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.before)
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.duringHalftime)
 
-        sails.models.status.errorCheck.prevID = moment()
-        sails.models.status.errorCheck.prevBreak = moment()
+        sails.models.status.errorCheck.prevID = DateTime.local().toISO()
+        sails.models.status.errorCheck.prevBreak = DateTime.local().toISO()
         await sails.helpers.error.count('stationID')
 
         // Change state to halftime mode
         if (sails.models.meta.memory.state.startsWith('sportsremote')) {
-          await sails.helpers.meta.change.with({ state: 'sportsremote_halftime', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ state: 'sportsremote_halftime', lastID: DateTime.local().toISO() })
         } else {
-          await sails.helpers.meta.change.with({ state: 'sports_halftime', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ state: 'sports_halftime', lastID: DateTime.local().toISO() })
         }
 
         // Standard break
       } else {
-        sails.models.status.errorCheck.prevBreak = moment()
+        sails.models.status.errorCheck.prevBreak = DateTime.local().toISO()
 
         // Queue and play tracks
         await sails.helpers.rest.cmd('EnableAssisted', 1)
         var d = new Date()
         var num = d.getMinutes()
         // Queue station ID if between :55 and :05, or if it's been more than 50 minutes since the last ID break.
-        if (num >= 55 || num < 5 || sails.models.status.errorCheck.prevID === null || moment().diff(moment(sails.models.status.errorCheck.prevID)) > (60 * 50 * 1000)) {
+        if (num >= 55 || num < 5 || sails.models.status.errorCheck.prevID === null || DateTime.local().diff(DateTime.fromISO(sails.models.status.errorCheck.prevID)).as('minutes') > 50) {
           await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
-          sails.models.status.errorCheck.prevID = moment()
+          sails.models.status.errorCheck.prevID = DateTime.local().toISO()
           await sails.helpers.error.count('stationID')
-          await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ lastID: DateTime.local().toISO() })
 
           // Earn XP for doing the top of the hour ID break, if the show is live
           if (sails.models.meta.memory.state.startsWith('live_')) {

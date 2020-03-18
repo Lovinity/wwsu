@@ -27,19 +27,19 @@ module.exports = {
     starts: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert starts. Recommended ISO string.`
+      description: `ISO string of when the alert starts.`
     },
 
     expires: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of when the alert expires. Recommended ISO string.`
+      description: `ISO string of when the alert expires.`
     },
 
     color: {
@@ -61,7 +61,7 @@ module.exports = {
     sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`)
     try {
       // Add the alert to EAS
-      await sails.helpers.eas.addAlert(moment().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, inputs.starts !== null && typeof inputs.starts !== 'undefined' ? moment(inputs.starts).toISOString(true) : moment().toISOString(true), inputs.expires !== null && typeof inputs.expires !== 'undefined' ? moment(inputs.expires).toISOString(true) : moment().add(15, 'minutes').toISOString(true), inputs.color, inputs.information)
+      await sails.helpers.eas.addAlert(DateTime.local().valueOf(), 'WWSU', inputs.counties, inputs.alert, inputs.severity, inputs.starts !== null && typeof inputs.starts !== 'undefined' ? inputs.starts : DateTime.local().toISO(), inputs.expires !== null && typeof inputs.expires !== 'undefined' ? inputs.expires : DateTime.local().plus({hours: 1}).toISO(), inputs.color, inputs.information)
 
       // Process post tasks (this is what actually pushes the new alert out)
       await sails.helpers.eas.postParse()

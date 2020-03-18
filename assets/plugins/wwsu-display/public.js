@@ -585,7 +585,7 @@ function processEas (db) {
         }
         innercontent += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark`} border border-${borderclass} rounded shadow-4 ${!isLightTheme ? `bg-dark-4` : `bg-light-1`}">
                         <div class="m-1" style="text-align: center; width: 100%"><span class="${!isLightTheme ? `text-white` : `text-dark`}" style="font-size: 1.5em;">${(typeof dodo[ 'alert' ] !== 'undefined') ? dodo[ 'alert' ] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo[ 'starts' ]).isValid() ? moment(dodo[ 'starts' ]).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo[ 'expires' ]).isValid() ? moment(dodo[ 'expires' ]).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${DateTime.fromISO(dodo['starts']).isValid ? moment(dodo[ 'starts' ]).format('MM/DD h:mmA') : 'UNKNOWN'} - ${DateTime.fromISO(dodo['expires']).isValid ? moment(dodo[ 'expires' ]).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
 <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo[ 'counties' ] !== 'undefined') ? dodo[ 'counties' ] : 'Unknown Counties'}</span><br /></div>
                         </div>
                         `
@@ -979,7 +979,7 @@ function doEas () {
         easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
                     <h1 style="font-size: 3em;">WWSU Emergency Alert System</h1>
                     <div id="eas-alert-text" class="m-3 text-white" style="font-size: 6em;">${alert}</div>
-                    <div class="m-1 text-white" style="font-size: 2em;">Effective ${moment(newEas[ 0 ][ 'starts' ]).isValid() ? moment(newEas[ 0 ][ 'starts' ]).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(newEas[ 0 ][ 'expires' ]).isValid() ? moment(newEas[ 0 ][ 'expires' ]).format('MM/DD h:mmA') : 'UNKNOWN'}</div>
+                    <div class="m-1 text-white" style="font-size: 2em;">Effective ${DateTime.fromISO(newEas[0]['starts']).isValid ? moment(newEas[ 0 ][ 'starts' ]).format('MM/DD h:mmA') : 'UNKNOWN'} - ${DateTime.fromISO(newEas[0]['expires']).isValid ? moment(newEas[ 0 ][ 'expires' ]).format('MM/DD h:mmA') : 'UNKNOWN'}</div>
                     <div class="m-1 text-white" style="font-size: 2em;">for the counties ${(typeof newEas[ 0 ][ 'counties' ] !== 'undefined') ? newEas[ 0 ][ 'counties' ] : 'Unknown Counties'}</div>
                     <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(color2.red / 4)}, ${Math.round(color2.green / 4)}, ${Math.round(color2.blue / 4)}); font-size: 2.5em;">${text}</div>
                     </div></div>`
@@ -1073,7 +1073,7 @@ function doEas () {
           color = `rgb(${Math.round(color.red / 4)}, ${Math.round(color.green / 4)}, ${Math.round(color.blue / 4)});`
           innercontent.innerHTML += `<div style="width: 32%;${!isLightTheme ? `background-color: ${color}` : ``}" class="d-flex align-items-stretch m-1 ${!isLightTheme ? `text-white` : `text-dark bg-light-1`} border border-${borderclass} rounded shadow-4">
                         <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 1.5em;">${(typeof dodo[ 'alert' ] !== 'undefined') ? dodo[ 'alert' ] : 'Unknown Alert'}</span><br />
-                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${moment(dodo[ 'starts' ]).isValid() ? moment(dodo[ 'starts' ]).format('MM/DD h:mmA') : 'UNKNOWN'} - ${moment(dodo[ 'expires' ]).isValid() ? moment(dodo[ 'expires' ]).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
+                        <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${DateTime.fromISO(dodo['starts']).isValid ? moment(dodo[ 'starts' ]).format('MM/DD h:mmA') : 'UNKNOWN'} - ${DateTime.fromISO(dodo['expires']).isValid ? moment(dodo[ 'expires' ]).format('MM/DD h:mmA') : 'UNKNOWN'}</span><br />
 <span style="font-size: 1em;" class="${!isLightTheme ? `text-white` : `text-dark`}">${(typeof dodo[ 'counties' ] !== 'undefined') ? dodo[ 'counties' ] : 'Unknown Counties'}</span><br />
                         </div>
                         `

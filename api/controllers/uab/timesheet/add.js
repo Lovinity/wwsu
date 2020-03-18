@@ -1,5 +1,3 @@
-/* global sails, Directors, Timesheet, moment, sails.models.uabtimesheet, sails.models.uabdirectors */
-
 module.exports = {
 
     friendlyName: 'Uab / Timesheet / Add',
@@ -11,9 +9,9 @@ module.exports = {
             type: 'string',
             required: true,
             custom: function (value) {
-                return moment(value).isValid();
+                return DateTime.fromISO(value).isValid;
             },
-            description: 'A moment.js compatible timestamp for the timesheet entry.'
+            description: 'An ISO String for the timesheet entry.'
         }
     },
 
@@ -35,32 +33,32 @@ module.exports = {
             if (record.present)
             {
                 var toapprove = false;
-                thetime = moment(inputs.timestamp);
+                thetime = DateTime.fromISO(inputs.timestamp);
 
                 // If the entry is less than 30 minutes off from the current time, approve automatically
-                if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))
+                if (thetime > DateTime.local().minus({minutes: 30}) && thetime < DateTime.local().plus({minutes: 30}))
                     toapprove = true;
 
                 // Add the timeOut entry
-                await sails.models.uabtimesheet.update({timeIn: {'!=': null}, timeOut: null, name: record.name}, {timeOut: thetime.toISOString(true), approved: toapprove}).fetch();
+                await sails.models.uabtimesheet.update({timeIn: {'!=': null}, timeOut: null, name: record.name}, {timeOut: thetime.toISO(), approved: toapprove}).fetch();
 
                 // Update the director presence
-                await sails.models.uabdirectors.update({ID: record.ID}, {present: false, since: thetime.toISOString(true)})
+                await sails.models.uabdirectors.update({ID: record.ID}, {present: false, since: thetime.toISO()})
                         .fetch();
 
             } else { // If the director is not present, this is a clock-in entry.
                 var toapprove = false;
-                thetime = moment(inputs.timestamp);
+                thetime = DateTime.fromISO(inputs.timestamp);
 
                 // If the entry is less than 30 minutes off from the current time, approve automatically
-                if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes')))
+                if (thetime > DateTime.local().minus({minutes: 30}) && thetime < DateTime.local().plus({minutes: 30}))
                     toapprove = true;
 
                 // Clock-ins need a new entry
-                await sails.models.uabtimesheet.create({name: record.name, timeIn: thetime.toISOString(true), approved: toapprove}).fetch();
+                await sails.models.uabtimesheet.create({name: record.name, timeIn: thetime.toISO(), approved: toapprove}).fetch();
 
                 // Update the director presence
-                await sails.models.uabdirectors.update({ID: record.ID}, {present: true, since: thetime.toISOString(true)})
+                await sails.models.uabdirectors.update({ID: record.ID}, {present: true, since: thetime.toISO()})
                         .fetch();
             }
             return exits.success();

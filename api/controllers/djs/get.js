@@ -45,7 +45,7 @@ module.exports = {
         }
       } else {
         var record = await sails.models.djs.findOne({ ID: inputs.dj })
-        var returnData = { startOfSemester: moment(sails.config.custom.startOfSemester).toISOString(true) }
+        var returnData = { startOfSemester: sails.config.custom.startOfSemester }
 
         if (!record || record === null) { return exits.success({}) }
 

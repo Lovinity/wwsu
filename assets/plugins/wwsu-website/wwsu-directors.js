@@ -566,8 +566,8 @@ function processDirectors (ddb, hdb) {
           if (temp2 === null) { return null }
 
           // null start or end? Use a default to prevent errors.
-          if (!moment(event.start).isValid()) { event.start = moment(Meta.time).startOf('day') }
-          if (!moment(event.end).isValid()) { event.end = moment(Meta.time).add(1, 'days').startOf('day') }
+          if (!DateTime.fromISO(event.start).isValid) { event.start = moment(Meta.time).startOf('day') }
+          if (!DateTime.fromISO(event.end).isValid) { event.end = moment(Meta.time).add(1, 'days').startOf('day') }
 
           event.startT = moment(event.start).minutes() === 0 ? moment(event.start).format('h') : moment(event.start).format('h:mm')
           if ((moment(event.start).hours() < 12 && moment(event.end).hours() >= 12) || ((moment(event.start).hours() >= 12) && moment(event.end).hours() < 12)) { event.startT += moment(event.start).format('A') }

@@ -15,7 +15,7 @@ module.exports = {
         start: {
             type: 'string',
             required: true,
-            custom: (value) => moment(value).isValid(),
+            custom: (value) => DateTime.fromISO(value).isValid,
             description: 'The ISO string date of the show to change the topic for'
         },
         additionalException: {

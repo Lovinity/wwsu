@@ -6,5 +6,5 @@ module.exports = async function displayPublic (req, res) {
   res.header('Expires', '-1')
   res.header('Pragma', 'no-cache')
 
-  return res.view('display/public', { layout: 'display/layout', timestamp: moment().valueOf() })
+  return res.view('display/public', { layout: 'display/layout', timestamp: DateTime.local().valueOf() })
 }

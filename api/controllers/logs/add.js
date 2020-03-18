@@ -8,10 +8,10 @@ module.exports = {
     date: {
       type: 'string',
       custom: function (value) {
-        return moment(value).isValid()
+        return DateTime.fromISO(value).isValid
       },
       allowNull: true,
-      description: `moment() parsable string of a date in which this log took place. Defaults to now.`
+      description: `ISO string of a date in which this log took place. Defaults to now.`
     },
     logtype: {
       type: 'string',
@@ -70,11 +70,11 @@ module.exports = {
       if (inputs.logtype === 'manual' && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to add a log entry because you are not on the air.')) }
 
       // Create the log entry
-      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? inputs.date : DateTime.local().toISO() }).fetch()
 
       // Set manual meta if criteria matches
       if (inputs.logtype === 'manual' && inputs.trackArtist.length > 0 && inputs.trackTitle.length > 0) {
-        await sails.helpers.meta.change.with({ trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, trackStamp: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) })
+        await sails.helpers.meta.change.with({ trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, trackStamp: inputs.date !== null && typeof inputs.date !== 'undefined' ? inputs.date : DateTime.local().toISO() })
       } else if (inputs.logtype === 'manual') {
         await sails.helpers.meta.change.with({ trackArtist: null, trackTitle: null, trackAlbum: null, trackLabel: null, trackStamp: null })
       }

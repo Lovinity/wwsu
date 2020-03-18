@@ -103,7 +103,7 @@ module.exports = {
                 var valid = true;
                 if (value.length > 0) {
                     value.map((val) => {
-                        if (!moment(val).isValid())
+                        if (!DateTime.fromISO(value).isValid)
                             valid = false;
                     })
                 }

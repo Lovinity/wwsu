@@ -21,7 +21,7 @@ module.exports = {
 
             var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers[ 'x-forwarded-for' ] !== 'undefined' ? this.req.socket.handshake.headers[ 'x-forwarded-for' ] : this.req.socket.conn.remoteAddress) : this.req.ip
             var host = sh.unique(fromIP + sails.config.custom.hostSecret)
-            var searchto = moment().subtract(1, 'days').toDate()
+            var searchto = DateTime.local().minus({days: 1}).toISO()
 
             var records = await sails.models.discipline.find({
                 where: {
