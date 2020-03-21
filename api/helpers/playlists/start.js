@@ -69,7 +69,7 @@ module.exports = {
               sails.log.verbose(`Playlists_list records retrieved: ${playlistTracks.length}`)
 
               // Bail if there are no tracks in this playlist
-              if (!playlistTracks) {
+              if (!playlistTracks || playlistTracks.length < 1) {
                 if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
                 sails.models.playlists.queuing = false
                 sails.log.verbose(`playlists.start: NO TRACKS`);
