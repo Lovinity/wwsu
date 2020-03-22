@@ -24,6 +24,11 @@ module.exports = {
       defaultsTo: 'Unknown'
     },
 
+    email: {
+      type: 'string',
+      allowNull: true
+    },
+
     login: {
       type: 'string',
       allowNull: true

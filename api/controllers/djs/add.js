@@ -25,6 +25,12 @@ module.exports = {
       description: 'Real name of the DJ.'
     },
 
+    email: {
+      type: 'string',
+      allowNull: true,
+      description: 'Email address of the DJ for notifications.'
+    },
+
     login: {
       type: 'string',
       allowNull: true,

@@ -28,6 +28,11 @@ module.exports = {
       allowNull: true,
       description: 'New real name of the DJ.'
     },
+    email: {
+      type: 'string',
+      allowNull: true,
+      description: 'Email address of the DJ for notifications.'
+    },
     login: {
       type: 'string',
       allowNull: true,
@@ -47,10 +52,6 @@ module.exports = {
       var criteria = {}
       if (inputs.name !== null && typeof inputs.name !== 'undefined' && inputs.name !== '') {
         criteria.name = inputs.name
-
-        if (inputs.realName !== null && typeof inputs.realName !== 'undefined') {
-          criteria.realName = inputs.realName
-        }
 
         // Merge other DJ entries with the same name with this one
         var dj = await sails.models.djs.find({ name: inputs.name })
@@ -121,6 +122,13 @@ module.exports = {
             })
           await Promise.all(maps)
         }
+      }
+
+      if (inputs.realName !== null && typeof inputs.realName !== 'undefined') {
+        criteria.realName = inputs.realName
+      }
+      if (inputs.email !== null && typeof inputs.email !== 'undefined') {
+        criteria.email = inputs.email
       }
 
       // Encrypt login
