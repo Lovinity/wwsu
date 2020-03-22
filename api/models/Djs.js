@@ -19,6 +19,11 @@ module.exports = {
       unique: true
     },
 
+    realName: {
+      type: 'string',
+      defaultsTo: 'Unknown'
+    },
+
     login: {
       type: 'string',
       allowNull: true

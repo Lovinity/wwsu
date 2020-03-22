@@ -19,6 +19,12 @@ module.exports = {
       description: 'The DJ to add.'
     },
 
+    realName: {
+      type: 'string',
+      required: true,
+      description: 'Real name of the DJ.'
+    },
+
     login: {
       type: 'string',
       allowNull: true,
