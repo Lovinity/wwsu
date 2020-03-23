@@ -44,7 +44,7 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     sails.log.debug('Controller djs/add called.')
-    if (inputs.login === '') { inputs.login = null }
+    if (!inputs.login || inputs.login === '') { inputs.login = null }
 
     try {
       // Use findOrCreate because we do not want to create a DJ that already exists
