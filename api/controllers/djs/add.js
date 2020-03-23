@@ -48,7 +48,7 @@ module.exports = {
 
     try {
       // Use findOrCreate because we do not want to create a DJ that already exists
-      await sails.models.djs.findOrCreate({ name: inputs.name }, { name: inputs.name, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: DateTime.fromSQL('2002-01-01 00:00:00').toISO() })
+      await sails.models.djs.findOrCreate({ name: inputs.name }, { name: inputs.name, realName: inputs.realName, email: inputs.email, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: DateTime.fromSQL('2002-01-01 00:00:00').toISO() })
       return exits.success()
     } catch (e) {
       return exits.error(e)
