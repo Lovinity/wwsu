@@ -19,11 +19,13 @@ module.exports = {
       unique: true
     },
 
+    // TODO: add to schema
     realName: {
       type: 'string',
       defaultsTo: 'Unknown'
     },
 
+    // TODO: add to schema
     email: {
       type: 'string',
       allowNull: true

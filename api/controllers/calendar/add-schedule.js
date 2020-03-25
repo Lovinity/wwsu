@@ -121,6 +121,34 @@ module.exports = {
             columnType: 'date',
         },
 
+        recurDM: {
+            type: 'json',
+            custom: function (value) {
+                var valid = true;
+                if (value.length > 0) {
+                    value.map((val) => {
+                        if (isNaN(value) || value < 1 || value > 31)
+                            valid = false;
+                    })
+                }
+                return valid;
+            }
+        },
+
+        recurWM: {
+            type: 'json',
+            custom: function (value) {
+                var valid = true;
+                if (value.length > 0) {
+                    value.map((val) => {
+                        if (isNaN(value) || value < 0 || value > 5)
+                            valid = false;
+                    })
+                }
+                return valid;
+            }
+        },
+
         recurDW: {
             type: 'json',
             custom: function (value) {
@@ -154,6 +182,12 @@ module.exports = {
             allowNull: true,
             min: 0,
             max: 59
+        },
+
+        recurEvery: {
+            type: 'number',
+            min: 1,
+            defaultsTo: 1
         },
 
         duration: {
@@ -193,9 +227,12 @@ module.exports = {
                 oneTime: inputs.oneTime,
                 startDate: inputs.startDate,
                 endDate: inputs.endDate,
+                recurDM: inputs.recurDM,
+                recurWM: inputs.recurWM,
                 recurDW: inputs.recurDW,
                 recurH: inputs.recurH,
                 recurM: inputs.recurM,
+                recurFrequency: inputs.recurFrequency,
                 duration: inputs.duration
             }
 
