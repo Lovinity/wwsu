@@ -135,6 +135,17 @@ module.exports = {
             columnType: 'date',
         },
 
+        // TODO: add to schema
+        recurDM: {
+            type: 'json'
+        },
+
+        // TODO: add to schema
+        // 0 = last week of month for the day of week specified, whether 4th or 5th week.
+        recurWM: {
+            type: 'json'
+        },
+
         recurDW: {
             type: 'json'
         },
@@ -148,6 +159,13 @@ module.exports = {
             allowNull: true,
             min: 0,
             max: 59
+        },
+
+        // TODO: add to schema
+        recurEvery: {
+            type: 'number',
+            min: 1,
+            defaultsTo: 1
         },
 
         duration: {
