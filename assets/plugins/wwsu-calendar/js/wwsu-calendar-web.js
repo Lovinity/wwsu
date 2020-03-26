@@ -8,7 +8,12 @@ later.date.localTime()
 // Class to manage calendar events for WWSU
 class CalendarDb {
 
-    // Constructor stores initial calendar and calendarexceptions DB row arrays into TAFFYDB.
+    /**
+     * Construct the calendar database
+     * 
+     * @param {array} calendar Array of calendar entries to initialize with.
+     * @param {array} schedule Array of schedule entries to initialize with.
+     */
     constructor(calendar = [], schedule = []) {
         this.calendar = new WWSUdb(TAFFY());
         this.schedule = new WWSUdb(TAFFY());
@@ -16,7 +21,13 @@ class CalendarDb {
         this.schedule.db.insert(schedule);
     }
 
-    // Change the data in the in-memory database
+    /**
+     * Change data in the database via WWSUdb query.
+     * 
+     * @param {string} db Database to query: either calendar or schedule.
+     * @param {object|array} data Array of records to replace with if replace is true, otherwise WWSU standard query object.
+     * @param {boolean} replace Replace all data in the database with what was provided in data.
+     */
     query (db, data, replace = false) {
         switch (db) {
             case 'calendar':
@@ -28,8 +39,14 @@ class CalendarDb {
         }
     }
 
-    // Get an array of upcoming events based on provided criteria. 
-    // Generally for start, you will want to fetch up to 24 hours before your desired start time; events past start will not be returned even if they have not yet finished.
+    /**
+     * Get an array of upcoming events taking place within the provided parameters. It's recommended to set a start date 1 day earlier.
+     * 
+     * @param {string} start ISO String of the earliest date/time allowed for an event's start time
+     * @param {string} end ISO string of the latest date/time allowed for an event's end time
+     * @param {object} query Filter results by the provided TAFFY query
+     * @returns {array} Array of events. See processRecord for object structure.
+     */
     getEvents (start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}) {
         var events = [];
 
@@ -122,7 +139,7 @@ class CalendarDb {
 
                 // Next, process recurring schedules if hours is not null (if hours is null, we should never process this even if DW or M is not null)
                 if (schedule.recurH && schedule.recurH.length > 0) {
-                    // Null value denote all values for Days of Week
+                    // Null value denotes all values for Days of Week
                     if (!schedule.recurDW || schedule.recurDW.length === 0) schedule.recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
 
                     // Format minute into an array for proper processing in later.js
@@ -142,6 +159,27 @@ class CalendarDb {
                         var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
                         if (!eventStart) break;
                         beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
+
+                        // RecurDM, recurWM, and recurEvery not supported by later.js; do it ourselves
+                        // RecurDM
+                        if (schedule.recurDM && schedule.recurDM.length > 0 && schedule.recurDM.indexOf(moment(eventStart).date()) === -1) {
+                            continue;
+                        }
+
+                        // RecurWM
+                        if (schedule.recurWM && schedule.recurWM.length > 0) {
+                            var lastWeek = moment(eventStart).month() !== moment(eventStart).add(1, 'weeks').month();
+                            // 0 = last week of the month
+                            if (schedule.recurWM.indexOf(this.weekOfMonth(eventStart)) === -1 && (!lastWeek || schedule.recurWM.indexOf(0) === -1)) {
+                                continue;
+                            }
+                        }
+
+                        // RecurEvery
+                        if (moment(eventStart).week() % (schedule.recurEvery || 1) !== 0) {
+                            continue;
+                        }
+
                         // Get schedule overrides if they exist
                         try {
                             var scheduleOverrides = this.schedule.db(function () {
@@ -191,7 +229,12 @@ class CalendarDb {
         return events.sort(compare);
     }
 
-    // Return an array of programming that is allowed to be on the air right now
+    /**
+     * Return an array of events scheduled to be on the air, or permitted to go on the air right now.
+     * 
+     * @param {boolean} automationOnly If true, only prerecords, genres, and playlists will be returned.
+     * @returns {array} Array of events allowed / scheduled to go on the air. See processRecord for object structure.
+     */
     whatShouldBePlaying (automationOnly = false) {
         var events = this.getEvents(undefined, undefined, { active: true });
         if (events.length > 0) {
@@ -237,8 +280,12 @@ class CalendarDb {
         }
     }
 
-    // Check if an event will override other events or get overridden by other events.
-    // This should ALWAYS be run before adding calendar or exceptions to the database, AFTER first running verify on the event object.
+    /**
+     * Check if a proposed new or updated event will conflict with other events. Should ALWAYS be run before adding new events.
+     * 
+     * @param {object} event The event proposed to be added / updated. See processRecord for structure.
+     * @returns {object} {overridden: array of events this even will override, overriding: array of events that will override this event, error: Errors, if any}
+     */
     checkConflicts (event) {
 
         // No conflict check necessary if there is no schedules or duration defined
@@ -343,6 +390,26 @@ class CalendarDb {
                 var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
                 if (!eventStart) break;
                 beginAt = moment(eventStart).add(1, 'minutes');
+
+                // RecurDM, recurWM, and recurEvery not supported by later.js; do it ourselves
+                // RecurDM
+                if (event.recurDM && event.recurDM.length > 0 && event.recurDM.indexOf(moment(eventStart).date()) === -1) {
+                    continue;
+                }
+
+                // RecurWM
+                if (event.recurWM && event.recurWM.length > 0) {
+                    var lastWeek = moment(eventStart).month() !== moment(eventStart).add(1, 'weeks').month();
+                    // 0 = last week of the month
+                    if (event.recurWM.indexOf(this.weekOfMonth(eventStart)) === -1 && (!lastWeek || event.recurWM.indexOf(0) === -1)) {
+                        continue;
+                    }
+                }
+
+                // RecurEvery
+                if (moment(eventStart).week() % (event.recurEvery || 1) !== 0) {
+                    continue;
+                }
 
                 var eventEnd = moment(eventStart).add(event.duration, 'minutes');
 
@@ -492,7 +559,7 @@ class CalendarDb {
         var eventsOverriding = events
             .filter((eventb) => {
                 if (eventb.scheduleOverrideID === event.scheduleID) return false; // Ignore events overriding this schedule; we are probably undoing later schedules
-                
+
                 // Ignore events that are already canceled or no longer active
                 if (eventb.scheduleType === 'canceled' || eventb.scheduleType === 'canceled-system' || eventb.scheduleType === 'canceled-changed') return false;
 
@@ -617,7 +684,10 @@ class CalendarDb {
         return { overridden: eventsOverridden.sort(compareOriginalTime), overriding: eventsOverriding.sort(compareOriginalTime), error };
     }
 
-    // Returns an array of office-hours for directors who should be in the office right now.
+    /**
+     * Check which directors are scheduled to be in the office at this time +- 30 minutes.
+     * @returns {array} Array of office-hours events matching directors scheduled to be in. See processRecord for structure.
+     */
     whoShouldBeIn () {
         var events = this.getEvents(undefined, undefined, { active: true });
         if (events.length > 0) {
@@ -649,8 +719,12 @@ class CalendarDb {
         }
     }
 
-    // Check for validity of an event object. 
-    // This should ALWAYS be run before adding calendar or exceptions to the database.
+    /**
+     * Verify a provided event is valid and contains all required properties. MUST be run before adding anything to the calendar.
+     * 
+     * @param {object} event Proposed event being added.
+     * @returns {object|string} Event object if valid with necessary modifications, or string with an error message if invalid.
+     */
     verify (event) {
 
         var tempCal = {};
@@ -729,10 +803,15 @@ class CalendarDb {
         // If no startDate provided, default to current date.
         if (!tempCal.startDate) event.startDate = moment().toISOString(true);
 
-        return { event, tempCal };
+        return event;
     }
 
-    // Conflict detection: -1 = no conflict detection. 0 = no conflict detection except other 0 priorities. 1-10, conflict detection with priorities same or lower (except for -1 and 0).
+    /**
+     * Get the default priority of an event by its type.
+     * 
+     * @param {object} event The event
+     * @returns {number} Default priority
+     */
     getDefaultPriority (event) {
         switch (event.type) {
             case 'show':
@@ -752,6 +831,12 @@ class CalendarDb {
         }
     }
 
+    /**
+    * Get the color this event should be displayed as based on its type.
+    * 
+    * @param {object} event The event
+    * @returns {string} Hex color code
+    */
     getColor (event) {
         switch (event.type) {
             case 'show':
@@ -766,11 +851,90 @@ class CalendarDb {
                 return "#007bff";
             case 'playlist':
                 return "#17a2b8";
+            case 'office-hours':
+                return "#ffc107";
+            case 'task':
+                return "#ff851b";
+            case 'onair-booking':
+            case 'prod-booking':
+                return "#39cccc";
             default:
                 return "#6c757d";
         }
     }
 
+    /**
+     * Get the color class this event should be displayed as based on its type.
+     * 
+     * @param {object} event The event
+     * @returns {string} Color class
+     */
+    getColorClass (event) {
+        switch (event.type) {
+            case 'show':
+                return "danger";
+            case 'sports':
+                return "success";
+            case 'remote':
+                return "indigo";
+            case 'prerecord':
+                return "pink";
+            case 'genre':
+                return "primary";
+            case 'playlist':
+                return "info";
+            case 'office-hours':
+                return "warning";
+            case 'task':
+                return "orange";
+            case 'onair-booking':
+            case 'prod-booking':
+                return "teal";
+            default:
+                return "secondary";
+        }
+    }
+
+    /**
+     * Get the icon class this event should be displayed as based on its type.
+     * 
+     * @param {object} event The event
+     * @returns {string} Icon class
+     */
+    getIconClass (event) {
+        switch (event.type) {
+            case 'genre':
+                return 'fas fa-music';
+            case 'playlist':
+                return 'fas fa-play';
+            case 'show':
+                return 'fas fa-microphone';
+            case 'sports':
+                return 'fas fa-basketball-ball';
+            case 'remote':
+                return 'fas fa-broadcast-tower';
+            case 'prerecord':
+                return 'fas fa-play-circle';
+            case 'office-hours':
+                return 'fas fa-user-clock';
+            case 'task':
+                return 'fas fa-tasks';
+            case 'onair-booking':
+            case 'prod-booking':
+                return 'fas fa-clock';
+            default:
+                return 'fas fa-calendar';
+        }
+    }
+
+    /**
+     * Combine a base calendar or schedule record with a modifying schedule record.
+     * 
+     * @param {object} calendar The base event or schedule
+     * @param {object} schedule The schedule making modifications to calendar
+     * @param {string} eventStart ISO String of the start or original time for the event
+     * @returns {object} Modified event
+     */
     processRecord (calendar, schedule, eventStart) {
         var criteria = {
             calendarID: schedule.calendarID || calendar.ID, // ID of the main calendar event
@@ -799,11 +963,15 @@ class CalendarDb {
             start: schedule.newTime ? moment(schedule.newTime).toISOString(true) : moment(eventStart).toISOString(true), // Start time of the event
             duration: schedule.duration || schedule.duration === 0 ? schedule.duration : (calendar.duration || calendar.duration === 0 ? calendar.duration : null), // The duration of the event in minutes
             oneTime: schedule.oneTime || calendar.oneTime ? schedule.oneTime || calendar.oneTime : null, // Array of oneTime ISO dates to execute the event
+            recurDM: schedule.recurDM || calendar.recurDM, // Array of days of the month to execute this event
+            recurWM: schedule.recurWM || calendar.recurWM, // Array of weeks of the month to execute this event (0 = last week)
             recurDW: schedule.recurDW || calendar.recurDW, // Array of days of the week (1-7) to execute this event
             recurH: schedule.recurH || calendar.recurH, // Array of hours of the day to execute this event
             recurM: schedule.recurM || schedule.recurM === 0 ? schedule.recurM : (calendar.recurM || calendar.recurM === 0 ? calendar.recurM : null), // The minute of the hour at which to execute the event
+            recurEvery: schedule.recurEvery || calendar.recurEvery || 1, // Only schedule when week of year % recurEvery = 0 (eg. recurEvery = 2 means every even week of the year, recurEvery = 3 means every week of the year divisible by 3)
             startDate: schedule.startDate || calendar.startDate ? moment(schedule.startDate || calendar.startDate).startOf('day').toISOString(true) : null, // Date the event starts
             endDate: schedule.endDate || calendar.endDate ? moment(schedule.endDate || calendar.endDate).startOf('day').toISOString(true) : null, // Date the event ends (exclusive).
+            timeChanged: schedule.scheduleID && (schedule.newTime || schedule.duration), // True if this event's time was changed from the original, else false
         }
 
         // Determine event color
@@ -826,5 +994,20 @@ class CalendarDb {
         criteria.end = schedule.duration || calendar.duration ? moment(criteria.start).add(schedule.duration || calendar.duration, 'minutes').toISOString(true) : moment(criteria.start).toISOString(true);
 
         return criteria;
+    }
+
+    /**
+     * Date libraries do not support calculating week of the month; we have our own function for that.
+     * 
+     * @param {string} input ISO string of the date
+     * @returns {number} Week of the month the date falls on
+     */
+    weekOfMonth (input) {
+        const firstDayOfMonth = moment(input).startOf('month');
+        const firstDayOfWeek = moment(firstDayOfMonth).clone().startOf('week');
+
+        const offset = firstDayOfMonth.diff(firstDayOfWeek, 'days');
+
+        return Math.ceil((moment(input).date() + offset) / 7);
     }
 }
