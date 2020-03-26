@@ -850,7 +850,7 @@ class CalendarDb {
         // If no startDate provided, default to current date.
         if (!tempCal.startDate) event.startDate = moment().toISOString(true);
 
-        return event;
+        return { event, tempCal };
     }
 
     /**

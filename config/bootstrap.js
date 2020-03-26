@@ -80,7 +80,7 @@ module.exports.bootstrap = async function (done) {
   records.map((director) => {
     IDs.push(director.ID);
     (async (_director) => {
-      sails.models.calendar.findOrCreate({ type: 'office-hours', director: director.ID }, {
+      sails.models.calendar.findOrCreate({ type: 'office-hours', director: _director.ID }, {
         type: 'office-hours',
         active: true,
         priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'office-hours' }),
