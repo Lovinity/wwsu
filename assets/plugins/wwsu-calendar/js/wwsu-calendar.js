@@ -477,6 +477,7 @@ class CalendarDb {
         var eventsOverridden = events
             .filter((eventb) => {
                 if (eventb.scheduleOverrideID === event.scheduleID) return false; // Ignore events overriding this schedule; we are probably undoing later schedules
+                if (eventb.scheduleID === event.scheduleID) return false; // Also ignore if the schedule ID is the same; it's probably itself.
 
                 // Ignore events that are already canceled or no longer active
                 if (eventb.scheduleType === 'canceled' || eventb.scheduleType === 'canceled-system' || eventb.scheduleType === 'canceled-changed') return false;
@@ -606,6 +607,7 @@ class CalendarDb {
         var eventsOverriding = events
             .filter((eventb) => {
                 if (eventb.scheduleOverrideID === event.scheduleID) return false; // Ignore events overriding this schedule; we are probably undoing later schedules
+                if (eventb.scheduleID === event.scheduleID) return false; // Also ignore if the schedule ID is the same; it's probably itself.
 
                 // Ignore events that are already canceled or no longer active
                 if (eventb.scheduleType === 'canceled' || eventb.scheduleType === 'canceled-system' || eventb.scheduleType === 'canceled-changed') return false;
