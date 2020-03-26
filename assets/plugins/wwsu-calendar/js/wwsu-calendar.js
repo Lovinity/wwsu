@@ -107,7 +107,7 @@ class CalendarDb {
             // C. The event end time is between start and end.
             // D. The event start time is between start and end.
             // E. The event start time is before start, and the event end time is after end.
-            if ((calendar.startDate && moment(calendar.startDate).isAfter(moment(criteria.start))) || (calendar.endDate && moment(calendar.endDate).isBefore(moment(criteria.start)))) {
+            if ((criteria.startDate && moment(criteria.startDate).isAfter(moment(criteria.start))) || (criteria.endDate && moment(criteria.endDate).isBefore(moment(criteria.start)))) {
 
             } else {
                 if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.end).isSameOrBefore(moment(end))) || (moment(criteria.start).isSameOrAfter(start) && moment(criteria.start).isBefore(end)) || (moment(criteria.start).isBefore(start) && moment(criteria.end).isAfter(end))) {
@@ -477,7 +477,7 @@ class CalendarDb {
         var eventsOverridden = events
             .filter((eventb) => {
                 if (eventb.scheduleOverrideID === event.scheduleID) return false; // Ignore events overriding this schedule; we are probably undoing later schedules
-                if (eventb.scheduleID === event.scheduleID) return false; // Also ignore if the schedule ID is the same; it's probably itself.
+                if (eventb.scheduleID === event.scheduleID) return false; // Also ignore if the schedule ID is the same;
 
                 // Ignore events that are already canceled or no longer active
                 if (eventb.scheduleType === 'canceled' || eventb.scheduleType === 'canceled-system' || eventb.scheduleType === 'canceled-changed') return false;
@@ -607,7 +607,6 @@ class CalendarDb {
         var eventsOverriding = events
             .filter((eventb) => {
                 if (eventb.scheduleOverrideID === event.scheduleID) return false; // Ignore events overriding this schedule; we are probably undoing later schedules
-                if (eventb.scheduleID === event.scheduleID) return false; // Also ignore if the schedule ID is the same; it's probably itself.
 
                 // Ignore events that are already canceled or no longer active
                 if (eventb.scheduleType === 'canceled' || eventb.scheduleType === 'canceled-system' || eventb.scheduleType === 'canceled-changed') return false;

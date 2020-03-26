@@ -60,7 +60,7 @@ class CalendarDb {
             // C. The event end time is between start and end.
             // D. The event start time is between start and end.
             // E. The event start time is before start, and the event end time is after end.
-            if ((calendar.startDate && moment(calendar.startDate).isAfter(moment(criteria.start))) || (calendar.endDate && moment(calendar.endDate).isBefore(moment(criteria.start)))) {
+            if ((criteria.startDate && moment(criteria.startDate).isAfter(moment(criteria.start))) || (criteria.endDate && moment(criteria.endDate).isBefore(moment(criteria.start)))) {
 
             } else {
                 if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.end).isSameOrBefore(moment(end))) || (moment(criteria.start).isSameOrAfter(start) && moment(criteria.start).isBefore(end)) || (moment(criteria.start).isBefore(start) && moment(criteria.end).isAfter(end))) {
@@ -415,7 +415,7 @@ class CalendarDb {
 
                 if ((moment(eventEnd).isAfter(moment(eventsb.start)) && moment(eventEnd).isSameOrBefore(moment(eventsb.end))) || (moment(eventStart).isSameOrAfter(eventsb.start) && moment(eventStart).isBefore(eventsb.end)) || (moment(eventStart).isBefore(eventsb.start) && moment(eventEnd).isAfter(eventsb.end))) {
                     if ((!event.scheduleType || event.scheduleType === 'unscheduled') && event.calendarID === eventsb.calendarID)
-                        throw new Error("ALREADY_SCHEDULED");
+                        throw new Error(JSON.stringify({event, eventsb, eventStart, eventEnd}));
                     return { originalTime: eventStart, scheduleID: eventsb.scheduleID };
                 }
             }

@@ -270,6 +270,8 @@ module.exports = {
                         await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 }
+
+                // TODO: Conflict resolution on overriddenIDs
             }
 
             if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
@@ -294,6 +296,9 @@ module.exports = {
                         await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 }
+
+                // Remove any schedules that were created as an override for the canceled schedule.
+                await sails.models.schedule.destroy({ overriddenID: event.ID }).fetch();
             }
         })(updatedRecord);
 
@@ -359,6 +364,9 @@ module.exports = {
 
             // Remove any schedules that were created as an override for the deleted schedule.
             await sails.models.schedule.destroy({ overriddenID: event.ID }).fetch();
+
+            // Remove any schedules that were created to override this schedule
+            await sails.models.schedule.destroy({ scheduleID: event.ID }).fetch();
 
         })(destroyedRecord);
 
