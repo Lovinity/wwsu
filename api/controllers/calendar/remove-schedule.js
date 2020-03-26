@@ -27,10 +27,11 @@ module.exports = {
                 // Verify event and polyfill default information
                 try {
                     var event = await sails.helpers.calendar.verify(record2);
-                    return exits.success(event);
                 } catch (e) {
                     return exits.success(e.message);
                 }
+
+                event.scheduleID = event.ID;
 
                 // Check for event conflicts
                 var conflicts = sails.models.calendar.calendardb.checkConflicts(event);
