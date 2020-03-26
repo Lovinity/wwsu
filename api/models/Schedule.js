@@ -199,14 +199,14 @@ module.exports = {
                             start: exception.newTime,
                             oneTime: [ exception.newTime ]
                         });
-                        var event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.newTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.newTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 } else {
                     var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
                     if (calendar) {
-                        var event = sails.models.calendar.calendardb.processRecord(calendar, event, event.newTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.newTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 }
             }
@@ -223,14 +223,14 @@ module.exports = {
                             start: exception.newTime,
                             oneTime: [ exception.newTime ]
                         });
-                        var event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.originalTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.originalTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 } else {
                     var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
                     if (calendar) {
-                        var event = sails.models.calendar.calendardb.processRecord(calendar, event, event.originalTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.originalTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 }
             }
@@ -260,14 +260,14 @@ module.exports = {
                             start: exception.newTime,
                             oneTime: [ exception.newTime ]
                         });
-                        var event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.newTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.newTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 } else {
                     var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
                     if (calendar) {
-                        var event = sails.models.calendar.calendardb.processRecord(calendar, event, event.newTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.newTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 }
             }
@@ -284,14 +284,14 @@ module.exports = {
                             start: exception.newTime,
                             oneTime: [ exception.newTime ]
                         });
-                        var event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.originalTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.originalTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 } else {
                     var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
                     if (calendar) {
-                        var event = sails.models.calendar.calendardb.processRecord(calendar, event, event.originalTime);
-                        await sails.helpers.onesignal.sendEvent(event, false, false);
+                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.originalTime);
+                        await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 }
             }
