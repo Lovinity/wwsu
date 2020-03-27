@@ -41,6 +41,7 @@ class CalendarDb {
 
     /**
      * Get an array of upcoming events taking place within the provided parameters. It's recommended to set a start date 1 day earlier.
+     * // TODO: Convert to non-blocking event loop
      * 
      * @param {string} start ISO String of the earliest date/time allowed for an event's start time
      * @param {string} end ISO string of the latest date/time allowed for an event's end time
@@ -48,7 +49,7 @@ class CalendarDb {
      * @param {WWSUdb} scheduledb If provided, will use the scheduledb provided. Otherwise, will use the CalendarDb one.
      * @returns {array} Array of events. See processRecord for object structure.
      */
-    getEvents (start = moment().toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}, scheduledb = this.schedule) {
+    getEvents (start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}, scheduledb = this.schedule) {
         var events = [];
 
         // Extension of this.processRecord to also determine if the event falls within the start and end times.
@@ -59,7 +60,7 @@ class CalendarDb {
             // A. Calendar event start is same or before generated event start.
             // B. Calendar event end is same or after generated event start.
             // C. The event end time is after start, and the event start time is same or before end.
-            if ((criteria.startDate && moment(criteria.startDate).isAfter(moment(criteria.start))) || (criteria.endDate && moment(criteria.endDate).isBefore(moment(criteria.start)))) {
+            if ((moment(criteria.startDate).isAfter(moment(criteria.start))) || (!criteria.endDate || moment(criteria.endDate).isBefore(moment(criteria.start)))) {
 
             } else {
                 if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.start).isSameOrBefore(moment(end)))) {
@@ -434,10 +435,27 @@ class CalendarDb {
 
                         // Polyfill calendar and schedule information
                         var event = this.scheduleToEvent(query[ key ], vschedule);
+                        console.dir(event);
 
                         // Determine start and end times for conflict checking
-                        if (event.oneTime && event.oneTime.length > 0) {
-                            event.oneTime.map((ot) => {
+                        if (query[ key ].originalTime) {
+                            if (!start || moment(query[ key ].originalTime).isBefore(moment(start))) {
+                                start = moment(query[ key ].originalTime);
+                            }
+                            if (!end || moment(query[ key ].originalTime).isAfter(moment(end))) {
+                                end = moment(query[ key ].originalTime);
+                            }
+                        }
+                        if (query[ key ].newTime) {
+                            if (!start || moment(query[ key ].newTime).isBefore(moment(start))) {
+                                start = moment(query[ key ].newTime);
+                            }
+                            if (!end || moment(query[ key ].newTime).isAfter(moment(end))) {
+                                end = moment(query[ key ].newTime);
+                            }
+                        }
+                        if (query[ key ].oneTime && query[ key ].oneTime.length > 0) {
+                            query[ key ].oneTime.map((ot) => {
                                 if (!start || moment(ot).isBefore(moment(start))) {
                                     start = moment(ot);
                                 }
@@ -446,23 +464,7 @@ class CalendarDb {
                                 }
                             });
                         }
-                        if (event.originalTime) {
-                            if (!start || moment(event.originalTime).isBefore(moment(start))) {
-                                start = moment(event.originalTime);
-                            }
-                            if (!end || moment(event.originalTime).isAfter(moment(end))) {
-                                end = moment(event.originalTime);
-                            }
-                        }
-                        if (event.newTime) {
-                            if (!start || moment(event.newTime).isBefore(moment(start))) {
-                                start = moment(event.newTime);
-                            }
-                            if (!end || moment(event.newTime).isAfter(moment(end))) {
-                                end = moment(event.newTime);
-                            }
-                        }
-                        if (event.recurH && event.recurH.length > 0) {
+                        if (query[ key ].recurH && query[ key ].recurH.length > 0) {
                             if (!start || moment(event.startDate).isBefore(moment(start))) {
                                 start = moment(event.startDate);
                             }
