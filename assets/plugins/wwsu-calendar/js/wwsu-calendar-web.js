@@ -310,8 +310,8 @@ class CalendarDb {
         vschedule.query(this.schedule.db().get(), true);
 
         // prepare start and end detection
-        var start = moment();
-        var end = moment();
+        var start = null;
+        var end = null;
 
         // Return data
         var removals = [];
@@ -438,38 +438,36 @@ class CalendarDb {
                         // Determine start and end times for conflict checking
                         if (event.oneTime && event.oneTime.length > 0) {
                             event.oneTime.map((ot) => {
-                                if (moment(ot).isBefore(moment(start))) {
+                                if (!start || moment(ot).isBefore(moment(start))) {
                                     start = moment(ot);
                                 }
-                                if (moment(ot).isAfter(moment(end))) {
+                                if (!end || moment(ot).isAfter(moment(end))) {
                                     end = moment(ot);
                                 }
                             });
                         }
                         if (event.originalTime) {
-                            if (moment(event.originalTime).isBefore(moment(start))) {
+                            if (!start || moment(event.originalTime).isBefore(moment(start))) {
                                 start = moment(event.originalTime);
                             }
-                            if (moment(event.originalTime).isAfter(moment(end))) {
+                            if (!end || moment(event.originalTime).isAfter(moment(end))) {
                                 end = moment(event.originalTime);
                             }
                         }
                         if (event.newTime) {
-                            if (moment(event.newTime).isBefore(moment(start))) {
+                            if (!start || moment(event.newTime).isBefore(moment(start))) {
                                 start = moment(event.newTime);
                             }
-                            if (moment(event.newTime).isAfter(moment(end))) {
+                            if (!end || moment(event.newTime).isAfter(moment(end))) {
                                 end = moment(event.newTime);
                             }
                         }
                         if (event.recurH && event.recurH.length > 0) {
-                            if (event.startDate) {
-                                if (moment(event.startDate).isBefore(moment(start))) {
-                                    start = moment(event.startDate);
-                                }
-                                if (moment(event.endDate).isAfter(moment(end))) {
-                                    end = moment(event.endDate);
-                                }
+                            if (!start || moment(event.startDate).isBefore(moment(start))) {
+                                start = moment(event.startDate);
+                            }
+                            if (!end || moment(event.endDate).isAfter(moment(end))) {
+                                end = moment(event.endDate);
                             }
                         }
                     }
@@ -479,8 +477,10 @@ class CalendarDb {
             return { removals: [], additions: [], errors: [ 'You must provide at least one query to do conflict checking' ] };
         }
 
+        if (!start) start = moment();
+
         // If end is less than 1 day after start, make it 1 day after start for proper conflict checking
-        if (moment(end).diff(moment(start), 'minutes') < (60 * 24)) {
+        if (!end || moment(end).diff(moment(start), 'minutes') < (60 * 24)) {
             end = moment(start).add(1, 'days');
         }
 

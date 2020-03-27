@@ -254,7 +254,7 @@ module.exports = {
             }
 
             // Check for event conflicts
-            var conflicts = sails.models.calendar.calendardb.checkConflicts([{insert: event.event}]);
+            var conflicts = sails.models.calendar.calendardb.checkConflicts([{insert: event}]);
 
             // If there were errors, exit on the error
             if (conflicts.errors && conflicts.errors.length > 0)
