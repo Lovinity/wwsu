@@ -45,9 +45,10 @@ class CalendarDb {
      * @param {string} start ISO String of the earliest date/time allowed for an event's start time
      * @param {string} end ISO string of the latest date/time allowed for an event's end time
      * @param {object} query Filter results by the provided TAFFY query
+     * @param {WWSUdb} scheduledb If provided, will use the scheduledb provided. Otherwise, will use the CalendarDb one.
      * @returns {array} Array of events. See processRecord for object structure.
      */
-    getEvents (start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}) {
+    getEvents (start = moment().toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}, scheduledb = this.schedule) {
         var events = [];
 
         // Extension of this.processRecord to also determine if the event falls within the start and end times.
@@ -57,13 +58,11 @@ class CalendarDb {
             // This event is within our time range if one or more of the following is true:
             // A. Calendar event start is same or before generated event start.
             // B. Calendar event end is same or after generated event start.
-            // C. The event end time is between start and end.
-            // D. The event start time is between start and end.
-            // E. The event start time is before start, and the event end time is after end.
+            // C. The event end time is after start, and the event start time is same or before end.
             if ((criteria.startDate && moment(criteria.startDate).isAfter(moment(criteria.start))) || (criteria.endDate && moment(criteria.endDate).isBefore(moment(criteria.start)))) {
 
             } else {
-                if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.end).isSameOrBefore(moment(end))) || (moment(criteria.start).isSameOrAfter(start) && moment(criteria.start).isBefore(end)) || (moment(criteria.start).isBefore(start) && moment(criteria.end).isAfter(end))) {
+                if ((moment(criteria.end).isAfter(moment(start)) && moment(criteria.start).isSameOrBefore(moment(end)))) {
                     events.push(criteria);
                 }
             }
@@ -79,17 +78,19 @@ class CalendarDb {
                 if (b.scheduleType === 'canceled' && a.scheduleType !== 'canceled') return 1;
                 if (a.scheduleType === 'canceled-system' && b.scheduleType !== 'canceled-system') return -1;
                 if (b.scheduleType === 'canceled-system' && a.scheduleType !== 'canceled-system') return 1;
-                if (a.scheduleType === 'updated' && b.scheduleType !== 'updated') return -1;
-                if (b.scheduleType === 'updated' && a.scheduleType !== 'updated') return 1;
                 if (a.scheduleType === 'updated-system' && b.scheduleType !== 'updated-system') return -1;
                 if (b.scheduleType === 'updated-system' && a.scheduleType !== 'updated-system') return 1;
+                if (a.scheduleType === 'updated' && b.scheduleType !== 'updated') return -1;
+                if (b.scheduleType === 'updated' && a.scheduleType !== 'updated') return 1;
                 if (a.scheduleType === 'canceled-changed' && b.scheduleType !== 'canceled-changed') return -1;
                 if (b.scheduleType === 'canceled-changed' && a.scheduleType !== 'canceled-changed') return 1;
+                if (a.ID < b.ID) return -1;
+                if (b.ID < a.ID) return 1;
                 return 0;
             }
 
             // First, get regular and unscheduled events
-            var regularEvents = this.schedule.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled' ] }).get();
+            var regularEvents = scheduledb.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled', undefined ] }).get();
             regularEvents.map((schedule, ind) => {
 
                 // Polyfill any schedule overridden information with the main calendar event for use with schedule overrides
@@ -108,7 +109,7 @@ class CalendarDb {
                         var scheduleIDs = [];
                         try {
                             // Get schedule overrides if they exist
-                            var scheduleOverrides = this.schedule.db(function () {
+                            var scheduleOverrides = scheduledb.db(function () {
                                 return this.calendarID === calendar.ID && this.scheduleID === schedule.ID && this.scheduleType && this.scheduleType !== 'unscheduled' && this.originalTime && moment(this.originalTime).isSame(moment(oneTime), 'minute');
                             }).get() || [];
                             if (scheduleOverrides.length > 0) {
@@ -126,11 +127,19 @@ class CalendarDb {
                             console.error(e);
                         }
 
-                        // If there are schedule overrides, process schedule with highest priority schedule override according to scheduleCompare.
-                        // Otherwise, process main calendar event with the main schedule.
+                        // Merge all schedule overrides into one according to scheduleCompare priorities
                         if (tempSchedules.length > 0) {
-                            tempSchedules.sort(scheduleCompare);
-                            _processRecord(tempCal, tempSchedules[ 0 ], oneTime);
+                            var tempEvent = {};
+                            tempSchedules.sort(scheduleCompare).reverse();
+                            tempSchedules.map((ts) => {
+                                for (var stuff in ts) {
+                                    if (Object.prototype.hasOwnProperty.call(ts, stuff)) {
+                                        if (typeof ts[ stuff ] !== 'undefined' && ts[ stuff ] !== null)
+                                            tempEvent[ stuff ] = ts[ stuff ];
+                                    }
+                                }
+                            });
+                            _processRecord(tempCal, tempEvent, oneTime);
                         } else {
                             _processRecord(calendar, schedule, oneTime);
                         }
@@ -182,7 +191,7 @@ class CalendarDb {
 
                         // Get schedule overrides if they exist
                         try {
-                            var scheduleOverrides = this.schedule.db(function () {
+                            var scheduleOverrides = scheduledb.db(function () {
                                 return this.calendarID === calendar.ID && this.scheduleID === schedule.ID && this.scheduleType && this.scheduleType !== 'unscheduled' && this.originalTime && moment(this.originalTime).isSame(moment(eventStart), 'minute');
                             }).get() || [];
                             if (scheduleOverrides.length > 0) {
@@ -200,11 +209,19 @@ class CalendarDb {
                             console.error(e);
                         }
 
-                        // If there are schedule overrides, process schedule with highest priority schedule override according to scheduleCompare.
-                        // Otherwise, process main calendar event with the main schedule.
+                        // Merge all schedule overrides into one according to scheduleCompare priorities
                         if (tempSchedules.length > 0) {
-                            tempSchedules.sort(scheduleCompare);
-                            _processRecord(tempCal, tempSchedules[ 0 ], eventStart);
+                            var tempEvent = {};
+                            tempSchedules.sort(scheduleCompare).reverse();
+                            tempSchedules.map((ts) => {
+                                for (var stuff in ts) {
+                                    if (Object.prototype.hasOwnProperty.call(ts, stuff)) {
+                                        if (typeof ts[ stuff ] !== 'undefined' && ts[ stuff ] !== null)
+                                            tempEvent[ stuff ] = ts[ stuff ];
+                                    }
+                                }
+                            });
+                            _processRecord(tempCal, tempEvent, eventStart);
                         } else {
                             _processRecord(calendar, schedule, eventStart);
                         }
@@ -281,409 +298,226 @@ class CalendarDb {
     }
 
     /**
-     * Check if a proposed new or updated event will conflict with other events. Should ALWAYS be run before adding new events.
+     * Check for conflicts that would arise if we performed the provided schedule queries. Do this BEFORE adding/editing/deleting records!
      * 
-     * @param {object} event The event proposed to be added / updated. See processRecord for structure.
-     * @returns {object} {overridden: array of events this even will override, overriding: array of events that will override this event, error: Errors, if any}
+     * @param {array} queries Array of WWSUdb queries we want to perform on schedule; insert and update should be run through verify first!
+     * @returns {object} {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
-    checkConflicts (event) {
+    checkConflicts (queries = []) {
 
-        // No conflict check necessary if there is no schedules or duration defined
-        if ((!event.oneTime && !event.recurH) || !event.duration || event.duration <= 0) return { overridden: [], overriding: [] };
+        // Prepare a copy of the current schedule
+        var vschedule = new WWSUdb(TAFFY());
+        vschedule.query(this.schedule.db().get(), true);
 
-        var schedule;
-        var _event;
+        // prepare start and end detection
+        var start = moment();
+        var end = moment();
 
-        // Get the original calendar event and schedule if applicable, and polyfill into event.
-        if (event.calendarID) {
+        // Return data
+        var removals = [];
+        var additions = [];
+        var errors = [];
 
-            var calendar = this.calendar.db({ ID: event.calendarID }).first();
-            if (!calendar)
-                return false;
+        // Check if eventa and eventb conflicts
+        var conflicts = (eventa, eventb) => {
+            // If either event is a cancellation, there is no conflict
+            if ((eventa.scheduleType && eventa.scheduleType.startsWith('canceled')) || (eventb.scheduleType && eventb.scheduleType.startsWith('canceled'))) return 0;
 
-            if (event.scheduleID) {
-                schedule = this.schedule.db({ ID: event.scheduleID }).first();
-                if (!schedule)
-                    return false;
+            // If either event has a priority of -1, there is no conflict
+            if (eventa.priority === -1 || eventb.priority === -1) return 0;
+
+            // If one event is priority 0 and the other is not, there is no conflict
+            if ((eventa.priority === 0 && eventb.priority !== 0) || (eventb.priority === 0 && eventa.priority !== 0)) return 0;
+
+            // If the times overlap, there is a conflict, but we need to determine which event conflicts with the other
+            if ((moment(eventa.end).isAfter(moment(eventb.start)) && moment(eventa.end).isSameOrBefore(moment(eventb.end))) || (moment(eventa.start).isSameOrAfter(eventb.start) && moment(eventa.start).isBefore(eventb.end)) || (moment(eventa.start).isBefore(eventb.start) && moment(eventa.end).isAfter(eventb.end))) {
+                // If eventb priority is greater than eventa, then eventa is at conflict
+                if (eventb.priority > eventa.priority) {
+                    return -1;
+                    // If eventa priority is greater than eventb, then eventb is at conflict
+                } else if (eventa.priority > eventb.priority) {
+                    return 1;
+                    // If both priorities are the same, whichever event has the oldest createdAt time gets priority
+                } else if (moment(eventb.createdAt).isBefore(moment(eventa.createdAt))) {
+                    return -1;
+                } else if (moment(eventa.createdAt).isBefore(moment(eventb.createdAt))) {
+                    return 1;
+                    // If by miracle, createdAt was also exactly the same, prioritize the event with the longest duration
+                } else if (eventb.duration > eventa.duration) {
+                    return -1;
+                } else if (eventa.duration > eventb.duration) {
+                    return 1;
+                    // If durations were also the same, bail out by defaulting to eventb being at conflict
+                } else {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        // Check is eventa and eventb conflicts. If so, push an updated or canceled record into our arrays.
+        var checkAndResolveConflicts = (eventa, eventb) => {
+            var overrides;
+            var overridden;
+            var newRecord;
+            switch (conflicts(eventa, eventb)) {
+                case -1:
+                    overrides = eventb;
+                    overridden = eventa;
+                    break;
+                case 1:
+                    overrides = eventa;
+                    overridden = eventb;
+                    break;
+                default:
+                    return;
             }
 
-            if (schedule) {
-                var tempCal = Object.assign({}, calendar);
-                for (var stuff in schedule) {
-                    if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
-                        if (typeof schedule[ stuff ] !== 'undefined' && schedule[ stuff ] !== null)
-                            tempCal[ stuff ] = schedule[ stuff ];
-                    }
-                }
-                _event = this.processRecord(tempCal, event, event.newTime ? event.newTime : event.originalTime);
+            var newRecord = {
+                calendarID: overridden.calendarID,
+                scheduleID: overridden.scheduleID,
+                overriddenID: overrides.ID || null,
+                type: overridden.type,
+                hosts: overridden.hosts,
+                name: overridden.name
+            };
+
+            var startdiff = moment(overrides.start).diff(moment(overridden.start), 'minutes');
+            var enddiff = moment(overridden.end).diff(moment(overrides.end), 'minutes');
+
+            // The higher priority event starts 30 or more minutes after the event being checked and the differential is greater than the end time. 
+            // Instead of a cancellation, just decrease show duration.
+            if (startdiff >= 30 && startdiff >= enddiff) {
+                newRecord.scheduleType = "updated-system";
+                newRecord.scheduleReason = `An event with a higher priority (${overrides.type}: ${overrides.hosts} - ${overrides.name}) was scheduled to start during this event's time block.`;
+                newRecord.originalTime = overridden.start;
+                newRecord.duration = startdiff;
+            }
+            // The event being checked ends 30 or more minutes after the higher priority event and the differential is greater than the start time.
+            // Instead of a cancellation, just update show start time.
+            else if (enddiff >= 30 && enddiff >= startdiff) {
+                newRecord.scheduleType = "updated-system";
+                newRecord.scheduleReason = `An event with a higher priority (${overrides.type}: ${overrides.hosts} - ${overrides.name}) will run partially through this event's time block.`;
+                newRecord.originalTime = overridden.start;
+                newRecord.duration = enddiff;
+                newRecord.newTime = moment(overrides.end).toISOString(true);
+            }
+            // If neither of the above conditions apply, the event being checked should be canceled.
+            else {
+                newRecord.scheduleType = "canceled-system";
+                newRecord.scheduleReason = `An event with a higher priority (${overrides.type}: ${overrides.hosts} - ${overrides.name}) is scheduled during this event's time block.`;
+                newRecord.originalTime = overridden.start;
+            }
+
+            // Duplicate schedule for the same event? That's a problem! Throw an error.
+            if (!overridden.scheduleType && overridden.calendarID === overrides.calendarID) {
+                throw new Error(`There is a schedule for calendar ID ${overridden.calendarID} that would overlap another schedule for the same calendar ID. This is not allowed.`);
             } else {
-                _event = this.processRecord(calendar, event, event.newTime ? event.newTime : event.originalTime);
-            }
-        } else {
-            _event = this.processRecord(event, { calendarID: null }, moment().toISOString(true));
-        }
-
-        var eventPriority = _event.priority;
-
-        // No conflict check if the priority is less than 0.
-        if (eventPriority < 0) return { overridden: [], overriding: [] };
-
-        var error;
-
-        // Define ordering functions to order by time.
-        var compare = function (a, b) {
-            try {
-                if (moment(a).valueOf() < moment(b).valueOf()) { return -1 }
-                if (moment(a).valueOf() > moment(b).valueOf()) { return 1 }
-                return 0
-            } catch (e) {
-                console.error(e)
-            }
-        }
-        var compareReverse = function (a, b) {
-            try {
-                if (moment(b).valueOf() < moment(a).valueOf()) { return -1 }
-                if (moment(b).valueOf() > moment(a).valueOf()) { return 1 }
-                return 0
-            } catch (e) {
-                console.error(e)
-            }
-        }
-        var compareOriginalTime = function (a, b) {
-            try {
-                if (moment(a.originalTime).valueOf() < moment(b.originalTime).valueOf()) { return -1 }
-                if (moment(a.originalTime).valueOf() > moment(b.originalTime).valueOf()) { return 1 }
-                return 0
-            } catch (e) {
-                console.error(e)
+                additions.push(newRecord);
             }
         }
 
-        // Determine time to start searching for conflicts based on logic, which could include earliest oneTime time.
-        if (_event.oneTime && _event.oneTime.length > 0)
-            _event.oneTime = _event.oneTime.sort(compare);
-        var _start = moment(_event.newTime || _event.originalTime || (_event.startDate && _event.recurH ? _event.startDate : undefined) || (_event.oneTime && _event.oneTime[ 0 ] ? _event.oneTime[ 0 ] : undefined) || _event.startDate).toISOString(true);
+        if (queries.length > 0) {
 
-        // Now determine end time
-        if (_event.oneTime && _event.oneTime.length > 0)
-            _event.oneTime = _event.oneTime.sort(compareReverse);
-        var end = _event.endDate ? moment(_event.endDate).toISOString(true) : moment(_event.newTime || (_event.oneTime && _event.oneTime[ 0 ] ? _event.oneTime[ 0 ] : undefined) || _event.start).add(_event.duration, 'minutes').toISOString(true);
-
-        // No conflict check if this event is a canceled type
-        if (event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system' || event.scheduleType === 'canceled-changed') return { overridden: [], overriding: [] };
-
-        // Function to run on recurring schedules to check for conflicts.
-        var checkConflictingTime = (start, eventsb) => {
-            var beginAt = start;
-
-            // Null value denote all values for Days of Week
-            if (!event.recurDW || event.recurDW.length === 0) event.recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
-
-            // Format minute into an array for proper processing in later.js
-            if (!event.recurM) event.recurM = 0;
-
-            // Generate later schedule
-            var laterSchedule = later.schedule({ schedules: [ { "dw": event.recurDW, "h": event.recurH, "m": [ event.recurM ] } ] });
-
-            // Check for conflicting recurring schedule times. Return some data if a conflict is determined.
-            while (moment(beginAt).isBefore(moment(end).add(1, 'days').startOf('day'))) {
-                var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
-                if (!eventStart) break;
-                beginAt = moment(eventStart).add(1, 'minutes');
-
-                // RecurDM, recurWM, and recurEvery not supported by later.js; do it ourselves
-                // RecurDM
-                if (event.recurDM && event.recurDM.length > 0 && event.recurDM.indexOf(moment(eventStart).date()) === -1) {
-                    continue;
+            // Process virtual queries
+            queries.map((query) => {
+                if (typeof query.remove !== 'undefined') {
+                    query.remove = vschedule.db({ ID: query.remove }).first();
+                    vschedule.query(query.remove.ID);
+                } else {
+                    vschedule.query(query);
                 }
 
-                // RecurWM
-                if (event.recurWM && event.recurWM.length > 0) {
-                    var lastWeek = moment(eventStart).month() !== moment(eventStart).add(1, 'weeks').month();
-                    // 0 = last week of the month
-                    if (event.recurWM.indexOf(this.weekOfMonth(eventStart)) === -1 && (!lastWeek || event.recurWM.indexOf(0) === -1)) {
-                        continue;
+                // Determine start and end times for conflict checking
+                for (var key in query) {
+                    if (Object.prototype.hasOwnProperty.call(query, key)) {
+
+                        // Polyfill calendar and schedule information
+                        var event = this.scheduleToEvent(query[ key ], vschedule);
+
+                        // Determine start and end times for conflict checking
+                        if (event.oneTime && event.oneTime.length > 0) {
+                            event.oneTime.map((ot) => {
+                                if (moment(ot).isBefore(moment(start))) {
+                                    start = moment(ot);
+                                }
+                                if (moment(ot).isAfter(moment(end))) {
+                                    end = moment(ot);
+                                }
+                            });
+                        }
+                        if (event.originalTime) {
+                            if (moment(event.originalTime).isBefore(moment(start))) {
+                                start = moment(event.originalTime);
+                            }
+                            if (moment(event.originalTime).isAfter(moment(end))) {
+                                end = moment(event.originalTime);
+                            }
+                        }
+                        if (event.newTime) {
+                            if (moment(event.newTime).isBefore(moment(start))) {
+                                start = moment(event.newTime);
+                            }
+                            if (moment(event.newTime).isAfter(moment(end))) {
+                                end = moment(event.newTime);
+                            }
+                        }
+                        if (event.recurH && event.recurH.length > 0) {
+                            if (event.startDate) {
+                                if (moment(event.startDate).isBefore(moment(start))) {
+                                    start = moment(event.startDate);
+                                }
+                                if (moment(event.endDate).isAfter(moment(end))) {
+                                    end = moment(event.endDate);
+                                }
+                            }
+                        }
                     }
                 }
-
-                // RecurEvery
-                if (moment(eventStart).week() % (event.recurEvery || 1) !== 0) {
-                    continue;
-                }
-
-                var eventEnd = moment(eventStart).add(event.duration, 'minutes');
-
-                if ((moment(eventEnd).isAfter(moment(eventsb.start)) && moment(eventEnd).isSameOrBefore(moment(eventsb.end))) || (moment(eventStart).isSameOrAfter(eventsb.start) && moment(eventStart).isBefore(eventsb.end)) || (moment(eventStart).isBefore(eventsb.start) && moment(eventEnd).isAfter(eventsb.end))) {
-                    if ((!event.scheduleType || event.scheduleType === 'unscheduled') && event.calendarID === eventsb.calendarID)
-                        throw new Error(JSON.stringify({event, eventsb, eventStart, eventEnd}));
-                    return { originalTime: eventStart, scheduleID: eventsb.scheduleID };
-                }
-            }
-            return false;
+            });
+        } else { // No queries? We cannot do conflict checking
+            return { removals: [], additions: [], errors: [ 'You must provide at least one query to do conflict checking' ] };
         }
 
+        // If end is less than 1 day after start, make it 1 day after start for proper conflict checking
+        if (moment(end).diff(moment(start), 'minutes') < (60 * 24)) {
+            end = moment(start).add(1, 'days');
+        }
 
-        // Get events between start and end.
-        var events = this.getEvents(moment(_start).subtract(1, 'days').toISOString(true), end, { active: true });
+        // BEGIN actual conflict checking below
 
-        // Start with events that will get overridden by this event
-        var eventsOverridden = events
-            .filter((eventb) => {
-                if (eventb.scheduleOverrideID === event.scheduleID) return false; // Ignore events overriding this schedule; we are probably undoing later schedules
-                if (eventb.scheduleID === event.scheduleID) return false; // Also ignore if the schedule ID is the same; it's probably itself.
+        // Get events with virtual schedule
+        var events = this.getEvents(moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule);
 
-                // Ignore events that are already canceled or no longer active
-                if (eventb.scheduleType === 'canceled' || eventb.scheduleType === 'canceled-system' || eventb.scheduleType === 'canceled-changed') return false;
+        // Now, go through every event for conflict checking
+        try {
+            events
+                .map((event, index) => {
 
-                // Ignore events that will get updated by this one
-                if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && event.calendarID === eventb.calendarID && moment(event.originalTime).isSame(eventb.start, 'minute')) return false;
+                    // If this schedule was created as an override, we need to check to see if the override is still valid
+                    if (event.overriddenID) {
+                        // Find the original event
+                        var record = events.find((eventb) => eventb.ID === event.overriddenID);
 
-                var eventbPriority = eventb.priority || eventb.priority === 0 ? eventb.priority : this.getDefaultPriority(eventb);
+                        // If we could not find it, the override is invalid, so we can remove it and not continue beyond this point for the event.
+                        if (!record) {
+                            removals.push(event);
+                            return;
+                        }
+                    }
 
-                if (eventbPriority < 0) return false; // Will not get overridden if other event priority is less than 0
-                if (eventPriority === 0) return false; // Will not get overridden if this event's priority is 0.
-                if (eventbPriority > 0 && eventbPriority < eventPriority) return true; // WILL get overridden if other event's priority is less than this one.
-                return false;
-            });
-
-        var conflicts = [];
-        var temp;
-
-        // If a newTime is specified, check for conflicts on that.
-        if (event.newTime) {
-            var startb = moment(event.newTime || event.oneTime);
-            var endb = moment(event.newTime || event.oneTime).add(_event.duration, 'minutes');
-
-            temp = eventsOverridden
-                .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)))
-                .map((eventsb) => {
-                    eventsb.originalTime = moment(startb).toISOString(true);
-                    return eventsb;
+                    // Iterate conflict checking on every event after the index
+                    events
+                        .filter((ev, ind) => ind > index)
+                        .map((ev) => {
+                            checkAndResolveConflicts(event, ev);
+                        });
                 });
-
-            if (temp.length > 0) {
-                conflicts = conflicts.concat(temp);
-            }
+        } catch (e) {
+            errors.push(e.message);
         }
 
-        // If oneTime stamps are specified, check those.
-        if (event.oneTime) {
-            event.oneTime.map((time) => {
-                var startb = moment(time);
-                var endb = moment(time).add(_event.duration, 'minutes');
-
-                temp = eventsOverridden
-                    .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)))
-                    .map((eventsb) => {
-                        eventsb.originalTime = moment(startb).toISOString(true);
-                        return eventsb;
-                    });
-
-                if (temp.length > 0) {
-                    conflicts = conflicts.concat(temp);
-                }
-            });
-
-        }
-
-        // If a recurring schedule is provided, check that.
-        if (event.recurH && event.recurH.length > 0) {
-            var startb = moment(event.startDate);
-
-            temp = eventsOverridden
-                .reduce((newArray = [], eventsb) => {
-                    try {
-                        var val = checkConflictingTime(startb, eventsb)
-                        if (val) {
-                            eventsb.originalTime = val.originalTime;
-                            newArray.push(eventsb);
-                        }
-                        return newArray;
-                    } catch (e) {
-                        if (e.message === "ALREADY_SCHEDULED") {
-                            error = "This event additional time slot cannot be scheduled; this event is already scheduled within the provided time slot."
-                            return newArray;
-                        } else {
-                            throw e;
-                        }
-                    }
-                }, []);
-
-            if (temp.length > 0) {
-                conflicts = conflicts.concat(temp);
-            }
-        }
-
-        // Set new values
-        eventsOverridden = conflicts;
-
-        // Now, go through each event being overridden and determine cancellation versus show time update.
-        eventsOverridden = eventsOverridden.map((eventb) => {
-            var eventc = {
-                calendarID: eventb.calendarID,
-                scheduleID: eventb.scheduleID,
-                overriddenID: null, // This should be set after adding initial schedule.
-                type: eventb.type,
-                hosts: eventb.hosts,
-                name: eventb.name
-            };
-            var startdiff = moment(eventb.originalTime).diff(moment(eventb.start), 'minutes');
-            var enddiff = moment(eventb.end).diff(moment(eventb.originalTime).add(_event.duration, 'minutes'), 'minutes');
-
-            // The higher priority event starts 30 or more minutes after the event being checked and the differential is greater than the end time. 
-            // Instead of a cancellation, just decrease show duration.
-            if (startdiff >= 30 && startdiff >= enddiff) {
-                eventc.scheduleType = "updated-system";
-                eventc.scheduleReason = `An event with a higher priority (${_event.type}: ${_event.hosts} - ${_event.name}) was scheduled to start during this event's time block.`;
-                eventc.originalTime = eventb.start;
-                eventc.duration = startdiff;
-            }
-            // The event being checked ends 30 or more minutes after the higher priority event and the differential is greater than the start time.
-            // Instead of a cancellation, just update show start time.
-            else if (enddiff >= 30 && enddiff >= startdiff) {
-                eventc.scheduleType = "updated-system";
-                eventc.scheduleReason = `An event with a higher priority (${_event.type}: ${_event.hosts} - ${_event.name}) will run partially through this event's time block.`;
-                eventc.originalTime = eventb.start;
-                eventc.duration = enddiff;
-                eventc.newTime = moment(eventb.originalTime).add(_event.duration, 'minutes').toISOString(true);
-            }
-            // If neither of the above conditions apply, the event being checked should be canceled.
-            else {
-                eventc.scheduleType = "canceled-system";
-                eventc.scheduleReason = `An event with a higher priority (${_event.type}: ${_event.hosts} - ${_event.name}) is scheduled during this event's time block.`;
-                eventc.originalTime = eventb.start;
-            }
-            return eventc;
-        });
-
-        // Now, check for events that will override this one
-        var eventsOverriding = events
-            .filter((eventb) => {
-                if (eventb.scheduleOverrideID === event.scheduleID) return false; // Ignore events overriding this schedule; we are probably undoing later schedules
-                if (eventb.scheduleID === event.scheduleID) return false; // Also ignore if the schedule ID is the same; it's probably itself.
-
-                // Ignore events that are already canceled or no longer active
-                if (eventb.scheduleType === 'canceled' || eventb.scheduleType === 'canceled-system' || eventb.scheduleType === 'canceled-changed') return false;
-
-                // Ignore events that will get updated by this one
-                if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && event.calendarID === eventb.calendarID && moment(event.originalTime).isSame(eventb.start, 'minute')) return false;
-
-                var eventbPriority = eventb.priority || eventb.priority === 0 ? eventb.priority : this.getDefaultPriority(eventb);
-
-                if (eventbPriority < 0) return false; // Will not override if the other event's priority is less than 0.
-                if (eventPriority === 0 && eventbPriority === 0) return true; // WILL override if both this event and the other event's priority is 0.
-                if (eventPriority === 0 && eventbPriority !== 0) return false // Will NOT override if this event's priority is 0 but the other event is not priority 0.
-                if (eventbPriority > 0 && eventbPriority >= eventPriority) return true; // WILL override if the other event's priority is greater than or equal to this one.
-                return false;
-            });
-
-        var conflicts = [];
-        var temp;
-
-        // Check for newTime conflicts if specified
-        if (event.newTime) {
-            var startb = moment(event.newTime || event.oneTime);
-            var endb = moment(event.newTime || event.oneTime).add(_event.duration, 'minutes');
-
-            temp = eventsOverriding
-                .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)))
-                .map((eventb) => {
-                    eventb.originalTime = moment(startb).toISOString(true);
-                    return eventb;
-                })
-
-            if (temp.length > 0)
-                conflicts = conflicts.concat(temp);
-        }
-
-        // Check for oneTime times if specified
-        if (event.oneTime) {
-            event.oneTime.map((time) => {
-                var startb = moment(time);
-                var endb = moment(time).add(_event.duration, 'minutes');
-
-                temp = eventsOverriding
-                    .filter((eventb) => (moment(eventb.end).isAfter(moment(startb)) && moment(eventb.end).isSameOrBefore(moment(endb))) || (moment(eventb.start).isSameOrAfter(startb) && moment(eventb.start).isBefore(endb)) || (moment(eventb.start).isBefore(startb) && moment(eventb.end).isAfter(endb)))
-                    .map((eventb) => {
-                        eventb.originalTime = moment(startb).toISOString(true);
-                        return eventb;
-                    });
-
-                if (temp.length > 0)
-                    conflicts = conflicts.concat(temp);
-            });
-        }
-
-        // Check for recurring schedule conflicts if specified
-        if (event.recurH && event.recurH.length > 0) {
-            temp = eventsOverriding
-                .reduce((newArray = [], eventsb) => {
-                    try {
-                        var startb = moment(eventsb.startDate);
-                        var val = checkConflictingTime(startb, eventsb)
-                        if (val) {
-                            eventsb.originalTime = val.originalTime;
-                            newArray.push(eventsb);
-                        }
-                        return newArray;
-                    } catch (e) {
-                        if (e.message === "ALREADY_SCHEDULED") {
-                            error = "This event additional time slot cannot be scheduled; this event is already scheduled within the provided time slot."
-                            return newArray;
-                        } else {
-                            throw e;
-                        }
-                    }
-                }, []);
-
-            if (temp.length > 0)
-                conflicts = conflicts.concat(temp);
-        }
-
-        // Set value
-        eventsOverriding = conflicts;
-
-        // Now, determine for each event override if we should cancel or update.
-        // Also, this translates the overriding event objects into the current event with exceptions applied.
-        eventsOverriding = eventsOverriding.map((eventb) => {
-            var eventc = {
-                calendarID: _event.calendarID,
-                scheduleID: _event.scheduleID,
-                overriddenID: eventb.scheduleID,
-                type: _event.type,
-                hosts: _event.hosts,
-                name: _event.name
-            };
-            var startdiff = moment(eventb.start).diff(moment(eventb.originalTime), 'minutes');
-            var enddiff = moment(eventb.originalTime).add(_event.duration, 'minutes').diff(moment(eventb.end), 'minutes');
-
-            // The higher priority event starts 30 or more minutes after the event being checked and the differential is greater than the end time. 
-            // Instead of a cancellation, just decrease show duration.
-            if (startdiff >= 30 && startdiff >= enddiff) {
-                eventc.scheduleType = "updated-system";
-                eventc.scheduleReason = `An event with an equal or higher priority (${eventb.type}: ${eventb.hosts} - ${eventb.name}) was scheduled to start during this event's time block.`;
-                eventc.originalTime = eventb.originalTime;
-                eventc.duration = startdiff;
-            }
-            // The event being checked ends 30 or more minutes after the higher priority event and the differential is greater than the start time.
-            // Instead of a cancellation, just update show start time.
-            else if (enddiff >= 30 && enddiff >= startdiff) {
-                eventc.scheduleType = "updated-system";
-                eventc.scheduleReason = `An event with an equal or higher priority (${eventb.type}: ${eventb.hosts} - ${eventb.name}) will run partially through this event's time block.`;
-                eventc.originalTime = eventb.originalTime;
-                eventc.duration = enddiff;
-                eventc.newTime = moment(eventb.end).toISOString(true);
-            }
-            // If neither of the above conditions apply, the event being checked should be canceled.
-            else {
-                eventc.scheduleType = "canceled-system";
-                eventc.scheduleReason = `An event with an equal or higher priority (${eventb.type}: ${eventb.hosts} - ${eventb.name}) is scheduled during this event's time block.`;
-                eventc.originalTime = eventb.originalTime;
-            }
-            return eventc;
-        });
-
-        return { overridden: eventsOverridden.sort(compareOriginalTime), overriding: eventsOverriding.sort(compareOriginalTime), error };
+        return { removals, additions, errors };
     }
 
     /**
@@ -804,6 +638,9 @@ class CalendarDb {
 
         // If no startDate provided, default to current date.
         if (!tempCal.startDate) event.startDate = moment().toISOString(true);
+
+        // Make sure there is always a scheduleType. Otherwise, TAFFYDB will not like us.
+        if (!tempCal.scheduleType) event.scheduleType = null;
 
         return { event, tempCal };
     }
@@ -947,7 +784,7 @@ class CalendarDb {
             scheduleReason: schedule.scheduleReason || null, // A reason for this schedule or override, if applicable.
             originalTime: schedule.originalTime ? moment(schedule.originalTime).toISOString(true) : null, // The specific time this schedule is applicable for... used for updates and cancelations.
             type: schedule.type ? schedule.type : calendar.type, // Event type (show, remote, sports, prerecord, genre, playlist, event, onair-booking, prod-booking, office-hours, task)
-            priority: schedule.priority || schedule.priority === 0 ? schedule.priority : (calendar.priority || calendar.priority === 0 ? calendar.priority : this.getDefaultPriority(calendar)), // Priority of the event. -1 = no conflict detection. 0 and up = overridden by any events scheduled that have the same or higher priority.
+            priority: schedule.priority || schedule.priority === 0 ? schedule.priority : (calendar.priority || calendar.priority === 0 ? calendar.priority : (schedule.type ? this.getDefaultPriority(schedule) : this.getDefaultPriority(calendar))), // Priority of the event. -1 = no conflict detection. 0 and up = overridden by any events scheduled that have the same or higher priority.
             hostDJ: schedule.hostDJ ? schedule.hostDJ : calendar.hostDJ || null, // The ID of the DJ hosting the event
             cohostDJ1: schedule.cohostDJ1 ? schedule.cohostDJ1 : calendar.cohostDJ1 || null, // The ID of the first cohost DJ
             cohostDJ2: schedule.cohostDJ2 ? schedule.cohostDJ2 : calendar.cohostDJ2 || null, // The ID of the second cohost DJ
@@ -974,6 +811,8 @@ class CalendarDb {
             startDate: schedule.startDate || calendar.startDate ? moment(schedule.startDate || calendar.startDate).startOf('day').toISOString(true) : null, // Date the event starts
             endDate: schedule.endDate || calendar.endDate ? moment(schedule.endDate || calendar.endDate).startOf('day').toISOString(true) : null, // Date the event ends (exclusive).
             timeChanged: schedule.scheduleID && (schedule.newTime || schedule.duration), // True if this event's time was changed from the original, else false
+            createdAt: schedule.createdAt || calendar.createdAt, // createdAt used to determine which event gets priority in conflict checking if both have the same priority
+            updatedAt: schedule.updatedAt || calendar.updatedAt,
         }
 
         // Determine event color
@@ -1011,5 +850,215 @@ class CalendarDb {
         const offset = firstDayOfMonth.diff(firstDayOfWeek, 'days');
 
         return Math.ceil((moment(input).date() + offset) / 7);
+    }
+
+    /**
+     * Generate a human readable string for the schedule provided.
+     * 
+     * @param {object} event The CalendarDb event or the schedule DB record.
+     * @returns {string} Human readable representation of the schedule.
+     */
+    generateScheduleText (event) {
+        var recurAt = [];
+        var oneTime = [];
+        var recurDayString = ``;
+
+        if (event.newTime) {
+            return `On ${moment(event.newTime).format("LLLL")} for ${moment.duration(event.duration, 'minutes').format("h [hours], m [minutes]")}`;
+        }
+
+        // Start with the easy one
+        if (event.oneTime && event.oneTime.length > 0) {
+            oneTime = event.oneTime.map((onetime) => moment(onetime).format("LLLL"));
+        }
+
+        if (oneTime.length === 0) {
+            recurDayString = `Every `;
+        } else {
+            recurDayString = `On ${oneTime}`;
+        }
+
+        if (event.recurH && event.recurH.length > 0) {
+            if (oneTime.length > 0) {
+                recurDayString = `... and every `;
+            }
+
+            // Times
+            recurAt = event.recurH.map((h) => `${h < 10 ? `0${h}` : h}:${event.recurM < 10 ? `0${event.recurM}` : event.recurM}`);
+
+            if (event.recurDM && event.recurDM.length > 0) {
+                var ifit = false;
+                recurDayString += `${event.recurDM.join(", ")} day(s) of the month`;
+
+                if (event.recurWM && event.recurWM.length > 0) {
+                    if (!ifit) {
+                        recurDayString += ` if`;
+                        ifit = true;
+                    } else {
+                        recurDatString += `, and`;
+                    }
+                    recurDayString += ` it falls on ${event.recurWM.length > 1 ? `either` : ``} the ${event.recurWM.map((WM) => {
+                        switch (WM) {
+                            case 0:
+                                return 'last';
+                            case 1:
+                                return 'first';
+                            case 2:
+                                return 'second';
+                            case 3:
+                                return 'third';
+                            case 4:
+                                return 'fourth';
+                            case 5:
+                                return 'fifth';
+                        }
+                    }).join(', ')} week of the month`
+                }
+
+                if (event.recurDW && event.recurDW.length > 0) {
+                    if (!ifit) {
+                        recurDayString += ` if`;
+                        ifit = true;
+                    } else {
+                        recurDatString += `, and`;
+                    }
+                    recurDayString += ` it falls on ${event.recurDW.length > 1 ? `either` : ``} a ${event.recurDW.map((DW) => {
+                        switch (DW) {
+                            case 1:
+                                return 'Sunday';
+                            case 2:
+                                return 'Monday';
+                            case 3:
+                                return 'Tuesday';
+                            case 4:
+                                return 'Wednesday';
+                            case 5:
+                                return 'Thursday';
+                            case 6:
+                                return 'Friday';
+                            case 7:
+                                return 'Saturday';
+                        }
+                    }).join(', ')}`
+                }
+            } else if (event.recurWM && event.recurWM.length > 0) {
+                recurDayString += `${event.recurWM.map((WM) => {
+                    switch (WM) {
+                        case 0:
+                            return 'last';
+                        case 1:
+                            return 'first';
+                        case 2:
+                            return 'second';
+                        case 3:
+                            return 'third';
+                        case 4:
+                            return 'fourth';
+                        case 5:
+                            return 'fifth';
+                    }
+                }).join(', ')} week(s) of the month`
+
+                if (event.recurDW && event.recurDW.length > 0) {
+                    recurDayString += `, on ${event.recurDW.map((DW) => {
+                        switch (DW) {
+                            case 1:
+                                return 'Sunday';
+                            case 2:
+                                return 'Monday';
+                            case 3:
+                                return 'Tuesday';
+                            case 4:
+                                return 'Wednesday';
+                            case 5:
+                                return 'Thursday';
+                            case 6:
+                                return 'Friday';
+                            case 7:
+                                return 'Saturday';
+                        }
+                    }).join(', ')}`
+                } else {
+                    recurDayString += `, every day`;
+                }
+            } else {
+                if (event.recurDW && event.recurDW.length > 0) {
+                    recurDayString += `${event.recurDW.map((DW) => {
+                        switch (DW) {
+                            case 1:
+                                return 'Sunday';
+                            case 2:
+                                return 'Monday';
+                            case 3:
+                                return 'Tuesday';
+                            case 4:
+                                return 'Wednesday';
+                            case 5:
+                                return 'Thursday';
+                            case 6:
+                                return 'Friday';
+                            case 7:
+                                return 'Saturday';
+                        }
+                    }).join(', ')}`
+                } else {
+                    recurDayString += `day`;
+                }
+            }
+
+            if (event.recurEvery && event.recurEvery > 1) {
+                recurDayString += `, but only every ${evenr.recurEvery} weeks of the year`
+            }
+
+            recurDayString += `... at ${recurAt}`;
+        }
+
+        recurDayString += `... for ${moment.duration(event.duration, 'minutes').format("h [hours], m [minutes]")}`;
+
+        if (event.startDate || event.endDate) {
+            recurDayString += `... `
+        }
+        if (event.startDate) {
+            recurDayString += `starting ${moment(event.startDate).format("LL")} `;
+        }
+        if (event.endDate) {
+            recurDayString += `until ${moment(event.endDate).format("LL")} `;
+        }
+
+        return recurDayString;
+    }
+
+    /**
+     * Polyfill missing information in a schedule record from its scheduleID (if applicable) and the calendar event's default properties.
+     * 
+     * @param {object} record The schedule database record
+     * @param {WWSUdb} scheduledb If provided, will use this database of schedules instead of the CalendarDb one.
+     * @returns {object} Event, as structured in processRecord.
+     */
+    scheduleToEvent (record, scheduledb = this.schedule) {
+        var tempCal = {};
+        var event;
+        if (record.calendarID) {
+            var calendar = this.calendar.db({ ID: record.calendarID }).first();
+            if (record.scheduleID) {
+                var schedule = scheduledb.db({ ID: record.scheduleID }).first();
+            }
+            if (schedule) {
+                var tempCal = Object.assign({}, calendar);
+                for (var stuff in schedule) {
+                    if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
+                        if (typeof schedule[ stuff ] !== 'undefined' && schedule[ stuff ] !== null)
+                            tempCal[ stuff ] = schedule[ stuff ];
+                    }
+                }
+                event = this.processRecord(tempCal, record, record.newTime ? record.newTime : record.originalTime);
+            } else {
+                event = this.processRecord(calendar, record, record.newTime ? record.newTime : record.originalTime);
+            }
+        } else {
+            event = this.processRecord(record, { calendarID: null }, moment().toISOString(true));
+        }
+
+        return event;
     }
 }
