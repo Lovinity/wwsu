@@ -21,25 +21,10 @@ class WWSUdb {
     } else { // polyfill
       this.events = {
         emitEvent: (event, args) => {
-          switch (event) {
-            case 'insert':
-              this.events.doInsert(args[ 0 ], args[ 1 ]);
-              break;
-            case 'update':
-              this.events.doUpdate(args[ 0 ], args[ 1 ]);
-              break;
-            case 'remove':
-              this.events.doRemove(args[ 0 ], args[ 1 ]);
-              break;
-            case 'replace':
-              this.events.doReplace(args[ 0 ]);
-              break;
-          }
+          if (typeof this.events.fns[ event ] === 'function')
+            this.events.fns[ event ](...args);
         },
-        doInsert: () => { },
-        doUpdate: () => { },
-        doRemove: () => { },
-        doReplace: () => { }
+        fns: {}
       };
     }
   }
@@ -47,27 +32,14 @@ class WWSUdb {
   /**
    * Add an event listener.
    * 
-   * @param {string} event Event triggered
+   * @param {string} event Event triggered: insert(data, db), update(data, db), remove(data, db), or replace(db)
    * @param {function} fn Function to call when this event is triggered
    */
   on (event, fn) {
     if (typeof EventEmitter !== 'undefined') {
       this.events.on(event, fn);
     } else {
-      switch (event) {
-        case 'insert':
-          this.events.doInsert = fn;
-          break;
-        case 'update':
-          this.events.doUpdate = fn;
-          break;
-        case 'remove':
-          this.events.doRemove = fn;
-          break;
-        case 'replace':
-          this.events.doReplace = fn;
-          break;
-      }
+      this.events.fns[ event ] = fn;
     }
   }
 
@@ -132,8 +104,13 @@ class WWSUdb {
     }
   }
 
-  // Make a call to the WWSU API, and replace all the data in this database with what the API returns
-  // WWSUreq is a WWSUreq class to use to make the request. path is the URL to call. Data is an optional object of parameters to pass to the API request.
+  /**
+   * Call WWSU's API and replace all data in memory with what WWSU returns. Also establishes socket event.
+   * 
+   * @param {WWSUreq} WWSUreq The request to use
+   * @param {string} path URL path relative to the WWSU server
+   * @param {object} data Data to pass in the request
+   */
   replaceData (WWSUreq, path, data = {}) {
     try {
       WWSUreq.request({ method: 'POST', url: path, data: data }, (body) => {
@@ -144,8 +121,12 @@ class WWSUdb {
     }
   }
 
-  // Assign a socket event to this database. The socket should return data following the standards specified in the query function's query parameter,
-  // except replaceData should be used instead when replacing the data in the entire database.
+  /**
+   * Assign a socket event to this database which follows WWSU's websocket standards for data.
+   * 
+   * @param {string} event Socket event name to attach
+   * @param {sails.io} socket WWSU socket to use
+   */
   assignSocketEvent (event, socket) {
     socket.on(event, (data) => {
       this.query(data, false)
@@ -155,13 +136,26 @@ class WWSUdb {
 
 // Class for managing requests and authorization to WWSU's API
 // eslint-disable-next-line no-unused-vars
+
+// TODO: Use modals and Alpaca forms instead of iziToast
 class WWSUreq {
+
+  /**
+   * Construct the class
+   * 
+   * @param {sails.io} socket WWSU socket connection
+   * @param {string} host Host name of this client
+   * @param {?string} usernameField Name of the database column containing names of DJs/directors for authorization, if applicable
+   * @param {?string} authPath URL path in WWSU's API for authorization and getting a token, if applicable
+   * @param {?string} authName Human friendly name of the type of person (eg. "Director") that must authorize themselves for this request
+   */
   constructor(socket, host, usernameField = null, authPath = null, authName = null) {
     this.socket = socket
     this.host = host
     this.authPath = authPath
     this.authName = authName
     this.usernameField = usernameField
+    this.loginID = null
 
     // Storing authorization tokens in memory
     this._token = null
@@ -198,49 +192,32 @@ class WWSUreq {
     return this._token === null || moment().isAfter(moment(this.time).add(this.expiration - 1000, 'milliseconds'))
   }
 
-  // Request with authorization
+  /**
+   * Check authorization, and then make a request to WWSU's API
+   * 
+   * @param {object} opts Options to pass to the sails.io socket request
+   * @param {string} opts.dom DOM query string of the element to block / show login form when login is necessary vis JQuery blockui.
+   * @param {TaffyDB} opts.db List of records of people that can authorize for this request, if applicable
+   * @param {function} cb Callback executed after the request is made. Contains response body as parameter.
+   */
   request (opts, cb) {
     // Called after logging in and getting a token
     var step2 = (username, password) => {
       this._authorize(username, password, (token) => {
         if (token === 0) {
-          iziToast.show({
-            titleColor: '#000000',
-            messageColor: '#000000',
-            color: 'red',
-            close: true,
-            overlay: true,
-            overlayColor: 'rgba(0, 0, 0, 0.75)',
-            zindex: 100,
-            layout: 1,
-            imageWidth: 100,
-            image: ``,
-            progressBarColor: `rgba(255, 0, 0, 0.5)`,
-            closeOnClick: true,
-            position: 'center',
-            timeout: 30000,
-            title: 'Error authorizing',
-            message: 'There was a technical error trying to authorize. Please contact the developers or try again later.'
-          })
+          $(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'Error Authorizing',
+            body: 'There was an error authorizing. Did you type your password in correctly?',
+            icon: 'fas fa-skull-crossbones fa-lg',
+          });
         } else if (typeof token.errToken !== `undefined` || typeof token.token === 'undefined') {
-          iziToast.show({
-            titleColor: '#000000',
-            messageColor: '#000000',
-            color: 'red',
-            close: true,
-            overlay: true,
-            overlayColor: 'rgba(0, 0, 0, 0.75)',
-            zindex: 100,
-            layout: 1,
-            imageWidth: 100,
-            image: ``,
-            progressBarColor: `rgba(255, 0, 0, 0.5)`,
-            closeOnClick: true,
-            position: 'center',
-            timeout: 30000,
-            title: 'Access denied',
-            message: `${typeof token.errToken !== `undefined` ? `Failed to authenticate; please try again. ${token.errToken}` : `Failed to authenticate; unknown error.`}`
-          })
+          $(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'Error Authorizing',
+            body: `${typeof token.errToken !== `undefined` ? `Failed to authenticate; please try again. ${token.errToken}` : `Failed to authenticate; unknown error.`}`,
+            icon: 'fas fa-skull-crossbones fa-lg',
+          });
         } else {
           this._tryRequest(opts, (body2) => {
             cb(body2)
@@ -282,7 +259,14 @@ class WWSUreq {
     }
   }
 
-  // Helper function for trying a request with authorization. cb passes 0 if no body is returned or an error is thrown, -1 if tokenErr is given, and body otherwise.
+  /**
+   * Helper: Attempt the API request with the current token.
+   * 
+   * @param {object} opts Options to pass to the sails.io request
+   * @param {string} opts.dom The DOM query string to be blocked by JQuery BlockUI while the request is being made
+   * @param {TaffyDB} opts.db List of records of users that can authorize with this request if necessary
+   * @param {function} cb Function called after the request is made. Parameter: -1 = unauthorized. 0 = No body returned. Otherwise, returns body.
+   */
   _tryRequest (opts, cb) {
     try {
       if (this.authPath !== null) {
@@ -295,25 +279,47 @@ class WWSUreq {
         }
       }
 
-      this.socket.request(opts, (body) => {
-        if (!body) {
-          // eslint-disable-next-line standard/no-callback-literal
-          cb(0)
-        } else if (typeof body.tokenErr !== `undefined`) {
-          // eslint-disable-next-line standard/no-callback-literal
-          cb(-1)
-        } else {
-          cb(body)
-        }
-      })
+      var doRequest = (cb2) => {
+        this.socket.request(opts, (body) => {
+          cb2();
+          if (!body) {
+            // eslint-disable-next-line standard/no-callback-literal
+            cb(0)
+          } else if (typeof body.tokenErr !== `undefined`) {
+            // eslint-disable-next-line standard/no-callback-literal
+            cb(-1)
+          } else {
+            cb(body)
+          }
+        })
+      };
+
+      if (opts.dom) {
+        $(opts.dom).block({
+          message: '<h1>Processing...</h1>',
+          css: { border: '3px solid #a00' },
+          onBlock: () => {
+            doRequest(() => {
+              $(opts.dom).unblock();
+            })
+          }
+        });
+      } else {
+        doRequest(() => { });
+      }
     } catch (unusedE) {
       // eslint-disable-next-line standard/no-callback-literal
       cb(0)
     }
   }
 
-  // Helper. Attempt to log in and get a token. cb passes 0 for errors and body on success. Also stores token/expiration in memory so we don't have to
-  // authorize again until the token expires.
+  /**
+   * Make an authorization request to WWSU for a token, and store the token in memory.
+   * 
+   * @param {string} username Username of the person authorizing
+   * @param {string} password Password provided
+   * @param {function} cb Function called after request. 0 = failed to authorize, otherwise contains authorization information.
+   */
   _authorize (username, password, cb) {
     try {
       this.socket.request({ method: 'POST', url: this.authPath, data: { username: username, password: password } }, (body) => {
@@ -340,14 +346,28 @@ class WWSUreq {
     }
   }
 
-  // We need to log in; display a login window via iziToast. opts.db should have objects of current users (including a key named after this.usernameField) that can be authenticated
+  // We need to log in; display a login overlay via Alpaca forms. opts.db should have objects of current users (including a key named after this.usernameField) that can be authenticated
+  /**
+   * Create an authorization prompt.
+   * 
+   * @param {TaffyDB} opts.db Records of users that can authorize with this request.
+   * @param {function} cb Function called after user completes the prompt. Contains (username, password) as parameters.
+   */
   _promptLogin (opts, cb) {
-    var selection = [ `<option value="">--SELECT A USER--</option>` ]
-    if (opts.db !== null) {
-      opts.db.each((user) => {
-        selection.push(`<option value="${user[ `${this.usernameField}` ]}">${user[ `${this.usernameField}` ]}</option>`)
-      })
+    if (!opts.db || opts.db === null || opts.db.length < 1) {
+      $(document).Toasts('create', {
+        class: 'bg-danger',
+        title: 'Authorization error',
+        body: `There is no ${this.authName} available to authenticate. Please report this to engineer@wwsu1069.org.`,
+        icon: 'fas fa-skull-crossbones fa-lg',
+      });
+      return null;
     }
+
+    var selection = [ `<option value="">--SELECT A USER--</option>` ]
+    opts.db.each((user) => {
+      selection.push(`<option value="${user[ `${this.usernameField}` ]}">${user[ `${this.usernameField}` ]}</option>`)
+    })
 
     var username = ``
     var password = ``
@@ -358,9 +378,9 @@ class WWSUreq {
       displayMode: 'once',
       color: 'red',
       id: 'login-for-authorization',
-      zindex: 999,
       layout: 2,
-      maxWidth: 480,
+      zindex: 99999,
+      maxWidth: 600,
       title: `${this.authName} Authorization required`,
       message: `To perform this action, you must login with ${this.authName} credentials. Please choose a user, and then type in your password.`,
       position: 'center',
@@ -384,6 +404,7 @@ class WWSUreq {
         } ]
       ]
     })
+
   }
 }
 
@@ -394,6 +415,12 @@ class WWSUScriptLoader {
     this.loadedScripts = [];
   }
 
+  /**
+   * Load a script.
+   * 
+   * @param {string} filename Relative path to the script to load
+   * @param {string} filetype js or css
+   */
   loadScript (filename, filetype) {
     if (this.loadedScripts.indexOf(filename) === -1) {
       this._loadScript(filename, filetype);
@@ -401,7 +428,12 @@ class WWSUScriptLoader {
     }
   }
 
-  // Do not call this directly unless you want to avoid duplicate script loading checks!
+  /**
+   * Helper: Load a script. Should not be called directly; loadScript prevents duplicate script loading.
+   * 
+   * @param {string} filename Relative path to the script to load
+   * @param {string} filetype js or css
+   */
   _loadScript (filename, filetype) {
     if (filetype === "js") { //if filename is a external JavaScript file
       var fileref = document.createElement('script')
@@ -520,13 +552,119 @@ class WWSUutil {
    * @param {function} cb Function to call when the element exists
    */
   waitForElement (theelement, cb) {
-    console.log(theelement)
     if (!document.querySelector(theelement)) {
       window.requestAnimationFrame(() => this.waitForElement(theelement, cb))
     } else {
       // eslint-disable-next-line callback-return
       cb(document.querySelector(theelement))
     }
+  }
+
+  /**
+   * Create a UUID
+   */
+  createUUID () {
+    var dt = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = (dt + Math.random() * 16) % 16 | 0;
+      dt = Math.floor(dt / 16);
+      return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+    return uuid;
+  }
+
+  /**
+   * Create a confirmation dialog with iziToast
+   * 
+   * @param {string} description Further information to provide in the confirmation
+   * @param {?string} confirmText Require user to type this text to confirm their action (null: use simple yes/no confirmation)
+   * @param {function} cb Callback executed when and only if action is confirmed.
+   */
+  confirmDialog (description, confirmText, cb) {
+    var inputValue = ``;
+    var inputs = confirmText ? [
+      [ '<input type="text">', 'keyup', function (instance, toast, input, e) {
+        inputValue = input.value;
+      }, true ]
+    ] : [];
+    iziToast.question({
+      timeout: 60000,
+      close: false,
+      overlay: true,
+      title: 'Confirm Action',
+      layout: 2,
+      drag: false,
+      targetFirst: false,
+      zindex: 99999,
+      maxWidth: 600,
+      message: `<p>${description}</p><p>${confirmText ? `Type <strong>${confirmText}</strong> in the box and click "Yes" to confirm your action.` : `Click "Yes" to confirm your action.`}</p>`,
+      position: 'center',
+      inputs: inputs,
+      buttons: [
+        [ '<button>No</button>', function (instance, toast) {
+
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          $(document).Toasts('create', {
+            class: 'bg-warning',
+            title: 'Action canceled',
+            autohide: true,
+            delay: 10000,
+            body: `You clicked No.`,
+          });
+
+        } ],
+        [ '<button><b>Yes</b></button>', function (instance, toast) {
+
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+
+          if (!confirmText || confirmText === inputValue) {
+            cb();
+          } else {
+            $(document).Toasts('create', {
+              class: 'bg-warning',
+              title: 'Action canceled',
+              autohide: true,
+              delay: 10000,
+              body: `You did not type in the confirmation text correctly.`,
+            });
+          }
+
+        } ]
+      ]
+    });
+  }
+}
+
+class WWSUqueue {
+  constructor() {
+    this.timer = null;
+    this.queue = [];
+  }
+
+  add (fn, time) {
+    var setTimer = (time) => {
+      this.timer = setTimeout(() => {
+        time = this.add();
+        if (this.queue.length) {
+          setTimer(time);
+        }
+      }, time || 2);
+    }
+
+    if (fn) {
+      this.queue.push([ fn, time ]);
+      if (this.queue.length == 1) {
+        setTimer(time);
+      }
+      return;
+    }
+
+    var next = this.queue.shift();
+    if (!next) {
+      return 0;
+    }
+    next[ 0 ]();
+    return next[ 1 ];
   }
 }
 
@@ -535,4 +673,5 @@ if (typeof require !== 'undefined') {
   exports.WWSUreq = WWSUreq;
   exports.WWSUScriptLoader = WWSUScriptLoader;
   exports.WWSUutil = WWSUutil;
+  exports.WWSUqueue = WWSUqueue;
 }
