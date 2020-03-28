@@ -26,7 +26,7 @@ module.exports = {
 
       // Prevent state changing if host is lockToDJ and the specified lockToDJ is not on the air.
       // EXCEPTION: We are doing a remote broadcast, the host has answerCalls or MakeCalls = true, and inputs.problem = true
-      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) {
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3) {
         if (!inputs.problem || ((!sails.models.meta.memory.state.startsWith('remote') && !sails.models.meta.memory.state.startsWith('sportsremote')) || (!this.req.payload.makeCalls && !this.req.payload.answerCalls))) {
           return exits.error(new Error('You are not authorized to send the system into break because you are not on the air.'))
         }

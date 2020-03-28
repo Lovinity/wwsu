@@ -29,8 +29,8 @@ module.exports = {
     sails.log.debug('Controller state/sports called.')
 
     try {
-      // Do not continue if not in sports or automation mode; client should request automation before requesting sports
-      if (!sails.models.meta.memory.state.startsWith('sports') && !sails.models.meta.memory.state.startsWith('automation_')) { return exits.error(new Error(`Cannot execute state/sports unless in automation or sports mode. Please go to automation first.`)) }
+      // Do not continue if not in automation mode; client should request automation before requesting sports
+      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) { return exits.error(new Error(`Cannot execute state/sports unless in automation or prerecord mode. Please go to automation first.`)) }
 
       // Block this request if we are already switching states
       if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }

@@ -36,8 +36,8 @@ module.exports = {
     sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`)
 
     try {
-      // Do not continue if not in live or automation mode; client should request automation before requesting live
-      if (!sails.models.meta.memory.state.startsWith('live_') && !sails.models.meta.memory.state.startsWith('automation_')) { return exits.error(new Error(`Cannot execute state/live unless in automation or live mode. Please go to automation first.`)) }
+      // Do not continue if not in prerecord or automation mode; client should request automation before requesting live
+      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) { return exits.error(new Error(`Cannot execute state/live unless in automation or prerecord mode. Please go to automation first.`)) }
 
       // Block the request if we are changing states right now
       if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }

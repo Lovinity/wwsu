@@ -37,7 +37,7 @@ module.exports = {
 
     try {
       // Do not continue if not in automation mode; client should request automation before requesting remote
-      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('remote_')) { return exits.error(new Error(`Cannot execute state/remote unless in automation or remote. Please go to automation first.`)) }
+      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) { return exits.error(new Error(`Cannot execute state/remote unless in automation or prerecord mode. Please go to automation first.`)) }
 
       // Block this request if we are changing states right now
       if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
