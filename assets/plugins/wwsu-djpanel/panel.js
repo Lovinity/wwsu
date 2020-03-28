@@ -1,5 +1,7 @@
 /* global WWSUdb, TAFFY, WWSUreq, iziToast, JQuery, Taucharts */
 
+// TODO: FIX
+
 jQuery.noConflict()
 var calendardb = new CalendarDb();
 var DJReq

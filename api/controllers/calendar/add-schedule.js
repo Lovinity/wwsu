@@ -254,29 +254,25 @@ module.exports = {
             }
 
             // Check for event conflicts
-            var conflicts = sails.models.calendar.calendardb.checkConflicts([{insert: event}]);
+            sails.models.calendar.calendardb.checkConflicts(async (conflicts) => {
+                // Add the initial event into the calendar
+                var record = await sails.models.schedule.create(event).fetch();
 
-            // If there were errors, exit on the error
-            if (conflicts.errors && conflicts.errors.length > 0)
-                return exits.success(conflicts.errors);
+                // Remove records which should be removed first
+                if (conflicts.removals.length > 0) {
+                    await sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch();
+                }
 
-            // Add the initial event into the calendar
-            var record = await sails.models.schedule.create(event).fetch();
-
-            // Remove records which should be removed first
-            if (conflicts.removals.length > 0) {
-                await sails.models.schedule.destroy({ID: conflicts.removals.map((removal) => removal.scheduleID)}).fetch();
-            }
-
-            // Now, add overrides
-            if (conflicts.additions.length > 0) {
-                conflicts.additions.map((override) => {
-                    (async (override2) => {
-                        override2.overriddenID = !override2.overriddenID ? record.ID : override2.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
-                        await sails.models.schedule.create(override2).fetch();
-                    })(override);
-                })
-            }
+                // Now, add overrides
+                if (conflicts.additions.length > 0) {
+                    conflicts.additions.map((override) => {
+                        (async (override2) => {
+                            override2.overriddenID = !override2.overriddenID ? record.ID : override2.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
+                            await sails.models.schedule.create(override2).fetch();
+                        })(override);
+                    })
+                }
+            }, [ { insert: event } ]);
 
             // Success
             return exits.success();

@@ -632,58 +632,57 @@ function updateCalendar () {
     selectedOption = parseInt(selectedOption);
 
     // Process events for the next 7 days
-    var events = calendardb.getEvents(moment().add(selectedOption, 'days').startOf('day'), moment().add(selectedOption + 1, 'days').startOf('day'));
+    calendardb.getEvents((events) => {
+        var html = '';
 
-    var html = '';
+        // Run through every event in memory and add appropriate ones into our formatted calendar variable.
+        events
+            .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(meta.meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(meta.meta.time).startOf(`day`).add(selectedOption, `days`)))
+            .map(event => {
+                try {
+                    var colorClass = `secondary`;
+                    var iconClass = 'far fa-calendar-alt';
 
-    // Run through every event in memory and add appropriate ones into our formatted calendar variable.
-    events
-        .filter(event => [ 'event', 'onair-booking', 'prod-booking', 'office-hours' ].indexOf(event.type) === -1 && moment(event.start).isSameOrBefore(moment(meta.meta.time).startOf(`day`).add(selectedOption + 1, `days`)) && moment(event.start).isSameOrAfter(moment(meta.meta.time).startOf(`day`).add(selectedOption, `days`)))
-        .map(event => {
-            try {
-                var colorClass = `secondary`;
-                var iconClass = 'far fa-calendar-alt';
+                    switch (event.type) {
+                        case 'genre':
+                        case 'playlist':
+                            colorClass = 'primary';
+                            iconClass = 'fas fa-music';
+                            break;
+                        case 'show':
+                            colorClass = 'danger';
+                            iconClass = 'fas fa-microphone';
+                            break;
+                        case 'sports':
+                            colorClass = 'success';
+                            iconClass = 'fas fa-basketball-ball';
+                            break;
+                        case 'remote':
+                            colorClass = 'purple';
+                            iconClass = 'fas fa-broadcast-tower';
+                            break;
+                        case 'prerecord':
+                            colorClass = 'pink';
+                            iconClass = 'fas fa-play-circle';
+                            break;
+                    }
 
-                switch (event.type) {
-                    case 'genre':
-                    case 'playlist':
-                        colorClass = 'primary';
-                        iconClass = 'fas fa-music';
-                        break;
-                    case 'show':
-                        colorClass = 'danger';
-                        iconClass = 'fas fa-microphone';
-                        break;
-                    case 'sports':
-                        colorClass = 'success';
-                        iconClass = 'fas fa-basketball-ball';
-                        break;
-                    case 'remote':
-                        colorClass = 'purple';
-                        iconClass = 'fas fa-broadcast-tower';
-                        break;
-                    case 'prerecord':
-                        colorClass = 'pink';
-                        iconClass = 'fas fa-play-circle';
-                        break;
-                }
+                    if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1) { colorClass = 'dark' }
 
-                if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1) { colorClass = 'dark' }
+                    var badgeInfo
+                    if ([ 'canceled-changed' ].indexOf(event.scheduleType) !== -1) {
+                        badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
+                    }
+                    if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+                        badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
+                    }
+                    if ([ 'canceled', 'canceled-system' ].indexOf(event.scheduleType) !== -1) {
+                        badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
+                    }
 
-                var badgeInfo
-                if ([ 'canceled-changed' ].indexOf(event.scheduleType) !== -1) {
-                    badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
-                }
-                if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && (event.newTime !== null || event.duration !== null)) {
-                    badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
-                }
-                if ([ 'canceled', 'canceled-system' ].indexOf(event.scheduleType) !== -1) {
-                    badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
-                }
+                    var shouldBeDark = [ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1 || moment().isAfter(moment(event.end))
 
-                var shouldBeDark = [ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1 || moment().isAfter(moment(event.end))
-
-                html += `<div class="col-md-4 col-lg-3">
+                    html += `<div class="col-md-4 col-lg-3">
                 <div class="p-2 card card-${colorClass} card-outline${shouldBeDark ? ` bg-secondary` : ``}">
                   <div class="card-body box-profile">
                     <div class="text-center">
@@ -707,22 +706,23 @@ function updateCalendar () {
                   </div>
                 </div>
               </div>`
-            } catch (e) {
-                console.error(e)
-                $(document).Toasts('create', {
-                    class: 'bg-danger',
-                    title: 'calendar error',
-                    body: 'There was an error in the updateCalendar function, event mapping. Please report this to engineer@wwsu1069.org.',
-                    icon: 'fas fa-skull-crossbones fa-lg',
-                });
-            }
-        })
+                } catch (e) {
+                    console.error(e)
+                    $(document).Toasts('create', {
+                        class: 'bg-danger',
+                        title: 'calendar error',
+                        body: 'There was an error in the updateCalendar function, event mapping. Please report this to engineer@wwsu1069.org.',
+                        icon: 'fas fa-skull-crossbones fa-lg',
+                    });
+                }
+            })
 
-    $('#schedule-events').html(html);
+        $('#schedule-events').html(html);
 
-    for (var i = 1; i < 7; i++) {
-        $(`#schedule-select-${i}`).html(moment(meta.meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
-    }
+        for (var i = 1; i < 7; i++) {
+            $(`#schedule-select-${i}`).html(moment(meta.meta.time).startOf(`day`).add(i, 'days').format(`dddd MM/DD`))
+        }
+    }, moment().add(selectedOption, 'days').startOf('day'), moment().add(selectedOption + 1, 'days').startOf('day'));
 }
 
 /**
@@ -731,62 +731,61 @@ function updateCalendar () {
  * @param {string} showID Unique ID of the event to show
  */
 function displayEventInfo (showID) {
-    var events = calendardb.getEvents(undefined, moment().add(7, 'days'));
+    calendardb.getEvents((events) => {
+        events = events.filter((event) => event.unique === showID);
+        if (events.length === 0) {
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'calendar error',
+                subtitle: showID,
+                body: 'There was an error trying to load that event. Please report this to engineer@wwsu1069.org.',
+                icon: 'fas fa-skull-crossbones fa-lg',
+            });
+            return null;
+        }
+        var event = events[ 0 ]
+        viewingEvent = event;
+        var colorClass = `secondary`;
+        var iconClass = 'far fa-calendar-alt';
 
-    events = events.filter((event) => event.unique === showID);
-    if (events.length === 0) {
-        $(document).Toasts('create', {
-            class: 'bg-danger',
-            title: 'calendar error',
-            subtitle: showID,
-            body: 'There was an error trying to load that event. Please report this to engineer@wwsu1069.org.',
-            icon: 'fas fa-skull-crossbones fa-lg',
-        });
-        return null;
-    }
-    var event = events[ 0 ]
-    viewingEvent = event;
-    var colorClass = `secondary`;
-    var iconClass = 'far fa-calendar-alt';
+        switch (event.type) {
+            case 'genre':
+            case 'playlist':
+                colorClass = 'primary';
+                iconClass = 'fas fa-music';
+                break;
+            case 'show':
+                colorClass = 'danger';
+                iconClass = 'fas fa-microphone';
+                break;
+            case 'sports':
+                colorClass = 'success';
+                iconClass = 'fas fa-basketball-ball';
+                break;
+            case 'remote':
+                colorClass = 'purple';
+                iconClass = 'fas fa-broadcast-tower';
+                break;
+            case 'prerecord':
+                colorClass = 'pink';
+                iconClass = 'fas fa-play-circle';
+                break;
+        }
 
-    switch (event.type) {
-        case 'genre':
-        case 'playlist':
-            colorClass = 'primary';
-            iconClass = 'fas fa-music';
-            break;
-        case 'show':
-            colorClass = 'danger';
-            iconClass = 'fas fa-microphone';
-            break;
-        case 'sports':
-            colorClass = 'success';
-            iconClass = 'fas fa-basketball-ball';
-            break;
-        case 'remote':
-            colorClass = 'purple';
-            iconClass = 'fas fa-broadcast-tower';
-            break;
-        case 'prerecord':
-            colorClass = 'pink';
-            iconClass = 'fas fa-play-circle';
-            break;
-    }
+        if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1) { colorClass = 'dark' }
 
-    if ([ 'canceled', 'canceled-system', 'canceled-changed' ].indexOf(event.scheduleType) !== -1) { colorClass = 'dark' }
+        var badgeInfo
+        if ([ 'canceled-changed' ].indexOf(event.scheduleType) !== -1) {
+            badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
+        }
+        if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+            badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
+        }
+        if ([ 'canceled', 'canceled-system' ].indexOf(event.scheduleType) !== -1) {
+            badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
+        }
 
-    var badgeInfo
-    if ([ 'canceled-changed' ].indexOf(event.scheduleType) !== -1) {
-        badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
-    }
-    if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && (event.newTime !== null || event.duration !== null)) {
-        badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
-    }
-    if ([ 'canceled', 'canceled-system' ].indexOf(event.scheduleType) !== -1) {
-        badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`
-    }
-
-    $('#modal-eventinfo-body').html(`<div class="p-2 card card-${colorClass} card-outline">
+        $('#modal-eventinfo-body').html(`<div class="p-2 card card-${colorClass} card-outline">
       <div class="card-body box-profile">
         <div class="text-center">
         ${event.logo !== null ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">` : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`}
@@ -814,55 +813,56 @@ function displayEventInfo (showID) {
       </div>
     </div>`);
 
-    // If a device ID was provided from the WWSU mobile app
-    if (!notificationsSupported && !isMobile) {
-        $('#modal-eventinfo-subscribe-once').css('display', 'none');
-        $('#modal-eventinfo-unsubscribe').css('display', '');
-        $('#modal-eventinfo-subscribe-all').css('display', 'none');
-        $('#modal-eventinfo-unsubscribe').prop('disabled', true);
-        $('#modal-eventinfo-unsubscribe').html(`Browser does not support notifications`);
-    } else if (device !== null) {
-        // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
-
-        // Check the number of subscriptions
-        var subscribed = subscriptions.countSubscribed(event.unique, event.calendarID);
-
-        if (subscribed === 0) {
-            $('#modal-eventinfo-subscribe-once').css('display', '');
-            $('#modal-eventinfo-unsubscribe').css('display', 'none');
-            $('#modal-eventinfo-subscribe-all').css('display', '');
-            $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
-            $('#modal-eventinfo-unsubscribe').prop('disabled', false);
-            $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
-        } else {
+        // If a device ID was provided from the WWSU mobile app
+        if (!notificationsSupported && !isMobile) {
             $('#modal-eventinfo-subscribe-once').css('display', 'none');
             $('#modal-eventinfo-unsubscribe').css('display', '');
             $('#modal-eventinfo-subscribe-all').css('display', 'none');
-            $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
+            $('#modal-eventinfo-unsubscribe').prop('disabled', true);
+            $('#modal-eventinfo-unsubscribe').html(`Browser does not support notifications`);
+        } else if (device !== null) {
+            // Determine the types of subscriptions to search for to see if the user is already subscribed to this event.
+
+            // Check the number of subscriptions
+            var subscribed = subscriptions.countSubscribed(event.unique, event.calendarID);
+
+            if (subscribed === 0) {
+                $('#modal-eventinfo-subscribe-once').css('display', '');
+                $('#modal-eventinfo-unsubscribe').css('display', 'none');
+                $('#modal-eventinfo-subscribe-all').css('display', '');
+                $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
+                $('#modal-eventinfo-unsubscribe').prop('disabled', false);
+                $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
+            } else {
+                $('#modal-eventinfo-subscribe-once').css('display', 'none');
+                $('#modal-eventinfo-unsubscribe').css('display', '');
+                $('#modal-eventinfo-subscribe-all').css('display', 'none');
+                $('#modal-eventinfo-subscribe-all').html(`Subscribe All Times`);
+                $('#modal-eventinfo-unsubscribe').prop('disabled', false);
+                $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
+            }
+        } else if (!isMobile) {
+            $('#modal-eventinfo-subscribe-once').css('display', 'none');
+            $('#modal-eventinfo-unsubscribe').css('display', 'none');
+            $('#modal-eventinfo-subscribe-all').css('display', '');
+            $('#modal-eventinfo-subscribe-all').html(`Prompt for Notifications`);
             $('#modal-eventinfo-unsubscribe').prop('disabled', false);
             $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
-        }
-    } else if (!isMobile) {
-        $('#modal-eventinfo-subscribe-once').css('display', 'none');
-        $('#modal-eventinfo-unsubscribe').css('display', 'none');
-        $('#modal-eventinfo-subscribe-all').css('display', '');
-        $('#modal-eventinfo-subscribe-all').html(`Prompt for Notifications`);
-        $('#modal-eventinfo-unsubscribe').prop('disabled', false);
-        $('#modal-eventinfo-unsubscribe').html(`Unsubscribe All Times`);
 
-        $(`#modal-eventinfo-subscribe-all`).click((event) => {
-            OneSignal.showSlidedownPrompt({ force: true })
-            $('#modal-eventinfo').modal('hide');
-        });
-        $(`#modal-eventinfo-subscribe-all`).keypress((event) => {
-            if (event.which === 13) {
+            $(`#modal-eventinfo-subscribe-all`).click((event) => {
                 OneSignal.showSlidedownPrompt({ force: true })
                 $('#modal-eventinfo').modal('hide');
-            }
-        })
-    }
+            });
+            $(`#modal-eventinfo-subscribe-all`).keypress((event) => {
+                if (event.which === 13) {
+                    OneSignal.showSlidedownPrompt({ force: true })
+                    $('#modal-eventinfo').modal('hide');
+                }
+            })
+        }
 
-    $('#modal-eventinfo').modal('show');
+        $('#modal-eventinfo').modal('show');
+    }, undefined, moment().add(7, 'days'));
 }
 
 /**

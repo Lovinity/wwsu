@@ -1,5 +1,5 @@
-if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
-    console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
+if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
+    console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, WWSUqueue, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
 }
 
 // Use local time instead of UTC for scheduling
@@ -19,6 +19,8 @@ class CalendarDb {
         this.schedule = new WWSUdb(TAFFY());
         this.calendar.db.insert(calendar);
         this.schedule.db.insert(schedule);
+
+        this.queue = new WWSUqueue();
     }
 
     /**
@@ -41,15 +43,20 @@ class CalendarDb {
 
     /**
      * Get an array of upcoming events taking place within the provided parameters. It's recommended to set a start date 1 day earlier.
-     * // TODO: Convert to non-blocking event loop
      * 
+     * @param {?function} callback If provided, will be processed in an event queue and fire this callback when done. If not provided, function will process without event queue and return events.
      * @param {string} start ISO String of the earliest date/time allowed for an event's start time
      * @param {string} end ISO string of the latest date/time allowed for an event's end time
      * @param {object} query Filter results by the provided TAFFY query
      * @param {WWSUdb} scheduledb If provided, will use the scheduledb provided. Otherwise, will use the CalendarDb one.
-     * @returns {array} Array of events. See processRecord for object structure.
+     * @param {function} progressCallback Function fired after every task. Contains two number paramaters: Number of tasks completed, and total number of tasks.
+     * @returns {?array} If callback not provided, function will return events.
      */
-    getEvents (start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}, scheduledb = this.schedule) {
+    getEvents (callback = null, start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}, scheduledb = this.schedule, progressCallback = () => { }) {
+        // Event loop
+        var tasks = 0;
+        var tasksCompleted = 0;
+
         var events = [];
 
         // Extension of this.processRecord to also determine if the event falls within the start and end times.
@@ -69,167 +76,22 @@ class CalendarDb {
             }
         }
 
-        // Get all calendar events and process their schedules
-        var results = this.calendar.db(query).get();
-        results.map((calendar, index) => {
-
-            // Define a sort function for schedule types that prioritizes certain types above others in the event of multiple overrides.
-            var scheduleCompare = (a, b) => {
-                if (a.scheduleType === 'canceled' && b.scheduleType !== 'canceled') return -1;
-                if (b.scheduleType === 'canceled' && a.scheduleType !== 'canceled') return 1;
-                if (a.scheduleType === 'canceled-system' && b.scheduleType !== 'canceled-system') return -1;
-                if (b.scheduleType === 'canceled-system' && a.scheduleType !== 'canceled-system') return 1;
-                if (a.scheduleType === 'updated-system' && b.scheduleType !== 'updated-system') return -1;
-                if (b.scheduleType === 'updated-system' && a.scheduleType !== 'updated-system') return 1;
-                if (a.scheduleType === 'updated' && b.scheduleType !== 'updated') return -1;
-                if (b.scheduleType === 'updated' && a.scheduleType !== 'updated') return 1;
-                if (a.scheduleType === 'canceled-changed' && b.scheduleType !== 'canceled-changed') return -1;
-                if (b.scheduleType === 'canceled-changed' && a.scheduleType !== 'canceled-changed') return 1;
-                if (a.ID < b.ID) return -1;
-                if (b.ID < a.ID) return 1;
-                return 0;
-            }
-
-            // First, get regular and unscheduled events
-            var regularEvents = scheduledb.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled', undefined ] }).get();
-            regularEvents.map((schedule, ind) => {
-
-                // Polyfill any schedule overridden information with the main calendar event for use with schedule overrides
-                var tempCal = Object.assign({}, calendar);
-                for (var stuff in schedule) {
-                    if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
-                        if (typeof schedule[ stuff ] !== 'undefined' && schedule[ stuff ] !== null)
-                            tempCal[ stuff ] = schedule[ stuff ];
-                    }
-                }
-
-                // First, process one-time dates/times
-                if (schedule.oneTime && schedule.oneTime.length > 0) {
-                    schedule.oneTime.map((oneTime) => {
-                        var tempSchedules = [];
-                        var scheduleIDs = [];
-                        try {
-                            // Get schedule overrides if they exist
-                            var scheduleOverrides = scheduledb.db(function () {
-                                return this.calendarID === calendar.ID && this.scheduleID === schedule.ID && this.scheduleType && this.scheduleType !== 'unscheduled' && this.originalTime && moment(this.originalTime).isSame(moment(oneTime), 'minute');
-                            }).get() || [];
-                            if (scheduleOverrides.length > 0) {
-                                scheduleOverrides.map((exc) => {
-                                    scheduleIDs.push(exc.ID);
-                                    tempSchedules.push(exc);
-
-                                    // For updated records, add a canceled-changed record into the events so people know the original time was changed.
-                                    if ([ "updated", "updated-system" ].indexOf(exc.scheduleType) !== -1 && exc.newTime) {
-                                        _processRecord(tempCal, { calendarID: calendar.ID, ID: schedule.ID, scheduleType: 'canceled-changed', scheduleReason: `Rescheduled to ${moment(exc.newTime).format("lll")}` }, exc.originalTime);
-                                    }
-                                })
-                            }
-                        } catch (e) {
-                            console.error(e);
-                        }
-
-                        // Merge all schedule overrides into one according to scheduleCompare priorities
-                        if (tempSchedules.length > 0) {
-                            var tempEvent = {};
-                            tempSchedules.sort(scheduleCompare).reverse();
-                            tempSchedules.map((ts) => {
-                                for (var stuff in ts) {
-                                    if (Object.prototype.hasOwnProperty.call(ts, stuff)) {
-                                        if (typeof ts[ stuff ] !== 'undefined' && ts[ stuff ] !== null)
-                                            tempEvent[ stuff ] = ts[ stuff ];
-                                    }
-                                }
-                            });
-                            _processRecord(tempCal, tempEvent, oneTime);
-                        } else {
-                            _processRecord(calendar, schedule, oneTime);
-                        }
-                    });
-                }
-
-                // Next, process recurring schedules if hours is not null (if hours is null, we should never process this even if DW or M is not null)
-                if (schedule.recurH && schedule.recurH.length > 0) {
-                    // Null value denotes all values for Days of Week
-                    if (!schedule.recurDW || schedule.recurDW.length === 0) schedule.recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
-
-                    // Format minute into an array for proper processing in later.js
-                    if (!schedule.recurM) schedule.recurM = 0;
-
-                    // Generate later schedule
-                    var laterSchedule = later.schedule({ schedules: [ { "dw": schedule.recurDW, "h": schedule.recurH, "m": [ schedule.recurM ] } ] });
-
-                    var beginAt = start;
-
-                    // Loop through each schedule between start and end
-                    while (moment(beginAt).isBefore(moment(end))) {
-                        var tempSchedules = [];
-                        var scheduleIDs = [];
-
-                        // Determine next start date/time. Bail if there are no more. Set beginAt to the next minute so we avoid infinite loops.
-                        var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
-                        if (!eventStart) break;
-                        beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
-
-                        // RecurDM, recurWM, and recurEvery not supported by later.js; do it ourselves
-                        // RecurDM
-                        if (schedule.recurDM && schedule.recurDM.length > 0 && schedule.recurDM.indexOf(moment(eventStart).date()) === -1) {
-                            continue;
-                        }
-
-                        // RecurWM
-                        if (schedule.recurWM && schedule.recurWM.length > 0) {
-                            var lastWeek = moment(eventStart).month() !== moment(eventStart).add(1, 'weeks').month();
-                            // 0 = last week of the month
-                            if (schedule.recurWM.indexOf(this.weekOfMonth(eventStart)) === -1 && (!lastWeek || schedule.recurWM.indexOf(0) === -1)) {
-                                continue;
-                            }
-                        }
-
-                        // RecurEvery
-                        if (moment(eventStart).week() % (schedule.recurEvery || 1) !== 0) {
-                            continue;
-                        }
-
-                        // Get schedule overrides if they exist
-                        try {
-                            var scheduleOverrides = scheduledb.db(function () {
-                                return this.calendarID === calendar.ID && this.scheduleID === schedule.ID && this.scheduleType && this.scheduleType !== 'unscheduled' && this.originalTime && moment(this.originalTime).isSame(moment(eventStart), 'minute');
-                            }).get() || [];
-                            if (scheduleOverrides.length > 0) {
-                                scheduleOverrides.map((exc) => {
-                                    scheduleIDs.push(exc.ID);
-                                    tempSchedules.push(exc);
-
-                                    // For updated records, add a canceled-changed record into the events so people know the original time was changed.
-                                    if ([ "updated", "updated-system" ].indexOf(exc.scheduleType) !== -1 && exc.newTime) {
-                                        _processRecord(calendar, { calendarID: calendar.ID, ID: schedule.ID, scheduleType: 'canceled-changed', scheduleReason: `Rescheduled to ${moment(exc.newTime).format("lll")}` }, exc.originalTime);
-                                    }
-                                })
-                            }
-                        } catch (e) {
-                            console.error(e);
-                        }
-
-                        // Merge all schedule overrides into one according to scheduleCompare priorities
-                        if (tempSchedules.length > 0) {
-                            var tempEvent = {};
-                            tempSchedules.sort(scheduleCompare).reverse();
-                            tempSchedules.map((ts) => {
-                                for (var stuff in ts) {
-                                    if (Object.prototype.hasOwnProperty.call(ts, stuff)) {
-                                        if (typeof ts[ stuff ] !== 'undefined' && ts[ stuff ] !== null)
-                                            tempEvent[ stuff ] = ts[ stuff ];
-                                    }
-                                }
-                            });
-                            _processRecord(tempCal, tempEvent, eventStart);
-                        } else {
-                            _processRecord(calendar, schedule, eventStart);
-                        }
-                    }
-                }
-            });
-        });
+        // Define a sort function for schedule types that prioritizes certain types above others in the event of multiple overrides.
+        var scheduleCompare = (a, b) => {
+            if (a.scheduleType === 'canceled' && b.scheduleType !== 'canceled') return -1;
+            if (b.scheduleType === 'canceled' && a.scheduleType !== 'canceled') return 1;
+            if (a.scheduleType === 'canceled-system' && b.scheduleType !== 'canceled-system') return -1;
+            if (b.scheduleType === 'canceled-system' && a.scheduleType !== 'canceled-system') return 1;
+            if (a.scheduleType === 'updated-system' && b.scheduleType !== 'updated-system') return -1;
+            if (b.scheduleType === 'updated-system' && a.scheduleType !== 'updated-system') return 1;
+            if (a.scheduleType === 'updated' && b.scheduleType !== 'updated') return -1;
+            if (b.scheduleType === 'updated' && a.scheduleType !== 'updated') return 1;
+            if (a.scheduleType === 'canceled-changed' && b.scheduleType !== 'canceled-changed') return -1;
+            if (b.scheduleType === 'canceled-changed' && a.scheduleType !== 'canceled-changed') return 1;
+            if (a.ID < b.ID) return -1;
+            if (b.ID < a.ID) return 1;
+            return 0;
+        }
 
         // Define a comparison function that will order calendar events by start time when we run the iteration
         var compare = function (a, b) {
@@ -244,67 +106,268 @@ class CalendarDb {
             }
         }
 
-        return events.sort(compare);
+        // Get all calendar events and process their schedules
+        var results = this.calendar.db(query).get();
+        results.map((calendar) => {
+            // Add to task queue
+            tasks++;
+            if (callback) {
+                this.queue.add(() => {
+                    processCalendarEntry(calendar);
+                });
+            } else {
+                processCalendarEntry(calendar);
+            }
+        });
+
+        // Calendar function
+        var processCalendarEntry = (calendar) => {
+            // Get regular and unscheduled events
+            var regularEvents = scheduledb.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled', undefined ] }).get();
+            regularEvents.map((schedule) => {
+                // Add to task queue
+                tasks++;
+                if (callback) {
+                    this.queue.add(() => {
+                        processScheduleEntry(calendar, schedule);
+                    });
+                } else {
+                    processScheduleEntry(calendar, schedule);
+                }
+            });
+            taskComplete();
+        }
+
+        // Schedule function
+        var processScheduleEntry = (calendar, schedule) => {
+            // Polyfill any schedule overridden information with the main calendar event for use with schedule overrides
+            var tempCal = Object.assign({}, calendar);
+            for (var stuff in schedule) {
+                if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
+                    if (typeof schedule[ stuff ] !== 'undefined' && schedule[ stuff ] !== null)
+                        tempCal[ stuff ] = schedule[ stuff ];
+                }
+            }
+
+            // First, process one-time dates/times
+            if (schedule.oneTime && schedule.oneTime.length > 0) {
+                schedule.oneTime.map((oneTime) => {
+                    var tempSchedules = [];
+                    var scheduleIDs = [];
+                    try {
+                        // Get schedule overrides if they exist
+                        var scheduleOverrides = scheduledb.db(function () {
+                            return this.calendarID === calendar.ID && this.scheduleID === schedule.ID && this.scheduleType && this.scheduleType !== 'unscheduled' && this.originalTime && moment(this.originalTime).isSame(moment(oneTime), 'minute');
+                        }).get() || [];
+                        if (scheduleOverrides.length > 0) {
+                            scheduleOverrides.map((exc) => {
+                                scheduleIDs.push(exc.ID);
+                                tempSchedules.push(exc);
+
+                                // For updated records, add a canceled-changed record into the events so people know the original time was changed.
+                                if ([ "updated", "updated-system" ].indexOf(exc.scheduleType) !== -1 && exc.newTime) {
+                                    _processRecord(tempCal, { calendarID: calendar.ID, ID: schedule.ID, scheduleType: 'canceled-changed', scheduleReason: `Rescheduled to ${moment(exc.newTime).format("lll")}` }, exc.originalTime);
+                                }
+                            })
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+
+                    // Merge all schedule overrides into one according to scheduleCompare priorities
+                    if (tempSchedules.length > 0) {
+                        var tempEvent = {};
+                        tempSchedules.sort(scheduleCompare).reverse();
+                        tempSchedules.map((ts) => {
+                            for (var stuff in ts) {
+                                if (Object.prototype.hasOwnProperty.call(ts, stuff)) {
+                                    if (typeof ts[ stuff ] !== 'undefined' && ts[ stuff ] !== null)
+                                        tempEvent[ stuff ] = ts[ stuff ];
+                                }
+                            }
+                        });
+                        _processRecord(tempCal, tempEvent, oneTime);
+                    } else {
+                        _processRecord(calendar, schedule, oneTime);
+                    }
+                });
+            }
+
+            // Next, process recurring schedules if hours is not null (if hours is null, we should never process this even if DW or M is not null)
+            if (schedule.recurH && schedule.recurH.length > 0) {
+                // Null value denotes all values for Days of Week
+                if (!schedule.recurDW || schedule.recurDW.length === 0) schedule.recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
+
+                // Format minute into an array for proper processing in later.js
+                if (!schedule.recurM) schedule.recurM = 0;
+
+                // Generate later schedule
+                var laterSchedule = later.schedule({ schedules: [ { "dw": schedule.recurDW, "h": schedule.recurH, "m": [ schedule.recurM ] } ] });
+
+                var beginAt = start;
+
+                // Loop through each schedule between start and end
+                while (moment(beginAt).isBefore(moment(end))) {
+                    var tempSchedules = [];
+                    var scheduleIDs = [];
+
+                    // Determine next start date/time. Bail if there are no more. Set beginAt to the next minute so we avoid infinite loops.
+                    var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
+                    if (!eventStart) break;
+                    beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
+
+                    // RecurDM, recurWM, and recurEvery not supported by later.js; do it ourselves
+                    // RecurDM
+                    if (schedule.recurDM && schedule.recurDM.length > 0 && schedule.recurDM.indexOf(moment(eventStart).date()) === -1) {
+                        continue;
+                    }
+
+                    // RecurWM
+                    if (schedule.recurWM && schedule.recurWM.length > 0) {
+                        var lastWeek = moment(eventStart).month() !== moment(eventStart).add(1, 'weeks').month();
+                        // 0 = last week of the month
+                        if (schedule.recurWM.indexOf(this.weekOfMonth(eventStart)) === -1 && (!lastWeek || schedule.recurWM.indexOf(0) === -1)) {
+                            continue;
+                        }
+                    }
+
+                    // RecurEvery
+                    if (moment(eventStart).week() % (schedule.recurEvery || 1) !== 0) {
+                        continue;
+                    }
+
+                    // Get schedule overrides if they exist
+                    try {
+                        var scheduleOverrides = scheduledb.db(function () {
+                            return this.calendarID === calendar.ID && this.scheduleID === schedule.ID && this.scheduleType && this.scheduleType !== 'unscheduled' && this.originalTime && moment(this.originalTime).isSame(moment(eventStart), 'minute');
+                        }).get() || [];
+                        if (scheduleOverrides.length > 0) {
+                            scheduleOverrides.map((exc) => {
+                                scheduleIDs.push(exc.ID);
+                                tempSchedules.push(exc);
+
+                                // For updated records, add a canceled-changed record into the events so people know the original time was changed.
+                                if ([ "updated", "updated-system" ].indexOf(exc.scheduleType) !== -1 && exc.newTime) {
+                                    _processRecord(calendar, { calendarID: calendar.ID, ID: schedule.ID, scheduleType: 'canceled-changed', scheduleReason: `Rescheduled to ${moment(exc.newTime).format("lll")}` }, exc.originalTime);
+                                }
+                            })
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+
+                    // Merge all schedule overrides into one according to scheduleCompare priorities
+                    if (tempSchedules.length > 0) {
+                        var tempEvent = {};
+                        tempSchedules.sort(scheduleCompare).reverse();
+                        tempSchedules.map((ts) => {
+                            for (var stuff in ts) {
+                                if (Object.prototype.hasOwnProperty.call(ts, stuff)) {
+                                    if (typeof ts[ stuff ] !== 'undefined' && ts[ stuff ] !== null)
+                                        tempEvent[ stuff ] = ts[ stuff ];
+                                }
+                            }
+                        });
+                        _processRecord(tempCal, tempEvent, eventStart);
+                    } else {
+                        _processRecord(calendar, schedule, eventStart);
+                    }
+                }
+            }
+            taskComplete();
+        }
+
+        var taskComplete = () => {
+            tasksCompleted++;
+            progressCallback(tasksCompleted, tasks);
+            if (tasksCompleted === tasks && callback) {
+                callback(events.sort(compare));
+            }
+        }
+
+        if (!callback)
+            return events;
     }
 
     /**
      * Return an array of events scheduled to be on the air, or permitted to go on the air right now.
-     * 
+     *
+     * @param {?function} callback If provided, will be executed in a queue and callback fired on completion. If not provided, will return array.
      * @param {boolean} automationOnly If true, only prerecords, genres, and playlists will be returned.
-     * @returns {array} Array of events allowed / scheduled to go on the air. See processRecord for object structure.
+     * @param {function} progressCallback Function called after every task is completed. Parameters are tasks completed, and total tasks.
+     * @returns {?array} If callback not provided, will return array of events scheduled.
      */
-    whatShouldBePlaying (automationOnly = false) {
-        var events = this.getEvents(undefined, undefined, { active: true });
-        if (events.length > 0) {
-            var compare = function (a, b) {
-                try {
-                    if (a.priority > b.priority) { return -1 };
-                    if (a.priority < b.priority) { return 1 };
-                    if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
-                    if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
-                    if (a.ID < b.ID) { return -1 }
-                    if (a.ID > b.ID) { return 1 }
-                    return 0
-                } catch (e) {
-                    console.error(e)
+    whatShouldBePlaying (callback = null, automationOnly = false, progressCallback = () => { }) {
+        var afterFunction = (events) => {
+            if (events.length > 0) {
+                var compare = function (a, b) {
+                    try {
+                        if (a.priority > b.priority) { return -1 };
+                        if (a.priority < b.priority) { return 1 };
+                        if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
+                        if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
+                        if (a.ID < b.ID) { return -1 }
+                        if (a.ID > b.ID) { return 1 }
+                        return 0
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+                events = events.sort(compare);
+
+                var returnData = [];
+
+                events
+                    .filter((event) => {
+
+                        // Canceled events should not be playing
+                        if (event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system' || event.scheduleType === 'canceled-changed') return false;
+
+                        // Return events depending on whether or not we want only automation events
+                        if (automationOnly) {
+                            return (event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end));
+                        } else {
+                            // Allow 5 minutes early for non-automation shows.
+                            return (((event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end))) || ((event.type === 'show' || event.type === 'sports' || event.type === 'remote') && moment().add(5, 'minutes').isSameOrAfter(moment(event.start)) && moment().add(5, 'minutes').isBefore(moment(event.end)))) && event.active;
+                        }
+                    })
+                    .map((event) => {
+                        if (event && event.unique)
+                            returnData.push(event);
+                    })
+                if (callback) {
+                    callback(returnData);
+                } else {
+                    return returnData;
+                }
+            } else {
+                if (callback) {
+                    callback([]);
+                } else {
+                    return [];
                 }
             }
-            events = events.sort(compare);
+        }
 
-            var returnData = [];
-
-            events
-                .filter((event) => {
-
-                    // Canceled events should not be playing
-                    if (event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system' || event.scheduleType === 'canceled-changed') return false;
-
-                    // Return events depending on whether or not we want only automation events
-                    if (automationOnly) {
-                        return (event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end));
-                    } else {
-                        // Allow 5 minutes early for non-automation shows.
-                        return (((event.type === 'prerecord' || event.type === 'genre' || event.type === 'playlist') && moment().isSameOrAfter(moment(event.start)) && moment().isBefore(moment(event.end))) || ((event.type === 'show' || event.type === 'sports' || event.type === 'remote') && moment().add(5, 'minutes').isSameOrAfter(moment(event.start)) && moment().add(5, 'minutes').isBefore(moment(event.end)))) && event.active;
-                    }
-                })
-                .map((event) => {
-                    if (event && event.unique)
-                        returnData.push(event);
-                })
-
-            return returnData;
+        if (callback) {
+            this.getEvents(afterFunction, undefined, undefined, { active: true }, undefined, progressCallback);
         } else {
-            return [];
+            return afterFunction(this.getEvents(null, undefined, undefined, { active: true }, undefined));
         }
     }
 
     /**
      * Check for conflicts that would arise if we performed the provided schedule queries. Do this BEFORE adding/editing/deleting records!
      * 
+     * @param {?function} callback If provided, will run in queue and function fired when all tasks completed. Otherwise, will return conflicts.
      * @param {array} queries Array of WWSUdb queries we want to perform on schedule; insert and update should be run through verify first!
-     * @returns {object} {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
+     * @param {function} progressCallback Function fired on every task completion. Contains two parameters: tasks completed, and total tasks.
+     * @returns {?object} If callback not provided, returns conflicts object {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
-    checkConflicts (queries = []) {
+    checkConflicts (callback = null, queries = [], progressCallback = () => { }) {
+        // Start with 1 task; initialization
+        var tasks = 1;
+        var tasksCompleted = 1;
 
         // Prepare a copy of the current schedule
         var vschedule = new WWSUdb(TAFFY());
@@ -435,7 +498,6 @@ class CalendarDb {
 
                         // Polyfill calendar and schedule information
                         var event = this.scheduleToEvent(query[ key ], vschedule);
-                        console.dir(event);
 
                         // Determine start and end times for conflict checking
                         if (query[ key ].originalTime) {
@@ -475,8 +537,13 @@ class CalendarDb {
                     }
                 }
             });
-        } else { // No queries? We cannot do conflict checking
-            return { removals: [], additions: [], errors: [ 'You must provide at least one query to do conflict checking' ] };
+        } else { // No queries? We cannot do conflict checking. Fire callback and return.
+            if (callback) {
+                callback({ removals: [], additions: [], errors: [ 'You must provide at least one query to do conflict checking' ] });
+                return;
+            } else {
+                return { removals: [], additions: [], errors: [ 'You must provide at least one query to do conflict checking' ] };
+            }
         }
 
         if (!start) start = moment();
@@ -489,71 +556,112 @@ class CalendarDb {
         // BEGIN actual conflict checking below
 
         // Get events with virtual schedule
-        var events = this.getEvents(moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule);
+        if (callback) {
+            this.getEvents(eventsCall, moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule, (_tasksCompleted, _tasks) => {
+                tasks = _tasks * 2; // Double this because getEvents is only one of two major parts of the task queue.
+                tasksCompleted = _tasksCompleted;
+                taskComplete();
 
-        // Now, go through every event for conflict checking
-        try {
-            events
-                .map((event, index) => {
-
-                    // If this schedule was created as an override, we need to check to see if the override is still valid
-                    if (event.overriddenID) {
-                        // Find the original event
-                        var record = events.find((eventb) => eventb.ID === event.overriddenID);
-
-                        // If we could not find it, the override is invalid, so we can remove it and not continue beyond this point for the event.
-                        if (!record) {
-                            removals.push(event);
-                            return;
-                        }
-                    }
-
-                    // Iterate conflict checking on every event after the index
-                    events
-                        .filter((ev, ind) => ind > index)
-                        .map((ev) => {
-                            checkAndResolveConflicts(event, ev);
-                        });
-                });
-        } catch (e) {
-            errors.push(e.message);
+                // Reset number of tasks when getEvents is about to be done. This will be updated properly in the events callback.
+                if (_tasksCompleted === _tasks) {
+                    tasks = _tasks;
+                }
+            });
+        } else {
+            eventsCall(this.getEvents(null, moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule));
+            return { removals, additions, errors };
         }
 
-        return { removals, additions, errors };
+        var eventsCall = (events) => {
+            // Now, go through every event for conflict checking
+            events
+                .map((event, index) => {
+                    // Add to task queue
+                    tasks++;
+                    this.queue.add(() => {
+                        processEvent(events, event, index);
+                    });
+                });
+        }
+
+        var processEvent = (events, event, index) => {
+            // If this schedule was created as an override, we need to check to see if the override is still valid
+            if (event.overriddenID) {
+                // Find the original event
+                var record = events.find((eventb) => eventb.ID === event.overriddenID);
+
+                // If we could not find it, the override is invalid, so we can remove it and not continue beyond this point for the event.
+                if (!record) {
+                    removals.push(event);
+                    taskComplete();
+                    return;
+                }
+            }
+
+            // Iterate conflict checking on every event after the index
+            events
+                .filter((ev, ind) => ind > index)
+                .map((ev) => {
+                    try {
+                        checkAndResolveConflicts(event, ev);
+                    } catch (e) {
+                        errors.push(e.message);
+                    }
+                });
+
+            taskComplete();
+        }
+
+        var taskComplete = () => {
+            tasksCompleted++;
+            progressCallback(tasksCompleted, tasks);
+            if (tasksCompleted === tasks && callback) {
+                callback({ removals, additions, errors });
+            }
+        }
     }
 
     /**
      * Check which directors are scheduled to be in the office at this time +- 30 minutes.
-     * @returns {array} Array of office-hours events matching directors scheduled to be in. See processRecord for structure.
+     * 
+     * @param {?function} callback If provided, function will run in queue and call this function with office-hours array when done.
+     * @param {function} progressCallback Function called after every task executed. Contains two parameters: tasks completed, and total tasks.
+     * @returns {?array} If callback not provided, will return array of office-hours on the schedule.
      */
-    whoShouldBeIn () {
-        var events = this.getEvents(undefined, undefined, { active: true });
-        if (events.length > 0) {
-            var compare = function (a, b) {
-                try {
-                    if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
-                    if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
-                    if (a.ID < b.ID) { return -1 }
-                    if (a.ID > b.ID) { return 1 }
-                    return 0
-                } catch (e) {
-                    console.error(e)
+    whoShouldBeIn (callback = null, progressCallback = () => { }) {
+        var afterFunction = (events) => {
+            if (events.length > 0) {
+                var compare = function (a, b) {
+                    try {
+                        if (moment(a.start).valueOf() < moment(b.start).valueOf()) { return -1 }
+                        if (moment(a.start).valueOf() > moment(b.start).valueOf()) { return 1 }
+                        if (a.ID < b.ID) { return -1 }
+                        if (a.ID > b.ID) { return 1 }
+                        return 0
+                    } catch (e) {
+                        console.error(e)
+                    }
                 }
+                events = events.sort(compare);
+
+                events = events
+                    .filter((event) => {
+
+                        if (event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system' || event.scheduleType === 'canceled-changed') return false;
+
+                        // Return directors who are expected to come in in the next 30 minutes as well
+                        return (event.type === 'office-hours' && moment().add(30, 'minutes').isSameOrAfter(moment(event.start))) && moment().isBefore(moment(event.end)) && event.active;
+                    });
+
+                callback(events);
+            } else {
+                callback([]);
             }
-            events = events.sort(compare);
-
-            events = events
-                .filter((event) => {
-
-                    if (event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system' || event.scheduleType === 'canceled-changed') return false;
-
-                    // Return directors who are expected to come in in the next 30 minutes as well
-                    return (event.type === 'office-hours' && moment().add(30, 'minutes').isSameOrAfter(moment(event.start))) && moment().isBefore(moment(event.end)) && event.active;
-                });
-
-            return events;
+        }
+        if (callback) {
+            this.getEvents(afterFunction, undefined, undefined, { active: true }, undefined, progressCallback);
         } else {
-            return [];
+            return afterFunction(this.getEvents(null, undefined, undefined, { active: true }, undefined));
         }
     }
 

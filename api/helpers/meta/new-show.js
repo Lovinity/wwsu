@@ -27,7 +27,7 @@ module.exports = {
         var calendar;
 
         // Get the event that should be on the air right now
-        var _eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(false);
+        var _eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(null, false);
         var eventNow;
 
         var exception;

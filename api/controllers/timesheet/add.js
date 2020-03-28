@@ -74,22 +74,23 @@ module.exports = {
         thetime = moment(inputs.timestamp)
 
         // Check if an office hours record exists.
-        var calendar = sails.models.calendar.calendardb.whoShouldBeIn();
-        if (calendar.length > 0)
-          calendar = calendar.filter((cal) => cal.director === record.ID);
+        sails.models.calendar.calendardb.whoShouldBeIn(async (calendar) => {
+          if (calendar.length > 0)
+            calendar = calendar.filter((cal) => cal.director === record.ID);
 
 
-        // If the entry is less than 30 minutes off from the current time, approve automatically
-        if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
+          // If the entry is less than 30 minutes off from the current time, approve automatically
+          if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
 
-        // Clock-ins need a new entry
-        await sails.models.timesheet.create({ name: record.name, unique: calendar[ 0 ] ? calendar[ 0 ].unique : null, scheduledIn: calendar[ 0 ] ? moment(calendar[ 0 ].start).toISOString(true) : null, scheduledOut: calendar[ 0 ] ? moment(calendar[ 0 ].end).toISOString(true) : null, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
+          // Clock-ins need a new entry
+          await sails.models.timesheet.create({ name: record.name, unique: calendar[ 0 ] ? calendar[ 0 ].unique : null, scheduledIn: calendar[ 0 ] ? moment(calendar[ 0 ].start).toISOString(true) : null, scheduledOut: calendar[ 0 ] ? moment(calendar[ 0 ].end).toISOString(true) : null, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
 
-        // Update the director presence
-        await sails.models.directors.update({ ID: record.ID }, { present: true, since: thetime.toISOString(true) })
-          .fetch()
+          // Update the director presence
+          await sails.models.directors.update({ ID: record.ID }, { present: true, since: thetime.toISOString(true) })
+            .fetch()
 
-        if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'Timesheet Needs Approved in DJ Controls', `${record.name}'s timesheet, beginning on ${moment(thetime).format('LLLL')}, has been flagged and needs reviewed/approved because the director set their clock-in time more than 30 minutes from the current time.`) }
+          if (toapprove === 0) { await sails.helpers.onesignal.sendMass('accountability-directors', 'Timesheet Needs Approved in DJ Controls', `${record.name}'s timesheet, beginning on ${moment(thetime).format('LLLL')}, has been flagged and needs reviewed/approved because the director set their clock-in time more than 30 minutes from the current time.`) }
+        });
       }
       return exits.success()
     } catch (e) {

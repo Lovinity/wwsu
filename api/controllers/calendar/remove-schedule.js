@@ -15,32 +15,25 @@ module.exports = {
     fn: async function (inputs, exits) {
         sails.log.debug('Controller calendar/remove-schedule called.')
         try {
-            // Load the event
-            var record = await sails.models.schedule.findOne({ ID: inputs.ID });
-
             // Check for event conflicts
-            var conflicts = sails.models.calendar.calendardb.checkConflicts([ { remove: inputs.ID } ]);
+            sails.models.calendar.calendardb.checkConflicts((conflicts) => {
+                // Destroy the schedule event
+                await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
 
-            // If there were errors, exit on the error
-            if (conflicts.errors && conflicts.errors.length > 0)
-                return exits.success(conflicts.errors);
+                // Remove records which should be removed first
+                if (conflicts.removals.length > 0) {
+                    await sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch();
+                }
 
-            // Destroy the schedule event
-            await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
-
-            // Remove records which should be removed first
-            if (conflicts.removals.length > 0) {
-                await sails.models.schedule.destroy({ID: conflicts.removals.map((removal) => removal.scheduleID)}).fetch();
-            }
-
-            // Now, add overrides
-            if (conflicts.additions.length > 0) {
-                conflicts.additions.map((override) => {
-                    (async (override2) => {
-                        await sails.models.schedule.create(override2).fetch();
-                    })(override);
-                })
-            }
+                // Now, add overrides
+                if (conflicts.additions.length > 0) {
+                    conflicts.additions.map((override) => {
+                        (async (override2) => {
+                            await sails.models.schedule.create(override2).fetch();
+                        })(override);
+                    })
+                }
+            }, [ { remove: inputs.ID } ]);
 
             return exits.success();
         } catch (e) {
