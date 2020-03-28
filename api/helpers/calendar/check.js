@@ -27,7 +27,7 @@ module.exports = {
             sails.log.debug(`Calendar integrity started`);
             var status = 5;
             var issues = [];
-            sails.models.calendar.calendardb.getEvents(async (event) => {
+            sails.models.calendar.calendardb.getEvents(async (events) => {
                 sails.log.debug(`Calendar integrity events retrieved for the next 14 days.`);
 
                 if (events && events.length > 0) {
