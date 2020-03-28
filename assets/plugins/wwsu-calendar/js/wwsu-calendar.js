@@ -161,6 +161,14 @@ class CalendarDb {
             }
         }
 
+        var taskComplete = () => {
+            tasksCompleted++;
+            progressCallback(tasksCompleted, tasks);
+            if (tasksCompleted === tasks && callback) {
+                callback(events.sort(compare));
+            }
+        }
+
         // Schedule function
         var processScheduleEntry = (calendar, schedule) => {
             // Polyfill any schedule overridden information with the main calendar event for use with schedule overrides
@@ -331,14 +339,6 @@ class CalendarDb {
                 processCalendarEntry(calendar);
             }
         });
-
-        var taskComplete = () => {
-            tasksCompleted++;
-            progressCallback(tasksCompleted, tasks);
-            if (tasksCompleted === tasks && callback) {
-                callback(events.sort(compare));
-            }
-        }
 
         if (!callback)
             return events;
@@ -536,6 +536,14 @@ class CalendarDb {
             }
         }
 
+        var taskComplete = () => {
+            tasksCompleted++;
+            progressCallback(tasksCompleted, tasks);
+            if (tasksCompleted === tasks && callback) {
+                callback({ removals, additions, errors });
+            }
+        }
+
         if (queries.length > 0) {
 
             // Process virtual queries
@@ -666,14 +674,6 @@ class CalendarDb {
                 });
 
             taskComplete();
-        }
-
-        var taskComplete = () => {
-            tasksCompleted++;
-            progressCallback(tasksCompleted, tasks);
-            if (tasksCompleted === tasks && callback) {
-                callback({ removals, additions, errors });
-            }
         }
     }
 
