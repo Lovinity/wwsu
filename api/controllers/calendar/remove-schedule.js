@@ -16,7 +16,7 @@ module.exports = {
         sails.log.debug('Controller calendar/remove-schedule called.')
         try {
             // Check for event conflicts
-            sails.models.calendar.calendardb.checkConflicts((conflicts) => {
+            sails.models.calendar.calendardb.checkConflicts(async (conflicts) => {
                 // Destroy the schedule event
                 await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
 
