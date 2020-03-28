@@ -51,8 +51,7 @@ module.exports = {
                             cohostDJ2: sails.models.meta.memory.cohostDJ2,
                             cohostDJ3: sails.models.meta.memory.cohostDJ3,
                             hosts: hosts,
-                            name: name,
-                            startDate: moment().toISOString(true)
+                            name: name
                         }).fetch();
                         // If a calendar event does exist, use the first one returned and also re-activate it if it was deactivated.
                     } else {
@@ -84,8 +83,7 @@ module.exports = {
                             cohostDJ2: sails.models.meta.memory.cohostDJ2,
                             cohostDJ3: sails.models.meta.memory.cohostDJ3,
                             hosts: hosts,
-                            name: name,
-                            startDate: moment().toISOString(true)
+                            name: name
                         }).fetch();
                     } else {
                         calendar = calendar[ 0 ];
@@ -111,8 +109,7 @@ module.exports = {
                             type: 'sports',
                             active: true,
                             priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'sports' }),
-                            name: name,
-                            startDate: moment().toISOString(true)
+                            name: name
                         }).fetch();
                     } else {
                         calendar = calendar[ 0 ];
@@ -142,8 +139,7 @@ module.exports = {
                             cohostDJ2: sails.models.meta.memory.cohostDJ2,
                             cohostDJ3: sails.models.meta.memory.cohostDJ3,
                             hosts: hosts,
-                            name: name,
-                            startDate: moment().toISOString(true)
+                            name: name
                         }).fetch();
                     } else {
                         calendar = calendar[ 0 ];
@@ -174,8 +170,7 @@ module.exports = {
                             cohostDJ2: sails.models.meta.memory.cohostDJ2,
                             cohostDJ3: sails.models.meta.memory.cohostDJ3,
                             hosts: hosts,
-                            name: name,
-                            startDate: moment().toISOString(true)
+                            name: name
                         }).fetch();
                     } else {
                         calendar = calendar[ 0 ];
@@ -201,8 +196,7 @@ module.exports = {
                             active: true,
                             priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'genre' }),
                             hosts: "Unknown Hosts",
-                            name: sails.models.meta.memory.genre,
-                            startDate: moment().toISOString(true)
+                            name: sails.models.meta.memory.genre
                         }).fetch();
                     } else {
                         calendar = calendar[ 0 ];

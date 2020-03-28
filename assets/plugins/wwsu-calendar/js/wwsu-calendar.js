@@ -53,7 +53,7 @@ if (typeof require !== 'undefined') {
     console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, WWSUqueue, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
 }
 
-if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' ||  typeof later === 'undefined' || typeof moment === 'undefined') {
+if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
     console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, WWSUqueue, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
 }
 
@@ -159,38 +159,6 @@ class CalendarDb {
             } catch (e) {
                 console.error(e)
             }
-        }
-
-        // Get all calendar events and process their schedules
-        var results = this.calendar.db(query).get();
-        results.map((calendar) => {
-            // Add to task queue
-            tasks++;
-            if (callback) {
-                this.queue.add(() => {
-                    processCalendarEntry(calendar);
-                });
-            } else {
-                processCalendarEntry(calendar);
-            }
-        });
-
-        // Calendar function
-        var processCalendarEntry = (calendar) => {
-            // Get regular and unscheduled events
-            var regularEvents = scheduledb.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled', undefined ] }).get();
-            regularEvents.map((schedule) => {
-                // Add to task queue
-                tasks++;
-                if (callback) {
-                    this.queue.add(() => {
-                        processScheduleEntry(calendar, schedule);
-                    });
-                } else {
-                    processScheduleEntry(calendar, schedule);
-                }
-            });
-            taskComplete();
         }
 
         // Schedule function
@@ -331,6 +299,38 @@ class CalendarDb {
             }
             taskComplete();
         }
+
+        // Calendar function
+        var processCalendarEntry = (calendar) => {
+            // Get regular and unscheduled events
+            var regularEvents = scheduledb.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled', undefined ] }).get();
+            regularEvents.map((schedule) => {
+                // Add to task queue
+                tasks++;
+                if (callback) {
+                    this.queue.add(() => {
+                        processScheduleEntry(calendar, schedule);
+                    });
+                } else {
+                    processScheduleEntry(calendar, schedule);
+                }
+            });
+            taskComplete();
+        }
+
+        // Get all calendar events and process their schedules
+        var results = this.calendar.db(query).get();
+        results.map((calendar) => {
+            // Add to task queue
+            tasks++;
+            if (callback) {
+                this.queue.add(() => {
+                    processCalendarEntry(calendar);
+                });
+            } else {
+                processCalendarEntry(calendar);
+            }
+        });
 
         var taskComplete = () => {
             tasksCompleted++;

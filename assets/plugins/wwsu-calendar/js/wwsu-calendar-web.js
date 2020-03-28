@@ -106,38 +106,6 @@ class CalendarDb {
             }
         }
 
-        // Get all calendar events and process their schedules
-        var results = this.calendar.db(query).get();
-        results.map((calendar) => {
-            // Add to task queue
-            tasks++;
-            if (callback) {
-                this.queue.add(() => {
-                    processCalendarEntry(calendar);
-                });
-            } else {
-                processCalendarEntry(calendar);
-            }
-        });
-
-        // Calendar function
-        var processCalendarEntry = (calendar) => {
-            // Get regular and unscheduled events
-            var regularEvents = scheduledb.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled', undefined ] }).get();
-            regularEvents.map((schedule) => {
-                // Add to task queue
-                tasks++;
-                if (callback) {
-                    this.queue.add(() => {
-                        processScheduleEntry(calendar, schedule);
-                    });
-                } else {
-                    processScheduleEntry(calendar, schedule);
-                }
-            });
-            taskComplete();
-        }
-
         // Schedule function
         var processScheduleEntry = (calendar, schedule) => {
             // Polyfill any schedule overridden information with the main calendar event for use with schedule overrides
@@ -276,6 +244,38 @@ class CalendarDb {
             }
             taskComplete();
         }
+
+        // Calendar function
+        var processCalendarEntry = (calendar) => {
+            // Get regular and unscheduled events
+            var regularEvents = scheduledb.db({ calendarID: calendar.ID, scheduleType: [ null, 'unscheduled', undefined ] }).get();
+            regularEvents.map((schedule) => {
+                // Add to task queue
+                tasks++;
+                if (callback) {
+                    this.queue.add(() => {
+                        processScheduleEntry(calendar, schedule);
+                    });
+                } else {
+                    processScheduleEntry(calendar, schedule);
+                }
+            });
+            taskComplete();
+        }
+
+        // Get all calendar events and process their schedules
+        var results = this.calendar.db(query).get();
+        results.map((calendar) => {
+            // Add to task queue
+            tasks++;
+            if (callback) {
+                this.queue.add(() => {
+                    processCalendarEntry(calendar);
+                });
+            } else {
+                processCalendarEntry(calendar);
+            }
+        });
 
         var taskComplete = () => {
             tasksCompleted++;
