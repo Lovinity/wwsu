@@ -74,17 +74,7 @@ module.exports = {
         banner: {
             type: 'string',
             allowNull: true
-        },
-
-        startDate: {
-            type: 'ref',
-            columnType: 'date',
-        },
-
-        endDate: {
-            type: 'ref',
-            columnType: 'date',
-        },
+        }
 
     },
 
@@ -108,8 +98,6 @@ module.exports = {
                 description: inputs.description,
                 logo: inputs.logo,
                 banner: inputs.banner,
-                startDate: inputs.start,
-                endDate: inputs.end,
             }
 
             try {

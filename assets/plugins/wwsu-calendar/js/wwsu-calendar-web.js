@@ -555,6 +555,19 @@ class CalendarDb {
 
         // BEGIN actual conflict checking below
 
+        // Function called when we get all events for checking
+        var eventsCall = (events) => {
+            // Now, go through every event for conflict checking
+            events
+                .map((event, index) => {
+                    // Add to task queue
+                    tasks++;
+                    this.queue.add(() => {
+                        processEvent(events, event, index);
+                    });
+                });
+        }
+
         // Get events with virtual schedule
         if (callback) {
             this.getEvents(eventsCall, moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule, (_tasksCompleted, _tasks) => {
@@ -570,18 +583,6 @@ class CalendarDb {
         } else {
             eventsCall(this.getEvents(null, moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule));
             return { removals, additions, errors };
-        }
-
-        var eventsCall = (events) => {
-            // Now, go through every event for conflict checking
-            events
-                .map((event, index) => {
-                    // Add to task queue
-                    tasks++;
-                    this.queue.add(() => {
-                        processEvent(events, event, index);
-                    });
-                });
         }
 
         var processEvent = (events, event, index) => {

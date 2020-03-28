@@ -88,16 +88,6 @@ module.exports = {
         banner: {
             type: 'string',
             allowNull: true
-        },
-
-        startDate: {
-            type: 'ref',
-            columnType: 'date',
-        },
-
-        endDate: {
-            type: 'ref',
-            columnType: 'date',
         }
     },
 
