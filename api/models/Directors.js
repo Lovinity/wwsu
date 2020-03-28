@@ -62,6 +62,26 @@ module.exports = {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`directors socket: ${data}`)
     sails.sockets.broadcast('directors', 'directors', data)
+
+    // Create or activate office-hours calendar event for this director
+    sails.models.calendar.findOrCreate({ type: 'office-hours', director: newlyCreatedRecord.ID }, {
+      type: 'office-hours',
+      active: true,
+      priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'office-hours' }),
+      hosts: newlyCreatedRecord.name,
+      name: newlyCreatedRecord.name,
+      director: newlyCreatedRecord.ID,
+    })
+      .exec((err, record, wasCreated) => {
+        if (!wasCreated)
+          (async (_record) => {
+            await sails.models.calendar.update({ ID: _record.ID }, {
+              active: true,
+              priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'office-hours' }),
+            }).fetch();
+          })(record);
+      });
+
     return proceed()
   },
 
@@ -74,34 +94,34 @@ module.exports = {
     var temp;
     var temp2;
 
-      // Update host data in calendar and schedule
-      temp = (async () => {
-        records = await sails.models.calendar.find({ director: updatedRecord.ID });
-        if (records.length > 0) {
-          records.map(async (record) => {
-            try {
-              let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
-              await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
-            } catch (e) {
-              sails.log.error(e);
-            }
-          });
-        }
-      })()
+    // Update host data in calendar and schedule
+    temp = (async () => {
+      records = await sails.models.calendar.find({ director: updatedRecord.ID });
+      if (records.length > 0) {
+        records.map(async (record) => {
+          try {
+            let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
+            await sails.models.calendar.update({ ID: record.ID }, { hosts: hosts }).fetch();
+          } catch (e) {
+            sails.log.error(e);
+          }
+        });
+      }
+    })()
 
-      temp2 = (async () => {
-        records = await sails.models.schedule.find({ director: updatedRecord.ID });
-        if (records.length > 0) {
-          records.map(async (record) => {
-            try {
-              let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
-              await sails.models.schedule.update({ ID: record.ID }, { hosts: hosts }).fetch();
-            } catch (e) {
-              sails.log.error(e);
-            }
-          });
-        }
-      })()
+    temp2 = (async () => {
+      records = await sails.models.schedule.find({ director: updatedRecord.ID });
+      if (records.length > 0) {
+        records.map(async (record) => {
+          try {
+            let hosts = await sails.helpers.calendar.generateHosts({ director: record.ID });
+            await sails.models.schedule.update({ ID: record.ID }, { hosts: hosts }).fetch();
+          } catch (e) {
+            sails.log.error(e);
+          }
+        });
+      }
+    })()
     return proceed()
   },
 
