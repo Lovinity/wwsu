@@ -499,7 +499,7 @@ class CalendarDb {
             var newRecord = {
                 calendarID: overridden.calendarID,
                 scheduleID: overridden.scheduleID,
-                overriddenID: overrides.ID || null,
+                overriddenID: overrides.scheduleID || null,
                 type: overridden.type,
                 hosts: overridden.hosts,
                 name: overridden.name
