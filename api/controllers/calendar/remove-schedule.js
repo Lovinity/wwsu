@@ -20,16 +20,30 @@ module.exports = {
                 sails.sockets.broadcast('schedule', 'upbeat', conflicts);
 
                 // Destroy the schedule event
-                await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
+                try {
+                    await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
+                } catch (e) {
+                    sails.sockets.broadcast('schedule', 'upbeat', e);
+                }
+
+                sails.sockets.broadcast('schedule', 'upbeat', `Past destruction`);
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
-                    await sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch();
+                    sails.sockets.broadcast('schedule', 'upbeat', `removals present`);
+                    sails.sockets.broadcast('schedule', 'upbeat', conflicts.removals.map((removal) => removal.scheduleID));
+                    try {
+                        await sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch();
+                    } catch (e) {
+                        sails.sockets.broadcast('schedule', 'upbeat', e);
+                    }
                 }
+
+                sails.sockets.broadcast('schedule', 'upbeat', `Past removals`);
 
                 // Now, add overrides
                 if (conflicts.additions.length > 0) {
-                    sails.sockets.broadcast('schedule', 'upbeat', `Additions`);
+                    sails.sockets.broadcast('schedule', 'upbeat', `Additions present`);
                     conflicts.additions.map((override) => {
                         sails.sockets.broadcast('schedule', 'upbeat', override);
                         (async (override2) => {
@@ -37,7 +51,7 @@ module.exports = {
                             try {
                                 await sails.models.schedule.create(override2).fetch();
                             } catch (e) {
-                                sails.sockets.broadcast('schedule', 'upbeat', e.message);
+                                sails.sockets.broadcast('schedule', 'upbeat', e);
                             }
                         })(override);
                     })
