@@ -58,7 +58,8 @@ module.exports = {
             { cohostDJ1: updatedRecord.ID },
             { cohostDJ2: updatedRecord.ID },
             { cohostDJ3: updatedRecord.ID },
-          ]
+          ],
+          active: true
         });
         if (records.length > 0) {
           records.map(async (record) => {
@@ -111,7 +112,8 @@ module.exports = {
             { cohostDJ1: destroyedRecord.ID },
             { cohostDJ2: destroyedRecord.ID },
             { cohostDJ3: destroyedRecord.ID },
-          ]
+          ],
+          active: true
         });
         if (records.length > 0) {
           maps = records.map(async (record) => {

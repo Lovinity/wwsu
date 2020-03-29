@@ -96,7 +96,7 @@ module.exports = {
 
     // Update host data in calendar and schedule
     temp = (async () => {
-      records = await sails.models.calendar.find({ director: updatedRecord.ID });
+      records = await sails.models.calendar.find({ director: updatedRecord.ID, active: true });
       if (records.length > 0) {
         records.map(async (record) => {
           try {
@@ -134,7 +134,7 @@ module.exports = {
 
     // Deactivate office hours events for this director. Update all other events using this director ID to null director.
     (async () => {
-      records = await sails.models.calendar.find({ director: destroyedRecord.ID });
+      records = await sails.models.calendar.find({ director: destroyedRecord.ID, active: true });
       if (records.length > 0) {
         records.map(async (record) => {
           try {

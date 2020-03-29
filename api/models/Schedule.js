@@ -370,7 +370,7 @@ module.exports = {
 
         })(destroyedRecord);
 
-        return proceed()
+        return proceed();
     }
 
 }

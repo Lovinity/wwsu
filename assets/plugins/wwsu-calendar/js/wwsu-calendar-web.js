@@ -496,10 +496,11 @@ class CalendarDb {
         if (queries.length > 0) {
 
             // Process virtual queries
-            queries.map((query) => {
+            queries.forEach((_query) => {
+                var query = Object.assign({}, _query);
                 if (typeof query.remove !== 'undefined') {
                     query.remove = vschedule.db({ ID: query.remove }).first();
-                    vschedule.query(query.remove.ID);
+                    vschedule.query({ remove: query.remove.ID });
                 } else {
                     vschedule.query(query);
                 }
