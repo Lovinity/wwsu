@@ -16,7 +16,7 @@ module.exports = {
         scheduleType: {
             type: 'string',
             isIn: [ 'unscheduled', 'updated', 'canceled', 'updated-system', 'canceled-system' ],
-            required: true
+            allowNull: true
         },
         scheduleReason: {
             type: 'string',
@@ -103,7 +103,7 @@ module.exports = {
                 var valid = true;
                 if (value.length > 0) {
                     value.map((val) => {
-                        if (!DateTime.fromISO(value).isValid)
+                        if (!moment(val).isValid())
                             valid = false;
                     })
                 }
@@ -113,12 +113,16 @@ module.exports = {
 
         startDate: {
             type: 'ref',
-            columnType: 'date',
+            custom: function (value) {
+                return moment(value).isValid();
+            },
         },
 
         endDate: {
             type: 'ref',
-            columnType: 'date',
+            custom: function (value) {
+                return moment(value).isValid();
+            }
         },
 
         recurDM: {
