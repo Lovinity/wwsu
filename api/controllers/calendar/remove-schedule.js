@@ -20,41 +20,18 @@ module.exports = {
                 sails.sockets.broadcast('schedule', 'upbeat', conflicts);
 
                 // Destroy the schedule event
-                sails.sockets.broadcast('schedule', 'upbeat', `Pre destruction`);
-                sails.models.schedule.destroyOne({ ID: inputs.ID })
-                    .exec(function (err) {
-                        sails.sockets.broadcast('schedule', 'upbeat', `Past destruction A`);
-                        sails.sockets.broadcast('schedule', 'upbeat', err);
-                    });
-
-                sails.sockets.broadcast('schedule', 'upbeat', `Past destruction B`);
+                // Note: async does not seem to callback afterDestroy for this model.
+                sails.models.schedule.destroyOne({ ID: inputs.ID }).exec(() => { })
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
-                    sails.sockets.broadcast('schedule', 'upbeat', `removals present`);
-                    sails.sockets.broadcast('schedule', 'upbeat', conflicts.removals.map((removal) => removal.scheduleID));
-                    try {
-                        await sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch();
-                    } catch (e) {
-                        sails.sockets.broadcast('schedule', 'upbeat', e);
-                    }
+                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec(() => { });
                 }
-
-                sails.sockets.broadcast('schedule', 'upbeat', `Past removals`);
 
                 // Now, add overrides
                 if (conflicts.additions.length > 0) {
-                    sails.sockets.broadcast('schedule', 'upbeat', `Additions present`);
                     conflicts.additions.map((override) => {
-                        sails.sockets.broadcast('schedule', 'upbeat', override);
-                        (async (override2) => {
-                            sails.sockets.broadcast('schedule', 'upbeat', override2);
-                            try {
-                                await sails.models.schedule.create(override2).fetch();
-                            } catch (e) {
-                                sails.sockets.broadcast('schedule', 'upbeat', e);
-                            }
-                        })(override);
+                        sails.models.schedule.create(override).fetch().exec(() => { });
                     })
                 }
             }, [ { remove: inputs.ID } ]);
