@@ -103,11 +103,12 @@ class CalendarDb {
      * @param {string} start ISO String of the earliest date/time allowed for an event's start time
      * @param {string} end ISO string of the latest date/time allowed for an event's end time
      * @param {object} query Filter results by the provided TAFFY query
+     * @param {WWSUdb} calendardb If provided, will use the calendardb provided. Otherwise, will use the CalendarDb one.
      * @param {WWSUdb} scheduledb If provided, will use the scheduledb provided. Otherwise, will use the CalendarDb one.
      * @param {function} progressCallback Function fired after every task. Contains two number paramaters: Number of tasks completed, and total number of tasks.
      * @returns {?array} If callback not provided, function will return events.
      */
-    getEvents (callback = null, start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}, scheduledb = this.schedule, progressCallback = () => { }) {
+    getEvents (callback = null, start = moment().subtract(1, 'days').toISOString(true), end = moment().add(1, 'days').toISOString(true), query = {}, calendardb = this.calendar, scheduledb = this.schedule, progressCallback = () => { }) {
         // Event loop
         var tasks = 0;
         var tasksCompleted = 0;
@@ -331,7 +332,7 @@ class CalendarDb {
         }
 
         // Get all calendar events and process their schedules
-        var results = this.calendar.db(query).get();
+        var results = calendardb.db(query).get();
         results.map((calendar) => {
             // Add to task queue
             tasks++;
@@ -409,9 +410,9 @@ class CalendarDb {
         }
 
         if (callback) {
-            this.getEvents(afterFunction, undefined, undefined, { active: true }, undefined, progressCallback);
+            this.getEvents(afterFunction, undefined, undefined, { active: true }, undefined, undefined, progressCallback);
         } else {
-            return afterFunction(this.getEvents(null, undefined, undefined, { active: true }, undefined));
+            return afterFunction(this.getEvents(null, undefined, undefined, { active: true }));
         }
     }
 
@@ -419,7 +420,7 @@ class CalendarDb {
      * Check for conflicts that would arise if we performed the provided schedule queries. Do this BEFORE adding/editing/deleting records!
      * 
      * @param {?function} callback If provided, will run in queue and function fired when all tasks completed. Otherwise, will return conflicts.
-     * @param {array} queries Array of WWSUdb queries we want to perform on schedule; insert and update should be run through verify first!
+     * @param {array} queries Array of WWSUdb queries we want to perform on schedule; (insert, update, remove, updateCalendar, or removeCalendar).
      * @param {function} progressCallback Function fired on every task completion. Contains two parameters: tasks completed, and total tasks.
      * @returns {?object} If callback not provided, returns conflicts object {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
@@ -427,6 +428,10 @@ class CalendarDb {
         // Start with 1 task; initialization
         var tasks = 1;
         var tasksCompleted = 1;
+
+        // Prepare a copy of the current calendar
+        var vcalendar = new WWSUdb(TAFFY());
+        vcalendar.query(this.calendar.db().get(), true);
 
         // Prepare a copy of the current schedule
         var vschedule = new WWSUdb(TAFFY());
@@ -550,6 +555,35 @@ class CalendarDb {
 
         if (queries.length > 0) {
 
+            // Process updateCalendar or removeCalendar before we continue with anything else
+            queries
+                .filter((_query) => typeof _query.updateCalendar !== 'undefined' || typeof _query.removeCalendar !== 'undefined')
+                .map((_query, index) => {
+                    // Process the calendar update
+                    if (typeof _query.updateCalendar !== 'undefined') {
+                        vcalendar.query({ update: _query.updateCalendar });
+
+                        // Now, we need to remove updateCalendar from the query and replace it with all of its schedules as update queries.
+                        // That way, we can check all of its schedules for changes in conflicts resulting from changes in calendar defaults.
+                        var schedules = vschedule.db({ calendarID: _query.updateCalendar.ID }).get();
+                        queries.splice(index, 1);
+                        schedules.map((schedule) => {
+                            queries.push({ update: schedule });
+                        });
+                    }
+                    if (typeof _query.removeCalendar !== 'undefined') {
+                        vcalendar.query({ remove: _query.removeCalendar });
+
+                        // Remove the original removeCalendar query as we do not want to process it beyond this map.
+                        // We need to add all of the calendar's schedule records as remove queries since they will get removed too.
+                        var schedules = vschedule.db({ calendarID: _query.removeCalendar }).get();
+                        queries.splice(index, 1);
+                        schedules.map((schedule) => {
+                            queries.push({ remove: schedule.ID });
+                        });
+                    }
+                })
+
             // Process virtual queries
             queries.forEach((_query) => {
                 var query = Object.assign({}, _query);
@@ -636,7 +670,7 @@ class CalendarDb {
 
         // Get events with virtual schedule
         if (callback) {
-            this.getEvents(eventsCall, moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule, (_tasksCompleted, _tasks) => {
+            this.getEvents(eventsCall, moment(start).toISOString(true), moment(end).toISOString(true), {}, vcalendar, vschedule, (_tasksCompleted, _tasks) => {
                 tasks = _tasks * 2; // Double this because getEvents is only one of two major parts of the task queue.
                 tasksCompleted = _tasksCompleted;
                 taskComplete();
@@ -647,7 +681,7 @@ class CalendarDb {
                 }
             });
         } else {
-            eventsCall(this.getEvents(null, moment(start).toISOString(true), moment(end).toISOString(true), {}, vschedule));
+            eventsCall(this.getEvents(null, moment(start).toISOString(true), moment(end).toISOString(true), {}, vcalendar, vschedule));
             return { removals, additions, errors };
         }
 
@@ -718,9 +752,9 @@ class CalendarDb {
             }
         }
         if (callback) {
-            this.getEvents(afterFunction, undefined, undefined, { active: true }, undefined, progressCallback);
+            this.getEvents(afterFunction, undefined, undefined, { active: true }, undefined, undefined, progressCallback);
         } else {
-            return afterFunction(this.getEvents(null, undefined, undefined, { active: true }, undefined));
+            return afterFunction(this.getEvents(null, undefined, undefined, { active: true }));
         }
     }
 
