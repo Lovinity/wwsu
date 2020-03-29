@@ -131,7 +131,7 @@ module.exports = {
                 var valid = true;
                 if (value.length > 0) {
                     value.map((val) => {
-                        if (isNaN(value) || value < 1 || value > 31)
+                        if (isNaN(val) || val < 1 || val > 31)
                             valid = false;
                     })
                 }
@@ -145,7 +145,7 @@ module.exports = {
                 var valid = true;
                 if (value.length > 0) {
                     value.map((val) => {
-                        if (isNaN(value) || value < 0 || value > 5)
+                        if (isNaN(val) || val < 0 || val > 5)
                             valid = false;
                     })
                 }
@@ -159,7 +159,7 @@ module.exports = {
                 var valid = true;
                 if (value.length > 0) {
                     value.map((val) => {
-                        if (isNaN(value) || value < 1 || value > 7)
+                        if (isNaN(val) || val < 1 || val > 7)
                             valid = false;
                     })
                 }
@@ -173,7 +173,7 @@ module.exports = {
                 var valid = true;
                 if (value.length > 0) {
                     value.map((val) => {
-                        if (isNaN(value) || value < 0 || value > 23)
+                        if (isNaN(val) || val < 0 || val > 23)
                             valid = false;
                     })
                 }
