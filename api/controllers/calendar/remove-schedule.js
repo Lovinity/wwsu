@@ -20,13 +20,14 @@ module.exports = {
                 sails.sockets.broadcast('schedule', 'upbeat', conflicts);
 
                 // Destroy the schedule event
-                try {
-                    await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
-                } catch (e) {
-                    sails.sockets.broadcast('schedule', 'upbeat', e);
-                }
+                sails.sockets.broadcast('schedule', 'upbeat', `Pre destruction`);
+                sails.models.schedule.destroyOne({ ID: inputs.ID })
+                    .exec(function (err) {
+                        sails.sockets.broadcast('schedule', 'upbeat', `Past destruction A`);
+                        sails.sockets.broadcast('schedule', 'upbeat', err);
+                    });
 
-                sails.sockets.broadcast('schedule', 'upbeat', `Past destruction`);
+                sails.sockets.broadcast('schedule', 'upbeat', `Past destruction B`);
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
