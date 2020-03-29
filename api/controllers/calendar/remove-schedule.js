@@ -17,6 +17,8 @@ module.exports = {
         try {
             // Check for event conflicts
             sails.models.calendar.calendardb.checkConflicts(async (conflicts) => {
+                sails.sockets.broadcast('schedule', 'upbeat', conflicts);
+
                 // Destroy the schedule event
                 await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
 
