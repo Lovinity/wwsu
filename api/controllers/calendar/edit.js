@@ -135,7 +135,7 @@ module.exports = {
             sails.models.calendar.calendardb.checkConflicts(async (conflicts) => {
 
                 // Edit the event into the calendar
-                sails.models.calendar.updateOne({ID: inputs.ID}, event).exec(() => {});
+                sails.models.calendar.update({ID: inputs.ID}, event).fetch().exec(() => {});
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {

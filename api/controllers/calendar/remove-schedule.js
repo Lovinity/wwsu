@@ -21,7 +21,7 @@ module.exports = {
 
                 // Destroy the schedule event
                 // Note: async does not seem to callback afterDestroy for this model.
-                sails.models.schedule.destroyOne({ ID: inputs.ID }).exec(() => { })
+                sails.models.schedule.destroy({ ID: inputs.ID }).fetch().exec(() => { })
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
