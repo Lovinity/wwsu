@@ -265,14 +265,18 @@ module.exports = {
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
-                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec(() => { });
+                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec((err, records) => {
+                        sails.sockets.broadcast('schedule', 'debug', ['conflict destroy', err, records]);
+                    });
                 }
 
                 // Now, add overrides
                 if (conflicts.additions.length > 0) {
                     conflicts.additions.map((override) => {
                         override.overriddenID = !override.overriddenID ? record.ID : override.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
-                        sails.models.schedule.create(override).fetch().exec(() => { });
+                        sails.models.schedule.create(override).fetch().exec((err, records) => { 
+                            sails.sockets.broadcast('schedule', 'debug', ['conflict create', err, records]);
+                        });
                     })
                 }
             }, [ { insert: event } ]);

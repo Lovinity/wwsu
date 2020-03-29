@@ -135,17 +135,23 @@ module.exports = {
             sails.models.calendar.calendardb.checkConflicts(async (conflicts) => {
 
                 // Edit the event into the calendar
-                sails.models.calendar.update({ID: inputs.ID}, event).fetch().exec(() => {});
+                sails.models.calendar.updateOne({ID: inputs.ID}, event).exec((err, record) => {
+                    sails.sockets.broadcast('schedule', 'debug', ['calendar update', err, record]);
+                });
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
-                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec(() => {});
+                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec((err, record) => {
+                        sails.sockets.broadcast('schedule', 'debug', ['conflict destroy', err, record]);
+                    });
                 }
 
                 // Now, add overrides
                 if (conflicts.additions.length > 0) {
                     conflicts.additions.map((override) => {
-                            sails.models.schedule.create(override).fetch().exec(() => {});
+                            sails.models.schedule.create(override).fetch().exec((err, record) => {
+                                sails.sockets.broadcast('schedule', 'debug', ['conflict create', err, record]);
+                            });
                     })
                 }
 

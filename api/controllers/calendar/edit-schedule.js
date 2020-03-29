@@ -264,18 +264,24 @@ module.exports = {
             sails.models.calendar.calendardb.checkConflicts(async (conflicts) => {
 
                 // Add the initial event into the calendar
-                sails.models.schedule.update({ID: inputs.ID}, event).fetch().exec(() => {});
+                sails.models.schedule.updateOne({ID: inputs.ID}, event).exec((err, record) => {
+                    sails.sockets.broadcast('schedule', 'debug', ['updateOne', err, record]);
+                });
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
-                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec(() => { });
+                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec((err, record) => {
+                        sails.sockets.broadcast('schedule', 'debug', ['conflict destroy', err, record]);
+                    });
                 }
 
                 // Now, add overrides
                 if (conflicts.additions.length > 0) {
                     conflicts.additions.map((override) => {
                         override.overriddenID = !override.overriddenID ? inputs.ID : override.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
-                        sails.models.schedule.create(override).fetch().exec(() => { });
+                        sails.models.schedule.create(override).fetch().exec((err, record) => {
+                            sails.sockets.broadcast('schedule', 'debug', ['conflict create', err, record]);
+                        });
                     })
                 }
             }, [ { update: event } ]);
