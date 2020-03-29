@@ -572,7 +572,7 @@ class CalendarDb {
                                 start = moment(query[ key ].originalTime);
                             }
                             if (!end || moment(query[ key ].originalTime).isAfter(moment(end))) {
-                                end = moment(query[ key ].originalTime);
+                                end = moment(query[ key ].originalTime).add(event.duration, 'minutes');
                             }
                         }
                         if (query[ key ].newTime) {
@@ -580,7 +580,7 @@ class CalendarDb {
                                 start = moment(query[ key ].newTime);
                             }
                             if (!end || moment(query[ key ].newTime).isAfter(moment(end))) {
-                                end = moment(query[ key ].newTime);
+                                end = moment(query[ key ].newTime).add(event.duration, 'minutes');
                             }
                         }
                         if (query[ key ].oneTime && query[ key ].oneTime.length > 0) {
@@ -589,7 +589,7 @@ class CalendarDb {
                                     start = moment(ot);
                                 }
                                 if (!end || moment(ot).isAfter(moment(end))) {
-                                    end = moment(ot);
+                                    end = moment(ot).add(event.duration, 'minutes');
                                 }
                             });
                         }
@@ -598,7 +598,7 @@ class CalendarDb {
                                 start = moment(event.startDate);
                             }
                             if (!end || moment(event.endDate).isAfter(moment(end))) {
-                                end = moment(event.endDate);
+                                end = moment(event.endDate).add(event.duration, 'minutes');
                             }
                         }
                     }
@@ -615,10 +615,8 @@ class CalendarDb {
 
         if (!start) start = moment();
 
-        // If end is less than 1 day after start, make it 1 day after start for proper conflict checking
-        if (!end || moment(end).diff(moment(start), 'minutes') < (60 * 24)) {
-            end = moment(start).add(1, 'days');
-        }
+        // Make start 1 day sooner to account for any ongoing events
+        start = moment(start).subtract(1, 'days');
 
         // BEGIN actual conflict checking below
 
@@ -1045,22 +1043,22 @@ class CalendarDb {
         if (oneTime.length === 0) {
             recurDayString = `Every `;
         } else {
-            recurDayString = `On ${oneTime}`;
+            recurDayString = `On ${oneTime.join(", ")}`;
         }
 
         if (event.recurH && event.recurH.length > 0) {
             if (oneTime.length > 0) {
-                recurDayString = `... and every `;
+                recurDayString += `... and every `;
             }
 
             // Times
             recurAt = event.recurH.map((h) => `${h < 10 ? `0${h}` : h}:${event.recurM < 10 ? `0${event.recurM}` : event.recurM}`);
 
-            if (event.recurDM && event.recurDM.length > 0) {
+            if (event.recurDM && event.recurDM.length > 0 && event.recurDM.length < 31) {
                 var ifit = false;
                 recurDayString += `${event.recurDM.join(", ")} day(s) of the month`;
 
-                if (event.recurWM && event.recurWM.length > 0) {
+                if (event.recurWM && event.recurWM.length > 0 && event.recurWM.length < 5) {
                     if (!ifit) {
                         recurDayString += ` if`;
                         ifit = true;
@@ -1085,7 +1083,7 @@ class CalendarDb {
                     }).join(', ')} week of the month`
                 }
 
-                if (event.recurDW && event.recurDW.length > 0) {
+                if (event.recurDW && event.recurDW.length > 0 && event.recurDW.length < 7) {
                     if (!ifit) {
                         recurDayString += ` if`;
                         ifit = true;
@@ -1111,7 +1109,7 @@ class CalendarDb {
                         }
                     }).join(', ')}`
                 }
-            } else if (event.recurWM && event.recurWM.length > 0) {
+            } else if (event.recurWM && event.recurWM.length > 0 && event.recurWM.length < 5) {
                 recurDayString += `${event.recurWM.map((WM) => {
                     switch (WM) {
                         case 0:
@@ -1129,7 +1127,7 @@ class CalendarDb {
                     }
                 }).join(', ')} week(s) of the month`
 
-                if (event.recurDW && event.recurDW.length > 0) {
+                if (event.recurDW && event.recurDW.length > 0 && event.recurDW.length < 7) {
                     recurDayString += `, on ${event.recurDW.map((DW) => {
                         switch (DW) {
                             case 1:
@@ -1152,7 +1150,7 @@ class CalendarDb {
                     recurDayString += `, every day`;
                 }
             } else {
-                if (event.recurDW && event.recurDW.length > 0) {
+                if (event.recurDW && event.recurDW.length > 0 && event.recurDW.length < 7) {
                     recurDayString += `${event.recurDW.map((DW) => {
                         switch (DW) {
                             case 1:
