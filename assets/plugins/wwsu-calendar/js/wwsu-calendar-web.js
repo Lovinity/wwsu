@@ -504,30 +504,41 @@ class CalendarDb {
             queries
                 .filter((_query) => typeof _query.updateCalendar !== 'undefined' || typeof _query.removeCalendar !== 'undefined')
                 .map((_query, index) => {
+                    var query = Object.assign({}, _query);
                     // Process the calendar update
-                    if (typeof _query.updateCalendar !== 'undefined') {
-                        vcalendar.query({ update: _query.updateCalendar });
+                    if (typeof query.updateCalendar !== 'undefined') {
+                        vcalendar.query({ update: query.updateCalendar });
 
                         // Now, we need to remove updateCalendar from the query and replace it with all of its schedules as update queries.
                         // That way, we can check all of its schedules for changes in conflicts resulting from changes in calendar defaults.
-                        var schedules = vschedule.db({ calendarID: _query.updateCalendar.ID }).get();
+                        var schedules = vschedule.db({ calendarID: query.updateCalendar.ID }).get();
                         queries.splice(index, 1);
                         schedules.map((schedule) => {
                             queries.push({ update: schedule });
                         });
                     }
-                    if (typeof _query.removeCalendar !== 'undefined') {
-                        vcalendar.query({ remove: _query.removeCalendar });
+                    if (typeof query.removeCalendar !== 'undefined') {
+                        vcalendar.query({ remove: query.removeCalendar });
 
                         // Remove the original removeCalendar query as we do not want to process it beyond this map.
                         // We need to add all of the calendar's schedule records as remove queries since they will get removed too.
-                        var schedules = vschedule.db({ calendarID: _query.removeCalendar }).get();
+                        var schedules = vschedule.db({ calendarID: query.removeCalendar }).get();
                         queries.splice(index, 1);
                         schedules.map((schedule) => {
                             queries.push({ remove: schedule.ID });
                         });
                     }
                 })
+
+            // It is possible we edited or removed a calendar without any schedules, this the query is now empty. Exit if so; no more checks necessary.
+            if (queries.length === 0) {
+                if (callback) {
+                    callback({ removals: [], additions: [], errors: [] });
+                    return;
+                } else {
+                    return { removals: [], additions: [], errors: [] };
+                }
+            }
 
             // Process virtual queries
             queries.forEach((_query) => {
