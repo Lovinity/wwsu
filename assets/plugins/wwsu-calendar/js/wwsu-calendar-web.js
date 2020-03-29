@@ -366,13 +366,12 @@ class CalendarDb {
      * 
      * @param {?function} callback If provided, will run in queue and function fired when all tasks completed. Otherwise, will return conflicts.
      * @param {array} queries Array of WWSUdb queries we want to perform on schedule; (insert, update, remove, updateCalendar, or removeCalendar).
-     * @param {function} progressCallback Function fired on every task completion. Contains two parameters: tasks completed, and total tasks.
+     * @param {function} progressCallback Function fired on every task completion. Contains a single parameter with a descriptive string explaining the progress.
      * @returns {?object} If callback not provided, returns conflicts object {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
     checkConflicts (callback = null, queries = [], progressCallback = () => { }) {
-        // Start with 1 task; initialization
-        var tasks = 1;
-        var tasksCompleted = 1;
+        var tasks = 0;
+        var tasksCompleted = 0;
 
         // Prepare a copy of the current calendar
         var vcalendar = new WWSUdb(TAFFY());
@@ -385,6 +384,7 @@ class CalendarDb {
         // prepare start and end detection
         var start = null;
         var end = null;
+        var timePeriods = [];
 
         // Return data
         var removals = [];
@@ -490,11 +490,135 @@ class CalendarDb {
             }
         }
 
-        var taskComplete = () => {
+        var taskComplete3 = (cb) => {
             tasksCompleted++;
-            progressCallback(tasksCompleted, tasks);
+            var newprogress = tasksCompleted > 0 ? tasksCompleted / tasks : 0;
+            progressCallback(`Stage 3 of 4: Intelligently filtering events (${parseInt(newprogress * 100)}%)`);
+            if (tasksCompleted === tasks && cb) {
+                cb();
+            }
+        }
+
+        var taskComplete = (cb) => {
+            tasksCompleted++;
+            var newprogress = tasksCompleted > 0 ? tasksCompleted / tasks : 0;
+            progressCallback(`Stage 1 of 4: Processing Queries (${parseInt(newprogress * 100)}%)`);
+            if (tasksCompleted === tasks && cb) {
+                cb();
+            }
+        }
+
+        var taskComplete2 = () => {
+            tasksCompleted++;
+            var newprogress = tasksCompleted > 0 ? tasksCompleted / tasks : 0;
+            progressCallback(`Stage 4 of 4: Checking event conflicts (${parseInt(newprogress * 100)}%)`);
             if (tasksCompleted === tasks && callback) {
                 callback({ removals, additions, errors });
+            }
+        }
+
+        var processQuery = (_query) => {
+            var query = Object.assign({}, _query);
+            if (typeof query.remove !== 'undefined') {
+                query.remove = vschedule.db({ ID: query.remove }).first();
+                vschedule.query({ remove: query.remove.ID });
+            } else {
+                vschedule.query(query);
+            }
+
+            // Determine start and end times for conflict checking
+            for (var key in query) {
+                if (Object.prototype.hasOwnProperty.call(query, key)) {
+
+                    // Polyfill calendar and schedule information
+                    var event = this.scheduleToEvent(query[ key ], vcalendar, vschedule);
+
+                    // Determine start and end times for conflict checking
+                    if (query[ key ].originalTime) {
+                        if (!start || moment(query[ key ].originalTime).isBefore(moment(start))) {
+                            start = moment(query[ key ].originalTime);
+                        }
+                        if (!end || moment(query[ key ].originalTime).isAfter(moment(end))) {
+                            end = moment(query[ key ].originalTime).add(event.duration, 'minutes');
+                        }
+                        timePeriods.push({ start: moment(query[ key ].originalTime).toISOString(true), end: moment(query[ key ].originalTime).add(event.duration, 'minutes').toISOString(true) });
+                    }
+                    if (query[ key ].newTime) {
+                        if (!start || moment(query[ key ].newTime).isBefore(moment(start))) {
+                            start = moment(query[ key ].newTime);
+                        }
+                        if (!end || moment(query[ key ].newTime).isAfter(moment(end))) {
+                            end = moment(query[ key ].newTime).add(event.duration, 'minutes');
+                        }
+                        timePeriods.push({ start: moment(query[ key ].newTime).toISOString(true), end: moment(query[ key ].newTime).add(event.duration, 'minutes').toISOString(true) });
+                    }
+                    if (query[ key ].oneTime && query[ key ].oneTime.length > 0) {
+                        query[ key ].oneTime.map((ot) => {
+                            if (!start || moment(ot).isBefore(moment(start))) {
+                                start = moment(ot);
+                            }
+                            if (!end || moment(ot).isAfter(moment(end))) {
+                                end = moment(ot).add(event.duration, 'minutes');
+                            }
+                            timePeriods.push({ start: moment(ot).toISOString(true), end: moment(ot).add(event.duration, 'minutes').toISOString(true) });
+                        });
+                    }
+                    if (query[ key ].recurH && query[ key ].recurH.length > 0) {
+                        if (!start || moment(event.startDate).isBefore(moment(start))) {
+                            start = moment(event.startDate);
+                        }
+                        if (!end || moment(event.endDate).isAfter(moment(end))) {
+                            end = moment(event.endDate).add(event.duration, 'minutes');
+                        }
+
+                        // Determine time periods to check
+
+                        // Null value denotes all values for Days of Week
+                        if (!query[ key ].recurDW || query[ key ].recurDW.length === 0) query[ key ].recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
+
+                        // later.js does not work correctly if DW or H is not in numeric order
+                        query[ key ].recurDW.sort((a, b) => a - b);
+                        query[ key ].recurH.sort((a, b) => a - b);
+
+                        // Format minute into an array for proper processing in later.js
+                        if (!query[ key ].recurM) query[ key ].recurM = 0;
+
+                        // Generate later schedule
+                        var laterSchedule = later.schedule({ schedules: [ { "dw": query[ key ].recurDW, "h": query[ key ].recurH, "m": [ query[ key ].recurM ] } ] });
+
+                        var beginAt = moment(event.startDate);
+
+                        // Loop through each schedule between start and end
+                        while (moment(beginAt).isBefore(moment(event.endDate))) {
+                            // Determine next start date/time. Bail if there are no more. Set beginAt to the next minute so we avoid infinite loops.
+                            var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
+                            if (!eventStart) break;
+                            beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
+
+                            // RecurDM, recurWM, and recurEvery not supported by later.js; do it ourselves
+                            // RecurDM
+                            if (query[ key ].recurDM && query[ key ].recurDM.length > 0 && query[ key ].recurDM.indexOf(moment(eventStart).date()) === -1) {
+                                continue;
+                            }
+
+                            // RecurWM
+                            if (query[ key ].recurWM && query[ key ].recurWM.length > 0) {
+                                var lastWeek = moment(eventStart).month() !== moment(eventStart).add(1, 'weeks').month();
+                                // 0 = last week of the month
+                                if (query[ key ].recurWM.indexOf(this.weekOfMonth(eventStart)) === -1 && (!lastWeek || query[ key ].recurWM.indexOf(0) === -1)) {
+                                    continue;
+                                }
+                            }
+
+                            // RecurEvery
+                            if (moment(eventStart).week() % (query[ key ].recurEvery || 1) !== 0) {
+                                continue;
+                            }
+
+                            timePeriods.push({ start: moment(eventStart).toISOString(true), end: moment(eventStart).add(event.duration, 'minutes').toISOString(true) });
+                        }
+                    }
+                }
             }
         }
 
@@ -507,7 +631,7 @@ class CalendarDb {
                 // If we could not find it, the override is invalid, so we can remove it and not continue beyond this point for the event.
                 if (!record) {
                     removals.push(event);
-                    taskComplete();
+                    taskComplete2();
                     return;
                 }
             }
@@ -523,7 +647,7 @@ class CalendarDb {
                     }
                 });
 
-            taskComplete();
+            taskComplete2();
         }
 
         if (queries.length > 0) {
@@ -568,61 +692,87 @@ class CalendarDb {
                 }
             }
 
-            // Process virtual queries
-            queries.forEach((_query) => {
-                var query = Object.assign({}, _query);
-                if (typeof query.remove !== 'undefined') {
-                    query.remove = vschedule.db({ ID: query.remove }).first();
-                    vschedule.query({ remove: query.remove.ID });
-                } else {
-                    vschedule.query(query);
-                }
-
-                // Determine start and end times for conflict checking
-                for (var key in query) {
-                    if (Object.prototype.hasOwnProperty.call(query, key)) {
-
-                        // Polyfill calendar and schedule information
-                        var event = this.scheduleToEvent(query[ key ], vschedule);
-
-                        // Determine start and end times for conflict checking
-                        if (query[ key ].originalTime) {
-                            if (!start || moment(query[ key ].originalTime).isBefore(moment(start))) {
-                                start = moment(query[ key ].originalTime);
-                            }
-                            if (!end || moment(query[ key ].originalTime).isAfter(moment(end))) {
-                                end = moment(query[ key ].originalTime).add(event.duration, 'minutes');
-                            }
-                        }
-                        if (query[ key ].newTime) {
-                            if (!start || moment(query[ key ].newTime).isBefore(moment(start))) {
-                                start = moment(query[ key ].newTime);
-                            }
-                            if (!end || moment(query[ key ].newTime).isAfter(moment(end))) {
-                                end = moment(query[ key ].newTime).add(event.duration, 'minutes');
-                            }
-                        }
-                        if (query[ key ].oneTime && query[ key ].oneTime.length > 0) {
-                            query[ key ].oneTime.map((ot) => {
-                                if (!start || moment(ot).isBefore(moment(start))) {
-                                    start = moment(ot);
-                                }
-                                if (!end || moment(ot).isAfter(moment(end))) {
-                                    end = moment(ot).add(event.duration, 'minutes');
-                                }
+            var eventsCall2 = (events) => {
+                // Now, go through every event for conflict checking
+                tasks = events.length;
+                tasksCompleted = 0;
+                events
+                    .map((event, index) => {
+                        // Add to task queue
+                        if (callback) {
+                            this.queue.add(() => {
+                                processEvent(events, event, index);
                             });
+                        } else {
+                            processEvent(events, event, index);
                         }
-                        if (query[ key ].recurH && query[ key ].recurH.length > 0) {
-                            if (!start || moment(event.startDate).isBefore(moment(start))) {
-                                start = moment(event.startDate);
-                            }
-                            if (!end || moment(event.endDate).isAfter(moment(end))) {
-                                end = moment(event.endDate).add(event.duration, 'minutes');
-                            }
+                    });
+            }
+    
+            // Function called when we get all events for checking
+            var eventsCall = (events) => {
+                progressCallback(`Stage 3 of 4: Intelligently filtering events`);
+                tasks = events.length;
+                tasksCompleted = 0;
+                var filteredEvents = [];
+                events.map((event) => {
+                    var _determineFilter = (_event) => {
+                        var filter = timePeriods.find((period) => (moment(_event.end).isAfter(moment(period.start)) && moment(_event.start).isSameOrBefore(moment(period.end))));
+                        if (filter) {
+                            filteredEvents.push(_event);
                         }
+                    };
+                    if (callback) {
+                        this.queue.add(() => {
+                            _determineFilter(event);
+                            taskComplete3(() => {
+                                eventsCall2(filteredEvents);
+                            })
+                        });
+                    } else {
+                        _determineFilter(event);
                     }
+                })
+                if (!callback) {
+                    eventsCall2(filteredEvents);
+                }
+            }
+
+            var postQuery = () => {
+                if (!start) start = moment();
+
+                // Make start 1 day sooner to account for any ongoing events
+                start = moment(start).subtract(1, 'days');
+
+                // Get events with virtual schedule
+                if (callback) {
+                    this.getEvents(eventsCall, moment(start).toISOString(true), moment(end).toISOString(true), {}, vcalendar, vschedule, (_tasksCompleted, _tasks) => {
+                        var newprogress = _tasksCompleted > 0 ? _tasksCompleted / _tasks : 0;
+                        progressCallback(`Stage 2 of 4: Finding events (${parseInt(newprogress * 100)}%)`);
+                    });
+                } else {
+                    eventsCall(this.getEvents(null, moment(start).toISOString(true), moment(end).toISOString(true), {}, vcalendar, vschedule));
+                }
+            }
+
+            // Process virtual queries
+            tasks = queries.length;
+            tasksCompleted = 0;
+            queries.forEach((_query) => {
+                if (callback) {
+                    this.queue.add(() => {
+                        processQuery(_query);
+                        taskComplete(postQuery);
+                    });
+                } else {
+                    processQuery(_query);
                 }
             });
+
+            if (!callback) {
+                postQuery();
+            }
+
         } else { // No queries? We cannot do conflict checking. Fire callback and return.
             if (callback) {
                 callback({ removals: [], additions: [], errors: [ 'You must provide at least one query to do conflict checking' ] });
@@ -632,40 +782,7 @@ class CalendarDb {
             }
         }
 
-        if (!start) start = moment();
-
-        // Make start 1 day sooner to account for any ongoing events
-        start = moment(start).subtract(1, 'days');
-
-        // BEGIN actual conflict checking below
-
-        // Function called when we get all events for checking
-        var eventsCall = (events) => {
-            // Now, go through every event for conflict checking
-            events
-                .map((event, index) => {
-                    // Add to task queue
-                    tasks++;
-                    this.queue.add(() => {
-                        processEvent(events, event, index);
-                    });
-                });
-        }
-
-        // Get events with virtual schedule
-        if (callback) {
-            this.getEvents(eventsCall, moment(start).toISOString(true), moment(end).toISOString(true), {}, vcalendar, vschedule, (_tasksCompleted, _tasks) => {
-                tasks = _tasks * 2; // Double this because getEvents is only one of two major parts of the task queue.
-                tasksCompleted = _tasksCompleted;
-                taskComplete();
-
-                // Reset number of tasks when getEvents is about to be done. This will be updated properly in the events callback.
-                if (_tasksCompleted === _tasks) {
-                    tasks = _tasks;
-                }
-            });
-        } else {
-            eventsCall(this.getEvents(null, moment(start).toISOString(true), moment(end).toISOString(true), {}, vcalendar, vschedule));
+        if (!callback) {
             return { removals, additions, errors };
         }
     }
@@ -1191,14 +1308,15 @@ class CalendarDb {
      * Polyfill missing information in a schedule record from its scheduleID (if applicable) and the calendar event's default properties.
      * 
      * @param {object} record The schedule database record
+     * @param {WWSUdb} calendardb If provided, will use this database of calendar events instead of the CalendarDb one.
      * @param {WWSUdb} scheduledb If provided, will use this database of schedules instead of the CalendarDb one.
      * @returns {object} Event, as structured in processRecord.
      */
-    scheduleToEvent (record, scheduledb = this.schedule) {
+    scheduleToEvent (record, calendardb = this.calendar, scheduledb = this.schedule) {
         var tempCal = {};
         var event;
         if (record.calendarID) {
-            var calendar = this.calendar.db({ ID: record.calendarID }).first();
+            var calendar = calendardb.db({ ID: record.calendarID }).first();
             if (record.scheduleID) {
                 var schedule = scheduledb.db({ ID: record.scheduleID }).first();
             }
