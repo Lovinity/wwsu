@@ -174,6 +174,10 @@ class CalendarDb {
                 // Null value denotes all values for Days of Week
                 if (!schedule.recurDW || schedule.recurDW.length === 0) schedule.recurDW = [ 1, 2, 3, 4, 5, 6, 7 ];
 
+                // later.js does not work correctly if DW or H is not in numeric order
+                schedule.recurDW.sort((a, b) => a - b);
+                schedule.recurH.sort((a, b) => a - b);
+
                 // Format minute into an array for proper processing in later.js
                 if (!schedule.recurM) schedule.recurM = 0;
 
