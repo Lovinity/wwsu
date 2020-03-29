@@ -31,6 +31,7 @@ module.exports.policies = {
   'calendar/add-schedule': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'calendar/cancel-web': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
   'calendar/change-topic-web': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
+  'calendar/edit-schedule': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'calendar/edit': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'calendar/remove-schedule': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'calendar/remove': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
