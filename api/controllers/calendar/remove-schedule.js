@@ -29,9 +29,16 @@ module.exports = {
 
                 // Now, add overrides
                 if (conflicts.additions.length > 0) {
+                    sails.sockets.broadcast('schedule', 'upbeat', `Additions`);
                     conflicts.additions.map((override) => {
+                        sails.sockets.broadcast('schedule', 'upbeat', override);
                         (async (override2) => {
-                            await sails.models.schedule.create(override2).fetch();
+                            sails.sockets.broadcast('schedule', 'upbeat', override2);
+                            try {
+                                await sails.models.schedule.create(override2).fetch();
+                            } catch (e) {
+                                sails.sockets.broadcast('schedule', 'upbeat', e.message);
+                            }
                         })(override);
                     })
                 }
