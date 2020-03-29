@@ -498,6 +498,34 @@ class CalendarDb {
             }
         }
 
+        var processEvent = (events, event, index) => {
+            // If this schedule was created as an override, we need to check to see if the override is still valid
+            if (event.overriddenID) {
+                // Find the original event
+                var record = events.find((eventb) => eventb.ID === event.overriddenID);
+
+                // If we could not find it, the override is invalid, so we can remove it and not continue beyond this point for the event.
+                if (!record) {
+                    removals.push(event);
+                    taskComplete();
+                    return;
+                }
+            }
+
+            // Iterate conflict checking on every event after the index
+            events
+                .filter((ev, ind) => ind > index)
+                .map((ev) => {
+                    try {
+                        checkAndResolveConflicts(event, ev);
+                    } catch (e) {
+                        errors.push(e.message);
+                    }
+                });
+
+            taskComplete();
+        }
+
         if (queries.length > 0) {
 
             // Process updateCalendar or removeCalendar before we continue with anything else
@@ -639,34 +667,6 @@ class CalendarDb {
         } else {
             eventsCall(this.getEvents(null, moment(start).toISOString(true), moment(end).toISOString(true), {}, vcalendar, vschedule));
             return { removals, additions, errors };
-        }
-
-        var processEvent = (events, event, index) => {
-            // If this schedule was created as an override, we need to check to see if the override is still valid
-            if (event.overriddenID) {
-                // Find the original event
-                var record = events.find((eventb) => eventb.ID === event.overriddenID);
-
-                // If we could not find it, the override is invalid, so we can remove it and not continue beyond this point for the event.
-                if (!record) {
-                    removals.push(event);
-                    taskComplete();
-                    return;
-                }
-            }
-
-            // Iterate conflict checking on every event after the index
-            events
-                .filter((ev, ind) => ind > index)
-                .map((ev) => {
-                    try {
-                        checkAndResolveConflicts(event, ev);
-                    } catch (e) {
-                        errors.push(e.message);
-                    }
-                });
-
-            taskComplete();
         }
     }
 
