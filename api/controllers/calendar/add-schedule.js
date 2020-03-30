@@ -257,14 +257,16 @@ module.exports = {
                 await sails.models.schedule.destroy(query).fetch();
             }
 
-            var postConflicts = async (conflicts) => {
+            // Check for event conflicts
+            sails.models.calendar.calendardb.checkConflicts(async (conflicts) => {
+
                 // Add the initial event into the calendar
                 var record = await sails.models.schedule.create(event).fetch();
 
                 // Remove records which should be removed first
                 if (conflicts.removals.length > 0) {
                     sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec((err, records) => {
-                        sails.sockets.broadcast('schedule', 'debug', [ 'conflict destroy', err, records ]);
+                        sails.sockets.broadcast('schedule', 'debug', ['conflict destroy', err, records]);
                     });
                 }
 
@@ -272,15 +274,12 @@ module.exports = {
                 if (conflicts.additions.length > 0) {
                     conflicts.additions.map((override) => {
                         override.overriddenID = !override.overriddenID ? record.ID : override.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
-                        sails.models.schedule.create(override).fetch().exec((err, records) => {
-                            sails.sockets.broadcast('schedule', 'debug', [ 'conflict create', err, records ]);
+                        sails.models.schedule.create(override).fetch().exec((err, records) => { 
+                            sails.sockets.broadcast('schedule', 'debug', ['conflict create', err, records]);
                         });
                     })
                 }
-            }
-
-            // Check for event conflicts
-            sails.models.calendar.calendardb.checkConflicts(async (conflicts) => { postConflicts(conflicts) }, [ { insert: event } ]);
+            }, [ { insert: event } ]);
 
             // Success
             return exits.success();
