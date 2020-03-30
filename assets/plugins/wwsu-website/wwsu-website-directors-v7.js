@@ -48,11 +48,11 @@ $(document).ready(function () {
     });
 
     // Build navigation
-    navigation.addItem('#nav-timesheet', '#section-timesheet', 'Director Timesheets - WWSU 106.9 FM', '/timesheet', true, () => {
+    navigation.addItem('#nav-timesheet', '#section-timesheet', 'Director Timesheets - WWSU 106.9 FM', '/directors/timesheet', true, () => {
         filterDateTimesheet();
     });
 
-    navigation.addItem('#nav-calendar', '#section-calendar', 'Calendar - WWSU 106.9 FM', '/calendar', false, () => {
+    navigation.addItem('#nav-calendar', '#section-calendar', 'Calendar - WWSU 106.9 FM', '/directors/calendar', false, () => {
         $('#calendar').block({
             message: '<h1>Loading...</h1>',
             css: { border: '3px solid #a00' },
