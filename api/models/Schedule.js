@@ -311,6 +311,7 @@ module.exports = {
         sails.log.silly(`schedule socket: ${data}`)
         sails.sockets.broadcast('schedule', 'schedule', data)
         var temp;
+        return proceed();
 
         // Process notifications
         temp = (async (event) => {
