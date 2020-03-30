@@ -16,7 +16,7 @@ module.exports = {
         sails.log.debug('Controller calendar/remove-schedule called.')
         try {
 
-            var records = await sails.models.schedule.destroy({ ID: _inputs.ID }).fetch();
+            var records = await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
             sails.sockets.broadcast('schedule', 'removeSchedule', records);
             return exits.success();
 
