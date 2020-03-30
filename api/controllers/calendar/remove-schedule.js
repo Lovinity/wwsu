@@ -16,55 +16,29 @@ module.exports = {
         sails.log.debug('Controller calendar/remove-schedule called.')
         try {
 
-            var postConflicts = async (conflicts) => {
-                sails.sockets.broadcast('schedule', 'upbeat', conflicts);
-
-                // Destroy the schedule event
-                // Note: async does not seem to callback afterDestroy for this model.
-                sails.models.schedule.destroyOne({ ID: inputs.ID }).exec((err, record) => {
-                    sails.sockets.broadcast('schedule', 'debug', [ 'schedule destroy', err, record ]);
-                })
-
-                // Remove records which should be removed first
-                if (conflicts.removals.length > 0) {
-                    sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec((err, record) => {
-                        sails.sockets.broadcast('schedule', 'debug', [ 'conflicts destroy', err, record ]);
-                    });
-                }
-
-                // Now, add overrides
-                if (conflicts.additions.length > 0) {
-                    conflicts.additions.map((override) => {
-                        sails.models.schedule.create(override).fetch().exec((err, record) => {
-                            sails.sockets.broadcast('schedule', 'debug', [ 'conflicts create', err, record ]);
-                        });
-                    })
-                }
-            }
-
             // Check for event conflicts
             var conflicts = sails.models.calendar.calendardb.checkConflicts(null, [ { remove: inputs.ID } ]);
             sails.sockets.broadcast('schedule', 'upbeat', conflicts);
 
             // Destroy the schedule event
             // Note: async does not seem to callback afterDestroy for this model.
-            sails.models.schedule.destroyOne({ ID: inputs.ID }).exec((err, record) => {
-                sails.sockets.broadcast('schedule', 'debug', [ 'schedule destroy', err, record ]);
-            })
+            var records = await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
+            sails.sockets.broadcast('schedule', 'removeSchedule', records);
 
             // Remove records which should be removed first
             if (conflicts.removals.length > 0) {
-                sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch().exec((err, record) => {
-                    sails.sockets.broadcast('schedule', 'debug', [ 'conflicts destroy', err, record ]);
-                });
+                sails.sockets.broadcast('schedule', 'removeScheduleRemoveConflictsQuery', conflicts.removals.map((removal) => removal.scheduleID));
+                var records2 = await sails.models.schedule.destroy({ ID: conflicts.removals.map((removal) => removal.scheduleID) }).fetch();
+                sails.sockets.broadcast('schedule', 'removeScheduleRemoveConflicts', records2);
             }
 
             // Now, add overrides
             if (conflicts.additions.length > 0) {
                 conflicts.additions.map((override) => {
-                    sails.models.schedule.create(override).fetch().exec((err, record) => {
-                        sails.sockets.broadcast('schedule', 'debug', [ 'conflicts create', err, record ]);
-                    });
+                    (async (override2) => {
+                        var records3 = await sails.models.schedule.create(override2).fetch();
+                        sails.sockets.broadcast('schedule', 'removeScheduleAddConflicts', records3);
+                    })(override);
                 })
             }
 
