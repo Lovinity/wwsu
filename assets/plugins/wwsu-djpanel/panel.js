@@ -1,6 +1,6 @@
 /* global WWSUdb, TAFFY, WWSUreq, iziToast, JQuery, Taucharts */
 
-// TODO: FIX
+// TODO: Re-write to work with new system, WWSU classes, and AdminLTE
 
 jQuery.noConflict()
 var calendardb = new CalendarDb();

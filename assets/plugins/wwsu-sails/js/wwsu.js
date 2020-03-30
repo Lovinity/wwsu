@@ -95,6 +95,7 @@ class WWSUdb {
               this.events.emitEvent('update', [ query[ key ], this._db() ]);
               break
             case 'remove':
+              console.dir(this._db({ ID: query[ key ] }).get());
               this._db({ ID: query[ key ] }).remove()
               this.events.emitEvent('remove', [ query[ key ], this._db() ]);
               break
@@ -668,10 +669,81 @@ class WWSUqueue {
   }
 }
 
+// Build an izi Modal with some additional properties
+class WWSUmodal {
+
+  /**
+   * Construct the modal.
+   * 
+   * @param {string} title Set the initial title
+   * @param {?string} bgClass Set the initial color class for the modal background
+   * @param {?string} body Set the initial body of the modal
+   * @param {boolean} closeButton Should a close button be made in the top right corner?
+   * @param {object} modalOptions Options to pass to iziModal
+   */
+  constructor(title = ``, bgClass = null, body = ``, closeButton = true, modalOptions = {}) {
+    var util = new WWSUutil();
+
+    util.waitForElement('body', () => {
+      this.id = util.createUUID();
+
+      $('body').append(`<div class="modal" id="modal-${this.id}" aria-hidden="true" aria-labelledby="modal-${this.id}-title">
+      <div class="modal-content${bgClass ? ` ${bgClass}` : ``}">
+          <div class="modal-header">
+              <h4 class="modal-title" id="modal-${this.id}-title">${title}</h4>
+              ${closeButton ? `<button type="button" class="close" data-izimodal-close="" aria-label="Close">
+              <span aria-hidden="true">×</span>
+          </button>` : ``}
+          </div>
+          <div class="modal-body" id="modal-${this.id}-body" style="max-height: 50vh; overflow-x: scroll;">
+              ${body}
+          </div>
+          <div class="modal-footer justify-content-between" id="modal-${this.id}-footer">
+          </div>
+      </div>
+      <!-- /.modal-content -->
+  </div>`);
+
+      util.waitForElement(`#modal-${this.id}`, () => {
+        this.izi = $(`#modal-${this.id}`).iziModal(modalOptions);
+      });
+    });
+  }
+
+  get title () {
+    return $(`#modal-${this.id}-title`).html();
+  }
+
+  set title (value) {
+    $(`#modal-${this.id}-title`).html(value);
+  }
+
+  get body () {
+    return $(`#modal-${this.id}-body`);
+  }
+
+  set body (value) {
+    $(`#modal-${this.id}-body`).html(value);
+  }
+
+  get footer () {
+    return $(`#modal-${this.id}-footer`);
+  }
+
+  set footer (value) {
+    $(`#modal-${this.id}-footer`).html(value);
+  }
+
+  iziModal (query) {
+    return this.izi.iziModal(query);
+  }
+}
+
 if (typeof require !== 'undefined') {
   exports.WWSUdb = WWSUdb;
   exports.WWSUreq = WWSUreq;
   exports.WWSUScriptLoader = WWSUScriptLoader;
   exports.WWSUutil = WWSUutil;
   exports.WWSUqueue = WWSUqueue;
+  exports.WWSUmodal = WWSUmodal;
 }

@@ -3,8 +3,15 @@
 // This class manages calendar subscriptions
 
 // TODO: fix removal to allow removing unique or ID individually.
+// TODO: Extend with WWSUdb. (??)
 class WWSUsubscriptions {
 
+    /**
+     * Construct the class.
+     * 
+     * @param {sails.io} socket WWSU socket connection
+     * @param {WWSUreq} request Request without authorization
+     */
     constructor(socket, request) {
         this.endpoints = { 
             get: '/subscribers/get-web', 
@@ -18,7 +25,7 @@ class WWSUsubscriptions {
         this.subscriptions = TAFFY();
     }
 
-    // Initialize subscriptions with the provided device ID, or null if no device
+    // Initialize subscriptions with the provided device ID, or null if no device.
     init (device = null) {
         this.device = device;
         this.request.request({ method: 'POST', url: this.endpoints.get, data: { device: device } }, (body) => {
@@ -32,17 +39,33 @@ class WWSUsubscriptions {
         });
     }
 
-    // Supports these events: subscriptions([array of all subscriptions]), newSubscription(insert query, [array of all subscriptions]), removedSubscription(uniqueEvent, calendarID, [array of all current subscriptions])
+    /**
+     * Listen for an event.
+     * 
+     * @param {string} event Event to listen: subscriptions([array of all subscriptions]), newSubscription(insert query, [array of all subscriptions]), removedSubscription(uniqueEvent, calendarID, [array of all current subscriptions])
+     * @param {function} fn Function called when the event is fired
+     */
     on (event, fn) {
         this.events.on(event, fn);
     }
 
-    // Count and return the number of subscriptions to an event (both unique and calendar as a whole)
+    /**
+     * Count number of subscriptions to an event.
+     * 
+     * @param {string} unique Unique schedule string of specific event
+     * @param {number} calendar Calendar ID
+     * @returns {number} Number of subscriptions made to either the unique individual event or the calendar ID as a whole
+     */
     countSubscribed (unique, calendar) {
         return this.subscriptions([ { type: `calendar-once`, subtype: `${unique}` }, { type: `calendar-all`, subtype: `${calendar}` } ]).get().length;
     }
 
-    // Subscribe to an event
+    /**
+     * Subscribe to an event
+     * 
+     * @param {string} type calendar-once for single occurrence, or calendar-all for all occurrences
+     * @param {string} subtype occurrence unique string for calendar-once type, or calendar ID for calendar-all type
+     */
     subscribe (type, subtype) {
         this.request.request({ method: 'POST', url: this.endpoints.subscribe, data: { device: this.device, type, subtype } }, (response) => {
             try {
@@ -77,6 +100,12 @@ class WWSUsubscriptions {
         })
     }
 
+    /**
+     * Unsubscribe from an event.
+     * 
+     * @param {string} ID Unique string of single occurrence to unsubscribe
+     * @param {string} event Calendar ID to unsubscribe all events
+     */
     unsubscribe (ID, event) {
         this.request.request({ method: 'POST', url: this.endpoints.unsubscribe, data: { device: this.device, type: `calendar-once`, subtype: ID } }, (response) => {
             try {

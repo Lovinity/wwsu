@@ -1,110 +1,8 @@
 /* eslint-disable linebreak-style */
 /* global moment, iziToast, responsiveVoice, Slides, $, WWSUdb, TAFFY, WWSUreq */
 
-// Define the scoreboard class
-class Scoreboard {
-  constructor(main, wsuScore, oppScore, wsuNum, oppNum, wsuText, oppText) {
-    this.ID = Math.floor(1000000 + (Math.random() * 1000000))
-    this._main = main
-    this._wsuScore = wsuScore
-    this._wsuScoreValue = 0
-    this._oppScore = oppScore
-    this._oppScoreValue = 0
-    this._wsuNum = wsuNum
-    this._wsuNumValue = null
-    this._oppNum = oppNum
-    this._oppNumValue = null
-    this._wsuText = wsuText
-    this._wsuTextValue = null
-    this._oppText = oppText
-    this._oppTextValue = null
-  }
-
-  hide () {
-    $(this._main).fadeTo(500, 0)
-  }
-
-  show () {
-    $(this._main).fadeTo(500, 1)
-  }
-
-  set wsuScore (value) {
-    var temp = document.querySelector(this._wsuScore)
-    if (temp !== null) {
-      temp.innerHTML = value
-      if (value === null || value === ``) { $(this._wsuScore).fadeTo(500, 0) }
-      if (value !== null && value !== `` && (this._wsuScoreValue === null || this._wsuScoreValue === ``)) { $(this._wsuScore).fadeTo(500, 1) }
-      if (value > this._wsuScoreValue) { $(this._wsuScore).animateCss('heartBeat slower') }
-    }
-    this._wsuScoreValue = value
-  }
-
-  set oppScore (value) {
-    var temp = document.querySelector(this._oppScore)
-    if (temp !== null) {
-      temp.innerHTML = value
-      if (value === null || value === ``) { $(this._oppScore).fadeTo(500, 0) }
-      if (value !== null && value !== `` && (this._oppScoreValue === null || this._oppScoreValue === ``)) { $(this._oppScore).fadeTo(500, 1) }
-      if (value > this._oppScoreValue) { $(this._oppScore).animateCss('heartBeat slower') }
-    }
-    this._oppScoreValue = value
-  }
-
-  set wsuNum (value) {
-    var temp = document.querySelector(this._wsuNum)
-    if (temp !== null) {
-      var _this = this
-      $(this._wsuNum).fadeTo(500, 0, () => {
-        temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._wsuNum).fadeTo(500, 1) }
-      })
-    }
-    this._wsuNumValue = value
-  }
-
-  set oppNum (value) {
-    var temp = document.querySelector(this._oppNum)
-    if (temp !== null) {
-      var _this = this
-      $(this._oppNum).fadeTo(500, 0, () => {
-        temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._oppNum).fadeTo(500, 1) }
-      })
-    }
-    this._oppNumValue = value
-  }
-
-  set wsuText (value) {
-    var temp = document.querySelector(this._wsuText)
-    if (temp !== null) {
-      var _this = this
-      $(this._wsuText).fadeTo(500, 0, () => {
-        temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._wsuText).fadeTo(500, 1) }
-      })
-    }
-    this._wsuTextValue = value
-  }
-
-  set oppText (value) {
-    var temp = document.querySelector(this._oppText)
-    if (temp !== null) {
-      var _this = this
-      $(this._oppText).fadeTo(500, 0, () => {
-        temp.innerHTML = value
-        if (value !== null && value !== ``) { $(_this._oppText).fadeTo(500, 1) }
-      })
-    }
-    this._oppTextValue = value
-  }
-
-  hideTextNums () {
-    $(this._wsuNum).fadeTo(500, 0)
-    $(this._oppNum).fadeTo(500, 0)
-    $(this._wsuText).fadeTo(500, 0)
-    $(this._oppText).fadeTo(500, 0)
-  }
-}
+// TODO: Utilize new WWSU classes
+// TODO: document check
 
 try {
   // Sounds
@@ -117,9 +15,6 @@ try {
     severeeas: new Howl({ src: [ '/sounds/display/severeeas.mp3' ] }),
     sports: new Howl({ src: [ '/sounds/display/sports.mp3' ] })
   }
-
-  // Create a new scoreboard class
-  var ascoreboard = new Scoreboard('#scoreboard', '#score-wsu', '#score-opp', '#num-wsu', '#num-opp', '#text-wsu', '#text-opp')
 
   // Define hexrgb constants
   var hexChars = 'a-f\\d'
@@ -173,7 +68,6 @@ try {
   var temp
   var queueUnknown = false
   var isStudio = window.location.search.indexOf('studio=true') !== -1
-  var isLightTheme = window.location.search.indexOf('light=true') !== -1
   var weatherSlide = [
     { id: `weather`, icon: `fa-sun`, background: `#424242`, header: `Current Weather`, body: `Unknown`, show: true },
     { id: `precipitation`, icon: `fa-umbrella`, background: `#424242`, header: `Precipitation`, body: ``, show: false },
@@ -185,6 +79,7 @@ try {
   ]
   var weatherSlideSlot = -1
 
+  // Change weather block every 7 seconds
   setInterval(() => {
     var done = false
 
@@ -368,31 +263,6 @@ try {
       }
     }
   })
-
-  // scoreboard
-  var changeData = (data) => {
-    console.dir(data)
-    switch (data.name) {
-      case `wsuScore`:
-        ascoreboard.wsuScore = data.value
-        break
-      case `oppScore`:
-        ascoreboard.oppScore = data.value
-        break
-      case `wsuNum`:
-        ascoreboard.wsuNum = data.value
-        break
-      case `oppNum`:
-        ascoreboard.oppNum = data.value
-        break
-      case `wsuText`:
-        ascoreboard.wsuText = data.value
-        break
-      case `oppText`:
-        ascoreboard.oppText = data.value
-        break
-    }
-  }
 
   // Create restart function to restart the screen after 15 seconds if it does not connect.
   var restart = setTimeout(() => {
@@ -712,22 +582,6 @@ waitFor(() => {
   Darksky.setOnRemove((data, db) => processDarksky(db))
   Darksky.setOnReplace((db) => processDarksky(db))
 
-  // scoreboard
-  sportsdb.assignSocketEvent('sports', io.socket)
-  sportsdb.setOnInsert((data) => {
-    changeData(data)
-  })
-
-  sportsdb.setOnUpdate((data) => {
-    changeData(data)
-  })
-
-  sportsdb.setOnReplace((db) => {
-    db.each((record) => {
-      changeData(record)
-    })
-  })
-
   // on messages, display message if event is an insert
   io.socket.on('messages', (data) => {
     for (var key in data) {
@@ -883,8 +737,6 @@ function MetaSocket () {
       setTimeout(MetaSocket, 10000)
     }
   })
-  // scoreboard
-  sportsdb.replaceData(noReq, '/sports/get')
 }
 
 function eventSocket () {
@@ -1185,25 +1037,6 @@ function processNowPlaying (response) {
       var countdown
       var countdowntext
       var countdownclock
-
-      // scoreboard
-      /*
-             if (Meta.state.startsWith("sports"))
-             {
-             scoreboard.style.display = "inline";
-             nowplaying.style.display = "none";
-
-             if (Meta.show === "Women's Basketball")
-             {
-             scoreboard.style.backgroundImage = "url(../../images/sports/mcm_womenfinals.png)";
-             } else if (Meta.show === "Men's Basketball") {
-             scoreboard.style.backgroundImage = "url(../../images/sports/mcm_menfinals.png)";
-             }
-             } else {
-             nowplaying.style.display = "block";
-             scoreboard.style.display = "none";
-             }
-             */
 
       if (disconnected || typeof Meta.state === 'undefined') {
         djAlert.style.display = 'none'

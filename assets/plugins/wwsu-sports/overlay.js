@@ -30,6 +30,18 @@ $.fn.extend({
 
 // Define the scoreboard class
 class Scoreboard {
+
+  /**
+   * Create the scoreboard class.
+   * 
+   * @param {string} main DOM query string of the entire scoreboard
+   * @param {string} wsuScore DOM query string of WSU's score
+   * @param {string} oppScore DOM query string of opponent's score
+   * @param {string} wsuNum DOM query string of secondary info number for WSU (eg. number of fouls / timeouts etc)
+   * @param {string} oppNum DOM query string of secondary info number for opponent
+   * @param {string} wsuText DOM query string of secondary info text for WSU
+   * @param {string} oppText DOM query string of secondary info text for opponent
+   */
   constructor (main, wsuScore, oppScore, wsuNum, oppNum, wsuText, oppText) {
     this.ID = Math.floor(1000000 + (Math.random() * 1000000))
     this._main = main
@@ -47,14 +59,24 @@ class Scoreboard {
     this._oppTextValue = null
   }
 
+  /**
+   * Fade the scoreboard out
+   */
   hide () {
     $(this._main).fadeTo(500, 0)
   }
 
+  /**
+   * Fade the scoreboard in
+   */
   show () {
     $(this._main).fadeTo(500, 1)
   }
 
+  /**
+   * Sets WSU's score. Also flashes the number if the score increased via animate.css.
+   * @param {string|number} value New score
+   */
   set wsuScore (value) {
     var temp = document.querySelector(this._wsuScore)
     if (temp !== null) {
@@ -66,6 +88,10 @@ class Scoreboard {
     this._wsuScoreValue = value
   }
 
+  /**
+   * Sets opponent's score. Also flashes the number if the score increased via animate.css.
+   * @param {string|number} value New score
+   */
   set oppScore (value) {
     var temp = document.querySelector(this._oppScore)
     if (temp !== null) {
@@ -77,6 +103,10 @@ class Scoreboard {
     this._oppScoreValue = value
   }
 
+  /**
+   * Sets WSU's secondary info number. Also does fading via animate.css.
+   * @param {?string|number} value New number. Null or empty hides it.
+   */
   set wsuNum (value) {
     var temp = document.querySelector(this._wsuNum)
     if (temp !== null) {
@@ -89,6 +119,10 @@ class Scoreboard {
     this._wsuNumValue = value
   }
 
+  /**
+   * Sets opponent's secondary info number. Also does fading via animate.css.
+   * @param {?string|number} value New number. Null or empty hides it.
+   */
   set oppNum (value) {
     var temp = document.querySelector(this._oppNum)
     if (temp !== null) {
@@ -101,6 +135,10 @@ class Scoreboard {
     this._oppNumValue = value
   }
 
+  /**
+   * Sets WSU's secondary info text. Also does fading via animate.css.
+   * @param {?string} value Text to show. Null or empty hides it.
+   */
   set wsuText (value) {
     var temp = document.querySelector(this._wsuText)
     if (temp !== null) {
@@ -113,6 +151,10 @@ class Scoreboard {
     this._wsuTextValue = value
   }
 
+  /**
+   * Sets opponent's secondary info text. Also does fading via animate.css.
+   * @param {?string} value Text to show. Null or empty hides it.
+   */
   set oppText (value) {
     var temp = document.querySelector(this._oppText)
     if (temp !== null) {
@@ -125,6 +167,9 @@ class Scoreboard {
     this._oppTextValue = value
   }
 
+  /**
+   * Hides all secondary text and numbers.
+   */
   hideTextNums () {
     $(this._wsuNum).fadeTo(500, 0)
     $(this._oppNum).fadeTo(500, 0)
@@ -170,15 +215,15 @@ var changeData = (data) => {
   }
 }
 
-sportsdb.on('insert', (data) => {
+sportsdb.setOnInsert((data) => {
   changeData(data)
 })
 
-sportsdb.on('update', (data) => {
+sportsdb.setOnUpdate((data) => {
   changeData(data)
 })
 
-sportsdb.on('replace', (db) => {
+sportsdb.setOnReplace((db) => {
   db.each((record) => {
     changeData(record)
   })

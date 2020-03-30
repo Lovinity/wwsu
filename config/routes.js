@@ -81,4 +81,18 @@ module.exports.routes = {
     }
   },
 
+  'GET /directors': {
+    view: 'directors/timesheet',
+    locals: {
+      layout: 'directors/layout',
+    }
+  },
+
+  'GET /directors/calendar': {
+    view: 'directors/calendar',
+    locals: {
+      layout: 'directors/layout',
+    }
+  },
+
 }

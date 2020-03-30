@@ -3,6 +3,12 @@
 // This class handles WWSU metadata
 class WWSUMeta {
 
+    /**
+     * Construct the class
+     * 
+     * @param {sails.io} socket Socket connection to WWSU
+     * @param {WWSUreq} request Request with no authorization
+     */
     constructor(socket, request) {
         this.endpoint = '/meta/get';
 
@@ -45,20 +51,35 @@ class WWSUMeta {
         });
     }
 
-    // Event handler. Supported events: newMeta([updatedMeta, entireMeta]), metaTick([entireMeta])
+    /**
+     * Listen to an event.
+     * 
+     * @param {string} event Name of event: newMeta([updatedMeta, entireMeta]), metaTick([entireMeta])
+     * @param {function} fn Function to call when the event is fired
+     */
     on(event, fn) {
         this.events.on(event, fn);
     }
 
+    /**
+     * Get the current meta.
+     * 
+     * @returns {object} Current WWSU meta information in memory.
+     */
     get meta() {
         return this._meta;
     }
 
-    // Caution: Does not actually manipulate meta; only pretends to in newMeta event call for use in refreshing stuff manually.
+    /**
+     * Simulate newMeta and fire the newMeta event. Does NOT actually change meta; meta can only be changed by the WWSU socket.
+     */
     set meta(data = {}) {
         this.events.emitEvent('newMeta', [data, this._meta]);
     }
 
+    /**
+     * Reset the ticker that updates meta.time and fires metaTick every second.
+     */
     resetTick() {
         clearInterval(this.tick);
         this.tick = setInterval(() => {

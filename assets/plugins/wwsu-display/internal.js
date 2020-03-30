@@ -1,7 +1,14 @@
 /* global moment, iziToast, jdenticon, Slides, WWSUdb, TAFFY, $, WWSUreq, Howl */
 
+// TODO: utilize new WWSU classes
+// TODO: Move burnguard to a WWSU class
+
 try {
-  // Define default slide templates
+
+
+  /*
+      DEFAULT SLIDES
+  */
 
   // Director hours
   Slides.newSlide({
@@ -48,6 +55,7 @@ try {
     html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div>`
   })
 
+  // Director auto-clockout message
   Slides.newSlide({
     name: `director-clockout`,
     label: `Director Auto Clock Out`,
@@ -62,7 +70,7 @@ try {
     html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
   })
 
-  // Define sounds
+  // Sound alerts
   var sounds = {
     clockOut: new Howl({src: ['/sounds/display/clockout.mp3']}),
     critical: new Howl({src: ['/sounds/display/critical.mp3']}),
@@ -71,7 +79,7 @@ try {
     ping: new Howl({src: ['/sounds/display/ping.mp3']})
   }
 
-  // Define data variables
+  // Define data variables and workers
   var Directors = new WWSUdb(TAFFY())
   var Calendar = new WWSUdb(TAFFY())
   var Schedule = new WWSUdb(TAFFY())
@@ -200,6 +208,13 @@ var restart = setTimeout(() => {
   window.location.reload(true)
 }, 15000)
 
+/**
+ * Wait up to 10,000 animation counts for a condition to be satisfied
+ * 
+ * @param {function} check Function that is executed repeatedly until true is returned (and therefore callback is called).
+ * @param {function} callback Function to be called when check returns true.
+ * @param {number} count Start the counter at this number instead of 0.
+ */
 function waitFor (check, callback, count = 0) {
   if (!check()) {
     if (count < 10000) {
@@ -228,12 +243,13 @@ waitFor(() => {
   Announcements.assignSocketEvent('announcements', io.socket)
   Status.assignSocketEvent('status', io.socket)
 
-  // Do stuff when status changes are made
+  // Process status slide on changes
   Status.setOnUpdate((data, db) => processStatus(db))
   Status.setOnInsert((data, db) => processStatus(db))
   Status.setOnRemove((data, db) => processStatus(db))
   Status.setOnReplace((db) => processStatus(db))
 
+  // Process office hours on director or calendar changes
   Directors.setOnUpdate((data, db) => {
     calendarWorker.postMessage([ 'update' ]);
   })
@@ -375,8 +391,13 @@ waitFor(() => {
   })
 })
 
+/**
+ * Function should be called every second.
+ */
 function clockTick () {
   Meta.time = moment(Meta.time).add(1, 'seconds')
+
+  // At 11:55PM, display director clock-out message and play message
   if (moment(Meta.time).hour() === 23 && moment(Meta.time).minute() >= 55) {
     if (!directorNotify) {
       directorNotify = true
@@ -397,17 +418,25 @@ function clockTick () {
     calendarWorker.postMessage([ 'update' ]);
   }
 
+  // If status is critical, play ping sound every minute
   if (moment(Meta.time).second() === 0 && globalStatus < 2) {
     sounds.ping.play();
   }
 }
 
 // Define data-specific functions
-// Run through operations of each WWSU status
+
+/**
+ * Process statuses from WWSU.
+ * 
+ * @param {TaffyDB} db All current status records
+ */
 function processStatus (db) {
   try {
+    // These are used for alternating gray shades to make status table easier to read
     var doRow = false
     var secondRow = false
+
     globalStatus = 4
     statusMarquee = `<div class="row bg-dark-1">
                       <div class="col-2 text-warning">
@@ -424,6 +453,7 @@ function processStatus (db) {
                       </div>
                     </div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`
 
+    // Add status info to table for each status, and determine current global status (worst of all statuses)
     db.each((thestatus) => {
       try {
         if (doRow) {
@@ -501,6 +531,8 @@ function processStatus (db) {
     var status = document.getElementById('status-div')
     var color = 'rgba(158, 158, 158, 0.3)'
     clearInterval(flashInterval)
+
+    // Do stuff depending on global status
     switch (globalStatus) {
       case 0:
         color = 'rgba(244, 67, 54, 0.5)'
@@ -593,7 +625,7 @@ function processStatus (db) {
   }
 }
 
-// Update display when worker returns new data for calendar, but do so on a 3-second time out.
+// Update display when worker returns new data for calendar, but do so on a 3-second time out to avoid a bunch of updates freezing the page.
 calendarWorker.onmessage = function (e) {
 
   // Set / reset 3-second timer so we are not updating on literally every update pushed through sockets
@@ -968,6 +1000,7 @@ function announcementsSocket () {
   }
 }
 
+// Add a slide for an announcement
 function createAnnouncement (data) {
   if (data.type.startsWith(`display-internal`)) {
     Slides.newSlide({

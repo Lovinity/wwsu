@@ -3,7 +3,14 @@
 var Slides
 
 // Slide class for managing a single slide
+// DO NOT use this class directly; use the slides factory function instead.
 class Slide {
+
+  /**
+   * Create a slide.
+   * 
+   * @param {object} data Initial slide data. See constructor for properties.
+   */
   constructor(data = {}) {
     this._name = data.name || ''
     this._label = data.label || ''
@@ -37,6 +44,7 @@ class Slide {
     return this._label
   }
 
+  // Sets a new label for the slide and updates all slides.
   set label (value) {
     this._label = value
     Slides.updateBadges()
@@ -46,6 +54,7 @@ class Slide {
     return this._weight
   }
 
+  // Sets a new weight / order for the slide and updates all slides.
   set weight (value) {
     this._weight = value
     Slides.updateBadges()
@@ -55,6 +64,7 @@ class Slide {
     return this._isSticky
   }
 
+  // Changes whether or not this slide is sticky, and updates all slides.
   set isSticky (value) {
     this._isSticky = value
     Slides.updateBadges()
@@ -72,6 +82,7 @@ class Slide {
     return this._reset
   }
 
+  // Determine whether or not this slide should be displayed.
   get active () {
     if (!this._active) { return false }
 
@@ -82,16 +93,19 @@ class Slide {
     return true
   }
 
+  // Set manually whether or not to make the slide active, and update all slides.
   set active (value) {
     this._active = value
     Slides.updateBadges()
   }
 
+  // Set the ISO start date/time for the slide.
   set starts (value) {
     this._starts = value
     Slides.updateBadges()
   }
 
+  // Set the ISO string expires time for the slide.
   set expires (value) {
     this._expires = value
     Slides.updateBadges()
@@ -105,6 +119,7 @@ class Slide {
     return this._innerHtml
   }
 
+  // Set new HTML for the slide and update it.
   set html (value) {
     this._innerHtml = value
     if (Slides.activeSlide().name === this._name) {
@@ -147,13 +162,17 @@ class Slide {
     return this._fnEnd(this)
   }
 
+  // Destroy the slide
   remove () {
     var temp = document.getElementById(`slide-${this._name}`)
     if (temp !== null) { temp.parentNode.removeChild(temp) }
   }
 }
 
-// Slides factory function for containing all of the slides for this display sign
+/**
+ * Slides factory function for creating a slide manager.
+ * @returns {object} Object of functions for managing slides.
+ */
 Slides = (() => {
   // Storage of slides in the system
   var slides = []
@@ -177,11 +196,19 @@ Slides = (() => {
     }
   }
 
-  // Return the Slide class of the provided slide name
+  /**
+   * Get a slide by its name.
+   * 
+   * @param {string} slideName Name of the slide to fetch
+   * @returns {object} The slide if it exists
+   */
   const slide = (slideName) => {
     return slides.filter((_slide) => _slide.name === slideName)[ 0 ]
   }
 
+  /**
+   * Return all slides
+   */
   const allSlides = () => slides
 
   // function to update the order of the slides array by weight, and update the badges at the bottom of the screen for the slides
@@ -226,7 +253,11 @@ Slides = (() => {
     }
   }
 
-  // Add a Slide class into the system
+  /**
+   * Add a new slide.
+   * 
+   * @param {object} data Slide data. See Slides class constructor for properties.
+   */
   const newSlide = (data) => {
     // Check if the slide already exists
     var changed = false
@@ -244,7 +275,11 @@ Slides = (() => {
     }
   }
 
-  // Remove a slide from the system by slide name
+  /**
+   * Remove a slide.
+   * 
+   * @param {string} slideName Name of slide to destroy.
+   */
   const removeSlide = (slideName) => {
     slides.map((_slide, index) => {
       if (_slide.name === slideName) {
@@ -259,7 +294,11 @@ Slides = (() => {
     updateBadges()
   }
 
-  // Transition to a slide
+  /**
+   * Transition to / show a slide.
+   * 
+   * @param {string} slideName Name of slide to show
+   */
   const showSlide = (slideName) => {
     timeLeft = null
     if (activeSlide().fnEnd) { activeSlide().fnEnd() }
@@ -374,6 +413,7 @@ Slides = (() => {
     }
   }
 
+  // Generate a random gradient background
   const generateBG = () => {
     var hexValues = [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e' ]
 
@@ -543,6 +583,6 @@ Slides = (() => {
     }
   }, 1000)
 
-  // Return the stuff
+  // Return factory functions
   return { updateBadges, activeSlide, countActive, slide, allSlides, newSlide, removeSlide, showSlide }
 })()

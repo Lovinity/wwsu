@@ -2,6 +2,12 @@
 // This class manages the track liking system
 class WWSUlikedtracks {
 
+    /**
+     * Construct the class
+     * 
+     * @param {sails.io} socket Socket connection to WWSU
+     * @param {WWSUreq} request Request with no authorization
+     */
     constructor(socket, request) {
         this.endpoints = {
             get: '/songs/get-liked',
@@ -14,6 +20,7 @@ class WWSUlikedtracks {
         this._likedTracks = [];
     }
 
+    // Start the connection. Call this in socket connect event.
     init () {
         this.request.request({ method: 'POST', url: this.endpoints.get, data: {} }, (body) => {
             try {
@@ -25,17 +32,33 @@ class WWSUlikedtracks {
         })
     }
 
-    // Supports these events: init([array of all tracks liked]), likedTrack(ID of the track liked), likedTrackManual('artist - title of track');
+    /**
+     * Listen to an event.
+     * 
+     * @param {string} event Event to listen: init([array of all tracks liked]), likedTrack(ID of the track liked), likedTrackManual('artist - title of track')
+     * @param {function} fn Function to call when event is fired
+     */
     on (event, fn) {
         this.events.on(event, fn);
     }
 
+    /**
+     * Get the tracks liked by the current user.
+     * 
+     * @returns {array} Array of track IDs or 'artist - title' strings liked
+     */
     get likedTracks() {
         return this._likedTracks;
     }
 
+    /**
+     * Like a track.
+     * 
+     * @param {number|string} trackID Track ID liked, or string of 'artist - title' if track was manual (eg. DJ log)
+     * @param {string} nickname Current user's nickname
+     */
     likeTrack (trackID, nickname = ``) {
-        // If trackID is a string, send the like as a message to the DJ instead
+        // If trackID is a string, send the like as a message to the DJ
         if (isNaN(trackID)) {
             if (blocked) return null;
             this.request.request({ method: 'POST', url: this.endpoints.sendMessage, data: { message: `(System Message) This person liked a track you played: ${trackID}`, nickname: nickname, private: false } }, (response) => {
@@ -74,6 +97,7 @@ class WWSUlikedtracks {
                     });
                 }
             })
+            // Otherwise, register the tack ID as liked in the automation system
         } else {
             this.request.request({ method: 'POST', url: this.endpoints.like, data: { trackID: trackID } }, (response) => {
                 try {

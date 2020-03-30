@@ -1,6 +1,8 @@
 
 /* global moment, importScripts */
 
+// Manage darksky weather information
+
 importScripts(`../../../plugins/moment/moment.min.js`)
 
 onmessage = function (e) {

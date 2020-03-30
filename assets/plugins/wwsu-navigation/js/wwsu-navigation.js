@@ -1,13 +1,16 @@
-// This class manages the sidebar navigation menu on WWSU pages
+// This class manages the sidebar navigation menu on WWSU pages using AdminLTE
 
 class WWSUNavigation {
 
+    /**
+     * Construct the class
+     */
     constructor() {
         this.elements = [];
         this.activeMenu = ``;
 
-        window.onpopstate = function(e){
-            if(e.state){
+        window.onpopstate = function (e) {
+            if (e.state) {
                 $('body').html(e.state.html);
                 document.title = e.state.pageTitle;
             }
@@ -23,7 +26,7 @@ class WWSUNavigation {
      * @param {boolean} defaultItem Set to true to make this the default menu activated. Defaults to false
      * @param {function} callback Function with no parameters called when this menu becomes active. Defaults to empty function.
      */
-    addItem (dom, section, title, url, defaultItem = false, callback = () => {}) {
+    addItem (dom, section, title, url, defaultItem = false, callback = () => { }) {
         this.elements.push({ dom, section, title, url, callback });
 
         if (defaultItem) {
@@ -48,7 +51,11 @@ class WWSUNavigation {
         }
     }
 
-    // Cycle through all added navigation items and activate the one provided in dom
+    /**
+     * Activate the menu page provided.
+     * 
+     * @param {string} dom DOM query string of the sidebar menu item to activate.
+     */
     processMenu (dom) {
         this.activeMenu = dom;
 
@@ -58,13 +65,18 @@ class WWSUNavigation {
             $(element.section).css("display", "none");
         });
 
-        // Activate the menu item passed as dom parameter, and un-hide its section
+        // Activate the menu item passed as dom parameter, and un-hide its section.
         this.elements
             .filter((element) => element.dom === dom)
             .map((element) => {
                 $(element.dom).addClass("active");
                 $(element.section).css("display", "");
-                window.history.pushState({"html": $('body').html(), "pageTitle":element.title},"", element.url);
+                try {
+                    // Add window history manually since we are not physically going to another page.
+                    window.history.pushState({ "html": $('body').html(), "pageTitle": element.title }, "", element.url);
+                } catch (e) {
+                    // Consume errors
+                }
                 element.callback();
             });
     }
