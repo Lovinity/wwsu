@@ -305,6 +305,7 @@ module.exports = {
         return proceed()
     },
 
+    /*
     afterDestroy: function (destroyedRecord, proceed) {
         var data = { remove: destroyedRecord.ID }
         sails.models.calendar.calendardb.query('schedule', data);
@@ -373,5 +374,6 @@ module.exports = {
 
         return proceed();
     }
+    */
 
 }
