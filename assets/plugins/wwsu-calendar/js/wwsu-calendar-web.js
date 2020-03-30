@@ -697,6 +697,16 @@ class CalendarDb {
                 // Now, go through every event for conflict checking
                 tasks = events.length;
                 tasksCompleted = 0;
+
+                // No events? exit this stage immediately
+                if (events.length === 0) {
+                    if (callback) {
+                        callback({ additions, removals, errors });
+                        return;
+                    } else {
+                        return { additions, removals, errors };
+                    }
+                }
                 events
                     .map((event, index) => {
                         // Add to task queue
@@ -709,13 +719,24 @@ class CalendarDb {
                         }
                     });
             }
-    
+
             // Function called when we get all events for checking
             var eventsCall = (events) => {
                 progressCallback(`Stage 3 of 4: Intelligently filtering events`);
                 tasks = events.length;
                 tasksCompleted = 0;
                 var filteredEvents = [];
+
+                // No events? we are done with conflict checking.
+                if (events.length === 0) {
+                    if (callback) {
+                        callback({ additions, removals, errors });
+                        return;
+                    } else {
+                        return { additions, removals, errors };
+                    }
+                }
+
                 events.map((event) => {
                     var _determineFilter = (_event) => {
                         var filter = timePeriods.find((period) => (moment(_event.end).isAfter(moment(period.start)) && moment(_event.start).isSameOrBefore(moment(period.end))));
