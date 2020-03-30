@@ -695,7 +695,7 @@ class WWSUmodal {
               <span aria-hidden="true">×</span>
           </button>` : ``}
           </div>
-          <div class="modal-body" id="modal-${this.id}-body" style="max-height: 50vh; overflow-x: scroll;">
+          <div class="modal-body" id="modal-${this.id}-body">
               ${body}
           </div>
           <div class="modal-footer justify-content-between" id="modal-${this.id}-footer">
