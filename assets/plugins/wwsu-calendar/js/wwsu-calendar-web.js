@@ -371,6 +371,8 @@ class CalendarDb {
      */
     checkConflicts (callback = null, queries = [], progressCallback = () => { }) {
         queries = _.cloneDeep(queries);
+        console.log(`deep cloned queries`);
+        console.dir(queries);
         var tasks = 0;
         var tasksCompleted = 0;
 
@@ -518,7 +520,7 @@ class CalendarDb {
             }
         }
 
-        var processQuery = (_query) => {
+        var processQuery = (query) => {
             if (typeof query.remove !== 'undefined') {
                 query.remove = vschedule.db({ ID: query.remove }).first();
                 vschedule.query({ remove: query.remove.ID });
@@ -654,8 +656,8 @@ class CalendarDb {
 
             // Process updateCalendar or removeCalendar before we continue with anything else
             queries
-                .filter((_query) => typeof _query.updateCalendar !== 'undefined' || typeof _query.removeCalendar !== 'undefined')
-                .map((_query, index) => {
+                .filter((query) => typeof query.updateCalendar !== 'undefined' || typeof query.removeCalendar !== 'undefined')
+                .map((query, index) => {
                     // Process the calendar update
                     if (typeof query.updateCalendar !== 'undefined') {
                         vcalendar.query({ update: query.updateCalendar });
@@ -757,14 +759,14 @@ class CalendarDb {
             // Process virtual queries
             tasks = queries.length;
             tasksCompleted = 0;
-            queries.forEach((_query) => {
+            queries.forEach((query) => {
                 if (callback) {
                     this.queue.add(() => {
-                        processQuery(_query);
+                        processQuery(query);
                         taskComplete(postQuery);
                     });
                 } else {
-                    processQuery(_query);
+                    processQuery(query);
                 }
             });
 
