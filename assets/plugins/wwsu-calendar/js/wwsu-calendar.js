@@ -22,38 +22,11 @@ if (typeof require !== 'undefined') {
         var moment = require('moment');
     }
 
-    // JQuery custom implementation with AJAX
-} else if (typeof $ !== 'undefined' && typeof JQuery !== 'undefined') {
-
-    // Jquery loadscript replacement for require for in-browser use
-    jQuery.loadScript = function (url) {
-        jQuery.ajax({
-            url: url,
-            dataType: 'script',
-            async: false
-        });
+    if (typeof _ === 'undefined') {
+        var _ = require('lodash');
     }
 
-    if (typeof TAFFY === 'undefined') {
-        $.loadScript('../../taffy/js/taffy-min.js');
-    }
-
-    if (typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined') {
-        $.loadScript('../../wwsu-sails/js/wwsu.js');
-    }
-
-    if (typeof later === 'undefined') {
-        $.loadScript('../../later/js/later.min.js');
-    }
-
-    if (typeof moment === 'undefined') {
-        $.loadScript('../../moment/moment.min.js');
-    }
-} else if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
-    console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, WWSUqueue, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
-}
-
-if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
+} else if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined' || typeof _ === 'undefined') {
     console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, WWSUqueue, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
 }
 

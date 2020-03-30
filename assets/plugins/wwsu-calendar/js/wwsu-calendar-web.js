@@ -1,5 +1,5 @@
-if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined') {
-    console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, WWSUqueue, later, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
+if (typeof TAFFY === 'undefined' || typeof WWSUdb === 'undefined' || typeof WWSUqueue === 'undefined' || typeof later === 'undefined' || typeof moment === 'undefined' || typeof _ === undefined) {
+    console.error(new Error('wwsu-calendar requires TAFFY, WWSUdb, WWSUqueue, later, lodash, and moment. However, neither node.js require() nor JQuery were available to require the scripts.'));
 }
 
 // Use local time instead of UTC for scheduling
@@ -375,11 +375,11 @@ class CalendarDb {
 
         // Prepare a copy of the current calendar
         var vcalendar = new WWSUdb(TAFFY());
-        vcalendar.query(this.calendar.db().get(), true);
+        vcalendar.query(_.cloneDeep(this.calendar.db().get()), true);
 
         // Prepare a copy of the current schedule
         var vschedule = new WWSUdb(TAFFY());
-        vschedule.query(this.schedule.db().get(), true);
+        vschedule.query(_.cloneDeep(this.schedule.db().get()), true);
 
         // prepare start and end detection
         var start = null;
@@ -518,7 +518,7 @@ class CalendarDb {
         }
 
         var processQuery = (_query) => {
-            var query = Object.assign({}, _query);
+            var query = _.cloneDeep(_query);
             if (typeof query.remove !== 'undefined') {
                 query.remove = vschedule.db({ ID: query.remove }).first();
                 vschedule.query({ remove: query.remove.ID });
@@ -656,7 +656,7 @@ class CalendarDb {
             queries
                 .filter((_query) => typeof _query.updateCalendar !== 'undefined' || typeof _query.removeCalendar !== 'undefined')
                 .map((_query, index) => {
-                    var query = Object.assign({}, _query);
+                    var query = _.cloneDeep(_query);
                     // Process the calendar update
                     if (typeof query.updateCalendar !== 'undefined') {
                         vcalendar.query({ update: query.updateCalendar });
@@ -1321,7 +1321,7 @@ class CalendarDb {
                 var schedule = scheduledb.db({ ID: record.scheduleID }).first();
             }
             if (schedule) {
-                var tempCal = Object.assign({}, calendar);
+                var tempCal = _.cloneDeep(calendar);
                 for (var stuff in schedule) {
                     if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
                         if (typeof schedule[ stuff ] !== 'undefined' && schedule[ stuff ] !== null)
