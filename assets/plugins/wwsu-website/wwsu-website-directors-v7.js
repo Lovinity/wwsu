@@ -45,6 +45,7 @@ $(document).ready(function () {
         closeButton: false,
         overlayClose: false,
         zindex: 10000,
+        openFullscreen: true,
     });
 
     // Build navigation

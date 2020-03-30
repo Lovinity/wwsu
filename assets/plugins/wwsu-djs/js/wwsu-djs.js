@@ -31,12 +31,14 @@ class WWSUdjs extends WWSUdb {
             headerColor: '',
             overlayClose: false,
             zindex: 1100,
+            openFullscreen: true,
         });
 
         this.newDjModal = new WWSUmodal(`New DJ`, null, ``, true, {
             headerColor: '',
             overlayClose: false,
             zindex: 1110,
+            openFullscreen: true,
         });
     }
 

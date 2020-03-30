@@ -85,26 +85,32 @@ class WWSUcalendar extends CalendarDb {
         this.occurrenceModal = new WWSUmodal(``, null, ``, true, {
             headerColor: '',
             zindex: 1100,
+            openFullscreen: true,
         });
         this.occurrenceActionModal = new WWSUmodal(``, null, ``, true, {
             headerColor: '',
             zindex: 1110,
+            openFullscreen: true,
         });
         this.eventsModal = new WWSUmodal(`Events`, null, ``, true, {
             headerColor: '',
             zindex: 1100,
+            openFullscreen: true,
         });
         this.schedulesModal = new WWSUmodal(`Schedules`, null, ``, true, {
             headerColor: '',
             zindex: 1110,
+            openFullscreen: true,
         });
         this.scheduleModal = new WWSUmodal(`Schedules`, null, ``, true, {
             headerColor: '',
             zindex: 1120,
+            openFullscreen: true,
         });
         this.eventModal = new WWSUmodal(`New Event`, null, ``, true, {
             headerColor: '',
             zindex: 1120,
+            openFullscreen: true,
         });
     }
 
