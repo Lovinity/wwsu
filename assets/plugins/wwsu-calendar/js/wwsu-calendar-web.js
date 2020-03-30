@@ -1193,7 +1193,7 @@ class CalendarDb {
                         recurDayString += ` if`;
                         ifit = true;
                     } else {
-                        recurDatString += `, and`;
+                        recurDayString += `, and`;
                     }
                     recurDayString += ` it falls on ${event.recurWM.length > 1 ? `either` : ``} the ${event.recurWM.map((WM) => {
                         switch (WM) {
@@ -1218,7 +1218,7 @@ class CalendarDb {
                         recurDayString += ` if`;
                         ifit = true;
                     } else {
-                        recurDatString += `, and`;
+                        recurDayString += `, and`;
                     }
                     recurDayString += ` it falls on ${event.recurDW.length > 1 ? `either` : ``} a ${event.recurDW.map((DW) => {
                         switch (DW) {
