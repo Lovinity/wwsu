@@ -370,6 +370,7 @@ class CalendarDb {
      * @returns {?object} If callback not provided, returns conflicts object {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
     checkConflicts (callback = null, queries = [], progressCallback = () => { }) {
+        queries = _.cloneDeep(queries);
         var tasks = 0;
         var tasksCompleted = 0;
 
@@ -518,7 +519,6 @@ class CalendarDb {
         }
 
         var processQuery = (_query) => {
-            var query = _.cloneDeep(_query);
             if (typeof query.remove !== 'undefined') {
                 query.remove = vschedule.db({ ID: query.remove }).first();
                 vschedule.query({ remove: query.remove.ID });
@@ -656,7 +656,6 @@ class CalendarDb {
             queries
                 .filter((_query) => typeof _query.updateCalendar !== 'undefined' || typeof _query.removeCalendar !== 'undefined')
                 .map((_query, index) => {
-                    var query = _.cloneDeep(_query);
                     // Process the calendar update
                     if (typeof query.updateCalendar !== 'undefined') {
                         vcalendar.query({ update: query.updateCalendar });
@@ -1321,7 +1320,6 @@ class CalendarDb {
                 var schedule = scheduledb.db({ ID: record.scheduleID }).first();
             }
             if (schedule) {
-                var tempCal = _.cloneDeep(calendar);
                 for (var stuff in schedule) {
                     if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
                         if (typeof schedule[ stuff ] !== 'undefined' && schedule[ stuff ] !== null)

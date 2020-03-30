@@ -398,16 +398,17 @@ class CalendarDb {
      * @returns {?object} If callback not provided, returns conflicts object {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
     checkConflicts (callback = null, queries = [], progressCallback = () => { }) {
+        queries = _.cloneDeep(queries);
         var tasks = 0;
         var tasksCompleted = 0;
 
         // Prepare a copy of the current calendar
         var vcalendar = new WWSUdb(TAFFY());
-        vcalendar.query(this.calendar.db().get(), true);
+        vcalendar.query(_.cloneDeep(this.calendar.db().get()), true);
 
         // Prepare a copy of the current schedule
         var vschedule = new WWSUdb(TAFFY());
-        vschedule.query(this.schedule.db().get(), true);
+        vschedule.query(_.cloneDeep(this.schedule.db().get()), true);
 
         // prepare start and end detection
         var start = null;
@@ -546,7 +547,6 @@ class CalendarDb {
         }
 
         var processQuery = (_query) => {
-            var query = Object.assign({}, _query);
             if (typeof query.remove !== 'undefined') {
                 query.remove = vschedule.db({ ID: query.remove }).first();
                 vschedule.query({ remove: query.remove.ID });
@@ -684,7 +684,6 @@ class CalendarDb {
             queries
                 .filter((_query) => typeof _query.updateCalendar !== 'undefined' || typeof _query.removeCalendar !== 'undefined')
                 .map((_query, index) => {
-                    var query = Object.assign({}, _query);
                     // Process the calendar update
                     if (typeof query.updateCalendar !== 'undefined') {
                         vcalendar.query({ update: query.updateCalendar });
@@ -1349,7 +1348,6 @@ class CalendarDb {
                 var schedule = scheduledb.db({ ID: record.scheduleID }).first();
             }
             if (schedule) {
-                var tempCal = Object.assign({}, calendar);
                 for (var stuff in schedule) {
                     if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
                         if (typeof schedule[ stuff ] !== 'undefined' && schedule[ stuff ] !== null)
