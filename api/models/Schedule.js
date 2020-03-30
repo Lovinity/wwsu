@@ -306,7 +306,6 @@ module.exports = {
     },
 
     afterDestroy: function (destroyedRecord, proceed) {
-        return proceed();
         var data = { remove: destroyedRecord.ID }
         sails.models.calendar.calendardb.query('schedule', data);
         sails.log.silly(`schedule socket: ${data}`)
@@ -364,10 +363,10 @@ module.exports = {
             }
 
             // Remove any schedules that were created as an override for the deleted schedule.
-            await sails.models.schedule.destroy({ overriddenID: event.ID }).fetch();
+            //await sails.models.schedule.destroy({ overriddenID: event.ID }).fetch();
 
             // Remove any schedules that were created to override this schedule
-            await sails.models.schedule.destroy({ scheduleID: event.ID }).fetch();
+            //await sails.models.schedule.destroy({ scheduleID: event.ID }).fetch();
 
         })(destroyedRecord);
 
