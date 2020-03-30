@@ -17,12 +17,13 @@ module.exports = {
         try {
 
             // Check for event conflicts
+            var _inputs = Object.assign({}, inputs);
             var conflicts = sails.models.calendar.calendardb.checkConflicts(null, [ { remove: inputs.ID } ]);
             sails.sockets.broadcast('schedule', 'upbeat', conflicts);
 
             // Destroy the schedule event
             // Note: async does not seem to callback afterDestroy for this model.
-            var records = await sails.models.schedule.destroy({ ID: inputs.ID }).fetch();
+            var records = await sails.models.schedule.destroy({ ID: _inputs.ID }).fetch();
             sails.sockets.broadcast('schedule', 'removeSchedule', records);
 
             // Remove records which should be removed first
