@@ -24,7 +24,7 @@ onmessage = function (e) {
   var innercontent = ``;
   var today = [];
 
-  var events = calendardb.getEvents();
+  var events = calendardb.getEvents(null);
 
   var noEvents = true
   var activeEvents = 0

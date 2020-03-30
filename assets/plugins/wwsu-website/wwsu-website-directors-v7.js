@@ -23,8 +23,6 @@ try {
     var notificationsSupported = false;
     var OneSignal;
 
-    var dataModal;
-    var formModal;
     var disciplineModal;
 
 } catch (e) {
@@ -41,16 +39,6 @@ try {
 $(document).ready(function () {
 
     // Create izi Modals
-    dataModal = $('#dataModal').iziModal({
-        headerColor: '',
-        overlayClose: false,
-        zindex: 1100,
-    });
-    formModal = $('#formModal').iziModal({
-        headerColor: '',
-        overlayClose: false,
-        zindex: 1200,
-    });
     disciplineModal = new WWSUmodal(`Disciplinary Notice`, `bg-danger`, false, {
         headerColor: '',
         closeOnEscape: false,

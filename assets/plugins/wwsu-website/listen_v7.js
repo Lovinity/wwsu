@@ -1306,7 +1306,7 @@ function updateCalendar () {
     var calendarOptions = document.getElementById('calendar-select')
     var selectedOption = parseInt(calendarOptions.options[ calendarOptions.selectedIndex ].value || 0) || 0
 
-    var events = calendardb.getEvents(undefined, moment().add(7, 'days'));
+    var events = calendardb.getEvents(null, undefined, moment().add(7, 'days'));
 
     // Run through every event in memory and add appropriate ones into our formatted calendar variable.
     events
@@ -1415,7 +1415,7 @@ function hexRgb (hex, options = {}) {
 // Used in HTML
 // eslint-disable-next-line no-unused-vars
 function displayEventInfo (showID) {
-  var events = calendardb.getEvents(undefined, moment().add(7, 'days'));
+  var events = calendardb.getEvents(null, undefined, moment().add(7, 'days'));
   events = events.filter((event) => event.unique === showID);
   if (events.length === 0) {
     iziToast.show({
