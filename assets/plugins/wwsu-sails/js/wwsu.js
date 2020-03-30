@@ -688,7 +688,7 @@ class WWSUmodal {
       this.id = util.createUUID();
 
       $('body').append(`<div class="modal" id="modal-${this.id}" aria-hidden="true" aria-labelledby="modal-${this.id}-title">
-      <div class="modal-content${bgClass ? ` ${bgClass}` : ``}">
+      <div class="modal-content${bgClass ? ` ${bgClass}` : ``}" style="height: 100vh;">
           <div class="modal-header">
               <h4 class="modal-title" id="modal-${this.id}-title">${title}</h4>
               ${closeButton ? `<button type="button" class="close" data-izimodal-close="" aria-label="Close">
