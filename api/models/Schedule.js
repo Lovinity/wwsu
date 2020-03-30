@@ -374,6 +374,14 @@ module.exports = {
 
         return proceed();
     }
-    */
+*/
+
+    afterDestroy: function (destroyedRecord, proceed) {
+        var data = { remove: destroyedRecord.ID }
+        sails.models.calendar.calendardb.query('schedule', data);
+        sails.log.silly(`schedule socket: ${data}`)
+        sails.sockets.broadcast('schedule', 'schedule', data)
+        return proceed();
+    }
 
 }
