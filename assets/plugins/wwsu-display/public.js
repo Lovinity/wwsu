@@ -68,6 +68,7 @@ try {
   var temp
   var queueUnknown = false
   var isStudio = window.location.search.indexOf('studio=true') !== -1
+  var isLightTheme = false
   var weatherSlide = [
     { id: `weather`, icon: `fa-sun`, background: `#424242`, header: `Current Weather`, body: `Unknown`, show: true },
     { id: `precipitation`, icon: `fa-umbrella`, background: `#424242`, header: `Precipitation`, body: ``, show: false },
