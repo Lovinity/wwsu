@@ -217,10 +217,10 @@ module.exports = {
                     } else {
                         // Remove duplicates
                         issues = issues.filter((v, i, a) => a.indexOf(v) === i)
-                        await sails.helpers.status.change.with({ name: 'calendar', label: 'Calendar', data: issues.join(` `), status: status });
+                        await sails.helpers.status.change.with({ name: 'calendar', label: 'Calendar', data: `<ul><li>${issues.join(`</li><li>`)}</li></ul>`, status: status });
                     }
                 }
-            }, undefined, moment().add(14, 'days').toISOString(true));
+            }, undefined, moment().add(7, 'days').toISOString(true));
         } else {
 
             // Check if it's time to trigger a program, and trigger it if so
