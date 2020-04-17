@@ -309,8 +309,8 @@ module.exports = {
 
           // Regular automation
           if (sails.models.meta.memory.state.startsWith('automation_') && sails.models.meta.memory.state !== 'automation_playlist' && sails.models.meta.memory.state !== 'automation_genre') {
-            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1) || sails.models.meta.memory.trackArtist.includes('Unknown Artist') || sails.models.meta.memory.trackArtist === null || sails.models.meta.memory.trackArtist === '') {
+            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta
+            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1)) {
               push2.line1 = sails.config.custom.meta.alt.automation
               push2.line2 = ''
               push2.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.automation}`
@@ -323,8 +323,8 @@ module.exports = {
 
             // Playlist automation
           } else if (sails.models.meta.memory.state === 'automation_playlist') {
-            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1) || sails.models.meta.memory.trackArtist.includes('Unknown Artist') || sails.models.meta.memory.trackArtist === null || sails.models.meta.memory.trackArtist === '') {
+            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta
+            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1)) {
               push2.line1 = sails.config.custom.meta.alt.playlist
               push2.line2 = `${sails.config.custom.meta.prefix.playlist}${sails.models.meta.memory.playlist}`
               push2.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.playlist}`
@@ -337,8 +337,8 @@ module.exports = {
 
             // Genre automation
           } else if (sails.models.meta.memory.state === 'automation_genre') {
-            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1) || sails.models.meta.memory.trackArtist.includes('Unknown Artist') || sails.models.meta.memory.trackArtist === null || sails.models.meta.memory.trackArtist === '') {
+            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta
+            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1)) {
               push2.line1 = sails.config.custom.meta.alt.genre
               push2.line2 = `${sails.config.custom.meta.prefix.genre}${sails.models.meta.memory.genre}`
               push2.stream = `WWSU 106.9FM - ${sails.config.custom.meta.alt.genre}`
@@ -351,8 +351,8 @@ module.exports = {
 
             // Live shows
           } else if (sails.models.meta.memory.state.startsWith('live_')) {
-            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1) || sails.models.meta.memory.trackArtist.includes('Unknown Artist') || sails.models.meta.memory.trackArtist === null || sails.models.meta.memory.trackArtist === '') {
+            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta
+            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1)) {
               push2.line1 = `${sails.config.custom.meta.prefix.live}${sails.models.meta.memory.show}`
               push2.line2 = sails.config.custom.meta.alt.live
               push2.stream = `${sails.models.meta.memory.show} (${sails.config.custom.meta.alt.live})`
@@ -365,8 +365,8 @@ module.exports = {
 
             // Prerecorded shows
           } else if (sails.models.meta.memory.state.startsWith('prerecord_')) {
-            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1) || sails.models.meta.memory.trackArtist.includes('Unknown Artist') || sails.models.meta.memory.trackArtist === null || sails.models.meta.memory.trackArtist === '') {
+            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta
+            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1)) {
               push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta.memory.playlist}`
               push2.line2 = sails.config.custom.meta.alt.prerecord
               push2.stream = `${sails.models.meta.memory.playlist} (${sails.config.custom.meta.alt.prerecord})`
@@ -379,8 +379,8 @@ module.exports = {
 
             // Remote broadcasts
           } else if (sails.models.meta.memory.state.startsWith('remote_')) {
-            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta, or have Unknown Artist as the artist
-            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1) || sails.models.meta.memory.trackArtist.includes('Unknown Artist') || sails.models.meta.memory.trackArtist === null || sails.models.meta.memory.trackArtist === '') {
+            // We do not want to display metadata for tracks that are within config.custom.categories.noMeta
+            if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1)) {
               push2.line1 = `${sails.config.custom.meta.prefix.remote}${sails.models.meta.memory.show}`
               push2.line2 = sails.config.custom.meta.alt.remote
               push2.stream = `${sails.models.meta.memory.show} (${sails.config.custom.meta.alt.remote})`
