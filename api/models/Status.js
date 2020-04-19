@@ -75,6 +75,9 @@ module.exports = {
     // This contains a moment timestamp of when the previous triggered error happened.
     prevError: null,
 
+    // This is used for determining the last time the silence detection was activated. 
+    prevSilence: null,
+
     // Contains a moment timestamp of when the most recent station ID was queued.
     prevID: null,
 
