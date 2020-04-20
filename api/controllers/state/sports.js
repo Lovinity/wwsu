@@ -51,7 +51,7 @@ module.exports = {
       }
 
       // Set meta to prevent accidental messages in DJ Controls
-      sails.helpers.meta.change.with({ show: inputs.sport, topic: inputs.topic, trackStamp: null })
+      sails.helpers.meta.change.with({ host: this.req.payload.ID, show: inputs.sport, topic: inputs.topic, trackStamp: null })
 
       // Start the sports broadcast
       if (!sails.models.meta.memory.state.startsWith('sports')) {

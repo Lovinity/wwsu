@@ -9,6 +9,11 @@ module.exports = {
       type: 'string',
       description: 'State of the WWSU system'
     },
+    host: {
+      type: 'number',
+      allowNull: true,
+      description: 'The ID of the host currently controlling the broadcast.'
+    },
     dj: {
       type: 'number',
       allowNull: true,

@@ -94,7 +94,7 @@ module.exports = {
       }
 
       // Send meta to prevent accidental interfering messages in Dj Controls
-      await sails.helpers.meta.change.with({ show: inputs.showname, topic: inputs.topic, trackStamp: null })
+      await sails.helpers.meta.change.with({ host: this.req.payload.ID, show: inputs.showname, topic: inputs.topic, trackStamp: null })
 
       // If we are not already in remote mode, prepare to go live in RadioDJ
       if (!sails.models.meta.memory.state.startsWith('remote_')) {

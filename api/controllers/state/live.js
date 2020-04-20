@@ -62,7 +62,7 @@ module.exports = {
       }
 
       // Send meta early so that DJ Controls does not think this person is interfering with another show
-      await sails.helpers.meta.change.with({ show: inputs.showname, topic: inputs.topic, trackStamp: null })
+      await sails.helpers.meta.change.with({ host: this.req.payload.ID, show: inputs.showname, topic: inputs.topic, trackStamp: null })
 
       // If we are not already in live mode, prepare to go live in RadioDJ
       if (!sails.models.meta.memory.state.startsWith('live_')) {
