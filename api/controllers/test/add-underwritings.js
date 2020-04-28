@@ -33,7 +33,7 @@ module.exports = {
 
       // If there are no queueUnderwritings breaks, this is an error! Bail.
       if (x === 0) {
-        //await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `Underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration. You can do this in DJ Controls under admin menu -> Server Configuration -> Breaks - Hourly`, status: 1 })
+        // await sails.helpers.status.change.with({ name: 'underwritings', label: 'Underwritings', data: `Underwritings are not airing; There are no queueUnderwritings tasks in clockwheel breaks with a quantity greater than 0. Please add a queueUnderwritings task to at least one of the clockwheel breaks in the server configuration. You can do this in DJ Controls under admin menu -> Server Configuration -> Breaks - Hourly`, status: 2 })
         return exits.success('No queueUnderwritings')
       }
 

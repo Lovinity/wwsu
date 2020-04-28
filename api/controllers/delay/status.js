@@ -23,13 +23,13 @@ module.exports = {
 
         try {
             if (inputs.bypass) {
-                await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `Delay system is in bypass mode and not actively delaying! This is against FCC regulations. Please disable bypass by pressing the bypass button on the delay system.`, status: 1 })
+                await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `Delay system is in bypass mode and not actively delaying! This is against FCC regulations. Please disable bypass by pressing the bypass button on the delay system.`, status: 2 })
                 await sails.helpers.meta.change.with({delaySystem: null})
             } else if (inputs.seconds <= 0) {
-                await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `Delay system is returning 0 seconds of delay. This is against FCC regulations (requirement is 7 seconds or more). Please ensure the delay system is activated. You may have to press the start button.`, status: 1 })
+                await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `Delay system is returning 0 seconds of delay. This is against FCC regulations (requirement is 7 seconds or more). Please ensure the delay system is activated. You may have to press the start button.`, status: 2 })
                 await sails.helpers.meta.change.with({delaySystem: 0})
             } else if (inputs.seconds < 7) {
-                await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `Delay system is reporting ${inputs.seconds} seconds of delay. This is against FCC regulations (requirement is 7 seconds or more). Please ensure the delay system is working properly. The delay system might be slowly re-building the delay after use of dump or cough.`, status: 2 })
+                await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `Delay system is reporting ${inputs.seconds} seconds of delay. This is against FCC regulations (requirement is 7 seconds or more). Please ensure the delay system is working properly. The delay system might be slowly re-building the delay after use of dump or cough.`, status: 3 })
                 await sails.helpers.meta.change.with({delaySystem: inputs.seconds})
             } else {
                 await sails.helpers.status.change.with({ name: 'delay-system', label: 'Delay System', data: `Delay System is reporting ${inputs.seconds} seconds of delay. This is within FCC limits (7 seconds or more).`, status: 5 })
