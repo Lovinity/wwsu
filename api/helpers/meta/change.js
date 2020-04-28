@@ -388,12 +388,12 @@ module.exports = {
           } else if (sails.models.meta.memory.state.startsWith('prerecord_')) {
             // We do not want to display metadata for tracks that are within config.custom.categories.noMeta
             if ((sails.config.custom.subcats.noMeta && sails.config.custom.subcats.noMeta.indexOf(sails.models.meta.memory.trackIDSubcat || 0) > -1)) {
-              push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta.memory.playlist}`
+              push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta.memory.show}`
               push2.line2 = sails.config.custom.meta.alt.prerecord
-              push2.stream = `${sails.models.meta.memory.playlist} (${sails.config.custom.meta.alt.prerecord})`
+              push2.stream = `${sails.models.meta.memory.show} (${sails.config.custom.meta.alt.prerecord})`
               push2.percent = 0
             } else {
-              push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta.memory.playlist}`
+              push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta.memory.show}`
               push2.line2 = await sails.helpers.filterProfane(`${sails.config.custom.meta.prefix.playing}${sails.models.meta.memory.trackArtist || 'Unknown Artist'} - ${sails.models.meta.memory.trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
               push2.stream = await sails.helpers.filterProfane(`${sails.models.meta.memory.trackArtist || 'Unknown Artist'} - ${sails.models.meta.memory.trackTitle || 'Unknown Title'} ${push2.requested ? `(${sails.config.custom.meta.prefix.request}${push2.requestedBy || 'Anonymous'})` : ``}`)
             }
