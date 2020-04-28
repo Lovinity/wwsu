@@ -47,6 +47,22 @@ module.exports = {
         return moment(value).isValid()
       }
     },
+    scheduledStart: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when the current programming was scheduled to start',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    scheduledEnd: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when the current programming is scheduled to end',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
     show: {
       type: 'string',
       description: 'If someone is on the air, host name - show name, or name of sports for sports broadcasts'

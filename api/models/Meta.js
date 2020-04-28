@@ -63,6 +63,16 @@ module.exports = {
       columnType: 'datetime'
     },
 
+    scheduledStart: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
+
+    scheduledEnd: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
+
     trackArtist: {
       type: 'string',
       allowNull: true
@@ -180,6 +190,22 @@ module.exports = {
       type: 'string',
       allowNull: true,
       description: 'ISO timestamp of when calendar attendance was last checked',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    scheduledStart: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when the current programming was scheduled to start',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    scheduledEnd: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when the current programming is scheduled to end',
       custom: function (value) {
         return moment(value).isValid()
       }

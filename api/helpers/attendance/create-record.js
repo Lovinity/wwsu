@@ -53,10 +53,10 @@ module.exports = {
         returnData.newID = created.ID
 
         // Switch to the new record in the system
-        await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: inputs.event.unique || null, calendarID: inputs.event.calendarID || null })
+        await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: inputs.event.unique || null, calendarID: inputs.event.calendarID || null, scheduledStart: inputs.event.start || null, scheduledEnd: inputs.event.end || null })
       } else {
         var created = await sails.models.attendance.create({ unique: "", happened: 1, event: `genre: Unknown Hosts - Default Rotation`, actualStart: moment().toISOString(true) }).fetch()
-        await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: null, calendarID: null })
+        await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: null, calendarID: null, scheduledStart: null, scheduledEnd: null })
       }
 
       // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast
