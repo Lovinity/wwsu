@@ -122,6 +122,6 @@ module.exports.sockets = {
      *                                                                          *
      ***************************************************************************/
 
-  grant3rdPartyCookie: false,
+  // grant3rdPartyCookie: false,
 
 }
