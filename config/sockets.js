@@ -94,7 +94,7 @@ module.exports.sockets = {
     }
 
     // At this point, allow the connection
-    return proceed(`End of function`, false)
+    return proceed(`End of function`, true)
   },
 
   /***************************************************************************
