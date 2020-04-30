@@ -50,7 +50,7 @@ module.exports.sockets = {
     var moment = require('moment')
     var searchto = moment().subtract(1, 'days').toDate()
     var sh = require('shorthash')
-    var theip = typeof handshake.headers['x-forwarded-for'] !== 'undefined' ? handshake.headers['x-forwarded-for'] : handshake.address
+    var theip = typeof handshake.headers[ 'x-forwarded-for' ] !== 'undefined' ? handshake.headers[ 'x-forwarded-for' ] : handshake.address
     var theid = sh.unique(theip + sails.config.custom.hostSecret)
     try {
       var record = await sails.models.discipline.find({
@@ -61,11 +61,11 @@ module.exports.sockets = {
             { action: 'dayban', createdAt: { '>': searchto } },
             { action: 'showban' }
           ],
-          IP: [theip, `website-${theid}`]
+          IP: [ theip, `website-${theid}` ]
         }
       }).sort(`createdAt DESC`).limit(1)
-      if (typeof record !== 'undefined' && typeof record[0] !== 'undefined') {
-        record = record[0]
+      if (typeof record !== 'undefined' && typeof record[ 0 ] !== 'undefined') {
+        record = record[ 0 ]
         var references = record.ID
         if (record.active === 1) {
           if (record.action === 'permaban' || record.action === 'dayban' || record.action === 'showban') {
@@ -80,7 +80,7 @@ module.exports.sockets = {
 
     // Allow requests from origin baseUrl and certain IPs and domains, otherwise require an authorized host header
     if (handshake.headers && handshake.headers.origin && (handshake.headers.origin.startsWith(sails.config.custom.baseUrl || `http://localhost:${sails.config.port}`) || handshake.headers.origin.startsWith(`http://130.108.128.116`))) {
-      return proceed(`Origin allow`, true)
+      return proceed(`Authorized: Origin Header`, true)
     } else {
       if (typeof handshake._query === 'undefined' || typeof handshake._query.host === 'undefined') {
         return proceed(`You must provide a host query parameter to authorize this websocket connection.`, false)
@@ -94,7 +94,7 @@ module.exports.sockets = {
     }
 
     // At this point, allow the connection
-    return proceed(`End of function`, true)
+    return proceed(`Authorized: Host`, true)
   },
 
   /***************************************************************************
@@ -113,7 +113,7 @@ module.exports.sockets = {
       sails.log.error(e)
     }
     return cb()
-  }
+  },
 
   /***************************************************************************
      *                                                                          *
@@ -122,6 +122,6 @@ module.exports.sockets = {
      *                                                                          *
      ***************************************************************************/
 
-  // grant3rdPartyCookie: true,
+  grant3rdPartyCookie: false,
 
 }
