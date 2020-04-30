@@ -113,7 +113,7 @@ module.exports = {
             sails.log.silly(`calendar socket: ${data}`)
             sails.sockets.broadcast('calendar', 'calendar', data)
             temp = (async () => {
-                await sails.helpers.schedule.destroy({ calendarID: updatedRecord.ID }).fetch();
+                await sails.models.schedule.destroy({ calendarID: updatedRecord.ID }).fetch();
                 var event = sails.models.calendar.calendardb.processRecord(updatedRecord, {}, moment().toISOString(true));
                 await sails.helpers.onesignal.sendEvent(event, false, false)
             })()
@@ -136,7 +136,7 @@ module.exports = {
 
         // Remove all calendar schedules
         temp = (async () => {
-            await sails.helpers.schedule.destroy({ calendarID: destroyedRecord.ID }).fetch();
+            await sails.models.schedule.destroy({ calendarID: destroyedRecord.ID }).fetch();
             var event = sails.models.calendar.calendardb.processRecord(destroyedRecord, {}, moment().toISOString(true));
             await sails.helpers.onesignal.sendEvent(event, false, false)
         })()
