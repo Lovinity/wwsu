@@ -789,7 +789,11 @@ class CalendarDb {
             }
 
             var postQuery = () => {
-                if (!start) start = moment();
+
+                // If no start detected, or start is before current time, then start should be current time.
+                // (We are bypassing conflict detection on events that have a start date over 24 hours ago)
+                if (!start || moment().isAfter(moment(start))) 
+                    start = moment();
 
                 // Make start 1 day sooner to account for any ongoing events
                 start = moment(start).subtract(1, 'days');
