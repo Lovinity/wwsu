@@ -365,6 +365,12 @@ module.exports = {
     // ```
     // --------------------------------------------------------------------------
 
+  },
+
+  ssl: {
+    ca: require('fs').readFileSync(require('path').resolve(__dirname,'../../20200407.crt')),
+    key: require('fs').readFileSync(require('path').resolve(__dirname,'../../20200407.key')),
+    cert: require('fs').readFileSync(require('path').resolve(__dirname,'../../20200407.cer'))
   }
 
 }
