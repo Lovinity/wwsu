@@ -93,7 +93,7 @@ module.exports = {
         await sails.helpers.meta.change.with({ changingState: null })
 
         return true
-      })()
+      })();
 
       // While the parallel is running, grab show time and listener minutes from attendance record.
       attendance = attendance.updatedRecord || undefined
