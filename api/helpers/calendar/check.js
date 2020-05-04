@@ -254,80 +254,78 @@ module.exports = {
 
             // Check to see if any events did not air
 
-            /* Still not working. Disabled for now.
 
             sails.models.calendar.calendardb.getEvents(async (eventCheck) => {
                 await sails.helpers.meta.change.with({ attendanceChecked: moment().toISOString(true) });
-            if (eventCheck && eventCheck.length > 0) {
+                if (eventCheck && eventCheck.length > 0) {
 
-                // Radio shows
-                eventCheck
-                    .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.scheduleType === null || (event.scheduleType !== 'canceled' && event.scheduleType !== 'canceled-system' && event.scheduleType !== 'canceled-changed'))) && [ 'show', 'sports', 'prerecord', 'remote', 'playlist' ].indexOf(event.type) !== -1)
-                    .map((event) => {
-                        sails.models.attendance.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, dj: event.hostDJ, cohostDJ1: event.cohostDJ1, cohostDJ2: event.cohostDJ2, cohostDJ3: event.cohostDJ3, event: `${event.type}: ${event.hosts} - ${event.name}`, happened: 0, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true) })
-                            .exec(async (err, record, wasCreated) => {
-                                if (err || !wasCreated) { return false }
+                    // Radio shows
+                    eventCheck
+                        .filter((event) => moment().isSameOrAfter(moment(event.end)) && (event.scheduleType === null || (event.scheduleType !== 'canceled' && event.scheduleType !== 'canceled-system' && event.scheduleType !== 'canceled-changed')) && [ 'show', 'sports', 'prerecord', 'remote', 'playlist' ].indexOf(event.type) !== -1)
+                        .map((event) => {
+                            sails.models.attendance.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, dj: event.hostDJ, cohostDJ1: event.cohostDJ1, cohostDJ2: event.cohostDJ2, cohostDJ3: event.cohostDJ3, event: `${event.type}: ${event.hosts} - ${event.name}`, happened: 0, scheduledStart: moment(event.start).toISOString(true), scheduledEnd: moment(event.end).toISOString(true) })
+                                .exec(async (err, record, wasCreated) => {
+                                    if (err || !wasCreated) { return false }
 
-                                if (event.type === 'show') {
-                                    await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Show did not air!</strong><br />Show: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                    if (event.type === 'show') {
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Show did not air!</strong><br />Show: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err)
+                                            })
+                                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Show did not air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
+                                    }
+
+                                    if (event.type === 'prerecord') {
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Prerecord did not air!</strong><br />Prerecord: ${event.hosts} - ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err)
+                                            })
+                                        await sails.helpers.onesignal.sendMass('emergencies', 'Prerecord failed to air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; this is likely a problem with the system.`)
+                                    }
+
+                                    if (event.type === 'remote') {
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Remote broadcast did not air!</strong><br />Remote: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err)
+                                            })
+                                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Remote broadcast did not air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
+                                    }
+
+                                    if (event.type === 'sports') {
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, event: `<strong>Sports broadcast did not air!</strong><br />Sport: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err)
+                                            })
+                                        await sails.helpers.onesignal.sendMass('accountability-shows', 'Sports broadcast did not air!', `${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
+                                    }
+
+                                    if (event.type === 'playlist') {
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, event: `<strong>Playlist did not air!</strong><br />Playlist: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                            .tolerate((err) => {
+                                                sails.log.error(err)
+                                            })
+                                        await sails.helpers.onesignal.sendMass('emergencies', 'Playlist failed to air', `${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; this is likely a problem with the system.`)
+                                    }
+                                });
+                        });
+
+                    // Director hours
+                    eventCheck
+                        .filter((event) => moment().isSameOrAfter(moment(event.end)) && (event.scheduleType === null || (event.scheduleType !== 'canceled' && event.scheduleType !== 'canceled-system' && event.scheduleType !== 'canceled-changed')) && event.type === 'office-hours')
+                        .map((event) => {
+                            sails.models.timesheet.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, name: event.hosts, approved: 0, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true) })
+                                .exec(async (err, record, wasCreated) => {
+                                    if (err || !wasCreated) { return false }
+
+                                    await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: event.hosts, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${event.hosts}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
                                         .tolerate((err) => {
                                             sails.log.error(err)
                                         })
-                                    await sails.helpers.onesignal.sendMass('accountability-shows', 'Show did not air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
-                                }
-
-                                if (event.type === 'prerecord') {
-                                    await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Prerecord did not air!</strong><br />Prerecord: ${event.hosts} - ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
-                                        .tolerate((err) => {
-                                            sails.log.error(err)
-                                        })
-                                    await sails.helpers.onesignal.sendMass('emergencies', 'Prerecord failed to air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; this is likely a problem with the system.`)
-                                }
-
-                                if (event.type === 'remote') {
-                                    await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Remote broadcast did not air!</strong><br />Remote: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
-                                        .tolerate((err) => {
-                                            sails.log.error(err)
-                                        })
-                                    await sails.helpers.onesignal.sendMass('accountability-shows', 'Remote broadcast did not air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
-                                }
-
-                                if (event.type === 'sports') {
-                                    await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, event: `<strong>Sports broadcast did not air!</strong><br />Sport: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
-                                        .tolerate((err) => {
-                                            sails.log.error(err)
-                                        })
-                                    await sails.helpers.onesignal.sendMass('accountability-shows', 'Sports broadcast did not air!', `${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
-                                }
-
-                                if (event.type === 'playlist') {
-                                    await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, event: `<strong>Playlist did not air!</strong><br />Playlist: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
-                                        .tolerate((err) => {
-                                            sails.log.error(err)
-                                        })
-                                    await sails.helpers.onesignal.sendMass('emergencies', 'Playlist failed to air', `${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; this is likely a problem with the system.`)
-                                }
-                            });
-                    });
-
-                // Director hours
-                eventCheck
-                    .filter((event) => (moment().isSameOrAfter(moment(event.end)) && (event.scheduleType === null || (event.scheduleType !== 'canceled' && event.scheduleType !== 'canceled-system' && event.scheduleType !== 'canceled-changed'))) && event.type === 'office-hours')
-                    .map((event) => {
-                        sails.models.timesheet.findOrCreate({ unique: event.unique }, { calendarID: event.calendarID, unique: event.unique, name: event.hosts, approved: 0, scheduledIn: moment(event.start).toISOString(true), scheduledOut: moment(event.end).toISOString(true) })
-                            .exec(async (err, record, wasCreated) => {
-                                if (err || !wasCreated) { return false }
-
-                                await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: event.hosts, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${event.hosts}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
-                                    .tolerate((err) => {
-                                        sails.log.error(err)
-                                    })
-                                await sails.helpers.onesignal.sendMass('accountability-directors', 'Director failed to do their hours!', `${event.hosts} failed to show up for their scheduled hours at ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}.`)
-                            });
-                    });
-            }
+                                    await sails.helpers.onesignal.sendMass('accountability-directors', 'Director failed to do their hours!', `${event.hosts} failed to show up for their scheduled hours at ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}.`)
+                                });
+                        });
+                }
             }, moment(sails.models.meta.memory.attendanceChecked).subtract(1, 'days').toISOString(true), moment().toISOString(true));
-            */
         }
 
         return exits.success();
