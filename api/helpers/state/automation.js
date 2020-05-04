@@ -30,9 +30,7 @@ module.exports = {
 
       // What to return for DJ Controls show stats, if applicable
       var returnData = { showTime: 0 }
-
-      // Begin parallel function for sending the system into automation
-      (async () => {
+      
         // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
         await sails.helpers.rest.cmd('EnableAssisted', 1)
 
@@ -91,9 +89,6 @@ module.exports = {
         await sails.helpers.rest.cmd('EnableAssisted', 0)
 
         await sails.helpers.meta.change.with({ changingState: null })
-
-        return true
-      })();
 
       // While the parallel is running, grab show time and listener minutes from attendance record.
       attendance = attendance.updatedRecord || undefined
