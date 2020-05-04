@@ -14,7 +14,7 @@ module.exports = {
     level: {
       type: 'string',
       required: true,
-      isIn: ['danger', 'warning', 'info', 'trivial'],
+      isIn: ["danger", "warning", "info", "success", "secondary"],
       description: 'Announcement warning level. Must be danger, warning, info, or trivial.'
     },
 

@@ -591,7 +591,6 @@ module.exports.bootstrap = async function (done) {
                           // Do not throw for errors, but log it.
                           sails.log.error(err)
                         })
-                      await sails.helpers.xp.addPrerecord()
                       break
                   }
                   await sails.helpers.rest.cmd('EnableAssisted', 0)
@@ -839,15 +838,6 @@ module.exports.bootstrap = async function (done) {
                     sails.models.status.errorCheck.prevID = moment()
                     await sails.helpers.error.count('stationID')
                     await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
-                  }
-
-                  // Add XP for prerecords
-                  if (sails.models.meta.memory.state.startsWith('prerecord_')) {
-                    await sails.models.xp.create({ dj: sails.models.meta.memory.dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.prerecordBreak, description: `A break was able to be queued during the prerecord.` })
-                      .tolerate((err) => {
-                        // Do not throw for error, but log it
-                        sails.log.error(err)
-                      })
                   }
 
                   // Remove liners in the queue. Do not do the playlist re-queue method as there may be a big prerecord or playlist in the queue.

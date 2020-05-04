@@ -29,15 +29,6 @@ module.exports = {
       await sails.helpers.rest.cmd('EnableAssisted', 0)
       await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
 
-      // Earn XP for playing a Top Add, if the show is live
-      if (sails.models.meta.memory.state.startsWith('live_')) {
-        await sails.models.xp.create({ dj: sails.models.meta.memory.dj, type: 'xp', subtype: 'topadd', amount: sails.config.custom.XP.topAdd, description: 'DJ played a Top Add.' })
-          .tolerate((err) => {
-            // Do not throw for error, but log it
-            sails.log.error(err)
-          })
-      }
-
       return exits.success()
     } catch (e) {
       return exits.error(e)

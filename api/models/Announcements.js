@@ -20,7 +20,7 @@ module.exports = {
 
     level: {
       type: 'string',
-      isIn: ['danger', 'warning', 'info', 'trivial']
+      isIn: ["danger", "warning", "info", "success", "secondary"]
     },
 
     title: {

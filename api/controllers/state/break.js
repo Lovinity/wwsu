@@ -90,15 +90,6 @@ module.exports = {
           sails.models.status.errorCheck.prevID = moment()
           await sails.helpers.error.count('stationID')
           await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
-
-          // Earn XP for doing the top of the hour ID break, if the show is live
-          if (sails.models.meta.memory.state.startsWith('live_')) {
-            await sails.models.xp.create({ dj: sails.models.meta.memory.dj, type: 'xp', subtype: 'id', amount: sails.config.custom.XP.ID, description: 'DJ played an on-time Top of the Hour ID break.' })
-              .tolerate((err) => {
-                // Do not throw for error, but log it
-                sails.log.error(err)
-              })
-          }
         }
 
         // Execute appropriate breaks, and switch state to break

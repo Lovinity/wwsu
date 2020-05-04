@@ -23,7 +23,6 @@ module.exports = {
         listeners: 0,
         ratio: 1,
         messages: 0,
-        xp: 0,
         remoteCredits: 0,
         shows: 0,
         prerecords: 0,
@@ -42,7 +41,6 @@ module.exports = {
         listeners: 0,
         ratio: 1,
         messages: 0,
-        xp: 0,
         remoteCredits: 0,
         shows: 0,
         prerecords: 0,
@@ -73,7 +71,6 @@ module.exports = {
           listeners: 0,
           ratio: 1,
           messages: 0,
-          xp: 0,
           remoteCredits: 0,
           shows: 0,
           prerecords: 0,
@@ -97,7 +94,6 @@ module.exports = {
           listeners: 0,
           ratio: 1,
           messages: 0,
-          xp: 0,
           remoteCredits: 0,
           shows: 0,
           prerecords: 0,
@@ -129,29 +125,17 @@ module.exports = {
 
     // Initialize first parallel async function
     var process1 = async () => {
-      // Calculate earned XP and remote credits
+      // Calculate earned remote credits
       var records = await sails.models.xp.find({ dj: inputs.dj ? inputs.dj : { '!=': null } })
       records.map((record) => {
         if (typeof DJs[ record.dj ] === 'undefined') { return }
-        if (record.type === `xp`) {
-          DJs[ record.dj ].overall.xp += record.amount
-          DJs[ 0 ].overall.xp += record.amount
-          if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-            DJs[ record.dj ].semester.xp += record.amount
-            DJs[ 0 ].semester.xp += record.amount
-          }
-        }
         if (record.type === `remote`) {
           DJs[ record.dj ].overall.remoteCredits += record.amount
           DJs[ 0 ].overall.remoteCredits += record.amount
-          DJs[ record.dj ].overall.xp += (record.amount * sails.config.custom.XP.remoteCredit)
-          DJs[ 0 ].overall.xp += (record.amount * sails.config.custom.XP.remoteCredit)
 
           if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
             DJs[ record.dj ].semester.remoteCredits += record.amount
             DJs[ 0 ].semester.remoteCredits += record.amount
-            DJs[ record.dj ].semester.xp += (record.amount * sails.config.custom.XP.remoteCredit)
-            DJs[ 0 ].semester.xp += (record.amount * sails.config.custom.XP.remoteCredit)
           }
         }
       })
@@ -239,7 +223,7 @@ module.exports = {
         if (Object.prototype.hasOwnProperty.call(unique, uniqueRecord)) {
           var record = unique[ uniqueRecord ]
           if (record.actualStart !== null && record.actualEnd !== null && record.happened === 1) {
-            if (record.event.startsWith('Show: ')) {
+            if (record.event.toLowerCase().startsWith('show: ')) {
               attendanceIDs3.push(record.ID)
               DJs[ record.dj ].overall.shows += 1
               DJs[ 0 ].overall.shows += 1
@@ -281,7 +265,7 @@ module.exports = {
                   }
                 }
               }
-            } else if (record.event.startsWith('Prerecord: ')) {
+            } else if (record.event.toLowerCase().startsWith('prerecord: ')) {
               attendanceIDs3.push(record.ID)
               DJs[ record.dj ].overall.prerecords += 1
               DJs[ record.dj ].overall.reputationScore += 2
@@ -289,7 +273,7 @@ module.exports = {
                 DJs[ record.dj ].semester.prerecords += 1
                 DJs[ record.dj ].semester.reputationScore += 2
               }
-            } else if (record.event.startsWith('Remote: ')) {
+            } else if (record.event.toLowerCase().startsWith('remote: ')) {
               attendanceIDs3.push(record.ID)
               DJs[ record.dj ].overall.remotes += 1
               DJs[ 0 ].overall.remotes += 1
