@@ -30,65 +30,65 @@ module.exports = {
 
       // What to return for DJ Controls show stats, if applicable
       var returnData = { showTime: 0 }
-      
-        // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
-        await sails.helpers.rest.cmd('EnableAssisted', 1)
 
-        // If coming out of a sports broadcast, queue a closer if exists.
-        if (sails.models.meta.memory.state.startsWith('sports')) {
-          if (typeof sails.config.custom.sportscats[sails.models.meta.memory.show] !== 'undefined') {
-            await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta.memory.show]['Sports Closers']], 'Bottom', 1)
-          }
-        } else {
-          if (typeof sails.config.custom.showcats[sails.models.meta.memory.show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.showcats[sails.models.meta.memory.show]['Show Closers']], 'Bottom', 1) }
+      // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
+      await sails.helpers.rest.cmd('EnableAssisted', 1)
+
+      // If coming out of a sports broadcast, queue a closer if exists.
+      if (sails.models.meta.memory.state.startsWith('sports')) {
+        if (typeof sails.config.custom.sportscats[ sails.models.meta.memory.show ] !== 'undefined') {
+          await sails.helpers.songs.queue([ sails.config.custom.sportscats[ sails.models.meta.memory.show ][ 'Sports Closers' ] ], 'Bottom', 1)
+        }
+      } else {
+        if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Closers' ] ], 'Bottom', 1) }
+      }
+
+      // Queue a station ID and a PSA
+      await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1)
+      await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1)
+
+      // Start playing something
+      await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
+      sails.models.status.errorCheck.prevID = moment()
+      await sails.helpers.error.count('stationID')
+
+      // Queue ending stuff
+      if (sails.models.meta.memory.state.startsWith('live_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end) }
+
+      if (sails.models.meta.memory.state.startsWith('remote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end) }
+
+      if (sails.models.meta.memory.state.startsWith('sports_') || sails.models.meta.memory.state.startsWith('sportsremote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end) }
+
+      // We are going to automation
+      if (!inputs.transition) {
+        await sails.helpers.meta.change.with({ host: null, dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_on', show: '', track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+        await sails.helpers.error.reset('automationBreak')
+
+        // Add up to 3 track requests if any are pending
+        await sails.helpers.requests.queue(3, true, true)
+
+        // Re-check and trigger any programs that should begin.
+        try {
+          await sails.helpers.calendar.check(true)
+        } catch (unusedE2) {
+          // Couldn't load calendar? Fall back to Default automation
+          await sails.helpers.genre.start(null, true)
         }
 
-        // Queue a station ID and a PSA
-        await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1)
-        await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1)
+        // Enable Auto DJ
+        await sails.helpers.rest.cmd('EnableAutoDJ', 1)
 
-        // Start playing something
-        await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
-        sails.models.status.errorCheck.prevID = moment()
-        await sails.helpers.error.count('stationID')
+        // We are going to break
+      } else {
+        await sails.helpers.meta.change.with({ host: null, dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_break', show: '', showLogo: null, track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
+        attendance = await sails.helpers.attendance.createRecord(null)
+      }
 
-        // Queue ending stuff
-        if (sails.models.meta.memory.state.startsWith('live_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end) }
+      // Finish up
+      await sails.helpers.songs.queuePending()
+      await sails.helpers.rest.cmd('EnableAssisted', 0)
 
-        if (sails.models.meta.memory.state.startsWith('remote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end) }
-
-        if (sails.models.meta.memory.state.startsWith('sports_') || sails.models.meta.memory.state.startsWith('sportsremote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end) }
-
-        // We are going to automation
-        if (!inputs.transition) {
-          await sails.helpers.meta.change.with({ host: null, dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_on', show: '', track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
-          await sails.helpers.error.reset('automationBreak')
-
-          // Add up to 3 track requests if any are pending
-          await sails.helpers.requests.queue(3, true, true)
-
-          // Re-check and trigger any programs that should begin.
-          try {
-            await sails.helpers.calendar.check(true)
-          } catch (unusedE2) {
-            // Couldn't load calendar? Fall back to Default automation
-            await sails.helpers.genre.start(null, true)
-          }
-
-          // Enable Auto DJ
-          await sails.helpers.rest.cmd('EnableAutoDJ', 1)
-
-          // We are going to break
-        } else {
-          await sails.helpers.meta.change.with({ host: null, dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_break', show: '', showLogo: null, track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
-          attendance = await sails.helpers.attendance.createRecord(null)
-        }
-
-        // Finish up
-        await sails.helpers.songs.queuePending()
-        await sails.helpers.rest.cmd('EnableAssisted', 0)
-
-        await sails.helpers.meta.change.with({ changingState: null })
+      await sails.helpers.meta.change.with({ changingState: null })
 
       // While the parallel is running, grab show time and listener minutes from attendance record.
       attendance = attendance.updatedRecord || undefined
