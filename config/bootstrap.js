@@ -43,7 +43,7 @@ module.exports.bootstrap = async function (done) {
 
   // Load calendardb
   sails.log.verbose(`BOOTSTRAP: Initiating calendar`)
-  sails.models.calendar.calendardb = new CalendarDb(await sails.models.calendar.find({ active: true }), await sails.models.schedule.find());
+  sails.models.calendar.calendardb = new CalendarDb(await sails.models.calendar.find({ active: true }), await sails.models.schedule.find(), await sails.models.clockwheels.find());
 
   if (sails.config.custom.sports) {
     sails.log.verbose(`BOOTSTRAP: Initiating sports events in calendar`)
@@ -1530,6 +1530,7 @@ module.exports.bootstrap = async function (done) {
       try {
         sails.models.calendar.calendardb.query('calendar', await sails.models.calendar.find({ active: true }), true)
         sails.models.calendar.calendardb.query('schedule', await sails.models.schedule.find(), true);
+        sails.models.calendar.calendardb.query('clockwheels', await sails.models.clockwheels.find(), true);
       } catch (e) {
         sails.log.error(e);
         return reject(e);

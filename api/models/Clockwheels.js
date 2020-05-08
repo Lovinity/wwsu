@@ -13,6 +13,10 @@ module.exports = {
         type: 'number',
         autoIncrement: true
       },
+
+      scheduleID: {
+        type: 'number'
+      },
   
       unique: {
         type: 'string'
@@ -43,6 +47,7 @@ module.exports = {
     afterCreate: function (newlyCreatedRecord, proceed) {
       var data = { insert: newlyCreatedRecord }
       sails.log.silly(`clockwheels socket: ${data}`)
+      sails.models.calendar.calendardb.query('clockwheels', data);
       sails.sockets.broadcast('clockwheels', 'clockwheels', data)
       return proceed()
     },
@@ -50,6 +55,7 @@ module.exports = {
     afterUpdate: function (updatedRecord, proceed) {
       var data = { update: updatedRecord }
       sails.log.silly(`Clockwheels socket: ${data}`)
+      sails.models.calendar.calendardb.query('clockwheels', data);
       sails.sockets.broadcast('clockwheels', 'clockwheels', data)
       return proceed()
     },
@@ -57,6 +63,7 @@ module.exports = {
     afterDestroy: function (destroyedRecord, proceed) {
       var data = { remove: destroyedRecord.ID }
       sails.log.silly(`clockwheels socket: ${data}`)
+      sails.models.calendar.calendardb.query('clockwheels', data);
       sails.sockets.broadcast('clockwheels', 'clockwheels', data)
       return proceed()
     }

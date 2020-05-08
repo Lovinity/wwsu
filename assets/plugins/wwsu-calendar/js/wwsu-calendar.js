@@ -39,14 +39,17 @@ class CalendarDb {
     /**
      * Construct the calendar database
      * 
-     * @param {array} calendar Array of calendar entries to initialize with.
-     * @param {array} schedule Array of schedule entries to initialize with.
+     * @param {?array} calendar Array of calendar entries to initialize with.
+     * @param {?array} schedule Array of schedule entries to initialize with.
+     * @param {?array} clockwheels Array of clockwheel records to initialize with.
      */
-    constructor(calendar = [], schedule = []) {
+    constructor(calendar = [], schedule = [], clockwheels = []) {
         this.calendar = new WWSUdb(TAFFY());
         this.schedule = new WWSUdb(TAFFY());
+        this.clockwheels = new WWSUdb(TAFFY());
         this.calendar.db.insert(calendar);
         this.schedule.db.insert(schedule);
+        this.clockwheels.db.insert(clockwheels);
 
         this.queue = new WWSUqueue();
     }
@@ -54,7 +57,7 @@ class CalendarDb {
     /**
      * Change data in the database via WWSUdb query.
      * 
-     * @param {string} db Database to query: either calendar or schedule.
+     * @param {string} db Database to query: either calendar, schedule, or clockwheels.
      * @param {object|array} data Array of records to replace with if replace is true, otherwise WWSU standard query object.
      * @param {boolean} replace Replace all data in the database with what was provided in data.
      */
@@ -65,6 +68,9 @@ class CalendarDb {
                 break;
             case 'schedule':
                 this.schedule.query(data, replace);
+                break;
+            case 'clockwheels':
+                this.clockwheels.query(data, replace);
                 break;
         }
     }
@@ -792,7 +798,7 @@ class CalendarDb {
 
                 // If no start detected, or start is before current time, then start should be current time.
                 // (We are bypassing conflict detection on events that have a start date over 24 hours ago)
-                if (!start || moment().isAfter(moment(start))) 
+                if (!start || moment().isAfter(moment(start)))
                     start = moment();
 
                 // Make start 1 day sooner to account for any ongoing events
@@ -1160,6 +1166,9 @@ class CalendarDb {
         } else {
             criteria.unique = `${criteria.calendarID}-${moment.utc(criteria.originalTime).valueOf()}`;
         }
+
+        // Attach array of clockwheel segments for this event if there are any
+        criteria.clockwheels = this.clockwheels.db({ unique: criteria.unique }).get();
 
         // Calculate end time after forming the object because we must refer to criteria.start
         criteria.end = schedule.duration || calendar.duration ? moment(criteria.start).add(schedule.duration || calendar.duration, 'minutes').toISOString(true) : moment(criteria.start).startOf('minute').toISOString(true);

@@ -135,12 +135,10 @@ module.exports = {
             columnType: 'date',
         },
 
-        // TODO: add to schema
         recurDM: {
             type: 'json'
         },
 
-        // TODO: add to schema
         // 0 = last week of month for the day of week specified, whether 4th or 5th week.
         recurWM: {
             type: 'json'
@@ -161,7 +159,6 @@ module.exports = {
             max: 59
         },
 
-        // TODO: add to schema
         recurEvery: {
             type: 'number',
             min: 1,
@@ -270,8 +267,6 @@ module.exports = {
                         await sails.helpers.onesignal.sendEvent(_event, false, false);
                     }
                 }
-
-                // TODO: Conflict resolution on overriddenIDs
             }
 
             if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
@@ -367,6 +362,9 @@ module.exports = {
 
             // Remove any schedules that were created to override this schedule
             //await sails.models.schedule.destroy({ scheduleID: event.ID }).fetch();
+
+            // Remove any clockwheels created for this schedule
+            await sails.models.clockwheels.destroy({ scheduleID: event.ID }).fetch();
 
         })(destroyedRecord);
 

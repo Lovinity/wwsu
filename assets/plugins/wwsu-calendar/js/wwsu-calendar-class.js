@@ -19,6 +19,7 @@ class WWSUcalendar extends CalendarDb {
             edit: '/calendar/edit',
             editSchedule: '/calendar/edit-schedule',
             get: '/calendar/get',
+            getClockwheels: '/clockwheels/get',
             getEventsPlaylists: '/calendar/get-events-playlists',
             getSchedule: '/calendar/get-schedule',
             remove: '/calendar/remove',
@@ -30,6 +31,7 @@ class WWSUcalendar extends CalendarDb {
             edit: {},
             editSchedule: {},
             get: {},
+            getClockwheels: {},
             getEventsPlaylists: {},
             getSchedule: {},
             remove: {},
@@ -45,6 +47,7 @@ class WWSUcalendar extends CalendarDb {
         // Assign socket events
         this.calendar.assignSocketEvent('calendar', socket);
         this.schedule.assignSocketEvent('schedule', socket);
+        this.clockwheels.assignSocketEvent('clockwheels', socket);
 
         // Emit calendarUpdated whenever a change is made to the calendar.
         this.calendar.on('insert', () => { this.calendarUpdated() });
@@ -55,6 +58,10 @@ class WWSUcalendar extends CalendarDb {
         this.schedule.on('update', () => { this.calendarUpdated() });
         this.schedule.on('remove', () => { this.calendarUpdated() });
         this.schedule.on('replace', () => { this.calendarUpdated() });
+        this.clockwheels.on('insert', () => { this.calendarUpdated() });
+        this.clockwheels.on('update', () => { this.calendarUpdated() });
+        this.clockwheels.on('remove', () => { this.calendarUpdated() });
+        this.clockwheels.on('replace', () => { this.calendarUpdated() });
 
         // Generate a modal for displaying event conflicts
         this.conflictModal = new WWSUmodal(`Event Conflicts`, `bg-info`, ``, false, {
@@ -118,6 +125,7 @@ class WWSUcalendar extends CalendarDb {
     init () {
         this.calendar.replaceData(this.requests.no, this.endpoints.get, this.data.get);
         this.schedule.replaceData(this.requests.no, this.endpoints.getSchedule, this.data.getSchedule);
+        this.clockwheels.replaceData(this.requests.no, this.endpoints.getClockwheels, this.data.getClockwheels);
     }
 
     // Emit calendarUpdated event when called.
