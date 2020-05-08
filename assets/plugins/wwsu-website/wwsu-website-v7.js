@@ -285,12 +285,7 @@ function doSockets (firsttime = false) {
         checkDiscipline(() => {
             likedtracks.init();
             meta.init();
-            announcementsToast.init();
-            announcementsNowplaying.init();
-            announcementsChat.init();
-            announcementsSchedule.init();
-            announcementsRequest.init();
-            announcementsDirectors.init();
+            announcements.init();
             calendarSocket()
             scheduleSocket()
             loadGenres()
@@ -303,12 +298,7 @@ function doSockets (firsttime = false) {
         checkDiscipline(() => {
             likedtracks.init();
             meta.init();
-            announcementsToast.init();
-            announcementsNowplaying.init();
-            announcementsChat.init();
-            announcementsSchedule.init();
-            announcementsRequest.init();
-            announcementsDirectors.init();
+            announcements.init();
             calendarSocket()
             scheduleSocket()
             loadGenres()
@@ -552,8 +542,8 @@ function processAnnouncements () {
         if (moment(meta.meta.time).isAfter(moment(announcement.starts)) && moment(meta.meta.time).isBefore(moment(announcement.expires))) {
             if (announcement.type.startsWith('website-')) {
                 var type = announcement.type.replace('website-', '');
-                if (type === 'toast' && announcementIDs.indexOf(announcement.ID) === -1) {
-                    announcementIDs.push(announcement.ID)
+                if (type === 'toast' && announcementsToastIDs.indexOf(announcement.ID) === -1) {
+                    announcementsToastIDs.push(announcement.ID)
                     $(document).Toasts('create', {
                         class: `bg-${announcement.level}`,
                         title: announcement.title,
