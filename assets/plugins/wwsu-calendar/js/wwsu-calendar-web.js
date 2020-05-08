@@ -193,7 +193,7 @@ class CalendarDb {
                     var scheduleIDs = [];
 
                     // Determine next start date/time. Bail if there are no more. Set beginAt to the next minute so we avoid infinite loops.
-                    var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
+                    var eventStart = moment(laterSchedule.next(1, beginAt)).startOf('minute').toISOString(true);
                     if (!eventStart) break;
                     beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
 
@@ -537,40 +537,40 @@ class CalendarDb {
 
                     // Determine start and end times for conflict checking
                     if (query[ key ].originalTime) {
-                        if (!start || moment(query[ key ].originalTime).isBefore(moment(start))) {
-                            start = moment(query[ key ].originalTime);
+                        if (!start || moment(query[ key ].originalTime).startOf('minute').isBefore(moment(start))) {
+                            start = moment(query[ key ].originalTime).startOf('minute');
                         }
-                        if (!end || moment(query[ key ].originalTime).isAfter(moment(end))) {
-                            end = moment(query[ key ].originalTime).add(event.duration, 'minutes');
+                        if (!end || moment(query[ key ].originalTime).startOf('minute').isAfter(moment(end))) {
+                            end = moment(query[ key ].originalTime).startOf('minute').add(event.duration, 'minutes');
                         }
-                        timePeriods.push({ start: moment(query[ key ].originalTime).toISOString(true), end: moment(query[ key ].originalTime).add(event.duration, 'minutes').toISOString(true) });
+                        timePeriods.push({ start: moment(query[ key ].originalTime).startOf('minute').toISOString(true), end: moment(query[ key ].originalTime).startOf('minute').add(event.duration, 'minutes').toISOString(true) });
                     }
                     if (query[ key ].newTime) {
-                        if (!start || moment(query[ key ].newTime).isBefore(moment(start))) {
-                            start = moment(query[ key ].newTime);
+                        if (!start || moment(query[ key ].newTime).startOf('minute').isBefore(moment(start))) {
+                            start = moment(query[ key ].newTime).startOf('minute');
                         }
-                        if (!end || moment(query[ key ].newTime).isAfter(moment(end))) {
-                            end = moment(query[ key ].newTime).add(event.duration, 'minutes');
+                        if (!end || moment(query[ key ].newTime).startOf('minute').isAfter(moment(end))) {
+                            end = moment(query[ key ].newTime).startOf('minute').add(event.duration, 'minutes');
                         }
-                        timePeriods.push({ start: moment(query[ key ].newTime).toISOString(true), end: moment(query[ key ].newTime).add(event.duration, 'minutes').toISOString(true) });
+                        timePeriods.push({ start: moment(query[ key ].newTime).startOf('minute').toISOString(true), end: moment(query[ key ].newTime).startOf('minute').add(event.duration, 'minutes').toISOString(true) });
                     }
                     if (query[ key ].oneTime && query[ key ].oneTime.length > 0) {
                         query[ key ].oneTime.map((ot) => {
-                            if (!start || moment(ot).isBefore(moment(start))) {
-                                start = moment(ot);
+                            if (!start || moment(ot).startOf('minute').isBefore(moment(start))) {
+                                start = moment(ot).startOf('minute');
                             }
-                            if (!end || moment(ot).isAfter(moment(end))) {
-                                end = moment(ot).add(event.duration, 'minutes');
+                            if (!end || moment(ot).startOf('minute').isAfter(moment(end))) {
+                                end = moment(ot).startOf('minute').add(event.duration, 'minutes');
                             }
-                            timePeriods.push({ start: moment(ot).toISOString(true), end: moment(ot).add(event.duration, 'minutes').toISOString(true) });
+                            timePeriods.push({ start: moment(ot).startOf('minute').toISOString(true), end: moment(ot).startOf('minute').add(event.duration, 'minutes').toISOString(true) });
                         });
                     }
                     if (query[ key ].recurH && query[ key ].recurH.length > 0) {
-                        if (!start || moment(event.startDate).isBefore(moment(start))) {
-                            start = moment(event.startDate);
+                        if (!start || moment(event.startDate).startOf('minute').isBefore(moment(start))) {
+                            start = moment(event.startDate).startOf('minute');
                         }
-                        if (!end || moment(event.endDate).isAfter(moment(end))) {
-                            end = moment(event.endDate).add(event.duration, 'minutes');
+                        if (!end || moment(event.endDate).startOf('minute').isAfter(moment(end))) {
+                            end = moment(event.endDate).startOf('minute').add(event.duration, 'minutes');
                         }
 
                         // Determine time periods to check
@@ -588,12 +588,12 @@ class CalendarDb {
                         // Generate later schedule
                         var laterSchedule = later.schedule({ schedules: [ { "dw": query[ key ].recurDW, "h": query[ key ].recurH, "m": [ query[ key ].recurM ] } ] });
 
-                        var beginAt = moment(event.startDate);
+                        var beginAt = moment(event.startDate).startOf('minute');
 
                         // Loop through each schedule between start and end
                         while (moment(beginAt).isBefore(moment(event.endDate))) {
                             // Determine next start date/time. Bail if there are no more. Set beginAt to the next minute so we avoid infinite loops.
-                            var eventStart = moment(laterSchedule.next(1, beginAt)).toISOString(true);
+                            var eventStart = moment(laterSchedule.next(1, beginAt)).startOf('minute').toISOString(true);
                             if (!eventStart) break;
                             beginAt = moment(eventStart).add(1, 'minute').toISOString(true);
 
@@ -939,7 +939,7 @@ class CalendarDb {
         if (!tempCal.duration || tempCal.duration <= 0) event.duration = 0;
 
         // If no startDate provided, default to current date.
-        if (!tempCal.startDate) event.startDate = moment().toISOString(true);
+        if (!tempCal.startDate) event.startDate = moment().startOf('day').toISOString(true);
 
         // Make sure there is always a scheduleType. Otherwise, TAFFYDB will not like us.
         if (!tempCal.scheduleType) event.scheduleType = null;
@@ -1084,7 +1084,7 @@ class CalendarDb {
             overriddenID: schedule.overriddenID || null, // ID of the schedule which overrode this one (for -system schedules).
             scheduleType: schedule.scheduleType || null, // Schedule type (null [default schedule], unscheduled, updated, updated-system, canceled, canceled-system, canceled-updated)
             scheduleReason: schedule.scheduleReason || null, // A reason for this schedule or override, if applicable.
-            originalTime: schedule.originalTime ? moment(schedule.originalTime).toISOString(true) : null, // The specific time this schedule is applicable for... used for updates and cancelations.
+            originalTime: schedule.originalTime ? moment(schedule.originalTime).startOf('minute').toISOString(true) : null, // The specific time this schedule is applicable for... used for updates and cancelations.
             type: schedule.type ? schedule.type : calendar.type, // Event type (show, remote, sports, prerecord, genre, playlist, event, onair-booking, prod-booking, office-hours, task)
             priority: schedule.priority || schedule.priority === 0 ? schedule.priority : (calendar.priority || calendar.priority === 0 ? calendar.priority : (schedule.type ? this.getDefaultPriority(schedule) : this.getDefaultPriority(calendar))), // Priority of the event. -1 = no conflict detection. 0 and up = overridden by any events scheduled that have the same or higher priority.
             hostDJ: schedule.hostDJ ? schedule.hostDJ : calendar.hostDJ || null, // The ID of the DJ hosting the event
@@ -1100,8 +1100,8 @@ class CalendarDb {
             description: schedule.description ? schedule.description : calendar.description || null, // Description of event
             logo: schedule.logo ? schedule.logo : calendar.logo || null, // URL to the event logo
             banner: schedule.banner ? schedule.banner : calendar.banner || null, // URL to the event banner
-            newTime: schedule.newTime ? moment(schedule.newTime).toISOString(true) : null, // If an exception is applied that overrides an event's start time, this is the event's new start time.
-            start: schedule.newTime ? moment(schedule.newTime).toISOString(true) : moment(eventStart).toISOString(true), // Start time of the event
+            newTime: schedule.newTime ? moment(schedule.newTime).startOf('minute').toISOString(true) : null, // If an exception is applied that overrides an event's start time, this is the event's new start time.
+            start: schedule.newTime ? moment(schedule.newTime).startOf('minute').toISOString(true) : moment(eventStart).startOf('minute').toISOString(true), // Start time of the event
             duration: schedule.duration || schedule.duration === 0 ? schedule.duration : (calendar.duration || calendar.duration === 0 ? calendar.duration : null), // The duration of the event in minutes
             oneTime: schedule.oneTime || calendar.oneTime ? schedule.oneTime || calendar.oneTime : null, // Array of oneTime ISO dates to execute the event
             recurDM: schedule.recurDM || calendar.recurDM, // Array of days of the month to execute this event
@@ -1134,7 +1134,7 @@ class CalendarDb {
         }
 
         // Calculate end time after forming the object because we must refer to criteria.start
-        criteria.end = schedule.duration || calendar.duration ? moment(criteria.start).add(schedule.duration || calendar.duration, 'minutes').toISOString(true) : moment(criteria.start).toISOString(true);
+        criteria.end = schedule.duration || calendar.duration ? moment(criteria.start).add(schedule.duration || calendar.duration, 'minutes').toISOString(true) : moment(criteria.start).startOf('minute').toISOString(true);
 
         return criteria;
     }

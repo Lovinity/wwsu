@@ -14,8 +14,8 @@ module.exports = {
         autoIncrement: true
       },
   
-      calendarID: {
-        type: 'number'
+      unique: {
+        type: 'string'
       },
   
       relativeStart: {
