@@ -34,7 +34,7 @@ module.exports = {
       var records = [];
       if (inputs.ID) {
         records = await sails.models.announcements.findOne({ ID: inputs.ID })
-      } else if (inputs.types.indexOf('all') !== -1) {
+      } else if (inputs.types && inputs.types.indexOf('all') !== -1) {
         records = await sails.models.announcements.find()
         // Subscribe to websockets
         if (this.req.isSocket) {
