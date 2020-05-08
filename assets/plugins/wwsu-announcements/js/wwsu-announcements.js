@@ -23,7 +23,7 @@ class WWSUannouncements extends WWSUdb {
             no: noReq
         };
 
-        this.assignSocketEvent('announcement', socket);
+        this.assignSocketEvent('announcements', socket);
     }
 
     // Initialize the connection and get initial data; should be called on socket connect event.
