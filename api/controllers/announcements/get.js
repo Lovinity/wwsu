@@ -42,7 +42,7 @@ module.exports = {
           sails.log.verbose(`Request was a socket. Joined announcements-all.`)
         }
       } else if (inputs.type) {
-        records.push(await sails.models.announcements.find({ type: inputs.type }))
+        records = records.concat(await sails.models.announcements.find({ type: inputs.type }))
 
         sails.log.verbose(`${records.length} records retrieved.`)
 
@@ -53,7 +53,7 @@ module.exports = {
         }
       } else {
         var maps = inputs.types.map(async (type) => {
-          records.push(await sails.models.announcements.find({ type: type }))
+          records = records.concat(await sails.models.announcements.find({ type: type }))
 
           sails.log.verbose(`${records.length} records retrieved.`)
 
