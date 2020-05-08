@@ -101,6 +101,8 @@ module.exports = {
     // Used for determining if RadioDJ froze.
     prevDuration: 0,
     prevElapsed: 0,
+    prevFetchedDuration: 0,
+    prevFetchedElapsed: 0,
 
     // Used for telling the system we are waiting for a good RadioDJ to switch to
     waitForGoodRadioDJ: false,

@@ -412,7 +412,7 @@ module.exports.bootstrap = async function (done) {
                 })
               }
 
-              /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
+          /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
            * This results in false transitions in system state. Run a check to detect if the queuelength deviated by more than 2 seconds since last run.
            * If so, we assume this was an error, so do not treat it as accurate, and trigger a 3 second error resolution wait.
            */
@@ -506,12 +506,14 @@ module.exports.bootstrap = async function (done) {
             }
 
             // Do automation system error checking and handling
-            if (((queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevElapsed) || queue.length < 1) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
+            if (((queue.length > 0 && queue[ 0 ].Duration === sails.models.status.errorCheck.prevFetchedDuration && queue[ 0 ].Elapsed === sails.models.status.errorCheck.prevFetchedElapsed) || queue.length < 1) && (sails.models.meta.memory.state.startsWith('automation_') || sails.models.meta.memory.state.endsWith('_break') || sails.models.meta.memory.state.endsWith('_disconnected') || sails.models.meta.memory.state.endsWith('_returning') || sails.models.meta.memory.state.startsWith('prerecord_'))) {
               await sails.helpers.error.count('frozen')
               sails.models.status.errorCheck.queueWait = 0;
             } else {
               sails.models.status.errorCheck.prevDuration = queue[ 0 ].Duration
               sails.models.status.errorCheck.prevElapsed = queue[ 0 ].Elapsed
+              sails.models.status.errorCheck.prevFetchedDuration = queue[ 0 ].Duration
+              sails.models.status.errorCheck.prevFetchedElapsed = queue[ 0 ].Elapsed
               await sails.helpers.error.reset('frozen')
             }
 
