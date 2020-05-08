@@ -8,16 +8,16 @@ class WWSUannouncements extends WWSUdb {
      * 
      * @param {sails.io} socket Socket connection to WWSU
      * @param {WWSUreq} noReq Request class with no authorization
-     * @param {string} type Type of announcements to retrieve
+     * @param {array} types Array of announcement types to subscribe to
      */
-    constructor(socket, noReq, type) {
+    constructor(socket, noReq, types) {
         super(); // Create the db
 
         this.endpoints = {
             get: '/announcements/get'
         };
         this.data = {
-            get: { type: type }
+            get: { types: types }
         };
         this.requests = {
             no: noReq

@@ -550,14 +550,14 @@
   <!--WWSU-->
   <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
   <script src="/plugins/nativeflashradiov4/nativeflashradiov4.js"></script>
-  <script src="/plugins/wwsu-sails/js/wwsu.js?v=202003300241"></script>
-  <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202003300241"></script>
-  <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202003300241"></script>
-  <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202003300241"></script>
-  <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202003300241"></script>
-  <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202003300241"></script>
-  <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202003300241"></script>
-  <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202003300241"></script>
+  <script src="/plugins/wwsu-sails/js/wwsu.js?v=202005081717"></script>
+  <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202005081717"></script>
+  <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202005081717"></script>
+  <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202005081717"></script>
+  <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202005081717"></script>
+  <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202005081717"></script>
+  <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202005081717"></script>
+  <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202005081717"></script>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
@@ -651,6 +651,8 @@
           </div><!-- /.container-fluid -->
         </div>
 
+        <div class="announcements-nowplaying"></div>
+
         <!-- Now Playing Box -->
         <div class="card card-primary card-outline p-1 m-3">
           <div class="card-body box-profile">
@@ -716,6 +718,8 @@
           </div><!-- /.container-fluid -->
         </div>
 
+        <div class="announcements-chat"></div>
+
         <div class="card card-sucress cardutline direct-chat direct-chat-success p-1 m-3">
           <div class="card-header">
             <h3 class="card-title">Chat</h3>
@@ -772,16 +776,7 @@
           </div><!-- /.container-fluid -->
         </div>
 
-        <div class="alert alert-danger">
-          <h5><i class="icon fas fa-exclamation-triangle"></i> Summer semester shows temporarily suspended</h5>
-          WWSU has temporarily suspended all summer semester shows / programming. We expect to begin airing shows again
-          in June 2020. We apologize for the inconvenience.
-        </div>
-        <div class="alert alert-warning">
-          <h5><i class="icon fas fa-exclamation-triangle"></i> Coronavirus Closure</h5>
-          WWSU offices and studios remain closed until further notice. All shows will be pre-recorded or remotely
-          broadcast. We will make every effort to keep the schedule updated as things change.
-        </div>
+        <div class="announcements-schedule"></div>
 
         <!-- Schedule Date Selector-->
         <div class="card p-1 m-3">
@@ -856,6 +851,8 @@
             </div><!-- /.row -->
           </div><!-- /.container-fluid -->
         </div>
+
+        <div class="announcements-request"></div>
 
         <div class="card p-1 m-3">
           <div class="card-header">

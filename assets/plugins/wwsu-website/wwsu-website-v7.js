@@ -23,22 +23,22 @@ try {
     });
 
     // Announcements
-    var announcementIDs = [];
-    var announcements = new WWSUannouncements(socket, noReq, `website`);
+    var announcementsToastIDs = [];
+    var announcements = new WWSUannouncements(socket, noReq, [ 'website-toast', 'website-nowplaying', 'website-chat', 'website-schedule', 'website-request', 'website-directors' ]);
+
+    // Add event handlers
     announcements.on('insert', (record, db) => {
-        if (announcementIDs.indexOf(record.ID) === -1) {
-            announcementIDs.push(record.ID);
-            addAnnouncement(record);
-        }
-    })
-    announcements.on('replace', (db) => {
-        db.get().map((record) => {
-            if (announcementIDs.indexOf(record.ID) === -1) {
-                announcementIDs.push(record.ID);
-                addAnnouncement(record);
-            }
-        });
-    })
+        processAnnouncements();
+    });
+    announcements.on('update', (record, db) => {
+        processAnnouncements();
+    });
+    announcements.on('remove', (record, db) => {
+        processAnnouncements();
+    });
+    announcements.on('replace', (record, db) => {
+        processAnnouncements();
+    });
 
     var messageIDs = [];
     var navigation = new WWSUNavigation();
@@ -285,7 +285,12 @@ function doSockets (firsttime = false) {
         checkDiscipline(() => {
             likedtracks.init();
             meta.init();
-            announcements.init();
+            announcementsToast.init();
+            announcementsNowplaying.init();
+            announcementsChat.init();
+            announcementsSchedule.init();
+            announcementsRequest.init();
+            announcementsDirectors.init();
             calendarSocket()
             scheduleSocket()
             loadGenres()
@@ -298,7 +303,12 @@ function doSockets (firsttime = false) {
         checkDiscipline(() => {
             likedtracks.init();
             meta.init();
-            announcements.init();
+            announcementsToast.init();
+            announcementsNowplaying.init();
+            announcementsChat.init();
+            announcementsSchedule.init();
+            announcementsRequest.init();
+            announcementsDirectors.init();
             calendarSocket()
             scheduleSocket()
             loadGenres()
@@ -532,26 +542,42 @@ function likeTrack (trackID) {
 
 
 /**
- * Display an announcement if it was not already displayed.
- * 
- * @param {object} announcement Announcement object received from WWSU API.
+ *  Update all announcements for the website.
  */
-function addAnnouncement (announcement) {
-    if (moment(meta.meta.time).isAfter(moment(announcement.starts)) && moment(meta.meta.time).isBefore(moment(announcement.expires))) {
-        var color = 'bg-light'
-        if (announcement.level === 'success') { color = 'bg-success' }
-        if (announcement.level === 'danger' || announcement.level === 'urgent') { color = 'bg-danger' }
-        if (announcement.level === 'warning') { color = 'bg-warning' }
-        announcementIDs.push(announcement.ID)
-        $(document).Toasts('create', {
-            class: color,
-            title: announcement.title,
-            subtitle: `Announcement`,
-            autohide: true,
-            delay: (announcement.displayTime * 1000) || 15000,
-            body: announcement.announcement,
-            icon: 'fas fa-bullhorn fa-lg',
-        })
+function processAnnouncements () {
+
+    // Process all announcements
+    var html = { nowplaying: ``, chat: ``, schedule: ``, request: ``, directors: `` };
+    announcements.db().each((announcement) => {
+        if (moment(meta.meta.time).isAfter(moment(announcement.starts)) && moment(meta.meta.time).isBefore(moment(announcement.expires))) {
+            if (announcement.type.startsWith('website-')) {
+                var type = announcement.type.replace('website-', '');
+                if (type === 'toast' && announcementIDs.indexOf(announcement.ID) === -1) {
+                    announcementIDs.push(announcement.ID)
+                    $(document).Toasts('create', {
+                        class: `bg-${announcement.level}`,
+                        title: announcement.title,
+                        subtitle: `Announcement`,
+                        autohide: true,
+                        delay: (announcement.displayTime * 1000) || 15000,
+                        body: announcement.announcement,
+                        icon: 'fas fa-bullhorn fa-lg',
+                    })
+                } else {
+                    html[ type ] += `<div class="alert alert-${announcement.level}">
+                    <h5>${announcement.title}</h5>
+                    ${announcement.announcement}
+                  </div>`;
+                }
+            }
+        }
+    });
+
+    // Display announcements on website
+    for (var announcementType in html) {
+        if (Object.prototype.hasOwnProperty.call(html, announcementType)) {
+            $(`.announcements-${announcementType}`).html(html[ announcementType ])
+        }
     }
 }
 
