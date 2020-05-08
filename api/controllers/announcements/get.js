@@ -34,7 +34,7 @@ module.exports = {
       var records = [];
       if (inputs.ID) {
         records = await sails.models.announcements.findOne({ ID: inputs.ID })
-      } else if (inputs.types && inputs.types.indexOf('all') !== -1) {
+      } else if ((inputs.types && inputs.types.indexOf('all') !== -1) || inputs.type === 'all') {
         records = await sails.models.announcements.find()
         // Subscribe to websockets
         if (this.req.isSocket) {
@@ -42,7 +42,8 @@ module.exports = {
           sails.log.verbose(`Request was a socket. Joined announcements-all.`)
         }
       } else if (inputs.type) {
-        records = records.concat(await sails.models.announcements.find({ type: inputs.type }))
+        var temp = await sails.models.announcements.find({ type: inputs.type });
+        temp.map((rec) => records.push(rec));
 
         sails.log.verbose(`${records.length} records retrieved.`)
 
@@ -53,7 +54,8 @@ module.exports = {
         }
       } else {
         var maps = inputs.types.map(async (type) => {
-          records = records.concat(await sails.models.announcements.find({ type: type }))
+          var temp = await sails.models.announcements.find({ type: type });
+          temp.map((rec) => records.push(rec));
 
           sails.log.verbose(`${records.length} records retrieved.`)
 
