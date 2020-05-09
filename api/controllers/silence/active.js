@@ -17,7 +17,7 @@ module.exports = {
       // If a track is playing in RadioDJ, skip it and log it
       if (typeof sails.models.meta.automation[ 0 ] !== 'undefined' && parseInt(sails.models.meta.automation[ 0 ].ID) !== 0) {
         // Add a log about the track
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: sails.models.meta.memory.show, event: `<strong>Track skipped due to silence.</strong><br />Track: ${sails.models.meta.automation[ 0 ].ID} (${sails.models.meta.automation[ 0 ].Artist} - ${sails.models.meta.automation[ 0 ].Title})` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'silence-track', loglevel: 'warning', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-forward`, title: `Track was skipped due to silence detection.`, event: `Track: ${sails.models.meta.automation[ 0 ].ID} (${sails.models.meta.automation[ 0 ].Artist} - ${sails.models.meta.automation[ 0 ].Title})<br />Please check this track to ensure it does not have more consecutive silence / very low audio than what silence detection is set at.` }).fetch()
           .tolerate(() => {
           })
 
@@ -32,11 +32,7 @@ module.exports = {
         await sails.helpers.meta.change.with({ changingState: `Switching automation instances due to no audio` })
 
         // Log the problem
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Switching automation instances;</strong> silence detection executed multiple times.` }).fetch()
-          .tolerate((err) => {
-            sails.log.error(err)
-          })
-        await sails.models.announcements.findOrCreate({ type: 'djcontrols', title: `Audio Error (system)` }, { type: 'djcontrols', level: 'warning', title: `Audio Error (system)`, announcement: `System had switched automation instances on ${moment().format('LLLL')} because the silence detection system triggered multiple times. Please check the logs for more info, and delete this announcement under admin menu -> Manage Announcements when the issue is considered resolved.`, starts: moment().toISOString(true), expires: moment({ year: 3000 }).toISOString(true) })
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'silence-switch', loglevel: 'danger', logsubtype: '', logIcon: `fas fa-volume-mute`, title: `System changed active RadioDJ due to multiple silence alarms.`, event: `Please check to make sure all RadioDJs are functioning correctly and audio is not muted or very quiet from all RadioDJ sources.` }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })
@@ -70,7 +66,7 @@ module.exports = {
         await sails.helpers.meta.change.with({ changingState: `Ending current broadcast due to no audio` })
 
         // Log the problem
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', event: `<strong>Long period of silence detected</strong>. This is likely due to an irresponsible DJ / show host. System terminated the current broadcast and went to automation to stop the silence.` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', logIcon: ``, title: `Broadcast terminated due to multiple silence alarms in a short period of time.`, event: `This is likely due to an irresponsible DJ / show host. System terminated the current broadcast and went to automation to stop the silence. Please investigate and, if necessary, speak with the host about ensuring proper volume levels and avoiding on-air silence.<br />Broadcast: ${sails.models.meta.memory.show}` }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })

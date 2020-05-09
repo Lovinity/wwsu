@@ -23,7 +23,7 @@ module.exports = {
 
       // log it
       (async () => {
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'return', loglevel: 'info', logsubtype: sails.models.meta.memory.show, event: '<strong>Return from break requested.</strong>' }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'return', loglevel: 'info', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-check`, title: `Host requested to resume the broadcast.`, event: '' }).fetch()
           .tolerate((err) => {
             // Don't throw errors, but log them
             sails.log.error(err)

@@ -73,7 +73,7 @@ module.exports = {
         }
 
         // Log changes in status
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: sails.models.meta.memory.show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: loglevel, logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-exclamation-triangle`, title: `Status changed for ${criteria.label || record.label || criteria.name || record.name || `Unknown System`}`, event: `${criteria.data ? criteria.data : `Unknown Issue`}` }).fetch()
           .tolerate((err) => {
             // Don't throw errors, but log them
             sails.log.error(err)
@@ -81,7 +81,7 @@ module.exports = {
       }
       if (updateIt === 1 && record.status && criteria.status && record.status <= 3 && criteria.status > 3) {
         // Log when bad statuses are now good.
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: 'success', logsubtype: sails.models.meta.memory.show, event: `<strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong>:<br />Now Operational.` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'status', loglevel: 'success', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-exclamation-triangle`, title: `Status: ${criteria.label || record.label || criteria.name || record.name || `Unknown System`} is now operational.`, event: `` }).fetch()
           .tolerate((err) => {
             // Don't throw errors, but log them
             sails.log.error(err)

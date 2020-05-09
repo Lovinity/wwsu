@@ -138,7 +138,7 @@ module.exports = {
           sails.log.verbose(`playlists.start: Changed Meta`);
           await sails.helpers.meta.newShow();
           sails.log.verbose(`playlists.start: Started new show`);
-          await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + inputs.event.name, event: '<strong>Playlist started.</strong><br />Playlist in RadioDJ: ' + theplaylist.name }).fetch()
+          await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + inputs.event.name, logIcon: `fas fa-play`, title: `A playlist started.`, event: `Event name: ${inputs.event.name}<br />Playlist in RadioDJ: ${theplaylist.name}` }).fetch()
             .tolerate((err) => {
               sails.log.error(err)
             })
@@ -149,7 +149,7 @@ module.exports = {
           sails.log.verbose(`playlists.start: Type prerecord`);
           if (forced) {
             sails.log.verbose(`playlists.start: Forced`);
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>Prerecord forcefully terminated as it was interfering with another scheduled prerecord.</strong>` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, logIcon: `fas fa-stop`, title: `A prerecord was terminated early as it ran over time into another prerecord.`, event: `Prerecord ending: ${sails.models.meta.memory.show}<br />Prerecord starting: ${inputs.event.hosts} - ${inputs.event.name}` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })

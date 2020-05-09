@@ -11,7 +11,7 @@
 
 module.exports.bootstrap = async function (done) {
   // Log that the server was rebooted
-  await sails.models.logs.create({ attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', event: '<strong>The Node server was rebooted.</strong>' }).fetch()
+  await sails.models.logs.create({ attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', logIcon: `fas fa-exclamation-triangle`, title: `The Node server was started.`, event: '' }).fetch()
     .tolerate((err) => {
       // Don't throw errors, but log them
       sails.log.error(err)
@@ -580,7 +580,7 @@ module.exports.bootstrap = async function (done) {
                   await sails.helpers.meta.change.with({ changingState: `Ending playlist` })
                   switch (sails.models.meta.memory.state) {
                     case 'automation_playlist':
-                      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A playlist finished airing.</strong>` }).fetch()
+                      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, logIcon: `fas fa-play`, title: `Playlist finished airing; no more tracks to play.`, event: `` }).fetch()
                         .tolerate((err) => {
                           // Do not throw for errors, but log it.
                           sails.log.error(err)
@@ -588,7 +588,7 @@ module.exports.bootstrap = async function (done) {
                       break
                     case 'prerecord_on':
                     case 'prerecord_break':
-                      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, event: `<strong>A prerecord finished airing.</strong>` }).fetch()
+                      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, logIcon: `fas fa-play-circle`, title: `Prerecord finished airing; no more tracks to play.`, event: `` }).fetch()
                         .tolerate((err) => {
                           // Do not throw for errors, but log it.
                           sails.log.error(err)
@@ -756,7 +756,7 @@ module.exports.bootstrap = async function (done) {
           var n = d.getMinutes()
           if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta.memory.lastID)) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
             await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'id', loglevel: 'urgent', logsubtype: sails.models.meta.memory.show, event: `<strong>Required top of the hour break was not taken!</strong><br />Show: ${sails.models.meta.memory.show}` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'id', loglevel: 'orange', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-coffee`, title: `Required top-of-hour ID break was not taken!`, event: `Broadcast: ${sails.models.meta.memory.show}` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })

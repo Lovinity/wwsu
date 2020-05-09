@@ -18,11 +18,12 @@ module.exports = {
       required: true,
       description: 'Category of log.'
     },
+
     loglevel: {
       type: 'string',
       required: true,
-      isIn: ['danger', 'urgent', 'warning', 'info', 'success', 'primary', 'secondary'],
-      description: 'Log severity: danger, urgent, warning, info, success, primary, or secondary.'
+      isIn: ['danger', 'orange', 'warning', 'info', 'success', 'primary', 'secondary'],
+      description: 'Log severity: danger, orange, warning, info, success, primary, or secondary.'
     },
 
     logsubtype: {
@@ -31,9 +32,26 @@ module.exports = {
       description: 'Log subcategory / subtype, such as a radio show name.'
     },
 
-    event: {
+    logIcon: {
       type: 'string',
       required: true,
+      description: 'The fontawesome icon associated with this log'
+    },
+
+    excused: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'If applicable, whether or not this log should be excused from reputation'
+    },
+
+    title: {
+      type: 'string',
+      required: true,
+      description: 'Event title'
+    },
+
+    event: {
+      type: 'string',
       description: 'The log event / what happened, plus any data (other than track information).'
     },
 
@@ -70,7 +88,7 @@ module.exports = {
       if (inputs.logtype === 'manual' && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to add a log entry because you are not on the air.')) }
 
       // Create the log entry
-      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, excused: inputs.excused, logIcon: inputs.logIcon, title: inputs.title, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }).fetch()
 
       // Set manual meta if criteria matches
       if (inputs.logtype === 'manual' && inputs.trackArtist.length > 0 && inputs.trackTitle.length > 0) {

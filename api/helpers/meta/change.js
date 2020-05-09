@@ -435,7 +435,7 @@ module.exports = {
 
           // Log the new track playing if the track was new
           if (typeof push.trackID !== 'undefined') {
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', event: `<strong>Track played in automation.</strong>${push2.requested ? `<br />Requested by: ${push2.requestedBy || `Unknown User`}` : ``}`, trackArtist: sails.models.meta.memory.trackArtist || null, trackTitle: sails.models.meta.memory.trackTitle || null, trackAlbum: sails.models.meta.memory.trackAlbum || null, trackLabel: sails.models.meta.memory.trackLabel || null }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', logIcon: `far fa-play-circle`, title: `A track played in RadioDJ.`, event: `${push2.requested ? `Requested by: ${push2.requestedBy || `Unknown User`}` : ``}`, trackArtist: sails.models.meta.memory.trackArtist || null, trackTitle: sails.models.meta.memory.trackTitle || null, trackAlbum: sails.models.meta.memory.trackAlbum || null, trackLabel: sails.models.meta.memory.trackLabel || null }).fetch()
               .tolerate(() => {
               })
 

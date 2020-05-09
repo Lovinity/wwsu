@@ -16,7 +16,7 @@ module.exports = {
       if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to queue a Top Add because you are not on the air.')) }
 
       // Log it
-      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: sails.models.meta.memory.show, event: '<strong>Top Add requested.</strong>' }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-headphones`, title: `Host requested to play a random top add.`, event: '' }).fetch()
         .tolerate((err) => {
           // Do not throw for an error, but log it.
           sails.log.error(err)

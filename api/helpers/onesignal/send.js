@@ -63,7 +63,7 @@ module.exports = {
             resp.body.errors[ 'invalid_player_ids' ].map((invalid) => {
               (async (invalid2) => {
                 await sails.models.subscribers.destroy({ device: invalid2 })
-                await sails.models.logs.create({ attendanceID: null, logtype: 'subscribers', loglevel: 'info', logsubtype: 'inactive', event: `<strong>An inactive subscriber was removed from the system.</strong><br />Device: ${invalid2}` }).fetch()
+                await sails.models.logs.create({ attendanceID: null, logtype: 'subscribers', loglevel: 'info', logsubtype: 'inactive', logIcon: `fas fa-bell-slash`, title: `A notification subscriber was removed (inactive / unsubscribed).`, event: `Device: ${invalid2}` }).fetch()
                   .tolerate((err) => {
                     // Don't throw errors, but log them
                     sails.log.error(err)
@@ -74,7 +74,7 @@ module.exports = {
             inputs.devices.map((invalid) => {
               (async (invalid2) => {
                 await sails.models.subscribers.destroy({ device: invalid2 })
-                await sails.models.logs.create({ attendanceID: null, logtype: 'subscribers', loglevel: 'info', logsubtype: 'inactive', event: `<strong>An inactive subscriber was removed from the system.</strong><br />Device: ${invalid2}` }).fetch()
+                await sails.models.logs.create({ attendanceID: null, logtype: 'subscribers', loglevel: 'info', logsubtype: 'inactive', logIcon: `fas fa-bell-slash`, title: `A notification subscriber was removed (inactive / unsubscribed).`, event: `Device: ${invalid2}` }).fetch()
                   .tolerate((err) => {
                     // Don't throw errors, but log them
                     sails.log.error(err)

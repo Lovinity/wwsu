@@ -60,7 +60,7 @@ module.exports = {
       // Get issue logs if ISSUES was provided as the subtype
       if (inputs.subtype === 'ISSUES') {
         query.or = []
-        query.or.push({ loglevel: ['warning', 'urgent', 'danger'] })
+        query.or.push({ loglevel: ['warning', 'orange', 'danger'] })
         query.or.push({ logtype: ['cancellation', 'director-cancellation'] })
       } else if (inputs.subtype !== '' && inputs.subtype !== null) {
         query.logsubtype = inputs.subtype

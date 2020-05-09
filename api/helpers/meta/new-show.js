@@ -232,7 +232,7 @@ module.exports = {
             toUpdate.attendanceID = attendance.newID;
 
             // Make a log that the broadcast started
-            await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>A ${eventNow.type} started.</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />Topic: ${sails.models.meta.memory.topic}`, createdAt: moment().toISOString(true) }).fetch()
+            await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, logIcon: sails.models.calendar.calendardb.getIconClass(eventNow), title: `A ${eventNow.type} started.`, event: `Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />Topic: ${sails.models.meta.memory.topic}`, createdAt: moment().toISOString(true) }).fetch()
                 .tolerate((err) => {
                     sails.log.error(err)
                 })
@@ -245,7 +245,7 @@ module.exports = {
 
                     // Make a log if the broadcast was unauthorized
                     if (exception) {
-                        await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, event: `<strong>An unauthorized / unscheduled broadcast started!</strong><br />Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />`, createdAt: moment().toISOString(true) }).fetch()
+                        await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'unauthorized', loglevel: 'warning', logsubtype: `${eventNow.hosts} - ${eventNow.name}`, logIcon: `fas fa-times-circle`, title: `An unscheduled / unauthorized broadcast started!`, event: `${eventNow.type}: ${eventNow.hosts} - ${eventNow.name}`, createdAt: moment().toISOString(true) }).fetch()
                             .tolerate((err) => {
                                 sails.log.error(err)
                             })
@@ -265,7 +265,7 @@ module.exports = {
             toUpdate.attendanceID = attendance.newID;
 
             // Make a log that the broadcast started
-            await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: ``, event: `<strong>Default rotation started.</strong>`, createdAt: moment().toISOString(true) }).fetch()
+            await sails.models.logs.create({ attendanceID: attendance.newID, logtype: 'sign-on', loglevel: 'primary', logsubtype: ``, logIcon: `fas fa-music`, title: `Default rotation started.`, event: ``, createdAt: moment().toISOString(true) }).fetch()
                 .tolerate((err) => {
                     sails.log.error(err)
                 })

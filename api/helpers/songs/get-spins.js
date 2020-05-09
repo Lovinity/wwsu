@@ -30,7 +30,7 @@ module.exports = {
       sails.log.silly(history)
 
       // Get history from manually logged track airs via DJs (EXPERIMENTAL: may need to revise to be more accurate, say, for mixed cases etc)
-      var history2 = await sails.models.logs.find({ event: { contains: 'DJ/Producer' }, trackArtist: song.artist, trackTitle: song.title }).sort(`createdAt ASC`)
+      var history2 = await sails.models.logs.find({ or: [ { title: { contains: 'DJ/Producer' } }, { event: { contains: 'DJ/Producer' } } ], trackArtist: song.artist, trackTitle: song.title }).sort(`createdAt ASC`)
       sails.log.verbose(`Retrieved logs records: ${history2.length}`)
       sails.log.silly(history2)
 

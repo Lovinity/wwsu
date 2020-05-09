@@ -21,18 +21,38 @@ module.exports = {
     logtype: {
       type: 'string'
     },
-    loglevel: {
-      type: 'string',
-      isIn: ['danger', 'urgent', 'warning', 'info', 'success', 'primary', 'secondary']
-    },
 
     logsubtype: {
       type: 'string',
       allowNull: true
     },
 
-    event: {
+    loglevel: {
+      type: 'string',
+      isIn: ['danger', 'orange', 'warning', 'info', 'success', 'primary', 'secondary']
+    },
+
+    logIcon: {
       type: 'string'
+    },
+
+    acknowledged: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
+    excused: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
+    title: {
+      type: 'string'
+    },
+
+    event: {
+      type: 'string',
+      defaultsTo: ''
     },
 
     trackArtist: {

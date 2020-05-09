@@ -69,7 +69,7 @@ module.exports = {
         if (sails.config.custom.requests.priorityBump !== 0) { await sails.models.songs.update({ ID: inputs.ID }, { weight: record2.weight + sails.config.custom.requests.priorityBump }) }
 
         // Log the request
-        await sails.models.logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: `track-request`, event: `<strong>A track was requested!</strong><br />Track: ${record2.artist} - ${record2.title} (ID ${inputs.ID})<br />Requested By: ${inputs.name}<br />Message: ${inputs.message}`, createdAt: moment().toISOString(true) }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'website', loglevel: 'info', logsubtype: `track-request`, logIcon: `fas fa-record-vinyl`, title: `A track was requested online.`, event: `Track: ${record2.artist} - ${record2.title} (ID ${inputs.ID})<br />Requested By: ${inputs.name}<br />Message: ${inputs.message}`, createdAt: moment().toISOString(true) }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })

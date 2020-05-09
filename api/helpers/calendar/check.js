@@ -268,7 +268,7 @@ module.exports = {
                                     if (err || !wasCreated) { return false }
 
                                     if (event.type === 'show') {
-                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Show did not air!</strong><br />Show: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, logIcon: `fas fa-calendar-times`, title: `A scheduled show did not air!`, event: `Show: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err)
                                             })
@@ -276,7 +276,7 @@ module.exports = {
                                     }
 
                                     if (event.type === 'prerecord') {
-                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Prerecord did not air!</strong><br />Prerecord: ${event.hosts} - ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, logIcon: `fas fa-calendar-times`, title: `A scheduled prerecord did not air!`, event: `Prerecord: ${event.hosts} - ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}<br />Note: When prerecords do not air, this is usually because of a system problem or the prerecord was not correctly added to the system.`, createdAt: moment().toISOString(true) }).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err)
                                             })
@@ -284,7 +284,7 @@ module.exports = {
                                     }
 
                                     if (event.type === 'remote') {
-                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, event: `<strong>Remote broadcast did not air!</strong><br />Remote: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, logIcon: `fas fa-calendar-times`, title: `A scheduled remote broadcast did not air!`, event: `Remote: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err)
                                             })
@@ -292,7 +292,7 @@ module.exports = {
                                     }
 
                                     if (event.type === 'sports') {
-                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, event: `<strong>Sports broadcast did not air!</strong><br />Sport: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, logIcon: `fas fa-calendar-times`, title: `A scheduled sports broadcast did not air!`, event: `Sport: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err)
                                             })
@@ -300,7 +300,7 @@ module.exports = {
                                     }
 
                                     if (event.type === 'playlist') {
-                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, event: `<strong>Playlist did not air!</strong><br />Playlist: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: event.name, logIcon: `fas fa-calendar-times`, title: `A scheduled playlist did not air!`, event: `Playlist: ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}<br />Note: when playlists do not air, this is usually because of a system problem or the playlist was not correctly added to the system.`, createdAt: moment().toISOString(true) }).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err)
                                             })
@@ -317,7 +317,7 @@ module.exports = {
                                 .exec(async (err, record, wasCreated) => {
                                     if (err || !wasCreated) { return false }
 
-                                    await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: event.hosts, event: `<strong>Director did not come in for scheduled office hours!</strong><br />Director: ${event.hosts}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                    await sails.models.logs.create({ attendanceID: null, logtype: 'director-absent', loglevel: 'warning', logsubtype: event.hosts, logIcon: `fas fa-user-times`, title: `A director failed to clock in for scheduled office hours!`, event: `Director: ${event.hosts}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
                                         .tolerate((err) => {
                                             sails.log.error(err)
                                         })

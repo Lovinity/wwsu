@@ -19,7 +19,7 @@ module.exports = {
       if (sails.models.meta.memory.state.startsWith('sports')) { return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`)) }
 
       // Log it
-      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: sails.models.meta.memory.show, event: '<strong>Sports Liner requested.</strong>' }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'liner', loglevel: 'info', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-angle-double-right`, title: `Host requested to play a random liner.`, event: '' }).fetch()
         .tolerate((err) => {
           // Do not throw for errors, but log it
           sails.log.error(err)

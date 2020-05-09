@@ -40,7 +40,7 @@ module.exports = {
 
       // Log it in a separate self-calling async function that we do not await so it does not block the rest of the call.
       (async () => {
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'break', loglevel: 'info', logsubtype: sails.models.meta.memory.show, event: '<strong>Break requested.</strong>' }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'break', loglevel: 'info', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-coffee`, title: `Host requested to take a break.`, event: '' }).fetch()
           .tolerate((err) => {
             // Do not throw for errors, but log it.
             sails.log.error(err)

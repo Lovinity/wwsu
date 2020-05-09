@@ -88,21 +88,21 @@ module.exports = {
 
                             // Make logs and push out notifications
                             if (record3.type === 'show') {
-                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Show was canceled via DJ Panel!</strong><br />Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
+                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, logIcon: `fas fa-calendar-minus`, title: `Show was canceled via DJ Panel`, event: `Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err)
                                     })
                                 await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Show', `${record3.hosts} - ${record3.name}, scheduled for ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
                             }
                             if (record3.type === 'remote') {
-                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Remote broadcast was canceled via DJ Panel!</strong><br />Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
+                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, logIcon: `fas fa-calendar-minus`, title: `Remote broadcast was canceled via DJ Panel`, event: `Show: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err)
                                     })
                                 await sails.helpers.onesignal.sendMass('accountability-shows', 'Cancelled Remote', `${record3.hosts} - ${record3.name}, scheduled for ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}, was cancelled via the DJ Panel. Please see DJ Controls / logs for the provided reason.`)
                             }
                             if (record3.type === 'prerecord') {
-                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, event: `<strong>Prerecord was canceled via DJ Panel!</strong><br />Prerecord: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
+                                await sails.models.logs.create({ attendanceID: attendance.ID, logtype: 'cancellation', loglevel: 'info', logsubtype: `${record3.hosts} - ${record3.name}`, logIcon: `fas fa-calendar-minus`, title: `Prerecord was canceled via DJ Panel`, event: `Prerecord: ${record3.hosts} - ${record3.name}<br />Scheduled time: ${moment(record3.start).format('llll')} - ${moment(record3.end).format('llll')}<br />Reason: ${inputs.reason}`, createdAt: moment().toISOString(true) }).fetch()
                                     .tolerate((err) => {
                                         sails.log.error(err)
                                     })

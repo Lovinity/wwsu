@@ -49,7 +49,7 @@ module.exports = {
       if (sails.config.custom.songsliked.priorityBump !== 0) { await sails.models.songs.update({ ID: inputs.trackID }, { weight: track.weight + sails.config.custom.songsliked.priorityBump }) }
 
       // Log the request
-      await sails.models.logs.create({ attendanceID: null, logtype: 'website', loglevel: 'info', logsubtype: `track-like`, event: `<strong>A track was liked!</strong><br />Track: ${track.artist} - ${track.title} (ID ${inputs.trackID})`, createdAt: moment().toISOString(true) }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'website-likedtrack', loglevel: 'info', logsubtype: ``, logIcon: `fas fa-thumbs-up`, title: `Someone liked a track on the website.`, event: `Track: ${track.artist} - ${track.title} (ID ${inputs.trackID})`, createdAt: moment().toISOString(true) }).fetch()
         .tolerate((err) => {
           sails.log.error(err)
         })

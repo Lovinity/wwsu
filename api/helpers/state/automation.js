@@ -19,7 +19,7 @@ module.exports = {
 
     try {
       // Log the request
-      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, event: '<strong>Show ended.</strong>' }).fetch()
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-stop`, title: `Broadcast ended ${inputs.transition ? ` and went into break.` : ` and went into automation.`}`, event: '' }).fetch()
         .tolerate((err) => {
           // Do not throw for error, but log it
           sails.log.error(err)
