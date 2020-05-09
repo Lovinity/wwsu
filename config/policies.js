@@ -64,6 +64,7 @@ module.exports.policies = {
   'hosts/get': ['isBanned', 'isSocket', 'isAuthorizedHost'],
   listen: true,
   'listen/*': true,
+  'logs/edit': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'logs/get-dj': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
   'messages/get-web': ['isBanned', 'isSocket'],
   'messages/send-web': ['isBanned', 'isSocket'],

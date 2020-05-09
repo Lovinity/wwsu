@@ -57,11 +57,12 @@ module.exports = {
       var query = { createdAt: { '>=': start.toISOString(true), '<': end.toISOString(true) } }
       if (inputs.attendanceID !== null && inputs.attendanceID > 0) { query = { attendanceID: inputs.attendanceID } }
 
-      // Get issue logs if ISSUES was provided as the subtype
+      // Get all unacknowledged issue logs (ignoring dates) if ISSUES was provided as the subtype.
       if (inputs.subtype === 'ISSUES') {
+        query = { acknowledged: false };
         query.or = []
-        query.or.push({ loglevel: ['warning', 'orange', 'danger'] })
-        query.or.push({ logtype: ['cancellation', 'director-cancellation'] })
+        query.or.push({ loglevel: [ 'warning', 'orange', 'danger' ] })
+        query.or.push({ logtype: [ 'cancellation', 'director-cancellation' ] })
       } else if (inputs.subtype !== '' && inputs.subtype !== null) {
         query.logsubtype = inputs.subtype
       }
