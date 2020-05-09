@@ -75,7 +75,11 @@ module.exports = {
           'system-changingstate',
           'reboot',
           'id',
-          'status-danger' 
+          'status-danger',
+          'sign-on-early',
+          'sign-on-late',
+          'sign-off-early',
+          'sign-off-late'
         ];
       } else if (inputs.subtype !== '' && inputs.subtype !== null) {
         query.logsubtype = inputs.subtype

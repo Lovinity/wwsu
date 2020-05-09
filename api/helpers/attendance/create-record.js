@@ -24,6 +24,7 @@ module.exports = {
 
       // Store the current ID in a variable; we want to start a new record before processing the old one
       var currentID = sails.models.meta.memory.attendanceID
+      var currentRecord = await sails.helpers.attendance.findOne({ ID: currentID });
 
       // Add a new attendance record if event is specified.
       if (inputs.event) {
@@ -46,6 +47,22 @@ module.exports = {
         if (inputs.event.unique && inputs.event.calendarID) {
           returnData.unique = inputs.event.unique
           created = await sails.models.attendance.create({ calendarID: inputs.event.calendarID, unique: inputs.event.unique, dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, happened: inputs.unscheduled ? 2 : 1, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, scheduledStart: moment(inputs.event.start).toISOString(true), scheduledEnd: moment(inputs.event.end).toISOString(true), actualStart: moment().toISOString(true) }).fetch()
+
+          // Log if actualStart was 5 or more minutes before scheduledStart
+          if (moment().add(5, 'minutes').isSameOrBefore(moment(inputs.event.start)) && [ 'show', 'sports', 'remote', 'prerecord', 'playlist' ].indexOf(inputs.event.type) !== -1) {
+            await sails.models.logs.create({ attendanceID: created.ID, logtype: 'sign-on-early', loglevel: 'orange', logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`, logIcon: sails.models.calendar.calendardb.getIconClass(inputs.event), title: `The broadcast started 5 or more minutes early.`, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, createdAt: moment().toISOString(true) }).fetch()
+              .tolerate((err) => {
+                sails.log.error(err)
+              })
+          }
+
+          // Log if actualStart was 10 or more minutes after scheduledStart
+          if (moment().subtract(10, 'minutes').isSameOrAfter(moment(inputs.event.start)) && [ 'show', 'sports', 'remote', 'prerecord', 'playlist' ].indexOf(inputs.event.type) !== -1) {
+            await sails.models.logs.create({ attendanceID: created.ID, logtype: 'sign-on-late', loglevel: 'warning', logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`, logIcon: sails.models.calendar.calendardb.getIconClass(inputs.event), title: `The broadcast started 10 or more minutes late.`, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, createdAt: moment().toISOString(true) }).fetch()
+              .tolerate((err) => {
+                sails.log.error(err)
+              })
+          }
         } else {
           created = await sails.models.attendance.create({ unique: "", dj: inputs.event.hostDJ, cohostDJ1: inputs.event.cohostDJ1, cohostDJ2: inputs.event.cohostDJ2, cohostDJ3: inputs.event.cohostDJ3, happened: inputs.unscheduled ? 2 : 1, event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`, actualStart: moment().toISOString(true), scheduledStart: null, scheduledEnd: null }).fetch()
         }
@@ -98,7 +115,25 @@ module.exports = {
           updateData.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(currentRecord.actualStart).toISOString(true) } })
 
           // Update the attendance record with the data
-          returnData.updatedRecord = await sails.models.attendance.updateOne({ ID: currentID }, updateData)
+          returnData.updatedRecord = await sails.models.attendance.updateOne({ ID: currentID }, updateData);
+
+          // Log if actualEnd was 10 or more minutes before scheduledEnd
+          if (currentRecord && createdRecord.scheduledEnd && moment().add(10, 'minutes').isSameOrBefore(moment(createdRecord.scheduledEnd)) && (currentRecord.event.toLowerCase().startsWith("show:") || currentRecord.event.toLowerCase().startsWith("sports:") || currentRecord.event.toLowerCase().startsWith("remote:") || currentRecord.event.toLowerCase().startsWith("prerecord:") || currentRecord.event.toLowerCase().startsWith("playlist:"))) {
+            var event = currentRecord.event.split(": ");
+            await sails.models.logs.create({ attendanceID: currentRecord.ID, logtype: 'sign-off-early', loglevel: 'warning', logsubtype: `${event[1]}`, logIcon: sails.models.calendar.calendardb.getIconClass({type: event[0]}), title: `The broadcast signed off 10 or more minutes early.`, event: `${createdRecord.event}`, createdAt: moment().toISOString(true) }).fetch()
+              .tolerate((err) => {
+                sails.log.error(err)
+              })
+          }
+
+          // Log if actualEnd was 5 or more minutes after scheduledEnd
+          if (currentRecord && createdRecord.scheduledEnd && moment().subtract(5, 'minutes').isSameOrAfter(moment(createdRecord.scheduledEnd)) && (currentRecord.event.toLowerCase().startsWith("show:") || currentRecord.event.toLowerCase().startsWith("sports:") || currentRecord.event.toLowerCase().startsWith("remote:") || currentRecord.event.toLowerCase().startsWith("prerecord:") || currentRecord.event.toLowerCase().startsWith("playlist:"))) {
+            var event = currentRecord.event.split(": ");
+            await sails.models.logs.create({ attendanceID: currentRecord.ID, logtype: 'sign-off-late', loglevel: 'orange', logsubtype: `${event[1]}`, logIcon: sails.models.calendar.calendardb.getIconClass({type: event[0]}), title: `The broadcast signed off 5 or more minutes late.`, event: `${createdRecord.event}`, createdAt: moment().toISOString(true) }).fetch()
+              .tolerate((err) => {
+                sails.log.error(err)
+              })
+          }
 
           // Recalculate weekly analytics
           await sails.helpers.attendance.calculateStats()
