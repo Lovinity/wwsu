@@ -60,9 +60,23 @@ module.exports = {
       // Get all unacknowledged issue logs (ignoring dates) if ISSUES was provided as the subtype.
       if (inputs.subtype === 'ISSUES') {
         query = { acknowledged: false };
-        query.or = []
-        query.or.push({ loglevel: [ 'warning', 'orange', 'danger' ] })
-        query.or.push({ logtype: [ 'cancellation', 'director-cancellation' ] })
+        query.logtype = [ 
+          'cancellation', 
+          'director-cancellation', 
+          'silence-track', 
+          'silence-switch', 
+          'silence-terminated', 
+          'absent', 
+          'director-absent', 
+          'unauthorized', 
+          'prerecord-terminated', 
+          'system-queuefail', 
+          'system-frozen', 
+          'system-changingstate',
+          'reboot',
+          'id',
+          'status-danger' 
+        ];
       } else if (inputs.subtype !== '' && inputs.subtype !== null) {
         query.logsubtype = inputs.subtype
       }

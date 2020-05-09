@@ -149,7 +149,7 @@ module.exports = {
           sails.log.verbose(`playlists.start: Type prerecord`);
           if (forced) {
             sails.log.verbose(`playlists.start: Forced`);
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, logIcon: `fas fa-stop`, title: `A prerecord was terminated early as it ran over time into another prerecord.`, event: `Prerecord ending: ${sails.models.meta.memory.show}<br />Prerecord starting: ${inputs.event.hosts} - ${inputs.event.name}` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'prerecord-terminated', loglevel: 'primary', logsubtype: sails.models.meta.memory.playlist, logIcon: `fas fa-stop`, title: `A prerecord was terminated early as it ran over time into another prerecord.`, event: `Prerecord ending: ${sails.models.meta.memory.show}<br />Prerecord starting: ${inputs.event.hosts} - ${inputs.event.name}` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })

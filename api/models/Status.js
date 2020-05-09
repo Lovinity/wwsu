@@ -122,7 +122,7 @@ module.exports = {
 
             await sails.helpers.meta.change.with({ changingState: `Switching radioDJ instances due to queueFail` })
             sails.sockets.broadcast('system-error', 'system-error', true)
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `Switched RadioDJs: Failed repeatedly to return queue data.`, event: `Please check to make sure all RadioDJs are functional and did not freeze. Sometimes, this error may also be thrown when a track in the queue contains special characters that cannot be processed.` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system-queuefail', loglevel: 'danger', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `Switched RadioDJs: Failed repeatedly to return queue data.`, event: `Please check to make sure all RadioDJs are functional and did not freeze. Sometimes, this error may also be thrown when a track in the queue contains special characters that cannot be processed.` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
@@ -166,7 +166,7 @@ module.exports = {
             // If the previous error was over a minute ago, attempt standard recovery. Otherwise, switch RadioDJs.
             if (!moment().isBefore(moment(sails.models.status.errorCheck.prevError).add(1, 'minutes'))) {
               sails.log.verbose(`No recent error; attempting standard recovery.`)
-              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'warning', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `Attempted to re-load RadioDJ queue: RadioDJ was frozen.`, event: `Please make sure all RadioDJs are functioning correctly and not freezing up. This could be caused by a corrupted track.` }).fetch()
+              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system-frozen', loglevel: 'warning', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `Attempted to re-load RadioDJ queue: RadioDJ was frozen.`, event: `Please make sure all RadioDJs are functioning correctly and not freezing up. This could be caused by a corrupted track.` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -177,7 +177,7 @@ module.exports = {
 
               await sails.helpers.meta.change.with({ changingState: `Switching automation instances due to frozen` })
               sails.log.verbose(`Recent error; switching RadioDJs.`)
-              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `Switched active RadioDJs: RadioDJ froze multiple times.`, event: `The queue froze multiple times in a short period. Please check to ensure all RadioDJs are functional and not frozen. This could be caused by an audio device issue (check the RadioDJ sound card settings), corrupt track (make sure most recently played audio tracks are okay), or a problem loading the track audio (make sure the storage device is healthy and, for networked drives, that they are connected and accessible by RadioDJ).` }).fetch()
+              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system-frozen', loglevel: 'danger', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `Switched active RadioDJs: RadioDJ froze multiple times.`, event: `The queue froze multiple times in a short period. Please check to ensure all RadioDJs are functional and not frozen. This could be caused by an audio device issue (check the RadioDJ sound card settings), corrupt track (make sure most recently played audio tracks are okay), or a problem loading the track audio (make sure the storage device is healthy and, for networked drives, that they are connected and accessible by RadioDJ).` }).fetch()
                 .tolerate((err) => {
                   sails.log.error(err)
                 })
@@ -327,7 +327,7 @@ module.exports = {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system', loglevel: 'danger', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `changingState took too long to finish; Node server was terminated.`, event: `An error might have occurred in the node server that resulted in the state changing to not complete. Node was terminated as a precaution (if using a process manager such as pm2, it will reboot Node automatically).` }).fetch()
+            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'system-changingstate', loglevel: 'danger', logsubtype: '', logIcon: `fas fa-exclamation-triangle`, title: `changingState took too long to finish; Node server was terminated.`, event: `An error might have occurred in the node server that resulted in the state changing to not complete. Node was terminated as a precaution (if using a process manager such as pm2, it will reboot Node automatically).` }).fetch()
               .tolerate((err) => {
                 sails.log.error(err)
               })
