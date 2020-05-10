@@ -319,13 +319,6 @@ module.exports = {
         { cohostDJ2: inputs.dj },
         { cohostDJ3: inputs.dj },
       ];
-    } else {
-      query.or = [
-        { dj: { '!=': null } },
-        { cohostDJ1: { '!=': null } },
-        { cohostDJ2: { '!=': null } },
-        { cohostDJ3: { '!=': null } },
-      ];
     }
     if (inputs.calendarID) {
       query.calendarID = inputs.calendarID;
@@ -333,10 +326,7 @@ module.exports = {
 
     // Get the attendance records
     var records2 = await sails.models.attendance.find(query);
-
-    console.log(`showtime query`)
-    console.dir(query);
-    console.log(`Showtime records retrieved: ${records2.length}`);
+    records2 = records2.filter((record) => record.dj !== null || record.cohostDJ1 !== null || record.cohostDJ2 !== null || record.cohostDJ3 !== null || record.event.toLowerCase().startsWith("sports: "));
 
     // Calculate earned remote credits for all DJs
     var process1 = async () => {
