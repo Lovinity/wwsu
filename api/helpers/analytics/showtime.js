@@ -399,7 +399,7 @@ module.exports = {
             }
           }
 
-          if (record.calendarID) {
+          if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
             shows[ record.calendarID ].overall.showtime += record.showTime
             shows[ record.calendarID ].overall.tuneins += record.tuneIns
             shows[ record.calendarID ].overall.listeners += record.listenerMinutes
@@ -453,7 +453,7 @@ module.exports = {
                 DJs[ 0 ].week.reputationScoreMax += 1
               }
 
-              if (record.calendarID) {
+              if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.reputationScoreMax += 1
                 if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                   shows[ record.calendarID ].semester.reputationScoreMax += 1
@@ -536,7 +536,7 @@ module.exports = {
               });
               DJs[ 0 ].overall.prerecords += 1
               DJs[ 0 ].overall.reputationScoreMax += (2 + breakPoints)
-              if (record.calendarID) {
+              if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.prerecords += 1
                 shows[ record.calendarID ].overall.reputationScoreMax += (2 + breakPoints)
               }
@@ -549,7 +549,7 @@ module.exports = {
                 });
                 DJs[ 0 ].semester.prerecords += 1
                 DJs[ 0 ].semester.reputationScoreMax += (2 + breakPoints)
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.prerecords += 1
                   shows[ record.calendarID ].semester.reputationScoreMax += (2 + breakPoints)
                 }
@@ -563,7 +563,7 @@ module.exports = {
                 });
                 DJs[ 0 ].week.prerecords += 1
                 DJs[ 0 ].week.reputationScoreMax += (2 + breakPoints)
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.prerecords += 1
                   shows[ record.calendarID ].week.reputationScoreMax += (2 + breakPoints)
                 }
@@ -629,7 +629,7 @@ module.exports = {
                 DJs[ record[ dj ] ].overall.breaks += record.breaks;
               });
               DJs[ 0 ].overall.sports += 1
-              if (record.calendarID) {
+              if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.sports += 1
                 shows[ record.calendarID ].overall.reputationScoreMax += (5 + breakPoints)
               }
@@ -640,7 +640,7 @@ module.exports = {
                   DJs[ record[ dj ] ].semester.breaks += record.breaks;
                 });
                 DJs[ 0 ].semester.sports += 1
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.sports += 1
                   shows[ record.calendarID ].semester.reputationScoreMax += (5 + breakPoints)
                 }
@@ -652,7 +652,7 @@ module.exports = {
                   DJs[ record[ dj ] ].week.breaks += record.breaks;
                 });
                 DJs[ 0 ].week.sports += 1
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.sports += 1
                   shows[ record.calendarID ].week.reputationScoreMax += (5 + breakPoints)
                 }
@@ -708,7 +708,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 1;
                   DJs[ 0 ].week.cancellations += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 1;
                   shows[ record.calendarID ].overall.cancellations += 1;
                   shows[ record.calendarID ].overall.cancellationsArray.push([ log.logsubtype, log.createdAt ]);
@@ -751,7 +751,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 1;
                   DJs[ 0 ].week.silences += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 1;
                   shows[ record.calendarID ].overall.silences += 1;
                   shows[ record.calendarID ].overall.silencesArray.push([ log.logsubtype, log.createdAt ]);
@@ -794,7 +794,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 3;
                   DJs[ 0 ].week.absences += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 3;
                   shows[ record.calendarID ].overall.absences += 1;
                   shows[ record.calendarID ].overall.absencesArray.push([ log.logsubtype, log.createdAt ]);
@@ -828,7 +828,7 @@ module.exports = {
                 if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
                   DJs[ 0 ].week.reputationScore -= 2;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 2;
                   if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                     shows[ record.calendarID ].semester.reputationScore -= 2;
@@ -865,7 +865,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 3;
                   DJs[ 0 ].week.missedIDs += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 3;
                   shows[ record.calendarID ].overall.missedIDs += 1;
                   shows[ record.calendarID ].overall.missedIDsArray.push([ log.logsubtype, log.createdAt ]);
@@ -908,7 +908,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 2;
                   DJs[ 0 ].week.earlyStart += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 2;
                   shows[ record.calendarID ].overall.earlyStart += 1;
                   shows[ record.calendarID ].overall.earlyStartArray.push([ log.logsubtype, log.createdAt ]);
@@ -951,7 +951,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 2;
                   DJs[ 0 ].week.lateEnd += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 2;
                   shows[ record.calendarID ].overall.lateEnd += 1;
                   shows[ record.calendarID ].overall.lateEndArray.push([ log.logsubtype, log.createdAt ]);
@@ -994,7 +994,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 1;
                   DJs[ 0 ].week.lateStart += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 1;
                   shows[ record.calendarID ].overall.lateStart += 1;
                   shows[ record.calendarID ].overall.lateStartArray.push([ log.logsubtype, log.createdAt ]);
@@ -1037,7 +1037,7 @@ module.exports = {
                   DJs[ 0 ].week.reputationScore -= 1;
                   DJs[ 0 ].week.earlyEnd += 1;
                 }
-                if (record.calendarID) {
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].overall.reputationScore -= 1;
                   shows[ record.calendarID ].overall.earlyEnd += 1;
                   shows[ record.calendarID ].overall.earlyEndArray.push([ log.logsubtype, log.createdAt ]);
