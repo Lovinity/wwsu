@@ -62,7 +62,9 @@ module.exports = {
         query = { acknowledged: false };
         query.logtype = [ 
           'cancellation', 
+          'updated',
           'director-cancellation',
+          'director-updated',
           'silence', 
           'silence-track', 
           'silence-switch', 

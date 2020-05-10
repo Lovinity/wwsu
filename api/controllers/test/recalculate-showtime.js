@@ -24,6 +24,8 @@ module.exports = {
 
         while (records.length > 0) {
             var record = records.shift();
+            if (record.actualEnd !== null)
+                continue;
 
             var toUpdate = {
                 showTime: null,
@@ -39,7 +41,8 @@ module.exports = {
                 signedOnEarly: false,
                 signedOnLate: false,
                 signedOffEarly: false,
-                signedOffLate: false
+                signedOffLate: false,
+                actualEnd: record[ 1 ] ? record[ 1 ].actualStart : null
             }
 
             // Get accountability logs

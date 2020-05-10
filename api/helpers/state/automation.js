@@ -99,8 +99,8 @@ module.exports = {
       }
 
       // Gather updated stats
-      if (attendance.dj !== null) {
-        var stats = await sails.helpers.analytics.showtime(undefined, attendance.calendarID);
+      if (attendance.dj || attendance.cohostDJ1 || attendance.cohostDJ2 || attendance.cohostDJ3) {
+        var stats = await sails.helpers.analytics.showtime([ attendance.dj, attendance.cohostDJ1, attendance.cohostDJ2, attendance.cohostDJ3 ], [ attendance.calendarID ]);
         returnData.statsDJs = stats[ 0 ];
         returnData.statsShows = stats[ 1 ];
       }

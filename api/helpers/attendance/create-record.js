@@ -77,8 +77,9 @@ module.exports = {
 
       // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast
       if (currentID !== null) {
-        // Get sails.models.attendance record
-        var currentRecord = await sails.models.attendance.findOne({ ID: currentID })
+
+        // Add actualEnd
+        var currentRecord = await sails.models.attendance.updateOne({ ID: currentID }, { actualEnd: moment().toISOString(true) });
 
         if (currentRecord) {
 
