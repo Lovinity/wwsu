@@ -24,7 +24,7 @@ module.exports = {
 
       // Store the current ID in a variable; we want to start a new record before processing the old one
       var currentID = sails.models.meta.memory.attendanceID
-      var currentRecord = await sails.helpers.attendance.findOne({ ID: currentID });
+      var currentRecord = await sails.models.attendance.findOne({ ID: currentID });
 
       // Add a new attendance record if event is specified.
       if (inputs.event) {
