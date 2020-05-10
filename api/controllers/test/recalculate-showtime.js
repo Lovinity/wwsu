@@ -24,7 +24,8 @@ module.exports = {
 
         while (records.length > 0) {
             var record = records.shift();
-            if (record.actualEnd !== null)
+
+            if (record.actualEnd)
                 continue;
 
             var toUpdate = {
@@ -42,7 +43,7 @@ module.exports = {
                 signedOnLate: false,
                 signedOffEarly: false,
                 signedOffLate: false,
-                actualEnd: record[ 1 ] ? record[ 1 ].actualStart : null
+                actualEnd: records[ 1 ] ? records[ 1 ].actualStart : null
             }
 
             // Get accountability logs
@@ -86,13 +87,13 @@ module.exports = {
             // Calculate show stats if it has ended
             if (toUpdate.actualEnd !== null) {
                 // Pre-calculations
-                toUpdate.showTime = moment(record.actualEnd).diff(moment(record.actualStart), 'minutes');
+                toUpdate.showTime = moment(toUpdate.actualEnd).diff(moment(record.actualStart), 'minutes');
                 toUpdate.listenerMinutes = 0;
 
                 // Calculate listener minutes
 
                 // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
-                var listenerRecords = listeners.filter((listener) => moment(listener.createdAt).isAfter(moment(record.actualStart)) && moment(listener.createdAt).isSameOrBefore(moment(record.actualEnd)))
+                var listenerRecords = listeners.filter((listener) => moment(listener.createdAt).isAfter(moment(record.actualStart)) && moment(listener.createdAt).isSameOrBefore(moment(toUpdate.actualEnd)))
                 var prevListeners = listeners.reverse().find((listener) => moment(listener.createdAt).isSameOrBefore(moment(record.actualStart)))
                 listeners.reverse();
                 prevListeners = prevListeners ? prevListeners.listeners || 0 : 0;
@@ -112,13 +113,13 @@ module.exports = {
                 }
 
                 // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-                listenerMinutes += (moment(record.actualEnd).diff(moment(prevTime), 'seconds') / 60) * prevListeners
+                listenerMinutes += (moment(toUpdate.actualEnd).diff(moment(prevTime), 'seconds') / 60) * prevListeners
 
                 toUpdate.listenerMinutes = Math.round(listenerMinutes)
                 toUpdate.tuneIns = tuneIns
 
                 // Calculate web messages
-                toUpdate.webMessages = messages.filter((message) => moment(message.createdAt).isSameOrAfter(moment(record.actualStart)) && moment(message.createdAt).isSameOrBefore(moment(record.actualEnd))).length;
+                toUpdate.webMessages = messages.filter((message) => moment(message.createdAt).isSameOrAfter(moment(record.actualStart)) && moment(message.createdAt).isSameOrBefore(moment(toUpdate.actualEnd))).length;
             }
 
             await sails.models.attendance.updateOne({ ID: record.ID }, toUpdate);
