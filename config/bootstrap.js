@@ -412,10 +412,10 @@ module.exports.bootstrap = async function (done) {
                 })
               }
 
-          /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
-           * This results in false transitions in system state. Run a check to detect if the queuelength deviated by more than 2 seconds since last run.
-           * If so, we assume this was an error, so do not treat it as accurate, and trigger a 3 second error resolution wait.
-           */
+              /* Every now and then, querying now playing queue happens when RadioDJ is in the process of queuing a track, resulting in an inaccurate reported queue length.
+               * This results in false transitions in system state. Run a check to detect if the queuelength deviated by more than 2 seconds since last run.
+               * If so, we assume this was an error, so do not treat it as accurate, and trigger a 3 second error resolution wait.
+               */
               if (queueLength > (sails.models.status.errorCheck.prevQueueLength - 3) || sails.models.status.errorCheck.trueZero > 0) {
                 // If the detected queueLength gets bigger, assume the issue resolved itself and immediately mark the queuelength as accurate
                 if (queueLength > (sails.models.status.errorCheck.prevQueueLength)) {
@@ -847,6 +847,17 @@ module.exports.bootstrap = async function (done) {
 
                   // Execute the break array
                   await sails.helpers.break.executeArray(sails.config.custom.breaks[ key ])
+
+                  // Increment break count
+                  if (sails.models.meta.memory.attendanceID !== null) {
+                    var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
+                    if (attendanceRecord) {
+                      await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { breaks: attendanceRecord.breaks + 1 }).fetch()
+                        .tolerate((err) => {
+                          sails.log.error(err)
+                        })
+                    }
+                  }
 
                   // If not doing a break, check to see if it's time to do a liner
                 } else {
