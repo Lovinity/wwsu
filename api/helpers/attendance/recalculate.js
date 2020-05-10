@@ -82,7 +82,7 @@ module.exports = {
                 // Calculate listener minutes
 
                 // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
-                var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': record.actualStart } }).sort('createdAt ASC')
+                var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } }).sort('createdAt ASC')
                 var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': record.actualStart } }).sort('createdAt DESC').limit(1) || 0
                 if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
 
@@ -107,7 +107,7 @@ module.exports = {
                 toUpdate.tuneIns = tuneIns
 
                 // Calculate web messages
-                toUpdate.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true) } })
+                toUpdate.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } })
             }
 
             await sails.models.attendance.updateOne({ ID: inputs.ID }, toUpdate);
