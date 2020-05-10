@@ -28,6 +28,8 @@ module.exports = {
             if (record.actualEnd)
                 continue;
 
+            var afind = records.find((rec) => rec.actualStart !== null);
+
             var toUpdate = {
                 showTime: null,
                 tuneIns: null,
@@ -43,7 +45,7 @@ module.exports = {
                 signedOnLate: false,
                 signedOffEarly: false,
                 signedOffLate: false,
-                actualEnd: records[ 1 ] ? records[ 1 ].actualStart : null
+                actualEnd: afind ? afind : null
             }
 
             // Get accountability logs
@@ -85,7 +87,7 @@ module.exports = {
                 });
 
             // Calculate show stats if it has ended
-            if (toUpdate.actualEnd !== null) {
+            if (toUpdate.actualEnd !== null && record.actualStart !== null) {
                 // Pre-calculations
                 toUpdate.showTime = moment(toUpdate.actualEnd).diff(moment(record.actualStart), 'minutes');
                 toUpdate.listenerMinutes = 0;
