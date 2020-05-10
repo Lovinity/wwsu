@@ -81,40 +81,6 @@ module.exports = {
         var currentRecord = await sails.models.attendance.findOne({ ID: currentID })
 
         if (currentRecord) {
-          // Pre-load update data
-          var updateData = { showTime: moment().diff(moment(currentRecord.actualStart), 'minutes'), listenerMinutes: 0, actualEnd: moment().toISOString(true) }
-
-          // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
-          var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': currentRecord.actualStart } }).sort('createdAt ASC')
-          var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort('createdAt DESC').limit(1) || 0
-          if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
-
-          // Calculate listener minutes and listener tune-ins
-          var prevTime = moment(currentRecord.actualStart)
-          var listenerMinutes = 0
-          var tuneIns = 0
-
-          if (listenerRecords && listenerRecords.length > 0) {
-            listenerRecords.map(listener => {
-              listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners
-              if (listener.listeners > prevListeners) { tuneIns += (listener.listeners - prevListeners) }
-              prevListeners = listener.listeners
-              prevTime = moment(listener.createdAt)
-            })
-          }
-
-          // This is to ensure listener minutes from the most recent entry up until the current time is also accounted for
-          listenerMinutes += (moment().diff(moment(prevTime), 'seconds') / 60) * prevListeners
-
-          listenerMinutes = Math.round(listenerMinutes)
-          updateData.listenerMinutes = listenerMinutes
-          updateData.tuneIns = tuneIns
-
-          // Calculate web messages
-          updateData.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(currentRecord.actualStart).toISOString(true) } })
-
-          // Update the attendance record with the data
-          returnData.updatedRecord = await sails.models.attendance.updateOne({ ID: currentID }, updateData);
 
           // Log if actualEnd was 10 or more minutes before scheduledEnd
           if (currentRecord && currentRecord.scheduledEnd && moment().add(10, 'minutes').isSameOrBefore(moment(currentRecord.scheduledEnd)) && (currentRecord.event.toLowerCase().startsWith("show:") || currentRecord.event.toLowerCase().startsWith("sports:") || currentRecord.event.toLowerCase().startsWith("remote:") || currentRecord.event.toLowerCase().startsWith("prerecord:") || currentRecord.event.toLowerCase().startsWith("playlist:"))) {
@@ -133,6 +99,9 @@ module.exports = {
                 sails.log.error(err)
               })
           }
+
+          // Recalculate stats
+          await sails.helpers.attendance.recalculate(currentID);
 
           // Recalculate weekly analytics
           await sails.helpers.attendance.calculateStats()

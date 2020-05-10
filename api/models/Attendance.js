@@ -87,13 +87,53 @@ module.exports = {
     },
 
     missedIDs: {
-      type: 'number',
-      defaultsTo: 0
+      type: 'json',
+      defaultsTo: []
     },
 
     breaks: {
       type: 'number',
       defaultsTo: 0
+    },
+
+    cancellation: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
+    absent: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
+    unauthorized: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
+    silence: {
+      type: 'json',
+      defaultsTo: [],
+    },
+
+    signedOnEarly: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
+    signedOnLate: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
+    signedOffEarly: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
+    signedOffLate: {
+      type: 'boolean',
+      defaultsTo: false,
     },
 
     scheduledStart: {

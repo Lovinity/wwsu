@@ -121,17 +121,6 @@ module.exports = {
         await sails.helpers.rest.cmd('EnableAssisted', 0)
       }
 
-      // Increment break count
-      if (sails.models.meta.memory.attendanceID !== null) {
-        var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
-        if (attendanceRecord) {
-          await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { breaks: attendanceRecord.breaks + 1 }).fetch()
-            .tolerate((err) => {
-              sails.log.error(err)
-            })
-        }
-      }
-
       await sails.helpers.meta.change.with({ changingState: null })
       return exits.success()
     } catch (e) {

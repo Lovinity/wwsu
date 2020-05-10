@@ -421,7 +421,7 @@ module.exports = {
             }
           }
         });
-        console.log(`showtime: process2 complete`)
+      console.log(`showtime: process2 complete`)
     }
 
     // Calculate maximum reputation score for every DJ
@@ -683,383 +683,378 @@ module.exports = {
       var maps = records2
         .filter((record) => ((inputs.dj && (record.dj === inputs.dj || record.cohostDJ1 === inputs.dj || record.cohostDJ2 === inputs.dj || record.cohostDJ3 === inputs.dj)) || (!inputs.dj && (record.dj || record.cohostDJ1 || record.cohostDJ2 || record.cohostDJ3))))
         .map(async (record) => {
-          var logs = await sails.models.logs.find({ attendanceID: record.ID, excused: false, logtype: ['cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late'] });
-          logs.map((log) => {
-            switch (log.logtype) {
-              case 'cancellation':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 1;
-                  DJs[ record[ dj ] ].overall.cancellations += 1;
-                  DJs[ record[ dj ] ].overall.cancellationsArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 1;
-                    DJs[ record[ dj ] ].semester.cancellations += 1;
-                    DJs[ record[ dj ] ].semester.cancellationsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 1;
-                    DJs[ record[ dj ] ].week.cancellations += 1;
-                    DJs[ record[ dj ] ].week.cancellationsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 1;
-                DJs[ 0 ].overall.cancellations += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 1;
-                  DJs[ 0 ].semester.cancellations += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 1;
-                  DJs[ 0 ].week.cancellations += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 1;
-                  shows[ record.calendarID ].overall.cancellations += 1;
-                  shows[ record.calendarID ].overall.cancellationsArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 1;
-                    shows[ record.calendarID ].semester.cancellations += 1;
-                    shows[ record.calendarID ].semester.cancellationsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 1;
-                    shows[ record.calendarID ].week.cancellations += 1;
-                    shows[ record.calendarID ].week.cancellationsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
-              case 'silence':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 1;
-                  DJs[ record[ dj ] ].overall.silences += 1;
-                  DJs[ record[ dj ] ].overall.silencesArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 1;
-                    DJs[ record[ dj ] ].semester.silences += 1;
-                    DJs[ record[ dj ] ].semester.silencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 1;
-                    DJs[ record[ dj ] ].week.silences += 1;
-                    DJs[ record[ dj ] ].week.silencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 1;
-                DJs[ 0 ].overall.silences += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 1;
-                  DJs[ 0 ].semester.silences += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 1;
-                  DJs[ 0 ].week.silences += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 1;
-                  shows[ record.calendarID ].overall.silences += 1;
-                  shows[ record.calendarID ].overall.silencesArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 1;
-                    shows[ record.calendarID ].semester.silences += 1;
-                    shows[ record.calendarID ].semester.silencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 1;
-                    shows[ record.calendarID ].week.silences += 1;
-                    shows[ record.calendarID ].week.silencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
-              case 'absent':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 3;
-                  DJs[ record[ dj ] ].overall.absences += 1;
-                  DJs[ record[ dj ] ].overall.absencesArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 3;
-                    DJs[ record[ dj ] ].semester.absences += 1;
-                    DJs[ record[ dj ] ].semester.absencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 3;
-                    DJs[ record[ dj ] ].week.absences += 1;
-                    DJs[ record[ dj ] ].week.absencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 3;
-                DJs[ 0 ].overall.absences += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 3;
-                  DJs[ 0 ].semester.absences += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 3;
-                  DJs[ 0 ].week.absences += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 3;
-                  shows[ record.calendarID ].overall.absences += 1;
-                  shows[ record.calendarID ].overall.absencesArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 3;
-                    shows[ record.calendarID ].semester.absences += 1;
-                    shows[ record.calendarID ].semester.absencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 3;
-                    shows[ record.calendarID ].week.absences += 1;
-                    shows[ record.calendarID ].week.absencesArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
-              case 'unauthorized':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 2;
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 2;
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 2;
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 2;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 2;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 2;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 2;
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 2;
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 2;
-                  }
-                }
-                break;
-              case 'id':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 3;
-                  DJs[ record[ dj ] ].overall.missedIDs += 1;
-                  DJs[ record[ dj ] ].overall.missedIDsArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 3;
-                    DJs[ record[ dj ] ].semester.missedIDs += 1;
-                    DJs[ record[ dj ] ].semester.missedIDsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 3;
-                    DJs[ record[ dj ] ].week.missedIDs += 1;
-                    DJs[ record[ dj ] ].week.missedIDsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 3;
-                DJs[ 0 ].overall.missedIDs += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 3;
-                  DJs[ 0 ].semester.missedIDs += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 3;
-                  DJs[ 0 ].week.missedIDs += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 3;
-                  shows[ record.calendarID ].overall.missedIDs += 1;
-                  shows[ record.calendarID ].overall.missedIDsArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 3;
-                    shows[ record.calendarID ].semester.missedIDs += 1;
-                    shows[ record.calendarID ].semester.missedIDsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 3;
-                    shows[ record.calendarID ].week.missedIDs += 1;
-                    shows[ record.calendarID ].week.missedIDsArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
-              case 'sign-on-early':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 2;
-                  DJs[ record[ dj ] ].overall.earlyStart += 1;
-                  DJs[ record[ dj ] ].overall.earlyStartArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 2;
-                    DJs[ record[ dj ] ].semester.earlyStart += 1;
-                    DJs[ record[ dj ] ].semester.earlyStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 2;
-                    DJs[ record[ dj ] ].week.earlyStart += 1;
-                    DJs[ record[ dj ] ].week.earlyStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 2;
-                DJs[ 0 ].overall.earlyStart += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 2;
-                  DJs[ 0 ].semester.earlyStart += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 2;
-                  DJs[ 0 ].week.earlyStart += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 2;
-                  shows[ record.calendarID ].overall.earlyStart += 1;
-                  shows[ record.calendarID ].overall.earlyStartArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 2;
-                    shows[ record.calendarID ].semester.earlyStart += 1;
-                    shows[ record.calendarID ].semester.earlyStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 2;
-                    shows[ record.calendarID ].week.earlyStart += 1;
-                    shows[ record.calendarID ].week.earlyStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
-              case 'sign-off-late':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 2;
-                  DJs[ record[ dj ] ].overall.lateEnd += 1;
-                  DJs[ record[ dj ] ].overall.lateEndArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 2;
-                    DJs[ record[ dj ] ].semester.lateEnd += 1;
-                    DJs[ record[ dj ] ].semester.lateEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 2;
-                    DJs[ record[ dj ] ].week.lateEnd += 1;
-                    DJs[ record[ dj ] ].week.lateEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 2;
-                DJs[ 0 ].overall.lateEnd += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 2;
-                  DJs[ 0 ].semester.lateEnd += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 2;
-                  DJs[ 0 ].week.lateEnd += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 2;
-                  shows[ record.calendarID ].overall.lateEnd += 1;
-                  shows[ record.calendarID ].overall.lateEndArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 2;
-                    shows[ record.calendarID ].semester.lateEnd += 1;
-                    shows[ record.calendarID ].semester.lateEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 2;
-                    shows[ record.calendarID ].week.lateEnd += 1;
-                    shows[ record.calendarID ].week.lateEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
-              case 'sign-on-late':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 1;
-                  DJs[ record[ dj ] ].overall.lateStart += 1;
-                  DJs[ record[ dj ] ].overall.lateStartArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 1;
-                    DJs[ record[ dj ] ].semester.lateStart += 1;
-                    DJs[ record[ dj ] ].semester.lateStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 1;
-                    DJs[ record[ dj ] ].week.lateStart += 1;
-                    DJs[ record[ dj ] ].week.lateStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 1;
-                DJs[ 0 ].overall.lateStart += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 1;
-                  DJs[ 0 ].semester.lateStart += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 1;
-                  DJs[ 0 ].week.lateStart += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 1;
-                  shows[ record.calendarID ].overall.lateStart += 1;
-                  shows[ record.calendarID ].overall.lateStartArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 1;
-                    shows[ record.calendarID ].semester.lateStart += 1;
-                    shows[ record.calendarID ].semester.lateStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 1;
-                    shows[ record.calendarID ].week.lateStart += 1;
-                    shows[ record.calendarID ].week.lateStartArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
-              case 'sign-off-early':
-                [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
-                  if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
-                  DJs[ record[ dj ] ].overall.reputationScore -= 1;
-                  DJs[ record[ dj ] ].overall.earlyEnd += 1;
-                  DJs[ record[ dj ] ].overall.earlyEndArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].semester.reputationScore -= 1;
-                    DJs[ record[ dj ] ].semester.earlyEnd += 1;
-                    DJs[ record[ dj ] ].semester.earlyEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    DJs[ record[ dj ] ].week.reputationScore -= 1;
-                    DJs[ record[ dj ] ].week.earlyEnd += 1;
-                    DJs[ record[ dj ] ].week.earlyEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                });
-                DJs[ 0 ].overall.reputationScore -= 1;
-                DJs[ 0 ].overall.earlyEnd += 1;
-                if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].semester.reputationScore -= 1;
-                  DJs[ 0 ].semester.earlyEnd += 1;
-                }
-                if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                  DJs[ 0 ].week.reputationScore -= 1;
-                  DJs[ 0 ].week.earlyEnd += 1;
-                }
-                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
-                  shows[ record.calendarID ].overall.reputationScore -= 1;
-                  shows[ record.calendarID ].overall.earlyEnd += 1;
-                  shows[ record.calendarID ].overall.earlyEndArray.push([ log.logsubtype, log.createdAt ]);
-                  if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].semester.reputationScore -= 1;
-                    shows[ record.calendarID ].semester.earlyEnd += 1;
-                    shows[ record.calendarID ].semester.earlyEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                  if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-                    shows[ record.calendarID ].week.reputationScore -= 1;
-                    shows[ record.calendarID ].week.earlyEnd += 1;
-                    shows[ record.calendarID ].week.earlyEndArray.push([ log.logsubtype, log.createdAt ]);
-                  }
-                }
-                break;
+          if (record.cancellation) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= 1;
+              DJs[ record[ dj ] ].overall.cancellations += 1;
+              DJs[ record[ dj ] ].overall.cancellationsArray.push([ record.event, record.scheduledStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= 1;
+                DJs[ record[ dj ] ].semester.cancellations += 1;
+                DJs[ record[ dj ] ].semester.cancellationsArray.push([ record.event, record.scheduledStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart))) {
+                DJs[ record[ dj ] ].week.reputationScore -= 1;
+                DJs[ record[ dj ] ].week.cancellations += 1;
+                DJs[ record[ dj ] ].week.cancellationsArray.push([ record.event, record.scheduledStart ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= 1;
+            DJs[ 0 ].overall.cancellations += 1;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart))) {
+              DJs[ 0 ].semester.reputationScore -= 1;
+              DJs[ 0 ].semester.cancellations += 1;
             }
-          });
+            if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart))) {
+              DJs[ 0 ].week.reputationScore -= 1;
+              DJs[ 0 ].week.cancellations += 1;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= 1;
+              shows[ record.calendarID ].overall.cancellations += 1;
+              shows[ record.calendarID ].overall.cancellationsArray.push([ record.event, record.scheduledStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart))) {
+                shows[ record.calendarID ].semester.reputationScore -= 1;
+                shows[ record.calendarID ].semester.cancellations += 1;
+                shows[ record.calendarID ].semester.cancellationsArray.push([ record.event, record.scheduledStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart))) {
+                shows[ record.calendarID ].week.reputationScore -= 1;
+                shows[ record.calendarID ].week.cancellations += 1;
+                shows[ record.calendarID ].week.cancellationsArray.push([ record.event, record.scheduledStart ]);
+              }
+            }
+          }
+          if (record.silence && record.silence.length > 0) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= record.silence.length;
+              DJs[ record[ dj ] ].overall.silences += record.silence.length;
+              DJs[ record[ dj ] ].overall.silencesArray.push([ record.event, record.silence ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart || record.actualStart || record.createdAt))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= record.silence.length;
+                DJs[ record[ dj ] ].semester.silences += record.silence.length;
+                DJs[ record[ dj ] ].semester.silencesArray.push([ record.event, record.silence ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart || record.actualStart || record.createdAt))) {
+                DJs[ record[ dj ] ].week.reputationScore -= record.silence.length;
+                DJs[ record[ dj ] ].week.silences += record.silence.length;
+                DJs[ record[ dj ] ].week.silencesArray.push([ record.event, record.silence ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= record.silence.length;
+            DJs[ 0 ].overall.silences += record.silence.length;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart || record.actualStart || record.createdAt))) {
+              DJs[ 0 ].semester.reputationScore -= record.silence.length;
+              DJs[ 0 ].semester.silences += record.silence.length;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart || record.actualStart || record.createdAt))) {
+              DJs[ 0 ].week.reputationScore -= record.silence.length;
+              DJs[ 0 ].week.silences += record.silence.length;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= record.silence.length;
+              shows[ record.calendarID ].overall.silences += record.silence.length;
+              shows[ record.calendarID ].overall.silencesArray.push([ record.event, record.silence ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart || record.actualStart || record.createdAt))) {
+                shows[ record.calendarID ].semester.reputationScore -= record.silence.length;
+                shows[ record.calendarID ].semester.silences += record.silence.length;
+                shows[ record.calendarID ].semester.silencesArray.push([ record.event, record.silence ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart || record.actualStart || record.createdAt))) {
+                shows[ record.calendarID ].week.reputationScore -= record.silence.length;
+                shows[ record.calendarID ].week.silences += record.silence.length;
+                shows[ record.calendarID ].week.silencesArray.push([ record.event, record.silence ]);
+              }
+            }
+          }
+          if (record.absent) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= 3;
+              DJs[ record[ dj ] ].overall.absences += 1;
+              DJs[ record[ dj ] ].overall.absencesArray.push([ record.event, record.scheduledStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= 3;
+                DJs[ record[ dj ] ].semester.absences += 1;
+                DJs[ record[ dj ] ].semester.absencesArray.push([ record.event, record.scheduledStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart))) {
+                DJs[ record[ dj ] ].week.reputationScore -= 3;
+                DJs[ record[ dj ] ].week.absences += 1;
+                DJs[ record[ dj ] ].week.absencesArray.push([ record.event, record.scheduledStart ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= 3;
+            DJs[ 0 ].overall.absences += 1;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart))) {
+              DJs[ 0 ].semester.reputationScore -= 3;
+              DJs[ 0 ].semester.absences += 1;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart))) {
+              DJs[ 0 ].week.reputationScore -= 3;
+              DJs[ 0 ].week.absences += 1;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= 3;
+              shows[ record.calendarID ].overall.absences += 1;
+              shows[ record.calendarID ].overall.absencesArray.push([ record.event, record.scheduledStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.scheduledStart))) {
+                shows[ record.calendarID ].semester.reputationScore -= 3;
+                shows[ record.calendarID ].semester.absences += 1;
+                shows[ record.calendarID ].semester.absencesArray.push([ record.event, record.scheduledStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.scheduledStart))) {
+                shows[ record.calendarID ].week.reputationScore -= 3;
+                shows[ record.calendarID ].week.absences += 1;
+                shows[ record.calendarID ].week.absencesArray.push([ record.event, record.scheduledStart ]);
+              }
+            }
+          }
+          if (record.unauthorized) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= 2;
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart || record.createdAt))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= 2;
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart || record.createdAt))) {
+                DJs[ record[ dj ] ].week.reputationScore -= 2;
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= 2;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart || record.createdAt))) {
+              DJs[ 0 ].semester.reputationScore -= 2;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.actualStart || record.createdAt))) {
+              DJs[ 0 ].week.reputationScore -= 2;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= 2;
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart || record.createdAt))) {
+                shows[ record.calendarID ].semester.reputationScore -= 2;
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart || record.createdAt))) {
+                shows[ record.calendarID ].week.reputationScore -= 2;
+              }
+            }
+          }
+          if (record.missedIDs && record.missedIDs.length > 0) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= (3 * record.missedIDs.length);
+              DJs[ record[ dj ] ].overall.missedIDs += record.missedIDs.length;
+              DJs[ record[ dj ] ].overall.missedIDsArray.push([ record.event, record.missedIDs ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= (3 * record.missedIDs.length);
+                DJs[ record[ dj ] ].semester.missedIDs += record.missedIDs.length;
+                DJs[ record[ dj ] ].semester.missedIDsArray.push([ record.event, record.missedIDs ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
+                DJs[ record[ dj ] ].week.reputationScore -= (3 * record.missedIDs.length);
+                DJs[ record[ dj ] ].week.missedIDs += record.missedIDs.length;
+                DJs[ record[ dj ] ].week.missedIDsArray.push([ record.event, record.missedIDs ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= (3 * record.missedIDs.length);
+            DJs[ 0 ].overall.missedIDs += record.missedIDs.length;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
+              DJs[ 0 ].semester.reputationScore -= (3 * record.missedIDs.length);
+              DJs[ 0 ].semester.missedIDs += record.missedIDs.length;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
+              DJs[ 0 ].week.reputationScore -= (3 * record.missedIDs.length);
+              DJs[ 0 ].week.missedIDs += record.missedIDs.length;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= (3 * record.missedIDs.length);
+              shows[ record.calendarID ].overall.missedIDs += record.missedIDs.length;
+              shows[ record.calendarID ].overall.missedIDsArray.push([ record.event, record.missedIDs ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
+                shows[ record.calendarID ].semester.reputationScore -= (3 * record.missedIDs.length);
+                shows[ record.calendarID ].semester.missedIDs += record.missedIDs.length;
+                shows[ record.calendarID ].semester.missedIDsArray.push([ record.event, record.missedIDs ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
+                shows[ record.calendarID ].week.reputationScore -= (3 * record.missedIDs.length);
+                shows[ record.calendarID ].week.missedIDs += record.missedIDs.length;
+                shows[ record.calendarID ].week.missedIDsArray.push([ record.event, record.missedIDs ]);
+              }
+            }
+          }
+          if (record.signedOnEarly) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= 2;
+              DJs[ record[ dj ] ].overall.earlyStart += 1;
+              DJs[ record[ dj ] ].overall.earlyStartArray.push([ record.event, record.actualStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= 2;
+                DJs[ record[ dj ] ].semester.earlyStart += 1;
+                DJs[ record[ dj ] ].semester.earlyStartArray.push([ record.event, record.actualStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].week.reputationScore -= 2;
+                DJs[ record[ dj ] ].week.earlyStart += 1;
+                DJs[ record[ dj ] ].week.earlyStartArray.push([ record.event, record.actualStart ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= 2;
+            DJs[ 0 ].overall.earlyStart += 1;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].semester.reputationScore -= 2;
+              DJs[ 0 ].semester.earlyStart += 1;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].week.reputationScore -= 2;
+              DJs[ 0 ].week.earlyStart += 1;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= 2;
+              shows[ record.calendarID ].overall.earlyStart += 1;
+              shows[ record.calendarID ].overall.earlyStartArray.push([ record.event, record.actualStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].semester.reputationScore -= 2;
+                shows[ record.calendarID ].semester.earlyStart += 1;
+                shows[ record.calendarID ].semester.earlyStartArray.push([ record.event, record.actualStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].week.reputationScore -= 2;
+                shows[ record.calendarID ].week.earlyStart += 1;
+                shows[ record.calendarID ].week.earlyStartArray.push([ record.event, record.actualStart ]);
+              }
+            }
+          }
+          if (record.signedOffLate) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= 2;
+              DJs[ record[ dj ] ].overall.lateEnd += 1;
+              DJs[ record[ dj ] ].overall.lateEndArray.push([ record.event, record.actualEnd ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= 2;
+                DJs[ record[ dj ] ].semester.lateEnd += 1;
+                DJs[ record[ dj ] ].semester.lateEndArray.push([ record.event, record.actualEnd ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].week.reputationScore -= 2;
+                DJs[ record[ dj ] ].week.lateEnd += 1;
+                DJs[ record[ dj ] ].week.lateEndArray.push([ record.event, record.actualEnd ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= 2;
+            DJs[ 0 ].overall.lateEnd += 1;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].semester.reputationScore -= 2;
+              DJs[ 0 ].semester.lateEnd += 1;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].week.reputationScore -= 2;
+              DJs[ 0 ].week.lateEnd += 1;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= 2;
+              shows[ record.calendarID ].overall.lateEnd += 1;
+              shows[ record.calendarID ].overall.lateEndArray.push([ record.event, record.actualEnd ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].semester.reputationScore -= 2;
+                shows[ record.calendarID ].semester.lateEnd += 1;
+                shows[ record.calendarID ].semester.lateEndArray.push([ record.event, record.actualEnd ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].week.reputationScore -= 2;
+                shows[ record.calendarID ].week.lateEnd += 1;
+                shows[ record.calendarID ].week.lateEndArray.push([ record.event, record.actualEnd ]);
+              }
+            }
+          }
+          if (record.signedOnLate) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= 1;
+              DJs[ record[ dj ] ].overall.lateStart += 1;
+              DJs[ record[ dj ] ].overall.lateStartArray.push([ record.event, record.actualStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= 1;
+                DJs[ record[ dj ] ].semester.lateStart += 1;
+                DJs[ record[ dj ] ].semester.lateStartArray.push([ record.event, record.actualStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].week.reputationScore -= 1;
+                DJs[ record[ dj ] ].week.lateStart += 1;
+                DJs[ record[ dj ] ].week.lateStartArray.push([ record.event, record.actualStart ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= 1;
+            DJs[ 0 ].overall.lateStart += 1;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].semester.reputationScore -= 1;
+              DJs[ 0 ].semester.lateStart += 1;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].week.reputationScore -= 1;
+              DJs[ 0 ].week.lateStart += 1;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= 1;
+              shows[ record.calendarID ].overall.lateStart += 1;
+              shows[ record.calendarID ].overall.lateStartArray.push([ record.event, record.actualStart ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].semester.reputationScore -= 1;
+                shows[ record.calendarID ].semester.lateStart += 1;
+                shows[ record.calendarID ].semester.lateStartArray.push([ record.event, record.actualStart ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].week.reputationScore -= 1;
+                shows[ record.calendarID ].week.lateStart += 1;
+                shows[ record.calendarID ].week.lateStartArray.push([ record.event, record.actualStart ]);
+              }
+            }
+          }
+          if (record.signedOffEarly) {
+            [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+              DJs[ record[ dj ] ].overall.reputationScore -= 1;
+              DJs[ record[ dj ] ].overall.earlyEnd += 1;
+              DJs[ record[ dj ] ].overall.earlyEndArray.push([ record.event, record.actualEnd ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].semester.reputationScore -= 1;
+                DJs[ record[ dj ] ].semester.earlyEnd += 1;
+                DJs[ record[ dj ] ].semester.earlyEndArray.push([ record.event, record.actualEnd ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                DJs[ record[ dj ] ].week.reputationScore -= 1;
+                DJs[ record[ dj ] ].week.earlyEnd += 1;
+                DJs[ record[ dj ] ].week.earlyEndArray.push([ record.event, record.actualEnd ]);
+              }
+            });
+            DJs[ 0 ].overall.reputationScore -= 1;
+            DJs[ 0 ].overall.earlyEnd += 1;
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].semester.reputationScore -= 1;
+              DJs[ 0 ].semester.earlyEnd += 1;
+            }
+            if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+              DJs[ 0 ].week.reputationScore -= 1;
+              DJs[ 0 ].week.earlyEnd += 1;
+            }
+            if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
+              shows[ record.calendarID ].overall.reputationScore -= 1;
+              shows[ record.calendarID ].overall.earlyEnd += 1;
+              shows[ record.calendarID ].overall.earlyEndArray.push([ record.event, record.actualEnd ]);
+              if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].semester.reputationScore -= 1;
+                shows[ record.calendarID ].semester.earlyEnd += 1;
+                shows[ record.calendarID ].semester.earlyEndArray.push([ record.event, record.actualEnd ]);
+              }
+              if (moment().subtract(7, 'days').isBefore(moment(record.actualStart))) {
+                shows[ record.calendarID ].week.reputationScore -= 1;
+                shows[ record.calendarID ].week.earlyEnd += 1;
+                shows[ record.calendarID ].week.earlyEndArray.push([ record.event, record.actualEnd ]);
+              }
+            }
+          }
         });
       await Promise.all(maps);
 

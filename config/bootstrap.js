@@ -761,16 +761,6 @@ module.exports.bootstrap = async function (done) {
                 sails.log.error(err)
               })
 
-            if (sails.models.meta.memory.attendanceID !== null) {
-              var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
-              if (attendanceRecord) {
-                await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { missedIDs: attendanceRecord.missedIDs + 1 }).fetch()
-                  .tolerate((err) => {
-                    sails.log.error(err)
-                  })
-              }
-            }
-
             await sails.helpers.onesignal.sendMass('accountability-shows', 'Broadcast did not do Top-of-hour ID!', `${sails.models.meta.memory.show} failed to take a required Top of the Hour ID break. This is an FCC violation.`)
           }
 
@@ -847,17 +837,6 @@ module.exports.bootstrap = async function (done) {
 
                   // Execute the break array
                   await sails.helpers.break.executeArray(sails.config.custom.breaks[ key ])
-
-                  // Increment break count
-                  if (sails.models.meta.memory.attendanceID !== null) {
-                    var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
-                    if (attendanceRecord) {
-                      await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { breaks: attendanceRecord.breaks + 1 }).fetch()
-                        .tolerate((err) => {
-                          sails.log.error(err)
-                        })
-                    }
-                  }
 
                   // If not doing a break, check to see if it's time to do a liner
                 } else {

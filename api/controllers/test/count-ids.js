@@ -15,8 +15,8 @@ module.exports = {
       records3
         .filter((record) => record.attendanceID !== null)
         .map((record) => {
-          if (typeof records4[record.attendanceID] === `undefined`) { records4[record.attendanceID] = 0 }
-          records4[record.attendanceID] += 1
+          if (typeof records4[record.attendanceID] === `undefined`) { records4[record.attendanceID] = [] }
+          records4[record.attendanceID].push(record.createdAt);
         })
 
       for (var record in records4) {

@@ -29,7 +29,7 @@ module.exports = {
 
     loglevel: {
       type: 'string',
-      isIn: ['danger', 'orange', 'warning', 'info', 'success', 'primary', 'secondary']
+      isIn: [ 'danger', 'orange', 'warning', 'info', 'success', 'primary', 'secondary' ]
     },
 
     logIcon: {
@@ -81,6 +81,13 @@ module.exports = {
     var data = { insert: newlyCreatedRecord }
     sails.log.silly(`status socket: ${data}`)
     sails.sockets.broadcast('logs', 'logs', data)
+
+    if (newlyCreatedRecord.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(newlyCreatedRecord.logtype) !== -1) {
+      (async (record) => {
+        await sails.helpers.attendance.recalculate(record.attendanceID);
+      })(newlyCreatedRecord)
+    }
+
     return proceed()
   },
 
@@ -88,6 +95,13 @@ module.exports = {
     var data = { update: updatedRecord }
     sails.log.silly(`status socket: ${data}`)
     sails.sockets.broadcast('logs', 'logs', data)
+
+    if (updatedRecord.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(updatedRecord.logtype) !== -1) {
+      (async (record) => {
+        await sails.helpers.attendance.recalculate(record.attendanceID);
+      })(updatedRecord)
+    }
+
     return proceed()
   },
 
@@ -95,6 +109,13 @@ module.exports = {
     var data = { remove: destroyedRecord.ID }
     sails.log.silly(`status socket: ${data}`)
     sails.sockets.broadcast('logs', 'logs', data)
+
+    if (destroyedRecord.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(destroyedRecord.logtype) !== -1) {
+      (async (record) => {
+        await sails.helpers.attendance.recalculate(record.attendanceID);
+      })(destroyedRecord)
+    }
+
     return proceed()
   }
 }
