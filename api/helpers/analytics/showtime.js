@@ -482,14 +482,14 @@ module.exports = {
                 DJs[ record[ dj ] ].overall.breaks += record.breaks;
               });
               DJs[ 0 ].overall.shows += 1
-              if (record.calendarID) shows[ record.calendarID ].overall.shows += 1;
+              if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].overall.shows += 1;
               if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].overall.reputationScoreMax += (5 + breakPoints)
                 });
                 DJs[ 0 ].overall.reputationScoreMax += (5 + breakPoints)
-                if (record.calendarID) shows[ record.calendarID ].overall.reputationScoreMax += (5 + breakPoints);
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].overall.reputationScoreMax += (5 + breakPoints);
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
@@ -498,14 +498,14 @@ module.exports = {
                   DJs[ record[ dj ] ].semester.breaks += record.breaks;
                 });
                 DJs[ 0 ].semester.shows += 1
-                if (record.calendarID) shows[ record.calendarID ].semester.shows += 1;
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].semester.shows += 1;
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].semester.reputationScoreMax += (5 + breakPoints)
                   });
                   DJs[ 0 ].semester.reputationScoreMax += (5 + breakPoints)
-                  if (record.calendarID) shows[ record.calendarID ].semester.reputationScoreMax += (5 + breakPoints);
+                  if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].semester.reputationScoreMax += (5 + breakPoints);
                 }
               }
               if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
@@ -515,14 +515,14 @@ module.exports = {
                   DJs[ record[ dj ] ].week.breaks += record.breaks;
                 });
                 DJs[ 0 ].week.shows += 1
-                if (record.calendarID) shows[ record.calendarID ].week.shows += 1;
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].week.shows += 1;
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].week.reputationScoreMax += (5 + breakPoints)
                   });
                   DJs[ 0 ].week.reputationScoreMax += (5 + breakPoints)
-                  if (record.calendarID) shows[ record.calendarID ].week.reputationScoreMax += (5 + breakPoints);
+                  if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].week.reputationScoreMax += (5 + breakPoints);
                 }
               }
             } else if (record.event.toLowerCase().startsWith('prerecord: ')) {
@@ -577,14 +577,14 @@ module.exports = {
                 DJs[ record[ dj ] ].overall.breaks += record.breaks;
               });
               DJs[ 0 ].overall.remotes += 1
-              if (record.calendarID) shows[ record.calendarID ].overall.remotes += 1;
+              if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].overall.remotes += 1;
               if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].overall.reputationScoreMax += (5 + breakPoints)
                 });
                 DJs[ 0 ].overall.reputationScoreMax += (5 + breakPoints)
-                if (record.calendarID) shows[ record.calendarID ].overall.reputationScoreMax += (5 + breakPoints);
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].overall.reputationScoreMax += (5 + breakPoints);
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
@@ -593,14 +593,14 @@ module.exports = {
                   DJs[ record[ dj ] ].semester.breaks += record.breaks;
                 });
                 DJs[ 0 ].semester.remotes += 1
-                if (record.calendarID) shows[ record.calendarID ].semester.remotes += 1;
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].semester.remotes += 1;
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].semester.reputationScoreMax += (5 + breakPoints)
                   });
                   DJs[ 0 ].semester.reputationScoreMax += (5 + breakPoints)
-                  if (record.calendarID) shows[ record.calendarID ].semester.reputationScoreMax += (5 + breakPoints);
+                  if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].semester.reputationScoreMax += (5 + breakPoints);
                 }
               }
               if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
@@ -610,14 +610,14 @@ module.exports = {
                   DJs[ record[ dj ] ].week.breaks += record.breaks;
                 });
                 DJs[ 0 ].week.remotes += 1
-                if (record.calendarID) shows[ record.calendarID ].week.remotes += 1;
+                if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].week.remotes += 1;
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].week.reputationScoreMax += (5 + breakPoints)
                   });
                   DJs[ 0 ].week.reputationScoreMax += (5 + breakPoints)
-                  if (record.calendarID) shows[ record.calendarID ].week.reputationScoreMax += (5 + breakPoints);
+                  if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].week.reputationScoreMax += (5 + breakPoints);
                 }
               }
             } else if (record.event.toLowerCase().startsWith('sports: ')) {
