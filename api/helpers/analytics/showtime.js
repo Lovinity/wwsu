@@ -683,7 +683,7 @@ module.exports = {
       var maps = records2
         .filter((record) => ((inputs.dj && (record.dj === inputs.dj || record.cohostDJ1 === inputs.dj || record.cohostDJ2 === inputs.dj || record.cohostDJ3 === inputs.dj)) || (!inputs.dj && (record.dj || record.cohostDJ1 || record.cohostDJ2 || record.cohostDJ3))))
         .map(async (record) => {
-          var logs = await sails.models.logs.find({ attendanceID: record.ID, excused: false });
+          var logs = await sails.models.logs.find({ attendanceID: record.ID, excused: false, logtype: ['cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late'] });
           logs.map((log) => {
             switch (log.logtype) {
               case 'cancellation':
