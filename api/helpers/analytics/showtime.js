@@ -334,6 +334,10 @@ module.exports = {
     // Get the attendance records
     var records2 = await sails.models.attendance.find(query);
 
+    console.log(`showtime query`)
+    console.dir(query);
+    console.log(`Showtime records retrieved: ${records2.length}`);
+
     // Calculate earned remote credits for all DJs
     var process1 = async () => {
       var records = await sails.models.xp.find({ dj: inputs.dj ? inputs.dj : { '!=': null } })
