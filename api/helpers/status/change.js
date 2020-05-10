@@ -69,7 +69,7 @@ module.exports = {
           // Push notification for danger/critical statuses
           await sails.helpers.onesignal.sendMass('emergencies', 'Critical Problem Detected', `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} experienced a critical problem on ${moment().format('LLL')}: ${criteria.data ? criteria.data : `Unknown Issue`}`)
         } else if (criteria.status < 3) {
-          loglevel = `urgent`
+          loglevel = `orange`
         }
 
         // Log changes in status
