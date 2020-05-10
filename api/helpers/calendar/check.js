@@ -240,8 +240,8 @@ module.exports = {
                             (async (eventNowb) => {
                                 try {
                                     await sails.helpers.genre.start(eventNowb, inputs.ignoreChangingState);
-                                } catch (unusedE) {
-
+                                } catch (e) {
+                                    sails.log.error(e);
                                 }
                             })(eventNow)
                         }
