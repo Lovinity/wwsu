@@ -39,6 +39,7 @@ module.exports = {
       if (!sails.models.meta.memory.state.startsWith('sports') && inputs.halftime) { inputs.halftime = false }
 
       // Log it in a separate self-calling async function that we do not await so it does not block the rest of the call.
+      // Also, increment break number in attendance record.
       (async () => {
         await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'break', loglevel: 'info', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-coffee`, title: `Host requested to take a break.`, event: '' }).fetch()
           .tolerate((err) => {
@@ -118,6 +119,17 @@ module.exports = {
 
         await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
         await sails.helpers.rest.cmd('EnableAssisted', 0)
+      }
+
+      // Increment break count
+      if (sails.models.meta.memory.attendanceID !== null) {
+        var attendanceRecord = await sails.models.attendance.findOne({ ID: sails.models.meta.memory.attendanceID })
+        if (attendanceRecord) {
+          await sails.models.attendance.update({ ID: sails.models.meta.memory.attendanceID }, { breaks: attendanceRecord.breaks + 1 }).fetch()
+            .tolerate((err) => {
+              sails.log.error(err)
+            })
+        }
       }
 
       await sails.helpers.meta.change.with({ changingState: null })

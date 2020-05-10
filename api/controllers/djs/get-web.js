@@ -24,7 +24,9 @@ module.exports = {
           { cohostDJ3: this.req.payload.ID },
         ]
       })
-      returnData.stats = await sails.helpers.analytics.showtime(this.req.payload.ID)
+      var stats = await sails.helpers.analytics.showtime(this.req.payload.ID);
+      returnData.statsDJ = stats[0][this.req.payload.ID];
+      returnData.statsShows = stats[1];
 
       return exits.success(returnData)
     } catch (e) {

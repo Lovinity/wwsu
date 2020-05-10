@@ -1,7 +1,7 @@
 {
   "name": "wwsu-4",
   "private": true,
-  "version": "8.0.0-alpha.3",
+  "version": "8.0.0-alpha.4",
   "description": "Core backend for WWSU Radio operations",
   "keywords": [],
   "dependencies": {

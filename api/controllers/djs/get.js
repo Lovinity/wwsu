@@ -61,7 +61,9 @@ module.exports = {
             { cohostDJ3: inputs.dj },
           ]
         })
-        returnData.stats = await sails.helpers.analytics.showtime(inputs.dj)
+        var stats = await sails.helpers.analytics.showtime(inputs.dj);
+        returnData.statsDJ = stats[ 0 ][ inputs.dj ];
+        returnData.statsShows = stats[ 1 ];
 
         return exits.success(returnData)
       }

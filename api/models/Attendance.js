@@ -91,6 +91,11 @@ module.exports = {
       defaultsTo: 0
     },
 
+    breaks: {
+      type: 'number',
+      defaultsTo: 0
+    },
+
     scheduledStart: {
       type: 'ref',
       columnType: 'datetime'

@@ -732,42 +732,6 @@ var defaultConfig = {
     auth: '' // Enter the REST authentication password for RadioDJ here. Must be the same on all RadioDJ instances
   },
 
-  // Object of configuration regarding XP
-  // NOTE: Changing these values does NOT change XP already earned; for example, if a DJ earned 30 XP (10 per message) yesterday for sending 3 web messages,
-  // changing web to 5 will NOT change the total they earned yesterday to 15 XP; it only affects future XP earned.
-  XP: {
-
-    // DJs earn 1 XP for every X listener minutes they had during their show. Decimals are permitted. DO NOT set to 0 or the program will crash!
-    listenerMinutes: 3,
-
-    // For prerecorded shows, DJs earn 1 XP for every specified listener minutes below.
-    prerecordListenerMinutes: 6,
-
-    // Earn 1 XP for every specified minutes on the air. Can be a decimal. DO NOT set to 0.
-    showMinutes: 1,
-
-    // For prerecorded shows, earn 1 XP for every specified minutes a prerecord airs.
-    prerecordShowMinutes: 2,
-
-    // Earn this many XP for every on-time top of the hour ID break.
-    ID: 15,
-
-    // Prerecorded shows earn this many XP for every spot in which the system was able to queue a break (encourages breaking the tracks up so we can put breaks in)
-    prerecordBreak: 10,
-
-    // Note: Prerecorded shows do not earn XP for the items below this point, such as Top Adds nor web messages.
-
-    // Earn this many XP for every Top Add played
-    topAdd: 10,
-
-    // Earn this many XP for every message the DJ sent to either all web visitors or a specific web visitor
-    web: 2,
-
-    // A DJ should be given this many XP for every remote credit earned
-    remoteCredit: 60
-
-  },
-
   // Object configuration regarding the track liking system
 
   songsliked: {

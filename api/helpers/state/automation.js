@@ -95,16 +95,15 @@ module.exports = {
       if (typeof attendance !== `undefined`) {
         returnData.showTime = attendance.showTime || 0
         returnData.listenerMinutes = attendance.listenerMinutes || 0
+        returnData.webMessages = attendance.webMessages || 0;
       }
 
-      returnData.messagesWeb = await sails.models.messages.count({ to: { startsWith: 'website' }, createdAt: { '>=': moment(attendance.actualStart).toISOString(true) } })
-        .tolerate((err) => {
-          // Do not throw for error, but log it
-          sails.log.error(err)
-        })
-
-      // Gather updated DJ stats
-      if (attendance.dj !== null) { returnData = Object.assign(returnData, await sails.helpers.analytics.showtime(attendance.dj)) }
+      // Gather updated stats
+      if (attendance.dj !== null) {
+        var stats = await sails.helpers.analytics.showtime(undefined, attendance.calendarID);
+        returnData.statsDJs = stats[ 0 ];
+        returnData.statsShows = stats[ 1 ];
+      }
 
       // Get listener analytics
       returnData.listeners = await sails.helpers.analytics.listeners(attendance.actualStart, attendance.actualEnd)
