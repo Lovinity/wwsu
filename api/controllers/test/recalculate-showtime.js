@@ -45,7 +45,7 @@ module.exports = {
                 signedOnLate: false,
                 signedOffEarly: false,
                 signedOffLate: false,
-                actualEnd: afind ? afind : null
+                actualEnd: afind ? afind.createdAt : null
             }
 
             // Get accountability logs
