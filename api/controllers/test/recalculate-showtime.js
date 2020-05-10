@@ -94,9 +94,6 @@ module.exports = {
                 listeners.reverse();
                 prevListeners = prevListeners ? prevListeners.listeners || 0 : 0;
 
-                console.log(`listenerRecords ${listenerRecords.length}`);
-                console.log(`prevListeners: ${prevListeners}`);
-
                 // Calculate listener minutes and listener tune-ins
                 var prevTime = moment(record.actualStart)
                 var listenerMinutes = 0
@@ -118,7 +115,7 @@ module.exports = {
                 toUpdate.tuneIns = tuneIns
 
                 // Calculate web messages
-                toUpdate.webMessages = messages.filter((message) => moment(message.createdAt).isSameOrAfter(moment(record.actualStart)) && moment(message.createdAt).isSameOrBefore(moment(record.actualEnd)))
+                toUpdate.webMessages = messages.filter((message) => moment(message.createdAt).isSameOrAfter(moment(record.actualStart)) && moment(message.createdAt).isSameOrBefore(moment(record.actualEnd))).length;
             }
 
             await sails.models.attendance.updateOne({ ID: record.ID }, toUpdate);
