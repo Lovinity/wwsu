@@ -82,7 +82,8 @@ module.exports = {
                 // Calculate listener minutes
 
                 // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
-                var listenerRecords = await sails.models.listeners.find({ createdAt: { '>=': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } }).sort('createdAt ASC')
+                var listenerRecords = await sails.models.listeners.find({ createdAt: { '>': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } }).sort('createdAt ASC')
+                console.log(`listenerRecords: ${listenerRecords.length}`);
                 var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': record.actualStart } }).sort('createdAt DESC').limit(1) || 0
                 if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
 
