@@ -608,7 +608,7 @@ module.exports = {
     // Initialize statistics templates for every returned DJ
     records.map(record => {
       shows[ record.ID ] = {
-        name: `${record.hosts} - ${record.name}`,
+        name: `${record.type}: ${record.hosts} - ${record.name}`,
         week: {
           showtime: 0,
           tuneins: 0,
@@ -914,9 +914,6 @@ module.exports = {
 
     // Get the attendance records
     var records2 = await sails.models.attendance.find(query);
-    if (!inputs.calendarIDs || inputs.calendarIDs.length === 0) {
-      records2 = records2.filter((record) => record.dj || record.cohostDJ1 || record.cohostDJ2 || record.cohostDJ3 || record.event.toLowerCase().startsWith("sports: "));
-    }
 
     // Calculate earned remote credits for all DJs
     var process1 = async () => {
