@@ -330,6 +330,8 @@ module.exports = {
       records2 = records2.filter((record) => record.dj || record.cohostDJ1 || record.cohostDJ2 || record.cohostDJ3 || record.event.toLowerCase().startsWith("sports: "));
     }
 
+    console.log(`Prep complete`)
+
     // Calculate earned remote credits for all DJs
     var process1 = async () => {
       var records = await sails.models.xp.find({ dj: inputs.dj ? inputs.dj : { '!=': null } })
@@ -350,6 +352,7 @@ module.exports = {
           }
         }
       })
+      console.log(`showtime: process1 complete`)
     }
 
     // Showtime, tuneins, listenerMinutes, and webMessages calculations
@@ -418,6 +421,7 @@ module.exports = {
             }
           }
         });
+        console.log(`showtime: process2 complete`)
     }
 
     // Calculate maximum reputation score for every DJ
@@ -661,6 +665,7 @@ module.exports = {
           }
         }
       }
+      console.log(`showtime: process3 complete`)
     }
 
     // Calculate reputation score penalties and analytics (ignores excused)
@@ -1057,10 +1062,14 @@ module.exports = {
           });
         });
       await Promise.all(maps);
+
+      console.log(`showtime: process4 complete`)
     }
 
     // Execute our parallel functions and wait for all of them to resolve.
     await Promise.all([ process1(), process2(), process3(), process4() ])
+
+    console.log(`showtime: All processes complete`)
 
     // Do additional final calculations for DJs
     for (var index in DJs) {
@@ -1096,6 +1105,8 @@ module.exports = {
         shows[ index ].week.reputationScorePercent = shows[ index ].week.reputationScore > 0 ? Math.round(100 * (shows[ index ].week.reputationScore / shows[ index ].week.reputationScoreMax)) : 0;
       }
     }
+
+    console.log(`showtime: Final calculations complete`);
 
     // All done. Return as an array pair.
     return exits.success([ DJs, shows ]);
