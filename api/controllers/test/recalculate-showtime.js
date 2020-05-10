@@ -84,7 +84,7 @@ module.exports = {
                 });
 
             // Calculate show stats if it has ended
-            if (record.actualEnd !== null) {
+            if (toUpdate.actualEnd !== null) {
                 // Pre-calculations
                 toUpdate.showTime = moment(record.actualEnd).diff(moment(record.actualStart), 'minutes');
                 toUpdate.listenerMinutes = 0;
