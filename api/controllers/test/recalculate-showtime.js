@@ -9,12 +9,15 @@ module.exports = {
     },
 
     fn: async function (inputs, exits) {
+        console.log(`showtime recalculate: started`);
         var records = await sails.models.attendance.find();
-        var maps = records.map(async (record) => {
+        console.log(`showtime recalculate: Got ${records.length} attendance records.`);
+
+        while (records.length > 0) {
+            var record = records.shift();
             await sails.helpers.attendance.recalculate(record.ID);
             console.log(`showtime recalculate: Finished ${record.ID}`);
-        })
-        await Promise.all(maps);
+        }
 
         sails.log.debug(`showtime recalculate: DONE`);
 
