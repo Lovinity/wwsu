@@ -101,7 +101,7 @@ module.exports = {
           .sort(compare)
           .map((stat, index) => {
             if (index > 2) return;
-            sails.models.attendance.weeklyAnalytics.push(stat.name.replace('show: ', '').replace('remote: ', '').replace('prerecord: ', ''))
+            sails.models.attendance.weeklyAnalytics.topShows.push(stat.name.replace('show: ', '').replace('remote: ', '').replace('prerecord: ', ''))
           })
 
         // Next, genres
