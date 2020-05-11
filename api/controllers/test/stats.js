@@ -20,7 +20,7 @@ module.exports = {
           var listenerRecords = listenerRecordsA
             .filter(record2 => moment(record2.createdAt).isSameOrAfter(moment(currentRecord.actualStart)) && moment(record2.createdAt).isSameOrBefore(moment(currentRecord.actualEnd)))
           var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': currentRecord.actualStart } }).sort('createdAt DESC').limit(1) || 0
-          if (prevListeners[0]) { prevListeners = prevListeners[0].listeners || 0 }
+          if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
 
           // Calculate listener minutes
           var prevTime = moment(currentRecord.actualStart)
@@ -45,7 +45,10 @@ module.exports = {
         })
       await Promise.all(maps)
 
-      await sails.helpers.attendance.calculateStats()
+      // Perform weekly stats re-calculations in the background
+        (async () => {
+          await sails.helpers.attendance.calculateStats()
+        })();
 
       return exits.success(sails.models.attendance.weeklyAnalytics)
     } catch (e) {

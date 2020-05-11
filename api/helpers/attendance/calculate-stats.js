@@ -12,8 +12,11 @@ module.exports = {
     sails.log.debug('Helper attendance.calculateStats called.')
 
     try {
-      // Get stats for the last 7 days
-      var earliest = moment().subtract(1, 'weeks')
+
+      // Get all showtime stats for shows
+      var stats = await sails.helpers.analytics.showtime()[ 1 ];
+
+      var earliest = moment().subtract(7, 'days');
 
       // Prepare with a clean template
       sails.models.attendance.weeklyAnalytics = {
@@ -29,11 +32,41 @@ module.exports = {
 
       // Define compare function for sorting records;
       var compare = function (a, b) {
-        var ratioA = a.showTime > 0 ? a.listenerMinutes / a.showTime : 0
-        var ratioB = b.showTime > 0 ? b.listenerMinutes / b.showTime : 0
-        if (ratioA > ratioB) { return -1 }
-        if (ratioB > ratioA) { return 1 }
-        return 0
+        var aWeek = a.week;
+        var bWeek = b.week;
+
+        var aScore = 0;
+        var bScore = 0;
+
+        // 60 points for every 1 ratio
+        aScore += (aWeek.ratio * 60)
+        bScore += (aWeek.ratio * 60)
+
+        // 3 points (divided by showtime / 60) for every message
+        aScore += ((3 / (aWeek.showtime / 60)) * aWeek.messages)
+        bScore += ((3 / (bWeek.showtime / 60)) * bWeek.messages)
+
+        // 10 points (divided by showtime / 60) for every break; max 4 per 60 showTime
+        var aMaxBreaks = (aWeek.showtime / 60) * 4
+        var bMaxBreaks = (bWeek.showtime / 60) * 4
+        aScore += ((10 / (aWeek.showtime / 60)) * Math.min(aMaxBreaks, aWeek.breaks))
+        bScore += ((10 / (bWeek.showtime / 60)) * Math.min(bMaxBreaks, bWeek.breaks))
+
+        // if reputationScoreMax is 0, reputationPercent is always 100.
+        if (aWeek.reputationScoreMax <= 0)
+          aWeek.reputationPercent = 100;
+        if (bWeek.reputationScoreMax <= 0)
+          bWeek.reputationPercent = 100;
+
+        // Multiply final score by reputationPercent (lower reputation = less likely to be featured)
+        aScore *= (aWeek.reputationPercent / 100);
+        bScore *= (bWeek.reputationPercent / 100);
+
+        // Shows with less than 15 minutes showtime are disqualified
+        if (aWeek.showtime < 15) aScore = 0;
+        if (bWeek.showtime < 15) bScore = 0;
+
+        return bScore - aScore;
       }
 
       // Grab attendance records from the last 7 days
@@ -52,83 +85,47 @@ module.exports = {
         sails.models.attendance.weeklyAnalytics.tracksRequested = await sails.models.requests.count({ createdAt: { '>=': earliest.toISOString(true) } })
 
         // Grab count of webMessagesExchanged
-        sails.models.attendance.weeklyAnalytics.webMessagesExchanged = await sails.models.messages.count({ status: 'active', or: [{ from: { startsWith: 'website' } }, { to: { startsWith: 'website' } }], createdAt: { '>=': earliest.toISOString(true) } })
+        sails.models.attendance.weeklyAnalytics.webMessagesExchanged = await sails.models.messages.count({ status: 'active', or: [ { from: { startsWith: 'website' } }, { to: { startsWith: 'website' } } ], createdAt: { '>=': earliest.toISOString(true) } })
       }
 
       // Prepare parallel function 2
       var f2 = async () => {
-        // Go through each record of attendance and populate topShows, onAir, and onAirListeners
-        records
-          .filter(attendance => attendance.calendarID !== null)
-          .map(attendance => {
-            var show = attendance.event
-            show = show.substring(show.indexOf(': ') + 2)
+        var stats2 = Object.values(stats);
 
-            // OnAir programming of Sports, Show, Remote, or Prerecord counts as show time.
-            if (attendance.event.toLowerCase().startsWith('sports:') || attendance.event.toLowerCase().startsWith('show:') || attendance.event.toLowerCase().startsWith('remote:') || attendance.event.toLowerCase().startsWith('prerecord:')) {
-              sails.models.attendance.weeklyAnalytics.onAir += attendance.showTime
-              sails.models.attendance.weeklyAnalytics.onAirListeners += attendance.listenerMinutes
-
-              // Sports broadcasts should not count towards the top 3 shows
-              if (!attendance.event.toLowerCase().startsWith('sports:')) {
-                // Group showTime and listenerMinutes by show; we only want one record per show to use when comparing top shows
-                if (typeof totals[show] === 'undefined') { totals[show] = { showTime: 0, listenerMinutes: 0 } }
-                totals[show].showTime += attendance.showTime
-                totals[show].listenerMinutes += attendance.listenerMinutes
-              }
-            } else if (attendance.event.toLowerCase().startsWith('genre:')) {
-              if (typeof totalsG[show] === 'undefined') { totalsG[show] = { showTime: 0, listenerMinutes: 0 } }
-              totalsG[show].showTime += attendance.showTime
-              totalsG[show].listenerMinutes += attendance.listenerMinutes
-            } else if (attendance.event.toLowerCase().startsWith('playlist:')) {
-              if (typeof totalsP[show] === 'undefined') { totalsP[show] = { showTime: 0, listenerMinutes: 0 } }
-              totalsP[show].showTime += attendance.showTime
-              totalsP[show].listenerMinutes += attendance.listenerMinutes
-            }
+        // Start with shows, remotes, and prerecords
+        stats2
+          .filter((stat) => stat.name.toLowerCase().startsWith('show: ') || stat.name.toLowerCase().startsWith('remote: ') || stat.name.toLowerCase().startsWith('prerecord: '))
+          .sort(compare)
+          .map((stat, index) => {
+            if (index > 2) return;
+            sails.models.attendance.weeklyAnalytics.push(stat.name.replace('show: ', '').replace('remote: ', '').replace('prerecord: ', ''))
           })
 
-        // Convert our show data into an array so we can sort it
-        var totalsA = []
-        for (var item in totals) {
-          if (Object.prototype.hasOwnProperty.call(totals, item)) {
-            totalsA.push({ name: item, showTime: totals[item].showTime, listenerMinutes: totals[item].listenerMinutes })
-          }
-        }
+        // Next, genres
+        stats2
+          .filter((stat) => stat.name.toLowerCase().startsWith('genre: '))
+          .sort(compare)
+          .map((stat, index) => {
+            if (index > 0) return;
+            sails.models.attendance.topGenre = stat.name.split(' - ')[ 1 ];
+          })
 
-        // Gather the top shows into analytics. Push the first 3 into the topShows array.
-        if (totalsA.length > 0) {
-          totalsA
-            .sort(compare)
-            .map((show, index) => {
-              if (index < 3) { sails.models.attendance.weeklyAnalytics.topShows.push(show.name) }
-            })
-        }
+        // Next, playlists
+        stats2
+          .filter((stat) => stat.name.toLowerCase().startsWith('playlist: '))
+          .sort(compare)
+          .map((stat, index) => {
+            if (index > 0) return;
+            sails.models.attendance.weeklyAnalytics.topPlaylist = stat.name.replace('playlist: ', '');
+          })
 
-        // Convert genre data into an array so we can sort it
-        totalsA = []
-        for (var item2 in totalsG) {
-          if (Object.prototype.hasOwnProperty.call(totalsG, item2)) {
-            totalsA.push({ name: item2, showTime: totalsG[item2].showTime, listenerMinutes: totalsG[item2].listenerMinutes })
-          }
-        }
-
-        // Use the first one as our top genre
-        if (totalsA.length > 0) { sails.models.attendance.weeklyAnalytics.topGenre = totalsA.sort(compare)[0].name }
-
-        // Convert our playlist data into an array so we can sort it
-        totalsA = []
-        for (var item3 in totalsP) {
-          if (Object.prototype.hasOwnProperty.call(totalsP, item3)) {
-            totalsA.push({ name: item3, showTime: totalsP[item3].showTime, listenerMinutes: totalsP[item3].listenerMinutes })
-          }
-        }
-
-        // Use the first one as our top playlist
-        if (totalsA.length > 0) { sails.models.attendance.weeklyAnalytics.topPlaylist = totalsA.sort(compare)[0].name }
+        // Finally, populate other stats
+        sails.models.attendance.weeklyAnalytics.onAir = stats[ -1 ].showtime;
+        sails.models.attendance.weeklyAnalytics.onAirListeners = stats[ -1 ].listeners;
       }
 
       // Execute our parallel functions and wait for them to resolve.
-      await Promise.all([f1(), f2()])
+      await Promise.all([ f1(), f2() ])
 
       // Broadcast socket
       sails.sockets.broadcast('analytics-weekly-dj', 'analytics-weekly-dj', sails.models.attendance.weeklyAnalytics)
