@@ -14,7 +14,7 @@ module.exports = {
     try {
 
       // Get all showtime stats for shows
-      var stats = await sails.helpers.analytics.showtime()[ 1 ];
+      var stats = await sails.helpers.analytics.showtime();
       console.dir(stats);
       console.dir(Object.values(stats))
 
