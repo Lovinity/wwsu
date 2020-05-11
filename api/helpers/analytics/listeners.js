@@ -53,7 +53,11 @@ module.exports = {
         if (records2) { records = records2.concat(records) }
       }
 
-      return exits.success(records)
+      var compare = (a, b) => {
+        return moment(b.createdAt).valueOf() - moment(a.createdAt).valueOf()
+      }
+
+      return exits.success(records.sort(compare))
     } catch (e) {
       return exits.error(e)
     }
