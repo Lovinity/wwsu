@@ -54,7 +54,7 @@ module.exports = {
       }
 
       var compare = (a, b) => {
-        return moment(b.createdAt).valueOf() - moment(a.createdAt).valueOf()
+        return moment(a.createdAt).valueOf() - moment(b.createdAt).valueOf()
       }
 
       return exits.success(records.sort(compare))
