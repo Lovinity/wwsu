@@ -1528,8 +1528,10 @@ module.exports.bootstrap = async function (done) {
     })
   })
 
-  sails.log.verbose(`BOOTSTRAP: calculate weekly analytics.`)
-  await sails.helpers.attendance.calculateStats()
+    // Calculate weekly analytics in the background; this takes several seconds
+    (async () => {
+      await sails.helpers.attendance.calculateStats()
+    })
 
   sails.log.verbose(`Set a 30 second timer for display-refresh.`)
   setTimeout(() => {
