@@ -45,10 +45,7 @@ module.exports = {
         })
       await Promise.all(maps)
 
-      // Perform weekly stats re-calculations in the background
-        (async () => {
-          await sails.helpers.attendance.calculateStats()
-        })();
+      await sails.helpers.attendance.calculateStats()
 
       return exits.success(sails.models.attendance.weeklyAnalytics)
     } catch (e) {

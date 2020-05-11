@@ -103,11 +103,7 @@ module.exports = {
 
           // Recalculate stats
           await sails.helpers.attendance.recalculate(currentID);
-
-          // Perform weekly stats re-calculations in the background
-          (async () => {
-            await sails.helpers.attendance.calculateStats()
-          })();
+          await sails.helpers.attendance.calculateStats()
         }
       }
 
