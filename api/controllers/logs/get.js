@@ -79,6 +79,7 @@ module.exports = {
           'reboot',
           'id',
           'status-danger',
+          'status-reported',
           'sign-on-early',
           'sign-on-late',
           'sign-off-early',

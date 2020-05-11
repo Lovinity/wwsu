@@ -57,7 +57,8 @@ module.exports = {
     { name: 'music-library', label: 'Music Library', data: 'Music library tests have not yet executed since initialization.', status: 4, time: null },
     { name: 'calendar', label: 'Calendar', data: 'Calendar has not been loaded since initialization.', status: 4, time: null },
     { name: 'underwritings', label: 'Underwritings', data: 'Underwritings were not yet checked since initialization.', status: 4, time: null },
-    { name: 'delay-system', label: 'Delay System', data: 'Status of Delay System has not been checked since initialization', status: 4, time: moment().toISOString(true) }
+    { name: 'delay-system', label: 'Delay System', data: 'Status of Delay System has not been checked since initialization', status: 4, time: moment().toISOString(true) },
+    { name: 'reported', label: 'Reported Problems', status: 4, data: 'System has not yet checked reported problems since initialization.', time: null },
   ],
 
   /* Object used internally to check for errors.

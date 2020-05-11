@@ -165,11 +165,12 @@ module.exports.bootstrap = async function (done) {
     sails.models.status.template.push({ name: `display-${display.name}`, label: `Display ${display.label}`, status: display.level, data: 'This display sign has not reported online since initialization.', time: null })
   })
 
-  sails.log.verbose(`BOOTSTRAP: Adding sails.models.status template to database.`)
+  sails.log.verbose(`BOOTSTRAP: Adding sails.models.status template to database and checking for reported problems.`)
   await sails.models.status.createEach(sails.models.status.template)
     .tolerate((err) => {
       return done(err)
     })
+  await sails.helpers.status.checkReported();
 
   // Load internal sails.models.recipients into memory
   sails.log.verbose(`BOOTSTRAP: Adding sails.models.recipients template to database.`)
