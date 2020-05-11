@@ -10,12 +10,7 @@
  */
 
 module.exports.bootstrap = async function (done) {
-  // Log that the server was rebooted
-  await sails.models.logs.create({ attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', logIcon: `fas fa-exclamation-triangle`, title: `The Node server was started.`, event: '' }).fetch()
-    .tolerate((err) => {
-      // Don't throw errors, but log them
-      sails.log.error(err)
-    })
+  sails.log.verbose(`BOOTSTRAP: started; initializing variables`)
 
   // Require CalendarDb
   const CalendarDb = require('../assets/plugins/wwsu-calendar/js/wwsu-calendar.js');
@@ -1536,6 +1531,14 @@ module.exports.bootstrap = async function (done) {
   setTimeout(() => {
     sails.sockets.broadcast('display-refresh', 'display-refresh', true)
   }, 30000)
+
+  // Log that the server was rebooted
+  sails.log.verbose(`BOOTSTRAP: logging reboot`)
+  await sails.models.logs.create({ attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', logIcon: `fas fa-exclamation-triangle`, title: `The Node server was started.`, event: '' }).fetch()
+    .tolerate((err) => {
+      // Don't throw errors, but log them
+      sails.log.error(err)
+    })
 
   sails.log.verbose(`BOOTSTRAP: Done.`)
 
