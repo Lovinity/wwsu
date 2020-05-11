@@ -1536,7 +1536,7 @@ module.exports.bootstrap = async function (done) {
 
   // Log that the server was rebooted
   sails.log.verbose(`BOOTSTRAP: logging reboot`)
-  await sails.models.logs.create({ attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', logIcon: `fas fa-exclamation-triangle`, title: `The Node server was started.`, event: '' }).fetch()
+  await sails.models.logs.create({ attendanceID: null, logtype: 'reboot', loglevel: 'warning', logsubtype: 'automation', logIcon: `fas fa-exclamation-triangle`, title: `The Node server was started.`, event: `If this reboot was not intentional, please check the server and error logs.` }).fetch()
     .tolerate((err) => {
       // Don't throw errors, but log them
       sails.log.error(err)
