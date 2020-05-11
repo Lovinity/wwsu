@@ -97,7 +97,7 @@ module.exports = {
 
         // Start with shows, remotes, and prerecords
         stats2
-          .filter((stat) => stat.name.toLowerCase().startsWith('show: ') || stat.name.toLowerCase().startsWith('remote: ') || stat.name.toLowerCase().startsWith('prerecord: '))
+          .filter((stat) => (stat.name.toLowerCase().startsWith('show: ') || stat.name.toLowerCase().startsWith('remote: ') || stat.name.toLowerCase().startsWith('prerecord: ')) && stat.week.showtime > 0)
           .sort(compare)
           .map((stat, index) => {
             if (index > 2) return;
@@ -106,7 +106,7 @@ module.exports = {
 
         // Next, genres
         stats2
-          .filter((stat) => stat.name.toLowerCase().startsWith('genre: '))
+          .filter((stat) => stat.name.toLowerCase().startsWith('genre: ') && stat.week.showtime > 0)
           .sort(compare)
           .map((stat, index) => {
             if (index > 0) return;
@@ -115,7 +115,7 @@ module.exports = {
 
         // Next, playlists
         stats2
-          .filter((stat) => stat.name.toLowerCase().startsWith('playlist: '))
+          .filter((stat) => stat.name.toLowerCase().startsWith('playlist: ') && stat.week.showtime > 0)
           .sort(compare)
           .map((stat, index) => {
             if (index > 0) return;
@@ -123,8 +123,8 @@ module.exports = {
           })
 
         // Finally, populate other stats
-        sails.models.attendance.weeklyAnalytics.onAir = stats[ -1 ].showtime;
-        sails.models.attendance.weeklyAnalytics.onAirListeners = stats[ -1 ].listeners;
+        sails.models.attendance.weeklyAnalytics.onAir = stats[ -1 ].week.showtime;
+        sails.models.attendance.weeklyAnalytics.onAirListeners = stats[ -1 ].week.listeners;
       }
 
       // Execute our parallel functions and wait for them to resolve.
