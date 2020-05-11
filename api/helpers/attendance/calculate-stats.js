@@ -15,6 +15,8 @@ module.exports = {
 
       // Get all showtime stats for shows
       var stats = await sails.helpers.analytics.showtime()[ 1 ];
+      console.dir(stats);
+      console.dir(Object.values(stats))
 
       var earliest = moment().subtract(7, 'days');
 
