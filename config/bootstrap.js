@@ -1525,7 +1525,9 @@ module.exports.bootstrap = async function (done) {
   })
 
   // Calculate weekly analytics in the background; this takes several seconds
-  await sails.helpers.attendance.calculateStats()
+  var temp = (async () => {
+    await sails.helpers.attendance.calculateStats()
+  })();
 
   sails.log.verbose(`Set a 30 second timer for display-refresh.`)
   setTimeout(() => {

@@ -82,14 +82,15 @@ module.exports = {
     sails.log.silly(`status socket: ${data}`)
     sails.sockets.broadcast('logs', 'logs', data)
 
-      (async (record) => {
-        if (record.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(record.logtype) !== -1) {
-          await sails.helpers.attendance.recalculate(record.attendanceID);
-        }
+    var temp = (async (record) => {
+      if (record.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(record.logtype) !== -1) {
+        await sails.helpers.attendance.recalculate(record.attendanceID);
+      }
 
-        if (record.logtype === 'status-reported')
-          await sails.helpers.status.checkReported();
-      })(newlyCreatedRecord)
+      if (record.logtype === 'status-reported') {
+        await sails.helpers.status.checkReported();
+      }
+    })(newlyCreatedRecord)
 
     return proceed()
   },
@@ -99,14 +100,15 @@ module.exports = {
     sails.log.silly(`status socket: ${data}`)
     sails.sockets.broadcast('logs', 'logs', data)
 
-      (async (record) => {
-        if (record.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(record.logtype) !== -1) {
-          await sails.helpers.attendance.recalculate(record.attendanceID);
-        }
+    var temp = (async (record) => {
+      if (record.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(record.logtype) !== -1) {
+        await sails.helpers.attendance.recalculate(record.attendanceID);
+      }
 
-        if (record.logtype === 'status-reported')
-          await sails.helpers.status.checkReported();
-      })(updatedRecord)
+      if (record.logtype === 'status-reported') {
+        await sails.helpers.status.checkReported();
+      }
+    })(updatedRecord)
 
     return proceed()
   },
@@ -116,14 +118,15 @@ module.exports = {
     sails.log.silly(`status socket: ${data}`)
     sails.sockets.broadcast('logs', 'logs', data)
 
-      (async (record) => {
-        if (record.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(record.logtype) !== -1) {
-          await sails.helpers.attendance.recalculate(record.attendanceID);
-        }
+    var temp = (async (record) => {
+      if (record.attendanceID && [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ].indexOf(record.logtype) !== -1) {
+        await sails.helpers.attendance.recalculate(record.attendanceID);
+      }
 
-        if (record.logtype === 'status-reported')
-          await sails.helpers.status.checkReported();
-      })(destroyedRecord)
+      if (record.logtype === 'status-reported') {
+        await sails.helpers.status.checkReported();
+      }
+    })(destroyedRecord)
 
     return proceed()
   }
