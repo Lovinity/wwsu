@@ -72,6 +72,7 @@ module.exports = {
         await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: inputs.event.unique || null, calendarID: inputs.event.calendarID || null, scheduledStart: inputs.event.start || null, scheduledEnd: inputs.event.end || null })
       } else {
         var created = await sails.models.attendance.create({ unique: "", happened: 1, event: `genre: Unknown Hosts - Default Rotation`, actualStart: moment().toISOString(true) }).fetch()
+        returnData.newID = created.ID
         await sails.helpers.meta.change.with({ attendanceID: created.ID, calendarUnique: null, calendarID: null, scheduledStart: null, scheduledEnd: null })
       }
 
