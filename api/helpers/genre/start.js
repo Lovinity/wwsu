@@ -54,10 +54,6 @@ module.exports = {
             if (inputs.event !== null) {
               await sails.helpers.meta.change.with({ state: 'automation_genre', genre: inputs.event.name, playlistPlayed: moment().toISOString(true) })
               await sails.helpers.meta.newShow();
-              await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-on', loglevel: 'primary', logsubtype: '', logIcon: `fas fa-music`, title: `A genre rotation started.`, event: 'Genre: ' + inputs.event.name }).fetch()
-                .tolerate((err) => {
-                  sails.log.error(err)
-                })
             } else {
               await sails.helpers.meta.change.with({ state: 'automation_on', genre: 'Default', playlistPlayed: moment().toISOString(true) })
               await sails.helpers.meta.newShow();

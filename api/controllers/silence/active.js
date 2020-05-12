@@ -71,7 +71,7 @@ module.exports = {
         await sails.helpers.meta.change.with({ changingState: `Ending current broadcast due to no audio` })
 
         // Log the problem
-        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'silence-terminated', loglevel: 'danger', logsubtype: '', logIcon: ``, title: `Broadcast terminated due to multiple silence alarms in a short period of time.`, event: `This is likely due to an irresponsible DJ / show host. System terminated the current broadcast and went to automation to stop the silence. Please investigate and, if necessary, speak with the host about ensuring proper volume levels and avoiding on-air silence.<br />Broadcast: ${sails.models.meta.memory.show}` }).fetch()
+        await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'silence-terminated', loglevel: 'danger', logsubtype: 'fas fa-microphone-slash', logIcon: ``, title: `Broadcast terminated due to multiple silence alarms in a short period of time.`, event: `This is likely due to an irresponsible DJ / show host. System terminated the current broadcast and went to automation to stop the silence. Please investigate and, if necessary, speak with the host about ensuring proper volume levels and avoiding on-air silence.<br />Broadcast: ${sails.models.meta.memory.show}` }).fetch()
           .tolerate((err) => {
             sails.log.error(err)
           })

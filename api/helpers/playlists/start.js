@@ -138,10 +138,6 @@ module.exports = {
           sails.log.verbose(`playlists.start: Changed Meta`);
           await sails.helpers.meta.newShow();
           sails.log.verbose(`playlists.start: Started new show`);
-          await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'primary', loglevel: 'success', logsubtype: 'playlist - ' + inputs.event.name, logIcon: `fas fa-play`, title: `A playlist started.`, event: `Event name: ${inputs.event.name}<br />Playlist in RadioDJ: ${theplaylist.name}` }).fetch()
-            .tolerate((err) => {
-              sails.log.error(err)
-            })
           await loadPlaylist()
           await sails.helpers.rest.cmd('EnableAutoDJ', 1)
           // Prerecords

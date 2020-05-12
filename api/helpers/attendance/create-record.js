@@ -112,6 +112,7 @@ module.exports = {
 
       return exits.success(returnData)
     } catch (e) {
+      sails.log.error(e);
       return exits.error(e)
     }
   }
