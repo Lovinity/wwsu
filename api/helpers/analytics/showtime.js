@@ -602,297 +602,293 @@ module.exports = {
       }
     }
 
-    // Get all of the shows in the system and their DJs, or the provided show
-    var records = await sails.models.calendar.find(inputs.calendarIDs && inputs.calendarIDs.length > 0 ? { ID: inputs.calendarIDs } : {})
-
-    // Initialize statistics templates for every returned DJ
-    records.map(record => {
-      shows[ record.ID ] = {
-        name: `${record.type}: ${record.hosts} - ${record.name}`,
-        week: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          prerecords: 0,
-          remotes: 0,
-          sports: 0,
-          genres: 0,
-          playlists: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
-        },
-        range: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          genres: 0,
-          playlists: 0,
-          prerecords: 0,
-          remotes: 0,
-          sports: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
-        },
-        semester: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          prerecords: 0,
-          remotes: 0,
-          sports: 0,
-          genres: 0,
-          playlists: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
-        },
-        overall: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          prerecords: 0,
-          remotes: 0,
-          sports: 0,
-          genres: 0,
-          playlists: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
+    var initializeShow = (id) => {
+      if (id && typeof shows[ id ] === 'undefined') {
+        shows[ id ] = {
+          name: null,
+          week: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            prerecords: 0,
+            remotes: 0,
+            sports: 0,
+            genres: 0,
+            playlists: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          },
+          range: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            genres: 0,
+            playlists: 0,
+            prerecords: 0,
+            remotes: 0,
+            sports: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          },
+          semester: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            prerecords: 0,
+            remotes: 0,
+            sports: 0,
+            genres: 0,
+            playlists: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          },
+          overall: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            prerecords: 0,
+            remotes: 0,
+            sports: 0,
+            genres: 0,
+            playlists: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          }
         }
       }
-    })
+    }
 
-    // Get all of the DJs in the system, or the provided dj if one was provided
-    var records = await sails.models.djs.find(inputs.djs && inputs.djs.length > 0 ? { ID: inputs.djs } : {})
-
-    // Initialize statistics templates for every returned DJ
-    records.map(record => {
-      DJs[ record.ID ] = {
-        name: record.name,
-        week: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          prerecords: 0,
-          remotes: 0,
-          sports: 0,
-          genres: 0,
-          playlists: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
-        },
-        range: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          prerecords: 0,
-          remotes: 0,
-          sports: 0,
-          genres: 0,
-          playlists: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
-        },
-        semester: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          prerecords: 0,
-          remotes: 0,
-          sports: 0,
-          genres: 0,
-          playlists: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
-        },
-        overall: {
-          showtime: 0,
-          tuneins: 0,
-          listeners: 0,
-          ratio: 1,
-          messages: 0,
-          remoteCredits: 0,
-          shows: 0,
-          prerecords: 0,
-          remotes: 0,
-          genres: 0,
-          playlists: 0,
-          sports: 0,
-          breaks: 0,
-          earlyStart: 0,
-          lateStart: 0,
-          earlyEnd: 0,
-          lateEnd: 0,
-          absences: 0,
-          cancellations: 0,
-          missedIDs: 0,
-          silences: 0,
-          earlyStartArray: [],
-          lateStartArray: [],
-          earlyEndArray: [],
-          lateEndArray: [],
-          absencesArray: [],
-          cancellationsArray: [],
-          missedIDsArray: [],
-          silencesArray: [],
-          reputationScore: 0,
-          reputationScoreMax: 0,
-          reputationPercent: 0
+    var initializeDJ = (id) => {
+      if (id && typeof DJs[ id ] === 'undefined') {
+        DJs[ id ] = {
+          name: null,
+          week: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            prerecords: 0,
+            remotes: 0,
+            sports: 0,
+            genres: 0,
+            playlists: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          },
+          range: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            prerecords: 0,
+            remotes: 0,
+            sports: 0,
+            genres: 0,
+            playlists: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          },
+          semester: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            prerecords: 0,
+            remotes: 0,
+            sports: 0,
+            genres: 0,
+            playlists: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          },
+          overall: {
+            showtime: 0,
+            tuneins: 0,
+            listeners: 0,
+            ratio: 1,
+            messages: 0,
+            remoteCredits: 0,
+            shows: 0,
+            prerecords: 0,
+            remotes: 0,
+            genres: 0,
+            playlists: 0,
+            sports: 0,
+            breaks: 0,
+            earlyStart: 0,
+            lateStart: 0,
+            earlyEnd: 0,
+            lateEnd: 0,
+            absences: 0,
+            cancellations: 0,
+            missedIDs: 0,
+            silences: 0,
+            earlyStartArray: [],
+            lateStartArray: [],
+            earlyEndArray: [],
+            lateEndArray: [],
+            absencesArray: [],
+            cancellationsArray: [],
+            missedIDsArray: [],
+            silencesArray: [],
+            reputationScore: 0,
+            reputationScoreMax: 0,
+            reputationPercent: 0
+          }
         }
       }
-    })
+    }
 
     // Initialize range
     var start = inputs.start ? moment(inputs.start).toISOString(true) : moment("2002-01-01T00:00:00Z").toISOString(true);
@@ -919,7 +915,8 @@ module.exports = {
     var process1 = async () => {
       var records = await sails.models.xp.find({ dj: inputs.djs ? inputs.djs : { '!=': null } })
       records.map((record) => {
-        if (typeof DJs[ record.dj ] === 'undefined') { return }
+        initializeDJ(record.dj);
+        if (!record.dj || typeof DJs[ record.dj ] === 'undefined') { return }
         if (record.type === `remote`) {
           DJs[ record.dj ].overall.remoteCredits += record.amount
 
@@ -945,6 +942,7 @@ module.exports = {
         .filter(record => record.showTime !== null && record.listenerMinutes !== null)
         .map(record => {
           [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+            initializeDJ(record[ dj ]);
             if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
             if (!record.event.toLowerCase().startsWith("sports: ") && !record.event.toLowerCase().startsWith("genre: ")) {
               DJs[ record[ dj ] ].overall.showtime += record.showTime
@@ -1095,6 +1093,7 @@ module.exports = {
             }
           }
 
+          initializeShow(record.calendarID);
           if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
             shows[ record.calendarID ].overall.showtime += record.showTime
             shows[ record.calendarID ].overall.tuneins += record.tuneIns
@@ -1139,6 +1138,7 @@ module.exports = {
           if (record.unique !== null && record.unique !== ``) {
             if (record.unique in unique && record.showTime && record.scheduledStart !== null && record.scheduledEnd !== null) {
               [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                initializeDJ(record[ dj ]);
                 if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                 DJs[ record[ dj ] ].overall.reputationScoreMax += 1
                 if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
@@ -1215,6 +1215,7 @@ module.exports = {
                 }
               }
 
+              initializeShow(record.calendarID);
               if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.reputationScoreMax += 1
                 if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
@@ -1242,6 +1243,7 @@ module.exports = {
             var breakPoints = Math.min(maxBreaks, record.breaks);
             if (record.event.toLowerCase().startsWith('show: ')) {
               [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                initializeDJ(record[ dj ]);
                 if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                 DJs[ record[ dj ] ].overall.shows += 1
                 DJs[ record[ dj ] ].overall.breaks += record.breaks;
@@ -1250,21 +1252,25 @@ module.exports = {
               shows[ 0 ].overall.breaks += record.breaks;
               shows[ -1 ].overall.shows += 1
               shows[ -1 ].overall.breaks += record.breaks;
+              initializeShow(record.calendarID);
               if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.shows += 1;
                 shows[ record.calendarID ].overall.breaks += record.breaks;
               }
               if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].overall.reputationScoreMax += (5 + breakPoints)
                 });
                 shows[ 0 ].overall.reputationScoreMax += (5 + breakPoints)
                 shows[ -1 ].overall.reputationScoreMax += (5 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].overall.reputationScoreMax += (5 + breakPoints);
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].semester.shows += 1
                   DJs[ record[ dj ] ].semester.breaks += record.breaks;
@@ -1273,22 +1279,26 @@ module.exports = {
                 shows[ 0 ].semester.breaks += record.breaks;
                 shows[ -1 ].semester.shows += 1
                 shows[ -1 ].semester.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.shows += 1;
                   shows[ record.calendarID ].semester.breaks += record.breaks;
                 }
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                    initializeDJ(record[ dj ]);
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].semester.reputationScoreMax += (5 + breakPoints)
                   });
                   shows[ 0 ].semester.reputationScoreMax += (5 + breakPoints)
                   shows[ -1 ].semester.reputationScoreMax += (5 + breakPoints)
+                  initializeShow(record.calendarID);
                   if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].semester.reputationScoreMax += (5 + breakPoints);
                 }
               }
               if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].week.shows += 1
                   DJs[ record[ dj ] ].week.breaks += record.breaks;
@@ -1297,22 +1307,26 @@ module.exports = {
                 shows[ 0 ].week.breaks += record.breaks;
                 shows[ -1 ].week.shows += 1
                 shows[ -1 ].week.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.shows += 1;
                   shows[ record.calendarID ].week.breaks += record.breaks;
                 }
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                    initializeDJ(record[ dj ]);
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].week.reputationScoreMax += (5 + breakPoints)
                   });
                   shows[ 0 ].week.reputationScoreMax += (5 + breakPoints)
                   shows[ -1 ].week.reputationScoreMax += (5 + breakPoints)
+                  initializeShow(record.calendarID);
                   if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].week.reputationScoreMax += (5 + breakPoints);
                 }
               }
               if (moment(record.createdAt).isSameOrAfter(moment(start)) && moment(record.createdAt).isBefore(moment(end))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].range.shows += 1
                   DJs[ record[ dj ] ].range.breaks += record.breaks;
@@ -1321,17 +1335,20 @@ module.exports = {
                 shows[ 0 ].range.breaks += record.breaks;
                 shows[ -1 ].range.shows += 1
                 shows[ -1 ].range.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].range.shows += 1;
                   shows[ record.calendarID ].range.breaks += record.breaks;
                 }
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                    initializeDJ(record[ dj ]);
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].range.reputationScoreMax += (5 + breakPoints)
                   });
                   shows[ 0 ].range.reputationScoreMax += (5 + breakPoints)
                   shows[ -1 ].range.reputationScoreMax += (5 + breakPoints)
+                  initializeShow(record.calendarID);
                   if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].range.reputationScoreMax += (5 + breakPoints);
                 }
               }
@@ -1339,6 +1356,7 @@ module.exports = {
               var maxBreaks = record.showTime / 20;
               var breakPoints = Math.min(maxBreaks, record.breaks);
               [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                initializeDJ(record[ dj ]);
                 if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                 DJs[ record[ dj ] ].overall.prerecords += 1
                 DJs[ record[ dj ] ].overall.breaks += record.breaks;
@@ -1350,6 +1368,7 @@ module.exports = {
               shows[ -1 ].overall.prerecords += 1
               shows[ -1 ].overall.reputationScoreMax += (2 + breakPoints)
               shows[ -1 ].overall.breaks += record.breaks;
+              initializeShow(record.calendarID);
               if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.prerecords += 1
                 shows[ record.calendarID ].overall.reputationScoreMax += (2 + breakPoints)
@@ -1357,6 +1376,7 @@ module.exports = {
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].semester.prerecords += 1
                   DJs[ record[ dj ] ].semester.breaks += record.breaks;
@@ -1368,6 +1388,7 @@ module.exports = {
                 shows[ -1 ].semester.prerecords += 1
                 shows[ -1 ].semester.reputationScoreMax += (2 + breakPoints)
                 shows[ -1 ].semester.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.prerecords += 1
                   shows[ record.calendarID ].semester.reputationScoreMax += (2 + breakPoints)
@@ -1376,6 +1397,7 @@ module.exports = {
               }
               if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].week.prerecords += 1
                   DJs[ record[ dj ] ].week.breaks += record.breaks;
@@ -1387,6 +1409,7 @@ module.exports = {
                 shows[ -1 ].week.prerecords += 1
                 shows[ -1 ].week.reputationScoreMax += (2 + breakPoints)
                 shows[ -1 ].week.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.prerecords += 1
                   shows[ record.calendarID ].week.reputationScoreMax += (2 + breakPoints)
@@ -1395,6 +1418,7 @@ module.exports = {
               }
               if (moment(record.createdAt).isSameOrAfter(moment(start)) && moment(record.createdAt).isBefore(moment(end))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].range.prerecords += 1
                   DJs[ record[ dj ] ].range.breaks += record.breaks;
@@ -1406,6 +1430,7 @@ module.exports = {
                 shows[ -1 ].range.prerecords += 1
                 shows[ -1 ].range.reputationScoreMax += (2 + breakPoints)
                 shows[ -1 ].range.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].range.prerecords += 1
                   shows[ record.calendarID ].range.reputationScoreMax += (2 + breakPoints)
@@ -1416,6 +1441,7 @@ module.exports = {
               var maxBreaks = record.showTime / 20;
               var breakPoints = Math.min(maxBreaks, record.breaks);
               [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                initializeDJ(record[ dj ]);
                 if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                 DJs[ record[ dj ] ].overall.remotes += 1
                 DJs[ record[ dj ] ].overall.breaks += record.breaks;
@@ -1424,21 +1450,25 @@ module.exports = {
               shows[ 0 ].overall.breaks += record.breaks;
               shows[ -1 ].overall.remotes += 1
               shows[ -1 ].overall.breaks += record.breaks;
+              initializeShow(record.calendarID);
               if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.remotes += 1;
                 shows[ record.calendarID ].overall.breaks += record.breaks;
               }
               if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].overall.reputationScoreMax += (5 + breakPoints)
                 });
                 shows[ 0 ].overall.reputationScoreMax += (5 + breakPoints)
                 shows[ -1 ].overall.reputationScoreMax += (5 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].overall.reputationScoreMax += (5 + breakPoints);
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].semester.remotes += 1
                   DJs[ record[ dj ] ].semester.breaks += record.breaks;
@@ -1447,22 +1477,26 @@ module.exports = {
                 shows[ 0 ].semester.breaks += record.breaks;
                 shows[ -1 ].semester.remotes += 1
                 shows[ -1 ].semester.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.remotes += 1;
                   shows[ record.calendarID ].semester.breaks += record.breaks;
                 }
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                    initializeDJ(record[ dj ]);
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].semester.reputationScoreMax += (5 + breakPoints)
                   });
                   shows[ 0 ].semester.reputationScoreMax += (5 + breakPoints)
                   shows[ -1 ].semester.reputationScoreMax += (5 + breakPoints)
+                  initializeShow(record.calendarID);
                   if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].semester.reputationScoreMax += (5 + breakPoints);
                 }
               }
               if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].week.remotes += 1
                   DJs[ record[ dj ] ].week.breaks += record.breaks;
@@ -1471,22 +1505,26 @@ module.exports = {
                 shows[ 0 ].week.breaks += record.breaks;
                 shows[ -1 ].week.remotes += 1
                 shows[ -1 ].week.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.remotes += 1;
                   shows[ record.calendarID ].week.breaks += record.breaks;
                 }
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                    initializeDJ(record[ dj ]);
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].week.reputationScoreMax += (5 + breakPoints)
                   });
                   shows[ 0 ].week.reputationScoreMax += (5 + breakPoints)
                   shows[ -1 ].week.reputationScoreMax += (5 + breakPoints)
+                  initializeShow(record.calendarID);
                   if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].week.reputationScoreMax += (5 + breakPoints);
                 }
               }
               if (moment(record.createdAt).isSameOrAfter(moment(start)) && moment(record.createdAt).isBefore(moment(end))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].range.remotes += 1
                   DJs[ record[ dj ] ].range.breaks += record.breaks;
@@ -1495,17 +1533,20 @@ module.exports = {
                 shows[ 0 ].range.breaks += record.breaks;
                 shows[ -1 ].range.remotes += 1
                 shows[ -1 ].range.breaks += record.breaks;
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].range.remotes += 1;
                   shows[ record.calendarID ].range.breaks += record.breaks;
                 }
                 if (record.scheduledStart !== null && record.scheduledEnd !== null) {
                   [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                    initializeDJ(record[ dj ]);
                     if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                     DJs[ record[ dj ] ].range.reputationScoreMax += (5 + breakPoints)
                   });
                   shows[ 0 ].range.reputationScoreMax += (5 + breakPoints)
                   shows[ -1 ].range.reputationScoreMax += (5 + breakPoints)
+                  initializeShow(record.calendarID);
                   if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') shows[ record.calendarID ].range.reputationScoreMax += (5 + breakPoints);
                 }
               }
@@ -1513,6 +1554,7 @@ module.exports = {
               var maxBreaks = record.showTime / 20;
               var breakPoints = Math.min(maxBreaks, record.breaks);
               [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                initializeDJ(record[ dj ]);
                 if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                 DJs[ record[ dj ] ].overall.sports += 1
               });
@@ -1522,6 +1564,7 @@ module.exports = {
               shows[ -2 ].overall.sports += 1
               shows[ -2 ].overall.breaks += record.breaks;
               shows[ -2 ].overall.reputationScoreMax += (5 + breakPoints)
+              initializeShow(record.calendarID);
               if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.sports += 1
                 shows[ record.calendarID ].overall.breaks += record.breaks;
@@ -1529,6 +1572,7 @@ module.exports = {
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].semester.sports += 1
                 });
@@ -1538,6 +1582,7 @@ module.exports = {
                 shows[ -2 ].semester.sports += 1
                 shows[ -2 ].semester.breaks += record.breaks;
                 shows[ -2 ].semester.reputationScoreMax += (5 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.sports += 1
                   shows[ record.calendarID ].semester.breaks += record.breaks;
@@ -1546,6 +1591,7 @@ module.exports = {
               }
               if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].week.sports += 1
                 });
@@ -1555,6 +1601,7 @@ module.exports = {
                 shows[ -2 ].week.sports += 1
                 shows[ -2 ].week.breaks += record.breaks;
                 shows[ -2 ].week.reputationScoreMax += (5 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.sports += 1
                   shows[ record.calendarID ].week.breaks += record.breaks;
@@ -1563,6 +1610,7 @@ module.exports = {
               }
               if (moment(record.createdAt).isSameOrAfter(moment(start)) && moment(record.createdAt).isBefore(moment(end))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].range.sports += 1
                 });
@@ -1572,6 +1620,7 @@ module.exports = {
                 shows[ -2 ].range.sports += 1
                 shows[ -2 ].range.breaks += record.breaks;
                 shows[ -2 ].range.reputationScoreMax += (5 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].range.sports += 1
                   shows[ record.calendarID ].range.breaks += record.breaks;
@@ -1587,6 +1636,7 @@ module.exports = {
               shows[ -3 ].overall.genres += 1
               shows[ -3 ].overall.breaks += record.breaks;
               shows[ -3 ].overall.reputationScoreMax += (1 + breakPoints)
+              initializeShow(record.calendarID);
               if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.genres += 1
                 shows[ record.calendarID ].overall.breaks += record.breaks;
@@ -1599,6 +1649,7 @@ module.exports = {
                 shows[ -3 ].semester.genres += 1
                 shows[ -3 ].semester.breaks += record.breaks;
                 shows[ -3 ].semester.reputationScoreMax += (1 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.genres += 1
                   shows[ record.calendarID ].semester.breaks += record.breaks;
@@ -1612,6 +1663,7 @@ module.exports = {
                 shows[ -3 ].week.genres += 1
                 shows[ -3 ].week.breaks += record.breaks;
                 shows[ -3 ].week.reputationScoreMax += (1 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.genres += 1
                   shows[ record.calendarID ].week.breaks += record.breaks;
@@ -1625,6 +1677,7 @@ module.exports = {
                 shows[ -3 ].range.genres += 1
                 shows[ -3 ].range.breaks += record.breaks;
                 shows[ -3 ].range.reputationScoreMax += (1 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].range.genres += 1
                   shows[ record.calendarID ].range.breaks += record.breaks;
@@ -1635,6 +1688,7 @@ module.exports = {
               var maxBreaks = record.showTime / 20;
               var breakPoints = Math.min(maxBreaks, record.breaks);
               [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                initializeDJ(record[ dj ]);
                 if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                 DJs[ record[ dj ] ].overall.playlists += 1
                 DJs[ record[ dj ] ].overall.breaks += record.breaks;
@@ -1646,6 +1700,7 @@ module.exports = {
               shows[ -4 ].overall.playlists += 1
               shows[ -4 ].overall.breaks += record.breaks;
               shows[ -4 ].overall.reputationScoreMax += (2 + breakPoints)
+              initializeShow(record.calendarID);
               if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                 shows[ record.calendarID ].overall.playlists += 1
                 shows[ record.calendarID ].overall.breaks += record.breaks;
@@ -1653,6 +1708,7 @@ module.exports = {
               }
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].semester.playlists += 1
                   DJs[ record[ dj ] ].semester.breaks += record.breaks;
@@ -1664,6 +1720,7 @@ module.exports = {
                 shows[ -4 ].semester.playlists += 1
                 shows[ -4 ].semester.breaks += record.breaks;
                 shows[ -4 ].semester.reputationScoreMax += (2 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].semester.playlists += 1
                   shows[ record.calendarID ].semester.breaks += record.breaks;
@@ -1672,6 +1729,7 @@ module.exports = {
               }
               if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].week.playlists += 1
                   DJs[ record[ dj ] ].week.breaks += record.breaks;
@@ -1683,6 +1741,7 @@ module.exports = {
                 shows[ -4 ].week.playlists += 1
                 shows[ -4 ].week.breaks += record.breaks;
                 shows[ -4 ].week.reputationScoreMax += (2 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].week.playlists += 1
                   shows[ record.calendarID ].week.breaks += record.breaks;
@@ -1691,6 +1750,7 @@ module.exports = {
               }
               if (moment(record.createdAt).isSameOrAfter(moment(start)) && moment(record.createdAt).isBefore(moment(end))) {
                 [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+                  initializeDJ(record[ dj ]);
                   if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
                   DJs[ record[ dj ] ].range.playlists += 1
                   DJs[ record[ dj ] ].range.breaks += record.breaks;
@@ -1702,6 +1762,7 @@ module.exports = {
                 shows[ -4 ].range.playlists += 1
                 shows[ -4 ].range.breaks += record.breaks;
                 shows[ -4 ].range.reputationScoreMax += (2 + breakPoints)
+                initializeShow(record.calendarID);
                 if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
                   shows[ record.calendarID ].range.playlists += 1
                   shows[ record.calendarID ].range.breaks += record.breaks;
@@ -1734,6 +1795,7 @@ module.exports = {
           // Cancelled broadcasts
           if (record.cancellation) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= 1;
               DJs[ record[ dj ] ].overall.cancellations += 1;
@@ -1832,6 +1894,7 @@ module.exports = {
                 shows[ -4 ].range.cancellations += 1;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= 1;
               shows[ record.calendarID ].overall.cancellations += 1;
@@ -1857,6 +1920,7 @@ module.exports = {
           // Number of times silence alarm was triggered
           if (record.silence && record.silence.length > 0) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= record.silence.length;
               DJs[ record[ dj ] ].overall.silences += record.silence.length;
@@ -1955,6 +2019,7 @@ module.exports = {
                 shows[ -4 ].range.silences += record.silence.length;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= record.silence.length;
               shows[ record.calendarID ].overall.silences += record.silence.length;
@@ -1980,6 +2045,7 @@ module.exports = {
           // Absences
           if (record.absent) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= 3;
               DJs[ record[ dj ] ].overall.absences += 1;
@@ -2078,6 +2144,7 @@ module.exports = {
                 shows[ -4 ].range.absences += 1;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= 3;
               shows[ record.calendarID ].overall.absences += 1;
@@ -2103,6 +2170,7 @@ module.exports = {
           // Unauthorized broadcasts
           if (record.unauthorized) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= 2;
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart || record.createdAt))) {
@@ -2173,6 +2241,7 @@ module.exports = {
                 shows[ -4 ].range.reputationScore -= 2;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= 2;
               if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.actualStart || record.createdAt))) {
@@ -2190,6 +2259,7 @@ module.exports = {
           // Missed top-of-hour ID breaks
           if (record.missedIDs && record.missedIDs.length > 0) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= (3 * record.missedIDs.length);
               DJs[ record[ dj ] ].overall.missedIDs += record.missedIDs.length;
@@ -2288,6 +2358,7 @@ module.exports = {
                 shows[ -4 ].range.missedIDs += record.missedIDs.length;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= (3 * record.missedIDs.length);
               shows[ record.calendarID ].overall.missedIDs += record.missedIDs.length;
@@ -2313,6 +2384,7 @@ module.exports = {
           // Early sign-ons
           if (record.signedOnEarly) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= 2;
               DJs[ record[ dj ] ].overall.earlyStart += 1;
@@ -2411,6 +2483,7 @@ module.exports = {
                 shows[ -4 ].range.earlyStart += 1;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= 2;
               shows[ record.calendarID ].overall.earlyStart += 1;
@@ -2436,6 +2509,7 @@ module.exports = {
           // Late sign-offs
           if (record.signedOffLate) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= 2;
               DJs[ record[ dj ] ].overall.lateEnd += 1;
@@ -2534,6 +2608,7 @@ module.exports = {
                 shows[ -4 ].range.lateEnd += 1;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= 2;
               shows[ record.calendarID ].overall.lateEnd += 1;
@@ -2559,6 +2634,7 @@ module.exports = {
           // Late sign-ons
           if (record.signedOnLate) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= 1;
               DJs[ record[ dj ] ].overall.lateStart += 1;
@@ -2657,6 +2733,7 @@ module.exports = {
                 shows[ -4 ].range.lateStart += 1;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= 1;
               shows[ record.calendarID ].overall.lateStart += 1;
@@ -2682,6 +2759,7 @@ module.exports = {
           // Early sign-offs
           if (record.signedOffEarly) {
             [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
+              initializeDJ(record[ dj ]);
               if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined' || record.event.toLowerCase().startsWith('genre: ') || record.event.toLowerCase().startsWith('sports: ')) return;
               DJs[ record[ dj ] ].overall.reputationScore -= 1;
               DJs[ record[ dj ] ].overall.earlyEnd += 1;
@@ -2780,6 +2858,7 @@ module.exports = {
                 shows[ -4 ].range.earlyEnd += 1;
               }
             }
+            initializeShow(record.calendarID);
             if (record.calendarID && typeof shows[ record.calendarID ] !== 'undefined') {
               shows[ record.calendarID ].overall.reputationScore -= 1;
               shows[ record.calendarID ].overall.earlyEnd += 1;
@@ -2819,13 +2898,23 @@ module.exports = {
 
         // Calculate the reputation percent
         DJs[ index ].overall.reputationScore += DJs[ index ].overall.reputationScoreMax;
-        DJs[ index ].overall.reputationScorePercent = DJs[ index ].overall.reputationScore > 0 ? Math.round(100 * (DJs[ index ].overall.reputationScore / DJs[ index ].overall.reputationScoreMax)) : 0;
+        DJs[ index ].overall.reputationPercent = DJs[ index ].overall.reputationScore > 0 ? Math.round(100 * (DJs[ index ].overall.reputationScore / DJs[ index ].overall.reputationScoreMax)) : 0;
         DJs[ index ].semester.reputationScore += DJs[ index ].semester.reputationScoreMax;
-        DJs[ index ].semester.reputationScorePercent = DJs[ index ].semester.reputationScore > 0 ? Math.round(100 * (DJs[ index ].semester.reputationScore / DJs[ index ].semester.reputationScoreMax)) : 0;
+        DJs[ index ].semester.reputationPercent = DJs[ index ].semester.reputationScore > 0 ? Math.round(100 * (DJs[ index ].semester.reputationScore / DJs[ index ].semester.reputationScoreMax)) : 0;
         DJs[ index ].week.reputationScore += DJs[ index ].week.reputationScoreMax;
-        DJs[ index ].week.reputationScorePercent = DJs[ index ].week.reputationScore > 0 ? Math.round(100 * (DJs[ index ].week.reputationScore / DJs[ index ].week.reputationScoreMax)) : 0;
+        DJs[ index ].week.reputationPercent = DJs[ index ].week.reputationScore > 0 ? Math.round(100 * (DJs[ index ].week.reputationScore / DJs[ index ].week.reputationScoreMax)) : 0;
         DJs[ index ].range.reputationScore += DJs[ index ].range.reputationScoreMax;
-        DJs[ index ].range.reputationScorePercent = DJs[ index ].range.reputationScore > 0 ? Math.round(100 * (DJs[ index ].range.reputationScore / DJs[ index ].range.reputationScoreMax)) : 0;
+        DJs[ index ].range.reputationPercent = DJs[ index ].range.reputationScore > 0 ? Math.round(100 * (DJs[ index ].range.reputationScore / DJs[ index ].range.reputationScoreMax)) : 0;
+
+        // Get DJ name
+        if (index > 0) {
+          let name = await sails.models.djs.findOne({ ID: index });
+          if (name) {
+            DJs[ index ].name = `${name.name} (${name.realName || `Unknown Person`})`;
+          } else {
+            DJs[ index ].name = `Unknown DJ`;
+          }
+        }
       }
     }
 
@@ -2839,13 +2928,23 @@ module.exports = {
 
         // Calculate the reputation percent
         shows[ index ].overall.reputationScore += shows[ index ].overall.reputationScoreMax;
-        shows[ index ].overall.reputationScorePercent = shows[ index ].overall.reputationScore > 0 ? Math.round(100 * (shows[ index ].overall.reputationScore / shows[ index ].overall.reputationScoreMax)) : 0;
+        shows[ index ].overall.reputationPercent = shows[ index ].overall.reputationScore > 0 ? Math.round(100 * (shows[ index ].overall.reputationScore / shows[ index ].overall.reputationScoreMax)) : 0;
         shows[ index ].semester.reputationScore += shows[ index ].semester.reputationScoreMax;
-        shows[ index ].semester.reputationScorePercent = shows[ index ].semester.reputationScore > 0 ? Math.round(100 * (shows[ index ].semester.reputationScore / shows[ index ].semester.reputationScoreMax)) : 0;
+        shows[ index ].semester.reputationPercent = shows[ index ].semester.reputationScore > 0 ? Math.round(100 * (shows[ index ].semester.reputationScore / shows[ index ].semester.reputationScoreMax)) : 0;
         shows[ index ].week.reputationScore += shows[ index ].week.reputationScoreMax;
-        shows[ index ].week.reputationScorePercent = shows[ index ].week.reputationScore > 0 ? Math.round(100 * (shows[ index ].week.reputationScore / shows[ index ].week.reputationScoreMax)) : 0;
+        shows[ index ].week.reputationPercent = shows[ index ].week.reputationScore > 0 ? Math.round(100 * (shows[ index ].week.reputationScore / shows[ index ].week.reputationScoreMax)) : 0;
         shows[ index ].range.reputationScore += shows[ index ].range.reputationScoreMax;
-        shows[ index ].range.reputationScorePercent = shows[ index ].range.reputationScore > 0 ? Math.round(100 * (shows[ index ].range.reputationScore / shows[ index ].range.reputationScoreMax)) : 0;
+        shows[ index ].range.reputationPercent = shows[ index ].range.reputationScore > 0 ? Math.round(100 * (shows[ index ].range.reputationScore / shows[ index ].range.reputationScoreMax)) : 0;
+
+        // Get show name
+        if (index > 0) {
+          let name = await sails.models.calendar.findOne({ ID: index });
+          if (name) {
+            shows[ index ].name = `${name.type}: ${name.hosts} - ${name.name}`;
+          } else {
+            shows[ index ].name = `Unknown Event`;
+          }
+        }
       }
     }
 
