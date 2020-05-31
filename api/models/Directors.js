@@ -76,8 +76,12 @@ module.exports = {
         if (!wasCreated)
           (async (_record) => {
             await sails.models.calendar.update({ ID: _record.ID }, {
+              type: 'office-hours',
               active: true,
               priority: sails.models.calendar.calendardb.getDefaultPriority({ type: 'office-hours' }),
+              hosts: newlyCreatedRecord.name,
+              name: newlyCreatedRecord.name,
+              director: newlyCreatedRecord.ID,
             }).fetch();
           })(record);
       });
