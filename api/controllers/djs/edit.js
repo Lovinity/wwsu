@@ -23,6 +23,14 @@ module.exports = {
       },
       description: 'The new name for the DJ.'
     },
+    realName: {
+      type: 'string',
+      description: 'The full real name of the DJ.'
+    },
+    email: {
+      type: 'string',
+      description: 'The email address of the DJ.'
+    },
     login: {
       type: 'string',
       allowNull: true,
@@ -42,6 +50,12 @@ module.exports = {
       var criteria = {}
       if (inputs.name !== null && typeof inputs.name !== 'undefined' && inputs.name !== '') {
         criteria.name = inputs.name
+
+        if (inputs.realName)
+          criteria.fullName = inputs.realName;
+
+        if (inputs.email)
+          criteria.email = inputs.email;
 
         // Merge other DJ entries with the same name with this one
         var dj = await sails.models.djs.find({ name: inputs.name })

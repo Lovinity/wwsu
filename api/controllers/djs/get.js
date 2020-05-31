@@ -24,8 +24,10 @@ module.exports = {
         var records = await sails.models.djs.find()
 
         // Return only true or false for login if a login was set for the DJ
-        records = records.map((record, index) => {
-          records[ index ].login = records[ index ].login === null ? false : true
+        // Also, remove email property
+        records = records.map((record) => {
+          record.login = record.login === null ? false : true
+          delete record.email;
           return record
         })
 
@@ -50,6 +52,7 @@ module.exports = {
         if (!record || record === null) { return exits.success({}) }
 
         record.login = record.login === null ? false : true
+        delete record.email;
 
         returnData.DJ = record
         returnData.XP = await sails.models.xp.find({ dj: inputs.dj })
@@ -61,7 +64,7 @@ module.exports = {
             { cohostDJ3: inputs.dj },
           ]
         })
-        var stats = await sails.helpers.analytics.showtime([inputs.dj]);
+        var stats = await sails.helpers.analytics.showtime([ inputs.dj ]);
         returnData.statsDJ = stats[ 0 ];
         returnData.statsShows = stats[ 1 ];
 

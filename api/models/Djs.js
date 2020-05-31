@@ -19,6 +19,16 @@ module.exports = {
       unique: true
     },
 
+    realName: {
+      type: 'string',
+      required: true,
+    },
+
+    email: {
+      type: 'string',
+      required: true,
+    },
+
     login: {
       type: 'string',
       allowNull: true
