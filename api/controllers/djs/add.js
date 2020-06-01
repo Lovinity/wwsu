@@ -21,13 +21,11 @@ module.exports = {
 
     realName: {
       type: 'string',
-      required: true,
       description: 'The full real name of the DJ.'
     },
 
     email: {
       type: 'string',
-      required: true,
       description: 'The email address of the DJ.'
     },
 
@@ -48,7 +46,7 @@ module.exports = {
 
     try {
       // Use findOrCreate because we do not want to create a DJ that already exists
-      await sails.models.djs.findOrCreate({ name: inputs.name }, { name: inputs.name, realName: inputs.realName, email: inputs.email, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: moment('2002-01-01 00:00:00').toISOString(true) })
+      await sails.models.djs.findOrCreate({ name: inputs.name }, { name: inputs.name, realName: inputs.realName || null, email: inputs.email || null, login: inputs.login !== null ? bcrypt.hashSync(inputs.login, 10) : null, lastSeen: moment('2002-01-01 00:00:00').toISOString(true) })
       return exits.success()
     } catch (e) {
       return exits.error(e)
