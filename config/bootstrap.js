@@ -414,7 +414,7 @@ module.exports.bootstrap = async function (done) {
                */
               if (queueLength > (sails.models.status.errorCheck.prevQueueLength - 3) || sails.models.status.errorCheck.trueZero > 0) {
                 // If the detected queueLength gets bigger, assume the issue resolved itself and immediately mark the queuelength as accurate
-                if (queueLength > (sails.models.status.errorCheck.prevQueueLength)) {
+                if (queueLength > (sails.models.status.errorCheck.prevQueueLength - 1)) {
                   sails.models.status.errorCheck.trueZero = 0
                   change.queueCalculating = false
                 } else if (sails.models.status.errorCheck.trueZero > 0) {
@@ -434,7 +434,7 @@ module.exports.bootstrap = async function (done) {
                 } else { // No error wait time [remaining]? Use actual detected queue time.
                 }
               } else {
-                sails.models.status.errorCheck.trueZero = 3 // Wait up to 5 seconds before considering the queue accurate
+                sails.models.status.errorCheck.trueZero = 3 // Wait up to 3 seconds before considering the queue accurate
                 change.queueCalculating = true
                 // Instead of using the actually recorded queueLength, use the previously detected length minus 1 second.
                 queueLength = (sails.models.status.errorCheck.prevQueueLength - 1)
