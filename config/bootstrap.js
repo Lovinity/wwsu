@@ -750,7 +750,7 @@ module.exports.bootstrap = async function (done) {
           // Check if a DJ neglected the required top of the hour break (passes :05 after)
           var d = new Date()
           var n = d.getMinutes()
-          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta.memory.lastID)) && !sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
+          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta.memory.lastID)) && !sails.models.meta.memory.state.startsWith('automation_')) {
             await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'id', loglevel: 'orange', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-coffee`, title: `Required top-of-hour ID break was not taken!`, event: `Broadcast: ${sails.models.meta.memory.show}` }).fetch()
               .tolerate((err) => {
