@@ -21,12 +21,12 @@ module.exports = {
 
     realName: {
       type: 'string',
-      required: true,
+      allowNull: true
     },
 
     email: {
       type: 'string',
-      required: true,
+      allowNull: true
     },
 
     login: {
