@@ -284,7 +284,7 @@ module.exports = {
                                     }
 
                                     if (event.type === 'remote') {
-                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, logIcon: `fas fa-calendar-times`, title: `A scheduled remote broadcast did not air!`, event: `Remote: ${event.hosts} - ${event.name}}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, logIcon: `fas fa-calendar-times`, title: `A scheduled remote broadcast did not air!`, event: `Remote: ${event.hosts} - ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err)
                                             })

@@ -21,6 +21,7 @@
     "moment-duration-format": "^2.3.2",
     "needle": "^2.4.0",
     "node-cron": "^2.0.3",
+    "nodemailer": "^6.4.8",
     "npm-gui": "^2.1.0",
     "os": "^0.1.1",
     "query-string": "^6.11.1",
