@@ -25,6 +25,10 @@ module.exports = {
       required: true
     },
 
+    email: {
+      type: 'string',
+    },
+
     admin: {
       type: 'boolean',
       defaultsTo: false
@@ -53,7 +57,22 @@ module.exports = {
     since: {
       type: 'ref',
       columnType: 'datetime'
-    }
+    },
+
+    emailEmergencies: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
+    emailDJs: {
+      type: 'boolean',
+      defaultsTo: false
+    },
+
+    emailDirectors: {
+      type: 'boolean',
+      defaultsTo: false
+    },
   },
 
   // Websockets standards

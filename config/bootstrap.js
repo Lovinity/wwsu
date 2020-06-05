@@ -1117,7 +1117,7 @@ module.exports.bootstrap = async function (done) {
         // LINT: RadioDJ tables cannot be changed
         // eslint-disable-next-line camelcase
         var checksRadioDJ = [ sails.models.category, sails.models.events, sails.models.genre, sails.models.history, sails.models.playlists, sails.models.playlists_list, sails.models.requests, sails.models.settings, sails.models.subcategory ]
-        var checksNodebase = [ sails.models.announcements, sails.models.calendar, sails.models.clockwheels, sails.models.discipline, sails.models.eas, sails.models.subscribers, sails.models.planner, sails.models.underwritings, sails.models.attendance, sails.models.darksky, sails.models.listeners, sails.models.djs, sails.models.hosts, sails.models.logs, sails.models.messages, sails.models.meta, sails.models.nodeusers, sails.models.timesheet, sails.models.directors, sails.models.songsliked, sails.models.sports, sails.models.xp, sails.models.schedule ]
+        var checksNodebase = [ sails.models.announcements, sails.models.calendar, sails.models.clockwheels, sails.models.discipline, sails.models.eas, sails.models.subscribers, sails.models.planner, sails.models.underwritings, sails.models.emails, sails.models.attendance, sails.models.darksky, sails.models.listeners, sails.models.djs, sails.models.hosts, sails.models.logs, sails.models.messages, sails.models.meta, sails.models.nodeusers, sails.models.timesheet, sails.models.directors, sails.models.songsliked, sails.models.sports, sails.models.xp, sails.models.schedule ]
         // Memory checks
         var checkStatus = { data: ``, status: 5 }
         sails.log.debug(`CHECK: DB Memory`)
@@ -1189,7 +1189,7 @@ module.exports.bootstrap = async function (done) {
                   checkStatus.status = 1
                   checkStatus.data += `Model failure (query error): ${index}. Please ensure this table / the database is online and not corrupt. `
                 })
-              if ((typeof record[ 0 ] === 'undefined' || typeof record[ 0 ].ID === 'undefined') && index > 7) {
+              if ((typeof record[ 0 ] === 'undefined' || typeof record[ 0 ].ID === 'undefined') && index > 8) {
                 if (checkStatus.status > 3) { checkStatus.status = 3 }
                 checkStatus.data += `Model failure (No records returned): ${index}. Expected at least 1 row in this database table. Please ensure the table is not corrupt.`
               }
@@ -1371,6 +1371,24 @@ module.exports.bootstrap = async function (done) {
           await sails.helpers.meta.change.with({ delaySystem: null })
         }
 
+        return resolve()
+      } catch (e) {
+        sails.log.error(e)
+        return reject(e)
+      }
+    })
+  })
+
+  // every minute at second 14, send one queued email
+  sails.log.verbose(`BOOTSTRAP: scheduling sendEmail CRON.`)
+  cron.schedule('14 * * * * *', () => {
+    return new Promise(async (resolve, reject) => {
+      sails.log.debug(`CRON sendEmail called.`)
+      try {
+        var records = await sails.models.emails.find({ sent: false });
+        if (records && records.length > 0) {
+          await sails.helpers.emails.send(records[ 0 ].ID);
+        }
         return resolve()
       } catch (e) {
         sails.log.error(e)

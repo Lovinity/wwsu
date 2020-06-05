@@ -18,6 +18,13 @@ module.exports = {
       description: 'The login used for the clock-in and clock-out computer.'
     },
 
+    email: {
+      type: 'string',
+      required: true,
+      isEmail: true,
+      description: 'The email address of the director'
+    },
+
     admin: {
       type: 'boolean',
       defaultsTo: false,
@@ -34,7 +41,25 @@ module.exports = {
       type: 'string',
       required: true,
       description: 'The description of the position of this director (such as general manager).'
-    }
+    },
+
+    emailEmergencies: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'Should this director receive emails of critical problems?'
+    },
+
+    emailDJs: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'Should this director receive emails regarding DJ shows, accountability, and analytics?'
+    },
+
+    emailDirectors: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'Should this director receive emails of director hours and timesheets?'
+    },
   },
 
   exits: {

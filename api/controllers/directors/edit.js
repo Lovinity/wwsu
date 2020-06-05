@@ -22,6 +22,12 @@ module.exports = {
       description: 'If provided, the login for the director will be changed to this.'
     },
 
+    email: {
+      type: 'string',
+      isEmail: true,
+      description: 'If provided, the email for the director will be changed to this.'
+    },
+
     admin: {
       type: 'boolean',
       description: 'If provided, the admin status of the director will be changed to this.'
@@ -35,7 +41,22 @@ module.exports = {
     position: {
       type: 'string',
       description: 'If provided, the director position will be changed to this.'
-    }
+    },
+
+    emailEmergencies: {
+      type: 'boolean',
+      description: 'Should this director receive emails of critical problems?'
+    },
+
+    emailDJs: {
+      type: 'boolean',
+      description: 'Should this director receive emails regarding DJ shows, accountability, and analytics?'
+    },
+
+    emailDirectors: {
+      type: 'boolean',
+      description: 'Should this director receive emails of director hours and timesheets?'
+    },
   },
 
   exits: {
@@ -60,11 +81,19 @@ module.exports = {
 
       if (typeof inputs.login !== 'undefined' && inputs.login !== null && inputs.login !== '') { criteria.login = bcrypt.hashSync(inputs.login, 10) }
 
+      if (typeof inputs.email !== 'undefined' && inputs.email !== null) { criteria.email = inputs.email }
+
       if (typeof inputs.admin !== 'undefined' && inputs.admin !== null) { criteria.admin = inputs.admin }
 
       if (typeof inputs.assistant !== 'undefined' && inputs.assistant !== null) { criteria.assistant = inputs.assistant }
 
       if (typeof inputs.position !== 'undefined' && inputs.position !== null) { criteria.position = inputs.position }
+
+      if (typeof inputs.emailEmergencies !== 'undefined' && inputs.emailEmergencies !== null) { criteria.emailEmergencies = inputs.emailEmergencies }
+
+      if (typeof inputs.emailDJs !== 'undefined' && inputs.emailDJs !== null) { criteria.emailDJs = inputs.emailDJs }
+
+      if (typeof inputs.emailDirectors !== 'undefined' && inputs.emailDirectors !== null) { criteria.emailDirectors = inputs.emailDirectors }
 
       // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
       var criteriaB = _.cloneDeep(criteria)
