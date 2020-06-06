@@ -42,16 +42,18 @@ module.exports = {
 
         var query = {};
 
-        var dj = await sails.models.djs.findOne({ ID: inputs.event[ key ], email: { '!=': null } });
-        if (dj) {
+        var dj = await sails.models.djs.findOne({ ID: inputs.event[ key ] });
+        if (dj && dj.email && dj.email !== '') {
           to.push(dj.email);
         }
       });
       await Promise.all(maps);
 
       // Load in directors to be CCd
-      var records = await sails.models.directors.find({ emailDJs: true, email: { '!=': null } });
-      cc = records.map((record) => record.email);
+      var records = await sails.models.directors.find({ emailDJs: true });
+      cc = records
+        .filter((record) => record.email && record.email !== '')
+        .map((record) => record.email);
 
       if (inputs.started) {
         // Do nothing

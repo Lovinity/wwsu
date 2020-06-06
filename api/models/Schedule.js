@@ -185,55 +185,15 @@ module.exports = {
         // Process notifications
         temp = (async (event) => {
             if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && event.newTime !== null) {
-                if (event.scheduleID !== null) {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    var exception = await sails.models.schedule.findOne({ ID: event.scheduleID });
-                    if (calendar && exception) {
-                        var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, exception);
-                        Object.assign(tempCal, {
-                            ID: calendar.ID,
-                            start: exception.newTime,
-                            oneTime: [ exception.newTime ]
-                        });
-                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.newTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                } else {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    if (calendar) {
-                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.newTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                }
+                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                await sails.helpers.onesignal.sendEvent(_event, false, false);
+                await sails.helpers.emails.queueEvent(_event, false, false);
             }
 
             if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
-                if (event.scheduleID !== null) {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    var exception = await sails.models.schedule.findOne({ ID: event.scheduleID });
-                    if (calendar && exception) {
-                        var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, exception);
-                        Object.assign(tempCal, {
-                            ID: calendar.ID,
-                            start: exception.newTime,
-                            oneTime: [ exception.newTime ]
-                        });
-                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.originalTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                } else {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    if (calendar) {
-                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.originalTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                }
+                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                await sails.helpers.onesignal.sendEvent(_event, false, false);
+                await sails.helpers.emails.queueEvent(_event, false, false);
             }
         })(newlyCreatedRecord);
 
@@ -250,58 +210,15 @@ module.exports = {
         // Process notifications
         temp = (async (event) => {
             if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && (event.newTime !== null || event.duration !== null)) {
-                if (event.scheduleID !== null) {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    var exception = await sails.models.schedule.findOne({ ID: event.scheduleID });
-                    if (calendar && exception) {
-                        var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, exception);
-                        Object.assign(tempCal, {
-                            ID: calendar.ID,
-                            start: exception.newTime,
-                            oneTime: [ exception.newTime ]
-                        });
-                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.newTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                } else {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    if (calendar) {
-                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.newTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                }
+                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                await sails.helpers.onesignal.sendEvent(_event, false, false);
+                await sails.helpers.emails.queueEvent(_event, false, false);
             }
 
             if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
-                if (event.scheduleID !== null) {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    var exception = await sails.models.schedule.findOne({ ID: event.scheduleID });
-                    if (calendar && exception) {
-                        var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, exception);
-                        Object.assign(tempCal, {
-                            ID: calendar.ID,
-                            start: exception.newTime,
-                            oneTime: [ exception.newTime ]
-                        });
-                        var _event = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.originalTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                } else {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    if (calendar) {
-                        var _event = sails.models.calendar.calendardb.processRecord(calendar, event, event.originalTime);
-                        await sails.helpers.onesignal.sendEvent(_event, false, false);
-                        await sails.helpers.emails.queueEvent(_event, false, false);
-                    }
-                }
-
-                // Remove any schedules that were created as an override for the canceled schedule.
-                await sails.models.schedule.destroy({ overriddenID: event.ID }).fetch();
+                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                await sails.helpers.onesignal.sendEvent(_event, false, false);
+                await sails.helpers.emails.queueEvent(_event, false, false);
             }
         })(updatedRecord);
 
@@ -318,55 +235,15 @@ module.exports = {
         // Process notifications
         temp = (async (event) => {
             if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && (event.newTime !== null || event.duration !== null)) {
-                if (event.scheduleID !== null) {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    var exception = await sails.models.schedule.findOne({ ID: event.scheduleID });
-                    if (calendar && exception) {
-                        var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, exception);
-                        Object.assign(tempCal, {
-                            ID: calendar.ID,
-                            start: exception.newTime,
-                            oneTime: [ exception.newTime ]
-                        });
-                        var event2 = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.newTime);
-                        await sails.helpers.onesignal.sendEvent(event2, false, false, true);
-                        await sails.helpers.emails.queueEvent(event2, false, false, true);
-                    }
-                } else {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    if (calendar) {
-                        var event2 = sails.models.calendar.calendardb.processRecord(calendar, event, event.newTime);
-                        await sails.helpers.onesignal.sendEvent(event2, false, false, true);
-                        await sails.helpers.emails.queueEvent(event2, false, false, true);
-                    }
-                }
+                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                await sails.helpers.onesignal.sendEvent(_event, false, false, true);
+                await sails.helpers.emails.queueEvent(_event, false, false, true);
             }
 
             if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
-                if (event.scheduleID !== null) {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    var exception = await sails.models.schedule.findOne({ ID: event.scheduleID });
-                    if (calendar && exception) {
-                        var tempCal = Object.assign({}, calendar);
-                        Object.assign(tempCal, exception);
-                        Object.assign(tempCal, {
-                            ID: calendar.ID,
-                            start: exception.newTime,
-                            oneTime: [ exception.newTime ]
-                        });
-                        var event2 = sails.models.calendar.calendardb.processRecord(tempCal, event, exception.originalTime);
-                        await sails.helpers.onesignal.sendEvent(event2, false, false, true);
-                        await sails.helpers.emails.queueEvent(event2, false, false, true);
-                    }
-                } else {
-                    var calendar = await sails.models.calendar.findOne({ ID: event.calendarID });
-                    if (calendar) {
-                        var event2 = sails.models.calendar.calendardb.processRecord(calendar, event, event.originalTime);
-                        await sails.helpers.onesignal.sendEvent(event2, false, false, true);
-                        await sails.helpers.emails.queueEvent(event2, false, false, true);
-                    }
-                }
+                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                await sails.helpers.onesignal.sendEvent(_event, false, false, true);
+                await sails.helpers.emails.queueEvent(_event, false, false, true);
             }
 
             // Remove any schedules that were created as an override for the deleted schedule.
