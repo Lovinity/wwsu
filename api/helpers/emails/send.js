@@ -35,9 +35,10 @@ module.exports = {
       to: record.to,
       cc: record.cc,
       subject: `[WWSU] ${record.subject}`,
-      text: record.text
+      text: record.text,
+      html: record.text
     }, (err, info) => {
-      sails.models.emails.updateOne({ ID: record.id }, { sent: true, status: err || info }).exec(() => { });
+      sails.models.emails.updateOne({ ID: record.ID }, { sent: true, status: err || info }).exec(() => { });
 
       if (err)
         return exits.error(err);

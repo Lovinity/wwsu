@@ -27,6 +27,7 @@ module.exports = {
 
     email: {
       type: 'string',
+      allowNull: true
     },
 
     admin: {

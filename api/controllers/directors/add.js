@@ -20,7 +20,6 @@ module.exports = {
 
     email: {
       type: 'string',
-      required: true,
       isEmail: true,
       description: 'The email address of the director'
     },
