@@ -226,7 +226,7 @@ module.exports = {
             // Check if it's time to trigger a program, and trigger it if so
             sails.models.calendar.calendardb.whatShouldBePlaying(async (_eventNow) => {
                 var triggered = false;
-                var maps = _eventNow.map((eventNow) => {
+                var maps = _eventNow.map(async (eventNow) => {
                     if (triggered) return null;
                     if (eventNow) {
                         if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
