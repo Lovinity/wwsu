@@ -1380,6 +1380,7 @@ class CalendarDb {
         var event;
         if (record.calendarID) {
             var calendar = calendardb.db({ ID: record.calendarID }).first();
+            tempCal = calendar || {};
             if (record.scheduleID) {
                 var schedule = scheduledb.db({ ID: record.scheduleID }).first();
             }
