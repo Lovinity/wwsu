@@ -16,6 +16,7 @@ module.exports = {
       // Get all showtime stats for shows
       var stats = await sails.helpers.analytics.showtime();
       stats = stats[ 1 ];
+      var stats2 = Object.values(stats);
       //console.dir(stats[ 1 ]);
       //console.dir(Object.values(stats))
 
@@ -72,13 +73,6 @@ module.exports = {
         return bScore - aScore;
       }
 
-      // Grab attendance records from the last 7 days
-      var records = await sails.models.attendance.find({ showTime: { '!=': null }, listenerMinutes: { '!=': null }, actualEnd: { '>=': earliest.toISOString(true) } })
-
-      var totals = {}
-      var totalsG = {}
-      var totalsP = {}
-
       // Prepare parallel function 1
       var f1 = async () => {
         // Grab count of liked tracks from last week
@@ -93,7 +87,6 @@ module.exports = {
 
       // Prepare parallel function 2
       var f2 = async () => {
-        var stats2 = Object.values(stats);
 
         // Start with shows, remotes, and prerecords
         stats2
@@ -133,7 +126,7 @@ module.exports = {
       // Broadcast socket
       sails.sockets.broadcast('analytics-weekly-dj', 'analytics-weekly-dj', sails.models.attendance.weeklyAnalytics)
 
-      return exits.success()
+      return exits.success([ sails.models.attendance.weeklyAnalytics, stats ])
     } catch (e) {
       return exits.error(e)
     }

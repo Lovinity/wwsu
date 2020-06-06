@@ -104,6 +104,7 @@ module.exports = {
 
           // Recalculate stats
           await sails.helpers.attendance.recalculate(currentID);
+          
           // Calculate weekly analytics in the background; this takes several seconds
           var temp = (async () => {
             await sails.helpers.attendance.calculateStats()
