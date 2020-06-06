@@ -52,7 +52,7 @@ module.exports = {
 
     // If send immediately, send it.
     if (inputs.sendNow) {
-      await sails.helpers.emails.send(record.id);
+      await sails.helpers.emails.send(record.ID);
     }
   }
 
