@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 module.exports = {
 
-  friendlyName: 'helpers.email.send',
+  friendlyName: 'helpers.emails.send',
 
   description: 'Send an email out via sendmail.',
 

@@ -1,7 +1,7 @@
 module.exports = {
 
 
-  friendlyName: 'helpers.email.queue',
+  friendlyName: 'helpers.emails.queue',
 
 
   description: 'Queue an email for sending.',
@@ -52,7 +52,7 @@ module.exports = {
 
     // If send immediately, send it.
     if (inputs.sendNow) {
-      await sails.helpers.email.send(record.id);
+      await sails.helpers.emails.send(record.id);
     }
   }
 

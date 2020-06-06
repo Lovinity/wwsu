@@ -1,6 +1,6 @@
 module.exports = {
 
-  friendlyName: 'sails.helpers.email.queueEvent',
+  friendlyName: 'sails.helpers.emails.queueEvent',
 
   description: 'Queue emails for shows / programs that have started or have been changed.',
 
