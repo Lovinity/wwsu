@@ -226,27 +226,28 @@ module.exports = {
             // Check if it's time to trigger a program, and trigger it if so
             sails.models.calendar.calendardb.whatShouldBePlaying(async (_eventNow) => {
                 var triggered = false;
-                _eventNow.map((eventNow) => {
+                var maps = _eventNow.map((eventNow) => {
                     if (triggered) return null;
                     if (eventNow) {
                         if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
-                            triggered = true;
-                            (async (eventNowb) => {
-                                await sails.helpers.playlists.start(eventNowb, inputs.ignoreChangingState);
-                            })(eventNow)
+                            try {
+                                triggered = await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
+                            } catch (e) {
+                                triggered = false;
+                            }
                         }
                         if (eventNow.type === 'genre' && eventNow.eventID !== null) {
-                            triggered = true;
-                            (async (eventNowb) => {
-                                try {
-                                    await sails.helpers.genre.start(eventNowb, inputs.ignoreChangingState);
-                                } catch (e) {
-                                    sails.log.error(e);
-                                }
-                            })(eventNow)
+                            try {
+                                triggered = await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
+                            } catch (e) {
+                                sails.log.error(e);
+                                triggered = false;
+                            }
                         }
                     }
-                })
+                });
+                await Promise.all(maps);
+
                 if (!triggered) {
                     await sails.helpers.genre.start(null, inputs.ignoreChangingState);
                 }
@@ -273,14 +274,36 @@ module.exports = {
                                                 sails.log.error(err)
                                             })
                                         await sails.helpers.onesignal.sendMass('accountability-shows', 'Show did not air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
+                                        await sails.helpers.emails.queueDjs(
+                                            event,
+                                            `Unexcused absence for ${event.hosts} - ${event.name}`,
+                                            `Dear ${event.hosts},<br /><br />
+                                
+                                  Your show, <strong>${event.name}</strong>, was scheduled to air, but you did not air your show. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                                
+                                  Scheduled time: ${moment(event.start).format("LLLL")} - ${moment(event.end).format("LTS")}<br />
+                                                                  
+                                  Please contact a director if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show).`
+                                        );
                                     }
 
                                     if (event.type === 'prerecord') {
-                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, logIcon: `fas fa-calendar-times`, title: `A scheduled prerecord did not air!`, event: `Prerecord: ${event.hosts} - ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}<br />Note: When prerecords do not air, this is usually because of a system problem or the prerecord was not correctly added to the system.`, createdAt: moment().toISOString(true) }).fetch()
+                                        await sails.models.logs.create({ attendanceID: record.ID, logtype: 'absent', loglevel: 'warning', logsubtype: `${event.hosts} - ${event.name}`, logIcon: `fas fa-calendar-times`, title: `A scheduled prerecord did not air!`, event: `Prerecord: ${event.hosts} - ${event.name}<br />Scheduled time: ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}<br />Note: When prerecords do not air, this is usually because of a system problem or the prerecord was not correctly added to the system. If this is the case, please mark this as excused.`, createdAt: moment().toISOString(true) }).fetch()
                                             .tolerate((err) => {
                                                 sails.log.error(err)
                                             })
                                         await sails.helpers.onesignal.sendMass('emergencies', 'Prerecord failed to air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; this is likely a problem with the system.`)
+                                        await sails.helpers.emails.queueDjs(
+                                            event,
+                                            `Prerecord did not air for ${event.hosts} - ${event.name}`,
+                                            `Dear ${event.hosts},<br /><br />
+                                
+                                  A prerecord, <strong>${event.name}</strong>, was scheduled to air, but it did not air. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                                
+                                  Scheduled time: ${moment(event.start).format("LLLL")} - ${moment(event.end).format("LTS")}<br />
+                                                                  
+                                  <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the prerecord, please let a director know.`
+                                        );
                                     }
 
                                     if (event.type === 'remote') {
@@ -289,6 +312,17 @@ module.exports = {
                                                 sails.log.error(err)
                                             })
                                         await sails.helpers.onesignal.sendMass('accountability-shows', 'Remote broadcast did not air!', `${event.hosts} - ${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
+                                        await sails.helpers.emails.queueDjs(
+                                            event,
+                                            `Unexcused absence for ${event.hosts} - ${event.name}`,
+                                            `Dear ${event.hosts},<br /><br />
+                                
+                                  Your remote broadcast, <strong>${event.name}</strong>, was scheduled to air, but you did not air your remote broadcast. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                                
+                                  Scheduled time: ${moment(event.start).format("LLLL")} - ${moment(event.end).format("LTS")}<br />
+                                                                  
+                                  Please contact a director if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show, or if you experienced technical problems with WWSU preventing you from doing the remote broadcast).`
+                                        );
                                     }
 
                                     if (event.type === 'sports') {
@@ -297,6 +331,17 @@ module.exports = {
                                                 sails.log.error(err)
                                             })
                                         await sails.helpers.onesignal.sendMass('accountability-shows', 'Sports broadcast did not air!', `${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; unexcused absence.`)
+                                        await sails.helpers.emails.queueDjs(
+                                            event,
+                                            `Sports broadcast did not air for ${event.name}`,
+                                            `Dear directors,<br /><br />
+                                
+                                  A sports broadcast, <strong>${event.name}</strong>, was scheduled to air, but it did not air.<br /><br />
+                                
+                                  Scheduled time: ${moment(event.start).format("LLLL")} - ${moment(event.end).format("LTS")}<br />
+                                                                  
+                                  Please cancel sports broadcasts in the calendar in advance if they no longer are supposed to air. Otherwise, DJs who have had their shows canceled/rescheduled will unnecessarily miss part or all of their show.`
+                                        );
                                     }
 
                                     if (event.type === 'playlist') {
@@ -305,6 +350,17 @@ module.exports = {
                                                 sails.log.error(err)
                                             })
                                         await sails.helpers.onesignal.sendMass('emergencies', 'Playlist failed to air', `${event.name} failed to air on ${moment(event.start).format('llll')} - ${moment(event.end).format('llll')}; this is likely a problem with the system.`)
+                                        await sails.helpers.emails.queueDjs(
+                                            event,
+                                            `Playlist did not air for ${event.hosts} - ${event.name}`,
+                                            `Dear ${event.hosts},<br /><br />
+                                
+                                  A playlist, <strong>${event.name}</strong>, was scheduled to air, but it did not air. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                                
+                                  Scheduled time: ${moment(event.start).format("LLLL")} - ${moment(event.end).format("LTS")}<br />
+                                                                  
+                                  <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the playlist, please let a director know.`
+                                        );
                                     }
                                 });
                         });

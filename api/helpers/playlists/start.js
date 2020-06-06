@@ -29,7 +29,7 @@ module.exports = {
           var records = await sails.models.attendance.count({ unique: inputs.event.unique });
           if (records && records > 0) {
             sails.log.verbose(`EXIT: Event already happened`);
-            return exits.success();
+            return exits.success(false);
           }
         }
 
@@ -182,10 +182,10 @@ module.exports = {
         }
         sails.log.verbose(`playlists.start: DONE`);
         if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
-        return exits.success()
+        return exits.success(true)
       } else {
         sails.log.verbose('Helper SKIPPED.')
-        return exits.success()
+        return exits.success(true)
       }
     } catch (e) {
       if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }

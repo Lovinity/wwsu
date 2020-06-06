@@ -66,7 +66,7 @@ module.exports = {
           }
         }
       }
-      return exits.success()
+      return exits.success(true)
     } catch (e) {
       if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }
       return exits.error(e)
