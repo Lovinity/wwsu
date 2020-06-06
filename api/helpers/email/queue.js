@@ -19,7 +19,7 @@ module.exports = {
     },
     subject: {
       type: 'string',
-      maxLength: 64,
+      maxLength: 255,
       required: true,
       description: 'The subject of the email (will be pre-pended with WWSU)'
     },

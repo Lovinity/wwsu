@@ -25,7 +25,7 @@ module.exports = {
 
     subject: {
       type: 'string',
-      maxLength: 64
+      maxLength: 255
     },
 
     text: {
