@@ -195,6 +195,9 @@ module.exports = {
                 await sails.helpers.onesignal.sendEvent(_event, false, false);
                 await sails.helpers.emails.queueEvent(_event, false, false);
             }
+
+            console.dir(event);
+            console.dir(_event);
         })(newlyCreatedRecord);
 
         return proceed()
@@ -254,6 +257,9 @@ module.exports = {
 
             // Remove any clockwheels created for this schedule
             await sails.models.clockwheels.destroy({ scheduleID: event.ID }).fetch();
+
+            console.dir(event);
+            console.dir(_event);
 
         })(destroyedRecord);
 
