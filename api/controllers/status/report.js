@@ -38,6 +38,19 @@ module.exports = {
       // Push notification
       await sails.helpers.onesignal.sendMass('emergencies', `Reported Problem from ${inputs.location}`, await sails.helpers.truncateText(inputs.information, 256))
 
+      // Email
+      await sails.helpers.emails.queueEmergencies(
+        `A problem was reported from host ${inputs.location}`,
+        `Directors,<br /><br />
+
+A problem was reported from the <strong>${inputs.location}</strong> host. Please investigate and fix ASAP.<br /><br />
+
+Additional information: ${inputs.information}<br /><br />
+
+When this problem has been resolved, please mark it off in DJ Controls under the "To-Do" administration menu item.`,
+        true
+      );
+
       return exits.success()
     } catch (e) {
       return exits.error(e)

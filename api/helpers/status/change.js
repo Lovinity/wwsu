@@ -52,7 +52,7 @@ module.exports = {
       var updateIt = false
       for (var key in criteria) {
         if (Object.prototype.hasOwnProperty.call(criteria, key)) {
-          if (criteria[key] !== record[key]) {
+          if (criteria[ key ] !== record[ key ]) {
             // We don't want to fetch() on time-only updates; this will flood websockets
             if (!updateIt && key === 'time') {
               updateIt = 2
@@ -68,6 +68,15 @@ module.exports = {
           loglevel = `danger`
           // Push notification for danger/critical statuses
           await sails.helpers.onesignal.sendMass('emergencies', 'Critical Problem Detected', `${criteria.label || record.label || criteria.name || record.name || `Unknown System`} experienced a critical problem on ${moment().format('LLL')}: ${criteria.data ? criteria.data : `Unknown Issue`}`)
+          await sails.helpers.emails.queueEmergencies(
+            `Critical Problem detected for ${criteria.label || record.label || criteria.name || record.name || `Unknown System`}`,
+            `Directors,<br /><br />
+
+  A critical problem has been detected in the WWSU system with <strong>${criteria.label || record.label || criteria.name || record.name || `Unknown System`}</strong> on ${moment().format("LLLL")}. Please fix this issue immediately (if a fix is still needed).<br /><br />
+  
+  Additional information: ${criteria.data ? criteria.data : `Unknown Issue`}`,
+            true
+          );
         } else if (criteria.status < 3) {
           loglevel = `orange`
         }

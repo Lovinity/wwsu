@@ -32,8 +32,8 @@ module.exports = {
     // Send the email
     transporter.sendMail({
       from: 'wwsu4@wright.edu',
-      to: record.to,
-      cc: record.cc,
+      to: record.to ? record.to : undefined,
+      cc: record.cc ? record.cc : undefined,
       subject: `[WWSU] ${record.subject}`,
       text: record.text,
       html: record.text
