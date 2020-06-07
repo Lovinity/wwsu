@@ -11,6 +11,7 @@ module.exports = {
       description: 'A string containing a short blurb about this live broadcast.'
     },
 
+    // TODO: Deprecate this and change to DJ / show name fields in v8
     showname: {
       type: 'string',
       required: true,

@@ -16,8 +16,8 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     sails.log.debug('Helper state.automation called.')
-
     try {
+
       // Log the request
       await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'sign-off', loglevel: 'primary', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-stop`, title: `Broadcast ended ${inputs.transition ? ` and went into break.` : ` and went into automation.`}`, event: '' }).fetch()
         .tolerate((err) => {
@@ -25,11 +25,8 @@ module.exports = {
           sails.log.error(err)
         })
 
-      // Close off the current attendance record and calculate statistics.
-      var attendance = await sails.helpers.attendance.createRecord()
-
-      // What to return for DJ Controls show stats, if applicable
-      var returnData = { showTime: 0 }
+      // Close off the current attendance record.
+      await sails.helpers.attendance.createRecord(inputs.transition ? null : undefined)
 
       // Prepare RadioDJ; we want to get something playing before we begin the intensive processes in order to avoid a long silence period.
       await sails.helpers.rest.cmd('EnableAssisted', 1)
@@ -81,35 +78,14 @@ module.exports = {
         // We are going to break
       } else {
         await sails.helpers.meta.change.with({ host: null, dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_break', show: '', showLogo: null, track: '', topic: '', webchat: true, playlist: null, lastID: moment().toISOString(true), playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString() })
-        attendance = await sails.helpers.attendance.createRecord(null)
       }
 
-      // Finish up
       await sails.helpers.songs.queuePending()
       await sails.helpers.rest.cmd('EnableAssisted', 0)
 
       await sails.helpers.meta.change.with({ changingState: null })
 
-      // While the parallel is running, grab show time and listener minutes from attendance record.
-      attendance = attendance.updatedRecord || undefined
-      if (typeof attendance !== `undefined`) {
-        returnData.showTime = attendance.showTime || 0
-        returnData.listenerMinutes = attendance.listenerMinutes || 0
-        returnData.webMessages = attendance.webMessages || 0;
-      }
-
-      // Gather updated stats
-      if (attendance.dj || attendance.cohostDJ1 || attendance.cohostDJ2 || attendance.cohostDJ3) {
-        var stats = await sails.helpers.analytics.showtime([ attendance.dj, attendance.cohostDJ1, attendance.cohostDJ2, attendance.cohostDJ3 ], [ attendance.calendarID ]);
-        returnData.statsDJs = stats[ 0 ];
-        returnData.statsShows = stats[ 1 ];
-      }
-
-      // Get listener analytics
-      returnData.listeners = await sails.helpers.analytics.listeners(attendance.actualStart, attendance.actualEnd)
-
-      // Return our stats
-      return exits.success(returnData)
+      return exits.success()
     } catch (e) {
       await sails.helpers.meta.change.with({ changingState: null })
       return exits.error(e)
