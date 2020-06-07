@@ -40,21 +40,21 @@ module.exports = {
         if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Closers' ] ], 'Bottom', 1) }
       }
 
-      // Queue a station ID and a PSA
-      await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Top', 1)
-      await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1)
-
-      // Start playing something
-      await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
-      sails.models.status.errorCheck.prevID = moment()
-      await sails.helpers.error.count('stationID')
-
       // Queue ending stuff
       if (sails.models.meta.memory.state.startsWith('live_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.end) }
 
       if (sails.models.meta.memory.state.startsWith('remote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.end) }
 
       if (sails.models.meta.memory.state.startsWith('sports_') || sails.models.meta.memory.state.startsWith('sportsremote_')) { await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.end) }
+
+      // Queue a station ID and two PSAs
+      await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
+      await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Bottom', 2)
+
+      // Start playing something
+      await sails.helpers.rest.cmd('PlayPlaylistTrack', 0)
+      sails.models.status.errorCheck.prevID = moment()
+      await sails.helpers.error.count('stationID')
 
       // We are going to automation
       if (!inputs.transition) {
@@ -67,8 +67,9 @@ module.exports = {
         // Re-check and trigger any programs that should begin.
         try {
           await sails.helpers.calendar.check(true)
-        } catch (unusedE2) {
+        } catch (e2) {
           // Couldn't load calendar? Fall back to Default automation
+          sails.log.error(e2);
           await sails.helpers.genre.start(null, true)
         }
 
