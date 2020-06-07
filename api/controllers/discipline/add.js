@@ -18,7 +18,7 @@ module.exports = {
     action: {
       type: 'string',
       required: true,
-      isIn: ['dayban', 'permaban', 'showban'],
+      isIn: [ 'dayban', 'permaban', 'showban' ],
       description: 'Type of ban: dayban (24 hours from createdAt), permaban (indefinite), show ban (until the current broadcast ends).'
     },
     message: {
@@ -37,7 +37,8 @@ module.exports = {
 
     try {
       // Prevent adding discipline to website visitors if host is lockToDJ and the specified lockToDJ is not on the air
-      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to discipline website visitors because you are not on the air.')) }
+      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
+        return exits.error(new Error('You are not authorized to discipline website visitors because you are not on the air.'))
 
       await sails.helpers.discipline.add(inputs.IP, inputs.action, inputs.message, inputs.active)
 

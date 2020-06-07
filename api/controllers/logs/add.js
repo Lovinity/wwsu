@@ -22,7 +22,7 @@ module.exports = {
     loglevel: {
       type: 'string',
       required: true,
-      isIn: ['danger', 'orange', 'warning', 'info', 'success', 'primary', 'secondary'],
+      isIn: [ 'danger', 'orange', 'warning', 'info', 'success', 'primary', 'secondary' ],
       description: 'Log severity: danger, orange, warning, info, success, primary, or secondary.'
     },
 
@@ -85,7 +85,8 @@ module.exports = {
 
     try {
       // Prevent adding manual logs if host is lockToDJ and the specified lockToDJ is not on the air
-      if (inputs.logtype === 'manual' && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj) { return exits.error(new Error('You are not authorized to add a log entry because you are not on the air.')) }
+      if (inputs.logtype === 'manual' && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
+        return exits.error(new Error('You are not authorized to add a manual log entry because you are not on the air.'))
 
       // Create the log entry
       await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: inputs.logtype, loglevel: inputs.loglevel, logsubtype: inputs.logsubtype, excused: inputs.excused, logIcon: inputs.logIcon, title: inputs.title, event: inputs.event, trackArtist: inputs.trackArtist, trackTitle: inputs.trackTitle, trackAlbum: inputs.trackAlbum, trackLabel: inputs.trackLabel, createdAt: inputs.date !== null && typeof inputs.date !== 'undefined' ? moment(inputs.date).toISOString(true) : moment().toISOString(true) }).fetch()
