@@ -25,6 +25,11 @@ module.exports = {
       defaultsTo: 'Unknown Host'
     },
 
+    app: {
+      type: 'string',
+      allowNull: true
+    },
+
     authorized: {
       type: 'boolean',
       defaultsTo: false

@@ -9,6 +9,10 @@ module.exports = {
       type: 'string',
       required: true,
       description: 'The host name to search for or authorize.'
+    },
+    app: {
+      type: 'string',
+      description: 'The application name and version this host is running.'
     }
   },
 
@@ -33,6 +37,11 @@ module.exports = {
       sails.log.silly(record)
 
       if (!record) { return exits.notFound() }
+
+      // If app provided, update it
+      if (inputs.app) {
+        await sails.models.hosts.updateOne({ ID: record.ID }, { app: inputs.app });
+      }
 
       // Subscribe to websockets if applicable
       if (record.authorized && this.req.isSocket && record.admin) {
