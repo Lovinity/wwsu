@@ -184,14 +184,13 @@ module.exports = {
 
         // Process notifications
         temp = (async (event) => {
+            var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
             if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && event.newTime !== null) {
-                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                 await sails.helpers.onesignal.sendEvent(_event, false, false);
                 await sails.helpers.emails.queueEvent(_event, false, false);
             }
 
             if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
-                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                 await sails.helpers.onesignal.sendEvent(_event, false, false);
                 await sails.helpers.emails.queueEvent(_event, false, false);
 
@@ -240,14 +239,13 @@ module.exports = {
 
         // Process notifications
         temp = (async (event) => {
+            var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
             if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && (event.newTime !== null || event.duration !== null)) {
-                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                 await sails.helpers.onesignal.sendEvent(_event, false, false);
                 await sails.helpers.emails.queueEvent(_event, false, false);
             }
 
             if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
-                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                 await sails.helpers.onesignal.sendEvent(_event, false, false);
                 await sails.helpers.emails.queueEvent(_event, false, false);
 
@@ -294,15 +292,14 @@ module.exports = {
 
         // Process notifications
         temp = (async (event) => {
+            var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
             if (_event.active) {
                 if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && (event.newTime !== null || event.duration !== null)) {
-                    var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                     await sails.helpers.onesignal.sendEvent(_event, false, false, true);
                     await sails.helpers.emails.queueEvent(_event, false, false, true);
                 }
 
                 if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
-                    var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                     await sails.helpers.onesignal.sendEvent(_event, false, false, true);
                     await sails.helpers.emails.queueEvent(_event, false, false, true);
 
