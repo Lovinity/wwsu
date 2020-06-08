@@ -129,10 +129,10 @@ module.exports = {
   <p>Below are issues encountered during your broadcast (if any). Please avoid repeating these issues as you could lose your show. If any of these issues were caused by a technical problem, please let directors know.</p>
   <ul>
   ${stats.unauthorized ? `<li><strong>This broadcast was unscheduled / unauthorized.</strong></li>` : ``}
-  ${stats.missedIDs.length > 0 ? `<li><strong>You failed to take a required top-of-the-hour ID break at these times:</strong><br />
+  ${stats.missedIDs.length > 0 && typeof stats.missedIDs.map === 'function' ? `<li><strong>You failed to take a required top-of-the-hour ID break at these times:</strong><br />
   ${stats.missedIDs.map((record) => moment(record).format("LT")).join("<br />")}
   </li>` : ``}
-  ${stats.silence.length > 0 ? `<li><strong>There was excessive silence / very low audio at these times:</strong><br />
+  ${stats.silence.length > 0 && typeof stats.silence.map === 'function' ? `<li><strong>There was excessive silence / very low audio at these times:</strong><br />
   ${stats.silence.map((record) => moment(record).format("LT")).join("<br />")}
   </li>` : ``}
   ${stats.signedOnEarly ? `<li><strong>You signed on 5 or more minutes early.</strong></li>` : ``}

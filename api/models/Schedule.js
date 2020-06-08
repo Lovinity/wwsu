@@ -194,10 +194,36 @@ module.exports = {
                 var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                 await sails.helpers.onesignal.sendEvent(_event, false, false);
                 await sails.helpers.emails.queueEvent(_event, false, false);
-            }
 
-            console.dir(event);
-            console.dir(_event);
+                // Create cancellation logs
+                if ([ 'show', 'remote', 'sports', 'prerecord', 'genre', 'playlist' ].indexOf(_event.type) !== -1) {
+                    sails.models.attendance.findOrCreate({ unique: _event.unique }, { calendarID: _event.calendarID, unique: _event.unique, dj: _event.hostDJ, cohostDJ1: _event.cohostDJ1, cohostDJ2: _event.cohostDJ2, cohostDJ3: _event.cohostDJ3, happened: -1, event: `${_event.type}: ${_event.hosts} - ${_event.name}`, scheduledStart: moment(_event.start).toISOString(true), scheduledEnd: moment(_event.end).toISOString(true), actualStart: null, actualEnd: null })
+                        .exec(async (err, created, wasCreated) => {
+                            if (err || created.happened === 1) return;
+
+                            if (!wasCreated)
+                                await sails.models.attendance.updateOne({ ID: created.ID }, { happened: -1 });
+
+                            await sails.models.logs.create({ attendanceID: created.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: `${_event.hosts} - ${_event.name}`, logIcon: sails.models.calendar.calendardb.getIconClass(_event), title: `The event was marked canceled.`, event: `${_event.type}: ${_event.hosts} - ${_event.name} was canceled for ${moment(_event.start).format("LLLL")}.`, createdAt: moment().toISOString(true) }).fetch()
+                                .tolerate((err) => {
+                                    sails.log.error(err)
+                                })
+                        });
+                } else if (_event.type === 'office-hours') {
+                    sails.models.timesheet.findOrCreate({ unique: _event.unique }, { calendarID: _event.calendarID, unique: _event.unique, name: _event.hosts, approved: -1, scheduledIn: moment(_event.start).toISOString(true), scheduledOut: moment(_event.end).toISOString(true) })
+                        .exec(async (err, created, wasCreated) => {
+                            if (err || created.approved === 1) { return false }
+
+                            if (!wasCreated)
+                                await sails.models.timesheet.updateOne({ ID: created.ID }, { approved: -1 });
+
+                            await sails.models.logs.create({ attendanceID: null, logtype: 'director-cancellation', loglevel: 'info', logsubtype: _event.hosts, logIcon: `fas fa-user-times`, title: `A director cancelled their office hours!`, event: `Director: ${_event.hosts}<br />Scheduled time: ${moment(_event.start).format('llll')} - ${moment(_event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                .tolerate((err) => {
+                                    sails.log.error(err)
+                                })
+                        });
+                }
+            }
         })(newlyCreatedRecord);
 
         return proceed()
@@ -209,6 +235,8 @@ module.exports = {
         sails.log.silly(`schedule socket: ${data}`)
         sails.sockets.broadcast('schedule', 'schedule', data)
         var temp;
+
+        // API note: updated/canceled schedule.type records should NEVER be updated; delete the old one and create a new one.
 
         // Process notifications
         temp = (async (event) => {
@@ -222,6 +250,35 @@ module.exports = {
                 var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                 await sails.helpers.onesignal.sendEvent(_event, false, false);
                 await sails.helpers.emails.queueEvent(_event, false, false);
+
+                // Create cancellation logs
+                if ([ 'show', 'remote', 'sports', 'prerecord', 'genre', 'playlist' ].indexOf(_event.type) !== -1) {
+                    sails.models.attendance.findOrCreate({ unique: _event.unique }, { calendarID: _event.calendarID, unique: _event.unique, dj: _event.hostDJ, cohostDJ1: _event.cohostDJ1, cohostDJ2: _event.cohostDJ2, cohostDJ3: _event.cohostDJ3, happened: -1, event: `${_event.type}: ${_event.hosts} - ${_event.name}`, scheduledStart: moment(_event.start).toISOString(true), scheduledEnd: moment(_event.end).toISOString(true), actualStart: null, actualEnd: null })
+                        .exec(async (err, created, wasCreated) => {
+                            if (err || created.happened === 1) return;
+
+                            if (!wasCreated)
+                                await sails.models.attendance.updateOne({ ID: created.ID }, { happened: -1 });
+
+                            await sails.models.logs.create({ attendanceID: created.ID, logtype: 'cancellation', loglevel: 'warning', logsubtype: `${_event.hosts} - ${_event.name}`, logIcon: sails.models.calendar.calendardb.getIconClass(_event), title: `The event was marked canceled.`, event: `${_event.type}: ${_event.hosts} - ${_event.name} was canceled for ${moment(_event.start).format("LLLL")}.`, createdAt: moment().toISOString(true) }).fetch()
+                                .tolerate((err) => {
+                                    sails.log.error(err)
+                                })
+                        });
+                } else if (_event.type === 'office-hours') {
+                    sails.models.timesheet.findOrCreate({ unique: _event.unique }, { calendarID: _event.calendarID, unique: _event.unique, name: _event.hosts, approved: -1, scheduledIn: moment(_event.start).toISOString(true), scheduledOut: moment(_event.end).toISOString(true) })
+                        .exec(async (err, created, wasCreated) => {
+                            if (err || created.approved === 1) { return false }
+
+                            if (!wasCreated)
+                                await sails.models.timesheet.updateOne({ ID: created.ID }, { approved: -1 });
+
+                            await sails.models.logs.create({ attendanceID: null, logtype: 'director-cancellation', loglevel: 'info', logsubtype: _event.hosts, logIcon: `fas fa-user-times`, title: `A director cancelled their office hours!`, event: `Director: ${_event.hosts}<br />Scheduled time: ${moment(_event.start).format('llll')} - ${moment(_event.end).format('llll')}`, createdAt: moment().toISOString(true) }).fetch()
+                                .tolerate((err) => {
+                                    sails.log.error(err)
+                                })
+                        });
+                }
             }
         })(updatedRecord);
 
@@ -247,6 +304,20 @@ module.exports = {
                 var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
                 await sails.helpers.onesignal.sendEvent(_event, false, false, true);
                 await sails.helpers.emails.queueEvent(_event, false, false, true);
+
+                // Destroy cancellation records (but only if the main calendar event is still active)
+                if (_event.active) {
+                    if ([ 'show', 'remote', 'sports', 'prerecord', 'genre', 'playlist' ].indexOf(_event.type) !== -1) {
+                        var destroyed = await sails.models.attendance.destroy({ unique: _event.unique, happened: -1 }).fetch();
+                        if (destroyed && destroyed.length > 0) {
+                            var IDs = destroyed.map((record) => record.ID);
+                            await sails.models.logs.destroy({ attendanceID: IDs }).fetch();
+                        }
+                    } else if (_event.type === 'office-hours') {
+                        await sails.models.timesheet.destroy({ unique: _event.unique, approved: -1 }).fetch();
+                        await sails.models.logs.destroy({ logtype: `director-cancellation`, event: `Director: ${_event.hosts}<br />Scheduled time: ${moment(_event.start).format('llll')} - ${moment(_event.end).format('llll')}` }).fetch();
+                    }
+                }
             }
 
             // Remove any schedules that were created as an override for the deleted schedule.
@@ -257,9 +328,6 @@ module.exports = {
 
             // Remove any clockwheels created for this schedule
             await sails.models.clockwheels.destroy({ scheduleID: event.ID }).fetch();
-
-            console.dir(event);
-            console.dir(_event);
 
         })(destroyedRecord);
 
