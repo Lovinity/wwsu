@@ -108,7 +108,42 @@ module.exports = {
 
           // Calculate attendance stats and weekly analytics in the background; this takes several seconds
           var temp = (async (cID) => {
-            await sails.helpers.attendance.recalculate(cID);
+            var stats = await sails.helpers.attendance.recalculate(cID);
+
+            // Send analytic emails to DJs
+            await sails.helpers.emails.queueDjs(
+              {hostDJ: currentRecord.dj, cohostDJ1: currentRecord.cohostDJ1, cohostDJ2: currentRecord.cohostDJ2, cohostDJ3: currentRecord.cohostDJ3},
+              `Analytics for show ${currentRecord.event}`,
+              `<p>Hello!</p>
+              
+  <p>Congratulations on another successful episode of ${currentRecord.event}! Below, you will find analytics for this episode.</p>
+  <ul>
+  <li><strong>Signed On:</strong> ${moment(currentRecord.actualStart).format("LLLL")}</li>
+  <li><strong>Signed Off:</strong> ${moment().format("LLLL")}</li>
+  <li><strong>Showtime (minutes):</strong> ${stats.showTime}</li>
+  <li><strong>Online Listener Minutes:</strong> ${stats.listenerMinutes}</li>
+  <li><strong>Listener to Showtime Ratio (higher ratio = better performing broadcast):</strong> ${stats.showTime > 0 ? (stats.listenerMinutes / stats.showTime) : 0}</li>
+  <li><strong>Messages sent / received with listeners:</strong> ${stats.webMessages}</li>
+  </ul>
+  
+  <p>Below are issues encountered during your broadcast (if any). Please avoid repeating these issues as you could lose your show. If any of these issues were caused by a technical problem, please let directors know.</p>
+  <ul>
+  ${stats.unauthorized ? `<li><strong>This broadcast was unscheduled / unauthorized.</strong></li>` : ``}
+  ${stats.missedIDs.length > 0 ? `<li><strong>You failed to take a required top-of-the-hour ID break at these times:</strong><br />
+  ${stats.missedIDs.map((record) => moment(record).format("LT")).join("<br />")}
+  </li>` : ``}
+  ${stats.silence.length > 0 ? `<li><strong>There was excessive silence / very low audio at these times:</strong><br />
+  ${stats.silence.map((record) => moment(record).format("LT")).join("<br />")}
+  </li>` : ``}
+  ${stats.signedOnEarly ? `<li><strong>You signed on 5 or more minutes early.</strong></li>` : ``}
+  ${stats.signedOnLate ? `<li><strong>You signed on 10 or more minutes late.</strong></li>` : ``}
+  ${stats.signedOffEarly ? `<li><strong>You signed off 10 or more minutes early.</strong></li>` : ``}
+  ${stats.signedOffLate ? `<li><strong>You signed off 5 or more minutes late.</strong></li>` : ``}
+  </ul>`,
+  false,
+  true
+  );
+
             await sails.helpers.attendance.calculateStats();
           })(currentID);
         }

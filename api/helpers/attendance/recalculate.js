@@ -112,7 +112,7 @@ module.exports = {
 
             await sails.models.attendance.updateOne({ ID: inputs.ID }, toUpdate);
 
-            return exits.success()
+            return exits.success(toUpdate);
         } catch (e) {
             return exits.error(e)
         }

@@ -11,7 +11,7 @@ module.exports = {
     event: {
       type: 'ref',
       required: true,
-      description: 'The calendardb event.'
+      description: 'The calendardb event (we just need dj data).'
     },
     subject: {
       type: 'string',
@@ -29,7 +29,12 @@ module.exports = {
       type: 'boolean',
       defaultsTo: false,
       description: 'Should the email be sent immediately?'
-    }
+    },
+    skipDirectors: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'Do not include directors in the email.'
+    },
   },
 
 
@@ -56,13 +61,22 @@ module.exports = {
     await Promise.all(maps);
 
     // Load in directors to be CCd
-    var records = await sails.models.directors.find({ emailDJs: true });
-    cc = records
-      .filter((record) => record.email && record.email !== '')
-      .map((record) => record.email);
+    if (!inputs.skipDirectors) {
+      var records = await sails.models.directors.find({ emailDJs: true });
+      cc = records
+        .filter((record) => record.email && record.email !== '')
+        .map((record) => record.email);
+    }
+
+    // If no DJs in to, make directors to instead.
+    if (to.length === 0) {
+      to = cc;
+      cc = null;
+    }
 
     // Queue the email
-    await sails.helpers.emails.queue(to, cc, inputs.subject, inputs.text, inputs.sendNow);
+    if (to.length > 0)
+      await sails.helpers.emails.queue(to, cc, inputs.subject, inputs.text, inputs.sendNow);
 
 
   }

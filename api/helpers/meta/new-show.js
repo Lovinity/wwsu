@@ -252,7 +252,7 @@ module.exports = {
                         await sails.helpers.onesignal.sendMass('accountability-shows', 'Un-scheduled Broadcast Started', `${eventNow.hosts} - ${eventNow.name} went on the air at ${moment().format('llll')}; this show was not scheduled to go on the air!`)
                         await sails.helpers.emails.queueDjsDirectors(`Unscheduled ${eventNow.type} started: ${eventNow.hosts} - ${eventNow.name}`, `Dear Directors,<br /><br />
                         
-                        An unauthorized / unscheduled ${eventNow.type} went on the air at ${moment().format("LLLL")}. Please investigate and deal with accordingly, if applicable.`);
+                        An unauthorized / unscheduled ${eventNow.type}, <strong>${eventNow.hosts} - ${eventNow.name}</strong>, went on the air at ${moment().format("LLLL")}. Please investigate and deal with accordingly, if applicable.`);
                     }
 
                     // Let subscribers know this show is now on the air
