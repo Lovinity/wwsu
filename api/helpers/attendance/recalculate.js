@@ -110,7 +110,9 @@ module.exports = {
                 toUpdate.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } })
             }
 
-            await sails.models.attendance.updateOne({ ID: inputs.ID }, toUpdate);
+            var toUpdate2 = _.cloneDeep(toUpdate);
+
+            await sails.models.attendance.updateOne({ ID: inputs.ID }, toUpdate2);
 
             return exits.success(toUpdate);
         } catch (e) {
