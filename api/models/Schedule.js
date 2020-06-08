@@ -294,19 +294,19 @@ module.exports = {
 
         // Process notifications
         temp = (async (event) => {
-            if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && (event.newTime !== null || event.duration !== null)) {
-                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
-                await sails.helpers.onesignal.sendEvent(_event, false, false, true);
-                await sails.helpers.emails.queueEvent(_event, false, false, true);
-            }
+            if (_event.active) {
+                if ((event.scheduleType === 'updated' || event.scheduleType === 'updated-system') && (event.newTime !== null || event.duration !== null)) {
+                    var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                    await sails.helpers.onesignal.sendEvent(_event, false, false, true);
+                    await sails.helpers.emails.queueEvent(_event, false, false, true);
+                }
 
-            if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
-                var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
-                await sails.helpers.onesignal.sendEvent(_event, false, false, true);
-                await sails.helpers.emails.queueEvent(_event, false, false, true);
+                if ((event.scheduleType === 'canceled' || event.scheduleType === 'canceled-system')) {
+                    var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+                    await sails.helpers.onesignal.sendEvent(_event, false, false, true);
+                    await sails.helpers.emails.queueEvent(_event, false, false, true);
 
-                // Destroy cancellation records (but only if the main calendar event is still active)
-                if (_event.active) {
+                    // Destroy cancellation records (but only if the main calendar event is still active)
                     if ([ 'show', 'remote', 'sports', 'prerecord', 'genre', 'playlist' ].indexOf(_event.type) !== -1) {
                         var destroyed = await sails.models.attendance.destroy({ unique: _event.unique, happened: -1 }).fetch();
                         if (destroyed && destroyed.length > 0) {
