@@ -126,19 +126,19 @@ module.exports = {
   <li><strong>Messages sent / received with listeners:</strong> ${stats.webMessages}</li>
   </ul>
   
-  <p>Below are issues encountered during your broadcast (if any). Please avoid repeating these issues as you could lose your show. If any of these issues were caused by a technical problem, please let directors know.</p>
+  <p>If any issues were discovered during your broadcast, they will be listed below. Please avoid repeating these issues as they could result in disciplinary action. If an issue was caused by a technical problem, please let the directors know.</p>
   <ul>
-  ${stats.unauthorized ? `<li><strong>This broadcast was unscheduled / unauthorized.</strong></li>` : ``}
-  ${stats.missedIDs.length > 0 && typeof stats.missedIDs.map === 'function' ? `<li><strong>You failed to take a required top-of-the-hour ID break at these times:</strong><br />
+  ${stats.unauthorized ? `<li><strong>This broadcast was unscheduled / unauthorized.</strong> You should ensure the directors scheduled your show in and that you go on the air during your scheduled time (or request a re-schedule if applicable).</li>` : ``}
+  ${stats.missedIDs.length > 0 && typeof stats.missedIDs.map === 'function' ? `<li><strong>You failed to take a required top-of-the-hour ID break at these times</strong>; it is mandatory by the FCC to take a break at the top of every hour before :05 after. For prerecords and playlists, ensure your audio cut-offs allow for the top-of-hour ID break to air on time:<br />
   ${stats.missedIDs.map((record) => moment(record).format("LT")).join("<br />")}
   </li>` : ``}
-  ${stats.silence.length > 0 && typeof stats.silence.map === 'function' ? `<li><strong>There was excessive silence / very low audio at these times:</strong><br />
+  ${stats.silence.length > 0 && typeof stats.silence.map === 'function' ? `<li><strong>There was excessive silence / very low audio at these times;</strong> please avoid excessive silence on the air (of more than 15 seconds) as this violates FCC regulations:</strong><br />
   ${stats.silence.map((record) => moment(record).format("LT")).join("<br />")}
   </li>` : ``}
-  ${stats.signedOnEarly ? `<li><strong>You signed on 5 or more minutes early.</strong></li>` : ``}
-  ${stats.signedOnLate ? `<li><strong>You signed on 10 or more minutes late.</strong></li>` : ``}
-  ${stats.signedOffEarly ? `<li><strong>You signed off 10 or more minutes early.</strong></li>` : ``}
-  ${stats.signedOffLate ? `<li><strong>You signed off 5 or more minutes late.</strong></li>` : ``}
+  ${stats.signedOnEarly ? `<li><strong>You signed on 5 or more minutes early.</strong> Please avoid doing this, especially if there's a scheduled show before yours.</li>` : ``}
+  ${stats.signedOnLate ? `<li><strong>You signed on 10 or more minutes late.</strong> Please inform directors in advance if you are going to be late for your show.</li>` : ``}
+  ${stats.signedOffEarly ? `<li><strong>You signed off 10 or more minutes early.</strong> Please inform directors in advance if you are going to end your show early.</li>` : ``}
+  ${stats.signedOffLate ? `<li><strong>You signed off 5 or more minutes late.</strong> Please avoid doing this, especially if there's a scheduled show after yours.</li>` : ``}
   </ul>`,
   false,
   true
