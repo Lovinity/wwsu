@@ -799,8 +799,8 @@ module.exports.bootstrap = async function (done) {
                   }
                 }
 
-                // Do not queue if we are not in automation, playlist, genre, or prerecord states
-                if (sails.models.meta.memory.state !== 'automation_on' && sails.models.meta.memory.state !== 'automation_playlist' && sails.models.meta.memory.state !== 'automation_genre' && !sails.models.meta.memory.state.startsWith('prerecord_')) { doBreak = false }
+                // Do not queue if we are not in automation, playlist, genre, or prerecord states, or if we are in a break already.
+                if ((sails.models.meta.memory.state !== 'automation_on' && sails.models.meta.memory.state !== 'automation_playlist' && sails.models.meta.memory.state !== 'automation_genre' && !sails.models.meta.memory.state.startsWith('prerecord_')) || sails.models.meta.memory.state.endsWith("_break")) { doBreak = false }
 
                 // Do not queue if we queued a break less than the configured failsafe time, and this isn't the 0 break
                 if (key !== 0 && sails.models.status.errorCheck.prevBreak !== null && moment(sails.models.status.errorCheck.prevBreak).isAfter(moment().subtract(sails.config.custom.breakCheck, 'minutes'))) { doBreak = false }
