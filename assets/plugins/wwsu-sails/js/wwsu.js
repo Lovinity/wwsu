@@ -70,11 +70,12 @@ class WWSUdb {
   /**
      * Execute a query on the database.
      *
-     * @param {Array || Object} query An array of records to replace in the database (if replace = true), or a query object {insert || update: {record object}} or {remove: record ID}.
+     * @param {Array || Object} _query An array of records to replace in the database (if replace = true), or a query object {insert || update: {record object}} or {remove: record ID}.
      * @param {boolean} [replace=false] If true, this query will replace everything in the TAFFY database.
      * @memberof WWSUdb
      */
-  query (query, replace = false) {
+  query (_query, replace = false) {
+    var query = _.cloneDeep(_query);
     if (replace) {
       if (query.constructor === Array) {
         this._db().remove()
