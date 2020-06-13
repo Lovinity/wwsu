@@ -233,6 +233,7 @@ module.exports = {
                             try {
                                 triggered = await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
                             } catch (e) {
+                                sails.log.error(e);
                                 triggered = false;
                             }
                         }
