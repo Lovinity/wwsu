@@ -9,17 +9,16 @@
  * https://sailsjs.com/config/bootstrap
  */
 
+const CalendarDb = require('../assets/plugins/wwsu-calendar/js/wwsu-calendar.js');
+var cron = require('node-cron')
+var sh = require('shorthash')
+const queryString = require('query-string')
+const DarkSkyApi = require('dark-sky')
+const cryptoRandomString = require('crypto-random-string')
+
 module.exports.bootstrap = async function (done) {
   sails.log.verbose(`BOOTSTRAP: started; initializing variables`)
 
-  // Require CalendarDb
-  const CalendarDb = require('../assets/plugins/wwsu-calendar/js/wwsu-calendar.js');
-
-  var cron = require('node-cron')
-  var sh = require('shorthash')
-  const queryString = require('query-string')
-  const DarkSkyApi = require('dark-sky')
-  const cryptoRandomString = require('crypto-random-string')
   const darksky = new DarkSkyApi(sails.config.custom.darksky.api)
 
   // Generate token secrets
@@ -1566,7 +1565,7 @@ module.exports.bootstrap = async function (done) {
           <p><strong>Total online listener minutes during sports:</strong>: ${overall[ -2 ].week.listeners}</p>
           <p><strong>Listener to showtime ratio of sports (higher is better):</strong> ${overall[ -2 ].week.ratio}</p>`;
 
-          await sails.helpers.emails.queueDjsDirectors(`Weekly Analytics Report`, body);
+        await sails.helpers.emails.queueDjsDirectors(`Weekly Analytics Report`, body);
 
         return resolve()
       } catch (e) {

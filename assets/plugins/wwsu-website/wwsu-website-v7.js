@@ -641,7 +641,7 @@ function scheduleSocket () {
  * Re-process calendar events
  */
 function updateCalendar () {
-    $('#schedule-events').html('');
+    $('#schedule-events').html('Processing...');
 
     // Get the value of the currently selected calendar item
     var selectedOption = $('#schedule-select').children("option:selected").val();
@@ -794,7 +794,7 @@ function displayEventInfo (showID) {
         if ([ 'canceled-changed' ].indexOf(event.scheduleType) !== -1) {
             badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`
         }
-        if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && (event.newTime !== null || event.duration !== null)) {
+        if ([ 'updated', 'updated-system' ].indexOf(event.scheduleType) !== -1 && event.timeChanged) {
             badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`
         }
         if ([ 'canceled', 'canceled-system' ].indexOf(event.scheduleType) !== -1) {
