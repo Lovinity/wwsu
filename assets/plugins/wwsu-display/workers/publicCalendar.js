@@ -3,6 +3,7 @@
 // Worker for processing calendar events
 
 importScripts(`../../../plugins/moment/moment.min.js`)
+importScripts(`../../plugins/lodash/js/lodash.min.js`)
 importScripts(`../../../plugins/wwsu-sails/js/wwsu.js`)
 importScripts(`../../../plugins/taffy/js/taffy-min.js`)
 importScripts(`../../../plugins/later/js/later.min.js`)
