@@ -25,7 +25,7 @@ onmessage = function (e) {
   var innercontent = ``;
   var today = [];
 
-  var events = calendardb.getEvents(null);
+  var events = calendardb.getEvents(null, undefined, moment().add(1, 'days').toISOString(true));
 
   var noEvents = true
   var activeEvents = 0
@@ -96,6 +96,7 @@ onmessage = function (e) {
                 </div>`
       }
     })
+    .sort((a, b) => moment(a.start).valueOf() - moment(b.start).valueOf())
 
   if (noEvents) {
     innercontent = `

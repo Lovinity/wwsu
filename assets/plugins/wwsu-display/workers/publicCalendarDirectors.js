@@ -19,8 +19,14 @@ onmessage = function (e) {
 
   var events = calendardb.getEvents(null, undefined, moment().add(7, 'days').toISOString(true));
 
-  directorHours = events.filter(event => [ 'office-hours' ].indexOf(event.type) !== -1 && moment(event.end).isAfter(moment()));
-  tasks = events.filter(event => [ 'office-hours' ].indexOf(event.type) !== -1 && moment(event.end).isAfter(moment()));
+  directorHours = events
+    .filter(event => [ 'office-hours' ].indexOf(event.type) !== -1 && moment(event.end).isAfter(moment()))
+    .sort((a, b) => moment(a.start).valueOf() - moment(b.start).valueOf());
+
+  tasks = events
+    .filter(event => [ 'tasks' ].indexOf(event.type) !== -1 && moment(event.end).isAfter(moment()))
+    .sort((a, b) => moment(a.start).valueOf() - moment(b.start).valueOf());
+
 
 
   this.postMessage([ directorHours, tasks ])
