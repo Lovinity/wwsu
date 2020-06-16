@@ -264,7 +264,7 @@ module.exports = {
         // Default genres
         if (eventNow === null && sails.models.meta.memory.calendarUnique !== null) {
             // Create a new attendance record and update meta with the new attendance ID
-            attendance = await sails.helpers.attendance.createRecord();
+            attendance = await sails.helpers.attendance.createRecord(null);
             toUpdate.attendanceID = attendance.newID;
 
             // Make a log that the broadcast started
