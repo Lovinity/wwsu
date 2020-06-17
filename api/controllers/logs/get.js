@@ -83,7 +83,8 @@ module.exports = {
           'sign-on-early',
           'sign-on-late',
           'sign-off-early',
-          'sign-off-late'
+          'sign-off-late',
+          'sign-off-problem'
         ];
       } else if (inputs.subtype !== '' && inputs.subtype !== null) {
         query.logsubtype = inputs.subtype

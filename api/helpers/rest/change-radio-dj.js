@@ -40,6 +40,9 @@ module.exports = {
             var status = await sails.models.status.findOne({ name: `radiodj-${instance.name}` })
             // If the current RadioDJ is also not status 5, we have a huge problem! Trigger critical status, and wait for a good RadioDJ to report
             if (!status || status.status !== 5) {
+              // End the current show/log
+              await sails.helpers.attendance.createRecord(undefined, false, true);
+
               sails.models.status.errorCheck.waitForGoodRadioDJ = true
               await sails.helpers.status.change.with({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 1, data: `None of the configured RadioDJs are operational! System is waiting for one to report online. Please ensure RadioDJ is running and the REST server is online, configured properly, and accessible. You may have to play a track in RadioDJ before REST begins working.` })
               await sails.helpers.onesignal.sendMass('emergencies', 'No operational RadioDJ instances!', `On ${moment().format('LLLL')}, the system ran into a condition where there were no operational RadioDJs. Dead air was likely and may be still occurring. Please ensure at least 1 RadioDJ is functional immediately.`)

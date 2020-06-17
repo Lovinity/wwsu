@@ -223,40 +223,41 @@ module.exports = {
             }, undefined, moment().add(7, 'days').toISOString(true));
         } else {
 
-            // Check if it's time to trigger a program, and trigger it if so
-            sails.models.calendar.calendardb.whatShouldBePlaying(async (_eventNow) => {
-                var triggered = false;
-                var maps = _eventNow.map(async (eventNow) => {
-                    if (triggered) return null;
-                    if (eventNow) {
-                        if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
-                            try {
-                                triggered = await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
-                            } catch (e) {
-                                sails.log.error(e);
-                                triggered = false;
+            // Do not trigger programming if lofi or no healthy RadioDJs
+            if (!sails.config.custom.lofi && !sails.models.status.errorCheck.waitForGoodRadioDJ) {
+                // Check if it's time to trigger a program, and trigger it if so
+                sails.models.calendar.calendardb.whatShouldBePlaying(async (_eventNow) => {
+                    var triggered = false;
+                    var maps = _eventNow.map(async (eventNow) => {
+                        if (triggered) return null;
+                        if (eventNow) {
+                            if ((eventNow.type === 'prerecord' || eventNow.type === 'playlist') && eventNow.playlistID !== null) {
+                                try {
+                                    triggered = await sails.helpers.playlists.start(eventNow, inputs.ignoreChangingState);
+                                } catch (e) {
+                                    sails.log.error(e);
+                                    triggered = false;
+                                }
+                            }
+                            if (eventNow.type === 'genre' && eventNow.eventID !== null) {
+                                try {
+                                    triggered = await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
+                                } catch (e) {
+                                    sails.log.error(e);
+                                    triggered = false;
+                                }
                             }
                         }
-                        if (eventNow.type === 'genre' && eventNow.eventID !== null) {
-                            try {
-                                triggered = await sails.helpers.genre.start(eventNow, inputs.ignoreChangingState);
-                            } catch (e) {
-                                sails.log.error(e);
-                                triggered = false;
-                            }
-                        }
-                    }
-                });
-                await Promise.all(maps);
+                    });
+                    await Promise.all(maps);
 
-                if (!triggered) {
-                    await sails.helpers.genre.start(null, inputs.ignoreChangingState);
-                }
-            }, true);
+                    if (!triggered) {
+                        await sails.helpers.genre.start(null, inputs.ignoreChangingState);
+                    }
+                }, true);
+            }
 
             // Check to see if any events did not air
-
-
             sails.models.calendar.calendardb.getEvents(async (eventCheck) => {
                 await sails.helpers.meta.change.with({ attendanceChecked: moment().toISOString(true) });
                 if (eventCheck && eventCheck.length > 0) {
@@ -367,7 +368,7 @@ module.exports = {
                                 });
                         });
 
-                    // Director hours
+                    // Director hours absence checking
                     eventCheck
                         .filter((event) => moment().isSameOrAfter(moment(event.end)) && (event.scheduleType === null || (event.scheduleType !== 'canceled' && event.scheduleType !== 'canceled-system' && event.scheduleType !== 'canceled-changed')) && event.type === 'office-hours')
                         .map((event) => {

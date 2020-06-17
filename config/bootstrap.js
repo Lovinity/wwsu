@@ -257,9 +257,9 @@ module.exports.bootstrap = async function (done) {
       var theplaylist
       var playlistTracks
       var change = {} // Instead of doing a bunch of changeMetas, put all non-immediate changes into this object and changeMeta at the end of this operation.
-      //
-      // Skip all checks and use default meta template if sails.config.custom.lofi = true
-      if (sails.config.custom.lofi) {
+
+      // Skip all checks and use default meta template if lofi is activated or we have no healthy RadioDJs.
+      if (sails.config.custom.lofi || sails.models.status.errorCheck.waitForGoodRadioDJ) {
         try {
           change = sails.models.meta.memoryDefault
           change.time = moment().toISOString(true)

@@ -533,8 +533,8 @@ module.exports = {
       // Clone our changes due to a Sails discrepancy
       var criteria = _.cloneDeep(db)
 
-      // Update meta in the database, but only if lofi is disabled.
-      if (!sails.config.custom.lofi) {
+      // Update meta in the database, but only if lofi is disabled and we are not waiting for a healthy RadioDJ
+      if (!sails.config.custom.lofi || sails.models.status.errorCheck.waitForGoodRadioDJ) {
         await sails.models.meta.update({ ID: 1 }, criteria)
           .tolerate((err) => {
             sails.log.error(err)

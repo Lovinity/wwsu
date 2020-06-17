@@ -45,6 +45,12 @@ module.exports = {
     sails.log.debug('Controller config/basic/set called.')
 
     try {
+      
+      if (inputs.lofi) {
+        // End the current show/log
+        await sails.helpers.attendance.createRecord(undefined, false, true);
+      }
+
       var returnData = {}
       // Set the new configuration of any and all values provided as input
       for (var key in inputs) {
