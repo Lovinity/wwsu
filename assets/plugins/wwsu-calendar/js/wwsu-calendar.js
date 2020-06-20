@@ -47,9 +47,9 @@ class CalendarDb {
         this.calendar = new WWSUdb(TAFFY());
         this.schedule = new WWSUdb(TAFFY());
         this.clockwheels = new WWSUdb(TAFFY());
-        this.calendar.db.insert(calendar);
-        this.schedule.db.insert(schedule);
-        this.clockwheels.db.insert(clockwheels);
+        this.calendar.query(calendar, true);
+        this.schedule.query(schedule, true);
+        this.clockwheels.query(clockwheels, true);
 
         this.queue = new WWSUqueue();
     }
