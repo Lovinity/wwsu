@@ -1581,9 +1581,10 @@ module.exports.bootstrap = async function (done) {
     return new Promise(async (resolve, reject) => {
       sails.log.debug('CRON calendardbCacheSync called')
       try {
-        sails.models.calendar.calendardb.query('calendar', await sails.models.calendar.find({ active: true }), true)
-        sails.models.calendar.calendardb.query('schedule', await sails.models.schedule.find(), true);
-        sails.models.calendar.calendardb.query('clockwheels', await sails.models.clockwheels.find(), true);
+        // TODO: Temporarily disabled
+        // sails.models.calendar.calendardb.query('calendar', await sails.models.calendar.find({ active: true }), true)
+        // sails.models.calendar.calendardb.query('schedule', await sails.models.schedule.find(), true);
+        // sails.models.calendar.calendardb.query('clockwheels', await sails.models.clockwheels.find(), true);
       } catch (e) {
         sails.log.error(e);
         return reject(e);

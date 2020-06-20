@@ -75,7 +75,7 @@ class WWSUdb {
      * @memberof WWSUdb
      */
   query (_query, replace = false) {
-    var query = _.merge({}, _query);
+    var query = _.cloneDeep(_query);
     if (replace) {
       if (query.constructor === Array) {
         this._db().remove()
