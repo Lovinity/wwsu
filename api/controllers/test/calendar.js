@@ -13,7 +13,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    return exits.success(sails.models.calendar.calendar)
+    return exits.success(sails.models.calendar.calendardb.whatShouldBePlaying(null, true));
   }
 
 }
