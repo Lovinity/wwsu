@@ -78,8 +78,8 @@ class WWSUdb {
     var query = _.cloneDeep(_query);
     if (replace) {
       if (query.constructor === Array) {
-        this._db().remove()
-        this._db.insert(query)
+        this._db = TAFFY();
+        this._db.insert(query);
         this.events.emitEvent('replace', [ this._db() ]);
       }
       return null
