@@ -157,7 +157,7 @@ function doRequests () {
     if (typeof response.stats === 'undefined') {
       iziToast.show({
         title: 'An error occurred',
-        message: 'Error occurred trying to authenticate the DJ. Please try again or contact engineer@wwsu1069.org.'
+        message: 'Error occurred trying to authenticate the DJ. Please try again or contact wwsu4@wright.edu.'
       })
     } else {
       // Populate DJ statistics and information
@@ -571,7 +571,7 @@ function doRequests () {
       console.error(e)
       iziToast.show({
         title: 'An error occurred',
-        message: 'Error occurred trying to get announcements. Please try again or contact engineer@wwsu1069.org.'
+        message: 'Error occurred trying to get announcements. Please try again or contact wwsu4@wright.edu.'
       })
     }
   })
@@ -711,7 +711,7 @@ function loadLog (logID) {
           ]
         })
       } else {
-        logs.innerHTML = 'ERROR: Unable to load the log for that show. Please try again or contact engineer@wwsu1069.org .'
+        logs.innerHTML = 'ERROR: Unable to load the log for that show. Please try again or contact wwsu4@wright.edu .'
       }
     })
   }
@@ -836,7 +836,7 @@ function cancelShow () {
             console.dir(response)
             iziToast.show({
               title: `Failed to cancel show!`,
-              message: `There was an error trying to cancel the show. Please try again or email engineer@wwsu1069.org if this problem continues.`,
+              message: `There was an error trying to cancel the show. Please try again or email wwsu4@wright.edu if this problem continues.`,
               timeout: 15000,
               close: true,
               color: 'red',
@@ -893,7 +893,7 @@ function changeTopic () {
       console.dir(response)
       iziToast.show({
         title: `Failed to change topic!`,
-        message: `There was an error trying to change the show topic. Please try again or email engineer@wwsu1069.org if this problem continues.`,
+        message: `There was an error trying to change the show topic. Please try again or email wwsu4@wright.edu if this problem continues.`,
         timeout: 15000,
         close: true,
         color: 'red',

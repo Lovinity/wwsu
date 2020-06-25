@@ -301,7 +301,7 @@ class WWSUcalendar extends CalendarDb {
                     $(document).Toasts('create', {
                         class: 'bg-danger',
                         title: 'Error loading events and playlists',
-                        body: 'There was an error loading events and playlists. Please report this to engineer@wwsu1069.org.',
+                        body: 'There was an error loading events and playlists. Please report this to the engineer.',
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                     cb([], []);
@@ -313,7 +313,7 @@ class WWSUcalendar extends CalendarDb {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error loading events and playlists',
-                body: 'There was an error loading events and playlists. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error loading events and playlists. Please report this to the engineer.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
             cb([], []);
@@ -337,7 +337,7 @@ class WWSUcalendar extends CalendarDb {
                         $(document).Toasts('create', {
                             class: 'bg-danger',
                             title: 'Error adding schedule',
-                            body: 'There was an error adding the schedule. Please report this to engineer@wwsu1069.org.',
+                            body: 'There was an error adding the schedule. Please report this to the engineer.',
                             icon: 'fas fa-skull-crossbones fa-lg',
                         });
                         cb(false);
@@ -356,7 +356,7 @@ class WWSUcalendar extends CalendarDb {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Error adding schedule',
-                    body: 'There was an error adding the schedule. Please report this to engineer@wwsu1069.org.',
+                    body: 'There was an error adding the schedule. Please report this to the engineer.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
                 console.error(e);
@@ -381,7 +381,7 @@ class WWSUcalendar extends CalendarDb {
                         $(document).Toasts('create', {
                             class: 'bg-danger',
                             title: 'Error editing schedule',
-                            body: 'There was an error editing the schedule. Please report this to engineer@wwsu1069.org.',
+                            body: 'There was an error editing the schedule. Please report this to the engineer.',
                             icon: 'fas fa-skull-crossbones fa-lg',
                         });
                         cb(false);
@@ -400,7 +400,7 @@ class WWSUcalendar extends CalendarDb {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Error editing schedule',
-                    body: 'There was an error editing the schedule. Please report this to engineer@wwsu1069.org.',
+                    body: 'There was an error editing the schedule. Please report this to the engineer.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
                 console.error(e);
@@ -427,7 +427,7 @@ class WWSUcalendar extends CalendarDb {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error removing/reversing schedule',
-                body: 'There was an error removing/reversing the schedule. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error removing/reversing the schedule. Please report this to the engineer.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
             cb(false);
@@ -440,7 +440,7 @@ class WWSUcalendar extends CalendarDb {
                         $(document).Toasts('create', {
                             class: 'bg-danger',
                             title: 'Error removing/reversing schedule',
-                            body: 'There was an error removing/reversing the schedule. Please report this to engineer@wwsu1069.org.',
+                            body: 'There was an error removing/reversing the schedule. Please report this to the engineer.',
                             icon: 'fas fa-skull-crossbones fa-lg',
                         });
                         cb(false);
@@ -459,7 +459,7 @@ class WWSUcalendar extends CalendarDb {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Error removing/reversing schedule',
-                    body: 'There was an error removing/reversing the schedule. Please report this to engineer@wwsu1069.org.',
+                    body: 'There was an error removing/reversing the schedule. Please report this to the engineer.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
                 console.error(e);
@@ -484,7 +484,7 @@ class WWSUcalendar extends CalendarDb {
                     $(document).Toasts('create', {
                         class: 'bg-danger',
                         title: 'Error adding event',
-                        body: 'There was an error adding the event. Please report this to engineer@wwsu1069.org.',
+                        body: 'There was an error adding the event. Please report this to the engineer.',
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                     cb(false);
@@ -503,7 +503,7 @@ class WWSUcalendar extends CalendarDb {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error adding event',
-                body: 'There was an error adding the event. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error adding the event. Please report this to the engineer.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
             console.error(e);
@@ -528,7 +528,7 @@ class WWSUcalendar extends CalendarDb {
                         $(document).Toasts('create', {
                             class: 'bg-danger',
                             title: 'Error editing event',
-                            body: 'There was an error editing the event. Please report this to engineer@wwsu1069.org.',
+                            body: 'There was an error editing the event. Please report this to the engineer.',
                             icon: 'fas fa-skull-crossbones fa-lg',
                         });
                         cb(false);
@@ -547,7 +547,7 @@ class WWSUcalendar extends CalendarDb {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Error editing event',
-                    body: 'There was an error editing the event. Please report this to engineer@wwsu1069.org.',
+                    body: 'There was an error editing the event. Please report this to the engineer.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
                 console.error(e);
@@ -574,7 +574,7 @@ class WWSUcalendar extends CalendarDb {
                         $(document).Toasts('create', {
                             class: 'bg-danger',
                             title: 'Error removing event',
-                            body: 'There was an error removing the event. Please report this to engineer@wwsu1069.org.',
+                            body: 'There was an error removing the event. Please report this to the engineer.',
                             icon: 'fas fa-skull-crossbones fa-lg',
                         });
                         cb(false);
@@ -593,7 +593,7 @@ class WWSUcalendar extends CalendarDb {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Error removing event',
-                    body: 'There was an error removing the event. Please report this to engineer@wwsu1069.org.',
+                    body: 'There was an error removing the event. Please report this to the engineer.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
                 console.error(e);

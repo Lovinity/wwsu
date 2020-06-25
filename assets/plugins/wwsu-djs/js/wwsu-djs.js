@@ -223,7 +223,7 @@ class WWSUdjs extends WWSUdb {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error adding DJ',
-                body: 'There was an error adding a new DJ. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error adding a new DJ. Please report this to the engineer.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
             console.error(e);

@@ -92,7 +92,7 @@ class WWSUlikedtracks {
                     $(document).Toasts('create', {
                         class: 'bg-danger',
                         title: 'Error sending message',
-                        body: 'There was an error telling the DJ you liked that track. Please report this to engineer@wwsu1069.org.',
+                        body: 'There was an error telling the DJ you liked that track. Please report this to the engineer.',
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 }
@@ -132,7 +132,7 @@ class WWSUlikedtracks {
                         subtitle: trackID,
                         autohide: true,
                         delay: 10000,
-                        body: `<p>There was a problem liking that track. Please contact engineer@wwsu1069.org if you are having problems liking any tracks.</p>`,
+                        body: `<p>There was a problem liking that track. Please contact the engineer if you are having problems liking any tracks.</p>`,
                         icon: 'fas fa-music fa-lg',
                     })
                 }

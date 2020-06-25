@@ -73,7 +73,7 @@ class WWSUsubscriptions {
                     $(document).Toasts('create', {
                         class: 'bg-warning',
                         title: 'Subscription failed',
-                        body: 'Unable to subscribe you to that event at this time. Please contact engineer@wwsu1069.org.',
+                        body: 'Unable to subscribe you to that event at this time. Please contact wwsu4@wright.edu.',
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 } else {
@@ -93,7 +93,7 @@ class WWSUsubscriptions {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Subscription failed',
-                    body: 'Unable to subscribe you to that event at this time. Please contact engineer@wwsu1069.org.',
+                    body: 'Unable to subscribe you to that event at this time. Please contact wwsu4@wright.edu.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
             }
@@ -113,7 +113,7 @@ class WWSUsubscriptions {
                     $(document).Toasts('create', {
                         class: 'bg-warning',
                         title: 'Un-subscription failed',
-                        body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact engineer@wwsu1069.org.',
+                        body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact wwsu4@wright.edu.',
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 } else {
@@ -123,7 +123,7 @@ class WWSUsubscriptions {
                                 $(document).Toasts('create', {
                                     class: 'bg-warning',
                                     title: 'Un-subscription failed',
-                                    body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact engineer@wwsu1069.org.',
+                                    body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact wwsu4@wright.edu.',
                                     icon: 'fas fa-skull-crossbones fa-lg',
                                 });
                             } else {
@@ -144,7 +144,7 @@ class WWSUsubscriptions {
                             $(document).Toasts('create', {
                                 class: 'bg-danger',
                                 title: 'Un-subscription failed',
-                                body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact engineer@wwsu1069.org.',
+                                body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact wwsu4@wright.edu.',
                                 icon: 'fas fa-skull-crossbones fa-lg',
                             });
                         }
@@ -155,7 +155,7 @@ class WWSUsubscriptions {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Un-subscription failed',
-                    body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact engineer@wwsu1069.org.',
+                    body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact wwsu4@wright.edu.',
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
             }

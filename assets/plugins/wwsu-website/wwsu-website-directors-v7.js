@@ -30,7 +30,7 @@ try {
     $(document).Toasts('create', {
         class: 'bg-danger',
         title: 'Error initializing',
-        body: 'There was an error initializing the website. Please report this to engineer@wwsu1069.org.',
+        body: 'There was an error initializing the website. Please report this to wwsu4@wright.edu.',
         icon: 'fas fa-skull-crossbones fa-lg',
     });
 }
@@ -244,7 +244,7 @@ function checkDiscipline (cb) {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error checking discipline',
-                body: 'There was an error checking to see if you are allowed to access WWSU. Please try again later, or contact engineer@wwsu1069.org if this problem continues.',
+                body: 'There was an error checking to see if you are allowed to access WWSU. Please try again later, or contact wwsu4@wright.edu if this problem continues.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             })
         }

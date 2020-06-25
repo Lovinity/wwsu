@@ -37,6 +37,6 @@ module.exports = async function (req, res, next) {
       }
   } catch (e) {
     sails.log.error(e)
-    return res.status(500).send('There was an error checking security protocols. Please try again in a few minutes. If this problem continues, email engineer@wwsu1069.org.')
+    return res.status(500).send('There was an error checking security protocols. Please try again in a few minutes. If this problem continues, email wwsu4@wright.edu.')
   }
 }

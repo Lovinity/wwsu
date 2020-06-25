@@ -71,7 +71,7 @@ try {
     $(document).Toasts('create', {
         class: 'bg-danger',
         title: 'Error initializing',
-        body: 'There was an error initializing the website. Please report this to engineer@wwsu1069.org.',
+        body: 'There was an error initializing the website. Please report this to wwsu4@wright.edu.',
         icon: 'fas fa-skull-crossbones fa-lg',
     });
 }
@@ -184,7 +184,7 @@ $(document).ready(function () {
         $(document).Toasts('create', {
             class: 'bg-danger',
             title: 'Error in document.ready',
-            body: 'There was an error in the document.ready function. Please report this to engineer@wwsu1069.org.',
+            body: 'There was an error in the document.ready function. Please report this to wwsu4@wright.edu.',
             icon: 'fas fa-skull-crossbones fa-lg',
         });
     }
@@ -259,7 +259,7 @@ function checkDiscipline (cb) {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error checking discipline',
-                body: 'There was an error checking to see if you are allowed to access WWSU. Please try again later, or contact engineer@wwsu1069.org if this problem continues.',
+                body: 'There was an error checking to see if you are allowed to access WWSU. Please try again later, or contact wwsu4@wright.edu if this problem continues.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             })
         }
@@ -727,7 +727,7 @@ function updateCalendar () {
                     $(document).Toasts('create', {
                         class: 'bg-danger',
                         title: 'calendar error',
-                        body: 'There was an error in the updateCalendar function, event mapping. Please report this to engineer@wwsu1069.org.',
+                        body: 'There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.',
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 }
@@ -754,7 +754,7 @@ function displayEventInfo (showID) {
                 class: 'bg-danger',
                 title: 'calendar error',
                 subtitle: showID,
-                body: 'There was an error trying to load that event. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error trying to load that event. Please report this to wwsu4@wright.edu.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
             return null;
@@ -1113,7 +1113,7 @@ function sendMessage (privateMsg = false) {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error sending message',
-                body: 'There was an error sending your message. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error sending your message. Please report this to wwsu4@wright.edu.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
         }
@@ -1145,7 +1145,7 @@ function loadGenres () {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error loading genres for request system',
-                body: 'There was an error loading the available genres to filter by in the request system. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error loading the available genres to filter by in the request system. Please report this to wwsu4@wright.edu.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
         }
@@ -1197,7 +1197,7 @@ function loadTracks (skip = skipIt) {
             $(document).Toasts('create', {
                 class: 'bg-danger',
                 title: 'Error loading tracks for request system',
-                body: 'There was an error loading the tracks for the request system. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error loading the tracks for the request system. Please report this to wwsu4@wright.edu.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
         }
@@ -1250,7 +1250,7 @@ function loadTrackInfo (trackID) {
                 class: 'bg-danger',
                 title: 'Error loading track information',
                 subtitle: trackID,
-                body: 'There was an error loading track information. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error loading track information. Please report this to wwsu4@wright.edu.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
         }
@@ -1295,7 +1295,7 @@ function requestTrack (trackID) {
                 class: 'bg-danger',
                 title: 'Error placing track request',
                 subtitle: trackID,
-                body: 'There was an error placing the track request. Please report this to engineer@wwsu1069.org.',
+                body: 'There was an error placing the track request. Please report this to wwsu4@wright.edu.',
                 icon: 'fas fa-skull-crossbones fa-lg',
             });
         }

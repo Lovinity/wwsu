@@ -360,7 +360,7 @@ class WWSUreq {
       $(document).Toasts('create', {
         class: 'bg-danger',
         title: 'Authorization error',
-        body: `There is no ${this.authName} available to authenticate. Please report this to engineer@wwsu1069.org.`,
+        body: `There is no ${this.authName} available to authenticate. Please report this to wwsu4@wright.edu.`,
         icon: 'fas fa-skull-crossbones fa-lg',
       });
       return null;
@@ -473,7 +473,7 @@ class WWSUutil {
       $(document).Toasts('create', {
         class: 'bg-danger',
         title: 'Error in getUrlParameter function',
-        body: 'There was an error in the getUrlParameter function. Please report this to engineer@wwsu1069.org.',
+        body: 'There was an error in the getUrlParameter function. Please report this to wwsu4@wright.edu.',
         icon: 'fas fa-skull-crossbones fa-lg',
       });
     }
@@ -530,7 +530,7 @@ class WWSUutil {
       $(document).Toasts('create', {
         class: 'bg-danger',
         title: 'hexrgb error',
-        body: 'There was an error in the hexrgb function. Please report this to engineer@wwsu1069.org.',
+        body: 'There was an error in the hexrgb function. Please report this to wwsu4@wright.edu.',
         icon: 'fas fa-skull-crossbones fa-lg',
       });
     }
