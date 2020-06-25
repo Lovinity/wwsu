@@ -13,8 +13,8 @@ module.exports = {
 
     try {
       // Prevent adding tracks if host is lockToDJ and the specified lockToDJ is not on the air
-      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
-      return exits.error(new Error('You are not authorized to queue/play a liner because you are not on the air.'))
+      if (this.req.payload.ID !== sails.models.meta.memory.host && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
+        throw 'forbidden';
 
       // Error if we are not in a sports state
       if (sails.models.meta.memory.state.startsWith('sports')) { return exits.error(new Error(`A Liner cannot be queued when not in a sports broadcast.`)) }
@@ -27,7 +27,7 @@ module.exports = {
         })
 
       // Queue it
-      if (typeof sails.config.custom.sportscats[sails.models.meta.memory.show] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.sportscats[sails.models.meta.memory.show]['Sports Liners']], 'Top', 1) }
+      if (typeof sails.config.custom.sportscats[ sails.models.meta.memory.show ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.sportscats[ sails.models.meta.memory.show ][ 'Sports Liners' ] ], 'Top', 1) }
 
       // Play it
       await sails.helpers.rest.cmd('EnableAssisted', 0)

@@ -38,7 +38,9 @@ module.exports = {
 
     try {
       // Do not continue if not in automation mode; client should request automation before requesting remote
-      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) { return exits.error(new Error(`Cannot execute state/remote unless in automation or prerecord mode. Please go to automation first.`)) }
+      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
+        throw 'forbidden';
+      }
 
       // Block this request if we are changing states right now
       if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
@@ -46,8 +48,8 @@ module.exports = {
       // Disallow starting a remote broadcast if the host has lockToDJ and the provided DJ either does not match lockToDJ or is not scheduled to start a remote broadcast
       if (this.req.payload.lockToDJ !== null) {
         var dj = inputs.showname.split(' - ')
-        var show = dj[1];
-        var djs = dj[0];
+        var show = dj[ 1 ];
+        var djs = dj[ 0 ];
         dj = dj[ 0 ].split("; ");
         var query = { name: [] };
         if (dj && dj[ 0 ])
@@ -62,7 +64,7 @@ module.exports = {
         if (query.name.length > 0)
           djRecord = await sails.models.djs.find(query)
         if (!djRecord || djRecord.length === 0) {
-          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided is not authorized.'))
+          throw 'forbidden';
         } else {
           var authorized = false;
           for (var i = 0; i < djRecord.length; i++) {
@@ -70,14 +72,13 @@ module.exports = {
               authorized = true;
           }
           if (!authorized)
-            return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ name / show host you provided is not authorized.'))
+            throw 'forbidden';
         }
 
-        // TODO
         var record = sails.models.calendar.calendardb.whatShouldBePlaying(null, false);
         record = record.filter((event) => event.type === 'remote' && event.hosts === djs && event.name === show);
         if (record.length < 1) {
-          return exits.error(new Error('Your host is locked to a specific DJ and is only allowed to start remote broadcasts under that DJ. The DJ and show name you provided is not scheduled to go on the air at this time.'))
+          throw 'forbidden';
         }
       }
 

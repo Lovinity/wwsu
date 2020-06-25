@@ -16,8 +16,8 @@ module.exports = {
     sails.log.debug('Controller songs/queue-psa called.')
     try {
       // Prevent adding tracks if host is lockToDJ and the specified lockToDJ is not on the air
-      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
-      return exits.error(new Error('You are not authorized to queue/play a PSA because you are not on the air.'))
+      if (this.req.payload.ID !== sails.models.meta.memory.host && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
+        throw 'forbidden';
 
       // Queue applicable PSA
       await sails.helpers.songs.queue(sails.config.custom.subcats.PSAs, 'Top', 1, 'lenientRules', inputs.duration)

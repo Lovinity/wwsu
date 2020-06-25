@@ -13,8 +13,8 @@ module.exports = {
 
     try {
       // Prevent adding tracks if host is lockToDJ and the specified lockToDJ is not on the air
-      if (this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
-      return exits.error(new Error('You are not authorized to queue/play a Top Add because you are not on the air.'))
+      if (this.req.payload.ID !== sails.models.meta.memory.host && this.req.payload.lockToDJ !== null && this.req.payload.lockToDJ !== sails.models.meta.memory.dj && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ1 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ2 && this.req.payload.lockToDJ !== sails.models.meta.memory.cohostDJ3)
+        throw 'forbidden';
 
       // Log it
       await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'topadd', loglevel: 'info', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-headphones`, title: `Host requested to play a random top add.`, event: '' }).fetch()

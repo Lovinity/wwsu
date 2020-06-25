@@ -38,14 +38,16 @@ module.exports = {
 
     try {
       // Do not continue if not in prerecord or automation mode; client should request automation before requesting live
-      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) { return exits.error(new Error(`Cannot execute state/live unless in automation or prerecord mode. Please go to automation first.`)) }
+      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
+        throw 'forbidden';
+      }
 
       // Block the request if we are changing states right now
       if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
       // If the specified host has lockToDJ, deny going live because going live should only happen inside WWSU studios
       if (this.req.payload.lockToDJ !== null) {
-        return exits.error(new Error('You are not authorized to start a live broadcast.'))
+        throw 'forbidden';
       }
 
       // Lock so other state changing requests get blocked until we are done

@@ -30,14 +30,16 @@ module.exports = {
 
     try {
       // Do not continue if not in automation mode; client should request automation before requesting sports
-      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) { return exits.error(new Error(`Cannot execute state/sports unless in automation or prerecord mode. Please go to automation first.`)) }
+      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
+        throw 'forbidden';
+      }
 
       // Block this request if we are already switching states
       if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
 
       // If the specified host has lockToDJ, deny going sports because going sports live from the studio should only happen inside WWSU studios
       if (this.req.payload.lockToDJ !== null) {
-        return exits.error(new Error('You are not authorized to start a non-remote sports broadcast.'))
+        throw 'forbidden';
       }
 
       // Lock so that any other state changing requests are blocked until we are done
@@ -67,7 +69,7 @@ module.exports = {
         await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.start)
 
         // Queue a Sports opener if there is one
-        if (typeof sails.config.custom.sportscats[inputs.sport] !== 'undefined') { await sails.helpers.songs.queue([sails.config.custom.sportscats[inputs.sport]['Sports Openers']], 'Bottom', 1) }
+        if (typeof sails.config.custom.sportscats[ inputs.sport ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.sportscats[ inputs.sport ][ 'Sports Openers' ] ], 'Bottom', 1) }
 
         await sails.helpers.rest.cmd('EnableAssisted', 0)
 
