@@ -96,10 +96,10 @@ module.exports = {
       }
 
       await sails.helpers.error.reset('automationBreak')
-      await sails.helpers.meta.change.with({ changingState: null })
+      await sails.helpers.meta.change.with({ host: null, show: '', topic: '', trackStamp: null, changingState: null })
       return exits.success()
     } catch (e) {
-      await sails.helpers.meta.change.with({ changingState: null })
+      await sails.helpers.meta.change.with({ host: null, show: '', topic: '', trackStamp: null, changingState: null })
       return exits.error(e)
     }
   }
