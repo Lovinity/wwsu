@@ -144,6 +144,11 @@ module.exports = {
     playlistPlayed: {
       type: 'ref',
       columnType: 'datetime'
+    },
+
+    lastID: {
+      type: 'ref',
+      columnType: 'datetime'
     }
 
   },
@@ -413,7 +418,7 @@ module.exports = {
     lastID: {
       type: 'string',
       allowNull: true,
-      description: 'An ISO timestamp of when the last top of hour ID break was taken.',
+      description: 'An ISO timestamp of when the last top of hour ID break was aired.',
       custom: function (value) {
         return moment(value).isValid()
       }
@@ -427,7 +432,7 @@ module.exports = {
       type: 'boolean',
       defaultsTo: true,
       description: 'Set to false to restrict the ability to send chat messages through the website'
-    }
+    },
   },
 
   // DO NOT change any values in meta.memory directly! Instead, use sails.helpers.meta.change. This is populated in bootstrap.js via meta.template.

@@ -66,9 +66,9 @@ module.exports = {
 
         // Change state
         if (sails.models.meta.memory.state === 'sportsremote_halftime' || sails.models.meta.memory.state === 'sportsremote_halftime_disconnected') {
-          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sportsremote_returning'})
         } else {
-          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'sports_returning'})
         }
       } else {
         sails.models.status.errorCheck.prevBreak = moment()

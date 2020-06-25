@@ -72,9 +72,9 @@ module.exports = {
 
         // Change state to halftime mode
         if (sails.models.meta.memory.state.startsWith('sportsremote')) {
-          await sails.helpers.meta.change.with({ state: 'sportsremote_halftime', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ state: 'sportsremote_halftime'})
         } else {
-          await sails.helpers.meta.change.with({ state: 'sports_halftime', lastID: moment().toISOString(true) })
+          await sails.helpers.meta.change.with({ state: 'sports_halftime'})
         }
 
         // Standard break
@@ -90,7 +90,6 @@ module.exports = {
           await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
           sails.models.status.errorCheck.prevID = moment()
           await sails.helpers.error.count('stationID')
-          await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
         }
 
         // Execute appropriate breaks, and switch state to break

@@ -136,7 +136,7 @@ module.exports = {
           queueLength = await sails.helpers.songs.calculateQueueLength()
         }
         await sails.helpers.meta.changeDjs(inputs.showname);
-        await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_remote', show: inputs.showname, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat })
+        await sails.helpers.meta.change.with({ queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_remote', show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
       } else {
         // Otherwise, just update metadata but do not do anything else
         await sails.helpers.meta.changeDjs(inputs.showname);

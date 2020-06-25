@@ -746,19 +746,6 @@ module.exports.bootstrap = async function (done) {
           // Counter to ensure automation break is not running for too long
           if (sails.models.meta.memory.state === 'automation_break') { await sails.helpers.error.count('automationBreak') }
 
-          // Check if a DJ neglected the required top of the hour break (passes :05 after)
-          var d = new Date()
-          var n = d.getMinutes()
-          if (n > 5 && moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta.memory.lastID)) && !sails.models.meta.memory.state.startsWith('automation_')) {
-            await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
-            await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'id', loglevel: 'orange', logsubtype: sails.models.meta.memory.show, logIcon: `fas fa-coffee`, title: `Required top-of-hour ID break was not taken!`, event: `Broadcast: ${sails.models.meta.memory.show}` }).fetch()
-              .tolerate((err) => {
-                sails.log.error(err)
-              })
-
-            await sails.helpers.onesignal.sendMass('accountability-shows', 'Broadcast did not do Top-of-hour ID!', `${sails.models.meta.memory.show} failed to take a required Top of the Hour ID break. This is an FCC violation.`)
-          }
-
           // Manage breaks intelligently using track queue length. This gets complicated, so comments explain the process.
 
           // Do not run this process if we cannot get a duration for the currently playing track, or if we suspect the current queue duration to be inaccurate
@@ -824,7 +811,6 @@ module.exports.bootstrap = async function (done) {
                   if (key === 0) {
                     sails.models.status.errorCheck.prevID = moment()
                     await sails.helpers.error.count('stationID')
-                    await sails.helpers.meta.change.with({ lastID: moment().toISOString(true) })
                   }
 
                   // Remove liners in the queue. Do not do the playlist re-queue method as there may be a big prerecord or playlist in the queue.
@@ -1050,6 +1036,21 @@ module.exports.bootstrap = async function (done) {
       sails.log.error(e)
     }
   })
+
+  // Every hour at minute 5, second 5, check if there was a missed top of hour ID break.
+  sails.log.verbose('BOOTSTRAP: scheduling checkID CRON.')
+  cron.schedule('5 5 * * * *', async () => {
+    sails.log.debug('CRON checkID triggered.')
+    if (moment().startOf(`hour`).subtract(5, `minutes`).isAfter(moment(sails.models.meta.memory.lastID))) {
+      await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'id', loglevel: 'orange', logsubtype: sails.models.meta.memory.show !== '' ? sails.models.meta.memory.show : sails.models.meta.memory.genre, logIcon: `fas fa-coffee`, title: `Required top-of-hour ID was not aired!`, event: `Broadcast: ${sails.models.meta.memory.show && sails.models.meta.memory.show !== '' ? sails.models.meta.memory.show : sails.models.meta.memory.genre}` }).fetch()
+        .tolerate((err) => {
+          sails.log.error(err)
+        })
+
+      if (!sails.models.meta.memory.state.startsWith('automation_'))
+        await sails.helpers.onesignal.sendMass('accountability-shows', 'Broadcast did not air Top-of-hour ID!', `${sails.models.meta.memory.show} failed to air top of hour ID. This is an FCC violation.`)
+    }
+  });
 
   // Every minute on second 06, get NWS alerts for configured counties.
   sails.log.verbose(`BOOTSTRAP: scheduling EAS CRON.`)

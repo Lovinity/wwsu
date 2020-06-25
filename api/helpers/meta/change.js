@@ -235,7 +235,7 @@ module.exports = {
     lastID: {
       type: 'string',
       allowNull: true,
-      description: 'An ISO timestamp of when the last top of hour ID break was taken.',
+      description: 'An ISO timestamp of when the last top of hour ID break was aired.',
       custom: function (value) {
         return moment(value).isValid()
       }
@@ -248,7 +248,7 @@ module.exports = {
     webchat: {
       type: 'boolean',
       description: 'Set to false to restrict the ability to send chat messages through the website'
-    }
+    },
   },
 
   fn: async function (inputs, exits) {
@@ -433,8 +433,8 @@ module.exports = {
             push2.line2 = `${sails.config.custom.meta.prefix.pendSports}${sails.models.meta.memory.show}`
           }
 
-          // Log the new track playing if the track was new
           if (typeof push.trackID !== 'undefined') {
+            // Log the new track playing if the track was new
             await sails.models.logs.create({ attendanceID: sails.models.meta.memory.attendanceID, logtype: 'track', loglevel: 'secondary', logsubtype: 'automation', logIcon: `far fa-play-circle`, title: `A track played in RadioDJ.`, event: `${push2.requested ? `Requested by: ${push2.requestedBy || `Unknown User`}` : ``}`, trackArtist: sails.models.meta.memory.trackArtist || null, trackTitle: sails.models.meta.memory.trackTitle || null, trackAlbum: sails.models.meta.memory.trackAlbum || null, trackLabel: sails.models.meta.memory.trackLabel || null }).fetch()
               .tolerate(() => {
               })
@@ -444,6 +444,11 @@ module.exports = {
               push2.history = sails.models.meta.memory.history
               push2.history.unshift({ ID: sails.models.meta.memory.trackID, track: (sails.models.meta.memory.trackArtist || 'Unknown Artist') + ' - ' + (sails.models.meta.memory.trackTitle || 'Unknown Title'), likable: true })
               push2.history = push2.history.slice(0, 3)
+            }
+
+            // If this track is an ID, update lastID
+            if (sails.config.custom.subcats.IDs.indexOf(push.trackIDSubcat || sails.models.meta.memory.trackIDSubcat || 0) > -1) {
+              push2.lastID = moment().toISOString(true);
             }
           }
 

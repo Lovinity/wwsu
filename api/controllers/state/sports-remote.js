@@ -89,7 +89,7 @@ module.exports = {
         }
 
         // Change meta
-        await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_sportsremote', show: inputs.sport, topic: inputs.topic, trackStamp: null, lastID: moment().toISOString(true), webchat: inputs.webchat })
+        await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_sportsremote', show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
       } else {
         // Otherwise, just update metadata but do not do anything else
         await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
