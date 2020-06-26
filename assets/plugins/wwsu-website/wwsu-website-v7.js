@@ -923,7 +923,7 @@ socket.on('messages', (data) => {
                         addMessage(data[ key ], firstTime)
                         break
                     case 'remove':
-                        $(`#msg-${data[ key ]} .direct-chat-text`).html(`XXX This message was deleted XXX`)
+                        removeMessage(data[ key ]);
                         break
                 }
             }
@@ -1074,6 +1074,15 @@ function addMessage (data, firsttime = false) {
         </div>
       </div>`);
     }
+}
+
+/**
+ * Remove a message if it exists.
+ * 
+ * @param {number} ID ID of the message to remove.
+ */
+function removeMessage(ID) {
+    $(`#msg-${ID}`).remove();
 }
 
 /**
