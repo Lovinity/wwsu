@@ -1050,7 +1050,7 @@ function addMessage (data, firsttime = false) {
         }
 
     } else if (data.from === client) {
-        $('#chat-messages').append(`<div class="direct-chat-msg right">
+        $('#chat-messages').append(`<div class="direct-chat-msg right" id="msg-${data.ID}">
         <div class="direct-chat-infos clearfix">
           <span class="direct-chat-name float-right">YOU${data.to === 'DJ-private' ? ` (Private Message)` : ``}</span>
           <span class="direct-chat-timestamp float-left">${moment(data.createdAt).format('hh:mm A')}</span>
