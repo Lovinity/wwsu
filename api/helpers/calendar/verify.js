@@ -23,7 +23,7 @@ module.exports = {
 
     // Populate DJ Names
     try {
-      if (!event.event.scheduleType || event.event.scheduleType === null || inputs.event.hostDJ !== null || inputs.event.cohostDJ1 !== null || inputs.event.cohostDJ2 !== null || inputs.event.cohostDJ3 !== null || inputs.event.director !== null) {
+      if (!event.event.scheduleType || event.event.scheduleType === null || event.event.scheduleType === "" || inputs.event.hostDJ !== null || inputs.event.cohostDJ1 !== null || inputs.event.cohostDJ2 !== null || inputs.event.cohostDJ3 !== null || inputs.event.director !== null) {
         event.event.hosts = await sails.helpers.calendar.generateHosts(event.tempCal);
       } else {
         event.event.hosts = null;
