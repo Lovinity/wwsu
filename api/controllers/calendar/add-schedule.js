@@ -241,8 +241,7 @@ module.exports = {
             }
 
             try {
-                _event = await sails.helpers.calendar.verify(event);
-                event = _.cloneDeep(_event);
+                event = await sails.helpers.calendar.verify(event);
             } catch (e) {
                 return exits.success(e.message);
             }

@@ -371,12 +371,12 @@ class CalendarDb {
      * Check for conflicts that would arise if we performed the provided schedule queries. Do this BEFORE adding/editing/deleting records!
      * 
      * @param {?function} callback If provided, will run in queue and function fired when all tasks completed. Otherwise, will return conflicts.
-     * @param {array} _queries Array of WWSUdb queries we want to perform on schedule; (insert, update, remove, updateCalendar, or removeCalendar).
+     * @param {array} queries Array of WWSUdb queries we want to perform on schedule; (insert, update, remove, updateCalendar, or removeCalendar).
      * @param {function} progressCallback Function fired on every task completion. Contains a single parameter with a descriptive string explaining the progress.
      * @returns {?object} If callback not provided, returns conflicts object {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
-    checkConflicts (callback = null, _queries = [], progressCallback = () => { }) {
-        var queries = _.cloneDeep(_queries);
+    checkConflicts (callback = null, queries = [], progressCallback = () => { }) {
+        queries = _.cloneDeep(queries);
         console.log(`deep cloned queries`);
         console.dir(queries);
         var tasks = 0;
@@ -1077,14 +1077,12 @@ class CalendarDb {
     /**
      * Combine a base calendar or schedule record with a modifying schedule record.
      * 
-     * @param {object} _calendar The base event or schedule
-     * @param {object} _schedule The schedule making modifications to calendar
+     * @param {object} calendar The base event or schedule
+     * @param {object} schedule The schedule making modifications to calendar
      * @param {string} eventStart ISO String of the start or original time for the event
      * @returns {object} Modified event
      */
-    processRecord (_calendar, _schedule, eventStart) {
-        var calendar = _.cloneDeep(_calendar);
-        var schedule = _.cloneDeep(_schedule);
+    processRecord (calendar, schedule, eventStart) {
         var criteria = {
             calendarID: schedule.calendarID || calendar.ID, // ID of the main calendar event
             scheduleID: schedule.ID || null, // ID of the schedule record to process
@@ -1344,15 +1342,14 @@ class CalendarDb {
     /**
      * Polyfill missing information in a schedule record from its scheduleID (if applicable) and the calendar event's default properties.
      * 
-     * @param {object} _record The schedule database record
+     * @param {object} record The schedule database record
      * @param {WWSUdb} calendardb If provided, will use this database of calendar events instead of the CalendarDb one.
      * @param {WWSUdb} scheduledb If provided, will use this database of schedules instead of the CalendarDb one.
      * @returns {object} Event, as structured in processRecord.
      */
-    scheduleToEvent (_record, calendardb = this.calendar, scheduledb = this.schedule) {
+    scheduleToEvent (record, calendardb = this.calendar, scheduledb = this.schedule) {
         var tempCal = {};
         var event;
-        var record = _.cloneDeep(_record);
         if (record.calendarID) {
             var calendar = calendardb.db({ ID: record.calendarID }).first();
             tempCal = calendar || {};
