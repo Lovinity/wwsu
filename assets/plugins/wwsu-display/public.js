@@ -113,33 +113,6 @@ try {
   wrapper.width = window.innerWidth
   wrapper.height = window.innerHeight
 
-  // Teamsters strike
-  if (isStudio) {
-    Slides.newSlide({
-      name: `teamsters`,
-      label: `Teamsters Strike`,
-      weight: -999999,
-      isSticky: true,
-      color: `danger`,
-      active: false, // TODO: Change to true when/if they go on strike
-      transitionIn: `fadeIn`,
-      transitionOut: `fadeOut`,
-      displayTime: 14,
-      fitContent: false,
-      html: ``,
-      reset: false
-    });
-
-    setInterval(() => { // TODO: Set appropriate dates if Teamsters go on strike
-      Slides.slide(`teamsters`).html = `
-            <h1 style="text-align: center; font-size: 3em; color: #FF7878">Teamsters Strike</h1>
-            <div style="text-align: center; font-size: 6em; 4px 8px 6px rgba(0,0,0,0.3);" id="teamsters-day" class="rounded bg-danger text-white shadow-8">Day ${(parseInt(moment(Meta.time).diff(moment("2019-01-22 00:00:00"), 'days')) + 1)}</div>
-            <div style="text-align: center; font-size: 3em; color: #ffff78; 2px 4px 3px rgba(0,0,0,0.3);" id="teamsters-total">Total: ${moment.duration(moment(Meta.time).diff(moment("2019-01-22 08:00:00"))).format("hh:mm:ss")}</div>
-            ${directorpresent ? `<div style="text-align: center; font-size: 4em; color: #FFFFFF; 2px 4px 3px rgba(0,0,0,0.3);" class="m-3" id="teamsters-strike2">Has the strike impacted you?</div><div style="text-align: center; font-size: 4em; color: #7878ff" id="teamsters-strike2">Come in to make a quick recording.</div>` : ``}`;
-    }, 1000);
-
-  }
-
   if (!isStudio) {
     Slides.newSlide({
       name: `weekly-stats`,
@@ -918,7 +891,7 @@ function doEas () {
             <h2 style="text-align: center; font-size: 3em;" class="${!isLightTheme ? `text-white` : `text-dark`}">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`
       var innercontent = document.getElementById('alerts')
-      Eas.db({ severity: 'Extreme' }).each((dodo) => {
+      Eas.find({ severity: 'Extreme' }).forEach((dodo) => {
         try {
           var color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color) ? hexRgb(dodo.color) : hexRgb('#787878')
           var borderclass = 'black'

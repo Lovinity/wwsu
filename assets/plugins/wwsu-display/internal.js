@@ -321,7 +321,7 @@ waitFor(() => {
           Meta[ key ] = data[ key ]
 
           // Do a status update if a state change was returned; this could impact power saving mode
-          if (key === 'state') { processStatus(Status.db()) }
+          if (key === 'state') { processStatus(Status.find()) }
 
           if (key === 'time') {
             clearInterval(clockTimer)
@@ -386,7 +386,7 @@ waitFor(() => {
     if (!disconnected) {
       // noConnection.style.display = "inline";
       disconnected = true
-      processStatus(Status.db())
+      processStatus(Status.find())
     }
   })
 })
@@ -402,7 +402,7 @@ function clockTick () {
     if (!directorNotify) {
       directorNotify = true
       var directorMentions = []
-      Directors.db({ present: true }).each((director) => {
+      Directors.find({ present: true }).forEach((director) => {
         directorMentions.push(director.name)
       })
       Slides.slide(`director-clockout`).active = true
@@ -454,7 +454,7 @@ function processStatus (db) {
                     </div><div class="row ${secondRow ? `bg-dark-3` : `bg-dark-2`}">`
 
     // Add status info to table for each status, and determine current global status (worst of all statuses)
-    db.each((thestatus) => {
+    db.forEach((thestatus) => {
       try {
         if (doRow) {
           if (!secondRow) {
@@ -654,7 +654,7 @@ calendarWorker.onmessage = function (e) {
     var calendar = {}
     var asstcalendar = {}
 
-    Directors.db({ assistant: false }).each((director) => {
+    Directors.find({ assistant: false }).forEach((director) => {
       calendar[ director.ID ] = {}
       calendar[ director.ID ][ 'director' ] = director;
       calendar[ director.ID ][ 0 ] = ``
@@ -666,7 +666,7 @@ calendarWorker.onmessage = function (e) {
       calendar[ director.ID ][ 6 ] = ``
     });
 
-    Directors.db({ assistant: true }).each((director) => {
+    Directors.find({ assistant: true }).forEach((director) => {
       asstcalendar[ director.ID ] = {}
       asstcalendar[ director.ID ][ 'director' ] = director;
       asstcalendar[ director.ID ][ 0 ] = ``
@@ -683,7 +683,7 @@ calendarWorker.onmessage = function (e) {
       .map(event => {
 
         // First, get the director
-        var temp = Directors.db({ ID: event.director }).first();
+        var temp = Directors.find({ ID: event.director }, true);
 
         // No temp record? Exit immediately. Also, default to assistant director = true if it is not provided.
         if (typeof temp === `undefined`) { return null }
@@ -958,7 +958,7 @@ function metaSocket () {
             clearInterval(clockTimer)
             clearTimeout(clockTimer)
             clockTimer = setInterval(clockTick, 1000)
-            processStatus(Status.db())
+            processStatus(Status.find())
           }
         }
       }
