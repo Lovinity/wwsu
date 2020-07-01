@@ -371,12 +371,12 @@ class CalendarDb {
      * Check for conflicts that would arise if we performed the provided schedule queries. Do this BEFORE adding/editing/deleting records!
      * 
      * @param {?function} callback If provided, will run in queue and function fired when all tasks completed. Otherwise, will return conflicts.
-     * @param {array} queries Array of WWSUdb queries we want to perform on schedule; (insert, update, remove, updateCalendar, or removeCalendar).
+     * @param {array} _queries Array of WWSUdb queries we want to perform on schedule; (insert, update, remove, updateCalendar, or removeCalendar).
      * @param {function} progressCallback Function fired on every task completion. Contains a single parameter with a descriptive string explaining the progress.
      * @returns {?object} If callback not provided, returns conflicts object {additions: [schedule records that should also be added], removals: [schedule records that should also be removed], errors: [strings of error messages for queries that cannot be performed]}
      */
     checkConflicts (callback = null, _queries = [], progressCallback = () => { }) {
-        _queries = _.cloneDeep(queries);
+        var queries = _.cloneDeep(_queries);
         var tasks = 0;
         var tasksCompleted = 0;
 
