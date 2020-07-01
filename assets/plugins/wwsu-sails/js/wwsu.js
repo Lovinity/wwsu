@@ -96,7 +96,6 @@ class WWSUdb {
               this.events.emitEvent('update', [ query[ key ], this._db() ]);
               break
             case 'remove':
-              console.dir(this._db({ ID: query[ key ] }).get());
               this._db({ ID: query[ key ] }).remove()
               this.events.emitEvent('remove', [ query[ key ], this._db() ]);
               break
@@ -104,6 +103,28 @@ class WWSUdb {
         }
       }
     }
+  }
+
+  /**
+   * Safely find and return array of matching documents in the db using cloneDeep.
+   * 
+   * @param {object|function} _query The search criteria
+   * @returns {array|?object} Array of matching records if first = false, or single object (null: none found) of the first found record if true
+   */
+  find (_query, first = false) {
+    var query;
+    if (typeof _query === 'object') {
+      query = _.cloneDeep(_query);
+    } else {
+      query = _query;
+    }
+    var records;
+    if (!first) {
+      records = this._db(query).get();
+    } else {
+      records = this._db(query).first();
+    }
+    return _.cloneDeep(records);
   }
 
   /**

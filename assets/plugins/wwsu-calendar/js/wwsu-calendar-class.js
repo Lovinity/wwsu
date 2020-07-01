@@ -169,7 +169,7 @@ class WWSUcalendar extends CalendarDb {
                     pageLength: 10
                 });
                 var drawRows = () => {
-                    this.calendar.db().each((calendar) => {
+                    this.calendar.find().forEach((calendar) => {
                         table.rows.add([ [
                             `<span class="badge bg-${this.getColorClass(calendar)}">${calendar.type}</span>`,
                             calendar.name,
@@ -184,7 +184,7 @@ class WWSUcalendar extends CalendarDb {
                     $('.btn-event-delete').unbind('click');
 
                     $('.btn-event-edit').click((e) => {
-                        var event = this.calendar.db().get().find((event) => event.ID === parseInt($(e.currentTarget).data('calendarid')));
+                        var event = this.calendar.find().find((event) => event.ID === parseInt($(e.currentTarget).data('calendarid')));
                         this.showEventForm(event, djs, directors);
                     });
 
@@ -194,7 +194,7 @@ class WWSUcalendar extends CalendarDb {
 
                     $('.btn-event-delete').click((e) => {
                         var util = new WWSUutil();
-                        var event = this.calendar.db().get().find((event) => event.ID === parseInt($(e.currentTarget).data('calendarid')));
+                        var event = this.calendar.find().find((event) => event.ID === parseInt($(e.currentTarget).data('calendarid')));
                         util.confirmDialog(`<p>Are you sure you want to <b>permanently</b> remove ${event.type}: ${event.name}?</p><ul><li>Removes the event</li><li>Removes all schedules of the event from the calendar</li><li>Notifies all notification subscribers the event has been discontinued</li><li>Removes all notification subscriptions</li><li>Does not remove broadcast logs nor timesheet records</li><li>Broadcasts: does not remove analytics, but disassociates them from the event</li></ul>`, event.name, () => {
                             this.removeCalendar(this.eventsModal, directors, { ID: parseInt($(e.currentTarget).data('calendarid')) }, (success) => {
                                 this.eventsModal.body = `<div class="alert alert-warning">
@@ -235,7 +235,7 @@ class WWSUcalendar extends CalendarDb {
                     pageLength: 10
                 });
                 var drawRows = () => {
-                    this.schedule.db({ calendarID: calendarID }).each((schedule) => {
+                    this.schedule.find({ calendarID: calendarID }).forEach((schedule) => {
                         // Skip all schedule entries that are unauthorized or specify an update/cancellation; these should be managed via the calendar.
                         if (schedule.scheduleType !== null) {
                             return;
@@ -254,7 +254,7 @@ class WWSUcalendar extends CalendarDb {
                     $('.btn-schedule-delete').unbind('click');
 
                     $('.btn-schedule-edit').click((e) => {
-                        var schedule = this.schedule.db({ ID: parseInt($(e.currentTarget).data('scheduleid')) }).first();
+                        var schedule = this.schedule.find({ ID: parseInt($(e.currentTarget).data('scheduleid')) }, true);
                         var calendarID = parseInt($(e.currentTarget).data('calendarid'));
                         this.showScheduleForm(schedule, calendarID, djs, directors);
                     });
@@ -419,7 +419,7 @@ class WWSUcalendar extends CalendarDb {
      */
     removeSchedule (modal, directors, data, cb) {
         try {
-            var schedule = this.schedule.db({ ID: data.ID }).first();
+            var schedule = this.schedule.find({ ID: data.ID }, true);
             //if (schedule.scheduleID) {
             //schedule = this.schedule.db({ ID: schedule.scheduleID }).first();
             //}
@@ -566,7 +566,7 @@ class WWSUcalendar extends CalendarDb {
      */
     removeCalendar (modal, directors, data, cb) {
         // We need to determine if the removal of this calendar (and thus all its schedules) will affect other events
-        var calendar = this.calendar.db({ ID: data.ID }).first();
+        var calendar = this.calendar.find({ ID: data.ID }, true);
         this.doConflictCheck(modal, calendar, 'removeCalendar', () => {
             try {
                 this.requests.director.request({ dom: `#modal-${modal.id}`, db: directors.db(), method: 'post', url: this.endpoints.remove, data: data }, (response) => {
@@ -727,7 +727,7 @@ class WWSUcalendar extends CalendarDb {
                                         break;
 
                                     case `Event: Edit defaults`:
-                                        var _calendar = this.calendar.db().get().find((_event) => event.ID === event.calendarID);
+                                        var _calendar = this.calendar.find().find((_event) => event.ID === event.calendarID);
                                         this.showEventForm(_calendar, djs, directors);
                                         break;
 
@@ -892,9 +892,9 @@ class WWSUcalendar extends CalendarDb {
         this.eventModal.body = ``;
 
         this.getEventsPlaylists((events, playlists) => {
-            var _djs = djs.db().get();
+            var _djs = djs.find();
 
-            var calendarEvents = this.calendar.db().get().map((event) => event.name);
+            var calendarEvents = this.calendar.find().map((event) => event.name);
 
             $(this.eventModal.body).alpaca({
                 "schema": {
@@ -1151,10 +1151,10 @@ class WWSUcalendar extends CalendarDb {
         }
 
         this.getEventsPlaylists((events, playlists) => {
-            var _djs = djs.db().get();
+            var _djs = djs.find();
 
-            var calendarEvents = this.calendar.db().get().map((event) => event.name);
-            var sportsEvents = this.calendar.db().get()
+            var calendarEvents = this.calendar.find().map((event) => event.name);
+            var sportsEvents = this.calendar.find()
                 .filter((event) => event.type === 'sports')
                 .map((event) => event.name);
 
@@ -1446,7 +1446,7 @@ class WWSUcalendar extends CalendarDb {
      * @param {WWSUdb} directors WWSUdb directors that can be selected in the form and authorize the request
      */
     showScheduleForm (schedule, calendarID, djs, directors) {
-        var event = this.calendar.db({ ID: calendarID }).first();
+        var event = this.calendar.find({ ID: calendarID }, true);
 
         this.scheduleModal.title = `${schedule ? `Edit schedule ${event.type}: ${event.hosts} - ${event.name}` : `New schedule for ${event.type}: ${event.hosts} - ${event.name}`}`;
         this.scheduleModal.footer = ``;
@@ -1481,10 +1481,10 @@ class WWSUcalendar extends CalendarDb {
         }
 
         this.getEventsPlaylists((events, playlists) => {
-            var _djs = djs.db().get();
+            var _djs = djs.find();
 
-            var calendarEvents = this.calendar.db().get().map((event) => event.name);
-            var sportsEvents = this.calendar.db().get()
+            var calendarEvents = this.calendar.find().map((event) => event.name);
+            var sportsEvents = this.calendar.find()
                 .filter((event) => event.type === 'sports')
                 .map((event) => event.name);
 
