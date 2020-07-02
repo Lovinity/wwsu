@@ -42,7 +42,7 @@ module.exports = {
 
       // Broadcast the ban to the client
       if (inputs.active) {
-        sails.sockets.broadcast(`discipline-${inputs.host.replace('website-', '')}`, `discipline-add`, { active: inputs.active, acknowledged: !inputs.active, message: inputs.message, action: inputs.action, createdAt: moment().toISOString(true) })
+        sails.sockets.broadcast(`discipline-${inputs.host.replace('website-', '')}`, `discipline-add`, { ID: reference.ID, active: inputs.active, acknowledged: !inputs.active, message: inputs.message, action: inputs.action, createdAt: moment().toISOString(true) })
       }
       return exits.success()
     } catch (e) {
