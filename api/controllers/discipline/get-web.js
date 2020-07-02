@@ -23,6 +23,11 @@ module.exports = {
             var host = sh.unique(fromIP + sails.config.custom.hostSecret)
             var searchto = moment().subtract(1, 'days').toDate()
 
+            if (this.req.isSocket) {
+                // If a ban is issued for this client later on, it is sent through this socket as "discipline-add" event
+                sails.sockets.join(this.req, `discipline-${host}`)
+            }
+
             var records = await sails.models.discipline.find({
                 where: {
                     or: [
@@ -40,12 +45,12 @@ module.exports = {
             if (records.length > 0) {
                 var discipline = []
                 records.map((record) => {
-                  discipline.push({ID: record.ID, active: record.active, acknowledged: record.acknowledged, message: record.message, action: record.action, createdAt: record.createdAt})
+                    discipline.push({ ID: record.ID, active: record.active, acknowledged: record.acknowledged, message: record.message, action: record.action, createdAt: record.createdAt })
                 })
                 return exits.success(discipline)
-              } else {
+            } else {
                 return exits.success([])
-              }
+            }
         } catch (e) {
             return exits.error(e)
         }

@@ -25,9 +25,6 @@ module.exports = {
       var fromIP = this.req.isSocket ? (typeof this.req.socket.handshake.headers['x-forwarded-for'] !== 'undefined' ? this.req.socket.handshake.headers['x-forwarded-for'] : this.req.socket.conn.remoteAddress) : this.req.ip
       var host = sh.unique(fromIP + sails.config.custom.hostSecret)
 
-      // If a ban is issued for this client later on, it is sent through this socket
-      sails.sockets.join(this.req, `discipline-${host}`)
-
       // Mark the client as online and retrieve their nickname
       var response = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`, inputs.device)
 
