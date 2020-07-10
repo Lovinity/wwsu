@@ -15,10 +15,9 @@ module.exports = {
       return;
 
     // Start with real-time data
-    var realtime = await needle(
-      "get",
-      `https://api.climacell.co/v3/weather/realtime`,
-      {
+    let { body } = await got("https://api.climacell.co/v3/weather/realtime", {
+      method: "GET",
+      query: {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
@@ -39,20 +38,19 @@ module.exports = {
           "road_risk_score",
         ],
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          apikey: sails.config.custom.climacell.api,
-        },
-      }
-    );
-    if (realtime.body.errorCode) {
-      sails.log.error(new Error(realtime.body.message));
+      responseType: "json",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: sails.config.custom.climacell.api,
+      },
+    });
+    if (body.errorCode) {
+      sails.log.error(new Error(body.message));
       return;
     }
-    if (realtime.body) {
-      for (var key in realtime.body) {
-        if (Object.prototype.hasOwnProperty.call(realtime.body, key)) {
+    if (body) {
+      for (var key in body) {
+        if (Object.prototype.hasOwnProperty.call(body, key)) {
           var key2 = `realtime-${key.replace("_", "-")}`;
           await new Promise(async (resolve) => {
             sails.models.climacell
@@ -60,9 +58,9 @@ module.exports = {
                 { dataClass: key2 },
                 {
                   dataClass: key2,
-                  data: realtime.body[key]
-                    ? `${realtime.body[key].value}${
-                        realtime.body[key].units ? realtime.body[key].units : ``
+                  data: body[key]
+                    ? `${body[key].value}${
+                        body[key].units ? body[key].units : ``
                       }`
                     : null,
                 }
@@ -81,11 +79,9 @@ module.exports = {
                     { dataClass: key2 },
                     {
                       dataClass: key2,
-                      data: realtime.body[key]
-                        ? `${realtime.body[key].value}${
-                            realtime.body[key].units
-                              ? realtime.body[key].units
-                              : ``
+                      data: body[key]
+                        ? `${body[key].value}${
+                            body[key].units ? body[key].units : ``
                           }`
                         : null,
                     }
@@ -100,29 +96,27 @@ module.exports = {
     }
 
     // Nowcast
-    var nowcast = await needle(
-      "get",
-      `https://api.climacell.co/v3/weather/nowcast`,
-      {
+    let { body } = await got("https://api.climacell.co/v3/weather/nowcast", {
+      method: "GET",
+      query: {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
         timestep: 5,
         fields: ["precipitation", "precipitation_type"],
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          apikey: sails.config.custom.climacell.api,
-        },
-      }
-    );
-    if (nowcast.body.errorCode) {
-      sails.log.error(new Error(nowcast.body.message));
+      responseType: "json",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: sails.config.custom.climacell.api,
+      },
+    });
+    if (body.errorCode) {
+      sails.log.error(new Error(body.message));
       return;
     }
-    if (nowcast.body && nowcast.body.constructor === Array) {
-      var nowcastMaps = nowcast.body.map(async (nc, index) => {
+    if (body && body.constructor === Array) {
+      var nowcastMaps = body.map(async (nc, index) => {
         for (var key in nc) {
           if (Object.prototype.hasOwnProperty.call(nc, key)) {
             var key2 = `nc-${index}-${key.replace("_", "-")}`;
@@ -170,10 +164,9 @@ module.exports = {
     }
 
     // Hourly forecast
-    var hourly = await needle(
-      "get",
-      `https://api.climacell.co/v3/weather/hourly`,
-      {
+    let { body } = await got("https://api.climacell.co/v3/weather/hourly", {
+      method: "GET",
+      query: {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
@@ -186,21 +179,18 @@ module.exports = {
           "weather_code",
         ],
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          apikey: sails.config.custom.climacell.api,
-        },
-      }
-    );
-
-    if (hourly.body.errorCode) {
-      sails.log.error(new Error(hourly.body.message));
+      responseType: "json",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: sails.config.custom.climacell.api,
+      },
+    });
+    if (body.errorCode) {
+      sails.log.error(new Error(body.message));
       return;
     }
-
-    if (hourly.body && typeof hourly.body.constructor === Array) {
-      var hourlyMaps = hourly.body.map(async (hr, index) => {
+    if (body && typeof body.constructor === Array) {
+      var hourlyMaps = body.map(async (hr, index) => {
         for (var key in hr) {
           if (Object.prototype.hasOwnProperty.call(hr, key)) {
             var key2 = `hr-${index}-${key.replace("_", "-")}`;
