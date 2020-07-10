@@ -46,44 +46,50 @@ module.exports = {
         },
       }
     );
-    for (var key in realtime) {
-      if (Object.prototype.hasOwnProperty.call(realtime, key)) {
-        var key2 = `realtime-${key.replace("_", "-")}`;
-        await new Promise(async (resolve) => {
-          sails.models.climacell
-            .findOrCreate(
-              { dataClass: key2 },
-              {
-                dataClass: key2,
-                data: realtime[key] ? (`${realtime[key].value}${
-                  realtime[key].units ? realtime[key].units : ``
-                }`) : null,
-              }
-            )
-            .exec(async (err, record, wasCreated) => {
-              if (err) {
-                sails.log.error(err);
-                resolve();
-              }
-              if (wasCreated) {
-                resolve();
-              }
+    if (realtime.body) {
+      for (var key in realtime.body) {
+        if (Object.prototype.hasOwnProperty.call(realtime, key)) {
+          var key2 = `realtime-${key.replace("_", "-")}`;
+          await new Promise(async (resolve) => {
+            sails.models.climacell
+              .findOrCreate(
+                { dataClass: key2 },
+                {
+                  dataClass: key2,
+                  data: realtime[key]
+                    ? `${realtime[key].value}${
+                        realtime[key].units ? realtime[key].units : ``
+                      }`
+                    : null,
+                }
+              )
+              .exec(async (err, record, wasCreated) => {
+                if (err) {
+                  sails.log.error(err);
+                  resolve();
+                }
+                if (wasCreated) {
+                  resolve();
+                }
 
-              await sails.models.climacell
-                .update(
-                  { dataClass: key2 },
-                  {
-                    dataClass: key2,
-                    data: realtime[key] ? (`${realtime[key].value}${
-                      realtime[key].units ? realtime[key].units : ``
-                    }`) : null,
-                  }
-                )
-                .fetch();
+                await sails.models.climacell
+                  .update(
+                    { dataClass: key2 },
+                    {
+                      dataClass: key2,
+                      data: realtime[key]
+                        ? `${realtime[key].value}${
+                            realtime[key].units ? realtime[key].units : ``
+                          }`
+                        : null,
+                    }
+                  )
+                  .fetch();
 
-              resolve();
-            });
-        });
+                resolve();
+              });
+          });
+        }
       }
     }
 
@@ -105,8 +111,8 @@ module.exports = {
         },
       }
     );
-    if (typeof nowcast.map === "function") {
-      var nowcastMaps = nowcast.map(async (nc, index) => {
+    if (nowcast.body && typeof nowcast.body.map === "function") {
+      var nowcastMaps = nowcast.body.map(async (nc, index) => {
         for (var key in nc) {
           if (Object.prototype.hasOwnProperty.call(nc, key)) {
             var key2 = `nc-${index}-${key.replace("_", "-")}`;
@@ -116,9 +122,9 @@ module.exports = {
                   { dataClass: key2 },
                   {
                     dataClass: key2,
-                    data: nc[key] ? (`${nc[key].value}${
-                      nc[key].units ? nc[key].units : ``
-                    }`) : null,
+                    data: nc[key]
+                      ? `${nc[key].value}${nc[key].units ? nc[key].units : ``}`
+                      : null,
                   }
                 )
                 .exec(async (err, record, wasCreated) => {
@@ -135,9 +141,11 @@ module.exports = {
                       { dataClass: key2 },
                       {
                         dataClass: key2,
-                        data: nc[key] ? (`${nc[key].value}${
-                          nc[key].units ? nc[key].units : ``
-                        }`) : null,
+                        data: nc[key]
+                          ? `${nc[key].value}${
+                              nc[key].units ? nc[key].units : ``
+                            }`
+                          : null,
                       }
                     )
                     .fetch();
@@ -175,8 +183,8 @@ module.exports = {
         },
       }
     );
-    if (typeof hourly.map === "function") {
-      var hourlyMaps = hourly.map(async (hr, index) => {
+    if (hourly.body && typeof hourly.body.map === "function") {
+      var hourlyMaps = hourly.body.map(async (hr, index) => {
         for (var key in hr) {
           if (Object.prototype.hasOwnProperty.call(hr, key)) {
             var key2 = `hr-${index}-${key.replace("_", "-")}`;
@@ -186,9 +194,9 @@ module.exports = {
                   { dataClass: key2 },
                   {
                     dataClass: key2,
-                    data: hr[key] ? (`${hr[key].value}${
-                      hr[key].units ? hr[key].units : ``
-                    }`) : null,
+                    data: hr[key]
+                      ? `${hr[key].value}${hr[key].units ? hr[key].units : ``}`
+                      : null,
                   }
                 )
                 .exec(async (err, record, wasCreated) => {
@@ -205,9 +213,11 @@ module.exports = {
                       { dataClass: key2 },
                       {
                         dataClass: key2,
-                        data: hr[key] ? (`${hr[key].value}${
-                          hr[key].units ? hr[key].units : ``
-                        }`) : null,
+                        data: hr[key]
+                          ? `${hr[key].value}${
+                              hr[key].units ? hr[key].units : ``
+                            }`
+                          : null,
                       }
                     )
                     .fetch();
