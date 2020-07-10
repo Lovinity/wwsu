@@ -34,6 +34,7 @@ module.exports.policies = {
   'calendar/edit': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'calendar/remove-schedule': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'calendar/remove': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
+  'climacell/get': 'isBanned',
   'clockwheels/*': ['isBanned', 'isSocket', 'isAuthorizedDJ'],
   'clockwheels/get': ['isBanned', 'isSocket'],
   'config/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
