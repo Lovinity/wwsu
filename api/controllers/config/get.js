@@ -33,6 +33,7 @@ module.exports = {
 
       // These are secret stuff we do not want others knowing
       delete returnData.onesignal.rest
+      delete returnData.climacell.api
       delete returnData.darksky.api
       delete returnData.hostSecret
       delete returnData.rest

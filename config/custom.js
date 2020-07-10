@@ -173,12 +173,23 @@ var defaultConfig = {
   },
 
   // Used for Darksky weather API
+  // DEPRECATED; TODO: remove
   darksky: {
     api: ``,
     position: {
-      latitude: 39.7800196,
-      longitude: -84.0599189
+      latitude: 39.7846,
+      longitude: -84.0583
     }
+  },
+
+  // Climacell weather API
+  climacell: {
+    api: ``,
+    position: {
+      latitude: 39.7846,
+      longitude: -84.0583
+    },
+    unitSystem: 'us'
   },
 
   startOfSemester: moment('2019-01-14 00:00:00').toISOString(true),
