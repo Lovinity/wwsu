@@ -9,7 +9,7 @@ module.exports = {
   attributes: {
     ID: {
       type: 'number',
-      required: true
+      autoIncrement: true
     },
 
     dataClass: {

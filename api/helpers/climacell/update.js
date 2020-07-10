@@ -55,9 +55,9 @@ module.exports = {
               { dataClass: key2 },
               {
                 dataClass: key2,
-                data: `${realtime[key].value}${
+                data: realtime[key] ? (`${realtime[key].value}${
                   realtime[key].units ? realtime[key].units : ``
-                }`,
+                }`) : null,
               }
             )
             .exec(async (err, record, wasCreated) => {
@@ -74,9 +74,9 @@ module.exports = {
                   { dataClass: key2 },
                   {
                     dataClass: key2,
-                    data: `${realtime[key].value}${
+                    data: realtime[key] ? (`${realtime[key].value}${
                       realtime[key].units ? realtime[key].units : ``
-                    }`,
+                    }`) : null,
                   }
                 )
                 .fetch();
@@ -116,9 +116,9 @@ module.exports = {
                   { dataClass: key2 },
                   {
                     dataClass: key2,
-                    data: `${nc[key].value}${
+                    data: nc[key] ? (`${nc[key].value}${
                       nc[key].units ? nc[key].units : ``
-                    }`,
+                    }`) : null,
                   }
                 )
                 .exec(async (err, record, wasCreated) => {
@@ -135,9 +135,9 @@ module.exports = {
                       { dataClass: key2 },
                       {
                         dataClass: key2,
-                        data: `${nc[key].value}${
+                        data: nc[key] ? (`${nc[key].value}${
                           nc[key].units ? nc[key].units : ``
-                        }`,
+                        }`) : null,
                       }
                     )
                     .fetch();
@@ -186,9 +186,9 @@ module.exports = {
                   { dataClass: key2 },
                   {
                     dataClass: key2,
-                    data: `${hr[key].value}${
+                    data: hr[key] ? (`${hr[key].value}${
                       hr[key].units ? hr[key].units : ``
-                    }`,
+                    }`) : null,
                   }
                 )
                 .exec(async (err, record, wasCreated) => {
@@ -205,9 +205,9 @@ module.exports = {
                       { dataClass: key2 },
                       {
                         dataClass: key2,
-                        data: `${hr[key].value}${
+                        data: hr[key] ? (`${hr[key].value}${
                           hr[key].units ? hr[key].units : ``
-                        }`,
+                        }`) : null,
                       }
                     )
                     .fetch();
