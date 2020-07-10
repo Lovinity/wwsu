@@ -9,7 +9,7 @@
     "@sailshq/lodash": "^3.10.4",
     "@sailshq/socket.io-redis": "^5.2.0",
     "async": "^3.2.0",
-    "bcrypt": "^2.0.1",
+    "bcrypt": "^5.0.0",
     "breakdance": "^3.0.1",
     "crypto-random-string": "^1.0.0",
     "dark-sky": "^1.1.5",
