@@ -8,6 +8,9 @@ module.exports = {
   exits: {},
 
   fn: async function (inputs) {
+    // Don't execute until we have node 12
+    return;
+
     if (
       !sails.config.custom.climacell.api ||
       sails.config.custom.climacell.api === ""
