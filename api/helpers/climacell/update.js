@@ -48,7 +48,7 @@ module.exports = {
     );
     if (realtime.body) {
       for (var key in realtime.body) {
-        if (Object.prototype.hasOwnProperty.call(realtime, key)) {
+        if (Object.prototype.hasOwnProperty.call(realtime.body, key)) {
           var key2 = `realtime-${key.replace("_", "-")}`;
           await new Promise(async (resolve) => {
             sails.models.climacell
@@ -56,9 +56,9 @@ module.exports = {
                 { dataClass: key2 },
                 {
                   dataClass: key2,
-                  data: realtime[key]
-                    ? `${realtime[key].value}${
-                        realtime[key].units ? realtime[key].units : ``
+                  data: realtime.body[key]
+                    ? `${realtime.body[key].value}${
+                        realtime.body[key].units ? realtime.body[key].units : ``
                       }`
                     : null,
                 }
@@ -77,9 +77,11 @@ module.exports = {
                     { dataClass: key2 },
                     {
                       dataClass: key2,
-                      data: realtime[key]
-                        ? `${realtime[key].value}${
-                            realtime[key].units ? realtime[key].units : ``
+                      data: realtime.body[key]
+                        ? `${realtime.body[key].value}${
+                            realtime.body[key].units
+                              ? realtime.body[key].units
+                              : ``
                           }`
                         : null,
                     }
@@ -111,7 +113,7 @@ module.exports = {
         },
       }
     );
-    if (nowcast.body && typeof nowcast.body.map === "function") {
+    if (nowcast.body && nowcast.body.constructor === Array) {
       var nowcastMaps = nowcast.body.map(async (nc, index) => {
         for (var key in nc) {
           if (Object.prototype.hasOwnProperty.call(nc, key)) {
@@ -183,7 +185,7 @@ module.exports = {
         },
       }
     );
-    if (hourly.body && typeof hourly.body.map === "function") {
+    if (hourly.body && typeof hourly.body.constructor === Array) {
       var hourlyMaps = hourly.body.map(async (hr, index) => {
         for (var key in hr) {
           if (Object.prototype.hasOwnProperty.call(hr, key)) {
