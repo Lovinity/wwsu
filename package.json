@@ -36,8 +36,7 @@
     "sanitize-html": "^1.22.1",
     "shorthash": "0.0.2",
     "url-safe-string": "^1.1.0",
-    "xml2js": "^0.4.23",
-    "xml2json": "^0.11.2"
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@sailshq/eslint": "^4.19.3",
