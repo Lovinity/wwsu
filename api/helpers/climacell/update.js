@@ -46,6 +46,10 @@ module.exports = {
         },
       }
     );
+    if (realtime.body.errorCode) {
+      sails.log.error(new Error(realtime.body.message));
+      return;
+    }
     if (realtime.body) {
       for (var key in realtime.body) {
         if (Object.prototype.hasOwnProperty.call(realtime.body, key)) {
@@ -113,6 +117,10 @@ module.exports = {
         },
       }
     );
+    if (nowcast.body.errorCode) {
+      sails.log.error(new Error(nowcast.body.message));
+      return;
+    }
     if (nowcast.body && nowcast.body.constructor === Array) {
       var nowcastMaps = nowcast.body.map(async (nc, index) => {
         for (var key in nc) {
@@ -185,6 +193,12 @@ module.exports = {
         },
       }
     );
+
+    if (hourly.body.errorCode) {
+      sails.log.error(new Error(hourly.body.message));
+      return;
+    }
+
     if (hourly.body && typeof hourly.body.constructor === Array) {
       var hourlyMaps = hourly.body.map(async (hr, index) => {
         for (var key in hr) {
