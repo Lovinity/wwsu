@@ -13,6 +13,7 @@
     "breakdance": "^3.0.1",
     "crypto-random-string": "^1.0.0",
     "dark-sky": "^1.1.5",
+    "deasync": "^0.1.20",
     "got": "^11.5.0",
     "grunt": "^1.1.0",
     "he": "^1.2.0",
@@ -35,7 +36,6 @@
     "sanitize-html": "^1.22.1",
     "shorthash": "0.0.2",
     "url-safe-string": "^1.1.0",
-    "wait-for-stuff": "^1.4.0",
     "xml2js": "^0.4.23",
     "xml2json": "^0.11.2"
   },
