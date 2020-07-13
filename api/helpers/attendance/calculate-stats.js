@@ -44,7 +44,7 @@ module.exports = {
 
         // 60 points for every 1 ratio
         aScore += (aWeek.ratio * 60)
-        bScore += (aWeek.ratio * 60)
+        bScore += (bWeek.ratio * 60)
 
         // 3 points (divided by showtime / 60) for every message
         aScore += ((3 / (aWeek.showtime / 60)) * aWeek.messages)
