@@ -47,7 +47,7 @@ module.exports = {
                 {
                   dataClass: key2,
                   data: body[key]
-                    ? `${body[key].value}${
+                    ? `${body[key].value} ${
                         body[key].units ? body[key].units : ``
                       }`
                     : null,
@@ -68,7 +68,7 @@ module.exports = {
                     {
                       dataClass: key2,
                       data: body[key]
-                        ? `${body[key].value}${
+                        ? `${body[key].value} ${
                             body[key].units ? body[key].units : ``
                           }`
                         : null,
@@ -115,7 +115,7 @@ module.exports = {
                   {
                     dataClass: key2,
                     data: nc[key]
-                      ? `${nc[key].value}${nc[key].units ? nc[key].units : ``}`
+                      ? `${nc[key].value} ${nc[key].units ? nc[key].units : ``}`
                       : null,
                   }
                 )
@@ -134,7 +134,7 @@ module.exports = {
                       {
                         dataClass: key2,
                         data: nc[key]
-                          ? `${nc[key].value}${
+                          ? `${nc[key].value} ${
                               nc[key].units ? nc[key].units : ``
                             }`
                           : null,
@@ -152,7 +152,7 @@ module.exports = {
     }
 
     // Hourly forecast
-    var { body } = await got("https://api.climacell.co/v3/weather/hourly", {
+    var { body } = await got("https://api.climacell.co/v3/weather/forecast/hourly", {
       method: "GET",
       searchParams: {
         lat: sails.config.custom.climacell.position.latitude,
@@ -183,7 +183,7 @@ module.exports = {
                   {
                     dataClass: key2,
                     data: hr[key]
-                      ? `${hr[key].value}${hr[key].units ? hr[key].units : ``}`
+                      ? `${hr[key].value} ${hr[key].units ? hr[key].units : ``}`
                       : null,
                   }
                 )
@@ -202,7 +202,7 @@ module.exports = {
                       {
                         dataClass: key2,
                         data: hr[key]
-                          ? `${hr[key].value}${
+                          ? `${hr[key].value} ${
                               hr[key].units ? hr[key].units : ``
                             }`
                           : null,
