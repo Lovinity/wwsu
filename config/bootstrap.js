@@ -2105,6 +2105,22 @@ module.exports.bootstrap = async function (done) {
     });
   });
 
+  // Every fifth minute at second 11, refresh sails.models.climacell weather information
+  sails.log.verbose(`BOOTSTRAP: scheduling climacell CRON.`);
+  cron.schedule("11 */5 * * * *", () => {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      sails.log.debug(`CRON climacell called.`);
+      try {
+        await sails.helpers.climacell.update();
+        return resolve();
+      } catch (e) {
+        sails.log.error(e);
+        return reject(e);
+      }
+    });
+  });
+
   // every hour at second 12, check all noFade tracks and remove any fading.
   sails.log.verbose(
     `BOOTSTRAP: scheduling checkNoFadeAndNegativeDuration CRON.`
