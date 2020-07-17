@@ -19,7 +19,7 @@ module.exports = {
     // Start with real-time data
     var { body } = await got("https://api.climacell.co/v3/weather/realtime", {
       method: "GET",
-      query: {
+      searchParams: {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
@@ -86,7 +86,7 @@ module.exports = {
     // Nowcast
     var { body } = await got("https://api.climacell.co/v3/weather/nowcast", {
       method: "GET",
-      query: {
+      searchParams: {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
@@ -154,7 +154,7 @@ module.exports = {
     // Hourly forecast
     var { body } = await got("https://api.climacell.co/v3/weather/hourly", {
       method: "GET",
-      query: {
+      searchParams: {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
