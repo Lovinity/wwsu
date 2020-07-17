@@ -1,4 +1,4 @@
-const got = require('got');
+const got = require("got");
 
 module.exports = {
   friendlyName: "Update",
@@ -23,22 +23,8 @@ module.exports = {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
-        fields: [
-          "temp",
-          "feels_like",
-          "humidity",
-          "dewpoint",
-          "wind_speed",
-          "wind_direction",
-          "wind_gust",
-          "precipitation",
-          "precipitation_type",
-          "visibility",
-          "cloud_cover",
-          "weather_code",
-          "epa_health_concern",
-          "road_risk_score",
-        ],
+        fields:
+          "temp,feels_like,humidity,dewpoint,wind_speed,wind_direction,wind_gust,precipitation,precipitation_type,visibility,cloud_cover,weather_code,epa_health_concern,road_risk_score",
       },
       responseType: "json",
       headers: {
@@ -47,7 +33,7 @@ module.exports = {
       },
     });
     if (body.errorCode) {
-      sails.log.error(new Error(body.message));
+      sails.log.error(new Error(body));
       return;
     }
     if (body) {
@@ -105,7 +91,7 @@ module.exports = {
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
         timestep: 5,
-        fields: ["precipitation", "precipitation_type"],
+        fields: "precipitation,precipitation_type",
       },
       responseType: "json",
       headers: {
@@ -114,7 +100,7 @@ module.exports = {
       },
     });
     if (body.errorCode) {
-      sails.log.error(new Error(body.message));
+      sails.log.error(new Error(body));
       return;
     }
     if (body && body.constructor === Array) {
@@ -172,14 +158,8 @@ module.exports = {
         lat: sails.config.custom.climacell.position.latitude,
         lon: sails.config.custom.climacell.position.longitude,
         unit_system: sails.config.custom.climacell.unitSystem,
-        fields: [
-          "temp",
-          "precipitation",
-          "precipitation_type",
-          "precipitation_probability",
-          "cloud_cover",
-          "weather_code",
-        ],
+        fields:
+          "temp,precipitation,precipitation_type,precipitation_probability,cloud_cover,weather_code",
       },
       responseType: "json",
       headers: {
@@ -188,7 +168,7 @@ module.exports = {
       },
     });
     if (body.errorCode) {
-      sails.log.error(new Error(body.message));
+      sails.log.error(new Error(body));
       return;
     }
     if (body && typeof body.constructor === Array) {
