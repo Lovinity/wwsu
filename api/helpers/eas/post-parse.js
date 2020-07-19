@@ -17,22 +17,25 @@ module.exports = {
       // Process sails.models.eas.pendingAlerts
       for (var key in sails.models.eas.pendingAlerts) {
         if (Object.prototype.hasOwnProperty.call(sails.models.eas.pendingAlerts, key)) {
-          sails.log.verbose(`Processing EAS`, sails.models.eas.pendingAlerts[key])
+          sails.log.verbose(`Finalizing alert`, sails.models.eas.pendingAlerts[key])
 
           // Do not process alerts containing no information
           if (sails.models.eas.pendingAlerts[key].information === '' || sails.models.eas.pendingAlerts[key].information === null) {
+            sails.log.verbose(`Alert has no information. Bailing.`)
             delete sails.models.eas.pendingAlerts[key]
             continue
           }
 
           // New alerts should be created
           if (sails.models.eas.pendingAlerts[key]._new) {
+            sails.log.verbose(`Alert is new. Creating.`)
             delete sails.models.eas.pendingAlerts[key]._new
             await sails.models.eas.create(sails.models.eas.pendingAlerts[key]).fetch()
             delete sails.models.eas.pendingAlerts[key]
 
             // Non-new alerts should be updated
           } else {
+            sails.log.verbose(`Alert is old but has had changes. Updating.`)
             delete sails.models.eas.pendingAlerts[key]._new
             await sails.models.eas.update({ source: sails.models.eas.pendingAlerts[key].source, reference: sails.models.eas.pendingAlerts[key].reference }, sails.models.eas.pendingAlerts[key]).fetch()
             delete sails.models.eas.pendingAlerts[key]

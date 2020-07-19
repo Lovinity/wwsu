@@ -61,7 +61,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper eas.addAlert called.')
+    sails.log.debug(`Helper eas.addAlert called for ${inputs.county}/${inputs.alert}.`)
     try {
       var criteria = {}
 
@@ -93,7 +93,7 @@ module.exports = {
         })
       // exists
       if (record) {
-        sails.log.verbose('Alert already exists.')
+        sails.log.verbose(`Alert ${inputs.county}/${inputs.alert} already exists.`)
         // Detect if the county issuing the alert is already in the alert. If not, add the county in.
         var temp = record.counties.split(', ')
         if (temp.indexOf(inputs.county) === -1) { temp.push(inputs.county) }
@@ -112,7 +112,7 @@ module.exports = {
         }
         if (typeof inputs.information !== 'undefined' && inputs.information !== null) { criteria.information = inputs.information }
 
-        sails.log.silly(`Criteria: ${criteria}`)
+        sails.log.verbose(`Criteria: ${criteria}`)
 
         // Detect any changes in the alert. If a change is detected, we will do a database update.
         var updateIt = false
@@ -123,14 +123,14 @@ module.exports = {
             }
           }
         }
-        sails.log.silly(`Needs updating?: ${updateIt}`)
+        sails.log.silly(`${inputs.county}/${inputs.alert} Needs updating?: ${updateIt}`)
         if (updateIt) {
           criteria._new = false
           processPending(criteria)
         }
         return exits.success()
       } else { // Does not exist; new alert
-        sails.log.verbose('Alert does not exist.')
+        sails.log.verbose(`Alert ${inputs.county}/${inputs.alert} is new.`)
 
         // Prepare criteria
         criteria = {
@@ -144,6 +144,8 @@ module.exports = {
           expires: inputs.expires !== null ? moment(inputs.expires).toISOString(true) : moment().add(1, 'hours').toISOString(true),
           information: inputs.information || ''
         }
+
+        sails.log.verbose(`Initial criteria: ${criteria}`);
 
         // If this alert came from NWS, we need to GET a separate URL for alert information before we create the record.
         if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
@@ -161,17 +163,22 @@ module.exports = {
               entry.children.map(entry2 => { alert[entry2.name] = entry2.value })
 
               // Sometimes, EAS will return "This alert has expired". If so, leave information blank.
-              if (!alert.description.includes('This alert has expired')) { criteria.information = alert.description + '. Precautionary / Preparedness actions: ' + alert.instruction }
+              if (alert.description && !alert.description.toLowerCase().includes('this alert has expired')) { 
+                criteria.information = alert.description + '. Precautionary / Preparedness actions: ' + alert.instruction;
+                sails.log.verbose(`Alert ${inputs.county}/${inputs.alert} is still valid.`)
+              } else {
+                sails.log.verbose(`Alert ${inputs.county}/${inputs.alert} has expired, according to NWS`)
+              }
               sails.log.silly(`Criteria: ${criteria}`)
               criteria._new = true
-              processPending(criteria)
+              processPending(criteria);
               return true
             })
           await Promise.all(maps)
 
           return exits.success()
         } else {
-          sails.log.silly(`Criteria: ${criteria}`)
+          sails.log.verbose(`Criteria: ${criteria}`);
           criteria._new = true
           processPending(criteria)
           return exits.success()

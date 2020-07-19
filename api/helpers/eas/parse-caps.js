@@ -18,7 +18,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper eas.parseCaps called.')
+    sails.log.debug(`Helper eas.parseCaps called on county ${inputs.county}.`)
     try {
       var maps = inputs.body.children
         .filter(entry => typeof entry.name !== 'undefined' && entry.name === 'entry')
@@ -32,11 +32,12 @@ module.exports = {
           if (typeof alert['id'] !== 'undefined' && typeof alert['cap:status'] !== 'undefined' && alert['cap:status'] === 'Actual') {
             // Skip expired alerts
             if (moment().isBefore(moment(alert['cap:expires']))) {
-              sails.log.verbose(`Processing ${index}.`)
+              sails.log.verbose(`Processing alert ${index} for county ${inputs.county}.`)
               var color = '#787878'
               if (alert['cap:event'] in sails.config.custom.EAS.alerts) { // Is the alert in our array of alerts to alert for? Get its color if so.
                 color = sails.config.custom.EAS.alerts[alert['cap:event']]
               } else { // If it is not in our array, then it is not an alert we should publish. Resolve to the next one.
+                sails.log.verbose(`Alert ${index}/${inputs.county} (${alert['cap:event']}) is not in our process list. Ignoring.`)
                 return false
               }
 
@@ -46,10 +47,10 @@ module.exports = {
               // Mark this alert as active in the caps
               sails.models.eas.activeCAPS.push(alert['id'])
             } else {
-              sails.log.verbose(`Skipped ${index} because it is expired.`)
+              sails.log.verbose(`Skipped ${index}/${inputs.county} because it is expired.`)
             }
           } else {
-            sails.log.verbose(`Skipped ${index} because it was not a valid alert.`)
+            sails.log.verbose(`Skipped ${index}/${inputs.county} because it was not a valid alert.`)
           }
           return true
         })
