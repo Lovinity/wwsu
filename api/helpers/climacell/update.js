@@ -16,6 +16,8 @@ module.exports = {
     )
       return;
 
+    var records = await sails.models.climacell.find();
+
     // Start with real-time data
     var { body } = await got("https://api.climacell.co/v3/weather/realtime", {
       method: "GET",
@@ -41,16 +43,17 @@ module.exports = {
         if (Object.prototype.hasOwnProperty.call(body, key)) {
           var key2 = `realtime-${key.replace("_", "-")}`;
           await new Promise(async (resolve) => {
+            var data = body[key]
+              ? `${body[key].value}${
+                  body[key].units ? ` ${body[key].units}` : ``
+                }`
+              : null;
             sails.models.climacell
               .findOrCreate(
                 { dataClass: key2 },
                 {
                   dataClass: key2,
-                  data: body[key]
-                    ? `${body[key].value} ${
-                        body[key].units ? body[key].units : ``
-                      }`
-                    : null,
+                  data: data,
                 }
               )
               .exec(async (err, record, wasCreated) => {
@@ -62,19 +65,20 @@ module.exports = {
                   resolve();
                 }
 
-                await sails.models.climacell
-                  .update(
-                    { dataClass: key2 },
-                    {
-                      dataClass: key2,
-                      data: body[key]
-                        ? `${body[key].value} ${
-                            body[key].units ? body[key].units : ``
-                          }`
-                        : null,
-                    }
-                  )
-                  .fetch();
+                var original = records.find(
+                  (record) => record.dataClass === key2
+                );
+                if (!original || original.data !== data) {
+                  await sails.models.climacell
+                    .update(
+                      { dataClass: key2 },
+                      {
+                        dataClass: key2,
+                        data: data,
+                      }
+                    )
+                    .fetch();
+                }
 
                 resolve();
               });
@@ -109,14 +113,15 @@ module.exports = {
           if (Object.prototype.hasOwnProperty.call(nc, key)) {
             var key2 = `nc-${index}-${key.replace("_", "-")}`;
             await new Promise(async (resolve) => {
+              var data = nc[key]
+                ? `${nc[key].value}${nc[key].units ? ` ${nc[key].units}` : ``}`
+                : null;
               sails.models.climacell
                 .findOrCreate(
                   { dataClass: key2 },
                   {
                     dataClass: key2,
-                    data: nc[key]
-                      ? `${nc[key].value} ${nc[key].units ? nc[key].units : ``}`
-                      : null,
+                    data: data,
                   }
                 )
                 .exec(async (err, record, wasCreated) => {
@@ -128,19 +133,20 @@ module.exports = {
                     resolve();
                   }
 
-                  await sails.models.climacell
-                    .update(
-                      { dataClass: key2 },
-                      {
-                        dataClass: key2,
-                        data: nc[key]
-                          ? `${nc[key].value} ${
-                              nc[key].units ? nc[key].units : ``
-                            }`
-                          : null,
-                      }
-                    )
-                    .fetch();
+                  var original = records.find(
+                    (record) => record.dataClass === key2
+                  );
+                  if (!original || original.data !== data) {
+                    await sails.models.climacell
+                      .update(
+                        { dataClass: key2 },
+                        {
+                          dataClass: key2,
+                          data: data,
+                        }
+                      )
+                      .fetch();
+                  }
 
                   resolve();
                 });
@@ -152,21 +158,24 @@ module.exports = {
     }
 
     // Hourly forecast
-    var { body } = await got("https://api.climacell.co/v3/weather/forecast/hourly", {
-      method: "GET",
-      searchParams: {
-        lat: sails.config.custom.climacell.position.latitude,
-        lon: sails.config.custom.climacell.position.longitude,
-        unit_system: sails.config.custom.climacell.unitSystem,
-        fields:
-          "temp,precipitation,precipitation_type,precipitation_probability,cloud_cover,weather_code",
-      },
-      responseType: "json",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: sails.config.custom.climacell.api,
-      },
-    });
+    var { body } = await got(
+      "https://api.climacell.co/v3/weather/forecast/hourly",
+      {
+        method: "GET",
+        searchParams: {
+          lat: sails.config.custom.climacell.position.latitude,
+          lon: sails.config.custom.climacell.position.longitude,
+          unit_system: sails.config.custom.climacell.unitSystem,
+          fields:
+            "temp,precipitation,precipitation_type,precipitation_probability,cloud_cover,weather_code",
+        },
+        responseType: "json",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: sails.config.custom.climacell.api,
+        },
+      }
+    );
     if (body.errorCode) {
       sails.log.error(new Error(body));
       return;
@@ -177,14 +186,15 @@ module.exports = {
           if (Object.prototype.hasOwnProperty.call(hr, key)) {
             var key2 = `hr-${index}-${key.replace("_", "-")}`;
             await new Promise(async (resolve) => {
+              var data = hr[key]
+                ? `${hr[key].value}${hr[key].units ? ` ${hr[key].units}` : ``}`
+                : null;
               sails.models.climacell
                 .findOrCreate(
                   { dataClass: key2 },
                   {
                     dataClass: key2,
-                    data: hr[key]
-                      ? `${hr[key].value} ${hr[key].units ? hr[key].units : ``}`
-                      : null,
+                    data: data,
                   }
                 )
                 .exec(async (err, record, wasCreated) => {
@@ -196,19 +206,20 @@ module.exports = {
                     resolve();
                   }
 
-                  await sails.models.climacell
-                    .update(
-                      { dataClass: key2 },
-                      {
-                        dataClass: key2,
-                        data: hr[key]
-                          ? `${hr[key].value} ${
-                              hr[key].units ? hr[key].units : ``
-                            }`
-                          : null,
-                      }
-                    )
-                    .fetch();
+                  var original = records.find(
+                    (record) => record.dataClass === key2
+                  );
+                  if (!original || original.data !== data) {
+                    await sails.models.climacell
+                      .update(
+                        { dataClass: key2 },
+                        {
+                          dataClass: key2,
+                          data: data,
+                        }
+                      )
+                      .fetch();
+                  }
 
                   resolve();
                 });
