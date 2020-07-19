@@ -112,7 +112,7 @@ module.exports = {
         }
         if (typeof inputs.information !== 'undefined' && inputs.information !== null) { criteria.information = inputs.information }
 
-        sails.log.verbose(`Criteria: ${criteria}`)
+        sails.log.verbose(`Criteria`, criteria)
 
         // Detect any changes in the alert. If a change is detected, we will do a database update.
         var updateIt = false
@@ -145,7 +145,7 @@ module.exports = {
           information: inputs.information || ''
         }
 
-        sails.log.verbose(`Initial criteria: ${criteria}`);
+        sails.log.verbose(`Initial criteria`, criteria);
 
         // If this alert came from NWS, we need to GET a separate URL for alert information before we create the record.
         if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
