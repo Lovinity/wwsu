@@ -1,25 +1,24 @@
 module.exports = {
+  friendlyName: "Meta / Get",
 
-  friendlyName: 'Meta / Get',
+  description:
+    "Get the current Meta. If the request is a socket, subscribe to meta changes.",
 
-  description: 'Get the current Meta. If the request is a socket, subscribe to meta changes.',
-
-  inputs: {
-  },
+  inputs: {},
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller meta/get called.')
+    sails.log.debug("Controller meta/get called.");
 
     // Subscribe to socket if applicable
     if (this.req.isSocket) {
-      sails.sockets.join(this.req, 'meta')
-      sails.log.verbose('Request was a socket. Joining meta.')
+      sails.sockets.join(this.req, "meta");
+      sails.log.verbose("Request was a socket. Joining meta.");
     }
 
-    // Return current meta, but update time to current time since it's not auto-updated automatically by changeMeta.
-    var returnData = sails.models.meta.memory
-    returnData.time = moment().toISOString(true)
-    return exits.success(returnData)
-  }
-
-}
+    // Return current meta, but update time to current time since it's not auto-updated automatically by changeMeta. Also include timezone of server.
+    var returnData = sails.models.meta.memory;
+    returnData.time = moment().toISOString(true);
+    returnData.timezone = moment.tz.guess();
+    return exits.success(returnData);
+  },
+};

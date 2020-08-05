@@ -11,7 +11,7 @@
  */
 
 // Declare global variables for a couple common libraries.
-global['moment'] = require('moment')
+global['moment'] = require('moment-timezone')
 require('moment-duration-format')
 global['needle'] = require('needle')
 

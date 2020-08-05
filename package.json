@@ -21,6 +21,7 @@
     "later": "^1.2.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
+    "moment-timezone": "^0.5.31",
     "needle": "^2.4.0",
     "node-cron": "^2.0.3",
     "nodemailer": "^6.4.8",
