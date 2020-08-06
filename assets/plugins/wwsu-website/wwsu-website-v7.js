@@ -119,13 +119,14 @@ $(document).ready(function () {
         streampath: "/live",
         streamtype: "other",
         streamurl: "https://server.wwsu1069.org",
-        songinformationinterval: "600000",
+        songinformationinterval: "86400000",
       });
     }
 
     // Add accessibility properties to flash player
     wwsuutil.waitForElement("#nativeflashradioplaystopcontainer", (element) => {
       $("#nativeflashradioplaystopcontainer").attr("tabindex", 0);
+      $("#nativeflashradiovolumegrab").attr("alt", "Play / Stop");
     });
     wwsuutil.waitForElement("#nativeflashradiovolumegrab", (element) => {
       $("#nativeflashradiovolumegrab").attr("tabindex", 0);
@@ -422,15 +423,9 @@ meta.on("newMeta", (response, _meta) => {
       $(".nowplaying-line2").html(_meta.line2);
       $(".nowplaying-topic").html(_meta.topic);
 
-      // Display a 10-second toast
-      $(document).Toasts("create", {
-        class: "bg-primary",
-        title: "Now Playing",
-        autohide: true,
-        delay: 10000,
-        body: `<p>${_meta.line1}</p><p>${_meta.line2}</p>`,
-        icon: "fas fa-play fa-lg",
-      });
+      // Update player info
+      $("#nativeflashradiochannelname").html(_meta.line1);
+      $("#nativeflashradiostatustext").html(_meta.line2);
     }
 
     if ("webchat" in response && !response.webchat) {
