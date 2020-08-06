@@ -87,57 +87,23 @@ try {
 $(document).ready(function () {
   try {
     // Initialize the web player
-    if (document.querySelector("#nativeflashradio")) {
-      $("#nativeflashradio").flashradio({
-        token: "dGZzd2ZzL3h4dHYyMTc6L3BzaAE=",
-        userinterface: "small",
-        backgroundcolor: "#263238",
-        themecolor: "#d31e38",
-        themefontcolor: "#ffffff",
-        startvolume: "75",
-        radioname: "WWSU 106.9 FM",
-        scroll: "auto",
-        autoplay: "false",
-        useanalyzer: "real",
-        analyzertype: "4",
-        usecover: "true",
-        usestreamcorsproxy: "false",
-        affiliatetoken: "1000lIPN",
-        debug: "false",
-        ownsongtitleurl: "",
-        radiocover: "",
-        songgooglefontname: "",
-        songfontname: "",
-        titlegooglefontname: "",
-        titlefontname: "",
-        corsproxy: "https://html5radioplayer2us.herokuapp.com/?q=",
-        streamprefix: "/stream",
-        mountpoint: "",
-        radiouid: "",
-        apikey: "",
-        streamid: "1",
-        streampath: "/live",
-        streamtype: "other",
-        streamurl: "https://server.wwsu1069.org",
-        songinformationinterval: "86400000",
+    if (document.querySelector("#single-song-player")) {
+      Amplitude.init({
+        bindings: {
+          32: "play_pause",
+        },
+        songs: [
+          {
+            url: "https://server.wwsu1069.org/stream",
+            live: true
+          },
+        ],
       });
-    }
 
-    // Add accessibility properties to flash player
-    wwsuutil.waitForElement("#nativeflashradioplaystopcontainer", (element) => {
-      $("#nativeflashradioplaystopcontainer").attr("tabindex", 0);
-      $("#nativeflashradiovolumegrab").attr("alt", "Play / Stop");
-    });
-    wwsuutil.waitForElement("#nativeflashradiovolumegrab", (element) => {
-      $("#nativeflashradiovolumegrab").attr("tabindex", 0);
-      $("#nativeflashradiovolumegrab").attr("alt", "Change Volume");
-    });
-    wwsuutil.waitForElement("#nativeflashradiovolumehit", (element) => {
-      $("#nativeflashradiovolumehit").attr("alt", "Volume");
-    });
-    wwsuutil.waitForElement("#nativeflashradioimagehit1", (element) => {
-      $("#nativeflashradioimagehit1").attr("alt", "logo");
-    });
+      window.onkeydown = function (e) {
+        return !(e.keyCode == 32);
+      };
+    }
 
     // Initialize menu items
     navigation.addItem(
@@ -422,10 +388,6 @@ meta.on("newMeta", (response, _meta) => {
       $(".nowplaying-line1").html(_meta.line1);
       $(".nowplaying-line2").html(_meta.line2);
       $(".nowplaying-topic").html(_meta.topic);
-
-      // Update player info
-      $("#nativeflashradiochannelname").html(_meta.line1);
-      $("#nativeflashradiostatustext").html(_meta.line2);
     }
 
     if ("webchat" in response && !response.webchat) {
