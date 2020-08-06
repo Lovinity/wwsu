@@ -36,6 +36,15 @@
     <script src="/plugins/pace-progress/pace.min.js"></script>
 
     <!-- Font Awesome Icons -->
+    <style>
+      .icon::before {
+        display: inline-block;
+        font-style: normal;
+        font-variant: normal;
+        text-rendering: auto;
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
     <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
     <!-- overlayScrollbars -->
     <link
@@ -94,13 +103,17 @@
         float: left;
         margin-left: 10px;
       }
-      div.control-container div.amplitude-play-pause.amplitude-paused {
+      div.control-container div.amplitude-play-pause.amplitude-paused::before {
         content: "\f144";
         font-size: 54px;
+        font-weight: 900;
+        font-family: "Font Awesome 5 Free";
       }
-      div.control-container div.amplitude-play-pause.amplitude-playing {
+      div.control-container div.amplitude-play-pause.amplitude-playing::before {
         content: "\f28b";
         font-size: 54px;
+        font-weight: 900;
+        font-family: "Font Awesome 5 Free";
       }
       div.control-container div.meta-container {
         float: left;
@@ -109,17 +122,13 @@
         color: white;
         margin-top: 10px;
       }
-      div.control-container
-        div.meta-container
-        span.nowplaying-line1 {
+      div.control-container div.meta-container span.nowplaying-line1 {
         font-family: "Open Sans", sans-serif;
         font-size: 16px;
         color: #fff;
         display: block;
       }
-      div.control-container
-        div.meta-container
-        span.nowplaying-line2 {
+      div.control-container div.meta-container span.nowplaying-line2 {
         font-family: "Open Sans", sans-serif;
         font-weight: 100;
         font-size: 12px;
@@ -221,7 +230,7 @@
               role="menu"
               data-accordion="false"
             >
-            <li class="nav-header text-light">ON-AIR</li>
+              <li class="nav-header text-light">ON-AIR</li>
               <li class="nav-item">
                 <a
                   href="#"
