@@ -834,7 +834,7 @@ function updateCalendar() {
 
       $("#schedule-events").html(html);
 
-      for (var i = 1; i < 7; i++) {
+      for (var i = 1; i < 14; i++) {
         $(`#schedule-select-${i}`).html(
           moment(meta.meta.time)
             .startOf(`day`)
