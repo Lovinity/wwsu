@@ -148,6 +148,15 @@ module.exports = {
             type: 'json'
         },
 
+        recurrenceRules: {
+            type: 'json'
+        },
+
+        startTime: {
+            type: 'string',
+            allowNull: true
+        },
+
         recurH: {
             type: 'json'
         },
