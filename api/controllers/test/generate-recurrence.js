@@ -50,6 +50,10 @@ module.exports = {
         }
 
         if (record.recurDW && record.recurDW.length > 0) {
+          record.recurDW = record.recurDW.map((recur) => {
+            recur -= 1;
+            return recur;
+          });
           criteria.recurrenceRules.push({
             measure: "daysOfWeek",
             units: record.recurDW,
