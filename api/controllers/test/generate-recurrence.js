@@ -8,7 +8,7 @@ module.exports = {
   exits: {},
 
   fn: async function (inputs, exits) {
-    var records = await sails.models.schedules.find();
+    var records = await sails.models.schedule.find();
 
     var maps = records.map(async (record) => {
       var criteria = { startTime: null, recurrenceRules: null };
