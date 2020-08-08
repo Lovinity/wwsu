@@ -67,8 +67,16 @@ module.exports = {
       if (inputs.email)
         criteria.email = inputs.email;
 
+      if (inputs.email === "remove@example.com") {
+        criteria.email = null;
+      }
+
       // Encrypt login
-      if (inputs.login !== null && typeof inputs.login !== 'undefined') { criteria.login = bcrypt.hashSync(inputs.login, 10) }
+      if (inputs.login !== null && inputs.login !== "remove" && typeof inputs.login !== 'undefined') { criteria.login = bcrypt.hashSync(inputs.login, 10) }
+
+      if (inputs.login === "remove") {
+        criteria.login = null;
+      }
 
       // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
       var criteriaB = _.cloneDeep(criteria)
