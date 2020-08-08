@@ -89,9 +89,6 @@ $(document).ready(function () {
     // Initialize the web player
     if (document.querySelector("#single-song-player")) {
       Amplitude.init({
-        bindings: {
-          32: "play_pause",
-        },
         songs: [
           {
             url: "https://server.wwsu1069.org/stream",
@@ -99,10 +96,6 @@ $(document).ready(function () {
           },
         ],
       });
-
-      window.onkeydown = function (e) {
-        return !(e.keyCode == 32);
-      };
     }
 
     // Initialize menu items
@@ -157,7 +150,7 @@ $(document).ready(function () {
       $("#modal-eventinfo").modal("hide");
     });
     $(`#modal-eventinfo-subscribe-once`).keypress((e) => {
-      if (e.which === 13) {
+      if (e.key === "Enter") {
         subscribe(`calendar-once`, viewingEvent.unique);
         $("#modal-eventinfo").modal("hide");
       }
@@ -167,7 +160,7 @@ $(document).ready(function () {
       $("#modal-eventinfo").modal("hide");
     });
     $(`#modal-eventinfo-subscribe-all`).keypress((e) => {
-      if (e.which === 13) {
+      if (e.key === "Enter") {
         subscribe(`calendar-all`, viewingEvent.calendarID);
         $("#modal-eventinfo").modal("hide");
       }
@@ -177,7 +170,7 @@ $(document).ready(function () {
       $("#modal-eventinfo").modal("hide");
     });
     $(`#modal-eventinfo-unsubscribe`).keypress((e) => {
-      if (e.which === 13) {
+      if (e.key === "Enter") {
         unsubscribe(viewingEvent.unique, viewingEvent.calendarID);
         $("#modal-eventinfo").modal("hide");
       }
@@ -535,13 +528,13 @@ meta.on("newMeta", (response, _meta) => {
                   track.likable && track.ID !== 0
                     ? `${
                         likedtracks.likedTracks.indexOf(track.ID) === -1
-                          ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>`
+                          ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="if (this.key === "Enter") likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>`
                           : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`
                       }`
                     : likedtracks.likedTracks.indexOf(track.track) === -1
                     ? `<button type="button" class="btn btn-info btn-small" tabindex="0" title="Tell the DJ you enjoy this track." onclick="likeTrack('${wwsuutil.escapeHTML(
                         track.track
-                      )}');" onkeydown="likeTrack('${wwsuutil.escapeHTML(
+                      )}');" onkeydown="if (this.key === "Enter") likeTrack('${wwsuutil.escapeHTML(
                         track.track
                       )}');">Like Track</button>`
                     : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`
@@ -814,7 +807,7 @@ function updateCalendar() {
     
                     <a href="#" class="btn btn-primary btn-block" onclick="displayEventInfo('${
                       event.unique
-                    }')" onkeydown="displayEventInfo('${
+                    }')" onkeydown="if (this.key === "Enter") displayEventInfo('${
               event.unique
             }')" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications."><b>More Info / Notifications</b></a>
                   </div>
@@ -1020,7 +1013,7 @@ function displayEventInfo(showID) {
           $("#modal-eventinfo").modal("hide");
         });
         $(`#modal-eventinfo-subscribe-all`).keypress((event) => {
-          if (event.which === 13) {
+          if (event.key === "Enter") {
             OneSignal.showSlidedownPrompt({ force: true });
             $("#modal-eventinfo").modal("hide");
           }
@@ -1390,7 +1383,7 @@ function loadTracks(skip = skipIt) {
               track.enabled === 1
                 ? `<button type="button" class="btn btn-success" onclick="loadTrackInfo(${
                     track.ID
-                  })" onkeydown="loadTrackInfo(${
+                  })" onkeydown="if (this.key === "Enter") loadTrackInfo(${
                     track.ID
                   })" title="Get more info, or request, ${wwsuutil.escapeHTML(
                     track.artist
@@ -1399,7 +1392,7 @@ function loadTracks(skip = skipIt) {
                   )}}">Info / Request</button>`
                 : `<button type="button" class="btn btn-info" onclick="loadTrackInfo(${
                     track.ID
-                  })" onkeydown="loadTrackInfo(${
+                  })" onkeydown="if (this.key === "Enter") loadTrackInfo(${
                     track.ID
                   })" title="Get more info about ${wwsuutil.escapeHTML(
                     track.artist
@@ -1500,7 +1493,7 @@ function loadTrackInfo(trackID) {
                                       <label for="track-request-message">Message for the DJ (optional)</label>
                                       <textarea class="form-control" id="track-request-message" rows="2" tabindex="0"></textarea>
                                       </div>                    
-                                      <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0" onclick="requestTrack(${response[0].ID})" onkeydown="requestTrack(${response[0].ID})">Place Request</button></div>`);
+                                      <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0" onclick="requestTrack(${response[0].ID})" onkeydown="if (this.key === "Enter") requestTrack(${response[0].ID})">Place Request</button></div>`);
         } else {
           $("#track-info-request")
             .html(`<div class="callout callout-${response[0].request.listDiv}">

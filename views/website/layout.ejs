@@ -183,7 +183,7 @@
     <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202007010035"></script>
     <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202007010035"></script>
     <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202007010035"></script>
-    <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008071833"></script>
+    <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008072314"></script>
   </head>
 
   <body
@@ -237,7 +237,7 @@
                   href="#"
                   class="nav-link"
                   id="nav-nowplaying"
-                  title="Now Playing"
+                  title="See what is currently on the air. Like/report recently played tracks."
                 >
                   <i class="nav-icon fas fa-play-circle"></i>
                   <p>
@@ -251,7 +251,7 @@
                   href="#"
                   class="nav-link"
                   id="nav-request"
-                  title="Request a Track"
+                  title="Request a track to be played on the air."
                 >
                   <i class="nav-icon fas fa-file-audio"></i>
                   <p>
@@ -281,7 +281,7 @@
                   href="#"
                   class="nav-link"
                   id="nav-chat"
-                  title="Chat with the DJ"
+                  title="Send messages with the DJ or other listeners."
                 >
                   <i class="nav-icon fas fa-comments"></i>
                   <p>
@@ -449,6 +449,7 @@
                   class="btn btn-success chat-blocker"
                   onclick="sendMessage()"
                   tabindex="0"
+                  title="Send the message publicly; other listeners can also see it."
                 >
                   Send Public
                 </button>
@@ -457,6 +458,7 @@
                   class="btn btn-danger chat-blocker"
                   onclick="sendMessage(true)"
                   tabindex="0"
+                  title="Send this message privately; only the DJ can see it."
                 >
                   Send Private
                 </button>
