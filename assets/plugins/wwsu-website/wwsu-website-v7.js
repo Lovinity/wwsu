@@ -813,6 +813,7 @@ function updateDirectorsCalendar() {
 
     directorsdb.db().each((dodo) => {
       try {
+        officeHours[dodo.ID] = ``;
         var color = "rgba(211, 47, 47, 0.15)";
         var text1 = "OUT";
         var theClass = "danger";
@@ -940,7 +941,7 @@ function updateDirectorsCalendar() {
                 endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike> (canceled)`;
               }
 
-              officeHours[event.director] = endText;
+              officeHours[event.director] += `${endText}`;
             });
 
           for (var officeHour in officeHours) {
