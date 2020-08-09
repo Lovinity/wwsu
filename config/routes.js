@@ -74,6 +74,13 @@ module.exports.routes = {
     }
   },
 
+  'GET /hours': {
+    view: 'website/hours',
+    locals: {
+      layout: 'website/layout',
+    }
+  },
+
   'GET /request': {
     view: 'website/request',
     locals: {
