@@ -38,9 +38,12 @@ try {
     processAnnouncements();
   });
 
+  // Directors
+  var directorsdb = new WWSUdirectors(socket, noReq);
+
   var messageIDs = [];
   var navigation = new WWSUNavigation();
-  var calendardb = new CalendarDb([], [], [], meta);
+  var calendardb = new WWSUcalendar(socket, meta, noReq);
   var newMessages = 0;
   var client = "";
   var automationpost = ``;
@@ -83,7 +86,7 @@ $(document).ready(function () {
         songs: [
           {
             url: "https://server.wwsu1069.org/stream",
-            live: true
+            live: true,
           },
         ],
       });
@@ -116,6 +119,16 @@ $(document).ready(function () {
       false,
       () => {
         updateCalendar();
+      }
+    );
+    navigation.addItem(
+      "#nav-hours",
+      "#section-hours",
+      "Office Hours - WWSU 106.9 FM Listener's Corner",
+      "/hours",
+      false,
+      () => {
+        updateDirectorsCalendar();
       }
     );
     navigation.addItem(
@@ -289,8 +302,8 @@ function doSockets(firsttime = false) {
       likedtracks.init();
       meta.init();
       announcements.init();
-      calendarSocket();
-      scheduleSocket();
+      directorsdb.init();
+      calendardb.init();
       loadGenres();
       onlineSocket();
       messagesSocket();
@@ -302,8 +315,8 @@ function doSockets(firsttime = false) {
       likedtracks.init();
       meta.init();
       announcements.init();
-      calendarSocket();
-      scheduleSocket();
+      directorsdb.init();
+      calendardb.init();
       loadGenres();
       onlineSocket(true);
       messagesSocket();
@@ -612,61 +625,13 @@ function processAnnouncements() {
     CALENDAR / SCHEDULE FUNCTIONS
 */
 
-socket.on("calendar", (data) => {
-  processCalendar(data);
-});
-
-socket.on("schedule", (data) => {
-  processSchedule(data);
-});
-
-/**
- * Process calendar records.
- *
- * @param {object} data Data received from WWSU according to websocket standards.
- * @param {boolean} replace Mark true if data is an array of records that should replace the database entirely.
- */
-function processCalendar(data, replace = false) {
-  calendardb.query("calendar", data, replace);
+calendardb.on("calendarUpdated", "renderer", (db) => {
   updateCalendar();
-}
-
-/**
- * Process calendar exception records.
- *
- * @param {object} data Data received from WWSU according to websocket standards.
- * @param {boolean} replace Mark true if data is an array of records that should replace the database entirely.
- */
-function processSchedule(data, replace = false) {
-  calendardb.query("schedule", data, replace);
-  updateCalendar();
-}
-
-/**
- * Hit the calendar WWSU endpoint and subscribe to socket events.
- */
-function calendarSocket() {
-  socket.post("/calendar/get", {}, function serverResponded(body) {
-    try {
-      processCalendar(body, true);
-    } catch (unusedE) {
-      setTimeout(calendarSocket, 10000);
-    }
-  });
-}
-
-/**
- * Hit the calendar schedule WWSU endpoint and subscribe to socket events.
- */
-function scheduleSocket() {
-  socket.post("/calendar/get-schedule", {}, function serverResponded(body) {
-    try {
-      processSchedule(body, true);
-    } catch (unusedE) {
-      setTimeout(scheduleSocket, 10000);
-    }
-  });
-}
+  updateDirectorsCalendar();
+});
+directorsdb.on("change", "renderer", () => {
+  updateDirectorsCalendar();
+});
 
 /**
  * Re-process calendar events
@@ -832,6 +797,177 @@ function updateCalendar() {
       .add(selectedOption + 1, "days")
       .startOf("day")
   );
+}
+
+/**
+ * Update director office hours
+ */
+function updateDirectorsCalendar() {
+  try {
+    var directors = {};
+
+    // Update directors html
+    var innercontent = document.getElementById("schedule-hours");
+    if (innercontent) {
+      innercontent.innerHTML = "";
+    }
+
+    directorsdb.db().each((dodo) => {
+      try {
+        directors[dodo.name] = dodo;
+        var color = "rgba(211, 47, 47, 0.25)";
+        var text1 = "OUT";
+        var theClass = "danger";
+        if (dodo.present) {
+          color = "rgba(56, 142, 60, 0.25)";
+          text1 = "IN";
+          theClass = "success";
+        }
+        if (innercontent) {
+          innercontent.innerHTML += `<div id="director-${
+            dodo.ID
+          }" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">
+            <div class="p-1 text-center" style="width: 100%;">${
+              dodo.avatar !== null && dodo.avatar !== ""
+                ? `<img src="${dodo.avatar}" width="96" class="rounded-circle">`
+                : jdenticon.toSvg(`Director ${dodo.name}`, 96)
+            }
+            <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+            <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${
+              dodo.name
+            }</span><br><span style="font-size: 0.8em;">${
+            dodo.position
+          }</span></div>
+            <h4><strong>Office Hours</strong></h4>
+            <div id="director-hours-${dodo.ID}"></div>
+            </div>
+        </div>`;
+        }
+      } catch (e) {
+        console.error(e);
+        iziToast.show({
+          title: "An error occurred - Please check the logs",
+          message: `Error occurred in processDirectors ddb iteration.`,
+        });
+      }
+    });
+
+    // A list of Office Hours for the directors
+
+    // Define a comparison function that will order calendar events by start time when we run the iteration
+    var compare = function (a, b) {
+      try {
+        if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
+          return -1;
+        }
+        if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
+          return 1;
+        }
+        if (a.ID < b.ID) {
+          return -1;
+        }
+        if (a.ID > b.ID) {
+          return 1;
+        }
+        return 0;
+      } catch (e) {
+        console.error(e);
+        iziToast.show({
+          title: "An error occurred - Please check the logs",
+          message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
+        });
+      }
+    };
+    window.requestAnimationFrame(() => {
+      calendardb.getEvents(
+        (events) => {
+          events
+            .compare(compare)
+            .filter((event) => event.type === "office-hours")
+            .map((event) => {
+              var temp = directors[event.director];
+
+              // No temp record? Exit immediately.
+              if (typeof temp === `undefined`) {
+                return null;
+              }
+
+              var directorID = temp.ID;
+
+              var temp2 = document.querySelector(
+                `#director-hours-${directorID}`
+              );
+
+              if (temp2 === null) {
+                return null;
+              }
+
+              // null start or end? Use a default to prevent errors.
+              if (!moment(event.start).isValid()) {
+                event.start = moment(meta.meta.time).startOf("day");
+              }
+              if (!moment(event.end).isValid()) {
+                event.end = moment(meta.meta.time).add(1, "days").startOf("day");
+              }
+
+              event.startT =
+                moment(event.start).minutes() === 0
+                  ? moment(event.start).format("h")
+                  : moment(event.start).format("h:mm");
+              if (
+                (moment(event.start).hours() < 12 &&
+                  moment(event.end).hours() >= 12) ||
+                (moment(event.start).hours() >= 12 &&
+                  moment(event.end).hours() < 12)
+              ) {
+                event.startT += moment(event.start).format("A");
+              }
+              event.endT =
+                moment(event.end).minutes() === 0
+                  ? moment(event.end).format("hA")
+                  : moment(event.end).format("h:mmA");
+
+              // Update strings if need be, if say, start time was before this day, or end time is after this day.
+              if (
+                moment(event.end).isAfter(
+                  moment(event.start).startOf("day").add(1, "days")
+                )
+              ) {
+                event.endT = `${moment(event.end).format("MM/DD ")} ${
+                  event.endT
+                }`;
+              }
+              event.startT = `${moment(event.start).format("MM/DD ")} ${
+                event.startT
+              }`;
+
+              var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
+              if (event.active === 0) {
+                endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT}</span></strike>`;
+              }
+              if (event.active === 2) {
+                endText = `<span class="text-info">${event.startT} - ${event.endT}</span>`;
+              }
+              if (event.active === -1) {
+                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`;
+              }
+
+              // Push the final product
+              temp2.innerHTML += `<div class="m-1 text-dark">${endText}</div>`;
+            });
+        },
+        moment().startOf("day"),
+        moment().add(7, "days").startOf("day"),
+        { type: "office-hours" }
+      );
+    });
+  } catch (e) {
+    iziToast.show({
+      title: "An error occurred - Please check the logs",
+      message: "Error occurred during the call of office hours.",
+    });
+    console.error(e);
+  }
 }
 
 /**
