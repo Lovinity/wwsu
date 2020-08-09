@@ -26,7 +26,7 @@ try {
   var djsdb = new WWSUdjs(socket, noReq, directorReq, null, null, meta);
   var djReq = new WWSUreq(
     socket,
-    machineID,
+    null,
     djsdb,
     null,
     "name",

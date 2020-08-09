@@ -21,7 +21,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // Add event listeners
     Status.on("change", "renderer", (db) => processStatus(db.get()));
     Directors.on("change", "renderer", () => {
-      calendarWorker.postMessage(["update"]);
+      updateCalendar();
     });
     Calendar.on("calendarUpdated", "renderer", (data, db) => {
       updateCalendar();
@@ -124,7 +124,7 @@ window.addEventListener("DOMContentLoaded", () => {
   */
 
     // Initialize slides manager
-    Slides(Meta);
+    Slides = Slides(Meta);
 
     // Director hours
     Slides.newSlide({
@@ -583,7 +583,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // Set / reset 1-second timer so we are not updating on literally every update pushed through sockets
     clearTimeout(officeHoursTimer);
     officeHoursTimer = setTimeout(() => {
-      calendardb.getEvents(
+      Calendar.getEvents(
         (events) => {
           var directorHours = [];
           var tasks = [];

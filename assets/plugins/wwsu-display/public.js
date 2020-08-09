@@ -43,7 +43,7 @@ window.addEventListener("DOMContentLoaded", () => {
       Meta
     );
     var Directors = new WWSUdirectors(socket, noReq);
-    var Eas = new WWSUeas(socket, noReq, directorReq, meta);
+    var Eas = new WWSUeas(socket, noReq, null, Meta);
     var Darksky = new WWSUdb(TAFFY()); // DEPRECATED
     var darkskyWorker = new Worker(
       "../../plugins/wwsu-display/workers/publicDarksky.js"
@@ -309,7 +309,7 @@ window.addEventListener("DOMContentLoaded", () => {
     wrapper.height = window.innerHeight;
 
     // Initialize slides
-    Slides(Meta);
+    Slides = Slides(Meta);
 
     if (!isStudio) {
       Slides.newSlide({
