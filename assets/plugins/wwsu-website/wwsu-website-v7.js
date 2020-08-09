@@ -40,7 +40,7 @@ try {
 
   // Directors
   var directorsdb = new WWSUdirectors(socket, noReq);
-  var officeHours = {};
+  var directorHours = {};
 
   var messageIDs = [];
   var navigation = new WWSUNavigation();
@@ -637,97 +637,108 @@ directorsdb.on("change", "renderer", () => {
 /**
  * Re-process calendar events
  */
+var calendarTimer;
 function updateCalendar() {
-  $("#schedule-events").html("Processing...");
+  clearTimeout(calendarTimer);
+  calendarTimer = setTimeout(() => {
+    $("#schedule-events").html("Processing...");
 
-  // Get the value of the currently selected calendar item
-  var selectedOption = $("#schedule-select").children("option:selected").val();
-  selectedOption = parseInt(selectedOption);
+    // Get the value of the currently selected calendar item
+    var selectedOption = $("#schedule-select")
+      .children("option:selected")
+      .val();
+    selectedOption = parseInt(selectedOption);
 
-  // Process events for the next 7 days
-  calendardb.getEvents(
-    (events) => {
-      var html = "";
+    // Process events for the next 7 days
+    calendardb.getEvents(
+      (events) => {
+        var html = "";
 
-      // Run through every event in memory and add appropriate ones into our formatted calendar variable.
-      events
-        .filter(
-          (event) =>
-            ["event", "onair-booking", "prod-booking", "office-hours"].indexOf(
-              event.type
-            ) === -1 &&
-            moment(event.start).isSameOrBefore(
-              moment(meta.meta.time)
-                .startOf(`day`)
-                .add(selectedOption + 1, `days`)
-            ) &&
-            moment(event.start).isSameOrAfter(
-              moment(meta.meta.time).startOf(`day`).add(selectedOption, `days`)
-            )
-        )
-        .map((event) => {
-          try {
-            var colorClass = `secondary`;
-            var iconClass = "far fa-calendar-alt";
+        // Run through every event in memory and add appropriate ones into our formatted calendar variable.
+        events
+          .filter(
+            (event) =>
+              [
+                "event",
+                "onair-booking",
+                "prod-booking",
+                "office-hours",
+              ].indexOf(event.type) === -1 &&
+              moment(event.start).isSameOrBefore(
+                moment(meta.meta.time)
+                  .startOf(`day`)
+                  .add(selectedOption + 1, `days`)
+              ) &&
+              moment(event.start).isSameOrAfter(
+                moment(meta.meta.time)
+                  .startOf(`day`)
+                  .add(selectedOption, `days`)
+              )
+          )
+          .map((event) => {
+            try {
+              var colorClass = `secondary`;
+              var iconClass = "far fa-calendar-alt";
 
-            switch (event.type) {
-              case "genre":
-              case "playlist":
-                colorClass = "primary";
-                iconClass = "fas fa-music";
-                break;
-              case "show":
-                colorClass = "danger";
-                iconClass = "fas fa-microphone";
-                break;
-              case "sports":
-                colorClass = "success";
-                iconClass = "fas fa-basketball-ball";
-                break;
-              case "remote":
-                colorClass = "purple";
-                iconClass = "fas fa-broadcast-tower";
-                break;
-              case "prerecord":
-                colorClass = "pink";
-                iconClass = "fas fa-play-circle";
-                break;
-            }
+              switch (event.type) {
+                case "genre":
+                case "playlist":
+                  colorClass = "primary";
+                  iconClass = "fas fa-music";
+                  break;
+                case "show":
+                  colorClass = "danger";
+                  iconClass = "fas fa-microphone";
+                  break;
+                case "sports":
+                  colorClass = "success";
+                  iconClass = "fas fa-basketball-ball";
+                  break;
+                case "remote":
+                  colorClass = "purple";
+                  iconClass = "fas fa-broadcast-tower";
+                  break;
+                case "prerecord":
+                  colorClass = "pink";
+                  iconClass = "fas fa-play-circle";
+                  break;
+              }
 
-            if (
-              ["canceled", "canceled-system", "canceled-changed"].indexOf(
-                event.scheduleType
-              ) !== -1
-            ) {
-              colorClass = "dark";
-            }
+              if (
+                ["canceled", "canceled-system", "canceled-changed"].indexOf(
+                  event.scheduleType
+                ) !== -1
+              ) {
+                colorClass = "dark";
+              }
 
-            var badgeInfo;
-            if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
-              badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
-            }
-            if (
-              ["updated", "updated-system"].indexOf(event.scheduleType) !==
-                -1 &&
-              (event.newTime !== null || event.duration !== null)
-            ) {
-              badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
-            }
-            if (
-              ["canceled", "canceled-system"].indexOf(event.scheduleType) !== -1
-            ) {
-              badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`;
-            }
+              var badgeInfo;
+              if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
+                badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
+              }
+              if (
+                ["updated", "updated-system"].indexOf(event.scheduleType) !==
+                  -1 &&
+                (event.newTime !== null || event.duration !== null)
+              ) {
+                badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
+              }
+              if (
+                ["canceled", "canceled-system"].indexOf(event.scheduleType) !==
+                -1
+              ) {
+                badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`;
+              }
 
-            var shouldBeDark =
-              ["canceled", "canceled-system", "canceled-changed"].indexOf(
-                event.scheduleType
-              ) !== -1 || moment().isAfter(moment(event.end));
+              var shouldBeDark =
+                ["canceled", "canceled-system", "canceled-changed"].indexOf(
+                  event.scheduleType
+                ) !== -1 || moment().isAfter(moment(event.end));
 
-            html += `<div class="col-md-4 col-lg-3">
+              html += `<div class="col-md-4 col-lg-3">
                 <div class="p-2 card card-${colorClass} card-outline${
-              shouldBeDark ? ` bg-secondary` : ``
-            }">
+                shouldBeDark ? ` bg-secondary` : ``
+              }">
                   <div class="card-body box-profile">
                     <div class="text-center">
                     ${
@@ -757,129 +768,96 @@ function updateCalendar() {
                       shouldBeDark ? ` bg-secondary` : ``
                     }">
                         <b>${moment(event.start).format("hh:mm A")} - ${moment(
-              event.end
-            ).format("hh:mm A")}</b>
+                event.end
+              ).format("hh:mm A")}</b>
                     </li>
                     </ul>
     
                     <a href="#" class="btn btn-primary btn-block" onclick="displayEventInfo('${
                       event.unique
                     }')" onkeydown="if (this.key === "Enter") displayEventInfo('${
-              event.unique
-            }')" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications."><b>More Info / Notifications</b></a>
+                event.unique
+              }')" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications."><b>More Info / Notifications</b></a>
                   </div>
                 </div>
               </div>`;
-          } catch (e) {
-            console.error(e);
-            $(document).Toasts("create", {
-              class: "bg-danger",
-              title: "calendar error",
-              body:
-                "There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.",
-              icon: "fas fa-skull-crossbones fa-lg",
-            });
-          }
-        });
+            } catch (e) {
+              console.error(e);
+              $(document).Toasts("create", {
+                class: "bg-danger",
+                title: "calendar error",
+                body:
+                  "There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.",
+                icon: "fas fa-skull-crossbones fa-lg",
+              });
+            }
+          });
 
-      $("#schedule-events").html(html);
+        $("#schedule-events").html(html);
 
-      for (var i = 1; i < 14; i++) {
-        $(`#schedule-select-${i}`).html(
-          moment(meta.meta.time)
-            .startOf(`day`)
-            .add(i, "days")
-            .format(`dddd MM/DD`)
-        );
-      }
-    },
-    moment().add(selectedOption, "days").startOf("day"),
-    moment()
-      .add(selectedOption + 1, "days")
-      .startOf("day")
-  );
+        for (var i = 1; i < 14; i++) {
+          $(`#schedule-select-${i}`).html(
+            moment(meta.meta.time)
+              .startOf(`day`)
+              .add(i, "days")
+              .format(`dddd MM/DD`)
+          );
+        }
+      },
+      moment().add(selectedOption, "days").startOf("day"),
+      moment()
+        .add(selectedOption + 1, "days")
+        .startOf("day")
+    );
+  }, 1000);
 }
 
 /**
  * Update director office hours
  */
+var directorsCalendarTimer;
 function updateDirectorsCalendar() {
-  try {
-    // Update directors html
-    var innercontent = document.getElementById("schedule-hours");
-    if (innercontent) {
-      innercontent.innerHTML = "";
-    }
-
-    directorsdb.db().each((dodo) => {
-      try {
-        officeHours[dodo.ID] = ``;
-        var color = "rgba(211, 47, 47, 0.15)";
-        var text1 = "OUT";
-        var theClass = "danger";
-        if (dodo.present) {
-          color = "rgba(56, 142, 60, 0.15)";
-          text1 = "IN";
-          theClass = "success";
-        }
-        if (innercontent) {
-          innercontent.innerHTML += `<div id="director-${
-            dodo.ID
-          }" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">
-            <div class="p-1 text-center" style="width: 100%;">${
-              dodo.avatar !== null && dodo.avatar !== ""
-                ? `<img src="${dodo.avatar}" width="96" class="rounded-circle">`
-                : jdenticon.toSvg(`Director ${dodo.name}`, 96)
-            }</div>
-            <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span></div>
-            <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${
-              dodo.name
-            }</span><br><span style="font-size: 0.8em;">${
-            dodo.position
-          }</span></div>
-          <div class="p-1 text-center" style="width: 100%;">
-            <h4><strong>Office Hours:</strong></h4>
-            <div id="director-hours-${dodo.ID}">Loading...</div>
-            </div>
-            </div>
-        </div>`;
-        }
-      } catch (e) {
-        console.error(e);
-        iziToast.show({
-          title: "An error occurred - Please check the logs",
-          message: `Error occurred in processDirectors ddb iteration.`,
-        });
+  clearTimeout(directorsCalendarTimer);
+  directorsCalendarTimer = setTimeout(() => {
+    try {
+      // Update directors html
+      var innercontent = document.getElementById("schedule-hours");
+      if (innercontent) {
+        innercontent.innerHTML = "Loading...";
       }
-    });
 
-    // A list of Office Hours for the directors
+      directorHours = {};
 
-    // Define a comparison function that will order calendar events by start time when we run the iteration
-    var compare = function (a, b) {
-      try {
-        if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
-          return -1;
+      directorsdb.db().each((director) => {
+        directorHours[director.ID] = { director: director, hours: [] };
+      });
+
+      // A list of Office Hours for the directors
+
+      // Define a comparison function that will order calendar events by start time when we run the iteration
+      var compare = function (a, b) {
+        try {
+          if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
+            return -1;
+          }
+          if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
+            return 1;
+          }
+          if (a.ID < b.ID) {
+            return -1;
+          }
+          if (a.ID > b.ID) {
+            return 1;
+          }
+          return 0;
+        } catch (e) {
+          console.error(e);
+          iziToast.show({
+            title: "An error occurred - Please check the logs",
+            message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
+          });
         }
-        if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
-          return 1;
-        }
-        if (a.ID < b.ID) {
-          return -1;
-        }
-        if (a.ID > b.ID) {
-          return 1;
-        }
-        return 0;
-      } catch (e) {
-        console.error(e);
-        iziToast.show({
-          title: "An error occurred - Please check the logs",
-          message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
-        });
-      }
-    };
-    window.requestAnimationFrame(() => {
+      };
       calendardb.getEvents(
         (events) => {
           events
@@ -941,35 +919,68 @@ function updateDirectorsCalendar() {
                 endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike> (canceled)`;
               }
 
-              officeHours[event.director] += `${endText}`;
+              if (
+                typeof directorHours[event.director] !== "undefined" &&
+                typeof directorHours[event.director].hours !== "undefined"
+              ) {
+                directorHours[event.director].hours.push(endText);
+              }
             });
 
-          for (var officeHour in officeHours) {
-            if (Object.prototype.hasOwnProperty.call(officeHours, officeHour)) {
-              var temp2 = document.getElementById(
-                `director-hours-${officeHour}`
-              );
-
-              if (temp2 === null) {
-                return null;
+          for (var directorHour in directorHours) {
+            if (
+              Object.prototype.hasOwnProperty.call(directorHours, directorHour)
+            ) {
+              var color = "rgba(211, 47, 47, 0.15)";
+              var text1 = "OUT";
+              var theClass = "danger";
+              if (directorHours[directorHour].director.present) {
+                color = "rgba(56, 142, 60, 0.15)";
+                text1 = "IN";
+                theClass = "success";
               }
-
-              // Push the final product
-              temp2.innerHTML = `<div class="m-1 text-dark text-center">${officeHours[officeHour]}</div>`;
+              if (innercontent) {
+                innercontent.innerHTML += `<div id="director-${
+                  directorHours[directorHour].director.ID
+                }" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">
+                  <div class="p-1 text-center" style="width: 100%;">${
+                    directorHours[directorHour].director.avatar !== null &&
+                    directorHours[directorHour].director.avatar !== ""
+                      ? `<img src="${directorHours[directorHour].director.avatar}" width="96" class="rounded-circle">`
+                      : jdenticon.toSvg(
+                          `Director ${directorHours[directorHour].director.name}`,
+                          96
+                        )
+                  }</div>
+                  <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span></div>
+                  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${
+                    directorHours[directorHour].director.name
+                  }</span><br><span style="font-size: 0.8em;">${
+                  directorHours[directorHour].director.position
+                }</span></div>
+                <div class="p-1 text-center" style="width: 100%;">
+                  <h4><strong>Office Hours:</strong></h4>
+                  <div id="director-hours-${
+                    directorHours[directorHour].director.ID
+                  }"><div class="m-1 text-dark text-center">${directorHours[directorHour].hours.join("")}</div></div>
+                  </div>
+                  </div>
+              </div>`;
+              }
             }
           }
         },
         moment().startOf("day"),
         moment().add(7, "days").startOf("day")
       );
-    });
-  } catch (e) {
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred during the call of office hours.",
-    });
-    console.error(e);
-  }
+    } catch (e) {
+      iziToast.show({
+        title: "An error occurred - Please check the logs",
+        message: "Error occurred during the call of office hours.",
+      });
+      console.error(e);
+    }
+  }, 1000);
 }
 
 /**
