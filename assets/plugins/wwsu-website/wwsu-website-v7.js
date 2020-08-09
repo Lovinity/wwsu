@@ -971,35 +971,6 @@ function updateDirectorsCalendar() {
                   </div>
                 </div>
               </div>`;
-
-                innercontent.innerHTML += `<div id="director-${
-                  directorHours[directorHour].director.ID
-                }" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">
-                  <div class="p-1 text-center" style="width: 100%;">${
-                    directorHours[directorHour].director.avatar !== null &&
-                    directorHours[directorHour].director.avatar !== ""
-                      ? `<img src="${directorHours[directorHour].director.avatar}" width="96" class="rounded-circle">`
-                      : jdenticon.toSvg(
-                          `Director ${directorHours[directorHour].director.name}`,
-                          96
-                        )
-                  }</div>
-                  <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span></div>
-                  <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${
-                    directorHours[directorHour].director.name
-                  }</span><br><span style="font-size: 0.8em;">${
-                  directorHours[directorHour].director.position
-                }</span></div>
-                <div class="p-1 text-center" style="width: 100%;">
-                  <h4><strong>Office Hours:</strong></h4>
-                  <div id="director-hours-${
-                    directorHours[directorHour].director.ID
-                  }"><div class="m-1 text-dark text-center">${directorHours[
-                  directorHour
-                ].hours.join("<br />")}</div></div>
-                  </div>
-                  </div>
-              </div>`;
               }
             }
           }
