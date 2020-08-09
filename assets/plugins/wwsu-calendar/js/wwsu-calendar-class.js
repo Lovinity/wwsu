@@ -2277,7 +2277,7 @@ class WWSUcalendar extends CalendarDb {
               items: {
                 type: "number",
               },
-              enum: [0, 1, 2, 3, 4, 5],
+              enum: [0, 1, 2, 3, 4],
             },
             recurDM: {
               title: "Recur on days of the month",
@@ -2487,8 +2487,7 @@ class WWSUcalendar extends CalendarDb {
                 "Second",
                 "Third",
                 "Fourth",
-                "Fifth (only if applicable)",
-                "Last (fifth if applicable, otherwise fourth)",
+                "Fifth (only if applicable)"
               ],
             },
             recurDM: {
@@ -2996,19 +2995,9 @@ class WWSUcalendar extends CalendarDb {
       }
 
       if (record.recurWM && record.recurWM.length > 0) {
-        record.recurWM = record.recurWM.map((recur) => {
-          recur -= 1;
-          if (recur < 0) {
-            recur = 5;
-            if (!record.recurDW || record.recurDW.length === 0) {
-              record.recurDW = [0, 1, 2, 3, 4, 5, 6];
-            }
-          }
-          return recur;
-        });
         criteria.recurrenceRules.push({
           measure:
-            record.recurWM && record.recurWM.length > 0
+            record.recurDW && record.recurDW.length > 0
               ? "weeksOfMonthByDay"
               : "weeksOfMonth",
           units: record.recurWM,
@@ -3016,10 +3005,6 @@ class WWSUcalendar extends CalendarDb {
       }
 
       if (record.recurDW && record.recurDW.length > 0) {
-        record.recurDW = record.recurDW.map((recur) => {
-          recur -= 1;
-          return recur;
-        });
         criteria.recurrenceRules.push({
           measure: "daysOfWeek",
           units: record.recurDW,
