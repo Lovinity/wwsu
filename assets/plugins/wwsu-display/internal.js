@@ -92,8 +92,8 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.on("disconnect", () => {
       console.log("Lost connection");
       try {
-        io.socket._raw.io._reconnection = true;
-        io.socket._raw.io._reconnectionAttempts = Infinity;
+        socket._raw.io._reconnection = true;
+        socket._raw.io._reconnectionAttempts = Infinity;
       } catch (e) {
         iziToast.show({
           title: "An error occurred - Please check the logs",

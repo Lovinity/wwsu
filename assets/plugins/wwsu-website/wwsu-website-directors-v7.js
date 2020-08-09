@@ -244,7 +244,7 @@ $(document).ready(function () {
 
 // Database event handlers
 var calTimer;
-calendar.on("calendarUpdated", "renderer", () => {
+calendardb.on("calendarUpdated", "renderer", () => {
   clearTimeout(calTimer);
   calTimer = setTimeout(() => {
     $("#calendar").block({
