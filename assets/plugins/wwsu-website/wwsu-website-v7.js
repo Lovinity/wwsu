@@ -907,16 +907,16 @@ function updateDirectorsCalendar() {
 
               var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
               if (event.timeChanged) {
-                endText = `<span class="text-primary" title="These hours were changed/updated from the original.">${event.startT} - ${event.endT}</span>`;
+                endText = `<span class="text-primary" title="These hours were changed/updated from the original.">${event.startT} - ${event.endT}</span> (temp hours)`;
               }
               if (moment(meta.meta.time).isAfter(moment(event.end))) {
-                endText = `<strike><span class="text-black-50" title="These hours have passed.">${event.startT} - ${event.endT}</span></strike>`;
+                endText = `<strike><span class="text-black-50" title="These hours have passed.">${event.startT} - ${event.endT}</span></strike> (passed)`;
               }
               if (
                 event.scheduleType &&
                 event.scheduleType.startsWith("canceled")
               ) {
-                endText = `<strike><span class="text-danger" title="These hours were canceled.">${event.startT} - ${event.endT}</span></strike>`;
+                endText = `<strike><span class="text-danger" title="These hours were canceled.">${event.startT} - ${event.endT}</span></strike> (canceled)`;
               }
 
               if (
@@ -940,7 +940,7 @@ function updateDirectorsCalendar() {
                 theClass = "success";
               }
               if (innercontent) {
-                innercontent.innerHTML += `<div class="col" style="min-width: 200px;">
+                innercontent.innerHTML += `<div class="col" style="min-width: 280px;">
                 <div class="p-2 card card-${theClass} card-outline">
                   <div class="card-body box-profile">
                     <div class="text-center">
