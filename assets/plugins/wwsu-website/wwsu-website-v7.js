@@ -40,6 +40,7 @@ try {
 
   // Directors
   var directorsdb = new WWSUdirectors(socket, noReq);
+  var officeHours = {};
 
   var messageIDs = [];
   var navigation = new WWSUNavigation();
@@ -802,10 +803,7 @@ function updateCalendar() {
 /**
  * Update director office hours
  */
-var dcRunning = false;
 function updateDirectorsCalendar() {
-  if (dcRunning) return;
-  dcRunning = true;
   try {
     // Update directors html
     var innercontent = document.getElementById("schedule-hours");
@@ -840,7 +838,7 @@ function updateDirectorsCalendar() {
           }</span></div>
           <div class="p-1 text-center" style="width: 100%;">
             <h4><strong>Office Hours:</strong></h4>
-            <div id="director-hours-${dodo.ID}"></div>
+            <div id="director-hours-${dodo.ID}">Loading...</div>
             </div>
             </div>
         </div>`;
@@ -873,7 +871,6 @@ function updateDirectorsCalendar() {
         }
         return 0;
       } catch (e) {
-        dcRunning = false;
         console.error(e);
         iziToast.show({
           title: "An error occurred - Please check the logs",
@@ -888,14 +885,6 @@ function updateDirectorsCalendar() {
             .sort(compare)
             .filter((event) => event.type === "office-hours")
             .map((event) => {
-              var temp2 = document.getElementById(
-                `director-hours-${event.director}`
-              );
-
-              if (temp2 === null) {
-                return null;
-              }
-
               // null start or end? Use a default to prevent errors.
               if (!moment(event.start).isValid()) {
                 event.start = moment(meta.meta.time).startOf("day");
@@ -944,21 +933,36 @@ function updateDirectorsCalendar() {
               if (moment(meta.meta.time).isAfter(moment(event.end))) {
                 endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT}</span></strike> (passed)`;
               }
-              if (event.scheduleType && event.scheduleType.startsWith("canceled")) {
+              if (
+                event.scheduleType &&
+                event.scheduleType.startsWith("canceled")
+              ) {
                 endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike> (canceled)`;
               }
 
-              // Push the final product
-              temp2.innerHTML += `<div class="m-1 text-dark">${endText}</div>`;
+              officeHours[event.director] = endText;
             });
+
+          for (var officeHour in officeHours) {
+            if (Object.prototype.hasOwnProperty.call(officeHours, officeHour)) {
+              var temp2 = document.getElementById(
+                `director-hours-${officeHour}`
+              );
+
+              if (temp2 === null) {
+                return null;
+              }
+
+              // Push the final product
+              temp2.innerHTML = `<div class="m-1 text-dark text-center">${officeHours[officeHour]}</div>`;
+            }
+          }
         },
         moment().startOf("day"),
         moment().add(7, "days").startOf("day")
       );
-      dcRunning = false;
     });
   } catch (e) {
-    dcRunning = false;
     iziToast.show({
       title: "An error occurred - Please check the logs",
       message: "Error occurred during the call of office hours.",
