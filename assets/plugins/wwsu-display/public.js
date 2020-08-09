@@ -34,7 +34,7 @@ window.addEventListener("DOMContentLoaded", () => {
     var socket = io.sails.connect();
     var noReq = new WWSUreq(socket, `display-public`);
     var Meta = new WWSUMeta(socket, noReq);
-    var Calendar = new WWSUcalendar(socket, meta, noReq);
+    var Calendar = new WWSUcalendar(socket, Meta, noReq);
     var calendar = [];
     var Announcements = new WWSUannouncements(
       socket,

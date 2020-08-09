@@ -23,7 +23,7 @@ try {
     "/auth/admin-director",
     "Administrator Director"
   );
-  var djsdb = new WWSUdjs(socket, noReq, directorReq, null, logs, meta);
+  var djsdb = new WWSUdjs(socket, noReq, directorReq, null, null, meta);
   var djReq = new WWSUreq(
     socket,
     machineID,
