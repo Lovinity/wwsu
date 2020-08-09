@@ -927,6 +927,8 @@ function updateDirectorsCalendar() {
               }
             });
 
+          if (innercontent) innercontent.innerHTML = ``;
+
           for (var directorHour in directorHours) {
             if (
               Object.prototype.hasOwnProperty.call(directorHours, directorHour)
@@ -940,7 +942,7 @@ function updateDirectorsCalendar() {
                 theClass = "success";
               }
               if (innercontent) {
-                innercontent.innerHTML = `<div id="director-${
+                innercontent.innerHTML += `<div id="director-${
                   directorHours[directorHour].director.ID
                 }" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">
                   <div class="p-1 text-center" style="width: 100%;">${
@@ -962,7 +964,9 @@ function updateDirectorsCalendar() {
                   <h4><strong>Office Hours:</strong></h4>
                   <div id="director-hours-${
                     directorHours[directorHour].director.ID
-                  }"><div class="m-1 text-dark text-center">${directorHours[directorHour].hours.join("<br />")}</div></div>
+                  }"><div class="m-1 text-dark text-center">${directorHours[
+                  directorHour
+                ].hours.join("<br />")}</div></div>
                   </div>
                   </div>
               </div>`;
