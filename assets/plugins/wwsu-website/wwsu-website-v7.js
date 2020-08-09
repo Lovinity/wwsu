@@ -939,13 +939,13 @@ function updateDirectorsCalendar() {
 
               var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
               if (event.timeChanged) {
-                endText = `<span class="text-primary">${event.startT} - ${event.endT} (updated)</span>`;
+                endText = `<span class="text-primary">${event.startT} - ${event.endT}</span> (updated)`;
               }
               if (moment(meta.meta.time).isAfter(moment(event.end))) {
-                endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT} (passed)</span></strike>`;
+                endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT}</span></strike> (passed)`;
               }
               if (event.scheduleType.startsWith("canceled")) {
-                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT} (canceled)</span></strike>`;
+                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike> (canceled)`;
               }
 
               // Push the final product
