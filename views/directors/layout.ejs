@@ -231,276 +231,266 @@
         <section id="section-timesheet" style="display: none;"></section>
 
         <section id="section-calendar" style="display: none;">
-          <div class="content-wrapper">
-            <div class="content-header">
-              <div class="container-fluid">
-                <div class="row mb-2">
-                  <div class="col-12">
-                    <h1 class="m-0 text-dark">Calendar</h1>
-                  </div>
-                  <!-- /.col -->
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Calendar</h1>
                 </div>
-                <!-- /.row -->
+                <!-- /.col -->
               </div>
-              <!-- /.container-fluid -->
+              <!-- /.row -->
             </div>
+            <!-- /.container-fluid -->
+          </div>
 
-            <div class="content">
-              <div class="container-fluid">
-                <div class="row">
-                  <!-- /.col -->
-                  <div class="col">
-                    <div class="card">
-                      <div class="card-header">
-                        <h4 class="card-title">Info / Tasks</h4>
-                      </div>
-                      <div class="card-body container-fluid">
-                        <div class="container-fluid">
-                          <div class="row">
-                            <div class="col-12 col-md-6 col-lg-3">
-                              <button
-                                type="button"
-                                class="btn btn-block btn-info btn-sm btn-calendar-definitions"
-                                title="Open a pop-up explaining what an event, schedule, and occurrence is."
-                              >
-                                Definitions
-                              </button>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3">
-                              <button
-                                type="button"
-                                class="btn btn-block btn-info btn-sm btn-calendar-prerequisites"
-                                title="Open a pop-up explaining what must be done for different types of events before adding them to the calendar."
-                              >
-                                Prerequisites
-                              </button>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3">
-                              <button
-                                type="button"
-                                class="btn btn-block btn-warning btn-sm btn-manage-djs"
-                                title="Manage the DJs in the system"
-                              >
-                                Manage DJs
-                              </button>
-                            </div>
-                            <div class="col-12 col-md-6 col-lg-3">
-                              <button
-                                type="button"
-                                class="btn btn-block btn-warning btn-sm btn-manage-events"
-                                title="Add, edit, and remove events and their schedules (for occurrences, use the calendar)."
-                              >
-                                Manage Events / Schedules
-                              </button>
-                            </div>
+          <div class="content">
+            <div class="container-fluid">
+              <div class="row">
+                <!-- /.col -->
+                <div class="col">
+                  <div class="card">
+                    <div class="card-header">
+                      <h4 class="card-title">Info / Tasks</h4>
+                    </div>
+                    <div class="card-body container-fluid">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-12 col-md-6 col-lg-3">
+                            <button
+                              type="button"
+                              class="btn btn-block btn-info btn-sm btn-calendar-definitions"
+                              title="Open a pop-up explaining what an event, schedule, and occurrence is."
+                            >
+                              Definitions
+                            </button>
+                          </div>
+                          <div class="col-12 col-md-6 col-lg-3">
+                            <button
+                              type="button"
+                              class="btn btn-block btn-info btn-sm btn-calendar-prerequisites"
+                              title="Open a pop-up explaining what must be done for different types of events before adding them to the calendar."
+                            >
+                              Prerequisites
+                            </button>
+                          </div>
+                          <div class="col-12 col-md-6 col-lg-3">
+                            <button
+                              type="button"
+                              class="btn btn-block btn-warning btn-sm btn-manage-djs"
+                              title="Manage the DJs in the system"
+                            >
+                              Manage DJs
+                            </button>
+                          </div>
+                          <div class="col-12 col-md-6 col-lg-3">
+                            <button
+                              type="button"
+                              class="btn btn-block btn-warning btn-sm btn-manage-events"
+                              title="Add, edit, and remove events and their schedules (for occurrences, use the calendar)."
+                            >
+                              Manage Events / Schedules
+                            </button>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div class="card">
-                      <div class="card-header">
-                        <h4 class="card-title">
-                          Filter Calendar by Event Type
-                        </h4>
-                      </div>
-                      <div class="card-body container-fluid">
-                        <div class="row p-2">
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-danger"
-                            title="Show live shows on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-show"
-                              checked
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-show"
-                              >Live Shows</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-success"
-                            title="Show sports broadcasts on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-sports"
-                              checked
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-sports"
-                              >Sports</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-indigo"
-                            title="Show remote broadcasts on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-remote"
-                              checked
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-remote"
-                              >Remote Broadcasts</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-pink"
-                            title="Show prerecords on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-prerecord"
-                              checked
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-prerecord"
-                              >Prerecords</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-info"
-                            title="Show playlists on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-playlist"
-                              checked
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-playlist"
-                              >Playlists</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-primary"
-                            title="Show genre rotations on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-genre"
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-genre"
-                              >Genres</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-gray"
-                            title="Show manual events on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-event"
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-event"
-                              >Manual Events</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-warning"
-                            title="Show office hours on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-office-hours"
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-office-hours"
-                              >Director Office Hours</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-orange"
-                            title="Show tasks on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-task"
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-task"
-                              >Director Tasks</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-teal"
-                            title="Show reservations for the on-air studio on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-onair-booking"
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-onair-booking"
-                              >On-Air Bookings</label
-                            >
-                          </div>
-                          <div
-                            class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-teal"
-                            title="Show reservations for the production studio on calendar?"
-                          >
-                            <input
-                              type="checkbox"
-                              class="custom-control-input"
-                              id="filter-prod-booking"
-                            />
-                            <label
-                              class="custom-control-label"
-                              for="filter-prod-booking"
-                              >Production Studio Bookings</label
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <!-- /.card-body -->
-                    </div>
-                    <div class="card card-primary">
-                      <div class="card-body p-0">
-                        <p class="p-1">
-                          <strong
-                            >All event times are displayed in your local time
-                            zone, but you will use the station timezone when
-                            specifying times in schedules.</strong
-                          >
-                        </p>
-                        <!-- THE CALENDAR -->
-                        <div id="calendar"></div>
-                      </div>
-                      <!-- /.card-body -->
-                    </div>
-                    <!-- /.card -->
                   </div>
-                  <!-- /.col -->
+                  <div class="card">
+                    <div class="card-header">
+                      <h4 class="card-title">
+                        Filter Calendar by Event Type
+                      </h4>
+                    </div>
+                    <div class="card-body container-fluid">
+                      <div class="row p-2">
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-danger"
+                          title="Show live shows on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-show"
+                            checked
+                          />
+                          <label class="custom-control-label" for="filter-show"
+                            >Live Shows</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-success"
+                          title="Show sports broadcasts on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-sports"
+                            checked
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="filter-sports"
+                            >Sports</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-indigo"
+                          title="Show remote broadcasts on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-remote"
+                            checked
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="filter-remote"
+                            >Remote Broadcasts</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-pink"
+                          title="Show prerecords on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-prerecord"
+                            checked
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="filter-prerecord"
+                            >Prerecords</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-info"
+                          title="Show playlists on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-playlist"
+                            checked
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="filter-playlist"
+                            >Playlists</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-primary"
+                          title="Show genre rotations on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-genre"
+                          />
+                          <label class="custom-control-label" for="filter-genre"
+                            >Genres</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-gray"
+                          title="Show manual events on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-event"
+                          />
+                          <label class="custom-control-label" for="filter-event"
+                            >Manual Events</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-warning"
+                          title="Show office hours on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-office-hours"
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="filter-office-hours"
+                            >Director Office Hours</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-orange"
+                          title="Show tasks on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-task"
+                          />
+                          <label class="custom-control-label" for="filter-task"
+                            >Director Tasks</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-teal"
+                          title="Show reservations for the on-air studio on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-onair-booking"
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="filter-onair-booking"
+                            >On-Air Bookings</label
+                          >
+                        </div>
+                        <div
+                          class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-teal"
+                          title="Show reservations for the production studio on calendar?"
+                        >
+                          <input
+                            type="checkbox"
+                            class="custom-control-input"
+                            id="filter-prod-booking"
+                          />
+                          <label
+                            class="custom-control-label"
+                            for="filter-prod-booking"
+                            >Production Studio Bookings</label
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.card-body -->
+                  </div>
+                  <div class="card card-primary">
+                    <div class="card-body p-0">
+                      <p class="p-1">
+                        <strong
+                          >All event times are displayed in your local time
+                          zone, but you will use the station timezone when
+                          specifying times in schedules.</strong
+                        >
+                      </p>
+                      <!-- THE CALENDAR -->
+                      <div id="calendar"></div>
+                    </div>
+                    <!-- /.card-body -->
+                  </div>
+                  <!-- /.card -->
                 </div>
-                <!-- /.row -->
+                <!-- /.col -->
               </div>
-              <!-- /.container-fluid -->
+              <!-- /.row -->
             </div>
+            <!-- /.container-fluid -->
           </div>
         </section>
       </div>
