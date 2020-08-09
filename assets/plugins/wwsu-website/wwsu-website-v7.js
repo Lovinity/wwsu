@@ -944,7 +944,7 @@ function updateDirectorsCalendar() {
               if (moment(meta.meta.time).isAfter(moment(event.end))) {
                 endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT}</span></strike> (passed)`;
               }
-              if (event.scheduleType.startsWith("canceled")) {
+              if (event.scheduleType && event.scheduleType.startsWith("canceled")) {
                 endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike> (canceled)`;
               }
 
