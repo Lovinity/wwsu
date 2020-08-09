@@ -1167,7 +1167,7 @@ function displayEventInfo(showID) {
       $("#modal-eventinfo").modal("show");
     },
     undefined,
-    moment().add(7, "days")
+    moment().add(14, "days")
   );
 }
 
