@@ -802,7 +802,10 @@ function updateCalendar() {
 /**
  * Update director office hours
  */
+var dcRunning = false;
 function updateDirectorsCalendar() {
+  if (dcRunning) return;
+  dcRunning = true;
   try {
     // Update directors html
     var innercontent = document.getElementById("schedule-hours");
@@ -812,11 +815,11 @@ function updateDirectorsCalendar() {
 
     directorsdb.db().each((dodo) => {
       try {
-        var color = "rgba(211, 47, 47, 0.25)";
+        var color = "rgba(211, 47, 47, 0.15)";
         var text1 = "OUT";
         var theClass = "danger";
         if (dodo.present) {
-          color = "rgba(56, 142, 60, 0.25)";
+          color = "rgba(56, 142, 60, 0.15)";
           text1 = "IN";
           theClass = "success";
         }
@@ -835,8 +838,10 @@ function updateDirectorsCalendar() {
             }</span><br><span style="font-size: 0.8em;">${
             dodo.position
           }</span></div>
+          <div class="p-1 text-center" style="width: 100%;">
             <h4><strong>Office Hours:</strong></h4>
             <div id="director-hours-${dodo.ID}"></div>
+            </div>
             </div>
         </div>`;
         }
@@ -868,6 +873,7 @@ function updateDirectorsCalendar() {
         }
         return 0;
       } catch (e) {
+        dcRunning = false;
         console.error(e);
         iziToast.show({
           title: "An error occurred - Please check the logs",
@@ -932,14 +938,14 @@ function updateDirectorsCalendar() {
               }`;
 
               var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
-              if (event.active === 0) {
-                endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT}</span></strike>`;
+              if (event.timeChanged) {
+                endText = `<span class="text-primary">${event.startT} - ${event.endT} (updated)</span>`;
               }
-              if (event.active === 2) {
-                endText = `<span class="text-info">${event.startT} - ${event.endT}</span>`;
+              if (moment(meta.meta.time).isAfter(moment(event.end))) {
+                endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT} (passed)</span></strike>`;
               }
-              if (event.active === -1) {
-                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`;
+              if (event.scheduleType.startsWith("canceled")) {
+                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT} (canceled)</span></strike>`;
               }
 
               // Push the final product
@@ -949,8 +955,10 @@ function updateDirectorsCalendar() {
         moment().startOf("day"),
         moment().add(7, "days").startOf("day")
       );
+      dcRunning = false;
     });
   } catch (e) {
+    dcRunning = false;
     iziToast.show({
       title: "An error occurred - Please check the logs",
       message: "Error occurred during the call of office hours.",
