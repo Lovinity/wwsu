@@ -13,6 +13,7 @@
 // Declare global variables for a couple common libraries.
 global['moment'] = require('moment-timezone')
 require('moment-duration-format')
+require('moment-recur-ts')
 global['needle'] = require('needle')
 
 // Create a config factory store; we are not using easy-config-store directly because it does not have a deleteProperty handler.

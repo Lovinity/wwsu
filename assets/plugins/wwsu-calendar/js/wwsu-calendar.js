@@ -19,8 +19,7 @@ if (typeof require !== "undefined") {
   }
 
   if (moment && typeof moment.recur === "undefined") {
-      // Use the WWSU version of moment-recur-ts
-    require("../../moment-recur-ts-wwsu/js/moment-recur-ts.js");
+    require("moment-recur-ts");
   }
 
   if (moment && typeof moment.duration === "undefined") {
