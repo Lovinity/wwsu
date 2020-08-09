@@ -882,7 +882,7 @@ function updateDirectorsCalendar() {
       calendardb.getEvents(
         (events) => {
           events
-            .compare(compare)
+            .sort(compare)
             .filter((event) => event.type === "office-hours")
             .map((event) => {
               var temp = directors[event.director];
