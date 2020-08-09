@@ -907,16 +907,16 @@ function updateDirectorsCalendar() {
 
               var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
               if (event.timeChanged) {
-                endText = `<span class="text-primary">${event.startT} - ${event.endT}</span> (updated)`;
+                endText = `<span class="text-primary" title="These hours were changed/updated from the original.">${event.startT} - ${event.endT}</span>`;
               }
               if (moment(meta.meta.time).isAfter(moment(event.end))) {
-                endText = `<strike><span class="text-black-50">${event.startT} - ${event.endT}</span></strike> (passed)`;
+                endText = `<strike><span class="text-black-50" title="These hours have passed.">${event.startT} - ${event.endT}</span></strike>`;
               }
               if (
                 event.scheduleType &&
                 event.scheduleType.startsWith("canceled")
               ) {
-                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike> (canceled)`;
+                endText = `<strike><span class="text-danger" title="These hours were canceled.">${event.startT} - ${event.endT}</span></strike>`;
               }
 
               if (
@@ -940,7 +940,7 @@ function updateDirectorsCalendar() {
                 theClass = "success";
               }
               if (innercontent) {
-                innercontent.innerHTML += `<div id="director-${
+                innercontent.innerHTML = `<div id="director-${
                   directorHours[directorHour].director.ID
                 }" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">
                   <div class="p-1 text-center" style="width: 100%;">${
@@ -962,7 +962,7 @@ function updateDirectorsCalendar() {
                   <h4><strong>Office Hours:</strong></h4>
                   <div id="director-hours-${
                     directorHours[directorHour].director.ID
-                  }"><div class="m-1 text-dark text-center">${directorHours[directorHour].hours.join("")}</div></div>
+                  }"><div class="m-1 text-dark text-center">${directorHours[directorHour].hours.join("<br />")}</div></div>
                   </div>
                   </div>
               </div>`;
