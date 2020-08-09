@@ -163,7 +163,7 @@ module.exports = {
                 "weeksOfMonthByDay",
                 "daysOfWeek",
                 "monthsOfYear",
-              ].indexOf(value.measure) === -1
+              ].indexOf(val.measure) === -1
             )
               valid = false;
             if (!val.units || val.units.constructor !== Array) valid = false;
