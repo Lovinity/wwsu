@@ -613,7 +613,7 @@ function subscribe (type, subtype) {
       if (response !== 'OK') {
         iziToast.show({
           title: 'Subscription failed',
-          message: 'Unable to subscribe you to this event at this time. Please try again later. If this problem continues, please email wwsu4@wright.edu.',
+          message: 'Unable to subscribe you to this event at this time. Please try again later. If this problem continues, please email engineer@wwsu1069.org.',
           color: 'red',
           zindex: 100,
           layout: 1,
@@ -643,7 +643,7 @@ function subscribe (type, subtype) {
     } catch (unusedE) {
       iziToast.show({
         title: 'Subscription failed',
-        message: 'Unable to subscribe you to this event at this time: internal error. Please try again later. Please email wwsu4@wright.edu if this problem continues.',
+        message: 'Unable to subscribe you to this event at this time: internal error. Please try again later. Please email engineer@wwsu1069.org if this problem continues.',
         color: 'red',
         zindex: 100,
         layout: 1,
@@ -664,7 +664,7 @@ function unsubscribe (ID, event) {
       if (response !== 'OK') {
         iziToast.show({
           title: 'Failed to unsubscribe',
-          message: 'Unable to un-subscribe you to this event at this time. Please try again later. If this problem continues, please email wwsu4@wright.edu.',
+          message: 'Unable to un-subscribe you to this event at this time. Please try again later. If this problem continues, please email engineer@wwsu1069.org.',
           color: 'red',
           zindex: 100,
           layout: 1,
@@ -678,7 +678,7 @@ function unsubscribe (ID, event) {
             if (response !== 'OK') {
               iziToast.show({
                 title: 'Failed to unsubscribe',
-                message: 'Unable to un-subscribe you to this event at this time. Please try again later. If this problem continues, please email wwsu4@wright.edu.',
+                message: 'Unable to un-subscribe you to this event at this time. Please try again later. If this problem continues, please email engineer@wwsu1069.org.',
                 color: 'red',
                 zindex: 100,
                 layout: 1,
@@ -706,7 +706,7 @@ function unsubscribe (ID, event) {
           } catch (unusedE) {
             iziToast.show({
               title: 'Failed to unsubscribe',
-              message: 'Unable to un-subscribe you to this event at this time. Please try again later. If this problem continues, please email wwsu4@wright.edu.',
+              message: 'Unable to un-subscribe you to this event at this time. Please try again later. If this problem continues, please email engineer@wwsu1069.org.',
               color: 'red',
               zindex: 100,
               layout: 1,
@@ -721,7 +721,7 @@ function unsubscribe (ID, event) {
     } catch (unusedE) {
       iziToast.show({
         title: 'Failed to unsubscribe',
-        message: 'Unable to un-subscribe you to this event at this time due to an internal error. Please email wwsu4@wright.edu.',
+        message: 'Unable to un-subscribe you to this event at this time due to an internal error. Please email engineer@wwsu1069.org.',
         color: 'red',
         zindex: 100,
         layout: 1,
@@ -752,7 +752,7 @@ function sendMessage (privateMsg) {
       if (response !== 'OK') {
         iziToast.show({
           title: 'Could not send message',
-          message: 'You might be sending messages too fast, are banned from sending messages, or there was a network issue. Please try again in a few minutes. Please email wwsu4@wright.edu if this problem continues.',
+          message: 'You might be sending messages too fast, are banned from sending messages, or there was a network issue. Please try again in a few minutes. Please email engineer@wwsu1069.org if this problem continues.',
           color: 'red',
           zindex: 100,
           layout: 1,
@@ -766,7 +766,7 @@ function sendMessage (privateMsg) {
     } catch (unusedE) {
       iziToast.show({
         title: 'Could not send message',
-        message: 'There was an internal error when trying to send a message. Please try clearing your browser cache and refreshing the website. If this continues, email wwsu4@wright.edu.',
+        message: 'There was an internal error when trying to send a message. Please try clearing your browser cache and refreshing the website. If this continues, email engineer@wwsu1069.org.',
         color: 'red',
         zindex: 100,
         layout: 1,

@@ -12,13 +12,13 @@ try {
 
   // Liked Tracks
   var likedtracks = new WWSUlikedtracks(socket, noReq);
-  likedtracks.on("init", () => {
+  likedtracks.on("init", "renderer", () => {
     meta.meta = meta.meta.history;
   });
-  likedtracks.on("likedTrack", () => {
+  likedtracks.on("likedTrack", "renderer", () => {
     meta.meta = meta.meta.history;
   });
-  likedtracks.on("likedTrackManual", () => {
+  likedtracks.on("likedTrackManual", "renderer", () => {
     meta.meta = meta.meta.history;
   });
 
@@ -34,16 +34,7 @@ try {
   ]);
 
   // Add event handlers
-  announcements.on("insert", (record, db) => {
-    processAnnouncements();
-  });
-  announcements.on("update", (record, db) => {
-    processAnnouncements();
-  });
-  announcements.on("remove", (record, db) => {
-    processAnnouncements();
-  });
-  announcements.on("replace", (record, db) => {
+  announcements.on("change", "renderer", (db) => {
     processAnnouncements();
   });
 
@@ -59,7 +50,7 @@ try {
 
   // subscriptions
   var subscriptions = new WWSUsubscriptions(socket, noReq);
-  subscriptions.on("subscriptions", (subscriptions) => {
+  subscriptions.on("subscriptions", "renderer", (subscriptions) => {
     meta.meta = { state: meta.meta.state };
   });
 
@@ -324,7 +315,7 @@ function doSockets(firsttime = false) {
     META FUNCTIONS
 */
 
-meta.on("newMeta", (response, _meta) => {
+meta.on("newMeta", "renderer", (response, _meta) => {
   try {
     var temp;
     var temp2;

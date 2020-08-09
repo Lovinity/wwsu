@@ -4,7 +4,7 @@
 
 // TODO: fix removal to allow removing unique or ID individually.
 // TODO: Extend with WWSUdb. (??)
-class WWSUsubscriptions {
+class WWSUsubscriptions extends WWSUevents {
 
     /**
      * Construct the class.
@@ -13,13 +13,13 @@ class WWSUsubscriptions {
      * @param {WWSUreq} request Request without authorization
      */
     constructor(socket, request) {
-        this.endpoints = { 
-            get: '/subscribers/get-web', 
-            subscribe: '/subscribers/add', 
-            unsubscribe: '/subscribers/remove' 
+        super();
+        this.endpoints = {
+            get: '/subscribers/get-web',
+            subscribe: '/subscribers/add',
+            unsubscribe: '/subscribers/remove'
         };
         this.request = request;
-        this.events = new EventEmitter();
         this.device = null;
 
         this.subscriptions = TAFFY();
@@ -32,21 +32,11 @@ class WWSUsubscriptions {
             try {
                 this.subscriptions = TAFFY()
                 this.subscriptions.insert(body)
-                this.events.emitEvent('subscriptions', [ body ]);
+                this.emitEvent('subscriptions', [ body ]);
             } catch (e) {
                 setTimeout(this.init, 10000);
             }
         });
-    }
-
-    /**
-     * Listen for an event.
-     * 
-     * @param {string} event Event to listen: subscriptions([array of all subscriptions]), newSubscription(insert query, [array of all subscriptions]), removedSubscription(uniqueEvent, calendarID, [array of all current subscriptions])
-     * @param {function} fn Function called when the event is fired
-     */
-    on (event, fn) {
-        this.events.on(event, fn);
     }
 
     /**
@@ -73,7 +63,9 @@ class WWSUsubscriptions {
                     $(document).Toasts('create', {
                         class: 'bg-warning',
                         title: 'Subscription failed',
-                        body: 'Unable to subscribe you to that event at this time. Please contact wwsu4@wright.edu.',
+                        body: 'Unable to subscribe you to that event at this time. Please contact the engineer.',
+                        autoHide: true,
+                        delay: 10000,
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 } else {
@@ -86,14 +78,16 @@ class WWSUsubscriptions {
                         icon: 'fas fa-bell fa-lg',
                     });
                     this.subscriptions.insert({ type, subtype: `${subtype}` });
-                    this.events.emitEvent('newSubscription', [ { type, subtype: `${subtype}` }, this.subscriptions().get() ]);
+                    this.emitEvent('newSubscription', [ { type, subtype: `${subtype}` }, this.subscriptions().get() ]);
                 }
             } catch (e) {
                 console.error(e);
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Subscription failed',
-                    body: 'Unable to subscribe you to that event at this time. Please contact wwsu4@wright.edu.',
+                    body: 'Unable to subscribe you to that event at this time. Please contact the engineer.',
+                    autoHide: true,
+                    delay: 10000,
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
             }
@@ -113,7 +107,9 @@ class WWSUsubscriptions {
                     $(document).Toasts('create', {
                         class: 'bg-warning',
                         title: 'Un-subscription failed',
-                        body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact wwsu4@wright.edu.',
+                        body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact the engineer.',
+                        autoHide: true,
+                        delay: 10000,
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 } else {
@@ -123,7 +119,9 @@ class WWSUsubscriptions {
                                 $(document).Toasts('create', {
                                     class: 'bg-warning',
                                     title: 'Un-subscription failed',
-                                    body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact wwsu4@wright.edu.',
+                                    body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact the engineer.',
+                                    autoHide: true,
+                                    delay: 10000,
                                     icon: 'fas fa-skull-crossbones fa-lg',
                                 });
                             } else {
@@ -137,14 +135,16 @@ class WWSUsubscriptions {
                                 });
                                 this.subscriptions({ type: `calendar-once`, subtype: `${ID}` }).remove();
                                 this.subscriptions({ type: `calendar-all`, subtype: `${event}` }).remove();
-                                this.events.emitEvent('removedSubscription', [ `${ID}`, `${event}`, this.subscriptions().get() ]);
+                                this.emitEvent('removedSubscription', [ `${ID}`, `${event}`, this.subscriptions().get() ]);
                             }
                         } catch (e) {
                             console.error(e);
                             $(document).Toasts('create', {
                                 class: 'bg-danger',
                                 title: 'Un-subscription failed',
-                                body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact wwsu4@wright.edu.',
+                                body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact the engineer.',
+                                autoHide: true,
+                                delay: 10000,
                                 icon: 'fas fa-skull-crossbones fa-lg',
                             });
                         }
@@ -155,7 +155,9 @@ class WWSUsubscriptions {
                 $(document).Toasts('create', {
                     class: 'bg-danger',
                     title: 'Un-subscription failed',
-                    body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact wwsu4@wright.edu.',
+                    body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact the engineer.',
+                    autoHide: true,
+                    delay: 10000,
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
             }

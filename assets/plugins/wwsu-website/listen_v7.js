@@ -1023,7 +1023,7 @@ function sendMessage (privateMsg) {
       }
       quill.setText('')
     } catch (unusedE) {
-      if (notificationsBox) { notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email wwsu4@wright.edu .</div>` }
+      if (notificationsBox) { notificationsBox.innerHTML += `<div class="p-3 mb-2 bg-warning" style="color: #000000;"><span class="badge badge-primary" style="font-size: 1em;">${moment().format('LTS')}</span>There was an error submitting your message. Either there was a network issue, or you sent a message too quickly (website visitors are limited to one message per minute). If this problem continues, email engineer@wwsu1069.org .</div>` }
       if (document.querySelector('#messages')) { $('#messages').animate({ scrollTop: $('#messages').prop('scrollHeight') }, 1000) }
     }
   })

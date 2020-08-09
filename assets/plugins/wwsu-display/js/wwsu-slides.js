@@ -1,4 +1,4 @@
-/* global moment, Meta, iziToast, $ */
+/* global moment, iziToast, $ */
 
 var Slides
 
@@ -9,9 +9,10 @@ class Slide {
   /**
    * Create a slide.
    * 
+   * @param {WWSUmeta} meta WWSUmeta class
    * @param {object} data Initial slide data. See constructor for properties.
    */
-  constructor(data = {}) {
+  constructor(meta, data = {}) {
     this._name = data.name || ''
     this._label = data.label || ''
     this._weight = data.weight || 0
@@ -31,6 +32,8 @@ class Slide {
     })
     this._fnEnd = data.fnEnd || (() => {
     })
+
+    this.meta = meta;
 
     var temp = document.getElementById(`slides`)
     if (temp !== null) { temp.innerHTML += this._html }
@@ -86,9 +89,9 @@ class Slide {
   get active () {
     if (!this._active) { return false }
 
-    if (this._starts !== null && moment(Meta.time).isBefore(moment(this._starts))) { return false }
+    if (this._starts !== null && moment(this.meta ? this.meta.time : undefined).isBefore(moment(this._starts))) { return false }
 
-    if (this._expires !== null && moment(Meta.time).isAfter(moment(this._expires))) { return false }
+    if (this._expires !== null && moment(this.meta ? this.meta.time : undefined).isAfter(moment(this._expires))) { return false }
 
     return true
   }
@@ -171,9 +174,10 @@ class Slide {
 
 /**
  * Slides factory function for creating a slide manager.
+ * @param {WWSUmeta} meta WWSUmeta class
  * @returns {object} Object of functions for managing slides.
  */
-Slides = (() => {
+Slides = ((meta) => {
   // Storage of slides in the system
   var slides = []
 
@@ -266,11 +270,11 @@ Slides = (() => {
       .map((slide, index) => {
         changed = true
         slides[ index ].remove()
-        slides[ index ] = new Slide(data)
+        slides[ index ] = new Slide(meta, data)
         updateBadges()
       })
     if (!changed) {
-      slides.push(new Slide(data))
+      slides.push(new Slide(meta, data))
       updateBadges()
     }
   }
@@ -585,4 +589,4 @@ Slides = (() => {
 
   // Return factory functions
   return { updateBadges, activeSlide, countActive, slide, allSlides, newSlide, removeSlide, showSlide }
-})()
+});

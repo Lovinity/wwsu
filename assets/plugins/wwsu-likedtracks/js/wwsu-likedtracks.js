@@ -1,6 +1,6 @@
 
 // This class manages the track liking system
-class WWSUlikedtracks {
+class WWSUlikedtracks extends WWSUevents {
 
     /**
      * Construct the class
@@ -9,13 +9,13 @@ class WWSUlikedtracks {
      * @param {WWSUreq} request Request with no authorization
      */
     constructor(socket, request) {
+        super();
         this.endpoints = {
             get: '/songs/get-liked',
             like: '/songs/like',
             sendMessage: '/messages/send-web'
         };
         this.request = request;
-        this.events = new EventEmitter();
 
         this._likedTracks = [];
     }
@@ -25,7 +25,7 @@ class WWSUlikedtracks {
         this.request.request({ method: 'POST', url: this.endpoints.get, data: {} }, (body) => {
             try {
                 this._likedTracks = body
-                this.events.emitEvent('init', [ body ]);
+                this.emitEvent('init', [ body ]);
             } catch (unusedE) {
                 setTimeout(this.init, 10000)
             }
@@ -33,21 +33,11 @@ class WWSUlikedtracks {
     }
 
     /**
-     * Listen to an event.
-     * 
-     * @param {string} event Event to listen: init([array of all tracks liked]), likedTrack(ID of the track liked), likedTrackManual('artist - title of track')
-     * @param {function} fn Function to call when event is fired
-     */
-    on (event, fn) {
-        this.events.on(event, fn);
-    }
-
-    /**
      * Get the tracks liked by the current user.
      * 
      * @returns {array} Array of track IDs or 'artist - title' strings liked
      */
-    get likedTracks() {
+    get likedTracks () {
         return this._likedTracks;
     }
 
@@ -75,7 +65,7 @@ class WWSUlikedtracks {
                         return null
                     } else {
                         this._likedTracks.push(trackID)
-                        this.events.emitEvent('likedTrackManual', trackID);
+                        this.emitEvent('likedTrackManual', trackID);
 
                         $(document).Toasts('create', {
                             class: 'bg-success',
@@ -93,6 +83,8 @@ class WWSUlikedtracks {
                         class: 'bg-danger',
                         title: 'Error sending message',
                         body: 'There was an error telling the DJ you liked that track. Please report this to the engineer.',
+                        autoHide: true,
+                        delay: 10000,
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 }
@@ -113,7 +105,7 @@ class WWSUlikedtracks {
                         })
                     } else {
                         this._likedTracks.push(trackID)
-                        this.events.emitEvent('likedTrack', trackID);
+                        this.emitEvent('likedTrack', trackID);
 
                         $(document).Toasts('create', {
                             class: 'bg-success',

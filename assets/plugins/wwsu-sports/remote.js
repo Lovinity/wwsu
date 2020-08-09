@@ -73,7 +73,7 @@ socket.on('disconnect', () => {
 sportsdb.assignSocketEvent('sports', socket)
 
 function updateValue (name, value) {
-  var temp = sportsdb.db({ name: name }).first()
+  var temp = sportsdb.find({ name: name }, true)
   if (!temp || typeof temp.value === `undefined` || temp.value !== value) {
     noReq.request({ method: 'POST', url: '/sports/update', data: { name: name, value: value } }, () => {
     })
