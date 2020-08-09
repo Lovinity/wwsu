@@ -700,6 +700,7 @@ function updateCalendar() {
             )
         )
         .map((event) => {
+          console.dir(event);
           try {
             var colorClass = `secondary`;
             var iconClass = "far fa-calendar-alt";
