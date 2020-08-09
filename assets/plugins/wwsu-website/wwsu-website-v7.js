@@ -719,7 +719,7 @@ function updateCalendar() {
               if (
                 ["updated", "updated-system"].indexOf(event.scheduleType) !==
                   -1 &&
-                (event.newTime !== null || event.duration !== null)
+                event.timeChanged
               ) {
                 badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
               }
@@ -934,9 +934,12 @@ function updateDirectorsCalendar() {
               Object.prototype.hasOwnProperty.call(directorHours, directorHour)
             ) {
               var text1 = "OUT OF OFFICE";
+              var textTitle =
+                "This director is not currently in the WWSU office.";
               var theClass = "danger";
               if (directorHours[directorHour].director.present) {
                 text1 = "IN OFFICE";
+                textTitle = "This director is currently in the WWSU office.";
                 theClass = "success";
               }
               if (innercontent) {
@@ -948,24 +951,28 @@ function updateDirectorsCalendar() {
                       directorHours[directorHour].director.avatar !== ""
                         ? `<img class="profile-user-img img-fluid img-circle" src="${directorHours[directorHour].director.avatar}" alt="Director Avatar">`
                         : `<div class="bg-${theClass} profile-user-img img-fluid img-circle">${jdenticon.toSvg(
-                          `Director ${directorHours[directorHour].director.name}`,
-                          96
-                        )}</div>`
+                            `Director ${directorHours[directorHour].director.name}`,
+                            96
+                          )}</div>`
                     }
                     </div>
     
-                    <h3 class="profile-username text-center">${directorHours[directorHour].director.name}</h3>
+                    <h3 class="profile-username text-center">${
+                      directorHours[directorHour].director.name
+                    }</h3>
     
-                    <p class="text-center">${directorHours[directorHour].director.position}</p>
+                    <p class="text-center">${
+                      directorHours[directorHour].director.position
+                    }</p>
     
                     <ul class="list-group list-group-unbordered mb-3 text-center">
                     <li class="list-group-item">
-                    <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span></div>
+                    <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;" title="${textTitle}">${text1}</span></div>
                     </li>
                     <li class="list-group-item">
-                        <strong>${directorHours[
-                          directorHour
-                        ].hours.join("<br />")}</strong>
+                        <strong>${directorHours[directorHour].hours.join(
+                          "<br />"
+                        )}</strong>
                     </li>
                     </ul>
                   </div>
