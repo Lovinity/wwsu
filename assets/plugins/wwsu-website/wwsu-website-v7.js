@@ -804,8 +804,6 @@ function updateCalendar() {
  */
 function updateDirectorsCalendar() {
   try {
-    var directors = {};
-
     // Update directors html
     var innercontent = document.getElementById("schedule-hours");
     if (innercontent) {
@@ -814,7 +812,6 @@ function updateDirectorsCalendar() {
 
     directorsdb.db().each((dodo) => {
       try {
-        directors[dodo.name] = dodo;
         var color = "rgba(211, 47, 47, 0.25)";
         var text1 = "OUT";
         var theClass = "danger";
@@ -831,14 +828,14 @@ function updateDirectorsCalendar() {
               dodo.avatar !== null && dodo.avatar !== ""
                 ? `<img src="${dodo.avatar}" width="96" class="rounded-circle">`
                 : jdenticon.toSvg(`Director ${dodo.name}`, 96)
-            }
-            <span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span>
+            }</div>
+            <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;">${text1}</span></div>
             <div class="m-1" style="text-align: center;"><span style="font-size: 1.25em;">${
               dodo.name
             }</span><br><span style="font-size: 0.8em;">${
             dodo.position
           }</span></div>
-            <h4><strong>Office Hours</strong></h4>
+            <h4><strong>Office Hours:</strong></h4>
             <div id="director-hours-${dodo.ID}"></div>
             </div>
         </div>`;
@@ -885,17 +882,8 @@ function updateDirectorsCalendar() {
             .sort(compare)
             .filter((event) => event.type === "office-hours")
             .map((event) => {
-              var temp = directors[event.director];
-
-              // No temp record? Exit immediately.
-              if (typeof temp === `undefined`) {
-                return null;
-              }
-
-              var directorID = temp.ID;
-
-              var temp2 = document.querySelector(
-                `#director-hours-${directorID}`
+              var temp2 = document.getElementById(
+                `director-hours-${event.director}`
               );
 
               if (temp2 === null) {
@@ -907,7 +895,9 @@ function updateDirectorsCalendar() {
                 event.start = moment(meta.meta.time).startOf("day");
               }
               if (!moment(event.end).isValid()) {
-                event.end = moment(meta.meta.time).add(1, "days").startOf("day");
+                event.end = moment(meta.meta.time)
+                  .add(1, "days")
+                  .startOf("day");
               }
 
               event.startT =
@@ -957,8 +947,7 @@ function updateDirectorsCalendar() {
             });
         },
         moment().startOf("day"),
-        moment().add(7, "days").startOf("day"),
-        { type: "office-hours" }
+        moment().add(7, "days").startOf("day")
       );
     });
   } catch (e) {
