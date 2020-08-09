@@ -193,7 +193,7 @@ module.exports = {
 
     duration: {
       type: "number",
-      min: 0,
+      min: 0, // 0 = null / no change
       max: 60 * 24,
       allowNull: true,
     },
@@ -227,7 +227,7 @@ module.exports = {
         startTime: inputs.startTime,
         recurrenceRules: inputs.recurrenceRules,
         recurrenceInterval: inputs.recurrenceInterval,
-        duration: inputs.duration,
+        duration: inputs.duration ? inputs.duration : null,
       };
 
       // Get calendarID and scheduleID and overriddenID from original record

@@ -196,7 +196,7 @@ module.exports = {
 
     duration: {
       type: "number",
-      min: 1,
+      min: 0, // 0 = null / no change
       max: 60 * 24,
       allowNull: true,
     },
@@ -232,7 +232,7 @@ module.exports = {
         startTime: inputs.startTime,
         recurrenceRules: inputs.recurrenceRules,
         recurrenceInterval: inputs.recurrenceInterval,
-        duration: inputs.duration,
+        duration: inputs.duration ? inputs.duration : null,
       };
 
       try {
