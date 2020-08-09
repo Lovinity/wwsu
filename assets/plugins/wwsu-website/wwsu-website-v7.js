@@ -40,7 +40,7 @@ try {
 
   var messageIDs = [];
   var navigation = new WWSUNavigation();
-  var calendardb = new CalendarDb();
+  var calendardb = new CalendarDb([], [], [], meta);
   var newMessages = 0;
   var client = "";
   var automationpost = ``;
@@ -700,7 +700,6 @@ function updateCalendar() {
             )
         )
         .map((event) => {
-          console.dir(event);
           try {
             var colorClass = `secondary`;
             var iconClass = "far fa-calendar-alt";
