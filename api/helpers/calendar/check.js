@@ -520,7 +520,7 @@ module.exports = {
                     happened: 0,
                     scheduledStart: moment(event.start).toISOString(true),
                     scheduledEnd: moment(event.end).toISOString(true),
-                  });
+                  }).fetch();
 
                   if (event.type === "show") {
                     await sails.models.logs

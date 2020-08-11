@@ -2449,7 +2449,7 @@ module.exports.bootstrap = async function (done) {
 
   // Every Sunday at 12:00:01AM, send out weekly analytics to directors
   sails.log.verbose(`BOOTSTRAP: scheduling weeklyAnalyticsEmail CRON.`);
-  cron.schedule("1 0 0 * * * 0", () => {
+  cron.schedule("1 0 0 * * 0", () => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON weeklyAnalyticsEmail called`);
