@@ -341,14 +341,24 @@ meta.on("newMeta", "renderer", (response, _meta) => {
     if ("line1" in response || "line2" in response) {
       // Update now playing icon
       if (
-        _meta.state.startsWith("live_") ||
+        _meta.state.startsWith("live_")
+      ) {
+        $(".nowplaying-icon").html(
+          `${
+            _meta.showLogo !== null
+              ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
+              : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger" aria-hidden="true" title="Live radio show"></i><span class="sr-only">Live radio show</span>`
+          }`
+        );
+      }
+      if (
         _meta.state.startsWith("prerecord_")
       ) {
         $(".nowplaying-icon").html(
           `${
             _meta.showLogo !== null
               ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger"></i>`
+              : `<i class="profile-user-img img-fluid img-circle fas fa-play-circle bg-pink" aria-hidden="true" title="Prerecorded show"></i><span class="sr-only">Prerecorded show</span>`
           }`
         );
       }
@@ -360,7 +370,7 @@ meta.on("newMeta", "renderer", (response, _meta) => {
           `${
             _meta.showLogo !== null
               ? `<img class="profile-user-img img-fluid img-circle bg-success" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success"></i>`
+              : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success" aria-hidden="true" title="Sports broadcast"></i><span class="sr-only">Sports broadcast</span>`
           }`
         );
       }
@@ -372,13 +382,13 @@ meta.on("newMeta", "renderer", (response, _meta) => {
           `${
             _meta.showLogo !== null
               ? `<img class="profile-user-img img-fluid img-circle bg-purple" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple"></i>`
+              : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple" aria-hidden="true" title="Remote broadcast"></i><span class="sr-only">Remote broadcast</span>`
           }`
         );
       }
       if (_meta.state.startsWith("automation_") || _meta.state === "unknown") {
         $(".nowplaying-icon").html(
-          `<i class="profile-user-img img-fluid img-circle fas fa-music bg-primary"></i>`
+          `<i class="profile-user-img img-fluid img-circle fas fa-music bg-primary" aria-hidden="true" title="Music genre"></i><span class="sr-only">Music</span>`
         );
       }
 
@@ -390,7 +400,7 @@ meta.on("newMeta", "renderer", (response, _meta) => {
 
     if ("webchat" in response && !response.webchat) {
       blocked = true;
-      $(".chat-status").html(`<h5>Chat Status: Disabled</h5>
+      $(".chat-status").html(`<p class="h5">Chat Status: Disabled</p>
             <p>Either the current DJ disabled the chat for their show, or directors have temporarily disabled the chat globally.</p>`);
       $(".chat-blocker").prop("disabled", true);
     }
@@ -402,14 +412,14 @@ meta.on("newMeta", "renderer", (response, _meta) => {
         _meta.state === "unknown"
       ) {
         if (automationpost !== "automation") {
-          $(".chat-status").html(`<h5>Chat Status: Inactive</h5>
+          $(".chat-status").html(`<p class="h5">Chat Status: Inactive</p>
                     <p>No shows are airing right now. Your message will likely not be seen by a DJ.</p>`);
           automationpost = "automation";
         }
       } else if (response.state.startsWith("prerecord_")) {
         if (automationpost !== response.show) {
           automationpost = response.show;
-          $(".chat-status").html(`<h5>Chat Status: Prerecord</h5>
+          $(".chat-status").html(`<p class="h5">Chat Status: Prerecord</p>
                     <p>The show airing now is prerecorded. There might not be anyone in the studio to see your messages.</p>`);
         }
 
@@ -460,7 +470,7 @@ meta.on("newMeta", "renderer", (response, _meta) => {
                 */
       } else {
         if (automationpost !== response.show) {
-          $(".chat-status").html(`<h5>Chat Status: Active</h5>
+          $(".chat-status").html(`<p class="h5">Chat Status: Active</p>
                     <p>Your messages should be received by the DJ / host.</p>`);
           automationpost = response.show;
         }
@@ -606,7 +616,7 @@ function processAnnouncements() {
           });
         } else {
           html[type] += `<div class="alert alert-${announcement.level}">
-                    <h5>${announcement.title}</h5>
+                    <p class="h5">${announcement.title}</p>
                     ${announcement.announcement}
                   </div>`;
         }
@@ -679,28 +689,34 @@ function updateCalendar() {
             try {
               var colorClass = `secondary`;
               var iconClass = "far fa-calendar-alt";
+              var accessibleText = "Event";
 
               switch (event.type) {
                 case "genre":
                 case "playlist":
                   colorClass = "primary";
                   iconClass = "fas fa-music";
+                  accessibleText = "Music";
                   break;
                 case "show":
                   colorClass = "danger";
                   iconClass = "fas fa-microphone";
+                  accessibleText = "Live Show";
                   break;
                 case "sports":
                   colorClass = "success";
                   iconClass = "fas fa-basketball-ball";
+                  accessibleText = "Sports Broadcast";
                   break;
                 case "remote":
                   colorClass = "purple";
                   iconClass = "fas fa-broadcast-tower";
+                  accessibleText = "Remote Broadcast";
                   break;
                 case "prerecord":
                   colorClass = "pink";
                   iconClass = "fas fa-play-circle";
+                  accessibleText = "Prerecorded Show";
                   break;
               }
 
@@ -744,11 +760,11 @@ function updateCalendar() {
                     ${
                       event.logo !== null
                         ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">`
-                        : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`
+                        : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;" aria-hidden="true" title="${accessibleText}"></i><span class="sr-only">${accessibleText}</span>`
                     }
                     </div>
     
-                    <h3 class="profile-username text-center">${event.name}</h3>
+                    <p class="profile-username text-center h3">${event.name}</p>
     
                     <p class="${
                       !shouldBeDark ? `text-muted ` : ``
@@ -957,9 +973,9 @@ function updateDirectorsCalendar() {
                     }
                     </div>
     
-                    <h3 class="profile-username text-center">${
+                    <p class="profile-username text-center h3">${
                       directorHours[directorHour].director.name
-                    }</h3>
+                    }</p>
     
                     <p class="text-center">${
                       directorHours[directorHour].director.position
@@ -1019,28 +1035,34 @@ function displayEventInfo(showID) {
       viewingEvent = event;
       var colorClass = `secondary`;
       var iconClass = "far fa-calendar-alt";
+      var accessibleText = `Event`;
 
       switch (event.type) {
         case "genre":
         case "playlist":
           colorClass = "primary";
           iconClass = "fas fa-music";
+          accessibleText = "Music";
           break;
         case "show":
           colorClass = "danger";
           iconClass = "fas fa-microphone";
+          accessibleText = "Live Show";
           break;
         case "sports":
           colorClass = "success";
           iconClass = "fas fa-basketball-ball";
+          accessibleText = "Sports Broadcast";
           break;
         case "remote":
           colorClass = "purple";
           iconClass = "fas fa-broadcast-tower";
+          accessibleText = "Remote Broadcast";
           break;
         case "prerecord":
           colorClass = "pink";
           iconClass = "fas fa-play-circle";
+          accessibleText = "Prerecorded Show";
           break;
       }
 
@@ -1073,11 +1095,11 @@ function displayEventInfo(showID) {
         ${
           event.logo !== null
             ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">`
-            : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;"></i>`
+            : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;" aria-hidden="true" title="${accessibleText}"></i><span class="sr-only">${accessibleText}</span>`
         }
         </div>
 
-        <h3 class="profile-username text-center">${event.name}</h3>
+        <p class="profile-username text-center h3">${event.name}</p>
 
         <p class="text-muted text-center">${event.hosts}</p>
 
