@@ -690,13 +690,10 @@ class WWSUutil {
    * @param {function} cb Function to call when the element exists
    */
   waitForElement(theelement, cb) {
-    console.log(`Waiting for ${theelement}...`)
     if (!document.querySelector(theelement)) {
-      console.log(`${theelement} not yet found...`)
       window.requestAnimationFrame(() => this.waitForElement(theelement, cb));
     } else {
       // eslint-disable-next-line callback-return
-      console.log(`${theelement} found`);
       cb(document.querySelector(theelement));
     }
   }

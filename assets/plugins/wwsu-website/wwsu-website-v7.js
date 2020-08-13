@@ -563,6 +563,7 @@ window.addEventListener("DOMContentLoaded", () => {
             if (track.likable && track.ID !== 0)
               wwsuutil.waitForElement(`#track-like-${track.ID}`, () => {
                 $(`#track-like-${track.ID}`).click(() => {
+                  console.log(`Clicked #track-like-${track.ID}`);
                   likeTrack(track.ID);
                 });
                 $(`#track-like-${track.ID}`).keydown((e) => {
@@ -841,6 +842,7 @@ window.addEventListener("DOMContentLoaded", () => {
               </div>`;
                   wwsuutil.waitForElement(`#event-info-${event.unique}`, () => {
                     $(`#event-info-${event.unique}`).click(() => {
+                      console.log(`Clicked #event-info-${event.unique}`);
                       displayEventInfo(event.unique);
                     });
                     $(`#event-info-${event.unique}`).keydown((e) => {
