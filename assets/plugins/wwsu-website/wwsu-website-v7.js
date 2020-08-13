@@ -650,16 +650,28 @@ function updateCalendar() {
   $("#schedule-events").block({
     message: "<h1>Loading...</h1>",
     css: { border: "3px solid #a00" },
+    timeout: 15000,
     onBlock: () => {
+      console.log(`calendar blocked`);
       // Get the value of the currently selected calendar item
       var selectedOption = $("#schedule-select")
         .children("option:selected")
         .val();
       selectedOption = parseInt(selectedOption);
 
+      for (var i = 1; i < 14; i++) {
+        $(`#schedule-select-${i}`).html(
+          moment(meta.meta.time)
+            .startOf(`day`)
+            .add(i, "days")
+            .format(`dddd MM/DD`)
+        );
+      }
+
       // Process events for the next 7 days
       calendardb.getEvents(
         (events) => {
+          console.log(`calendar events retrieved`);
           var html = "";
 
           // Run through every event in memory and add appropriate ones into our formatted calendar variable.
@@ -809,16 +821,7 @@ function updateCalendar() {
             });
 
           $("#schedule-events").html(html);
-
-          for (var i = 1; i < 14; i++) {
-            $(`#schedule-select-${i}`).html(
-              moment(meta.meta.time)
-                .startOf(`day`)
-                .add(i, "days")
-                .format(`dddd MM/DD`)
-            );
-          }
-
+          console.log(`calendar unblock called`);
           $("#schedule-events").unblock();
 
           calendarUpdating = false;
@@ -830,6 +833,7 @@ function updateCalendar() {
       );
     },
     onUnblock: () => {
+      console.log(`Calendar Unblocked`);
       calendarUpdating = false;
     },
   });
@@ -845,7 +849,9 @@ function updateDirectorsCalendar() {
   $("#schedule-hours").block({
     message: "<h1>Loading...</h1>",
     css: { border: "3px solid #a00" },
+    timeout: 15000,
     onBlock: () => {
+      console.log(`director calendar blocked`);
       try {
         directorHours = {};
 
@@ -881,6 +887,7 @@ function updateDirectorsCalendar() {
         };
         calendardb.getEvents(
           (events) => {
+            console.log(`director calendar events retrieved`);
             events
               .sort(compare)
               .filter((event) => event.type === "office-hours")
@@ -1005,6 +1012,7 @@ function updateDirectorsCalendar() {
             }
 
             $("#schedule-hours").html(html);
+            console.log(`director calendar unblock called`);
             $("#schedule-hours").unblock();
 
             directorsCalendarUpdating = false;
@@ -1021,6 +1029,7 @@ function updateDirectorsCalendar() {
       }
     },
     onUnblock: () => {
+      console.log(`Director Calendar Unblocked`);
       directorsCalendarUpdating = false;
     },
   });
