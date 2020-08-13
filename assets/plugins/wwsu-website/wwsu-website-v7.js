@@ -562,11 +562,11 @@ window.addEventListener("DOMContentLoaded", () => {
           response.history.map((track) => {
             if (track.likable && track.ID !== 0)
               wwsuutil.waitForElement(`#track-like-${track.ID}`, () => {
-                $(`#track-like-${track.ID}`).click(() => {
+                $(`#track-like-${track.ID}`).off('click').click(() => {
                   console.log(`Clicked #track-like-${track.ID}`);
                   likeTrack(track.ID);
                 });
-                $(`#track-like-${track.ID}`).keydown((e) => {
+                $(`#track-like-${track.ID}`).off('keydown').keydown((e) => {
                   if (e.code === "Space" || e.code === "Enter")
                     likeTrack(track.ID);
                 });
@@ -841,11 +841,10 @@ window.addEventListener("DOMContentLoaded", () => {
                 </div>
               </div>`;
                   wwsuutil.waitForElement(`#event-info-${event.unique}`, () => {
-                    $(`#event-info-${event.unique}`).click(() => {
-                      console.log(`Clicked #event-info-${event.unique}`);
+                    $(`#event-info-${event.unique}`).off('click').click(() => {
                       displayEventInfo(event.unique);
                     });
-                    $(`#event-info-${event.unique}`).keydown((e) => {
+                    $(`#event-info-${event.unique}`).off('keydown').keydown((e) => {
                       if (e.code === "Space" || e.code === "Enter")
                         displayEventInfo(event.unique);
                     });
@@ -1245,12 +1244,12 @@ window.addEventListener("DOMContentLoaded", () => {
           $("#modal-eventinfo-unsubscribe").prop("disabled", false);
           $("#modal-eventinfo-unsubscribe").html(`Unsubscribe All Times`);
 
-          $(`#modal-eventinfo-subscribe-all`).click((event) => {
+          $(`#modal-eventinfo-subscribe-all`).off('click').click((event) => {
             OneSignal.showSlidedownPrompt({ force: true });
             $("#modal-eventinfo").modal("hide");
           });
-          $(`#modal-eventinfo-subscribe-all`).keypress((event) => {
-            if (event.key === "Enter") {
+          $(`#modal-eventinfo-subscribe-all`).off('keydown').keydown((event) => {
+            if (event.code === "Enter" || event.code === "Space") {
               OneSignal.showSlidedownPrompt({ force: true });
               $("#modal-eventinfo").modal("hide");
             }
@@ -1635,10 +1634,10 @@ window.addEventListener("DOMContentLoaded", () => {
           </tr>`;
 
             wwsuutil.waitForElement(`#request-track-${track.ID}`, () => {
-              $(`#request-track-${track.ID}`).click(() => {
+              $(`#request-track-${track.ID}`).off('click').click(() => {
                 loadTrackInfo(track.ID);
               });
-              $(`#request-track-${track.ID}`).keydown((e) => {
+              $(`#request-track-${track.ID}`).off('keydown').keydown((e) => {
                 if (e.code === "Space" || e.code === "Enter")
                   loadTrackInfo(track.ID);
               });
@@ -1738,10 +1737,10 @@ window.addEventListener("DOMContentLoaded", () => {
                                       </div>                    
                                       <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0">Place Request</button></div>`);
             wwsuutil.waitForElement(`#track-request-submit`, () => {
-              $(`#track-request-submit`).click(() => {
+              $(`#track-request-submit`).off('click').click(() => {
                 requestTrack(response[0].ID);
               });
-              $(`#track-request-submit`).keydown((e) => {
+              $(`#track-request-submit`).off('keydown').keydown((e) => {
                 if (e.code === "Space" || e.code === "Enter")
                   requestTrack(response[0].ID);
               });
