@@ -1,5 +1,9 @@
 /* global WWSUreq, WWSUmeta, WWSUnavigation, CalendarDb, WWSUutil, WWSUsubscriptions, WWSUlikedtracks */
 
+// These need loaded immediately and on a global scale. They do not rely on the DOM being loaded first.
+var wwsuutil = new WWSUutil();
+var navigation = new WWSUNavigation();
+
 window.addEventListener("DOMContentLoaded", () => {
   try {
     // Initialize sails.js socket connection to WWSU
@@ -9,7 +13,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // WWSU Variables
     var meta = new WWSUMeta(socket, noReq);
-    var wwsuutil = new WWSUutil();
 
     // Liked Tracks
     var likedtracks = new WWSUlikedtracks(socket, noReq);
@@ -44,7 +47,6 @@ window.addEventListener("DOMContentLoaded", () => {
     var directorHours = {};
 
     var messageIDs = [];
-    var navigation = new WWSUNavigation();
     var calendardb = new WWSUcalendar(socket, meta, noReq);
     var newMessages = 0;
     var client = "";
