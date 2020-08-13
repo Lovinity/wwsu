@@ -180,16 +180,16 @@
 
     <!--WWSU-->
     <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202008131720"></script>
-    <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008131720"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202008131747"></script>
+    <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008131747"></script>
   </head>
 
   <body
@@ -483,8 +483,8 @@
                 <div class="input-group m-2">
                   <button
                     type="submit"
+                    id="send-message-public"
                     class="btn btn-success chat-blocker"
-                    onclick="sendMessage()"
                     tabindex="0"
                     title="Send the message publicly; other listeners can also see it."
                   >
@@ -492,8 +492,8 @@
                   </button>
                   <button
                     type="submit"
+                    id="send-message-private"
                     class="btn btn-danger chat-blocker"
-                    onclick="sendMessage(true)"
                     tabindex="0"
                     title="Send this message privately; only the DJ can see it."
                   >
@@ -555,7 +555,6 @@
                   <select
                     class="form-control"
                     id="schedule-select"
-                    onchange="updateCalendar()"
                   >
                     <option value="0" id="schedule-select-0">Today</option>
                     <option value="1" id="schedule-select-1">Day 2</option>
@@ -730,8 +729,7 @@
                     <div class="form-group">
                       <button
                         class="btn btn-primary"
-                        onclick="loadTracks(0)"
-                        onkeydown="loadTracks(0)"
+                        id="request-search"
                         tabindex="0"
                         title="Search for tracks"
                       >
@@ -762,8 +760,6 @@
                   class="btn btn-primary"
                   id="request-more"
                   style="display: none;"
-                  onclick="loadTracks()"
-                  onkeydown="loadTracks()"
                   tabindex="0"
                 >
                   Load More Tracks

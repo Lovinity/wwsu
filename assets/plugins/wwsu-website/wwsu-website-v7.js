@@ -181,13 +181,40 @@ window.addEventListener("DOMContentLoaded", () => {
         $("#modal-eventinfo").modal("hide");
       }
     });
+    $(`#send-message-public`).click(() => {
+      sendMessage();
+    });
+    $(`#send-message-public`).keydown((e) => {
+      if (e.code === "Space" || e.code === "Enter") sendMessage();
+    });
+    $(`#send-message-private`).click(() => {
+      sendMessage(true);
+    });
+    $(`#send-message-private`).keydown((e) => {
+      if (e.code === "Space" || e.code === "Enter") sendMessage(true);
+    });
+    $(`#schedule-select`).change(() => {
+      updateCalendar();
+    });
+    $(`#request-search`).click(() => {
+      loadTracks(0);
+    });
+    $(`#request-search`).keydown((e) => {
+      if (e.code === "Space" || e.code === "Enter") loadTracks(0);
+    });
+    $(`#request-more`).click(() => {
+      loadTracks(0);
+    });
+    $(`#request-more`).keydown((e) => {
+      if (e.code === "Space" || e.code === "Enter") loadTracks(0);
+    });
   } catch (e) {
     console.error(e);
     $(document).Toasts("create", {
       class: "bg-danger",
       title: "Error in document.ready",
       body:
-        "There was an error in the document.ready function. Please report this to wwsu4@wright.edu.",
+        "There was an error in initializing the webpage. Please report this to wwsu4@wright.edu.",
       icon: "fas fa-skull-crossbones fa-lg",
     });
   }
@@ -533,6 +560,16 @@ window.addEventListener("DOMContentLoaded", () => {
         // reset recent tracks
         $(".nowplaying-recentlyplayed").html(
           response.history.map((track) => {
+            if (track.likable && track.ID !== 0)
+              wwsuutil.waitForElement(`#track-like-${track.ID}`, () => {
+                $(`#track-like-${track.ID}`).click(() => {
+                  likeTrack(track.ID);
+                });
+                $(`#track-like-${track.ID}`).keydown((e) => {
+                  if (e.code === "Space" || e.code === "Enter")
+                    likeTrack(track.ID);
+                });
+              });
             return `<tr>
                 <td>
                 ${track.track}
@@ -542,16 +579,10 @@ window.addEventListener("DOMContentLoaded", () => {
                   track.likable && track.ID !== 0
                     ? `${
                         likedtracks.likedTracks.indexOf(track.ID) === -1
-                          ? `<button type="button" class="btn btn-success btn-small" onclick="likeTrack(${track.ID});" onkeydown="if (this.key === "Enter") likeTrack(${track.ID});" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>`
+                          ? `<button type="button" id="track-like-${track.ID}" class="btn btn-success btn-small" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>`
                           : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`
                       }`
-                    : likedtracks.likedTracks.indexOf(track.track) === -1
-                    ? `<button type="button" class="btn btn-info btn-small" tabindex="0" title="Tell the DJ you enjoy this track." onclick="likeTrack('${wwsuutil.escapeHTML(
-                        track.track
-                      )}');" onkeydown="if (this.key === "Enter") likeTrack('${wwsuutil.escapeHTML(
-                        track.track
-                      )}');">Like Track</button>`
-                    : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`
+                    : `<button type="button" class="btn btn-outline-danger btn-small disabled" tabindex="0" title="This track was not played in the WWSU automation system. If you like it, please send a message to the DJ instead.">Manually Played</button>`
                 }
                 </td>
                 </tr>`;
@@ -802,14 +833,21 @@ window.addEventListener("DOMContentLoaded", () => {
                     </li>
                     </ul>
     
-                    <a href="#" class="btn btn-primary btn-block" onclick="displayEventInfo('${
+                    <a href="#" class="btn btn-primary btn-block" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications." id="event-info-${
                       event.unique
-                    }')" onkeydown="if (this.key === "Enter") displayEventInfo('${
-                    event.unique
-                  }')" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications."><b>More Info / Notifications</b></a>
+                    }"><b>More Info / Notifications</b></a>
                   </div>
                 </div>
               </div>`;
+                  wwsuutil.waitForElement(`#event-info-${event.unique}`, () => {
+                    $(`#event-info-${event.unique}`).click(() => {
+                      displayEventInfo(event.unique);
+                    });
+                    $(`#event-info-${event.unique}`).keydown((e) => {
+                      if (e.code === "Space" || e.code === "Enter")
+                        displayEventInfo(event.unique);
+                    });
+                  });
                 } catch (e) {
                   console.error(e);
                   $(document).Toasts("create", {
@@ -1578,25 +1616,31 @@ window.addEventListener("DOMContentLoaded", () => {
             <td>
             ${
               track.enabled === 1
-                ? `<button type="button" class="btn btn-success" onclick="loadTrackInfo(${
+                ? `<button type="button" class="btn btn-success" id="request-track-${
                     track.ID
-                  })" onkeydown="if (this.key === "Enter") loadTrackInfo(${
-                    track.ID
-                  })" title="Get more info, or request, ${wwsuutil.escapeHTML(
+                  }" title="Get more info, or request, ${wwsuutil.escapeHTML(
                     track.artist
                   )} - ${wwsuutil.escapeHTML(
                     track.title
                   )}}">Info / Request</button>`
-                : `<button type="button" class="btn btn-info" onclick="loadTrackInfo(${
+                : `<button type="button" class="btn btn-info" id="request-track-${
                     track.ID
-                  })" onkeydown="if (this.key === "Enter") loadTrackInfo(${
-                    track.ID
-                  })" title="Get more info about ${wwsuutil.escapeHTML(
+                  }" title="Get more info about ${wwsuutil.escapeHTML(
                     track.artist
                   )} - ${wwsuutil.escapeHTML(track.title)}}.">Info</button>`
             }
             </td>
           </tr>`;
+
+            wwsuutil.waitForElement(`#request-track-${track.ID}`, () => {
+              $(`#request-track-${track.ID}`).click(() => {
+                loadTrackInfo(track.ID);
+              });
+              $(`#request-track-${track.ID}`).keydown((e) => {
+                if (e.code === "Space" || e.code === "Enter")
+                  loadTrackInfo(track.ID);
+              });
+            });
           });
 
           if (skip === 0) {
@@ -1690,7 +1734,16 @@ window.addEventListener("DOMContentLoaded", () => {
                                       <label for="track-request-message">Message for the DJ (optional)</label>
                                       <textarea class="form-control" id="track-request-message" rows="2" tabindex="0"></textarea>
                                       </div>                    
-                                      <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0" onclick="requestTrack(${response[0].ID})" onkeydown="if (this.key === "Enter") requestTrack(${response[0].ID})">Place Request</button></div>`);
+                                      <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0">Place Request</button></div>`);
+            wwsuutil.waitForElement(`#track-request-submit`, () => {
+              $(`#track-request-submit`).click(() => {
+                requestTrack(response[0].ID);
+              });
+              $(`#track-request-submit`).keydown((e) => {
+                if (e.code === "Space" || e.code === "Enter")
+                  requestTrack(response[0].ID);
+              });
+            });
           } else {
             $("#track-info-request")
               .html(`<div class="callout callout-${response[0].request.listDiv}">
