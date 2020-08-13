@@ -650,7 +650,6 @@ function updateCalendar() {
   $("#schedule-events").block({
     message: "<h1>Loading...</h1>",
     css: { border: "3px solid #a00" },
-    timeout: 15000,
     onBlock: () => {
       // Get the value of the currently selected calendar item
       var selectedOption = $("#schedule-select")
@@ -819,6 +818,10 @@ function updateCalendar() {
                 .format(`dddd MM/DD`)
             );
           }
+
+          $("#schedule-events").unblock();
+
+          calendarUpdating = false;
         },
         moment().add(selectedOption, "days").startOf("day"),
         moment()
@@ -842,7 +845,6 @@ function updateDirectorsCalendar() {
   $("#schedule-hours").block({
     message: "<h1>Loading...</h1>",
     css: { border: "3px solid #a00" },
-    timeout: 15000,
     onBlock: () => {
       try {
         directorHours = {};
@@ -1004,6 +1006,8 @@ function updateDirectorsCalendar() {
 
             $("#schedule-hours").html(html);
             $("#schedule-hours").unblock();
+
+            directorsCalendarUpdating = false;
           },
           moment().startOf("day"),
           moment().add(7, "days").startOf("day")
@@ -1016,7 +1020,7 @@ function updateDirectorsCalendar() {
         console.error(e);
       }
     },
-    onUnblock() {
+    onUnblock: () => {
       directorsCalendarUpdating = false;
     },
   });
