@@ -61,6 +61,8 @@
 
     <!-- jQuery -->
     <script src="/plugins/jquery/jquery.min.js"></script>
+    <!-- JQuery BlockUI -->
+    <script src="assets/plugins/jquery-blockui/js/jquery.blockUI.js"></script>
     <!-- Mousewheel -->
     <script src="/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
     <!-- Bootstrap -->
@@ -178,16 +180,16 @@
 
     <!--WWSU-->
     <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202008112133"></script>
-    <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008112133"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202008131651"></script>
+    <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008131651"></script>
   </head>
 
   <body
@@ -204,8 +206,9 @@
               data-widget="pushmenu"
               title="Display / Hide Side Menu"
               aria-label="Display / Hide Side Menu"
-              ><i class="fas fa-bars" aria-hidden="true"></i
-            ></button>
+            >
+              <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
           </li>
         </ul>
         <small
@@ -278,7 +281,10 @@
                   title="View what will air on WWSU up to 14 days in advance."
                   aria-label="View what will air on WWSU up to 14 days in advance."
                 >
-                  <i class="nav-icon far fa-calendar-alt" aria-hidden="true"></i>
+                  <i
+                    class="nav-icon far fa-calendar-alt"
+                    aria-hidden="true"
+                  ></i>
                   <p>
                     Program Schedule
                   </p>
@@ -664,7 +670,8 @@
             <div class="callout callout-info">
               <p class="h5">Timezone info</p>
               <p>
-                Displayed dates/times for office hours are in your local timezone.
+                Displayed dates/times for office hours are in your local
+                timezone.
               </p>
             </div>
 
@@ -916,7 +923,11 @@
           <div class="bottom-container">
             <div class="amplitude-visualization"></div>
             <div class="control-container">
-              <div class="amplitude-play-pause" id="play-pause" tabindex="0"></div>
+              <div
+                class="amplitude-play-pause"
+                id="play-pause"
+                tabindex="0"
+              ></div>
               <div class="meta-container">
                 <span class="nowplaying-line1"></span>
                 <span class="nowplaying-line2"></span>

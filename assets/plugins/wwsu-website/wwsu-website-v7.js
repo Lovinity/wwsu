@@ -340,9 +340,7 @@ meta.on("newMeta", "renderer", (response, _meta) => {
     // Update meta, if new meta was provided
     if ("line1" in response || "line2" in response) {
       // Update now playing icon
-      if (
-        _meta.state.startsWith("live_")
-      ) {
+      if (_meta.state.startsWith("live_")) {
         $(".nowplaying-icon").html(
           `${
             _meta.showLogo !== null
@@ -351,9 +349,7 @@ meta.on("newMeta", "renderer", (response, _meta) => {
           }`
         );
       }
-      if (
-        _meta.state.startsWith("prerecord_")
-      ) {
+      if (_meta.state.startsWith("prerecord_")) {
         $(".nowplaying-icon").html(
           `${
             _meta.showLogo !== null
@@ -647,114 +643,118 @@ directorsdb.on("change", "renderer", () => {
 /**
  * Re-process calendar events
  */
-var calendarTimer;
+var calendarUpdating = false;
 function updateCalendar() {
-  clearTimeout(calendarTimer);
-  calendarTimer = setTimeout(() => {
-    $("#schedule-events").html("Processing...");
+  if (calendarUpdating) return;
+  calendarUpdating = true;
+  $("#schedule-events").block({
+    message: "<h1>Loading...</h1>",
+    css: { border: "3px solid #a00" },
+    timeout: 15000,
+    onBlock: () => {
+      // Get the value of the currently selected calendar item
+      var selectedOption = $("#schedule-select")
+        .children("option:selected")
+        .val();
+      selectedOption = parseInt(selectedOption);
 
-    // Get the value of the currently selected calendar item
-    var selectedOption = $("#schedule-select")
-      .children("option:selected")
-      .val();
-    selectedOption = parseInt(selectedOption);
+      // Process events for the next 7 days
+      calendardb.getEvents(
+        (events) => {
+          var html = "";
 
-    // Process events for the next 7 days
-    calendardb.getEvents(
-      (events) => {
-        var html = "";
+          // Run through every event in memory and add appropriate ones into our formatted calendar variable.
+          events
+            .filter(
+              (event) =>
+                [
+                  "event",
+                  "onair-booking",
+                  "prod-booking",
+                  "office-hours",
+                ].indexOf(event.type) === -1 &&
+                moment(event.start).isSameOrBefore(
+                  moment(meta.meta.time)
+                    .startOf(`day`)
+                    .add(selectedOption + 1, `days`)
+                ) &&
+                moment(event.start).isSameOrAfter(
+                  moment(meta.meta.time)
+                    .startOf(`day`)
+                    .add(selectedOption, `days`)
+                )
+            )
+            .map((event) => {
+              try {
+                var colorClass = `secondary`;
+                var iconClass = "far fa-calendar-alt";
+                var accessibleText = "Event";
 
-        // Run through every event in memory and add appropriate ones into our formatted calendar variable.
-        events
-          .filter(
-            (event) =>
-              [
-                "event",
-                "onair-booking",
-                "prod-booking",
-                "office-hours",
-              ].indexOf(event.type) === -1 &&
-              moment(event.start).isSameOrBefore(
-                moment(meta.meta.time)
-                  .startOf(`day`)
-                  .add(selectedOption + 1, `days`)
-              ) &&
-              moment(event.start).isSameOrAfter(
-                moment(meta.meta.time)
-                  .startOf(`day`)
-                  .add(selectedOption, `days`)
-              )
-          )
-          .map((event) => {
-            try {
-              var colorClass = `secondary`;
-              var iconClass = "far fa-calendar-alt";
-              var accessibleText = "Event";
+                switch (event.type) {
+                  case "genre":
+                  case "playlist":
+                    colorClass = "primary";
+                    iconClass = "fas fa-music";
+                    accessibleText = "Music";
+                    break;
+                  case "show":
+                    colorClass = "danger";
+                    iconClass = "fas fa-microphone";
+                    accessibleText = "Live Show";
+                    break;
+                  case "sports":
+                    colorClass = "success";
+                    iconClass = "fas fa-basketball-ball";
+                    accessibleText = "Sports Broadcast";
+                    break;
+                  case "remote":
+                    colorClass = "purple";
+                    iconClass = "fas fa-broadcast-tower";
+                    accessibleText = "Remote Broadcast";
+                    break;
+                  case "prerecord":
+                    colorClass = "pink";
+                    iconClass = "fas fa-play-circle";
+                    accessibleText = "Prerecorded Show";
+                    break;
+                }
 
-              switch (event.type) {
-                case "genre":
-                case "playlist":
-                  colorClass = "primary";
-                  iconClass = "fas fa-music";
-                  accessibleText = "Music";
-                  break;
-                case "show":
-                  colorClass = "danger";
-                  iconClass = "fas fa-microphone";
-                  accessibleText = "Live Show";
-                  break;
-                case "sports":
-                  colorClass = "success";
-                  iconClass = "fas fa-basketball-ball";
-                  accessibleText = "Sports Broadcast";
-                  break;
-                case "remote":
-                  colorClass = "purple";
-                  iconClass = "fas fa-broadcast-tower";
-                  accessibleText = "Remote Broadcast";
-                  break;
-                case "prerecord":
-                  colorClass = "pink";
-                  iconClass = "fas fa-play-circle";
-                  accessibleText = "Prerecorded Show";
-                  break;
-              }
+                if (
+                  ["canceled", "canceled-system", "canceled-changed"].indexOf(
+                    event.scheduleType
+                  ) !== -1
+                ) {
+                  colorClass = "dark";
+                }
 
-              if (
-                ["canceled", "canceled-system", "canceled-changed"].indexOf(
-                  event.scheduleType
-                ) !== -1
-              ) {
-                colorClass = "dark";
-              }
+                var badgeInfo;
+                if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
+                  badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
+                }
+                if (
+                  ["updated", "updated-system"].indexOf(event.scheduleType) !==
+                    -1 &&
+                  event.timeChanged
+                ) {
+                  badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
+                }
+                if (
+                  ["canceled", "canceled-system"].indexOf(
+                    event.scheduleType
+                  ) !== -1
+                ) {
+                  badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`;
+                }
 
-              var badgeInfo;
-              if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
-                badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
-              }
-              if (
-                ["updated", "updated-system"].indexOf(event.scheduleType) !==
-                  -1 &&
-                event.timeChanged
-              ) {
-                badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
-              }
-              if (
-                ["canceled", "canceled-system"].indexOf(event.scheduleType) !==
-                -1
-              ) {
-                badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`;
-              }
+                var shouldBeDark =
+                  ["canceled", "canceled-system", "canceled-changed"].indexOf(
+                    event.scheduleType
+                  ) !== -1 || moment().isAfter(moment(event.end));
 
-              var shouldBeDark =
-                ["canceled", "canceled-system", "canceled-changed"].indexOf(
-                  event.scheduleType
-                ) !== -1 || moment().isAfter(moment(event.end));
-
-              html += `<div class="col" style="min-width: 280px;">
+                html += `<div class="col" style="min-width: 280px;">
                 <div class="p-2 card card-${colorClass} card-outline${
-                shouldBeDark ? ` bg-secondary` : ``
-              }">
+                  shouldBeDark ? ` bg-secondary` : ``
+                }">
                   <div class="card-body box-profile">
                     <div class="text-center">
                     ${
@@ -784,231 +784,242 @@ function updateCalendar() {
                       shouldBeDark ? ` bg-secondary` : ``
                     }">
                         <b>${moment(event.start).format("hh:mm A")} - ${moment(
-                event.end
-              ).format("hh:mm A")}</b>
+                  event.end
+                ).format("hh:mm A")}</b>
                     </li>
                     </ul>
     
                     <a href="#" class="btn btn-primary btn-block" onclick="displayEventInfo('${
                       event.unique
                     }')" onkeydown="if (this.key === "Enter") displayEventInfo('${
-                event.unique
-              }')" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications."><b>More Info / Notifications</b></a>
+                  event.unique
+                }')" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications."><b>More Info / Notifications</b></a>
                   </div>
                 </div>
               </div>`;
-            } catch (e) {
-              console.error(e);
-              $(document).Toasts("create", {
-                class: "bg-danger",
-                title: "calendar error",
-                body:
-                  "There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.",
-                icon: "fas fa-skull-crossbones fa-lg",
-              });
-            }
-          });
+              } catch (e) {
+                console.error(e);
+                $(document).Toasts("create", {
+                  class: "bg-danger",
+                  title: "calendar error",
+                  body:
+                    "There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.",
+                  icon: "fas fa-skull-crossbones fa-lg",
+                });
+              }
+            });
 
-        $("#schedule-events").html(html);
+          $("#schedule-events").html(html);
 
-        for (var i = 1; i < 14; i++) {
-          $(`#schedule-select-${i}`).html(
-            moment(meta.meta.time)
-              .startOf(`day`)
-              .add(i, "days")
-              .format(`dddd MM/DD`)
-          );
-        }
-      },
-      moment().add(selectedOption, "days").startOf("day"),
-      moment()
-        .add(selectedOption + 1, "days")
-        .startOf("day")
-    );
-  }, 1000);
+          for (var i = 1; i < 14; i++) {
+            $(`#schedule-select-${i}`).html(
+              moment(meta.meta.time)
+                .startOf(`day`)
+                .add(i, "days")
+                .format(`dddd MM/DD`)
+            );
+          }
+        },
+        moment().add(selectedOption, "days").startOf("day"),
+        moment()
+          .add(selectedOption + 1, "days")
+          .startOf("day")
+      );
+    },
+    onUnblock: () => {
+      calendarUpdating = false;
+    },
+  });
 }
 
 /**
  * Update director office hours
  */
-var directorsCalendarTimer;
+var directorsCalendarUpdating = false;
 function updateDirectorsCalendar() {
-  clearTimeout(directorsCalendarTimer);
-  directorsCalendarTimer = setTimeout(() => {
-    try {
-      // Update directors html
-      var innercontent = document.getElementById("schedule-hours");
-      if (innercontent) {
-        innercontent.innerHTML = "Loading...";
-      }
+  if (directorsCalendarUpdating) return;
+  directorsCalendarUpdating = true;
+  $("#schedule-hours").block({
+    message: "<h1>Loading...</h1>",
+    css: { border: "3px solid #a00" },
+    timeout: 15000,
+    onBlock: () => {
+      try {
+        directorHours = {};
 
-      directorHours = {};
+        directorsdb.db().each((director) => {
+          directorHours[director.ID] = { director: director, hours: [] };
+        });
 
-      directorsdb.db().each((director) => {
-        directorHours[director.ID] = { director: director, hours: [] };
-      });
+        // A list of Office Hours for the directors
 
-      // A list of Office Hours for the directors
-
-      // Define a comparison function that will order calendar events by start time when we run the iteration
-      var compare = function (a, b) {
-        try {
-          if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
-            return -1;
+        // Define a comparison function that will order calendar events by start time when we run the iteration
+        var compare = function (a, b) {
+          try {
+            if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
+              return -1;
+            }
+            if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
+              return 1;
+            }
+            if (a.ID < b.ID) {
+              return -1;
+            }
+            if (a.ID > b.ID) {
+              return 1;
+            }
+            return 0;
+          } catch (e) {
+            console.error(e);
+            iziToast.show({
+              title: "An error occurred - Please check the logs",
+              message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
+            });
           }
-          if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
-            return 1;
-          }
-          if (a.ID < b.ID) {
-            return -1;
-          }
-          if (a.ID > b.ID) {
-            return 1;
-          }
-          return 0;
-        } catch (e) {
-          console.error(e);
-          iziToast.show({
-            title: "An error occurred - Please check the logs",
-            message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
-          });
-        }
-      };
-      calendardb.getEvents(
-        (events) => {
-          events
-            .sort(compare)
-            .filter((event) => event.type === "office-hours")
-            .map((event) => {
-              // null start or end? Use a default to prevent errors.
-              if (!moment(event.start).isValid()) {
-                event.start = moment(meta.meta.time).startOf("day");
-              }
-              if (!moment(event.end).isValid()) {
-                event.end = moment(meta.meta.time)
-                  .add(1, "days")
-                  .startOf("day");
-              }
+        };
+        calendardb.getEvents(
+          (events) => {
+            events
+              .sort(compare)
+              .filter((event) => event.type === "office-hours")
+              .map((event) => {
+                // null start or end? Use a default to prevent errors.
+                if (!moment(event.start).isValid()) {
+                  event.start = moment(meta.meta.time).startOf("day");
+                }
+                if (!moment(event.end).isValid()) {
+                  event.end = moment(meta.meta.time)
+                    .add(1, "days")
+                    .startOf("day");
+                }
 
-              event.startT =
-                moment(event.start).minutes() === 0
-                  ? moment(event.start).format("h")
-                  : moment(event.start).format("h:mm");
+                event.startT =
+                  moment(event.start).minutes() === 0
+                    ? moment(event.start).format("h")
+                    : moment(event.start).format("h:mm");
+                if (
+                  (moment(event.start).hours() < 12 &&
+                    moment(event.end).hours() >= 12) ||
+                  (moment(event.start).hours() >= 12 &&
+                    moment(event.end).hours() < 12)
+                ) {
+                  event.startT += moment(event.start).format("A");
+                }
+                event.endT =
+                  moment(event.end).minutes() === 0
+                    ? moment(event.end).format("hA")
+                    : moment(event.end).format("h:mmA");
+
+                // Update strings if need be, if say, start time was before this day, or end time is after this day.
+                if (
+                  moment(event.end).isAfter(
+                    moment(event.start).startOf("day").add(1, "days")
+                  )
+                ) {
+                  event.endT = `${moment(event.end).format("MM/DD ")} ${
+                    event.endT
+                  }`;
+                }
+                event.startT = `${moment(event.start).format("MM/DD ")} ${
+                  event.startT
+                }`;
+
+                var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
+                if (event.timeChanged) {
+                  endText = `<span class="text-primary" title="These hours were changed/updated from the original.">${event.startT} - ${event.endT}</span> (temp hours)`;
+                }
+                if (moment(meta.meta.time).isAfter(moment(event.end))) {
+                  endText = `<strike><span class="text-black-50" title="These hours have passed.">${event.startT} - ${event.endT}</span></strike> (passed)`;
+                }
+                if (
+                  event.scheduleType &&
+                  event.scheduleType.startsWith("canceled")
+                ) {
+                  endText = `<strike><span class="text-danger" title="These hours were canceled.">${event.startT} - ${event.endT}</span></strike> (canceled)`;
+                }
+
+                if (
+                  typeof directorHours[event.director] !== "undefined" &&
+                  typeof directorHours[event.director].hours !== "undefined"
+                ) {
+                  directorHours[event.director].hours.push(endText);
+                }
+              });
+
+            var html = ``;
+
+            for (var directorHour in directorHours) {
               if (
-                (moment(event.start).hours() < 12 &&
-                  moment(event.end).hours() >= 12) ||
-                (moment(event.start).hours() >= 12 &&
-                  moment(event.end).hours() < 12)
-              ) {
-                event.startT += moment(event.start).format("A");
-              }
-              event.endT =
-                moment(event.end).minutes() === 0
-                  ? moment(event.end).format("hA")
-                  : moment(event.end).format("h:mmA");
-
-              // Update strings if need be, if say, start time was before this day, or end time is after this day.
-              if (
-                moment(event.end).isAfter(
-                  moment(event.start).startOf("day").add(1, "days")
+                Object.prototype.hasOwnProperty.call(
+                  directorHours,
+                  directorHour
                 )
               ) {
-                event.endT = `${moment(event.end).format("MM/DD ")} ${
-                  event.endT
-                }`;
-              }
-              event.startT = `${moment(event.start).format("MM/DD ")} ${
-                event.startT
-              }`;
-
-              var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
-              if (event.timeChanged) {
-                endText = `<span class="text-primary" title="These hours were changed/updated from the original.">${event.startT} - ${event.endT}</span> (temp hours)`;
-              }
-              if (moment(meta.meta.time).isAfter(moment(event.end))) {
-                endText = `<strike><span class="text-black-50" title="These hours have passed.">${event.startT} - ${event.endT}</span></strike> (passed)`;
-              }
-              if (
-                event.scheduleType &&
-                event.scheduleType.startsWith("canceled")
-              ) {
-                endText = `<strike><span class="text-danger" title="These hours were canceled.">${event.startT} - ${event.endT}</span></strike> (canceled)`;
-              }
-
-              if (
-                typeof directorHours[event.director] !== "undefined" &&
-                typeof directorHours[event.director].hours !== "undefined"
-              ) {
-                directorHours[event.director].hours.push(endText);
-              }
-            });
-
-          if (innercontent) innercontent.innerHTML = ``;
-
-          for (var directorHour in directorHours) {
-            if (
-              Object.prototype.hasOwnProperty.call(directorHours, directorHour)
-            ) {
-              var text1 = "OUT OF OFFICE";
-              var textTitle =
-                "This director is not currently in the WWSU office.";
-              var theClass = "danger";
-              if (directorHours[directorHour].director.present) {
-                text1 = "IN OFFICE";
-                textTitle = "This director is currently in the WWSU office.";
-                theClass = "success";
-              }
-              if (innercontent) {
-                innercontent.innerHTML += `<div class="col" style="min-width: 280px;">
-                <div class="p-2 card card-${theClass} card-outline">
-                  <div class="card-body box-profile">
-                    <div class="text-center">
-                    ${
-                      directorHours[directorHour].director.avatar !== ""
-                        ? `<img class="profile-user-img img-fluid img-circle" src="${directorHours[directorHour].director.avatar}" alt="Director Avatar">`
-                        : `<div class="bg-${theClass} profile-user-img img-fluid img-circle">${jdenticon.toSvg(
-                            `Director ${directorHours[directorHour].director.name}`,
-                            96
-                          )}</div>`
-                    }
+                var text1 = "OUT OF OFFICE";
+                var textTitle =
+                  "This director is not currently in the WWSU office.";
+                var theClass = "danger";
+                if (directorHours[directorHour].director.present) {
+                  text1 = "IN OFFICE";
+                  textTitle = "This director is currently in the WWSU office.";
+                  theClass = "success";
+                }
+                html += `<div class="col" style="min-width: 280px;">
+                  <div class="p-2 card card-${theClass} card-outline">
+                    <div class="card-body box-profile">
+                      <div class="text-center">
+                      ${
+                        directorHours[directorHour].director.avatar !== ""
+                          ? `<img class="profile-user-img img-fluid img-circle" src="${directorHours[directorHour].director.avatar}" alt="Director Avatar">`
+                          : `<div class="bg-${theClass} profile-user-img img-fluid img-circle">${jdenticon.toSvg(
+                              `Director ${directorHours[directorHour].director.name}`,
+                              96
+                            )}</div>`
+                      }
+                      </div>
+      
+                      <p class="profile-username text-center h3">${
+                        directorHours[directorHour].director.name
+                      }</p>
+      
+                      <p class="text-center">${
+                        directorHours[directorHour].director.position
+                      }</p>
+      
+                      <ul class="list-group list-group-unbordered mb-3 text-center">
+                      <li class="list-group-item">
+                      <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;" title="${textTitle}">${text1}</span></div>
+                      </li>
+                      <li class="list-group-item">
+                          <strong>${directorHours[directorHour].hours.join(
+                            "<br />"
+                          )}</strong>
+                      </li>
+                      </ul>
                     </div>
-    
-                    <p class="profile-username text-center h3">${
-                      directorHours[directorHour].director.name
-                    }</p>
-    
-                    <p class="text-center">${
-                      directorHours[directorHour].director.position
-                    }</p>
-    
-                    <ul class="list-group list-group-unbordered mb-3 text-center">
-                    <li class="list-group-item">
-                    <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;" title="${textTitle}">${text1}</span></div>
-                    </li>
-                    <li class="list-group-item">
-                        <strong>${directorHours[directorHour].hours.join(
-                          "<br />"
-                        )}</strong>
-                    </li>
-                    </ul>
                   </div>
-                </div>
-              </div>`;
+                </div>`;
               }
             }
-          }
-        },
-        moment().startOf("day"),
-        moment().add(7, "days").startOf("day")
-      );
-    } catch (e) {
-      iziToast.show({
-        title: "An error occurred - Please check the logs",
-        message: "Error occurred during the call of office hours.",
-      });
-      console.error(e);
-    }
-  }, 1000);
+
+            $("#schedule-hours").html(html);
+            $("#schedule-hours").unblock();
+          },
+          moment().startOf("day"),
+          moment().add(7, "days").startOf("day")
+        );
+      } catch (e) {
+        iziToast.show({
+          title: "An error occurred - Please check the logs",
+          message: "Error occurred during the call of office hours.",
+        });
+        console.error(e);
+      }
+    },
+    onUnblock() {
+      directorsCalendarUpdating = false;
+    },
+  });
 }
 
 /**
