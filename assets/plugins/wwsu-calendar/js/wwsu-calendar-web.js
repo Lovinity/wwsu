@@ -294,7 +294,7 @@ class CalendarDb {
       }
 
       // Next, process recurring schedules if startTime is not null (we will never process filters if startTime is null)
-      if (schedule.startTime) {
+      if (schedule.startTime && moment(end).isSameOrAfter(moment(start))) {
         // Construct the moment recurrence
         var recur = moment.recur({
           start: start,
@@ -956,7 +956,11 @@ class CalendarDb {
               });
             });
           }
-          if (query[key].startTime || query[key].recurrenceRules || query[key].recurrenceInterval) {
+          if (
+            query[key].startTime ||
+            query[key].recurrenceRules ||
+            query[key].recurrenceInterval
+          ) {
             if (
               !start ||
               moment(event.startDate).startOf("minute").isBefore(moment(start))
@@ -974,93 +978,95 @@ class CalendarDb {
 
             // Determine time periods to check
 
-            // Construct the moment recurrence
-            var recur = moment.recur({
-              start: start,
-              end: end,
-              rules: event.recurrenceRules
-                ? event.recurrenceRules
-                : undefined,
-            });
-
-            // get all the matching dates
-            var allDates = recur.all("YYYY-MM-DD");
-
-            // Loop through each schedule between start and end
-            if (allDates && allDates.length > 0) {
-              allDates.map((eventStart) => {
-                // Skip dates that fail recurrence intervals
-                if (
-                  event.recurrenceInterval &&
-                  event.recurrenceInterval.measure &&
-                  event.recurrenceInterval.unit &&
-                  event.recurrenceInterval.unit > 1
-                ) {
-                  var startInterval;
-                  switch (event.recurrenceInterval.measure) {
-                    case "days":
-                      startInterval = moment(start).startOf("day");
-                      if (
-                        moment(eventStart)
-                          .startOf("day")
-                          .diff(startInterval, "days") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                    case "weeks":
-                      startInterval = moment(start).startOf("week");
-                      if (
-                        moment(eventStart)
-                          .startOf("week")
-                          .diff(startInterval, "weeks") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                    case "months":
-                      startInterval = moment(start).startOf("month");
-                      if (
-                        moment(eventStart)
-                          .startOf("month")
-                          .diff(startInterval, "months") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                    case "years":
-                      startInterval = moment(start).startOf("year");
-                      if (
-                        moment(eventStart)
-                          .startOf("year")
-                          .diff(startInterval, "years") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                  }
-                }
-
-                timePeriods.push({
-                  start: moment
-                    .tz(
-                      `${eventStart} ${event.startTime}`,
-                      this.meta ? this.meta.meta.timezone : moment.tz.guess()
-                    )
-                    .toISOString(true),
-                  end: moment
-                    .tz(
-                      `${eventStart} ${event.startTime}`,
-                      this.meta ? this.meta.meta.timezone : moment.tz.guess()
-                    )
-                    .add(event.duration, "minutes")
-                    .toISOString(true),
-                });
+            if (moment(end).isSameOrAfter(moment(start))) {
+              // Construct the moment recurrence
+              var recur = moment.recur({
+                start: start,
+                end: end,
+                rules: event.recurrenceRules
+                  ? event.recurrenceRules
+                  : undefined,
               });
+
+              // get all the matching dates
+              var allDates = recur.all("YYYY-MM-DD");
+
+              // Loop through each schedule between start and end
+              if (allDates && allDates.length > 0) {
+                allDates.map((eventStart) => {
+                  // Skip dates that fail recurrence intervals
+                  if (
+                    event.recurrenceInterval &&
+                    event.recurrenceInterval.measure &&
+                    event.recurrenceInterval.unit &&
+                    event.recurrenceInterval.unit > 1
+                  ) {
+                    var startInterval;
+                    switch (event.recurrenceInterval.measure) {
+                      case "days":
+                        startInterval = moment(start).startOf("day");
+                        if (
+                          moment(eventStart)
+                            .startOf("day")
+                            .diff(startInterval, "days") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                      case "weeks":
+                        startInterval = moment(start).startOf("week");
+                        if (
+                          moment(eventStart)
+                            .startOf("week")
+                            .diff(startInterval, "weeks") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                      case "months":
+                        startInterval = moment(start).startOf("month");
+                        if (
+                          moment(eventStart)
+                            .startOf("month")
+                            .diff(startInterval, "months") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                      case "years":
+                        startInterval = moment(start).startOf("year");
+                        if (
+                          moment(eventStart)
+                            .startOf("year")
+                            .diff(startInterval, "years") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                    }
+                  }
+
+                  timePeriods.push({
+                    start: moment
+                      .tz(
+                        `${eventStart} ${event.startTime}`,
+                        this.meta ? this.meta.meta.timezone : moment.tz.guess()
+                      )
+                      .toISOString(true),
+                    end: moment
+                      .tz(
+                        `${eventStart} ${event.startTime}`,
+                        this.meta ? this.meta.meta.timezone : moment.tz.guess()
+                      )
+                      .add(event.duration, "minutes")
+                      .toISOString(true),
+                  });
+                });
+              }
             }
           }
         }
@@ -1791,7 +1797,8 @@ class CalendarDb {
       recurrenceInterval:
         schedule.recurrenceInterval && !schedule.recurrenceInterval.clearAll
           ? schedule.recurrenceInterval
-          : (!schedule.recurrenceInterval || !schedule.recurrenceInterval.clearAll) &&
+          : (!schedule.recurrenceInterval ||
+              !schedule.recurrenceInterval.clearAll) &&
             calendar.recurrenceInterval &&
             !calendar.recurrenceInterval.clearAll
           ? calendar.recurrenceInterval
@@ -1920,128 +1927,138 @@ class CalendarDb {
           case "weeks":
           case "months":
           case "years":
-            recurDayString += `every ${rule.units.sort((a, b) => a - b).join(", ")} ${
-              rule.measure
-            }, `;
+            recurDayString += `every ${rule.units
+              .sort((a, b) => a - b)
+              .join(", ")} ${rule.measure}, `;
             break;
           case "monthsOfYear":
-            var days = rule.units.sort((a, b) => a - b).map((unit) => {
-              switch (unit) {
-                case 0:
-                  return "January";
-                case 1:
-                  return "February";
-                case 2:
-                  return "March";
-                case 3:
-                  return "April";
-                case 4:
-                  return "May";
-                case 5:
-                  return "June";
-                case 6:
-                  return "July";
-                case 7:
-                  return "August";
-                case 8:
-                  return "September";
-                case 9:
-                  return "October";
-                case 10:
-                  return "November";
-                case 11:
-                  return "December";
-              }
-              return "Unknown month";
-            });
+            var days = rule.units
+              .sort((a, b) => a - b)
+              .map((unit) => {
+                switch (unit) {
+                  case 0:
+                    return "January";
+                  case 1:
+                    return "February";
+                  case 2:
+                    return "March";
+                  case 3:
+                    return "April";
+                  case 4:
+                    return "May";
+                  case 5:
+                    return "June";
+                  case 6:
+                    return "July";
+                  case 7:
+                    return "August";
+                  case 8:
+                    return "September";
+                  case 9:
+                    return "October";
+                  case 10:
+                    return "November";
+                  case 11:
+                    return "December";
+                }
+                return "Unknown month";
+              });
             recurDayString += `in ${days.join(", ")}, `;
             break;
           case "daysOfWeek":
-            var days = rule.units.sort((a, b) => a - b).map((unit) => {
-              switch (unit) {
-                case 0:
-                  return "Sunday";
-                case 1:
-                  return "Monday";
-                case 2:
-                  return "Tuesday";
-                case 3:
-                  return "Wednesday";
-                case 4:
-                  return "Thursday";
-                case 5:
-                  return "Friday";
-                case 6:
-                  return "Saturday";
-              }
-              return "Unknown day";
-            });
+            var days = rule.units
+              .sort((a, b) => a - b)
+              .map((unit) => {
+                switch (unit) {
+                  case 0:
+                    return "Sunday";
+                  case 1:
+                    return "Monday";
+                  case 2:
+                    return "Tuesday";
+                  case 3:
+                    return "Wednesday";
+                  case 4:
+                    return "Thursday";
+                  case 5:
+                    return "Friday";
+                  case 6:
+                    return "Saturday";
+                }
+                return "Unknown day";
+              });
             recurDayString += `on ${days.join(", ")}, `;
             break;
           case "weeksOfMonth":
           case "weeksOfMonthByDay":
-            var days = rule.units.sort((a, b) => a - b).map((unit) => {
-              switch (unit) {
-                case 0:
-                  return "1st";
-                case 1:
-                  return "2nd";
-                case 2:
-                  return "3rd";
-                case 3:
-                  return "4th";
-                case 4:
-                  return "5th";
-                case 5:
-                  return "last";
-              }
-            });
+            var days = rule.units
+              .sort((a, b) => a - b)
+              .map((unit) => {
+                switch (unit) {
+                  case 0:
+                    return "1st";
+                  case 1:
+                    return "2nd";
+                  case 2:
+                    return "3rd";
+                  case 3:
+                    return "4th";
+                  case 4:
+                    return "5th";
+                  case 5:
+                    return "last";
+                }
+              });
             recurDayString += `on the ${days.join(
               ", "
             )} week(s) of the month, `;
             break;
           case "daysOfMonth":
-            var days = rule.units.sort((a, b) => a - b).map((unit) => {
-              switch (unit) {
-                case 1:
-                case 21:
-                case 31:
-                  return `${unit}st`;
-                case 2:
-                case 22:
-                  return `${unit}nd`;
-                case 3:
-                case 23:
-                  return `${unit}rd`;
-              }
-              return `${unit}th`;
-            });
+            var days = rule.units
+              .sort((a, b) => a - b)
+              .map((unit) => {
+                switch (unit) {
+                  case 1:
+                  case 21:
+                  case 31:
+                    return `${unit}st`;
+                  case 2:
+                  case 22:
+                    return `${unit}nd`;
+                  case 3:
+                  case 23:
+                    return `${unit}rd`;
+                }
+                return `${unit}th`;
+              });
             recurDayString += `on the ${days.join(", ")} day(s) of the month, `;
             break;
           case "weeksOfYear":
-            var days = rule.units.sort((a, b) => a - b).map((unit) => {
-              switch (unit) {
-                case 1:
-                case 21:
-                case 31:
-                case 41:
-                case 51:
-                  return `${unit}st`;
-                case 2:
-                case 22:
-                case 32:
-                case 42:
-                case 52:
-                  return `${unit}nd`;
-                case 3:
-                case 23:
-                case 33:
-                case 43:
-                case 53:
-                  return `${unit}rd`;
-              }
-              return `${unit}th`;
-            });
+            var days = rule.units
+              .sort((a, b) => a - b)
+              .map((unit) => {
+                switch (unit) {
+                  case 1:
+                  case 21:
+                  case 31:
+                  case 41:
+                  case 51:
+                    return `${unit}st`;
+                  case 2:
+                  case 22:
+                  case 32:
+                  case 42:
+                  case 52:
+                    return `${unit}nd`;
+                  case 3:
+                  case 23:
+                  case 33:
+                  case 43:
+                  case 53:
+                    return `${unit}rd`;
+                }
+                return `${unit}th`;
+              });
             recurDayString += `on the ${days.join(", ")} week(s) of the year, `;
             break;
         }

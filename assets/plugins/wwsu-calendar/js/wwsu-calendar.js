@@ -325,7 +325,7 @@ class CalendarDb {
       }
 
       // Next, process recurring schedules if startTime is not null (we will never process filters if startTime is null)
-      if (schedule.startTime) {
+      if (schedule.startTime && moment(end).isSameOrAfter(moment(start))) {
         // Construct the moment recurrence
         var recur = moment.recur({
           start: start,
@@ -1009,91 +1009,95 @@ class CalendarDb {
 
             // Determine time periods to check
 
-            // Construct the moment recurrence
-            var recur = moment.recur({
-              start: start,
-              end: end,
-              rules: event.recurrenceRules ? event.recurrenceRules : undefined,
-            });
-
-            // get all the matching dates
-            var allDates = recur.all("YYYY-MM-DD");
-
-            // Loop through each schedule between start and end
-            if (allDates && allDates.length > 0) {
-              allDates.map((eventStart) => {
-                // Skip dates that fail recurrence intervals
-                if (
-                  event.recurrenceInterval &&
-                  event.recurrenceInterval.measure &&
-                  event.recurrenceInterval.unit &&
-                  event.recurrenceInterval.unit > 1
-                ) {
-                  var startInterval;
-                  switch (event.recurrenceInterval.measure) {
-                    case "days":
-                      startInterval = moment(start).startOf("day");
-                      if (
-                        moment(eventStart)
-                          .startOf("day")
-                          .diff(startInterval, "days") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                    case "weeks":
-                      startInterval = moment(start).startOf("week");
-                      if (
-                        moment(eventStart)
-                          .startOf("week")
-                          .diff(startInterval, "weeks") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                    case "months":
-                      startInterval = moment(start).startOf("month");
-                      if (
-                        moment(eventStart)
-                          .startOf("month")
-                          .diff(startInterval, "months") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                    case "years":
-                      startInterval = moment(start).startOf("year");
-                      if (
-                        moment(eventStart)
-                          .startOf("year")
-                          .diff(startInterval, "years") %
-                          event.recurrenceInterval.unit !==
-                        0
-                      )
-                        return;
-                      break;
-                  }
-                }
-
-                timePeriods.push({
-                  start: moment
-                    .tz(
-                      `${eventStart} ${event.startTime}`,
-                      this.meta ? this.meta.meta.timezone : moment.tz.guess()
-                    )
-                    .toISOString(true),
-                  end: moment
-                    .tz(
-                      `${eventStart} ${event.startTime}`,
-                      this.meta ? this.meta.meta.timezone : moment.tz.guess()
-                    )
-                    .add(event.duration, "minutes")
-                    .toISOString(true),
-                });
+            if (moment(end).isSameOrAfter(moment(start))) {
+              // Construct the moment recurrence
+              var recur = moment.recur({
+                start: start,
+                end: end,
+                rules: event.recurrenceRules
+                  ? event.recurrenceRules
+                  : undefined,
               });
+
+              // get all the matching dates
+              var allDates = recur.all("YYYY-MM-DD");
+
+              // Loop through each schedule between start and end
+              if (allDates && allDates.length > 0) {
+                allDates.map((eventStart) => {
+                  // Skip dates that fail recurrence intervals
+                  if (
+                    event.recurrenceInterval &&
+                    event.recurrenceInterval.measure &&
+                    event.recurrenceInterval.unit &&
+                    event.recurrenceInterval.unit > 1
+                  ) {
+                    var startInterval;
+                    switch (event.recurrenceInterval.measure) {
+                      case "days":
+                        startInterval = moment(start).startOf("day");
+                        if (
+                          moment(eventStart)
+                            .startOf("day")
+                            .diff(startInterval, "days") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                      case "weeks":
+                        startInterval = moment(start).startOf("week");
+                        if (
+                          moment(eventStart)
+                            .startOf("week")
+                            .diff(startInterval, "weeks") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                      case "months":
+                        startInterval = moment(start).startOf("month");
+                        if (
+                          moment(eventStart)
+                            .startOf("month")
+                            .diff(startInterval, "months") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                      case "years":
+                        startInterval = moment(start).startOf("year");
+                        if (
+                          moment(eventStart)
+                            .startOf("year")
+                            .diff(startInterval, "years") %
+                            event.recurrenceInterval.unit !==
+                          0
+                        )
+                          return;
+                        break;
+                    }
+                  }
+
+                  timePeriods.push({
+                    start: moment
+                      .tz(
+                        `${eventStart} ${event.startTime}`,
+                        this.meta ? this.meta.meta.timezone : moment.tz.guess()
+                      )
+                      .toISOString(true),
+                    end: moment
+                      .tz(
+                        `${eventStart} ${event.startTime}`,
+                        this.meta ? this.meta.meta.timezone : moment.tz.guess()
+                      )
+                      .add(event.duration, "minutes")
+                      .toISOString(true),
+                  });
+                });
+              }
             }
           }
         }

@@ -12,8 +12,9 @@ class WWSUclimacell extends WWSUdb {
    *
    * @param {sails.io} socket The sails.io socket connected to the WWSU API.
    * @param {WWSUreq} hostReq Request with no authorization
+   * @param {WWSUmeta} meta WWSUmeta class
    */
-  constructor(socket, noReq) {
+  constructor(socket, noReq, meta) {
     super();
 
     this.endpoints = {
@@ -25,6 +26,8 @@ class WWSUclimacell extends WWSUdb {
     this.requests = {
       no: noReq,
     };
+
+    this.meta = meta;
 
     this.assignSocketEvent("climacell", socket);
 
@@ -130,7 +133,7 @@ class WWSUclimacell extends WWSUdb {
       $('.climacell-nowcast-color').removeClass(`bg-danger`);
       $('.climacell-nowcast-color').removeClass(`bg-success`);
       $('.climacell-nowcast-color').addClass(`bg-warning`);
-      $('.climacell-nowcast-time').html(moment.parseZone(precipExpected.time).format("h:mm A Z"))
+      $('.climacell-nowcast-time').html(moment.tz(precipExpected.time, this.meta ? this.meta.meta.timezone : moment.tz.guess()).format("h:mm A"))
       $('.climacell-nowcast-text').html(`${precipExpected.type} possible`);
     } else if (!precipExpected) {
       $('.climacell-nowcast-color').removeClass(`bg-gray`);
@@ -147,7 +150,7 @@ class WWSUclimacell extends WWSUdb {
 
       // Determine when the precip is expected to end
       var precipEnd = precip.find((record) => record.type && record.type === 'none');
-      $('.climacell-nowcast-time').html(precipEnd ? moment.parseZone(precipEnd.time).format("h:mm A Z") : `Next >6 Hours`)
+      $('.climacell-nowcast-time').html(precipEnd ? moment.tz(precipEnd.time, this.meta ? this.meta.meta.timezone : moment.tz.guess()).format("h:mm A") : `Next >6 Hours`)
       $('.climacell-nowcast-text').html(`${realtimePrecipType ? realtimePrecipType.data || `Unknown Precip` : `Unknown Precip`} ending`);
     }
   }
