@@ -383,8 +383,12 @@ class CalendarDb {
                     this.originalTime &&
                     moment(this.originalTime).isSame(
                       moment(
-                        `${eventStart}T${schedule.startTime}${moment
-                          .parseZone(tempMeta ? tempMeta.meta.time : undefined)
+                        `${eventStart}T${schedule.startTime}${moment(eventStart)
+                          .tz(
+                            tempMeta
+                              ? tempMeta.meta.timezone
+                              : moment.tz.guess()
+                          )
                           .format("Z")}`
                       ),
                       "minute"
@@ -436,16 +440,16 @@ class CalendarDb {
               _processRecord(
                 tempCal,
                 tempEvent,
-                `${eventStart}T${schedule.startTime}${moment
-                  .parseZone(this.meta ? this.meta.meta.time : undefined)
+                `${eventStart}T${schedule.startTime}${moment(eventStart)
+                  .tz(this.meta ? this.meta.meta.timezone : moment.tz.guess())
                   .format("Z")}`
               );
             } else {
               _processRecord(
                 calendar,
                 schedule,
-                `${eventStart}T${schedule.startTime}${moment
-                  .parseZone(this.meta ? this.meta.meta.time : undefined)
+                `${eventStart}T${schedule.startTime}${moment(eventStart)
+                  .tz(this.meta ? this.meta.meta.timezone : moment.tz.guess())
                   .format("Z")}`
               );
             }
