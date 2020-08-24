@@ -34,7 +34,7 @@ module.exports = {
       await sails.helpers.rest.cmd('EnableAssisted', 1)
 
       // Remove clearBreak tracks to speed up the return
-      await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, false)
+      await sails.helpers.songs.remove(false, sails.config.custom.subcats.clearBreak, false, true)
 
       // Perform the break
 
