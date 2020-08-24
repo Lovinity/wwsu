@@ -1,5 +1,3 @@
-const { WWSUqueue } = require('../../../assets/plugins/wwsu-sails/js/wwsu');
-
 module.exports = {
 
   friendlyName: 'analytics.showtime',
