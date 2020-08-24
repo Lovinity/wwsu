@@ -1,939 +1,779 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
 
-    <title>WWSU 106.9 FM Listener's Corner</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
 
-    <!-- Pace progress style -->
-    <style>
-      .pace {
-        -webkit-pointer-events: none;
-        pointer-events: none;
+  <title>WWSU 106.9 FM Listener's Corner</title>
 
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
+  <!-- Pace progress style -->
+  <style>
+    .pace {
+      -webkit-pointer-events: none;
+      pointer-events: none;
 
-      .pace-inactive {
-        display: none;
-      }
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
 
-      .pace .pace-progress {
-        background: #37d;
-        position: fixed;
-        z-index: 2000;
-        top: 0;
-        right: 100%;
-        width: 100%;
-        height: 2px;
-      }
-    </style>
-    <!-- pace-progress -->
-    <script src="/plugins/pace-progress/pace.min.js"></script>
+    .pace-inactive {
+      display: none;
+    }
 
-    <!-- Font Awesome Icons -->
-    <style>
-      .icon::before {
-        display: inline-block;
-        font-style: normal;
-        font-variant: normal;
-        text-rendering: auto;
-        -webkit-font-smoothing: antialiased;
-      }
-    </style>
-    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
-    <!-- overlayScrollbars -->
-    <link
-      rel="stylesheet"
-      href="/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"
-    />
-    <!-- Theme style -->
-    <link rel="stylesheet" href="/plugins/adminlte/css/adminlte.min.css" />
-    <!-- Google Font: Source Sans Pro -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700"
-      rel="stylesheet"
-    />
+    .pace .pace-progress {
+      background: #37d;
+      position: fixed;
+      z-index: 2000;
+      top: 0;
+      right: 100%;
+      width: 100%;
+      height: 2px;
+    }
+  </style>
+  <!-- pace-progress -->
+  <script src="/plugins/pace-progress/pace.min.js"></script>
 
-    <!-- jQuery -->
-    <script src="/plugins/jquery/jquery.min.js"></script>
-    <!-- JQuery BlockUI -->
-    <script src="/plugins/jquery-blockui/js/jquery.blockUI.js"></script>
-    <!-- Mousewheel -->
-    <script src="/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
-    <!-- Bootstrap -->
-    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- overlayScrollbars -->
-    <script src="/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="/plugins/adminlte/js/adminlte.js"></script>
-    <!-- lodash -->
-    <script src="/plugins/lodash/js/lodash.min.js"></script>
+  <!-- Font Awesome Icons -->
+  <style>
+    .icon::before {
+      display: inline-block;
+      font-style: normal;
+      font-variant: normal;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+  <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="/plugins/overlayScrollbars/css/OverlayScrollbars.min.css" />
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/plugins/adminlte/css/adminlte.min.css" />
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet" />
 
-    <!-- Taffy -->
-    <script src="/plugins/taffy/js/taffy-min.js"></script>
-    <!-- Moment -->
-    <script src="/plugins/moment/moment.min.js"></script>
-    <!-- Moment Duration Format -->
-    <script src="/plugins/moment-duration-format/js/moment-duration-format.js"></script>
-    <!-- Moment recur -->
-    <script src="/plugins/moment-recur-ts/js/moment-recur-ts.js"></script>
-    <!-- Moment timezone -->
-    <script src="/plugins/moment-timezone/js/moment-timezone-with-data.js"></script>
-    <!-- Jdenticon -->
-    <script src="/plugins/jdenticon/js/jdenticon.min.js"></script>
-    <!--OneSignal-->
-    <script
-      src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"
-      async=""
-    ></script>
-    <!--EventEmitter-->
-    <script src="/plugins/eventemitter/js/EventEmitter.min.js"></script>
+  <!-- jQuery -->
+  <script src="/plugins/jquery/jquery.min.js"></script>
+  <!-- JQuery BlockUI -->
+  <script src="/plugins/jquery-blockui/js/jquery.blockUI.js"></script>
+  <!-- Mousewheel -->
+  <script src="/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
+  <!-- Bootstrap -->
+  <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- overlayScrollbars -->
+  <script src="/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/plugins/adminlte/js/adminlte.js"></script>
+  <!-- lodash -->
+  <script src="/plugins/lodash/js/lodash.min.js"></script>
 
-    <!-- AmplitudeJS -->
-    <style>
-      div.control-container {
-        padding-top: 5px;
-        padding-bottom: 5px;
-      }
-      div.control-container div.amplitude-play-pause {
-        width: 54px;
-        height: 54px;
-        cursor: pointer;
-        float: left;
-        margin-left: 10px;
-      }
-      div.control-container div.amplitude-play-pause.amplitude-paused::before {
-        content: "\f144";
-        font-size: 39px;
-        font-weight: 900;
-        font-family: "Font Awesome 5 Free";
-      }
-      div.control-container div.amplitude-play-pause.amplitude-playing::before {
-        content: "\f28b";
-        font-size: 39px;
-        font-weight: 900;
-        font-family: "Font Awesome 5 Free";
-      }
-      div.control-container div.meta-container {
-        float: left;
-        width: calc(100% - 64px);
-        text-align: center;
-        color: white;
-        margin-top: 10px;
-      }
-      div.control-container div.meta-container span.nowplaying-line1 {
-        font-family: "Open Sans", sans-serif;
-        font-size: 16px;
-        color: #fff;
-        display: block;
-      }
-      div.control-container div.meta-container span.nowplaying-line2 {
-        font-family: "Open Sans", sans-serif;
-        font-weight: 100;
-        font-size: 12px;
-        color: #fff;
-        display: block;
-      }
-      div.control-container:after {
-        content: "";
-        display: table;
-        clear: both;
-      }
+  <!-- Taffy -->
+  <script src="/plugins/taffy/js/taffy-min.js"></script>
+  <!-- Moment -->
+  <script src="/plugins/moment/moment.min.js"></script>
+  <!-- Moment Duration Format -->
+  <script src="/plugins/moment-duration-format/js/moment-duration-format.js"></script>
+  <!-- Moment recur -->
+  <script src="/plugins/moment-recur-ts/js/moment-recur-ts.js"></script>
+  <!-- Moment timezone -->
+  <script src="/plugins/moment-timezone/js/moment-timezone-with-data.js"></script>
+  <!-- Jdenticon -->
+  <script src="/plugins/jdenticon/js/jdenticon.min.js"></script>
+  <!--OneSignal-->
+  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+  <!--EventEmitter-->
+  <script src="/plugins/eventemitter/js/EventEmitter.min.js"></script>
 
-      /*
+  <!-- AmplitudeJS -->
+  <style>
+    div.control-container {
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+
+    div.control-container div.amplitude-play-pause {
+      width: 54px;
+      height: 54px;
+      cursor: pointer;
+      float: left;
+      margin-left: 10px;
+    }
+
+    div.control-container div.amplitude-play-pause.amplitude-paused::before {
+      content: "\f144";
+      font-size: 39px;
+      font-weight: 900;
+      font-family: "Font Awesome 5 Free";
+    }
+
+    div.control-container div.amplitude-play-pause.amplitude-playing::before {
+      content: "\f28b";
+      font-size: 39px;
+      font-weight: 900;
+      font-family: "Font Awesome 5 Free";
+    }
+
+    div.control-container div.meta-container {
+      float: left;
+      width: calc(100% - 64px);
+      text-align: center;
+      color: white;
+      margin-top: 10px;
+    }
+
+    div.control-container div.meta-container span.nowplaying-line1 {
+      font-family: "Open Sans", sans-serif;
+      font-size: 16px;
+      color: #fff;
+      display: block;
+    }
+
+    div.control-container div.meta-container span.nowplaying-line2 {
+      font-family: "Open Sans", sans-serif;
+      font-weight: 100;
+      font-size: 12px;
+      color: #fff;
+      display: block;
+    }
+
+    div.control-container:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    /*
   Small only
 */
-      @media screen and (max-width: 39.9375em) {
-        div.control-container div.amplitude-play-pause {
-          background-size: cover;
-          width: 54px;
-          height: 54px;
-        }
-        div.control-container div.meta-container {
-          width: calc(100% - 64px);
-        }
+    @media screen and (max-width: 39.9375em) {
+      div.control-container div.amplitude-play-pause {
+        background-size: cover;
+        width: 54px;
+        height: 54px;
       }
 
-      div.bottom-container {
-        background-color: rgb(211, 30, 56);
-        border-bottom-right-radius: 5px;
-        border-bottom-left-radius: 5px;
-        border-top-right-radius: 5px;
-        border-top-left-radius: 5px;
+      div.control-container div.meta-container {
+        width: calc(100% - 64px);
       }
+    }
 
-      div#single-song-player {
-        border-radius: 5px;
-        margin: auto;
-        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-        width: 100%;
-        height: 65px;
-        -webkit-font-smoothing: antialiased;
-      }
-    </style>
-    <script src="/plugins/amplitudejs/amplitude.min.js"></script>
+    div.bottom-container {
+      background-color: rgb(211, 30, 56);
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      border-top-right-radius: 5px;
+      border-top-left-radius: 5px;
+    }
 
-    <!--WWSU-->
-    <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202008131931"></script>
-    <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008131931"></script>
-  </head>
+    div#single-song-player {
+      border-radius: 5px;
+      margin: auto;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+      width: 100%;
+      height: 65px;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+  <script src="/plugins/amplitudejs/amplitude.min.js"></script>
 
-  <body
-    class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed"
-  >
-    <div class="wrapper">
-      <!-- Navbar -->
-      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <!-- Left navbar links -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              data-widget="pushmenu"
-              title="Display / Hide Side Menu"
-              aria-label="Display / Hide Side Menu"
-            >
-              <i class="fas fa-bars" aria-hidden="true"></i>
-            </button>
-          </li>
-        </ul>
-        <small
-          ><strong>Disclaimer:</strong> This page is managed by WWSU and not
-          Wright State University.</small
-        >
-      </nav>
-      <!-- /.navbar -->
+  <!--WWSU-->
+  <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
+  <script src="/plugins/wwsu-sails/js/wwsu.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202008241829"></script>
+  <script src="/plugins/wwsu-website/wwsu-website-v7.js?v=202008241829"></script>
+</head>
 
-      <!-- Main Sidebar Container -->
-      <aside class="main-sidebar sidebar-dark-maroon elevation-4">
-        <!-- Brand Logo -->
-        <a href="https://wwsu1069.org" class="brand-link">
-          <img
-            src="images/logo_round.png"
-            alt="WWSU Logo"
-            class="brand-image img-circle bg-white elevation-3"
-            style="opacity: 0.8;"
-          />
-          <span class="brand-text font-weight-light">WWSU 106.9 FM</span>
-        </a>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+  <div class="wrapper">
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+      <!-- Left navbar links -->
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <button class="nav-link" data-widget="pushmenu" title="Display / Hide Side Menu"
+            aria-label="Display / Hide Side Menu">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+          </button>
+        </li>
+      </ul>
+      <small><strong>Disclaimer:</strong> This page is managed by WWSU and not
+        Wright State University.</small>
+    </nav>
+    <!-- /.navbar -->
 
-        <!-- Sidebar -->
-        <div class="sidebar">
-          <!-- Sidebar Menu -->
-          <nav class="mt-2">
-            <ul
-              class="nav nav-pills nav-sidebar flex-column"
-              data-widget="treeview"
-              role="menu"
-              data-accordion="false"
-            >
-              <li class="nav-header text-light">ON-AIR</li>
-              <li class="nav-item">
-                <a
-                  href="#"
-                  class="nav-link"
-                  id="nav-nowplaying"
-                  title="See what is currently on the air. Like/report recently played tracks."
-                  aria-label="See what is currently on the air. Like/report recently played tracks."
-                >
-                  <i class="nav-icon fas fa-play-circle" aria-hidden="true"></i>
-                  <p>
-                    Now Playing
-                  </p>
-                </a>
-              </li>
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-maroon elevation-4">
+      <!-- Brand Logo -->
+      <a href="https://wwsu1069.org" class="brand-link">
+        <img src="images/logo_round.png" alt="WWSU Logo" class="brand-image img-circle bg-white elevation-3"
+          style="opacity: 0.8;" />
+        <span class="brand-text font-weight-light">WWSU 106.9 FM</span>
+      </a>
 
-              <li class="nav-item">
-                <a
-                  href="#"
-                  class="nav-link"
-                  id="nav-request"
-                  title="Request a track to be played on the air."
-                  aria-label="Request a track to be played on the air."
-                >
-                  <i class="nav-icon fas fa-file-audio" aria-hidden="true"></i>
-                  <p>
-                    Request a Track
-                  </p>
-                </a>
-              </li>
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <li class="nav-header text-light">ON-AIR</li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="nav-nowplaying"
+                title="See what is currently on the air. Like/report recently played tracks."
+                aria-label="See what is currently on the air. Like/report recently played tracks.">
+                <i class="nav-icon fas fa-play-circle" aria-hidden="true"></i>
+                <p>
+                  Now Playing
+                </p>
+              </a>
+            </li>
 
-              <li class="nav-header text-light">SCHEDULES</li>
-              <li class="nav-item">
-                <a
-                  href="#"
-                  class="nav-link"
-                  id="nav-schedule"
-                  title="View what will air on WWSU up to 14 days in advance."
-                  aria-label="View what will air on WWSU up to 14 days in advance."
-                >
-                  <i
-                    class="nav-icon far fa-calendar-alt"
-                    aria-hidden="true"
-                  ></i>
-                  <p>
-                    Program Schedule
-                  </p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a
-                  href="#"
-                  class="nav-link"
-                  id="nav-hours"
-                  title="Check when the directors will be in for hours up to 7 days in advance."
-                  aria-label="Check when the directors will be in for hours up to 7 days in advance."
-                >
-                  <i class="nav-icon fas fa-user-clock" aria-hidden="true"></i>
-                  <p>
-                    Office Hours
-                  </p>
-                </a>
-              </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="nav-request" title="Request a track to be played on the air."
+                aria-label="Request a track to be played on the air.">
+                <i class="nav-icon fas fa-file-audio" aria-hidden="true"></i>
+                <p>
+                  Request a Track
+                </p>
+              </a>
+            </li>
 
-              <li class="nav-header text-light">COMMUNICATION</li>
-              <li class="nav-item">
-                <a
-                  href="#"
-                  class="nav-link"
-                  id="nav-chat"
-                  title="Send messages with the DJ or other listeners."
-                  aria-label="Send messages with the DJ or other listeners."
-                >
-                  <i class="nav-icon fas fa-comments" aria-hidden="true"></i>
-                  <p>
-                    Chat with DJ
-                    <span
-                      class="badge badge-secondary right chat-newmessages"
-                      title="New Messages"
-                      >0</span
-                    >
-                  </p>
-                </a>
-              </li>
-            </ul>
-          </nav>
-          <!-- /.sidebar-menu -->
-        </div>
-        <!-- /.sidebar -->
-      </aside>
+            <li class="nav-header text-light">SCHEDULES</li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="nav-schedule"
+                title="View what will air on WWSU up to 14 days in advance."
+                aria-label="View what will air on WWSU up to 14 days in advance.">
+                <i class="nav-icon far fa-calendar-alt" aria-hidden="true"></i>
+                <p>
+                  Program Schedule
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="nav-hours"
+                title="Check when the directors will be in for hours up to 7 days in advance."
+                aria-label="Check when the directors will be in for hours up to 7 days in advance.">
+                <i class="nav-icon fas fa-user-clock" aria-hidden="true"></i>
+                <p>
+                  Office Hours
+                </p>
+              </a>
+            </li>
 
-      <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper" role="main">
-        <section id="section-nowplaying">
-          <div class="content-header">
-            <div class="container-fluid">
-              <div class="row mb-2">
-                <div class="col-12">
-                  <h1 class="m-0 text-dark">Now Playing on WWSU 106.9 FM</h1>
-                </div>
-                <!-- /.col -->
+            <li class="nav-header text-light">COMMUNICATION</li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="nav-chat" title="Send messages with the DJ or other listeners."
+                aria-label="Send messages with the DJ or other listeners.">
+                <i class="nav-icon fas fa-comments" aria-hidden="true"></i>
+                <p>
+                  Chat with DJ
+                  <span class="badge badge-secondary right chat-newmessages" title="New Messages">0</span>
+                </p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+      </div>
+      <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper" role="main">
+      <section id="section-nowplaying">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12">
+                <h1 class="m-0 text-dark">Now Playing on WWSU 106.9 FM</h1>
               </div>
-              <!-- /.row -->
+              <!-- /.col -->
             </div>
-            <!-- /.container-fluid -->
+            <!-- /.row -->
           </div>
+          <!-- /.container-fluid -->
+        </div>
 
-          <div class="content">
-            <div class="announcements-nowplaying"></div>
+        <div class="content">
+          <div class="announcements-nowplaying"></div>
 
-            <!-- Now Playing Box -->
-            <div class="card card-primary card-outline p-1 m-3">
-              <div class="card-body box-profile">
-                <div
-                  class="text-center nowplaying-icon"
-                  style="font-size: 5rem;"
-                >
-                  <i
-                    class="profile-user-img img-fluid img-circle fas fa-play-circle bg-primary"
-                  ></i>
-                </div>
+          <!-- Now Playing Box -->
+          <div class="card card-primary card-outline p-1 m-3">
+            <div class="card-body box-profile">
+              <div class="text-center nowplaying-icon" style="font-size: 5rem;">
+                <i class="profile-user-img img-fluid img-circle fas fa-play-circle bg-primary"></i>
+              </div>
 
-                <p class="profile-username text-center nowplaying-line1 h3"></p>
+              <p class="profile-username text-center nowplaying-line1 h3"></p>
 
-                <p class="text-muted text-center nowplaying-line2"></p>
+              <p class="text-muted text-center nowplaying-line2"></p>
 
-                <ul class="list-group list-group-unbordered mb-3">
-                  <li class="list-group-item nowplaying-topic"></li>
-                  <li class="list-group-item">
-                    <small
-                      >Due to internet stream delay, now playing information may
-                      be up to 30 seconds fast.</small
-                    >
-                  </li>
-                </ul>
+              <ul class="list-group list-group-unbordered mb-3">
+                <li class="list-group-item nowplaying-topic"></li>
+                <li class="list-group-item">
+                  <small>Due to internet stream delay, now playing information may
+                    be up to 30 seconds fast.</small>
+                </li>
+              </ul>
 
-                <!--
+              <!--
             <a href="#" class="btn btn-primary btn-block subscribe-button-all"
               title="Receive push notifications when this program goes on the air." tabindex="0"><b>Subscribe All
                 Times</b></a>
                 -->
-              </div>
-              <!-- /.card-body -->
             </div>
-
-            <!-- Recently Played-->
-            <div class="card p-1 m-3">
-              <div class="card-header">
-                <h2 class="card-title">Recently Played</h2>
-              </div>
-              <div class="card-body p-0">
-                <table class="table table-striped projects">
-                  <thead>
-                    <tr>
-                      <th style="width: 75%;">
-                        Track Name
-                      </th>
-                      <th style="width: 25%;">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="nowplaying-recentlyplayed">
-                    <!-- Recent tracks are populated here-->
-                  </tbody>
-                </table>
-              </div>
-              <!-- /.card-body -->
-            </div>
-          </div>
-        </section>
-
-        <section id="section-chat">
-          <div class="content-header">
-            <div class="container-fluid">
-              <div class="row mb-2">
-                <div class="col-12">
-                  <h1 class="m-0 text-dark">Chat with the DJ</h1>
-                </div>
-                <!-- /.col -->
-              </div>
-              <!-- /.row -->
-            </div>
-            <!-- /.container-fluid -->
+            <!-- /.card-body -->
           </div>
 
-          <div class="content">
-            <div class="announcements-chat"></div>
-
-            <div
-              class="card card-sucress cardutline direct-chat direct-chat-success p-1 m-3"
-            >
-              <div class="card-header">
-                <h2 class="card-title">Chat</h2>
-
-                <div class="card-tools">
-                  <span
-                    data-toggle="tooltip"
-                    title="New Messages"
-                    class="badge bg-secondary chat-newmessages"
-                    >0</span
-                  >
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="callout callout-secondary chat-status">
-                  <p class="h5">Not Connected</p>
-
-                  <p>You are not yet connected to the chat system.</p>
-                </div>
-
-                <div
-                  class="direct-chat-messages"
-                  id="chat-messages"
-                  style="height: 50vh;"
-                >
-                  <!--Chat messages go here-->
-                </div>
-                <div class="input-group m-2">
-                  <label for="chat-nickname">Nickname</label>
-                  <input
-                    type="text"
-                    name="chat-nickname"
-                    id="chat-nickname"
-                    placeholder=""
-                    class="form-control"
-                  />
-                </div>
-                <div class="input-group m-2">
-                  <label for="chat-message">Message</label>
-                  <textarea
-                    name="chat-message"
-                    id="chat-message"
-                    maxlength="1024"
-                    rows="3"
-                    placeholder="Type Message ..."
-                    class="form-control chat-blocker"
-                  ></textarea>
-                </div>
-                <div class="input-group m-2">
-                  <button
-                    type="submit"
-                    id="send-message-public"
-                    class="btn btn-success chat-blocker"
-                    tabindex="0"
-                    title="Send the message publicly; other listeners can also see it."
-                  >
-                    Send Public
-                  </button>
-                  <button
-                    type="submit"
-                    id="send-message-private"
-                    class="btn btn-danger chat-blocker"
-                    tabindex="0"
-                    title="Send this message privately; only the DJ can see it."
-                  >
-                    Send Private
-                  </button>
-                </div>
-              </div>
-              <div class="card-footer">
-                <div class="callout callout-warning">
-                  <p class="h5">IP Addresses are Logged</p>
-
-                  <p>
-                    Do not send any harassing nor threatening messages. You
-                    agree your IP address will be logged with every message
-                    sent, and you could be banned from WWSU's website for
-                    sending harmful messages.
-                  </p>
-                </div>
-              </div>
+          <!-- Recently Played-->
+          <div class="card p-1 m-3">
+            <div class="card-header">
+              <h2 class="card-title">Recently Played</h2>
             </div>
+            <div class="card-body p-0">
+              <table class="table table-striped projects">
+                <thead>
+                  <tr>
+                    <th style="width: 75%;">
+                      Track Name
+                    </th>
+                    <th style="width: 25%;">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="nowplaying-recentlyplayed">
+                  <!-- Recent tracks are populated here-->
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="section-schedule">
-          <div class="content-header">
-            <div class="container-fluid">
-              <div class="row mb-2">
-                <div class="col-12">
-                  <h1 class="m-0 text-dark">Upcoming Program Schedule</h1>
-                </div>
-                <!-- /.col -->
+      <section id="section-chat">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12">
+                <h1 class="m-0 text-dark">Chat with the DJ</h1>
               </div>
-              <!-- /.row -->
+              <!-- /.col -->
             </div>
-            <!-- /.container-fluid -->
+            <!-- /.row -->
           </div>
+          <!-- /.container-fluid -->
+        </div>
 
-          <div class="content">
-            <div class="announcements-schedule"></div>
+        <div class="content">
+          <div class="announcements-chat"></div>
 
-            <div class="callout callout-info">
-              <p class="h5">Timezone info</p>
-              <p>
-                Displayed dates/times for programs are in your local timezone.
-              </p>
+          <div class="card card-sucress cardutline direct-chat direct-chat-success p-1 m-3">
+            <div class="card-header">
+              <h2 class="card-title">Chat</h2>
+
+              <div class="card-tools">
+                <span data-toggle="tooltip" title="New Messages" class="badge bg-secondary chat-newmessages">0</span>
+              </div>
             </div>
+            <div class="card-body">
+              <div class="callout callout-secondary chat-status">
+                <p class="h5">Not Connected</p>
 
-            <!-- Schedule Date Selector-->
-            <div class="card p-1 m-3">
-              <div class="card-header">
-                <p class="card-title h3">
-                  Choose a Date
+                <p>You are not yet connected to the chat system.</p>
+              </div>
+
+              <div class="direct-chat-messages" id="chat-messages" style="height: 50vh;">
+                <!--Chat messages go here-->
+              </div>
+              <div class="input-group m-2">
+                <label for="chat-nickname">Nickname</label>
+                <input type="text" name="chat-nickname" id="chat-nickname" placeholder="" class="form-control" />
+              </div>
+              <div class="input-group m-2">
+                <label for="chat-message">Message</label>
+                <textarea name="chat-message" id="chat-message" maxlength="1024" rows="3" placeholder="Type Message ..."
+                  class="form-control chat-blocker"></textarea>
+              </div>
+              <div class="input-group m-2">
+                <button type="submit" id="send-message-public" class="btn btn-success chat-blocker" tabindex="0"
+                  title="Send the message publicly; other listeners can also see it.">
+                  Send Public
+                </button>
+                <button type="submit" id="send-message-private" class="btn btn-danger chat-blocker" tabindex="0"
+                  title="Send this message privately; only the DJ can see it.">
+                  Send Private
+                </button>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="callout callout-warning">
+                <p class="h5">IP Addresses are Logged</p>
+
+                <p>
+                  Do not send any harassing nor threatening messages. You
+                  agree your IP address will be logged with every message
+                  sent, and you could be banned from WWSU's website for
+                  sending harmful messages.
                 </p>
               </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <div class="form-group">
-                  <label>Date</label>
-                  <select
-                    class="form-control"
-                    id="schedule-select"
-                  >
-                    <option value="0" id="schedule-select-0">Today</option>
-                    <option value="1" id="schedule-select-1">Day 2</option>
-                    <option value="2" id="schedule-select-2">Day 3</option>
-                    <option value="3" id="schedule-select-3">Day 4</option>
-                    <option value="4" id="schedule-select-4">Day 5</option>
-                    <option value="5" id="schedule-select-5">Day 6</option>
-                    <option value="6" id="schedule-select-6">Day 7</option>
-                    <option value="7" id="schedule-select-7">Day 8</option>
-                    <option value="8" id="schedule-select-8">Day 9</option>
-                    <option value="9" id="schedule-select-9">Day 10</option>
-                    <option value="10" id="schedule-select-10">Day 11</option>
-                    <option value="11" id="schedule-select-11">Day 12</option>
-                    <option value="12" id="schedule-select-12">Day 13</option>
-                    <option value="13" id="schedule-select-13">Day 14</option>
-                  </select>
-                </div>
-              </div>
-              <!-- /.card-body -->
-            </div>
-
-            <!-- Schedule Events -->
-            <div class="container-fluid">
-              <div class="row" id="schedule-events">
-                <!-- Events are populated here by Javascript -->
-              </div>
-            </div>
-
-            <div
-              class="modal fade"
-              id="modal-eventinfo"
-              aria-hidden="true"
-              style="display: none;"
-            >
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <p class="modal-title h1">Event Information</p>
-                    <button
-                      type="button"
-                      class="close"
-                      data-dismiss="modal"
-                      aria-label="Close"
-                    >
-                      <span aria-hidden="true">×</span>
-                    </button>
-                  </div>
-                  <div class="modal-body" id="modal-eventinfo-body">
-                    <!--Event Info goes here-->
-                  </div>
-                  <div class="modal-footer justify-content-between">
-                    <button
-                      type="button"
-                      class="btn btn-default"
-                      data-dismiss="modal"
-                      tabindex="0"
-                    >
-                      Close
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-info subscribe-button-once"
-                      title="Receive a push notification when this event, only for this date/time, airs, changes time, or cancels."
-                      tabindex="0"
-                      id="modal-eventinfo-subscribe-once"
-                    >
-                      Subscribe One-Time
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-primary subscribe-button-all"
-                      title="Receive a push notification when this event goes on the air any time, or when a change is made to this event's schedule."
-                      id="modal-eventinfo-subscribe-all"
-                    >
-                      Subscribe All Times
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-danger"
-                      title="Do not receive any push notifications for this event anymore."
-                      id="modal-eventinfo-unsubscribe"
-                      style="display: none;"
-                    >
-                      Unsubscribe All Times
-                    </button>
-                  </div>
-                </div>
-                <!-- /.modal-content -->
-              </div>
-              <!-- /.modal-dialog -->
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="section-hours">
-          <div class="content-header">
-            <div class="container-fluid">
-              <div class="row mb-2">
-                <div class="col-12">
-                  <h1 class="m-0 text-dark">Director Office Hours</h1>
-                </div>
-                <!-- /.col -->
+      <section id="section-schedule">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12">
+                <h1 class="m-0 text-dark">Upcoming Program Schedule</h1>
               </div>
-              <!-- /.row -->
+              <!-- /.col -->
             </div>
-            <!-- /.container-fluid -->
+            <!-- /.row -->
+          </div>
+          <!-- /.container-fluid -->
+        </div>
+
+        <div class="content">
+          <div class="announcements-schedule"></div>
+
+          <div class="callout callout-info">
+            <p class="h5">Timezone info</p>
+            <p>
+              Displayed dates/times for programs are in your local timezone.
+            </p>
           </div>
 
-          <div class="content">
-            <div class="announcements-directors"></div>
-
-            <div class="callout callout-info">
-              <p class="h5">Timezone info</p>
-              <p>
-                Displayed dates/times for office hours are in your local
-                timezone.
+          <!-- Schedule Date Selector-->
+          <div class="card p-1 m-3">
+            <div class="card-header">
+              <p class="card-title h3">
+                Choose a Date
               </p>
             </div>
-
-            <div class="container-fluid">
-              <div class="row" id="schedule-hours">
-                <!-- Events are populated here by Javascript -->
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="form-group">
+                <label>Date</label>
+                <select class="form-control" id="schedule-select">
+                  <option value="0" id="schedule-select-0">Today</option>
+                  <option value="1" id="schedule-select-1">Day 2</option>
+                  <option value="2" id="schedule-select-2">Day 3</option>
+                  <option value="3" id="schedule-select-3">Day 4</option>
+                  <option value="4" id="schedule-select-4">Day 5</option>
+                  <option value="5" id="schedule-select-5">Day 6</option>
+                  <option value="6" id="schedule-select-6">Day 7</option>
+                  <option value="7" id="schedule-select-7">Day 8</option>
+                  <option value="8" id="schedule-select-8">Day 9</option>
+                  <option value="9" id="schedule-select-9">Day 10</option>
+                  <option value="10" id="schedule-select-10">Day 11</option>
+                  <option value="11" id="schedule-select-11">Day 12</option>
+                  <option value="12" id="schedule-select-12">Day 13</option>
+                  <option value="13" id="schedule-select-13">Day 14</option>
+                </select>
               </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+
+          <!-- Schedule Events -->
+          <div class="container-fluid">
+            <div class="row" id="schedule-events">
+              <!-- Events are populated here by Javascript -->
             </div>
           </div>
-        </section>
 
-        <section id="section-request">
-          <div class="content-header">
-            <div class="container-fluid">
-              <div class="row mb-2">
-                <div class="col-12">
-                  <h1 class="m-0 text-dark">Request a Track</h1>
+          <div class="modal fade" id="modal-eventinfo" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <p class="modal-title h1">Event Information</p>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                  </button>
                 </div>
-                <!-- /.col -->
+                <div class="modal-body" id="modal-eventinfo-body">
+                  <!--Event Info goes here-->
+                </div>
+                <div class="modal-footer justify-content-between">
+                  <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="0">
+                    Close
+                  </button>
+                  <button type="button" class="btn btn-info subscribe-button-once"
+                    title="Receive a push notification when this event, only for this date/time, airs, changes time, or cancels."
+                    tabindex="0" id="modal-eventinfo-subscribe-once">
+                    Subscribe One-Time
+                  </button>
+                  <button type="button" class="btn btn-primary subscribe-button-all"
+                    title="Receive a push notification when this event goes on the air any time, or when a change is made to this event's schedule."
+                    id="modal-eventinfo-subscribe-all">
+                    Subscribe All Times
+                  </button>
+                  <button type="button" class="btn btn-danger"
+                    title="Do not receive any push notifications for this event anymore."
+                    id="modal-eventinfo-unsubscribe" style="display: none;">
+                    Unsubscribe All Times
+                  </button>
+                </div>
               </div>
-              <!-- /.row -->
+              <!-- /.modal-content -->
             </div>
-            <!-- /.container-fluid -->
+            <!-- /.modal-dialog -->
+          </div>
+        </div>
+      </section>
+
+      <section id="section-hours">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12">
+                <h1 class="m-0 text-dark">Director Office Hours</h1>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.container-fluid -->
+        </div>
+
+        <div class="content">
+          <div class="announcements-directors"></div>
+
+          <div class="callout callout-info">
+            <p class="h5">Timezone info</p>
+            <p>
+              Displayed dates/times for office hours are in your local
+              timezone.
+            </p>
           </div>
 
-          <div class="content">
-            <div class="announcements-request"></div>
+          <div class="container-fluid">
+            <div class="row" id="schedule-hours">
+              <!-- Events are populated here by Javascript -->
+            </div>
+          </div>
+        </div>
+      </section>
 
-            <div class="card p-1 m-3">
-              <div class="card-header">
-                <h2 class="card-title">Browse Tracks</h2>
+      <section id="section-request">
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12">
+                <h1 class="m-0 text-dark">Request a Track</h1>
               </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.container-fluid -->
+        </div>
 
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-5">
-                    <div class="form-group">
-                      <label>Artist or Title</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="request-name"
-                        placeholder="Enter ..."
-                      />
-                    </div>
-                  </div>
-                  <div class="col-md-5">
-                    <div class="form-group">
-                      <label>Filter by genre</label>
-                      <select class="form-control" id="request-genre">
-                        <option value="0">Any Genre</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <div class="form-group">
-                      <button
-                        class="btn btn-primary"
-                        id="request-search"
-                        tabindex="0"
-                        title="Search for tracks"
-                      >
-                        Search
-                      </button>
-                    </div>
-                  </div>
-                </div>
+        <div class="content">
+          <div class="announcements-request"></div>
 
-                <table class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th>Artist - Title</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="request-table"></tbody>
-                </table>
-                <button
-                  type="button"
-                  class="btn btn-outline-danger disabled"
-                  id="request-more-none"
-                >
-                  No More Tracks
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  id="request-more"
-                  style="display: none;"
-                  tabindex="0"
-                >
-                  Load More Tracks
-                </button>
-              </div>
-
-              <div class="card-footer">
-                <div class="callout callout-warning">
-                  <p class="h5">Request Limits</p>
-
-                  <p>
-                    Each IP may request up to 10 tracks per day, reset at
-                    midnight ET.
-                  </p>
-                </div>
-                <div class="callout callout-info">
-                  <p class="h5">When do requests play?</p>
-
-                  <p>
-                    Up to 3 requests play every break during automation music.
-                    When a broadcast is airing, it is up to DJ discretion. If a
-                    DJ does not air a request during their show, it will play
-                    the next time we are in automation music.
-                  </p>
-                </div>
-                <div class="callout callout-info">
-                  <p class="h5">Do we not have the track you want?</p>
-
-                  <p>
-                    Contact music@wwsu1069.org and let us know if there is a
-                    track you would like us to check out and add to our system.
-                  </p>
-                </div>
-              </div>
+          <div class="card p-1 m-3">
+            <div class="card-header">
+              <h2 class="card-title">Browse Tracks</h2>
             </div>
 
-            <div
-              class="modal fade"
-              id="modal-trackinfo"
-              aria-hidden="true"
-              style="display: none;"
-            >
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <p class="modal-title h1">Track Information</p>
-                    <button
-                      type="button"
-                      class="close"
-                      data-dismiss="modal"
-                      aria-label="Close"
-                    >
-                      <span aria-hidden="true">×</span>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="form-group">
+                    <label>Artist or Title</label>
+                    <input type="text" class="form-control" id="request-name" placeholder="Enter ..." />
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <div class="form-group">
+                    <label>Filter by genre</label>
+                    <select class="form-control" id="request-genre">
+                      <option value="0">Any Genre</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-group">
+                    <button class="btn btn-primary" id="request-search" tabindex="0" title="Search for tracks">
+                      Search
                     </button>
                   </div>
-                  <div class="modal-body">
-                    <table class="table table-striped">
-                      <thead>
-                        <tr>
-                          <th scope="col"><strong>Name</strong></th>
-                          <th scope="col"><strong>Value</strong></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>Track ID</td>
-                          <td id="track-info-ID"></td>
-                        </tr>
-                        <tr>
-                          <td>Status</td>
-                          <td id="track-info-status"></td>
-                        </tr>
-                        <tr>
-                          <td>Artist</td>
-                          <td id="track-info-artist"></td>
-                        </tr>
-                        <tr>
-                          <td>Title</td>
-                          <td id="track-info-title"></td>
-                        </tr>
-                        <tr>
-                          <td>Album</td>
-                          <td id="track-info-album"></td>
-                        </tr>
-                        <tr>
-                          <td>Genre</td>
-                          <td id="track-info-genre"></td>
-                        </tr>
-                        <tr>
-                          <td>Duration</td>
-                          <td id="track-info-duration"></td>
-                        </tr>
-                        <tr>
-                          <td>Date Last Played</td>
-                          <td id="track-info-lastplayed"></td>
-                        </tr>
-                        <tr>
-                          <td>Track Limits</td>
-                          <td id="track-info-limits"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div
-                    class="modal-footer justify-content-between"
-                    id="track-info-request"
-                  ></div>
                 </div>
-                <!-- /.modal-content -->
               </div>
-              <!-- /.modal-dialog -->
-            </div>
-          </div>
-        </section>
 
-        <!-- Add padding to the end of the body because of the sticky footer-->
-        <div style="height: 85px;"></div>
-      </div>
-      <!-- /.content-wrapper -->
-
-      <!--Modals-->
-      <div
-        class="modal fade"
-        id="modal-discipline"
-        aria-hidden="true"
-        style="display: none;"
-      >
-        <div class="modal-dialog">
-          <div class="modal-content bg-danger">
-            <div class="modal-header">
-              <p class="modal-title h1" id="modal-discipline-title">
-                Disciplinary Notice
-              </p>
-            </div>
-            <div class="modal-body" id="modal-discipline-body">
-              <p></p>
-            </div>
-            <div class="modal-footer justify-content-between">
-              <button
-                type="button"
-                class="btn btn-outline-light"
-                id="modal-discipline-acknowledge"
-              >
-                Acknowledge
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Artist - Title</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="request-table"></tbody>
+              </table>
+              <button type="button" class="btn btn-outline-danger disabled" id="request-more-none">
+                No More Tracks
+              </button>
+              <button type="button" class="btn btn-primary" id="request-more" style="display: none;" tabindex="0">
+                Load More Tracks
               </button>
             </div>
-          </div>
-          <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-      </div>
-      <!-- /.modal -->
 
-      <!-- Main Footer -->
-      <footer class="main-footer">
-        <div id="single-song-player">
-          <div class="bottom-container">
-            <div class="amplitude-visualization"></div>
-            <div class="control-container">
-              <div
-                class="amplitude-play-pause"
-                id="play-pause"
-                tabindex="0"
-              ></div>
-              <div class="meta-container">
-                <span class="nowplaying-line1"></span>
-                <span class="nowplaying-line2"></span>
+            <div class="card-footer">
+              <div class="callout callout-warning">
+                <p class="h5">Request Limits</p>
+
+                <p>
+                  Each IP may request up to 10 tracks per day, reset at
+                  midnight ET.
+                </p>
+              </div>
+              <div class="callout callout-info">
+                <p class="h5">When do requests play?</p>
+
+                <p>
+                  Up to 3 requests play every break during automation music.
+                  When a broadcast is airing, it is up to DJ discretion. If a
+                  DJ does not air a request during their show, it will play
+                  the next time we are in automation music.
+                </p>
+              </div>
+              <div class="callout callout-info">
+                <p class="h5">Do we not have the track you want?</p>
+
+                <p>
+                  Contact music@wwsu1069.org and let us know if there is a
+                  track you would like us to check out and add to our system.
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </footer>
-    </div>
 
-    <%- body %>
-  </body>
+          <div class="modal fade" id="modal-trackinfo" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <p class="modal-title h1">Track Information</p>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col"><strong>Name</strong></th>
+                        <th scope="col"><strong>Value</strong></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Track ID</td>
+                        <td id="track-info-ID"></td>
+                      </tr>
+                      <tr>
+                        <td>Status</td>
+                        <td id="track-info-status"></td>
+                      </tr>
+                      <tr>
+                        <td>Artist</td>
+                        <td id="track-info-artist"></td>
+                      </tr>
+                      <tr>
+                        <td>Title</td>
+                        <td id="track-info-title"></td>
+                      </tr>
+                      <tr>
+                        <td>Album</td>
+                        <td id="track-info-album"></td>
+                      </tr>
+                      <tr>
+                        <td>Genre</td>
+                        <td id="track-info-genre"></td>
+                      </tr>
+                      <tr>
+                        <td>Duration</td>
+                        <td id="track-info-duration"></td>
+                      </tr>
+                      <tr>
+                        <td>Date Last Played</td>
+                        <td id="track-info-lastplayed"></td>
+                      </tr>
+                      <tr>
+                        <td>Track Limits</td>
+                        <td id="track-info-limits"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="modal-footer justify-content-between" id="track-info-request"></div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Add padding to the end of the body because of the sticky footer-->
+      <div style="height: 85px;"></div>
+    </div>
+    <!-- /.content-wrapper -->
+
+    <!--Modals-->
+    <div class="modal fade" id="modal-discipline" aria-hidden="true" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-content bg-danger">
+          <div class="modal-header">
+            <p class="modal-title h1" id="modal-discipline-title">
+              Disciplinary Notice
+            </p>
+          </div>
+          <div class="modal-body" id="modal-discipline-body">
+            <p></p>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-outline-light" id="modal-discipline-acknowledge">
+              Acknowledge
+            </button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+    <!-- Main Footer -->
+    <footer class="main-footer">
+      <div id="single-song-player">
+        <div class="bottom-container">
+          <div class="amplitude-visualization"></div>
+          <div class="control-container">
+            <div class="amplitude-play-pause" id="play-pause" tabindex="0"></div>
+            <div class="meta-container">
+              <span class="nowplaying-line1"></span>
+              <span class="nowplaying-line2"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <%- body %>
+</body>
+
 </html>
