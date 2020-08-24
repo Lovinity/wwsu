@@ -921,20 +921,21 @@ module.exports = {
 
       var process1_2 = (record) => {
         initializeDJ(record.dj);
-        if (!record.dj || typeof DJs[ record.dj ] === 'undefined') { return }
-        if (record.type === `remote`) {
-          DJs[ record.dj ].overall.remoteCredits += record.amount
+        if (record.dj && typeof DJs[ record.dj ] !== 'undefined') {
+          if (record.type === `remote`) {
+            DJs[ record.dj ].overall.remoteCredits += record.amount
 
-          if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
-            DJs[ record.dj ].semester.remoteCredits += record.amount
-          }
+            if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
+              DJs[ record.dj ].semester.remoteCredits += record.amount
+            }
 
-          if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
-            DJs[ record.dj ].week.remoteCredits += record.amount
-          }
+            if (moment().subtract(7, 'days').isBefore(moment(record.createdAt))) {
+              DJs[ record.dj ].week.remoteCredits += record.amount
+            }
 
-          if (moment(record.createdAt).isSameOrAfter(moment(start)) && moment(record.createdAt).isBefore(moment(end))) {
-            DJs[ record.dj ].range.remoteCredits += record.amount
+            if (moment(record.createdAt).isSameOrAfter(moment(start)) && moment(record.createdAt).isBefore(moment(end))) {
+              DJs[ record.dj ].range.remoteCredits += record.amount
+            }
           }
         }
 
