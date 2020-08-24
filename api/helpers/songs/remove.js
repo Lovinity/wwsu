@@ -22,7 +22,7 @@ module.exports = {
     },
     noRequeue: {
       type: 'boolean',
-      defaultsTo: false,
+      defaultsTo: true,
       description: 'If false, system will clear the entire queue and re-queue tracks that meet criteria. If true, system will remove tracks that fail specified criteria one by one instead of clearing the entire queue and re-queuing appropriate tracks.'
     }
   },
