@@ -941,6 +941,7 @@ module.exports = {
         }
 
         tasksLeft--;
+        sails.log.verbose(`analytics.showtime process1: ${tasksLeft} tasks left.`);
         if (tasksLeft <= 0) resolve();
       }
 
@@ -1137,6 +1138,7 @@ module.exports = {
         }
 
         tasksLeft--;
+        sails.log.verbose(`analytics.showtime process2: ${tasksLeft} tasks left.`);
         if (tasksLeft <= 0) resolve();
       }
 
@@ -1262,6 +1264,7 @@ module.exports = {
           }
 
           tasksLeft--;
+          sails.log.verbose(`analytics.showtime process3_2: ${tasksLeft} tasks left.`);
           if (tasksLeft <= 0) resolve2();
         }
 
@@ -1810,6 +1813,7 @@ module.exports = {
           }
 
           tasksLeft2--;
+          sails.log.verbose(`analytics.showtime process3_3: ${tasksLeft2} tasks left.`);
           if (tasksLeft2 <= 0) resolve2();
         }
 
@@ -2936,6 +2940,7 @@ module.exports = {
         }
 
         tasksLeft--;
+        sails.log.verbose(`analytics.showtime process4: ${tasksLeft} tasks left.`);
         if (tasksLeft <= 0) resolve();
       }
 
