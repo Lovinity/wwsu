@@ -852,7 +852,7 @@ window.addEventListener("DOMContentLoaded", () => {
             $("#schedule-events").unblock();
 
             window.requestAnimationFrame(() => {
-              $(`.button-event-info`).unbind('click').click(() => {
+              $(`.button-event-info`).unbind('click').click((e) => {
                 displayEventInfo($(e.currentTarget).data("id"));
               });
               $(`.button-event-info`).unbind('keydown').keydown((e) => {
@@ -1629,7 +1629,7 @@ window.addEventListener("DOMContentLoaded", () => {
           </tr>`;
 
             window.requestAnimationFrame(() => {
-              $(`.button-request-track`).unbind('click').click(() => {
+              $(`.button-request-track`).unbind('click').click((e) => {
                 loadTrackInfo(parseInt($(e.currentTarget).data("id")));
               });
               $(`.button-request-track`).unbind('keydown').keydown((e) => {
@@ -1732,7 +1732,7 @@ window.addEventListener("DOMContentLoaded", () => {
                                       </div>                    
                                       <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0">Place Request</button></div>`);
             window.requestAnimationFrame(() => {
-              $(`#track-request-submit`).unbind('click').click(() => {
+              $(`#track-request-submit`).unbind('click').click((e) => {
                 requestTrack(response[ 0 ].ID);
               });
               $(`#track-request-submit`).unbind('keydown').keydown((e) => {
