@@ -15,6 +15,8 @@ global['moment'] = require('moment-timezone')
 require('moment-duration-format')
 require('moment-recur-ts')
 global['needle'] = require('needle')
+const WWSU = require("../assets/plugins/wwsu-sails/js/wwsu.js");
+global['WWSUqueue'] = new WWSU.WWSUqueue();
 
 // Create a config factory store; we are not using easy-config-store directly because it does not have a deleteProperty handler.
 const config = (() => {

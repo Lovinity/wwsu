@@ -160,7 +160,7 @@ module.exports = {
               true
             );
 
-            await sails.helpers.attendance.calculateStats();
+            sails.helpers.attendance.calculateStats().exec(() => {});
           })(currentID);
         }
       }
