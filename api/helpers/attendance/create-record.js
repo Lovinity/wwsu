@@ -142,6 +142,8 @@ module.exports = {
   <li><strong>Messages sent / received with listeners:</strong> ${stats.webMessages}</li>
   ${topStats[ 0 ].topShows.indexOf(currentRecord.event) !== -1 ? `<li><strong>Congratulations! Your broadcast placed number ${topStats[ 0 ].topShows.indexOf(currentRecord.event) + 1} in the top ${topStats[ 0 ].topShows.length} shows of the last week!</strong></li>` : ``}
   </ul>
+
+  <hr>
   
   <p>If any issues were discovered during your broadcast, they will be listed below. These issues were logged for the directors; repeat issues could result in intervention. If an issue was caused by a technical problem, please email the directors.</p>
   <ul>
@@ -158,9 +160,23 @@ module.exports = {
   ${stats.signedOffEarly ? `<li><strong>You signed off 10 or more minutes early.</strong> Please inform directors in advance if you are going to end your show early.</li>` : ``}
   ${stats.signedOffLate ? `<li><strong>You signed off 5 or more minutes late.</strong> Please avoid doing this, especially if there's a scheduled show after yours.</li>` : ``}
   </ul>
+
+  <hr>
   
   <p>Here is a break-down of the number of online listeners tuned in during your broadcast and at what time:</p>
   <ul>${stats.listeners.map((stat) => `<li><strong>${moment(stat.time).format("LT")}</strong>: ${stat.listeners}</li>`).join("")}</ul>
+
+  <hr>
+
+  <p>Here are the messages (if any) sent/received between you and online listeners:</p>
+  <ul>${stats.messages.map((message) => `<li><strong>${moment(message.createdAt).format("LT")} by ${message.fromFriendly}</strong>: ${message.message}</li>`).join("")}</ul>
+
+  <hr>
+
+  <p>Here is your full show log:</p>
+  <ul>${stats.logs.map((log) => `<li><strong>${moment(message.createdAt).format("LT")}: ${log.title}</strong><br />${log.event}${log.trackArtist ? `<br />Artist: ${log.trackArtist}` : ``}${log.trackTitle ? `<br />Title: ${log.trackTitle}` : ``}${log.trackAlbum ? `<br />Album: ${log.trackAlbum}` : ``}${log.trackLabel ? `<br />Label: ${log.trackLabel}` : ``}</li>`).join("")}</ul>
+
+  <hr>
   
   ${topStats[ 1 ][ currentRecord.calendarID ]
                 ?
@@ -177,6 +193,8 @@ module.exports = {
   <li><strong>Messages sent/received with online listeners:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.messages}</li>
   <li><strong>Remote credits earned:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.remoteCredits}</li>
   </ul>
+
+  <hr>
   
   <p>Here are analytics for ${currentRecord.event} for <strong>lifetime</strong> so far:</p>
   <ul>
@@ -194,6 +212,8 @@ module.exports = {
                 :
                 ``
               }
+
+              <hr>
               
 <p>*Online listener time is calculated per-listener, per-minute. For example, 5 online listeners tuned in for an entire 30 minute show is (5*30) 2 hours, 30 minutes listener time.</p>`,
               false,

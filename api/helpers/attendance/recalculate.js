@@ -113,14 +113,19 @@ module.exports = {
                 toUpdate.tuneIns = tuneIns
 
                 // Calculate web messages
-                toUpdate.webMessages = await sails.models.messages.count({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } })
+                var messages = await sails.models.messages.find({ status: 'active', or: [ { to: { startsWith: 'website-' } }, { to: 'DJ' }, { to: 'DJ-private' } ], createdAt: { '>=': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } });
+                toUpdate.webMessages = messages.length;
             }
 
             var toUpdate2 = _.cloneDeep(toUpdate);
 
             await sails.models.attendance.updateOne({ ID: inputs.ID }, toUpdate2);
 
+            toUpdate.attendance = attendance;
             toUpdate.listeners = listeners;
+            toUpdate.logs = logs;
+            toUpdate.messages = messages;
+
 
             return exits.success(toUpdate);
         } catch (e) {

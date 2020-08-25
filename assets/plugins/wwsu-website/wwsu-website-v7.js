@@ -439,14 +439,14 @@ window.addEventListener("DOMContentLoaded", () => {
         ) {
           if (automationpost !== "automation") {
             $(".chat-status").html(`<p class="h5">Chat Status: Inactive</p>
-                    <p>No shows are airing right now. Your message will likely not be seen by a DJ.</p>`);
+                    <p>No shows are airing right now. Your message will likely not be seen.</p>`);
             automationpost = "automation";
           }
         } else if (response.state.startsWith("prerecord_")) {
           if (automationpost !== response.show) {
             automationpost = response.show;
-            $(".chat-status").html(`<p class="h5">Chat Status: Prerecord</p>
-                    <p>The show airing now is prerecorded. There might not be anyone in the studio to see your messages.</p>`);
+            $(".chat-status").html(`<p class="h5">Chat Status: Messages Will be Emailed</p>
+                    <p>The show airing now is prerecorded. There might not be anyone in the studio to see your messages. However, any messages you send will be emailed to the show hosts when the prerecord is finished airing.</p>`);
           }
 
           /* TODO
@@ -497,7 +497,7 @@ window.addEventListener("DOMContentLoaded", () => {
         } else {
           if (automationpost !== response.show) {
             $(".chat-status").html(`<p class="h5">Chat Status: Active</p>
-                    <p>Your messages should be received by the DJ / host.</p>`);
+                    <p>Your messages should be received by the hosts. They will also be emailed to the hosts at the end of the broadcast.</p>`);
             automationpost = response.show;
           }
 
