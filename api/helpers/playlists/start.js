@@ -221,7 +221,7 @@ module.exports = {
         return exits.success(true)
       } else {
         sails.log.verbose('Helper SKIPPED.')
-        return exits.success(true)
+        return exits.success(false)
       }
     } catch (e) {
       if (!inputs.ignoreChangingState) { await sails.helpers.meta.change.with({ changingState: null }) }

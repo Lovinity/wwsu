@@ -151,7 +151,7 @@ module.exports = {
         if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
           sails.log.verbose('Alert is from NWS source. Retrieving alert information.')
           var resp = await needle('get', inputs.reference)
-          sails.log.silly(resp.body)
+          sails.log.verbose(resp.body)
 
           // Go through each child
           var maps = resp.body.children
