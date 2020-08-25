@@ -81,10 +81,15 @@ module.exports = {
 
                 // Calculate listener minutes
 
+                var listeners = [];
+
                 // Fetch listenerRecords since beginning of sails.models.attendance, as well as the listener count prior to start of attendance record.
                 var listenerRecords = await sails.models.listeners.find({ createdAt: { '>': moment(record.actualStart).toISOString(true), '<=': moment(record.actualEnd).toISOString(true) } }).sort('createdAt ASC')
                 var prevListeners = await sails.models.listeners.find({ createdAt: { '<=': record.actualStart } }).sort('createdAt DESC').limit(1) || 0
-                if (prevListeners[ 0 ]) { prevListeners = prevListeners[ 0 ].listeners || 0 }
+                if (prevListeners[ 0 ]) {
+                    prevListeners = prevListeners[ 0 ].listeners || 0;
+                    listeners.push({ time: record.actualStart, listeners: prevListeners });
+                }
 
                 // Calculate listener minutes and listener tune-ins
                 var prevTime = moment(record.actualStart)
@@ -93,6 +98,7 @@ module.exports = {
 
                 if (listenerRecords && listenerRecords.length > 0) {
                     listenerRecords.map(listener => {
+                        listeners.push({ time: listener.createdAt, listeners: listener.listeners });
                         listenerMinutes += (moment(listener.createdAt).diff(moment(prevTime), 'seconds') / 60) * prevListeners
                         if (listener.listeners > prevListeners) { tuneIns += (listener.listeners - prevListeners) }
                         prevListeners = listener.listeners
@@ -113,6 +119,8 @@ module.exports = {
             var toUpdate2 = _.cloneDeep(toUpdate);
 
             await sails.models.attendance.updateOne({ ID: inputs.ID }, toUpdate2);
+
+            toUpdate.listeners = listeners;
 
             return exits.success(toUpdate);
         } catch (e) {

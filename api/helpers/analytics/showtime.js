@@ -1,3 +1,5 @@
+// TODO: Add more properties to enable skipping calculations of 365 days and overall
+
 module.exports = {
 
   friendlyName: 'analytics.showtime',
@@ -940,7 +942,6 @@ module.exports = {
         }
 
         tasksLeft--;
-        sails.log.verbose(`analytics.showtime process1: ${tasksLeft} tasks left.`);
         if (tasksLeft <= 0) resolve();
       }
 
@@ -1137,7 +1138,6 @@ module.exports = {
         }
 
         tasksLeft--;
-        sails.log.verbose(`analytics.showtime process2: ${tasksLeft} tasks left.`);
         if (tasksLeft <= 0) resolve();
       }
 
@@ -1263,7 +1263,6 @@ module.exports = {
           }
 
           tasksLeft--;
-          sails.log.verbose(`analytics.showtime process3_2: ${tasksLeft} tasks left.`);
           if (tasksLeft <= 0) resolve2();
         }
 
@@ -1812,7 +1811,6 @@ module.exports = {
           }
 
           tasksLeft2--;
-          sails.log.verbose(`analytics.showtime process3_3: ${tasksLeft2} tasks left.`);
           if (tasksLeft2 <= 0) resolve2();
         }
 
@@ -2939,7 +2937,6 @@ module.exports = {
         }
 
         tasksLeft--;
-        sails.log.verbose(`analytics.showtime process4: ${tasksLeft} tasks left.`);
         if (tasksLeft <= 0) resolve();
       }
 
@@ -2949,13 +2946,7 @@ module.exports = {
     });
 
     // Execute our parallel functions and wait for all of them to resolve.
-    process1.then(() => sails.log.debug(`Process 1 finished`));
-    process2.then(() => sails.log.debug(`Process 2 finished`));
-    process3.then(() => sails.log.debug(`Process 3 finished`));
-    process4.then(() => sails.log.debug(`Process 4 finished`));
     await Promise.all([ process1, process2, process3, process4 ]);
-
-    sails.log.debug(`ALL processes finished.`)
 
     // Do additional final calculations for DJs
     for (var index in DJs) {
