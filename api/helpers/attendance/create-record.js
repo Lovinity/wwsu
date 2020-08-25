@@ -174,7 +174,7 @@ module.exports = {
   <hr>
 
   <p>Here is your full show log:</p>
-  <ul>${stats.logs.map((log) => `<li><strong>${moment(message.createdAt).format("LT")}: ${log.title}</strong><br />${log.event}${log.trackArtist ? `<br />Artist: ${log.trackArtist}` : ``}${log.trackTitle ? `<br />Title: ${log.trackTitle}` : ``}${log.trackAlbum ? `<br />Album: ${log.trackAlbum}` : ``}${log.trackLabel ? `<br />Label: ${log.trackLabel}` : ``}</li>`).join("")}</ul>
+  <ul>${stats.logs.map((log) => `<li><strong>${moment(log.createdAt).format("LT")}: ${log.title}</strong><br />${log.event}${log.trackArtist ? `<br />Artist: ${log.trackArtist}` : ``}${log.trackTitle ? `<br />Title: ${log.trackTitle}` : ``}${log.trackAlbum ? `<br />Album: ${log.trackAlbum}` : ``}${log.trackLabel ? `<br />Label: ${log.trackLabel}` : ``}</li>`).join("")}</ul>
 
   <hr>
   
