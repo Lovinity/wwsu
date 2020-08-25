@@ -12,7 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
     var Announcements = new WWSUannouncements(
       socket,
       noReq,
-      ["display-internal", "display-internal-sticky"],
+      [ "display-internal", "display-internal-sticky" ],
       Meta
     );
     var Status = new WWSUstatus(socket, noReq);
@@ -112,11 +112,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Sound alerts
     var sounds = {
-      clockOut: new Howl({ src: ["/sounds/display/clockout.mp3"] }),
-      critical: new Howl({ src: ["/sounds/display/critical.mp3"] }),
-      disconnected: new Howl({ src: ["/sounds/display/disconnected.mp3"] }),
-      warning: new Howl({ src: ["/sounds/display/warning.mp3"] }),
-      ping: new Howl({ src: ["/sounds/display/ping.mp3"] }),
+      clockOut: new Howl({ src: [ "/sounds/display/clockout.mp3" ] }),
+      critical: new Howl({ src: [ "/sounds/display/critical.mp3" ] }),
+      disconnected: new Howl({ src: [ "/sounds/display/disconnected.mp3" ] }),
+      warning: new Howl({ src: [ "/sounds/display/warning.mp3" ] }),
+      ping: new Howl({ src: [ "/sounds/display/ping.mp3" ] }),
     };
 
     /*
@@ -206,7 +206,7 @@ window.addEventListener("DOMContentLoaded", () => {
     var officeHoursTimer;
     var directorNotify;
 
-    var colors = ["#FF0000", "#00FF00", "#0000FF"];
+    var colors = [ "#FF0000", "#00FF00", "#0000FF" ];
     var color = 0;
     var delay = 300000;
     var scrollDelay = 15000;
@@ -227,10 +227,10 @@ window.addEventListener("DOMContentLoaded", () => {
       .appendTo("body");
 
     // This function triggers a burn guard sweep.
-    function burnGuardAnimate() {
+    function burnGuardAnimate () {
       try {
         color = ++color % 3;
-        var rColor = colors[color];
+        var rColor = colors[ color ];
         $burnGuard
           .css({
             left: "0px",
@@ -296,8 +296,8 @@ window.addEventListener("DOMContentLoaded", () => {
         };
 
         for (var t in animations) {
-          if (el.style[t] !== undefined) {
-            return animations[t];
+          if (el.style[ t ] !== undefined) {
+            return animations[ t ];
           }
         }
       })(document.createElement("div"));
@@ -322,7 +322,7 @@ window.addEventListener("DOMContentLoaded", () => {
   /**
    * Function should be called every second.
    */
-  function clockTick() {
+  function clockTick () {
     // At 11:55PM, display director clock-out message and play message
     if (
       moment.parseZone(Meta.meta.time).hour() === 23 &&
@@ -360,47 +360,35 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {TaffyDB} db All current status records
    */
-  function processStatus(db) {
+  function processStatus (db) {
     try {
       // These are used for alternating gray shades to make status table easier to read
-      var doRow = false;
       var secondRow = false;
 
       globalStatus = 5;
       statusMarquee = `<div class="row bg-dark-1">
-                      <div class="col-2 text-warning">
+                      <div class="col-3 text-warning">
                       <strong>System</strong>
                       </div>
-                      <div class="col text-white">
-                      <strong>Status</strong>
-                      </div>
-                      <div class="col-2 text-warning">
-                      <strong>System</strong>
-                      </div>
-                      <div class="col text-white">
-                      <strong>Status</strong>
+                      <div class="col-9 text-white">
+                      <strong>Information</strong>
                       </div>
                     </div><div class="row ${
-                      secondRow ? `bg-dark-3` : `bg-dark-2`
-                    }">`;
+        secondRow ? `bg-dark-3` : `bg-dark-2`
+        }">`;
 
       // Add status info to table for each status, and determine current global status (worst of all statuses)
       db.forEach((thestatus) => {
         try {
           if (thestatus.status === 5) return; // Skip good statuses
-          if (doRow) {
-            if (!secondRow) {
-              secondRow = true;
-            } else {
-              secondRow = false;
-            }
-            statusMarquee += `</div><div class="row ${
-              secondRow ? `bg-dark-3` : `bg-dark-2`
-            }">`;
-            doRow = false;
+          if (!secondRow) {
+            secondRow = true;
           } else {
-            doRow = true;
+            secondRow = false;
           }
+          statusMarquee += `</div><div class="row ${
+            secondRow ? `bg-dark-3` : `bg-dark-2`
+            }">`;
 
           switch (thestatus.status) {
             case 1:
@@ -579,7 +567,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Update the calendar data
-  function updateCalendar() {
+  function updateCalendar () {
     // Set / reset 1-second timer so we are not updating on literally every update pushed through sockets
     clearTimeout(officeHoursTimer);
     officeHoursTimer = setTimeout(() => {
@@ -591,7 +579,7 @@ window.addEventListener("DOMContentLoaded", () => {
           directorHours = events
             .filter(
               (event) =>
-                ["office-hours"].indexOf(event.type) !== -1 &&
+                [ "office-hours" ].indexOf(event.type) !== -1 &&
                 moment(event.end).isAfter(moment())
             )
             .sort(
@@ -601,7 +589,7 @@ window.addEventListener("DOMContentLoaded", () => {
           tasks = events
             .filter(
               (event) =>
-                ["tasks"].indexOf(event.type) !== -1 &&
+                [ "tasks" ].indexOf(event.type) !== -1 &&
                 moment(event.end).isAfter(moment())
             )
             .sort(
@@ -632,27 +620,27 @@ window.addEventListener("DOMContentLoaded", () => {
           var asstcalendar = {};
 
           Directors.find({ assistant: false }).forEach((director) => {
-            calendar[director.ID] = {};
-            calendar[director.ID]["director"] = director;
-            calendar[director.ID][0] = ``;
-            calendar[director.ID][1] = ``;
-            calendar[director.ID][2] = ``;
-            calendar[director.ID][3] = ``;
-            calendar[director.ID][4] = ``;
-            calendar[director.ID][5] = ``;
-            calendar[director.ID][6] = ``;
+            calendar[ director.ID ] = {};
+            calendar[ director.ID ][ "director" ] = director;
+            calendar[ director.ID ][ 0 ] = ``;
+            calendar[ director.ID ][ 1 ] = ``;
+            calendar[ director.ID ][ 2 ] = ``;
+            calendar[ director.ID ][ 3 ] = ``;
+            calendar[ director.ID ][ 4 ] = ``;
+            calendar[ director.ID ][ 5 ] = ``;
+            calendar[ director.ID ][ 6 ] = ``;
           });
 
           Directors.find({ assistant: true }).forEach((director) => {
-            asstcalendar[director.ID] = {};
-            asstcalendar[director.ID]["director"] = director;
-            asstcalendar[director.ID][0] = ``;
-            asstcalendar[director.ID][1] = ``;
-            asstcalendar[director.ID][2] = ``;
-            asstcalendar[director.ID][3] = ``;
-            asstcalendar[director.ID][4] = ``;
-            asstcalendar[director.ID][5] = ``;
-            asstcalendar[director.ID][6] = ``;
+            asstcalendar[ director.ID ] = {};
+            asstcalendar[ director.ID ][ "director" ] = director;
+            asstcalendar[ director.ID ][ 0 ] = ``;
+            asstcalendar[ director.ID ][ 1 ] = ``;
+            asstcalendar[ director.ID ][ 2 ] = ``;
+            asstcalendar[ director.ID ][ 3 ] = ``;
+            asstcalendar[ director.ID ][ 4 ] = ``;
+            asstcalendar[ director.ID ][ 5 ] = ``;
+            asstcalendar[ director.ID ][ 6 ] = ``;
           });
 
           directorHours.sort(compare).map((event) => {
@@ -701,17 +689,17 @@ window.addEventListener("DOMContentLoaded", () => {
                 event.startT =
                   moment(event.start).minutes() === 0
                     ? moment
-                        .tz(
-                          event.start,
-                          Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                        )
-                        .format("h")
+                      .tz(
+                        event.start,
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("h")
                     : moment
-                        .tz(
-                          event.start,
-                          Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                        )
-                        .format("h:mm");
+                      .tz(
+                        event.start,
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("h:mm");
                 if (
                   (moment.parseZone(event.start).hours() < 12 &&
                     moment.parseZone(event.end).hours() >= 12) ||
@@ -728,17 +716,17 @@ window.addEventListener("DOMContentLoaded", () => {
                 event.endT =
                   moment.parseZone(event.end).minutes() === 0
                     ? moment
-                        .tz(
-                          event.end,
-                          Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                        )
-                        .format("hA")
+                      .tz(
+                        event.end,
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("hA")
                     : moment
-                        .tz(
-                          event.end,
-                          Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                        )
-                        .format("h:mmA");
+                      .tz(
+                        event.end,
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("h:mmA");
 
                 // Update strings if need be, if say, start time was before this day, or end time is after this day.
                 if (
@@ -774,13 +762,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 var endText = `<span class="text-white">${event.startT} - ${event.endT}</span>`;
                 if (
-                  ["updated", "updated-system"].indexOf(event.scheduleType) !==
+                  [ "updated", "updated-system" ].indexOf(event.scheduleType) !==
                   -1
                 ) {
                   endText = `<span class="text-warning">${event.startT} - ${event.endT}</span>`;
                 }
                 if (
-                  ["canceled", "canceled-system", "canceled-changed"].indexOf(
+                  [ "canceled", "canceled-system", "canceled-changed" ].indexOf(
                     event.scheduleType
                   ) !== -1
                 ) {
@@ -789,18 +777,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 // Push the final products into our formatted variable
                 if (!assistant) {
-                  calendar[event.director][
+                  calendar[ event.director ][
                     i
                   ] += `<div class="m-1 text-white" style="${
                     bg || ``
-                  }">${endText}</div>`;
+                    }">${endText}</div>`;
                 }
                 if (assistant) {
-                  asstcalendar[event.director][
+                  asstcalendar[ event.director ][
                     i
                   ] += `<div class="m-1 text-white" style="${
                     bg || ``
-                  }">${endText}</div>`;
+                    }">${endText}</div>`;
                 }
               }
             }
@@ -818,39 +806,39 @@ window.addEventListener("DOMContentLoaded", () => {
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(1, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(1, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(2, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(2, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(3, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(3, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(4, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(4, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(5, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(5, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(6, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(6, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      </div>`;
           doShade = false;
@@ -859,57 +847,57 @@ window.addEventListener("DOMContentLoaded", () => {
           for (var director in calendar) {
             if (Object.prototype.hasOwnProperty.call(calendar, director)) {
               isActive = true;
-              var temp = calendar[director].director;
+              var temp = calendar[ director ].director;
               Slides.slide(`hours-directors`).displayTime += 3;
               stuff += `<div class="row shadow-2 ${
                 doShade ? `bg-dark-3` : `bg-dark-2`
-              }">
+                }">
      <div class="col-3 shadow-2" style="background-color: ${
-       temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`
-     };">
+                temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`
+                };">
                 <div class="container">
   <div class="row">
     <div class="col-4">
                 ${
-                  temp.avatar && temp.avatar !== ""
-                    ? `<img src="${temp.avatar}" width="48" class="rounded-circle">`
-                    : jdenticon.toSvg(`Director ${temp.name}`, 48)
+                temp.avatar && temp.avatar !== ""
+                  ? `<img src="${temp.avatar}" width="48" class="rounded-circle">`
+                  : jdenticon.toSvg(`Director ${temp.name}`, 48)
                 }
     </div>
     <div class="col-8">
       <span class="text-white">${temp.name}</span><br />
       <span class="text-warning" style="font-size: 0.8em;">${
-        temp.position
-      }</span><br />
+                temp.position
+                }</span><br />
       ${
-        temp.present
-          ? `<span class="text-success"><strong>IN</strong></span>`
-          : `<span class="text-danger"><strong>OUT</strong></span>`
-      }
+                temp.present
+                  ? `<span class="text-success"><strong>IN</strong></span>`
+                  : `<span class="text-danger"><strong>OUT</strong></span>`
+                }
     </div>
   </div>
 </div>
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][0]}
+     ${calendar[ director ][ 0 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][1]}
+     ${calendar[ director ][ 1 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][2]}
+     ${calendar[ director ][ 2 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][3]}
+     ${calendar[ director ][ 3 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][4]}
+     ${calendar[ director ][ 4 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][5]}
+     ${calendar[ director ][ 5 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][6]}
+     ${calendar[ director ][ 6 ]}
      </div>
      </div>`;
               if (doShade) {
@@ -937,39 +925,39 @@ window.addEventListener("DOMContentLoaded", () => {
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(1, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(1, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(2, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(2, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(3, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(3, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(4, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(4, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(5, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(5, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      <div class="col text-info">
      <strong>${moment
-       .parseZone(Meta.time)
-       .add(6, "days")
-       .format("ddd MM/DD")}</strong>
+              .parseZone(Meta.meta.time)
+              .add(6, "days")
+              .format("ddd MM/DD")}</strong>
      </div>
      </div>`;
           doShade = false;
@@ -978,57 +966,57 @@ window.addEventListener("DOMContentLoaded", () => {
           for (var director2 in asstcalendar) {
             if (Object.prototype.hasOwnProperty.call(asstcalendar, director2)) {
               isActive = true;
-              var temp2 = asstcalendar[director2].director;
+              var temp2 = asstcalendar[ director2 ].director;
               Slides.slide(`hours-assistants`).displayTime += 3;
               stuff += `<div class="row shadow-2 ${
                 doShade ? `bg-dark-3` : `bg-dark-2`
-              }">
+                }">
      <div class="col-3 shadow-2" style="background-color: ${
-       temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`
-     };">
+                temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`
+                };">
                 <div class="container">
   <div class="row">
     <div class="col-4">
                 ${
-                  temp2.avatar && temp2.avatar !== ""
-                    ? `<img src="${temp2.avatar}" width="48" class="rounded-circle">`
-                    : jdenticon.toSvg(`Director ${temp2.name}`, 48)
+                temp2.avatar && temp2.avatar !== ""
+                  ? `<img src="${temp2.avatar}" width="48" class="rounded-circle">`
+                  : jdenticon.toSvg(`Director ${temp2.name}`, 48)
                 }
     </div>
     <div class="col-8">
       <span class="text-white">${temp2.name}</span><br />
       <span class="text-warning" style="font-size: 0.8em;">${
-        temp2.position
-      }</span><br />
+                temp2.position
+                }</span><br />
       ${
-        temp2.present
-          ? `<span class="text-success"><strong>IN</strong></span>`
-          : `<span class="text-danger"><strong>OUT</strong></span>`
-      }
+                temp2.present
+                  ? `<span class="text-success"><strong>IN</strong></span>`
+                  : `<span class="text-danger"><strong>OUT</strong></span>`
+                }
     </div>
   </div>
 </div>
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][0]}
+     ${asstcalendar[ director2 ][ 0 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][1]}
+     ${asstcalendar[ director2 ][ 1 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][2]}
+     ${asstcalendar[ director2 ][ 2 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][3]}
+     ${asstcalendar[ director2 ][ 3 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][4]}
+     ${asstcalendar[ director2 ][ 4 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][5]}
+     ${asstcalendar[ director2 ][ 5 ]}
      </div>
      <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][6]}
+     ${asstcalendar[ director2 ][ 6 ]}
      </div>
      </div>`;
               if (doShade) {
@@ -1054,7 +1042,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Add a slide for an announcement
-  function createAnnouncement(data) {
+  function createAnnouncement (data) {
     if (data.type.startsWith(`display-internal`)) {
       Slides.newSlide({
         name: `attn-${data.ID}`,

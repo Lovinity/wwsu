@@ -134,8 +134,8 @@ module.exports = {
                   case "prerecord":
                     // No playlist was assigned
                     if (event.playlistID === null) {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 3) {
+                        status = 3;
                       }
                       issues.push(
                         `Prerecord event "${event.hosts} - ${
@@ -149,8 +149,8 @@ module.exports = {
 
                     // Playlist does not exist in RadioDJ
                     if (typeof playlists[event.playlistID] === "undefined") {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 3) {
+                        status = 3;
                       }
                       issues.push(
                         `Prerecord event "${event.hosts} - ${
@@ -161,6 +161,10 @@ module.exports = {
                       );
                       break;
                     }
+
+                    // Disabled for now; there is no way to re-check track durations automatically on a requency in RadioDJ
+
+                    /*
 
                     // Playlist is 15 or more minutes too short
                     if (
@@ -208,10 +212,12 @@ module.exports = {
                       );
                     }
 
+                    */
+
                     // Duplicate tracks
                     if (playlists[event.playlistID].duplicates > 0) {
-                      if (status > 3) {
-                        status = 3;
+                      if (status > 4) {
+                        status = 4;
                       }
                       issues.push(
                         `Prerecord playlist "${event.hosts} - ${
@@ -226,8 +232,8 @@ module.exports = {
                   case "playlist":
                     // No playlist was assigned
                     if (event.playlistID === null) {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 3) {
+                        status = 3;
                       }
                       issues.push(
                         `Playlist event "${event.hosts} - ${
@@ -241,8 +247,8 @@ module.exports = {
 
                     // Playlist does not exist in RadioDJ
                     if (typeof playlists[event.playlistID] === "undefined") {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 3) {
+                        status = 3;
                       }
                       issues.push(
                         `Playlist event "${event.hosts} - ${
@@ -253,6 +259,10 @@ module.exports = {
                       );
                       break;
                     }
+
+                    // Disabled for now; there is no way to re-check track durations automatically on a requency in RadioDJ
+
+                    /*
 
                     // Playlist is 15 or more minutes too short
                     if (
@@ -300,10 +310,12 @@ module.exports = {
                       );
                     }
 
+                    */
+
                     // Duplicate tracks
                     if (playlists[event.playlistID].duplicates > 0) {
-                      if (status > 3) {
-                        status = 3;
+                      if (status > 4) {
+                        status = 4;
                       }
                       issues.push(
                         `Playlist event "${event.hosts} - ${
@@ -318,8 +330,8 @@ module.exports = {
                   case "genre":
                     // No event was assigned
                     if (event.eventID === null) {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 3) {
+                        status = 3;
                       }
                       issues.push(
                         `Genre event "${event.name}" for ${moment(
@@ -333,15 +345,15 @@ module.exports = {
 
                     // Assigned event does not exist in RadioDJ
                     if (typeof djevents[event.eventID] === "undefined") {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 3) {
+                        status = 3;
                       }
                       issues.push(
                         `Genre event "${event.name}" for ${moment(
                           event.start
                         ).format(
                           "llll"
-                        )} has an assigned event that does not exist in RadioDJ. This genre will not air until an existing manual event with a LoadRotation action is assigned!`
+                        )} has an assigned event that does not exist in RadioDJ. This genre will not air until an existing manual event with a "Load Rotation" action is assigned!`
                       );
                       break;
                     }
@@ -350,8 +362,8 @@ module.exports = {
                     if (
                       !djevents[event.eventID].data.includes("Load Rotation")
                     ) {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 3) {
+                        status = 3;
                       }
                       issues.push(
                         `Genre event "${event.name}" for ${moment(
@@ -364,8 +376,8 @@ module.exports = {
 
                     // Event disabled (should be minor severity because sometimes we may want to disable a genre)
                     if (djevents[event.eventID].enabled !== "True") {
-                      if (status > 3) {
-                        status = 3;
+                      if (status > 4) {
+                        status = 4;
                       }
                       issues.push(
                         `Genre event "${event.name}" for ${moment(
@@ -380,8 +392,8 @@ module.exports = {
 
                   case "office-hours":
                     if (event.director === null) {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 4) {
+                        status = 4;
                       }
                       issues.push(
                         `Director hours "${event.name}" for ${moment(
@@ -396,8 +408,8 @@ module.exports = {
                       (director) => director.ID === event.director
                     );
                     if (_director.length < 1) {
-                      if (status > 2) {
-                        status = 2;
+                      if (status > 4) {
+                        status = 4;
                       }
                       issues.push(
                         `Director hours "${event.name}" for ${moment(
