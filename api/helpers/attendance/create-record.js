@@ -135,7 +135,7 @@ module.exports = {
   <p>Congratulations on another successful episode of ${currentRecord.event}! Below, you will find analytics for this episode.</p>
   <ul>
   <li><strong>Signed On:</strong> ${moment(currentRecord.actualStart).format("LLLL")}</li>
-  <li><strong>Signed Off:</strong> ${moment().format("LLLL")}</li>
+  <li><strong>Signed Off:</strong> ${moment(currentRecord.actualEnd).format("LLLL")}</li>
   <li><strong>Showtime:</strong> ${moment.duration(stats.showTime, 'minutes').format("h [hours], m [minutes]")}</li>
   <li><strong>Online Listener Time*:</strong> ${moment.duration(stats.listenerMinutes, 'minutes').format("h [hours], m [minutes]")}</li>
   <li><strong>Listener to Showtime Ratio (higher ratio = better performing broadcast):</strong> ${stats.showTime > 0 ? (stats.listenerMinutes / stats.showTime) : 0}</li>
