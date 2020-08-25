@@ -28,7 +28,7 @@ module.exports = {
     severity: {
       type: 'string',
       required: true,
-      isIn: ['Extreme', 'Severe', 'Moderate', 'Minor'],
+      isIn: [ 'Extreme', 'Severe', 'Moderate', 'Minor' ],
       description: `Severity of alert: One of the following in order from highest to lowest ['Extreme', 'Severe', 'Moderate', 'Minor']`
     },
     starts: {
@@ -68,18 +68,18 @@ module.exports = {
       // Define a function for processing information into the sails.models.eas.pendingAlerts variable.
       // Notably, this function ensures the same alert from different counties are joined together.
       var processPending = (criteria) => {
-        if (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined`) {
-          sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] = criteria
+        if (typeof sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ] === `undefined`) {
+          sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ] = criteria
         } else {
           for (var key in criteria) {
             if (Object.prototype.hasOwnProperty.call(criteria, key)) {
               if (key !== `counties`) {
-                sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = criteria[key]
+                sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ][ key ] = criteria[ key ]
               } else {
-                var temp = sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key].split(', ')
+                var temp = sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ][ key ].split(', ')
                 if (temp.indexOf(inputs.county) === -1) { temp.push(inputs.county) }
                 temp = temp.join(', ')
-                sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`][key] = temp
+                sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ][ key ] = temp
               }
             }
           }
@@ -118,7 +118,7 @@ module.exports = {
         var updateIt = false
         for (var key in criteria) {
           if (Object.prototype.hasOwnProperty.call(criteria, key)) {
-            if (criteria[key] !== record[key]) {
+            if (criteria[ key ] !== record[ key ]) {
               updateIt = true
             }
           }
@@ -148,7 +148,7 @@ module.exports = {
         sails.log.verbose(`Initial criteria`, criteria);
 
         // If this alert came from NWS, we need to GET a separate URL for alert information before we create the record.
-        if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`] === `undefined` || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === '' || sails.models.eas.pendingAlerts[`${inputs.source}.${inputs.reference}`].information === null)) {
+        if (inputs.source === 'NWS' && (typeof sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ] === `undefined` || sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ].information === '' || sails.models.eas.pendingAlerts[ `${inputs.source}.${inputs.reference}` ].information === null)) {
           sails.log.verbose('Alert is from NWS source. Retrieving alert information.')
           var resp = await needle('get', inputs.reference)
 
@@ -156,16 +156,26 @@ module.exports = {
           var maps = resp.body.children
             .filter(entry => typeof entry.name !== 'undefined' && entry.name === 'info')
             .map(async entry => {
-              var alert = {}
-
-              sails.log.verbose(entry)
+              var details = {
+                description: '',
+                instruction: '',
+              }
 
               // Parse field information into the alert variable
-              entry.children.map(entry2 => { alert[entry2.name] = entry2.value })
+              entry.children.map(entry2 => {
+                switch (entry2.name) {
+                  case "description":
+                    details.description = entry2.value;
+                    break;
+                  case "instruction":
+                    details.instruction = entry2.value;
+                    break;
+                }
+              });
 
               // Sometimes, EAS will return "This alert has expired". If so, leave information blank.
-              if (alert.description && !alert.description.toLowerCase().includes('this alert has expired')) { 
-                criteria.information = alert.description + '. Precautionary / Preparedness actions: ' + alert.instruction;
+              if (!details.description.toLowerCase().includes('this alert has expired')) {
+                criteria.information = `${details.description === '' ? `No information is available for this alert.` : details.description}.${details.instruction !== '' ? `Precautionary / preparedness actions: ${details.instruction}.` : ``}`;
                 sails.log.verbose(`Alert ${inputs.county}/${inputs.alert} is still valid.`)
               } else {
                 sails.log.verbose(`Alert ${inputs.county}/${inputs.alert} has expired, according to NWS`)

@@ -42,7 +42,7 @@ module.exports = {
               }
 
               // Pre-add the alert (this does NOT put it in the database nor push in websockets yet; that is done via sails.helpers.eas.postParse)
-              await sails.helpers.eas.addAlert(alert['id'], 'NWS', inputs.county, alert['cap:event'], alert['cap:severity'] !== `Unknown` ? alert['cap:severity'] : `Minor`, moment(alert['cap:effective']).toISOString(true), moment(alert['cap:expires']).toISOString(true), color, alert['title'])
+              await sails.helpers.eas.addAlert(alert['id'], 'NWS', inputs.county, alert['cap:event'], alert['cap:severity'] !== `Unknown` ? alert['cap:severity'] : `Minor`, moment(alert['cap:effective']).toISOString(true), moment(alert['cap:expires']).toISOString(true), color)
 
               // Mark this alert as active in the caps
               sails.models.eas.activeCAPS.push(alert['id'])
