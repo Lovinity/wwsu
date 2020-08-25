@@ -564,7 +564,7 @@ module.exports = {
                                 "LLLL"
                               )} - ${moment(event.end).format("LTS")}<br />
                                                               
-                              Please contact a director if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show).`
+                              Please reply all to this email if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show).`
                     );
                   }
 
@@ -612,7 +612,7 @@ module.exports = {
                                 "LLLL"
                               )} - ${moment(event.end).format("LTS")}<br />
                                                               
-                              <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the prerecord, please let a director know.`
+                              <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the prerecord, please reply all to this email.`
                     );
                   }
 
@@ -658,7 +658,7 @@ module.exports = {
                                 "LLLL"
                               )} - ${moment(event.end).format("LTS")}<br />
                                                               
-                              Please contact a director if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show, or if you experienced technical problems with WWSU preventing you from doing the remote broadcast).`
+                              Please reply all to this email if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show, or if you experienced technical problems with WWSU preventing you from doing the remote broadcast).`
                     );
                   }
 
@@ -752,7 +752,7 @@ module.exports = {
                                 "LLLL"
                               )} - ${moment(event.end).format("LTS")}<br />
                                                               
-                              <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the playlist, please let a director know.`
+                              <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the playlist, please reply all to this email.`
                     );
                   }
                 }

@@ -4,7 +4,7 @@ module.exports = {
     friendlyName: 'helpers.emails.queueDjs',
   
   
-    description: 'Queue emails to emailDJs.',
+    description: 'Queue emails to directors with emailDJs set.',
   
   
     inputs: {

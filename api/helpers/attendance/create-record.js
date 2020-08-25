@@ -143,7 +143,7 @@ module.exports = {
   ${topStats[ 0 ].topShows.indexOf(currentRecord.event) !== -1 ? `<li><strong>Congratulations! Your broadcast placed number ${topStats[ 0 ].topShows.indexOf(currentRecord.event) + 1} in the top ${topStats[ 0 ].topShows.length} shows of the last week!</strong></li>` : ``}
   </ul>
   
-  <p>If any issues were discovered during your broadcast, they will be listed below. These issues were logged for the directors; repeat issues could result in intervention. If an issue was caused by a technical problem, please let the directors know.</p>
+  <p>If any issues were discovered during your broadcast, they will be listed below. These issues were logged for the directors; repeat issues could result in intervention. If an issue was caused by a technical problem, please email the directors.</p>
   <ul>
   ${inputs.problemTerminated ? `<li><strong>This broadcast was terminated early automatically due to a critical system problem.</strong> This will not be held against you.</li>` : ``}
   ${stats.unauthorized ? `<li><strong>This broadcast was unscheduled / unauthorized.</strong> You should ensure the directors scheduled your show in and that you go on the air during your scheduled time (or request a re-schedule if applicable).</li>` : ``}
@@ -166,30 +166,30 @@ module.exports = {
                 ?
                 `<p>Here are analytics for ${currentRecord.event} for <strong>this semester</strong> so far:</p>
   <ul>
-  <li><strong>On-air time:</string> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].semester.showtime, 'minutes').format("h [hours], m [minutes]")}</li>
-  <li><strong>Online listener time*:</string> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].semester.listeners, 'minutes').format("h [hours], m [minutes]")}</li>\
-  <li><strong>Listeners to Showtime Ratio (higher is better):</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.ratio}</li>
-  <li><strong>Live episodes aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.shows}</li>
-  <li><strong>Prerecorded episodes aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.prerecords}</li>
-  <li><strong>Remote episodes aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.remotes}</li>
-  <li><strong>Sports broadcasts aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.sports}</li>
-  <li><strong>Playlist airings:</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.playlists}</li>
-  <li><strong>Messages sent/received with online listeners:</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.messages}</li>
-  <li><strong>Remote credits earned:</string> ${topStats[ 1 ][ currentRecord.calendarID ].semester.remoteCredits}</li>
+  <li><strong>On-air time:</strong> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].semester.showtime, 'minutes').format("h [hours], m [minutes]")}</li>
+  <li><strong>Online listener time*:</strong> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].semester.listeners, 'minutes').format("h [hours], m [minutes]")}</li>\
+  <li><strong>Listeners to Showtime Ratio (higher is better):</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.ratio}</li>
+  <li><strong>Live episodes aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.shows}</li>
+  <li><strong>Prerecorded episodes aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.prerecords}</li>
+  <li><strong>Remote episodes aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.remotes}</li>
+  <li><strong>Sports broadcasts aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.sports}</li>
+  <li><strong>Playlist airings:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.playlists}</li>
+  <li><strong>Messages sent/received with online listeners:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.messages}</li>
+  <li><strong>Remote credits earned:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].semester.remoteCredits}</li>
   </ul>
   
   <p>Here are analytics for ${currentRecord.event} for <strong>lifetime</strong> so far:</p>
   <ul>
-  <li><strong>On-air time:</string> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].overall.showtime, 'minutes').format("h [hours], m [minutes]")}</li>
-  <li><strong>Online listener time*:</string> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].overall.listeners, 'minutes').format("h [hours], m [minutes]")}</li>\
-  <li><strong>Listeners to Showtime Ratio (higher is better):</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.ratio}</li>
-  <li><strong>Live episodes aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.shows}</li>
-  <li><strong>Prerecorded episodes aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.prerecords}</li>
-  <li><strong>Remote episodes aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.remotes}</li>
-  <li><strong>Sports broadcasts aired:</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.sports}</li>
-  <li><strong>Playlist airings:</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.playlists}</li>
-  <li><strong>Messages sent/received with online listeners:</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.messages}</li>
-  <li><strong>Remote credits earned:</string> ${topStats[ 1 ][ currentRecord.calendarID ].overall.remoteCredits}</li>
+  <li><strong>On-air time:</strong> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].overall.showtime, 'minutes').format("h [hours], m [minutes]")}</li>
+  <li><strong>Online listener time*:</strong> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].overall.listeners, 'minutes').format("h [hours], m [minutes]")}</li>\
+  <li><strong>Listeners to Showtime Ratio (higher is better):</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.ratio}</li>
+  <li><strong>Live episodes aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.shows}</li>
+  <li><strong>Prerecorded episodes aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.prerecords}</li>
+  <li><strong>Remote episodes aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.remotes}</li>
+  <li><strong>Sports broadcasts aired:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.sports}</li>
+  <li><strong>Playlist airings:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.playlists}</li>
+  <li><strong>Messages sent/received with online listeners:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.messages}</li>
+  <li><strong>Remote credits earned:</strong> ${topStats[ 1 ][ currentRecord.calendarID ].overall.remoteCredits}</li>
   </ul>`
                 :
                 ``

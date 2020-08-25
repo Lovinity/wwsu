@@ -75,7 +75,7 @@ module.exports = {
 
   This re-schedule only applies to the date/time listed above; it does not apply to future time slots.<br /><br />
   
-  If you have any questions or concerns, please contact a director.`
+  If you have any questions or concerns, please reply all to this email.`
           );
 
           // Canceled date/time
@@ -94,7 +94,7 @@ module.exports = {
 
   This cancellation only applies to the date/time listed above; it does not apply to future time slots.<br /><br />
   
-  If you have any questions or concerns, please contact a director.`
+  If you have any questions or concerns, please reply all to this email.`
           );
         }
 
@@ -112,9 +112,9 @@ module.exports = {
   Your show, <strong>${inputs.event.name}</strong>, was originally re-scheduled to a different time. However, that re-schedule was reversed and your show is now scheduled for its <strong>original time</strong>.<br /><br />
 
   Rescheduled time: ${moment(inputs.event.start).format("LLLL")} - ${moment(inputs.event.end).format("LT")}<br />
-  <strong>The show should now air on its originally scheduled time slot and duration of ${moment(inputs.event.originalTime).format("LLLL")}.</strong>
+  <strong>The show should now air on its originally scheduled start time of ${moment(inputs.event.originalTime).format("LLLL")} and end at its original end time.</strong>
   
-  If you have any questions or concerns, please contact a director.`
+  If you have any questions or concerns, please reply all to this email.`
           );
 
           // reversed Canceled date/time
@@ -127,9 +127,9 @@ module.exports = {
 
   Your show, <strong>${inputs.event.name}</strong>, was originally canceled on a date/time. However, that cancellation was reversed and your show is now scheduled for its <strong>original time</strong>.<br /><br />
 
-  <strong>The show should now air on its originally scheduled time slot and duration of ${moment(inputs.event.originalTime).format("LLLL")}; the cancellation of this date/time was reversed.</strong>
+  <strong>The show should now air on its originally scheduled start time of ${moment(inputs.event.originalTime).format("LLLL")} and end at its original end time; the cancellation of this date/time was reversed.</strong>
   
-  If you have any questions or concerns, please contact a director.`
+  If you have any questions or concerns, please reply all to this email.`
           );
         }
       }
