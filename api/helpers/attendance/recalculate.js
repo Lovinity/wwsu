@@ -121,7 +121,7 @@ module.exports = {
 
             await sails.models.attendance.updateOne({ ID: inputs.ID }, toUpdate2);
 
-            toUpdate.attendance = attendance;
+            toUpdate.attendance = record;
             toUpdate.listeners = listeners;
             toUpdate.logs = logs;
             toUpdate.messages = messages;
