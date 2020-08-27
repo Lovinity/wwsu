@@ -48,7 +48,7 @@ module.exports = {
         await sails.helpers.rest.cmd('ClearPlaylist')
 
         // Remove applicable items from our queue snapshot
-        for (var i = queue.length - 1; i >= 0; i -= 1) {
+        for (var i = queue.length - 1; i > 0; i -= 1) {
           if (parseInt(queue[ i ].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i ].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i ].IDSubcat)) !== -1))) {
             // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
             if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[ i ].ID)) === -1) {
@@ -72,7 +72,7 @@ module.exports = {
           var stopLoop = false;
           while (!stopLoop) {
             queue = await sails.helpers.rest.getQueue();
-            for (var i2 = queue.length - 1; i2 >= 0; i2 -= 1) {
+            for (var i2 = queue.length - 1; i2 > 0; i2 -= 1) {
               stopLoop = true;
               sails.log.verbose(`songs.remove: checking ${i2}`);
               if (parseInt(queue[ i2 ].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i2 ].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i2 ].IDSubcat)) !== -1))) {

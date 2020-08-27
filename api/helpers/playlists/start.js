@@ -131,6 +131,7 @@ module.exports = {
           sails.log.verbose(`playlists.start: Type playlist`);
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           sails.log.verbose(`playlists.start: clear queue`);
+          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, false);
           var queue = await sails.helpers.rest.getQueue();
           queue.reverse(); // Since we will be re-queuing at top, we must reverse the order as it will get reversed again when re-queuing
           await sails.helpers.rest.cmd('clearPlaylist');
@@ -150,9 +151,6 @@ module.exports = {
             await Promise.all(maps)
           }
 
-          // Remove necessary tracks
-          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, false);
-
           await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
           // Prerecords
@@ -168,6 +166,7 @@ module.exports = {
           sails.log.verbose(`playlists.start: Disable autodj`);
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           sails.log.verbose(`playlists.start: clear queue`);
+          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false);
           var queue = await sails.helpers.rest.getQueue();
           queue.reverse(); // Since we will be re-queuing at top, we must reverse the order as it will get reversed again when re-queuing
           await sails.helpers.rest.cmd('clearPlaylist');
@@ -186,9 +185,6 @@ module.exports = {
             var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToTop', track.ID))
             await Promise.all(maps)
           }
-
-          // Remove necessary tracks
-          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false);
 
           // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.
           var timeToFirstTrack = 0
