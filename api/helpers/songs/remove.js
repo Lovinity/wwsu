@@ -72,6 +72,7 @@ module.exports = {
           var stopLoop = false;
           while (!stopLoop) {
             queue = await sails.helpers.rest.getQueue();
+            if (queue.length <= 1) stopLoop = true;
             for (var i2 = queue.length - 1; i2 > 0; i2 -= 1) {
               stopLoop = true;
               sails.log.verbose(`songs.remove: checking ${i2}`);
