@@ -131,7 +131,6 @@ module.exports = {
           sails.log.verbose(`playlists.start: Type playlist`);
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           sails.log.verbose(`playlists.start: clear queue`);
-          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, false);
           var queue = await sails.helpers.rest.getQueue();
           queue.reverse(); // Since we will be re-queuing at top, we must reverse the order as it will get reversed again when re-queuing
           await sails.helpers.rest.cmd('clearPlaylist');
@@ -145,7 +144,14 @@ module.exports = {
           await loadPlaylist()
           sails.log.verbose('playlists.start: Re-queuing other tracks');
 
-          // Re-queue tracks
+          // Remove applicable items from our queue snapshot
+          for (var i = queue.length - 1; i >= 0; i -= 1) {
+            if (parseInt(queue[ i ].ID) !== 0 && (sails.config.custom.subcats.noClearGeneral.indexOf(parseInt(queue[ i ].IDSubcat)) === -1)) {
+              queue.splice(i, 1)
+            }
+          }
+
+          // Re-queue the remaining tracks
           if (queue.length > 0) {
             var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToTop', track.ID))
             await Promise.all(maps)
@@ -166,7 +172,6 @@ module.exports = {
           sails.log.verbose(`playlists.start: Disable autodj`);
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           sails.log.verbose(`playlists.start: clear queue`);
-          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false);
           var queue = await sails.helpers.rest.getQueue();
           queue.reverse(); // Since we will be re-queuing at top, we must reverse the order as it will get reversed again when re-queuing
           await sails.helpers.rest.cmd('clearPlaylist');
@@ -179,7 +184,15 @@ module.exports = {
           sails.log.verbose('playlists.start: Loading playlist')
           await loadPlaylist();
           sails.log.verbose('playlists.start: Re-queuing other tracks');
-          // Re-queue tracks
+          
+          // Remove applicable items from our queue snapshot
+          for (var i = queue.length - 1; i >= 0; i -= 1) {
+            if (parseInt(queue[ i ].ID) !== 0 && (sails.config.custom.subcats.noClearShow.indexOf(parseInt(queue[ i ].IDSubcat)) === -1)) {
+              queue.splice(i, 1)
+            }
+          }
+
+          // Re-queue the remaining tracks
           if (queue.length > 0) {
             var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToTop', track.ID))
             await Promise.all(maps)
