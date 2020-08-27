@@ -144,18 +144,14 @@ module.exports = {
           await loadPlaylist()
           sails.log.verbose('playlists.start: Re-queuing other tracks');
 
-          // Remove applicable items from our queue snapshot
-          for (var i = queue.length - 1; i >= 0; i -= 1) {
-            if (parseInt(queue[ i ].ID) !== 0 && (sails.config.custom.subcats.noClearGeneral.indexOf(parseInt(queue[ i ].IDSubcat)) === -1)) {
-              queue.splice(i, 1)
-            }
-          }
-
-          // Re-queue the remaining tracks
+          // Re-queue
           if (queue.length > 0) {
             var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToTop', track.ID))
             await Promise.all(maps)
           }
+
+          // Remove necessary tracks
+          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, false);
 
           await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
@@ -184,19 +180,15 @@ module.exports = {
           sails.log.verbose('playlists.start: Loading playlist')
           await loadPlaylist();
           sails.log.verbose('playlists.start: Re-queuing other tracks');
-          
-          // Remove applicable items from our queue snapshot
-          for (var i = queue.length - 1; i >= 0; i -= 1) {
-            if (parseInt(queue[ i ].ID) !== 0 && (sails.config.custom.subcats.noClearShow.indexOf(parseInt(queue[ i ].IDSubcat)) === -1)) {
-              queue.splice(i, 1)
-            }
-          }
 
-          // Re-queue the remaining tracks
+          // Re-queue
           if (queue.length > 0) {
             var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToTop', track.ID))
             await Promise.all(maps)
           }
+
+          // Remove necessary tracks
+          await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false);
 
           // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.
           var timeToFirstTrack = 0

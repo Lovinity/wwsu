@@ -49,9 +49,9 @@ module.exports = {
 
         // Remove applicable items from our queue snapshot
         for (var i = queue.length - 1; i >= 0; i -= 1) {
-          if (parseInt(queue[i].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i].IDSubcat)) !== -1))) {
+          if (parseInt(queue[ i ].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i ].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i ].IDSubcat)) !== -1))) {
             // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
-            if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[i].ID)) === -1) {
+            if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[ i ].ID)) === -1) {
               sails.log.verbose(`REMOVING`)
               queue.splice(i, 1)
             }
@@ -68,15 +68,24 @@ module.exports = {
 
         // Remove tracks one at a time instead of re-queuing a new playlist
       } else {
-        for (var i2 = queue.length - 1; i2 >= 0; i2 -= 1) {
-          if (parseInt(queue[i2].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[i2].IDSubcat)) !== -1))) {
-            // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
-            if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[i2].ID)) === -1) {
-              sails.log.verbose(`REMOVING`)
-              await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1)
+        await new Promise(async (resolve) => {
+          var stopLoop = false;
+          while (!stopLoop) {
+            queue = await sails.helpers.rest.getQueue();
+            for (var i2 = queue.length - 1; i2 >= 0; i2 -= 1) {
+              stopLoop = true;
+              if (parseInt(queue[ i2 ].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i2 ].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i2 ].IDSubcat)) !== -1))) {
+                // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
+                if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[ i2 ].ID)) === -1) {
+                  stopLoop = false;
+                  sails.log.verbose(`REMOVING`);
+                  await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1);
+                }
+              }
             }
           }
-        }
+          resolve();
+        });
       }
 
       return exits.success()

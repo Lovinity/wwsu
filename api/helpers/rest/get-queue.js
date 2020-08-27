@@ -13,14 +13,22 @@ module.exports = {
   fn: async function (inputs, exits) {
     sails.log.debug('Helper rest.getQueue called.')
     try {
-      // Return queue in memory instead of checking for the current queue if we are waiting for a healthy RadioDJ to report, or if this helper is still running from another call.
-      if (sails.models.status.errorCheck.waitForGoodRadioDJ || running) { return exits.success(sails.models.meta.automation) }
+      // Return queue in memory instead of checking for the current queue if we are waiting for a healthy RadioDJ to report.
+      if (sails.models.status.errorCheck.waitForGoodRadioDJ) { return exits.success(sails.models.meta.automation) }
 
       running = true;
       // Query for the radioDJ queue and update sails.models.meta.automation with the queue.
       // LINT: Do not camel case; parameters are for needle.
       // eslint-disable-next-line camelcase
-      var resp = await needle('get', sails.models.meta.memory.radiodj + '/p?auth=' + sails.config.custom.rest.auth, {}, { open_timeout: 3000, response_timeout: 3000, read_timeout: 3000, headers: { 'Content-Type': 'application/json' } });
+      var fn = () => {
+        return new Promise((resolve) => {
+          needle('get', sails.models.meta.memory.radiodj + '/p?auth=' + sails.config.custom.rest.auth, {}, { open_timeout: 3000, response_timeout: 3000, read_timeout: 3000, headers: { 'Content-Type': 'application/json' } })
+            .then((resp) => resolve(resp));
+        })
+      }
+
+      var resp = await fn();
+      
       // No queue? Return empty array
       if (!resp || typeof resp.body === 'undefined' || typeof resp.body.name === 'undefined' || (resp.body.name !== 'ArrayOfSongData' && resp.body.name !== 'SongData')) {
         running = false;

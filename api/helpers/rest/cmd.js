@@ -34,18 +34,21 @@ module.exports = {
       // Query REST
       // LINT: do NOT camel case; these are needle parameters.
       // eslint-disable-next-line camelcase
-      var func = async () => {
-         return needle('get', sails.models.meta.memory.radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, { open_timeout: inputs.timeout > 0 ? inputs.timeout : 10000, response_timeout: inputs.timeout > 0 ? inputs.timeout : 10000, read_timeout: inputs.timeout > 0 ? inputs.timeout : 10000, headers: { 'Content-Type': 'application/json' } });
+      var func = () => {
+        return new Promise((resolve) => {
+          needle('get', sails.models.meta.memory.radiodj + '/opt?auth=' + sails.config.custom.rest.auth + '&command=' + inputs.command + endstring, {}, { open_timeout: inputs.timeout > 0 ? inputs.timeout : 10000, response_timeout: inputs.timeout > 0 ? inputs.timeout : 10000, read_timeout: inputs.timeout > 0 ? inputs.timeout : 10000, headers: { 'Content-Type': 'application/json' } })
+            .then((resp) => resolve(resp));
+        });
       }
       if (inputs.timeout > 0) {
         var resp = await func()
-        return exits.success(true)
+        return exits.success(resp)
       }
       if (inputs.timeout === 0) {
         var resp = func()
-        return exits.success(false)
+        return exits.success(resp)
       }
-    } catch (unusedE2) {
+    } catch (e) {
       return exits.success(false)
     }
   }
