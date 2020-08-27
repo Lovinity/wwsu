@@ -74,15 +74,17 @@ module.exports = {
             queue = await sails.helpers.rest.getQueue();
             for (var i2 = queue.length - 1; i2 >= 0; i2 -= 1) {
               stopLoop = true;
+              sails.log.verbose(`songs.remove: checking ${i2}`);
               if (parseInt(queue[ i2 ].ID) !== 0 && ((inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i2 ].IDSubcat)) === -1) || (!inputs.exclusive && inputs.subcategories.indexOf(parseInt(queue[ i2 ].IDSubcat)) !== -1))) {
                 // If it was requested to keep track requests in the queue, skip over any tracks that were requested.
                 if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[ i2 ].ID)) === -1) {
                   stopLoop = false;
-                  sails.log.verbose(`REMOVING`);
+                  sails.log.verbose(`songs.remove: removing ${i2}`);
                   await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1);
                 }
               }
             }
+            sails.log.verbose(`songs.remove: stopLoop is ${stopLoop}`);
           }
           resolve();
         });
