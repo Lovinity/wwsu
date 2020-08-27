@@ -455,38 +455,36 @@ module.exports = {
         sails.models.calendar.calendardb.whatShouldBePlaying(
           async (_eventNow) => {
             var triggered = false;
-            var maps = _eventNow.map(async (eventNow) => {
-              if (triggered) return null;
-              if (eventNow) {
-                if (
-                  (eventNow.type === "prerecord" ||
-                    eventNow.type === "playlist") &&
-                  eventNow.playlistID !== null
-                ) {
-                  try {
-                    triggered = await sails.helpers.playlists.start(
-                      eventNow,
-                      inputs.ignoreChangingState
-                    );
-                  } catch (e) {
-                    sails.log.error(e);
-                    triggered = false;
-                  }
-                }
-                if (eventNow.type === "genre" && eventNow.eventID !== null) {
-                  try {
-                    triggered = await sails.helpers.genre.start(
-                      eventNow,
-                      inputs.ignoreChangingState
-                    );
-                  } catch (e) {
-                    sails.log.error(e);
-                    triggered = false;
-                  }
+            for (var eventNow in _eventNow) {
+              eventNow = _eventNow[eventNow];
+              if (
+                (eventNow.type === "prerecord" ||
+                  eventNow.type === "playlist") &&
+                eventNow.playlistID !== null
+              ) {
+                try {
+                  triggered = await sails.helpers.playlists.start(
+                    eventNow,
+                    inputs.ignoreChangingState
+                  );
+                } catch (e) {
+                  sails.log.error(e);
+                  triggered = false;
                 }
               }
-            });
-            await Promise.all(maps);
+              if (eventNow.type === "genre" && eventNow.eventID !== null) {
+                try {
+                  triggered = await sails.helpers.genre.start(
+                    eventNow,
+                    inputs.ignoreChangingState
+                  );
+                } catch (e) {
+                  sails.log.error(e);
+                  triggered = false;
+                }
+              }
+              if (triggered) break;
+            }
 
             if (!triggered) {
               await sails.helpers.genre.start(null, inputs.ignoreChangingState);
