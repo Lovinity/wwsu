@@ -132,8 +132,6 @@ module.exports = {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           sails.log.verbose(`playlists.start: clear queue`);
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearGeneral, false);
-          var queue = await sails.helpers.rest.getQueue();
-          queue.reverse(); // Since we will be re-queuing at top, we must reverse the order as it will get reversed again when re-queuing
           await sails.helpers.rest.cmd('clearPlaylist');
           await sails.helpers.rest.cmd('EnableAssisted', 0);
           await sails.helpers.meta.changeDjs(`${inputs.event.hosts} - ${inputs.event.name}`);
@@ -144,12 +142,6 @@ module.exports = {
           sails.log.verbose(`playlists.start: Started new show`);
           await loadPlaylist()
           sails.log.verbose('playlists.start: Re-queuing other tracks');
-
-          // Re-queue
-          if (queue.length > 0) {
-            var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToTop', track.ID))
-            await Promise.all(maps)
-          }
 
           await sails.helpers.rest.cmd('EnableAutoDJ', 1);
 
@@ -167,8 +159,6 @@ module.exports = {
           await sails.helpers.rest.cmd('EnableAutoDJ', 0)
           sails.log.verbose(`playlists.start: clear queue`);
           await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false);
-          var queue = await sails.helpers.rest.getQueue();
-          queue.reverse(); // Since we will be re-queuing at top, we must reverse the order as it will get reversed again when re-queuing
           await sails.helpers.rest.cmd('clearPlaylist');
           sails.log.verbose(`playlists.start: Disable assisted`);
           await sails.helpers.rest.cmd('EnableAssisted', 0)
@@ -179,12 +169,6 @@ module.exports = {
           sails.log.verbose('playlists.start: Loading playlist')
           await loadPlaylist();
           sails.log.verbose('playlists.start: Re-queuing other tracks');
-
-          // Re-queue
-          if (queue.length > 0) {
-            var maps = queue.map(async track => await sails.helpers.rest.cmd('LoadTrackToTop', track.ID))
-            await Promise.all(maps)
-          }
 
           // After loading playlist, determine if we should immediately skip the currently playing track to get the prerecord on the air sooner.
           var timeToFirstTrack = 0
