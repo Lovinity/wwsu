@@ -11,9 +11,9 @@ module.exports = {
       description: 'Command to send over REST.'
     },
     arg: {
-      type: 'ref',
+      type: 'string',
+      allowNull: true,
       description: 'If the command takes an argument, arg is that argument.',
-      defaultsTo: 0
     },
     timeout: {
       type: 'number',
@@ -23,7 +23,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Helper rest.cmd called.')
+    sails.log.debug(`Helper rest.cmd called: ${inputs.command} / ${inputs.arg}`)
 
     var endstring = '' // appends at the end of a REST call, say, if arg was supplied
 
