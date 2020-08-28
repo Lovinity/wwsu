@@ -1168,7 +1168,20 @@ module.exports = {
             if (record.unique in unique && record.showTime && record.scheduledStart !== null && record.scheduledEnd !== null) {
               [ 'dj', 'cohostDJ1', 'cohostDJ2', 'cohostDJ3' ].map((dj) => {
                 initializeDJ(record[ dj ]);
-                if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') return;
+                if (!record[ dj ] || typeof DJs[ record[ dj ] ] === 'undefined') {
+                  tasksLeft--;
+                  if (tasksLeft <= 0) resolve2();
+                  return;
+                }
+
+                // Update showTime and breaks to be correct as it is necessary for break reputation calculations
+                if (record.showTime) {
+                  !unique[record.unique].showtime ? unique[record.unique].showtime = record.showTime : unique[record.unique].showtime += record.showTime;
+                }
+                if (record.breaks) {
+                  !unique[record.unique].breaks ? unique[record.unique].breaks = record.breaks : unique[record.unique].breaks += record.breaks;
+                }
+
                 DJs[ record[ dj ] ].overall.reputationScoreMax += 1
                 if (moment(sails.config.custom.startOfSemester).isBefore(moment(record.createdAt))) {
                   DJs[ record[ dj ] ].semester.reputationScoreMax += 1
@@ -1257,7 +1270,6 @@ module.exports = {
                   shows[ record.calendarID ].range.reputationScoreMax += 1
                 }
               }
-
             }
             unique[ record.unique ] = record;
           }

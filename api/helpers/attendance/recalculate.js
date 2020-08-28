@@ -36,42 +36,46 @@ module.exports = {
                 signedOffLate: false
             }
 
-            // Get accountability logs
-            var logs = await sails.models.logs.find({ attendanceID: inputs.ID, excused: false, logtype: [ 'cancellation', 'silence', 'absent', 'unauthorized', 'id', 'sign-on-early', 'sign-on-late', 'sign-off-early', 'sign-off-late', 'break' ] });
-            logs.map((log) => {
-                switch (log.logtype) {
-                    case 'cancellation':
-                        toUpdate.cancellation = true;
-                        break;
-                    case 'silence':
-                        toUpdate.silence.push(log.createdAt);
-                        break;
-                    case 'absent':
-                        toUpdate.absent = true;
-                        break;
-                    case 'unauthorized':
-                        toUpdate.unauthorized = true;
-                        break;
-                    case 'id':
-                        toUpdate.missedIDs.push(log.createdAt);
-                        break;
-                    case 'sign-on-early':
-                        toUpdate.signedOnEarly = true;
-                        break;
-                    case 'sign-on-late':
-                        toUpdate.signedOnLate = true;
-                        break;
-                    case 'sign-off-early':
-                        toUpdate.signedOffEarly = true;
-                        break;
-                    case 'sign-off-late':
-                        toUpdate.signedOffLate = true;
-                        break;
-                    case 'break':
-                        toUpdate.breaks++;
-                        break;
-                }
-            });
+            // Get logs
+            var logs = await sails.models.logs.find({ attendanceID: inputs.ID });
+
+            // Calculate accountability
+            logs
+                .filter((log) => !log.excused)
+                .map((log) => {
+                    switch (log.logtype) {
+                        case 'cancellation':
+                            toUpdate.cancellation = true;
+                            break;
+                        case 'silence':
+                            toUpdate.silence.push(log.createdAt);
+                            break;
+                        case 'absent':
+                            toUpdate.absent = true;
+                            break;
+                        case 'unauthorized':
+                            toUpdate.unauthorized = true;
+                            break;
+                        case 'id':
+                            toUpdate.missedIDs.push(log.createdAt);
+                            break;
+                        case 'sign-on-early':
+                            toUpdate.signedOnEarly = true;
+                            break;
+                        case 'sign-on-late':
+                            toUpdate.signedOnLate = true;
+                            break;
+                        case 'sign-off-early':
+                            toUpdate.signedOffEarly = true;
+                            break;
+                        case 'sign-off-late':
+                            toUpdate.signedOffLate = true;
+                            break;
+                        case 'break':
+                            toUpdate.breaks++;
+                            break;
+                    }
+                });
 
             // Calculate show stats if it has ended
             if (record.actualEnd !== null) {
