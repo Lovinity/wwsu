@@ -31,6 +31,9 @@ module.exports = {
     // API NOTE: This should never throw an error unless we have to stop all execution.
     sails.log.debug('Helper songs.remove called.')
 
+    // TODO: Due to a bug, we are temporarily forcing noRequeue to be false.
+    inputs.noRequeue = false;
+
     try {
       // Get rid of all the null entries
       try {
