@@ -84,7 +84,7 @@ module.exports = {
                 if (!inputs.keepRequests || sails.models.requests.pending.indexOf(parseInt(queue[ i2 ].ID)) === -1) {
                   stopLoop = false;
                   sails.log.verbose(`songs.remove: removing ${i2}`);
-                  await sails.helpers.rest.cmd('RemovePlaylistTrack', i2);
+                  await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1);
                 }
               }
             }
