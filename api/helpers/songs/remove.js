@@ -31,9 +31,6 @@ module.exports = {
     // API NOTE: This should never throw an error unless we have to stop all execution.
     sails.log.debug('Helper songs.remove called.')
 
-    // TODO: Due to a bug, we are temporarily forcing noRequeue to be false.
-    inputs.noRequeue = false;
-
     try {
       // Get rid of all the null entries
       try {
@@ -61,6 +58,9 @@ module.exports = {
           }
         }
 
+        // Remove the currently playing track
+        queue.splice(0, 1);
+
         // Re-queue the remaining tracks
         if (queue.length > 0) {
           // LINT: await necessary for Sails.js
@@ -73,6 +73,8 @@ module.exports = {
       } else {
         await new Promise(async (resolve) => {
           var stopLoop = false;
+          var loopCheck = -1;
+          var loopCheckCount = 0;
           while (!stopLoop) {
             queue = await sails.helpers.rest.getQueue();
             if (queue.length <= 1) stopLoop = true;
@@ -85,6 +87,16 @@ module.exports = {
                   stopLoop = false;
                   sails.log.verbose(`songs.remove: removing ${i2}`);
                   await sails.helpers.rest.cmd('RemovePlaylistTrack', i2 - 1);
+
+                  // Failsafe; bail trying to remove a track if we tried 5 times.
+                  if (i2 === loopCheck) {
+                    loopCheckCount++;
+                    if (loopCheckCount >= 5) stopLoop = true;
+                  } else {
+                    loopCheckCount = 1;
+                    loopCheck = i2;
+                  }
+                  
                 }
               }
             }
