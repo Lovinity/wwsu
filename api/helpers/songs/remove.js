@@ -91,7 +91,11 @@ module.exports = {
                   // Failsafe; bail trying to remove a track if we tried 5 times.
                   if (i2 === loopCheck) {
                     loopCheckCount++;
-                    if (loopCheckCount >= 5) stopLoop = true;
+                    if (loopCheckCount >= 5) {
+                      stopLoop = true;
+                      // Try again with re-queuing instead of removing one at a time.
+                      await sails.helpers.songs.remove(inputs.exclusive, inputs.subcategories, inputs.keepRequests, false);
+                    }
                   } else {
                     loopCheckCount = 1;
                     loopCheck = i2;
